@@ -79,7 +79,6 @@ const isValidConfig = (key: string, config: any) => {
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
-// - cypress.schema.json
 //
 // Add options in alphabetical order for better readability
 
