@@ -296,6 +296,7 @@ export default class ProxyLogging {
     const unloggedPreRequest = take(this.unloggedPreRequests, ({ requestId }) => requestId === interception.browserRequestId)
 
     if (unloggedPreRequest) {
+      Cypress.backend('debug', 'interception matched an unlogged prerequest, logging %o', { unloggedPreRequest, interception })
       debug('interception matched an unlogged prerequest, logging %o', { unloggedPreRequest, interception })
       this.createProxyRequestLog(unloggedPreRequest)
     }
@@ -303,6 +304,7 @@ export default class ProxyLogging {
     let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
+      Cypress.backend('debug', `Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
       // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
       debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
 
@@ -328,6 +330,8 @@ export default class ProxyLogging {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
 
     if (!proxyRequest) {
+      Cypress.backend('debug', 'unmatched responseReceived event %o', responseReceived)
+
       return debug('unmatched responseReceived event %o', responseReceived)
     }
 
@@ -347,6 +351,8 @@ export default class ProxyLogging {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === error.requestId)
 
     if (!proxyRequest) {
+      Cypress.backend('debug', 'unmatched error event %o', error)
+
       return debug('unmatched error event %o', error)
     }
 

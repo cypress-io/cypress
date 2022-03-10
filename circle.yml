@@ -420,7 +420,7 @@ commands:
             if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-              DEBUG=cypress*proxy* yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              DEBUG=cypress:server:socket-base,cypress:*proxy* yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -429,7 +429,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              DEBUG=cypress*proxy* yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              DEBUG=cypress:server:socket-base,cypress:*proxy* yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
             fi
           working_directory: packages/driver
       - verify-mocha-results

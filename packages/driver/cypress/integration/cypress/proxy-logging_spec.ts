@@ -106,11 +106,6 @@ describe('Proxy Logging', () => {
     it('xhr log has response body/status code', (done) => {
       cy.window()
       .then({ timeout: 10000 }, (win) => {
-        const xhr = new win.XMLHttpRequest()
-
-        xhr.open('GET', '/some-url')
-        xhr.send()
-
         cy.on('log:changed', (log) => {
           try {
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
@@ -132,10 +127,16 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
+            Cypress.backend('debug', err)
             // eslint-disable-next-line no-console
             console.log('assertion error, retrying', err)
           }
         })
+
+        const xhr = new win.XMLHttpRequest()
+
+        xhr.open('GET', '/some-url')
+        xhr.send()
       })
     })
 
