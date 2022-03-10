@@ -199,6 +199,8 @@ export function mergeDefaults (
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
+  debug('validate that there is no breaking changes before plugins')
+
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw errors.get(err, ...args)
   })
@@ -256,10 +258,19 @@ export function updateWithPluginValues (cfg, overrides) {
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
-    // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
-  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
+  configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
+    throw errors.get(err, {
+      ...options,
+      setupNodeEvents: true,
+    })
+  })
+
+  let originalResolvedBrowsers = cfg
+    && cfg.resolved
+    && cfg.resolved.browsers
+    && _.cloneDeep(cfg.resolved.browsers)
 
   if (!originalResolvedBrowsers) {
     // have something to resolve with if plugins return nothing

@@ -1310,7 +1310,7 @@ export const AllCypressErrors = {
     `
   },
 
-  MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name }: {name: string}, err?: Error) => {
+  MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name, setupNodeEvents }: {name: string, setupNodeEvents: boolean}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
@@ -1323,14 +1323,20 @@ export const AllCypressErrors = {
       ? errPartial`${fmt.highlight('integrationFolder')} or ${fmt.highlight('componentFolder')}`
       : errPartial`${fmt.highlight('testFiles')}`
 
+    const message = setupNodeEvents ? errPartial`
+    In ${fmt.highlight('setupNodeEvents()')}, you are attempting to update a configuration that is no longer supported: ${fmt.highlight(name)}
+    ` : errPartial`
+    You are attempting to use a configuration that is no longer supported: ${fmt.highlight(name)}
+    `
+
     return errTemplate`
-      You are attempting to use a configuration value that is no longer supported: ${fmt.highlight(name)}
+    ${message}
       
-      ${fmt.highlight(name)} merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
+    ${fmt.highlight(name)} merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
 
-      https://on.cypress.io/migration-guide
+    https://on.cypress.io/migration-guide
 
-      ${stackTrace}
+    ${stackTrace}
     `
   },
 
