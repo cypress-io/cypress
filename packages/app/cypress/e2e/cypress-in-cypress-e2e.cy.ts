@@ -1,7 +1,7 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
-describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
+describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
