@@ -14,7 +14,7 @@ function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integ
     return ([] as string[]).concat(glob)
   }
 
-  return ['**/*']
+  return ['**/*.{js,ts,jsx,tsx,coffee}']
 }
 
 export function getIntegrationTestFilesGlobs (config: OldCypressConfig): string[] {
@@ -30,7 +30,7 @@ export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' 
     ? getComponentTestFilesGlobs(config)
     : getIntegrationTestFilesGlobs(config)
 
-  return testFiles.length === 1 && testFiles[0] === '**/*'
+  return testFiles.length === 1 && testFiles[0] === '**/*.{js,ts,jsx,tsx,coffee}'
 }
 
 export function getPluginsFile (config: OldCypressConfig) {
@@ -152,16 +152,12 @@ async function shouldShowRenameManual (projectRoot: string, config: OldCypressCo
   return anyComponentSpecsExist(projectRoot, config)
 }
 
-// All projects must move from cypress.json to cypress.config.js!
-export function shouldShowConfigFileStep (config: OldCypressConfig) {
-  return true
-}
-
 export type Step = typeof MIGRATION_STEPS[number]
 
 export async function getStepsForMigration (
   projectRoot: string,
   config: OldCypressConfig,
+  configFileExists: boolean,
 ): Promise<Step[]> {
   const steps: Step[] = []
 
@@ -178,7 +174,7 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'configFile' && shouldShowConfigFileStep(config)) {
+    if (step === 'configFile' && configFileExists) {
       steps.push(step)
     }
 

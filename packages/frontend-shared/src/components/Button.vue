@@ -39,10 +39,7 @@
   <component
     :is="linkVersion"
     v-else
-    :href="props.disabled ? null : props.href"
-    :to="props.disabled ? null : props.to"
-    :role="props.disabled ? 'link' : null"
-    :aria-disabled="props.disabled ? 'disabled' : null "
+    v-bind="linkProps"
     style="width: fit-content"
     class="border rounded flex outline-none gap-8px items-center select-none"
     :class="classes"
@@ -147,5 +144,21 @@ const linkVersion = computed(() => {
   }
 
   return RouterLink
+})
+
+const linkProps = computed(() => {
+  if (props.disabled) {
+    return {
+      role: 'link',
+      ariaDisabled: 'disabled',
+      href: null,
+    }
+  }
+
+  if (props.to) return { to: props.to }
+
+  if (props.href) return { href: props.href }
+
+  return {}
 })
 </script>

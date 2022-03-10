@@ -551,6 +551,7 @@ enum ErrorTypeEnum {
   INVALID_REPORTER_NAME
   INVOKED_BINARY_OUTSIDE_NPM_MODULE
   LEGACY_CONFIG_FILE
+  MIGRATION_ALREADY_OCURRED
   MULTIPLE_SUPPORT_FILES_FOUND
   NODE_VERSION_DEPRECATION_BUNDLED
   NODE_VERSION_DEPRECATION_SYSTEM
@@ -781,6 +782,12 @@ type Migration {
   """contents of the cypress.json file before conversion"""
   configBeforeCode: String!
 
+  """the name of the config file after the migration"""
+  configFileNameAfter: String!
+
+  """the name of the config file to be migrated"""
+  configFileNameBefore: String!
+
   """Steps filtered with the current context"""
   filteredSteps: [MigrationStep!]!
 
@@ -903,6 +910,9 @@ type Mutation {
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
   completeSetup: Query
+
+  """add the passed text to the local clipboard"""
+  copyTextToClipboard(text: String!): Boolean
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -1137,6 +1147,9 @@ type Query {
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
+
+  """Whether the project was specified from the --project flag"""
+  projectRootFromCI: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!

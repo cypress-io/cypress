@@ -1,31 +1,37 @@
-import { debug as debugFn } from 'debug'
-import { createServer, InlineConfig } from 'vite'
-import { resolveServerConfig, StartDevServerOptions } from './resolveServerConfig'
-const debug = debugFn('cypress:vite-dev-server:vite')
+import debugFn from 'debug'
+import getPort from 'get-port'
+import { createServer as viteCreateServer } from 'vite'
+import { createConfig } from './resolveConfig'
+import type { CypressViteDevServerConfig, StartDevServer } from './types'
 
-export { StartDevServerOptions }
+const debug = debugFn('cypress:vite-dev-server:index')
 
-export async function startDevServer (startDevServerArgs: StartDevServerOptions): Promise<Cypress.ResolvedDevServerConfig> {
-  if (!startDevServerArgs.viteConfig) {
-    debug('User did not pass in any Vite dev server configuration')
-    startDevServerArgs.viteConfig = {}
+export const startDevServer = async ({ options, viteConfig = {} }: StartDevServer) => {
+  debug('Starting Vite Server')
+  let server
+
+  try {
+    const config = await createConfig({ options, viteConfig })
+
+    server = await viteCreateServer(config)
+  } catch (err) {
+    throw new Error(err as string)
   }
 
-  debug('starting vite dev server')
-  const resolvedConfig = await resolveServerConfig(startDevServerArgs)
-  const port = resolvedConfig.server!.port!
+  debug('Vite server created')
+  const port = await getPort({ port: 3000 })
 
-  const viteDevServer = await createServer(resolvedConfig)
+  await server.listen(port)
+  debug('Successfully launched the vite server on port', port)
 
-  await viteDevServer.listen()
-
-  debug('Component testing vite server started on port', port)
-
-  return { port, close: viteDevServer.close }
+  return {
+    port,
+    close: server.close,
+  }
 }
 
-export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
-
 export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
-  return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
+  const { indexHtmlFile, ...viteConfig } = devServerConfig ?? {}
+
+  return startDevServer({ options: cypressDevServerConfig, viteConfig, indexHtmlFile })
 }

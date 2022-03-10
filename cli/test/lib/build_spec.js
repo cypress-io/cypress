@@ -10,7 +10,17 @@ const hasVersion = (json) => {
   return la(is.semver(json.version), 'cannot find version', json)
 }
 
-const changeVersion = (o) => ({ ...o, version: 'x.y.z' })
+const normalizePackageJson = (o) => {
+  expect(o.buildInfo).to.include({ stable: false })
+  expect(o.buildInfo.commitBranch).to.match(/.+/)
+  expect(o.buildInfo.commitSha).to.match(/[a-f0-9]+/)
+
+  return {
+    ...o,
+    version: 'x.y.z',
+    buildInfo: 'replaced by normalizePackageJson',
+  }
+}
 
 describe('package.json build', () => {
   beforeEach(function () {
@@ -32,7 +42,7 @@ describe('package.json build', () => {
 
   it('outputs expected properties', () => {
     return makeUserPackageFile()
-    .then(changeVersion)
+    .then(normalizePackageJson)
     .then(snapshot)
   })
 })
