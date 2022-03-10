@@ -5,7 +5,7 @@ export default defineConfig({
   'video': false,
   'fixturesFolder': false,
   'component': {
-    'supportFile': 'cypress/support.js',
+    'supportFile': './cypress/support.js',
     setupNodeEvents (_on, config) {
       if (config.env.RUN_SIGNATURE) {
         require('./cypress/new-signature/plugins.js')
