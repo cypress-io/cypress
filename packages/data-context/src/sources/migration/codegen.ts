@@ -29,6 +29,7 @@ export interface OldCypressConfig {
   viewportWidth?: number
   baseUrl?: string
   retries?: number
+  slowTestThreshold?: number
 
   component?: Omit<OldCypressConfig, 'component' | 'e2e'>
   e2e?: Omit<OldCypressConfig, 'component' | 'e2e'>
@@ -353,92 +354,89 @@ export function renameSupportFilePath (relative: string) {
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
-  const excludedFields = ['pluginsFile', '$schema']
-
-  return Object.entries(cfg).reduce((acc, [key, val]) => {
-    if (excludedFields.includes(key)) {
-      return acc
-    }
-
-    if (key === 'e2e' || key === 'component') {
-      const value = val as Cypress.ResolvedConfigOptions
-
-      if (!value) {
+  const reducer = (acc, [key, val]) => {
+    switch (key) {
+      case 'pluginsFile':
+      case '$schema':
         return acc
-      }
 
-      const { testFiles, ignoreTestFiles, ...rest } = value
+      case 'e2e':
+      case 'component': {
+        const value = val as Cypress.ResolvedConfigOptions
 
-      // don't include if it's the default! No need.
-      const specPattern = getSpecPattern(cfg, key)
-      const ext = '**/*.cy.{js,jsx,ts,tsx}'
-      const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
-      const isDefaultCT = key === 'component' && specPattern === ext
+        if (!value) {
+          return acc
+        }
 
-      if (isDefaultE2E || isDefaultCT) {
+        const { testFiles, ignoreTestFiles, ...rest } = value
+
+        // don't include if it's the default! No need.
+        const specPattern = getSpecPattern(cfg, key)
+        const ext = '**/*.cy.{js,jsx,ts,tsx}'
+        const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
+        const isDefaultCT = key === 'component' && specPattern === ext
+
+        if (isDefaultE2E || isDefaultCT) {
+          return {
+            ...acc, [key]: {
+              ...rest,
+              ...acc[key],
+            },
+          }
+        }
+
         return {
           ...acc, [key]: {
             ...rest,
             ...acc[key],
+            specPattern,
           },
         }
       }
-
-      return {
-        ...acc, [key]: {
-          ...rest,
-          ...acc[key],
-          specPattern,
-        },
-      }
+      case 'integrationFolder':
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+        }
+      case 'componentFolder':
+        return {
+          ...acc,
+          component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
+        }
+      case 'testFiles':
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+          component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
+        }
+      case 'ignoreTestFiles':
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, specExcludePattern: val },
+          component: { ...acc.component, specExcludePattern: val },
+        }
+      case 'supportFile':
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, supportFile: val },
+        }
+      case 'baseUrl':
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, [key]: val },
+        }
+      case 'slowTestThreshold':
+        return {
+          ...acc,
+          component: { ...acc.component, [key]: val },
+          e2e: { ...acc.e2e, [key]: val },
+        }
+      default:
+        return { ...acc, global: { ...acc.global, [key]: val } }
     }
+  }
 
-    if (key === 'integrationFolder') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
-      }
-    }
-
-    if (key === 'componentFolder') {
-      return {
-        ...acc,
-        component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
-      }
-    }
-
-    if (key === 'testFiles') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
-        component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
-      }
-    }
-
-    if (key === 'ignoreTestFiles') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specExcludePattern: val },
-        component: { ...acc.component, specExcludePattern: val },
-      }
-    }
-
-    if (key === 'supportFile') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, supportFile: val },
-      }
-    }
-
-    if (key === 'baseUrl') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, [key]: val },
-      }
-    }
-
-    return { ...acc, global: { ...acc.global, [key]: val } }
-  }, { global: {}, e2e: {}, component: {} })
+  return Object.entries(cfg).reduce(reducer, { global: {}, e2e: {}, component: {} })
 }
 
 export function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {

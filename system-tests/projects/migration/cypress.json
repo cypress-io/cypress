@@ -12,7 +12,7 @@
     "slowTestThreshold": 5000
   },
   "component": {
-    "slowTestThreshold": 5000,
+    "slowTestThreshold": 500,
     "retries": 1
   }
 }
