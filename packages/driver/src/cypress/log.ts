@@ -385,7 +385,7 @@ class Log {
     // dont set back to passed
     // if we've already ended
     if (this.get('ended')) {
-      this.fireChangeEvent()
+      this.fireChangeEvent(this)
 
       return
     }
