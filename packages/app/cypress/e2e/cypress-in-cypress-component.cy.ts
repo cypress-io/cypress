@@ -103,7 +103,14 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500 }, () => {
     cy.contains('renders the test component').should('be.visible')
     .then(() => {
       cy.withCtx((ctx) => {
-        ctx.actions.project.setSpecs([])
+        // rename relative path for any specs that happen to be found
+        const specs = [...ctx.project.specs]
+
+        specs.forEach((spec) => {
+          spec.relative += '-updated'
+        })
+
+        ctx.actions.project.setSpecs(specs)
         ctx.emitter.toApp()
       }).then(() => {
         cy.contains(noSpecErrorTitle).should('be.visible')
