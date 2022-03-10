@@ -332,20 +332,22 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    const href = state('window').location.href
-    const count = getRedirectionCount(href)
-    const limit = config('redirectionLimit')
+    if (state('window')) {
+      const href = state('window').location.href
+      const count = getRedirectionCount(href)
+      const limit = config('redirectionLimit')
 
-    if (count === limit) {
-      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-        args: {
-          href,
-          limit,
-        },
-      })
+      if (count === limit) {
+        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+          args: {
+            href,
+            limit,
+          },
+        })
+      }
+
+      updateRedirectionCount(href)
     }
-
-    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 
@@ -420,7 +422,10 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     }
 
     // If the command queue has been cleaned up, throw the error ourselves
-    err?.onFail()
+    if (err?.onFail) {
+      err.onFail()
+    }
+
     throw err
   }
 
