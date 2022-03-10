@@ -4,6 +4,7 @@ const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
+const { bundleRequire } = require('bundle-require')
 
 let tsRegistered = false
 
@@ -78,58 +79,13 @@ function run (ipc, configFile, projectRoot) {
     return false
   }
 
-  const executeConfigViaEsbuild = async (configFile) => {
-    let registerEsbuild
-    let configFileExport
-
-    try {
-      // Cypress will bundle its own esbuild-register, which will use the user's esbuild
-      debug('trying to require.resolve esbuild')
-      require.resolve('esbuild')
-
-      registerEsbuild = require('esbuild-register/dist/node').register
-    } catch (_) {
-      // If the user does not have esbuild, return
-      debug('the user does not have esbuild, so we\'ll invoke the config file via node')
-
-      return
-    }
-
-    // Cleanup esbuild after invoking the plugins file
-    const { unregister: unregisterEsbuild } = registerEsbuild()
-
-    try {
-      debug('invoking the config file with esbuild')
-      configFileExport = await import(configFile)
-    } catch (err) {
-      // There was an issue running their config file.
-      debug('there was an error!', err)
-      throw err
-    } finally {
-      debug('cleaning up esbuild')
-      typeof unregisterEsbuild === 'function' && unregisterEsbuild()
-    }
-
-    debug('successfully invoked the config file with esbuild')
-
-    return configFileExport
-  }
-
-  // Import their configFile.
-  // If they're using "type": "module", *.mjs, *.cjs, or *.js this is the way
-  const executeConfigViaNode = async (configFile) => {
-    debug('loaded config file via node without esbuild', configFile)
-
-    return import(configFile)
-  }
-
   ipc.on('loadConfig', async () => {
     try {
       debug('try loading', configFile)
 
       // Config file loading of modules is tested within
       // system-tests/projects/config-cjs-and-esm/*
-      const configFileExport = await executeConfigViaEsbuild(configFile) || await executeConfigViaNode(configFile)
+      const configFileExport = (await bundleRequire({ filepath: configFile })).mod
 
       debug('loaded config file', configFile)
       const result = configFileExport.default || configFileExport
