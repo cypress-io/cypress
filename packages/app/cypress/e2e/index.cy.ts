@@ -647,10 +647,47 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
+            }).should('have.attr', 'href', getRunnerHref('cypress.config.cy.js')).click()
           })
 
           cy.findByTestId('spec-gen-component-app', { timeout: 5000 }).should('be.visible')
+        })
+
+        it('displays alert with docs link on new spec', () => {
+          cy.get('@CreateFromComponentDialog').within(() => {
+            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
+            cy.get('@NewSpecFile').click()
+          })
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
+            cy.findByRole('link', {
+              name: 'Okay, run the spec',
+            }).should('have.attr', 'href', getRunnerHref('cypress.config.cy.js')).click()
+          })
+
+          cy.contains('Review the docs')
+          .should('have.attr', 'href', 'https://on.cypress.io/mount')
+        })
+
+        it('stops showing alert after navigating', () => {
+          cy.get('@CreateFromComponentDialog').findAllByTestId('file-list-row').first().click()
+
+          cy.log('create a second spec')
+
+          cy.contains('Create another spec').click()
+          cy.contains('Create from component').click()
+          cy.get('@CreateFromComponentDialog').findAllByTestId('file-list-row').last().click()
+          cy.contains('Okay, run the spec').click()
+
+          cy.get('#spec-runner-header').should('contain', 'Review the docs')
+
+          cy.log('should not contain the link if you navigate away and back')
+
+          cy.get('[data-testid=spec-file-item]').first().click()
+          cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
+
+          cy.get('[data-testid=spec-file-item]').last().click()
+          cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
         })
       })
     })

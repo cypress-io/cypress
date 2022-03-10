@@ -122,11 +122,26 @@
       :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
+
+    <Alert
+      v-model="showAlert"
+      status="success"
+      dismissible
+    >
+      <template #title>
+        <ExternalLink href="https://on.cypress.io/mount">
+          <i-cy-book_x16 class="inline-block icon-dark-indigo-500 icon-light-indigo-200" />
+          {{ t('runner.header.reviewDocs') }}
+        </ExternalLink>
+        {{ t('runner.header.troubleRendering') }}
+      </template>
+    </Alert>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAutStore, useSpecStore } from '../store'
 import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
@@ -135,7 +150,9 @@ import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
+import { useI18n } from 'vue-i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
@@ -186,12 +203,26 @@ mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
 }
 `
 
+const { t } = useI18n()
+
+const autStore = useAutStore()
+
+const specStore = useSpecStore()
+
+const route = useRoute()
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
   width: number
 }>()
+
+const showAlert = ref(false)
+
+watchEffect(() => {
+  showAlert.value = route.params.shouldShowTroubleRenderingAlert === 'true'
+})
 
 const autIframe = props.getAutIframe()
 
@@ -205,10 +236,6 @@ const togglePlayground = () => _togglePlayground(autIframe)
 
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql.currentBrowser })
-
-const autStore = useAutStore()
-
-const specStore = useSpecStore()
 
 const activeSpecPath = specStore.activeSpec?.absolute
 
