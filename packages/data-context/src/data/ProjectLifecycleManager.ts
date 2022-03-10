@@ -1143,20 +1143,22 @@ export class ProjectLifecycleManager {
       const filePath = this._pathToFile(fileName)
       const fileExists = fs.existsSync(filePath)
 
-      if (this._configFilePath && fileExists) {
-        // If you've already set the file path AND we've found yet another config file,
-        // we don't know which one to use. We mark it here and then handle this case
-        // later on in the flow. We need to collect them all.
-        metaState.allFoundConfigFiles.push(filePath)
-      } else if (fileExists) {
-        // We've found a config file. We'll continue looping to make sure there's
-        // only one. This is solely so that we can provide rich errors and warnings.
+      if (fileExists) {
+        // We'll collect all the found config files.
+        // If we found more than one, this list will be used in an error message.
+        metaState.allFoundConfigFiles.push(fileName)
 
-        metaState.hasValidConfigFile = true
-        this.setConfigFilePath(fileName)
+        // We've found our first config file! We'll continue looping to make sure there's
+        // only one. Looping over all config files is done so we can provide rich errors and warnings.
+        if (!this._configFilePath) {
+          metaState.hasValidConfigFile = true
+          this.setConfigFilePath(fileName)
+        }
       }
     }
 
+    // We finished looping through all of the possible config files
+    // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!this._configFilePath) {
       this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
     }
