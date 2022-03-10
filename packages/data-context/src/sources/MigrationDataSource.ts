@@ -184,4 +184,8 @@ export class MigrationDataSource {
       this.componentTestingMigrationWatcher = null
     }
   }
+
+  get configFileNameAfterMigration () {
+    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
+  }
 }
