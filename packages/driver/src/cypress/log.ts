@@ -372,6 +372,8 @@ const Log = function (cy, state, config, obj) {
       // dont set back to passed
       // if we've already ended
       if (this.get('ended')) {
+        this.fireChangeEvent()
+
         return
       }
 
