@@ -1096,11 +1096,6 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
-    SETUP_NODE_EVENTS_INVALID_OPTIONS_PLUGINS_FILE: () => {
-      return {
-        default: [{ name: 'pluginsFile' }, makeErr()],
-      }
-    },
     SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN: () => {
       return {
         default: [{ name: 'integrationFolder' }, makeErr()],

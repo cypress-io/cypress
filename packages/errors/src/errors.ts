@@ -1324,11 +1324,11 @@ export const AllCypressErrors = {
       : errPartial`${fmt.highlight('testFiles')}`
 
     return errTemplate`
-      ## Invalid config update in ${fmt.highlight('setupNodeEvents()')}
-
-      Option ${fmt.highlight(name)} is no longer supported.
+      You are attempting to update a configuration value that is no longer supported: ${fmt.highlight(name)}
       
-      It was merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
+      ${fmt.highlight(name)} merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
+
+      https://on.cypress.io/migration-guide
 
       ${stackTrace}
     `
