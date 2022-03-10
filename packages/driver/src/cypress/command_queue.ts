@@ -383,7 +383,7 @@ export class CommandQueue extends Queue<Command> {
       onFinish: () => {
         // By removing the reject state, we can handle navigation timeouts after the command queue has finished.
         this.state('reject', undefined)
-        this.cleanup
+        this.cleanup()
       },
     })
 
