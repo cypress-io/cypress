@@ -522,7 +522,7 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.multiDomainCommunicator.on('before:unload', ({ url }) => {
+    Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
       // Sync stable if the expected domain has loaded.
       cy.isStable(true, 'load')
       // Prints out the newly loaded URL
