@@ -129,8 +129,8 @@ export const createRoutesE2E = ({
     res.sendFile(file, { etag: false })
   })
 
-  routesE2E.get('/__cypress/multi-domain-iframes/:domain', (req, res) => {
-    debug('handling multi-domain iframe for domain: %s', decodeURI(req.params.domain))
+  routesE2E.get('/__cypress/multi-domain-iframes', (req, res) => {
+    debug('handling multi-domain iframe for domain: %s', req.hostname)
 
     files.handleMultiDomainIframe(req, res)
   })

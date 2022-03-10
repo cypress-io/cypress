@@ -6,13 +6,13 @@ context('multi-domain location', { experimentalSessionSupport: true }, () => {
   })
 
   it('.hash()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.hash().should('be.empty')
     })
   })
 
   it('.location()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.location().should((location) => {
         expect(location.href).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
         expect(location.origin).to.equal('http://www.foobar.com:3500')
@@ -21,8 +21,8 @@ context('multi-domain location', { experimentalSessionSupport: true }, () => {
   })
 
   it('.url()', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy.url().should('eq', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+    cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.url().should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
     })
   })
 })

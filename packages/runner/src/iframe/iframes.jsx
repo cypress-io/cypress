@@ -170,12 +170,12 @@ export default class Iframes extends Component {
     return $autIframe
   }
 
-  _addCrossDomainIframe = (domain) => {
-    const id = `Spec Bridge: ${domain}`
+  _addCrossDomainIframe = (location) => {
+    const id = `Spec Bridge: ${location.hostname}`
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
-      this.props.eventManager.notifyCrossDomainBridgeReady(domain)
+      this.props.eventManager.notifyCrossDomainBridgeReady(location.hostname)
 
       return
     }
@@ -186,8 +186,7 @@ export default class Iframes extends Component {
       // container since it needs to match the size of the top window for screenshots
       $container: $(document.body),
       className: 'spec-bridge-iframe',
-      // TODO: Update this to the correct origin once we decide on string vs object
-      src: `//${domain}:3500/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,
+      src: `${location.originPolicy}/${this.props.config.namespace}/multi-domain-iframes`,
     })
   }
 
