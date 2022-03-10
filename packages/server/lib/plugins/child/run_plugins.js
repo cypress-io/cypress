@@ -14,6 +14,7 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
+const { breakingOptions } = require('@packages/config')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -127,7 +128,6 @@ class RunPlugins {
     })
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
-      modifiedCfg && validateNonMigratedOptions(modifiedCfg)
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
         registrations: this.registrations,
@@ -264,58 +264,37 @@ class RunPlugins {
   }
 }
 
-/**
- * Values not allowed in 10.X+ in the root, e2e and component config
- */
-const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile', 'testFiles']
-
-function getNonMigratedOptionsErr (key, errInternal) {
-  return require('@packages/errors').getError('SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID', key, errInternal)
+function getNonMigratedOptionsErr (name, errorKey, errInternal) {
+  return require('@packages/errors').getError(errorKey, { name }, errInternal)
 }
 
-function throwInvalidOptionError (key) {
-  debug('throwing err %s', key)
+function throwInvalidOptionError (name, errorKey) {
+  debug('throwing err %s', name)
   const errInternal = new Error()
 
   Error.captureStackTrace(errInternal, throwInvalidOptionError)
-  const err = getNonMigratedOptionsErr(key, errInternal)
+  const err = getNonMigratedOptionsErr(errorKey, name, errInternal)
 
   throw err
 }
 
-function setInvalidPropSetterWarning (opts, key, keyForError = key) {
-  debug('setting invalid property %s', key)
-  Object.defineProperty(opts, key, {
-    set: throwInvalidOptionError.bind(null, keyForError),
+function setInvalidPropSetterWarning (opts, errorKey, optionName, optionNameForError = optionName) {
+  debug('setting invalid property %s', optionName)
+  Object.defineProperty(opts, optionName, {
+    set: throwInvalidOptionError.bind(null, errorKey, optionNameForError),
   })
 }
 
 function wrapNonMigratedOptions (options) {
   debug('wrapping non-migrated options')
-  optionsNonValidFor10Anywhere.forEach((key) => {
-    setInvalidPropSetterWarning(options, key)
+  breakingOptions.forEach(({ name, errorKey }) => {
+    setInvalidPropSetterWarning(options, errorKey, name)
 
     const testingTypes = ['component', 'e2e']
 
     testingTypes.forEach((testingType) => {
       options[testingType] = options[testingType] || {}
-      setInvalidPropSetterWarning(options[testingType], key, `${testingType}.${key}`)
-    })
-  })
-}
-
-function validateNonMigratedOptions (options) {
-  optionsNonValidFor10Anywhere.forEach((key) => {
-    const testingTypes = ['component', 'e2e']
-
-    if (options[key]) {
-      throw getNonMigratedOptionsErr(key)
-    }
-
-    testingTypes.forEach((testingType) => {
-      if (options[testingType]?.[key]) {
-        throw getNonMigratedOptionsErr(`${testingType}.${key}`)
-      }
+      setInvalidPropSetterWarning(options[testingType], errorKey, name, `${testingType}.${name}`)
     })
   })
 }

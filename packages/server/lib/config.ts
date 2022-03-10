@@ -4,7 +4,7 @@ import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
@@ -128,7 +128,7 @@ export function mergeDefaults (
   .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
-  .each((val, key) => {
+  .each((val: any, key) => {
     // If users pass in testing-type specific keys (eg, specPattern),
     // we want to merge this with what we've read from the config file,
     // rather than override it entirely.

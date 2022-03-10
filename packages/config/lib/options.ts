@@ -1,7 +1,8 @@
 import os from 'os'
-import validate from './validation'
+import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
+import type errors from '@packages/errors'
 
 type TestingType = 'e2e' | 'component'
 
@@ -29,7 +30,7 @@ interface RuntimeConfigOption {
   canUpdateDuringTestTime?: boolean
 }
 
-interface BreakingOption {
+export interface BreakingOption {
   /**
    * The non-passive configuration option.
    */
@@ -37,7 +38,7 @@ interface BreakingOption {
   /**
    * String to summarize the error messaging that is logged.
    */
-  errorKey: string
+  errorKey: keyof typeof errors.AllCypressErrors
   /**
    * Array of testing types this config option is valid for
    */
@@ -493,8 +494,23 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...runtimeOptions,
 ]
 
+/**
+ * Values not allowed in 10.X+ in the root, e2e and component config
+ */
 export const breakingOptions: Array<BreakingOption> = [
   {
+    name: 'integrationFolder',
+    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
+  }, {
+    name: 'componentFolder',
+    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
+  }, {
+    name: 'testFiles',
+    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
+  }, {
+    name: 'pluginsFile',
+    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_PLUGINS_FILE',
+  }, {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',

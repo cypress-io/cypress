@@ -3,4 +3,11 @@
   "include": [
     "lib/*",
   ],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "lib": [
+      "dom",
+    ],
+  },
 }

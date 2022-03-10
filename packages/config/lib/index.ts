@@ -4,6 +4,8 @@ import Debug from 'debug'
 import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
 import type { BreakingOption } from './options'
 
+export * as validation from './validation'
+
 export { breakingOptions }
 
 const debug = Debug('cypress:config:validator')
