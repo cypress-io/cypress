@@ -121,7 +121,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
           spec.relative += '-updated'
         })
 
-        ctx.actions.project.setSpecs([])
+        ctx.actions.project.setSpecs(specs)
         ctx.emitter.toApp()
       }).then(() => {
         cy.contains(noSpecErrorTitle).should('be.visible')
