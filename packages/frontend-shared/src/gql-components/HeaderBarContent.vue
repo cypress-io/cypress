@@ -129,11 +129,7 @@ subscription HeaderBarContent_authChange {
 }
 `
 
-useSubscription({ query: HeaderBarContent_AuthChangeDocument }, (current, next) => {
-  // console.log(current, next)
-
-  return next
-})
+useSubscription({ query: HeaderBarContent_AuthChangeDocument })
 
 gql`
 mutation GlobalPageHeader_clearCurrentProject {
