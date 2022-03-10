@@ -46,7 +46,7 @@
 import { computed } from 'vue'
 import { gql } from '@urql/core'
 import Button from '@cy/components/Button.vue'
-import CopyButton from '@cy/components/CopyButton.vue'
+import CopyButton from '@cy/gql-components/CopyButton.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
 import IconKey from '~icons/cy/placeholder_x16.svg'

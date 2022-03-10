@@ -103,7 +103,7 @@ export const CurrentProject = objectType({
     t.boolean('needsLegacyConfigMigration', {
       description: 'Whether the project needs to be migrated before proceeding',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.metaState.needsCypressJsonMigration
+        return ctx.lifecycleManager.needsCypressJsonMigration()
       },
     })
 

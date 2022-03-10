@@ -32,9 +32,8 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - unify-1001-windows-app-e2e-tests
-        - ryanm/fix/windows-builds
         - rebase/develop-10.0-release-2022-03-04
+        - marktnoonan/backmerge-develop-3-8-22
         - kevin/add-ct-component-examples-to-circle
 
 # usually we don't build Mac app - it takes a long time
@@ -45,8 +44,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ rebase/develop-10.0-release-2022-03-04, << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ marktnoonan/backmerge-develop-3-8-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -56,7 +54,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ marktnoonan/backmerge-develop-3-8-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>

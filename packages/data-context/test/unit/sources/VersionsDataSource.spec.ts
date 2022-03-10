@@ -120,5 +120,31 @@ describe('VersionsDataSource', () => {
 
       expect(latestVersion).to.eql('16.0.0')
     })
+
+    it('handles errors fetching version data', async () => {
+      nmiStub.resolves('abcd123')
+
+      fetchStub
+      .withArgs('https://download.cypress.io/desktop.json', {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cypress-version': currentCypressVersion,
+          'x-os-name': 'darwin',
+          'x-arch': 'x64',
+          'x-initial-launch': String(true),
+          'x-machine-id': 'abcd123',
+          'x-testing-type': 'e2e',
+        },
+      })
+      .rejects()
+      .withArgs('https://registry.npmjs.org/cypress')
+      .rejects()
+
+      versionsDataSource = new VersionsDataSource(ctx)
+
+      const versionInfo = await versionsDataSource.versionData()
+
+      expect(versionInfo.current).to.eql(versionInfo.latest)
+    })
   })
 })

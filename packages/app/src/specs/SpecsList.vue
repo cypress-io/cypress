@@ -1,5 +1,21 @@
 <template>
   <div class="p-24px spec-container">
+    <Alert
+      v-if="isAlertOpen"
+      v-model="isAlertOpen"
+      status="error"
+      :title="t('specPage.noSpecErrorTitle')"
+      class="mb-16px"
+      :icon="WarningIcon"
+      dismissible
+    >
+      <p class="mb-24px">
+        {{ t('specPage.noSpecErrorIntro') }} <InlineCodeFragment variant="error">
+          {{ route.params.unrunnable }}
+        </InlineCodeFragment>
+      </p>
+      <p>{{ t('specPage.noSpecErrorExplainer') }}</p>
+    </Alert>
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
@@ -117,7 +133,12 @@ import { useVirtualList } from '@packages/frontend-shared/src/composables/useVir
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce } from '@vueuse/core'
+import Alert from '../../../frontend-shared/src/components/Alert.vue'
+import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
+import WarningIcon from '~icons/cy/warning_x16.svg'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const { t } = useI18n()
 
 gql`
@@ -163,6 +184,8 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
+const isAlertOpen = ref(!!route.params?.unrunnable)
+
 const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const search = ref('')
@@ -203,6 +226,7 @@ function getIdIfDirectory (row) {
 
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
 }
+
 </script>
 
 <style scoped>

@@ -51,8 +51,8 @@ export interface InjectedConfigApi {
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
-  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
-  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
+  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
+  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
@@ -158,7 +158,15 @@ export class ProjectLifecycleManager {
   }
 
   get legacyJsonPath () {
-    return path.join(this.configFilePath, 'cypress.json')
+    return path.join(this.configFilePath, this.legacyConfigFile)
+  }
+
+  get legacyConfigFile () {
+    if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
+      return this.ctx.modeOptions.configFile
+    }
+
+    return 'cypress.json'
   }
 
   get configFile () {
@@ -207,6 +215,12 @@ export class ProjectLifecycleManager {
 
   get projectTitle () {
     return path.basename(this.projectRoot)
+  }
+
+  async checkIfLegacyConfigFileExist () {
+    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.legacyConfigFile)
+
+    return Boolean(legacyConfigFileExist)
   }
 
   clearCurrentProject () {
@@ -594,7 +608,7 @@ export class ProjectLifecycleManager {
     }
 
     const legacyFileWatcher = this.addWatcher([
-      this._pathToFile('cypress.json'),
+      this._pathToFile(this.legacyConfigFile),
       this._pathToFile('cypress.config.js'),
       this._pathToFile('cypress.config.ts'),
     ])
@@ -1067,7 +1081,7 @@ export class ProjectLifecycleManager {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
-      hasLegacyCypressJson: fs.existsSync(this._pathToFile('cypress.json')),
+      hasLegacyCypressJson: fs.existsSync(this._pathToFile(this.legacyConfigFile)),
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 
@@ -1097,6 +1111,16 @@ export class ProjectLifecycleManager {
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
+
+        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+
+        if (this.ctx.fs.existsSync(this._pathToFile(configFileNameAfterMigration))) {
+          if (this.ctx.fs.existsSync(this._pathToFile(configFile))) {
+            this.ctx.onError(getError('LEGACY_CONFIG_FILE', configFileNameAfterMigration, this.projectRoot, configFile))
+          } else {
+            this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, configFile))
+          }
+        }
       } else {
         this._configFilePath = this._pathToFile(configFile)
         if (fs.existsSync(this._configFilePath)) {
@@ -1114,7 +1138,7 @@ export class ProjectLifecycleManager {
 
     if (fs.existsSync(configFileTs)) {
       metaState.hasValidConfigFile = true
-      this.setConfigFilePath('ts')
+      this.setConfigFilePath('cypress.config.ts')
     }
 
     if (fs.existsSync(configFileJs)) {
@@ -1122,12 +1146,12 @@ export class ProjectLifecycleManager {
       if (this._configFilePath) {
         metaState.hasMultipleConfigPaths = true
       } else {
-        this.setConfigFilePath('js')
+        this.setConfigFilePath('cypress.config.js')
       }
     }
 
     if (!this._configFilePath) {
-      this.setConfigFilePath(metaState.hasTypescript ? 'ts' : 'js')
+      this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
     }
 
     if (metaState.hasLegacyCypressJson && !metaState.hasValidConfigFile) {
@@ -1139,8 +1163,8 @@ export class ProjectLifecycleManager {
     return metaState
   }
 
-  setConfigFilePath (lang: 'ts' | 'js') {
-    this._configFilePath = this._pathToFile(`cypress.config.${lang}`)
+  setConfigFilePath (fileName: string) {
+    this._configFilePath = this._pathToFile(fileName)
   }
 
   private _pathToFile (file: string) {
@@ -1286,6 +1310,12 @@ export class ProjectLifecycleManager {
     }
 
     return true
+  }
+
+  async needsCypressJsonMigration () {
+    const legacyConfigFileExist = await this.checkIfLegacyConfigFileExist()
+
+    return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
   private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
