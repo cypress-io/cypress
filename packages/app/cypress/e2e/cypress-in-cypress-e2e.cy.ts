@@ -87,7 +87,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${badFilePath}`)
+    cy.visitApp(`/specs/runner?file=${badFilePath}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
