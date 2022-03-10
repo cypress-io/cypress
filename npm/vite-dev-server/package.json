@@ -9,7 +9,7 @@
     "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "cy:run-signature": "yarn cy:run --config=\"{\\\"pluginsFile\\\":\\\"cypress/new-signature/plugins.js\\\"}\"",
+    "cy:run-signature": "RUN_SIGNATURE=true yarn cy:run",
     "test": "yarn cy:run && yarn cy:run-signature",
     "watch": "tsc -w"
   },
