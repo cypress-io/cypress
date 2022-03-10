@@ -368,12 +368,13 @@ export default class ProxyLogging {
    * Create a Cypress.Log for an incoming proxy request, or store the metadata for later if it is ignored.
    */
   private logIncomingRequest (preRequest: BrowserPreRequest): void {
-    Cypress.backend('debug', 'logIncomingRequest %o', preRequest)
+    Cypress.backend('debug', 'logIncomingRequest %o', { preRequest, unmatchedXhrLogs: this.unmatchedXhrLogs })
     // if this is an XHR, check to see if it matches an XHR log that is missing a pre-request
     if (preRequest.resourceType === 'xhr') {
       const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
 
       if (unmatchedXhrLog) {
+        Cypress.backend('debug', 'unmatchedXhrLog %o', { unmatchedXhrLog })
         const { log, route } = unmatchedXhrLog
         const proxyRequest = new ProxyRequest(preRequest, unmatchedXhrLog)
 
