@@ -95,7 +95,7 @@ const specifyFileByRelativePath = (url, log) => {
 }
 
 const aboutBlank = (cy, win) => {
-  if (Cypress.state('isMultiDomain')) {
+  if (Cypress.isMultiDomain) {
     return new Promise((resolve) => {
       Cypress.specBridgeCommunicator.once('visit:about:blank:end', resolve)
 
@@ -454,7 +454,7 @@ const normalizeOptions = (options) => {
   .pick(REQUEST_URL_OPTS)
   .extend({
     timeout: options.responseTimeout,
-    isMultiDomain: !!Cypress.state('isMultiDomain'),
+    isMultiDomain: Cypress.isMultiDomain,
   })
   .value()
 }
@@ -921,7 +921,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // if this is multi-domain, we need to tell the primary to change
           // the AUT iframe since we don't have access to it
-          if (Cypress.state('isMultiDomain')) {
+          if (Cypress.isMultiDomain) {
             return Cypress.specBridgeCommunicator.toPrimary('visit:url', { url })
           }
 
@@ -1092,7 +1092,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // if we are in multi-domain and the origin policies weren't the same,
           // we need to throw an error since the user tried to visit a new
           // domain which isn't allowed within a multi-domain block
-          if (Cypress.state('isMultiDomain') && win) {
+          if (Cypress.isMultiDomain && win) {
             // TODO: need a better error message
             return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
           }

@@ -1,5 +1,4 @@
 import type { $Cy } from '../cypress/cy'
-import type { SpecBridgeDomainCommunicator } from './communicator'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
 import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
@@ -54,7 +53,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   return runnable
 }
 
-export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
+export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   const reset = (state) => {
     cy.reset({})
 
@@ -84,7 +83,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     cy.state('runnable').state = 'passed'
   }
 
-  specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
+  Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
     const { config, data, env, fn, state, skipConfigValidation, isStable } = options
 
     let queueFinished = false
@@ -106,13 +105,13 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
-        specBridgeCommunicator.toPrimary('uncaught:error', { err })
+        Cypress.specBridgeCommunicator.toPrimary('uncaught:error', { err })
 
         return
       }
 
       cy.stop()
-      specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
+      Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
 
     try {
@@ -132,7 +131,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
         // value
         const subject = hasCommands ? undefined : await value
 
-        specBridgeCommunicator.toPrimary('ran:domain:fn', {
+        Cypress.specBridgeCommunicator.toPrimary('ran:domain:fn', {
           subject,
           finished: !hasCommands,
         }, {
@@ -151,7 +150,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       }
     } catch (err) {
       setRunnableStateToPassed()
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
+      Cypress.specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
 
       return
     }
@@ -160,7 +159,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     .then(() => {
       queueFinished = true
       setRunnableStateToPassed()
-      specBridgeCommunicator.toPrimary('queue:finished', {
+      Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.state('subject'),
       }, {
         syncGlobals: true,
