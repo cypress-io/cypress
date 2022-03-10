@@ -315,7 +315,7 @@ describe('errors', { experimentalSessionSupport: true, experimentalMultiDomain: 
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('redirects to the wrong subDomain', { pageLoadTimeout: 5000 }, () => {
+  it('redirects to the wrong subDomain', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load.`)
       done()
