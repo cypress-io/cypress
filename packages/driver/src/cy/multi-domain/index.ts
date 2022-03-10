@@ -74,9 +74,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       return new Bluebird((resolve, reject) => {
         const cleanup = () => {
           communicator.off('queue:finished', onQueueFinished)
-          // After the switch to domain command has exited we no longer need to listen for loads
-          // happening within that spec bridge as any subsequent load should happen in either the parent or another spec bridge.
-          communicator.off('window:load', onWindowLoad)
         }
 
         const _resolve = ({ subject, unserializableSubjectType }) => {
@@ -101,18 +98,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           _resolve({ subject, unserializableSubjectType })
         }
-
-        const onWindowLoad = ({ url }, windowLoadDomain) => {
-          if (windowLoadDomain === domain) {
-            // Sync stable if the expected domain has loaded.
-            cy.isStable(true, 'load')
-            // Prints out the newly loaded URL
-            Cypress.emit('internal:window:load', { type: 'cross:domain', url })
-          }
-        }
-
-        // We can't sync stable on exit because stability may change after the command has exited.
-        communicator.on('window:load', onWindowLoad)
 
         communicator.once('sync:globals', ({ config, env, state }) => {
           syncConfigToCurrentDomain(config)
