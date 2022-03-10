@@ -16,7 +16,7 @@ export type BreakingOptionErrorKey =
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
-  | 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN'
+  | 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN'
 
 type TestingType = 'e2e' | 'component'
 
@@ -508,13 +508,13 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
 export const breakingOptions: Array<BreakingOption> = [
   {
     name: 'integrationFolder',
-    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
+    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
   }, {
     name: 'componentFolder',
-    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
+    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
   }, {
     name: 'testFiles',
-    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
+    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
   }, {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',

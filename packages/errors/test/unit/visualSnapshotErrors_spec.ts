@@ -1096,7 +1096,7 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
-    SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN: () => {
+    MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: () => {
       return {
         default: [{ name: 'integrationFolder' }, makeErr()],
         testFiles: [{ name: 'testFiles' }, makeErr()],

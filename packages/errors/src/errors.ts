@@ -1310,7 +1310,7 @@ export const AllCypressErrors = {
     `
   },
 
-  SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN: ({ name }: {name: string}, err?: Error) => {
+  MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name }: {name: string}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
@@ -1324,7 +1324,7 @@ export const AllCypressErrors = {
       : errPartial`${fmt.highlight('testFiles')}`
 
     return errTemplate`
-      You are attempting to update a configuration value that is no longer supported: ${fmt.highlight(name)}
+      You are attempting to use a configuration value that is no longer supported: ${fmt.highlight(name)}
       
       ${fmt.highlight(name)} merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
 
