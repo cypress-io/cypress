@@ -3,7 +3,7 @@ const { devServer } = require('@cypress/webpack-dev-server')
 module.exports = {
   component: {
     supportFile: false,
-    testFiles: '**/*cy-spec.{js,jsx,ts,tsx}',
+    specPattern: '**/*cy-spec.{js,jsx,ts,tsx}',
     componentFolder: 'src',
     devServer,
     devServerConfig: {

@@ -21,6 +21,11 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+type ResolvedConfigOptions = Cypress.ResolvedConfigOptions & {
+  testFiles: string | string[]
+  ignoreTestFiles: string | string[]
+}
+
 /**
  * config format pre-10.0
  */
@@ -361,7 +366,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
     }
 
     if (key === 'e2e' || key === 'component') {
-      const value = val as Cypress.ResolvedConfigOptions
+      const value = val as ResolvedConfigOptions
 
       if (!value) {
         return acc

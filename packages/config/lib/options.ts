@@ -559,6 +559,11 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
   },
+  {
+    name: 'testFiles',
+    errorKey: 'TEST_FILES_DEPRECATION',
+    isWarning: false,
+  },
 ]
 
 export const breakingRootOptions: Array<BreakingOption> = [
