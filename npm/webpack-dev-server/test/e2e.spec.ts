@@ -8,12 +8,12 @@ import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
 import { devServer, startDevServer } from '../'
 
-const requestSpecFile = (port: number) => {
+const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
     const opts = {
       host: 'localhost',
       port,
-      path: '/test/fixtures/foo.spec.js',
+      path: file,
     }
 
     const callback = (response: EventEmitter) => {
@@ -67,9 +67,28 @@ describe('#startDevServer', () => {
       },
     })
 
-    const response = await requestSpecFile(port as number)
+    const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
 
     expect(response).to.eq('const foo = () => {}\n')
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
+  it('serves specs in directory with [] chars via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs,
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/[foo]/bar.spec.js', port as number)
+
+    expect(response).to.eq(`it('this is a spec with a path containing []', () => {})\n`)
 
     return new Promise((res) => {
       close(() => res())
@@ -178,7 +197,7 @@ describe('#startDevServer', () => {
       { webpackConfig },
     )
 
-    const response = await requestSpecFile(port as number)
+    const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
 
     expect(response).to.eq('const foo = () => {}\n')
 
