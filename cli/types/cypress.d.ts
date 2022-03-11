@@ -2618,6 +2618,11 @@ declare namespace Cypress {
      */
     env: { [key: string]: any }
     /**
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * @default "*.hot-update.js"
+     */
+    excludeSpecPattern: string | string[]
+    /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
      */
@@ -2734,6 +2739,11 @@ declare namespace Cypress {
      */
     screenshotsFolder: string | false
     /**
+     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
+     * @default "cypress/support/{e2e|component}.js"
+     */
+    supportFile: string | false
+    /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
      */
@@ -2842,6 +2852,10 @@ declare namespace Cypress {
      */
     supportFolder: string
     /**
+     * Glob pattern to determine what test files to load.
+     */
+    specPattern: string | string[]
+    /**
      * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
@@ -2921,23 +2935,6 @@ declare namespace Cypress {
     devServerPublicPathRoute: string
   }
 
-  interface TestingTypeOptions {
-    /**
-     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
-     * @default "cypress/support/{e2e|component}.js"
-     */
-    supportFile: string | false
-    /**
-     * Glob pattern to determine what test files to load.
-     */
-    specPattern: string | string[]
-    /**
-     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
-     * @default "*.hot-update.js"
-     */
-    excludeSpecPattern: string | string[]
-  }
-
   /**
    * Optional options added before the server starts
    */
@@ -2979,7 +2976,7 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>> & Partial<TestingTypeOptions>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
   interface E2eConfigOptions extends CoreConfigOptions {
     /**
