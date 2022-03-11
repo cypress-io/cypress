@@ -5,7 +5,6 @@ const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
 const { bundleRequire } = require('bundle-require')
-const { loadTsConfig } = require('load-tsconfig')
 
 let tsRegistered = false
 
@@ -83,18 +82,18 @@ function run (ipc, configFile, projectRoot) {
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadConfig = async (configFile) => {
-    // We try to use `bundleRequire` to handle user-space node imports where possible.
-    // The one exception is that when
-    // - users have a JS config file *and*
-    // - a tsconfig in their project *and*
-    // - that tsconfig has a `target` or es5/es2015/es3
-    const tsConfig = loadTsConfig(process.cwd())?.data
-    const shouldUseNodeImport = tsConfig && !configFile.endsWith('.ts') && tsConfig.compilerOptions?.target?.match(/es(2015|5|3)/ig)
+    // 1. Try loading the configFile
+    // 2. Catch the "ERR_REQUIRE_ESM" error
+    // 3. Try using esbuild via `bundleRequire`
 
-    if (shouldUseNodeImport) {
-      debug(`We're loading the configFile via user's node instead of bundleRequire. TSConfig target is`, tsConfig.compilerOptions?.target, `and the config file ends with .ts`)
-
-      return await import(configFile)
+    try {
+      return require(configFile)
+    } catch (err) {
+      if (err.stack.includes('[ERR_REQUIRE_ESM]')) {
+        debug('ERR INCLUDES REQUIRE ESM')
+      } else {
+        throw err
+      }
     }
 
     debug(`We're loading the configFile via bundleRequire`)
