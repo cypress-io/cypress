@@ -1,7 +1,7 @@
 import snapshot from 'snap-shot-it'
 import { expect } from 'chai'
 
-import * as validation from '../../lib/validation'
+import * as validation from '../../src/validation'
 
 describe('src/validation', () => {
   const mockKey = 'mockConfigKey'

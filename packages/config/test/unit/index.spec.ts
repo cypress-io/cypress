@@ -3,7 +3,7 @@ import snapshot from 'snap-shot-it'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 
-import * as configUtil from '../../lib/index'
+import * as configUtil from '../../src/index'
 
 chai.use(sinonChai)
 const { expect } = chai
