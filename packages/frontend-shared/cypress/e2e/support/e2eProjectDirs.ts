@@ -6,6 +6,7 @@ export const e2eProjectDirs = [
   'chrome-browser-preferences',
   'component-tests',
   'config-cjs-and-esm',
+  'config-with-base-url-warning',
   'config-with-custom-file-js',
   'config-with-custom-file-ts',
   'config-with-import-error',
