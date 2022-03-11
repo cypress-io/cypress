@@ -49,12 +49,13 @@ In addition to sometimes showing a route's name in the UI, we also use the `name
 
 #### `params` vs `query`
 
-We use `params` when there is temporary state that should be present when a user gets to a route from somewhere else in the App, but shouldn't be present after page refresh or when using the `back` button. Useful for things like the warning if you view a spec right after creating it and we want to show a warning, for example.
+We use `params` when there is temporary state that should be present when a user gets to a route from somewhere else in the App, but shouldn't be present after page refresh or when using the `back` button. Useful for things like the notice if you view a spec right after creating it, for example.
 
-For values that should survive a page refresh, which is most cases where we'd put something in the route, we use `query` to put the values into the URL's query parameters.
+For values that should survive a page refresh, which is most cases where we'd put something in the route, we use `query` in the route object to put the values into the URL's query parameters.
 
-The terminology can get a bit confusing as Vue Router's `params` are not the query parameters in the url. Vue Router's `params` can be accessed and used to form dynamic parts of a URL's path, but we are not currently using that feature, so for us `params` are used as described above. The option to interpolate values from `params` into a `path` is why the `to` property needs to be the route's `name` in order for `params` to be passed. Vue will warn if you try to do this.
+The terminology can get a bit confusing as Vue Router's `params` are not the query parameters in the url. Vue Router's `params` can be accessed and used to form dynamic parts of a URL's path, but we are not currently using that feature, so for us `params` are used as described above. The option to interpolate values from `params` into a `path` is why the `to` property needs to be the route's `name` in order for `params` to be passed. Vue will warn, not error, if we try to do specify both `path` and `params` in a `to` or a router push, and our `params` will be ignored.
 
+More details on all of this at https://router.vuejs.org/ - these are just some examples of things we are using here.
 
 ## Using existing, Vite-incompatible modules
 
