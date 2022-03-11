@@ -10,7 +10,9 @@
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
-    "test": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --exit"
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register test/unit/**/*.spec.ts --exit"
   },
   "dependencies": {
     "check-more-types": "2.24.0",
