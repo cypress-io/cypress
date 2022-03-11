@@ -4,7 +4,7 @@ import { setupLayouts } from 'virtual:generated-layouts'
 
 /**
  * Generated Routes are created via https://github.com/hannoeru/vite-plugin-pages
- * They are pages on the files contained in src/pages.
+ * The generates are based on the files contained in src/pages.
  * See README.md this package for more details
  */
 
