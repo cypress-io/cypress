@@ -86,7 +86,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('app.foobar5.com', () => {})
       cy.then(() => {
         const expectedSrc = `https://foobar5.com/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ app.foobar5.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar5.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -106,7 +106,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('app.foobar.herokuapp.com', () => {})
       cy.then(() => {
         const expectedSrc = `https://foobar.herokuapp.com/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ app.foobar.herokuapp.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar.herokuapp.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
