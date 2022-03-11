@@ -2613,20 +2613,10 @@ declare namespace Cypress {
 
   interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
     /**
-     * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
-     * @default null
-     */
-    baseUrl: string | null
-    /**
      * Any values to be set as [environment variables](https://docs.cypress.io/guides/guides/environment-variables.html)
      * @default {}
      */
     env: { [key: string]: any }
-    /**
-     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
-     * @default "*.hot-update.js"
-     */
-    excludeSpecPattern: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
@@ -2744,11 +2734,6 @@ declare namespace Cypress {
      */
     screenshotsFolder: string | false
     /**
-     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
-     * @default "cypress/support/{e2e|component}.js"
-     */
-    supportFile: string | false
-    /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
      */
@@ -2857,10 +2842,6 @@ declare namespace Cypress {
      */
     supportFolder: string
     /**
-     * Glob pattern to determine what test files to load.
-     */
-    specPattern: string | string[]
-    /**
      * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
@@ -2879,7 +2860,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: CoreConfigOptions
+    e2e: E2eConfigOptions
 
     /**
      * An array of objects defining the certificates
@@ -2940,6 +2921,23 @@ declare namespace Cypress {
     devServerPublicPathRoute: string
   }
 
+  interface TestingTypeOptions {
+    /**
+     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
+     * @default "cypress/support/{e2e|component}.js"
+     */
+    supportFile: string | false
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    specPattern: string | string[]
+    /**
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * @default "*.hot-update.js"
+     */
+    excludeSpecPattern: string | string[]
+  }
+
   /**
    * Optional options added before the server starts
    */
@@ -2973,7 +2971,7 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -2981,7 +2979,15 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>> & Partial<TestingTypeOptions>
+
+  interface E2eConfigOptions extends CoreConfigOptions {
+    /**
+     * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
+     * @default null
+     */
+     baseUrl: string | null
+  }
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
