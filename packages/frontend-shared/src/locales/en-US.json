@@ -654,5 +654,8 @@
       "invalidSelector": "Invalid",
       "selectorMethodsLabel": "Selector Methods"
     }
+  },
+  "warnings": {
+    "retry": "Try again"
   }
 }
