@@ -76,7 +76,7 @@ class $Cypress {
     _.extend(this.$, $)
   }
 
-  setConfig (config: Cypress.ObjectLike = {}) {
+  configure (config: Cypress.ObjectLike = {}) {
     // config.remote
     // {
     //   origin: "http://localhost:2020"
@@ -683,7 +683,7 @@ class $Cypress {
   static create (config) {
     const cypress = new $Cypress()
 
-    cypress.setConfig(config)
+    cypress.configure(config)
 
     return cypress
   }

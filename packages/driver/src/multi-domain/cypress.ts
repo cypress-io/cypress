@@ -37,7 +37,7 @@ const createCypress = () => {
 const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   const Cypress = window.Cypress
 
-  Cypress.setConfig({
+  Cypress.configure({
     ...cypressConfig,
     env,
     // never turn on video for multi-domain when syncing the config. This is handled in the primary.
