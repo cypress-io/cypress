@@ -475,7 +475,7 @@ export const mutation = mutationType({
       description: 'Initialize the migration wizard to the first step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.initialize()
+        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
 
         return {}
       },

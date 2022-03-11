@@ -1,6 +1,8 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
+const pkg = require('@packages/root')
+
 const loginText = defaultMessages.topNav.login
 
 describe('App Top Nav Workflows', () => {
@@ -123,7 +125,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
@@ -201,6 +203,34 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.findAllByRole('dialog').should('not.exist')
+      })
+    })
+
+    context('version data unreachable', () => {
+      it('treats unreachable data as current version', () => {
+        cy.withCtx((ctx, o) => {
+          const oldFetch = ctx.util.fetch
+
+          o.sinon.stub(ctx.util, 'fetch').get(() => {
+            return async (url: RequestInfo, init?: RequestInit) => {
+              if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+                throw new Error(String(url))
+              }
+
+              return oldFetch(url, init)
+            }
+          })
+        })
+
+        cy.findBrowsers()
+        cy.openProject('launchpad')
+        cy.startAppServer()
+        cy.visitApp()
+
+        cy.findByTestId('app-header-bar').validateExternalLink({
+          name: `v${pkg.version}`,
+          href: `https://github.com/cypress-io/cypress/releases/tag/v${pkg.version}`,
+        })
       })
     })
   })
