@@ -9,8 +9,8 @@
     "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "cy:run-signature": "RUN_SIGNATURE=true yarn cy:run",
-    "test": "yarn cy:run && yarn cy:run-signature",
+    "cy:run-legacy": "yarn cy:run --config-file ./cypress.config.legacy.ts",
+    "test": "yarn cy:run && yarn cy:run-legacy",
     "watch": "tsc -w"
   },
   "dependencies": {
