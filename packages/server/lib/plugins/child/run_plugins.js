@@ -274,6 +274,8 @@ function throwInvalidOptionError (errorKey, name) {
   throw err
 }
 
+// only works if config.myProperty = 'something'
+// this will not throw config = {...config, myProperty: 'something'}
 function setInvalidPropSetterWarning (opts, errorKey, optionName, optionNameForError = optionName) {
   debug('setting invalid property %s', optionName)
   Object.defineProperty(opts, optionName, {
