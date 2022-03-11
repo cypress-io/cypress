@@ -1,20 +1,14 @@
 <template>
-  <div v-if="specStore.activeSpec && activeSpecTouched">
+  <div v-if="specStore.activeSpec">
     <SpecRunnerOpenMode
       v-if="initialized"
       :gql="props.gql"
     />
   </div>
-  <div
-    v-else
-  >
-    Active Spec: {{ specStore.activeSpec?.relative }} <br>
-    Specs: {{ props.gql.currentProject?.specs?.map(spec => spec.name) }}
-  </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, watchEffect, ref } from 'vue'
+import { computed, watchEffect } from 'vue'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
@@ -36,16 +30,7 @@ const specs = computed(() => {
 
 watchSpec(specs)
 
-const activeSpecTouched = ref(false)
-
 watchEffect(() => {
-  // return early if activeSpec was _never_ changed from null
-  if (specStore.activeSpec && !activeSpecTouched.value) {
-    activeSpecTouched.value = true
-
-    return
-  }
-
   const specPath = router.currentRoute.value.query.file
 
   if (specPath && !specStore.activeSpec && specs.value) {
