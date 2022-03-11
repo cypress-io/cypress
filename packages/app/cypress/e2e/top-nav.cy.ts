@@ -1,6 +1,8 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { AuthStateShape } from '@packages/data-context/src/data'
 
+const pkg = require('@packages/root')
+
 const loginText = defaultMessages.topNav.login
 
 describe('App Top Nav Workflows', () => {
@@ -203,6 +205,35 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.findAllByRole('dialog').should('not.exist')
+      })
+    })
+
+    context('version data unreachable', () => {
+      it('treats unreachable data as current version', () => {
+        cy.withCtx((ctx) => {
+          const oldFetch = ctx.util.fetch
+
+          // @ts-ignore sinon is a global in the node process where this is executed
+          sinon.stub(ctx.util, 'fetch').get(() => {
+            return async (url: RequestInfo, init?: RequestInit) => {
+              if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+                throw new Error(String(url))
+              }
+
+              return oldFetch(url, init)
+            }
+          })
+        })
+
+        cy.findBrowsers()
+        cy.openProject('launchpad')
+        cy.startAppServer()
+        cy.__incorrectlyVisitAppWithIntercept()
+
+        cy.findByTestId('app-header-bar').validateExternalLink({
+          name: `v${pkg.version}`,
+          href: `https://github.com/cypress-io/cypress/releases/tag/v${pkg.version}`,
+        })
       })
     })
   })

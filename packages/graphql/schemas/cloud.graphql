@@ -415,7 +415,7 @@ type Mutation {
   """
   Request access to an organization from a projectId
   """
-  cloudProjectRequestAccess(projectSlug: String!): Boolean
+  cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
 
   """
   Adding as a test

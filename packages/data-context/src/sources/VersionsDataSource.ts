@@ -31,8 +31,8 @@ export class VersionsDataSource {
   constructor (private ctx: DataContext) {
     this._initialLaunch = true
     this._currentTestingType = this.ctx.coreData.currentTestingType
-    this._latestVersion = this.getLatestVersion()
-    this._npmMetadata = this.getVersionMetadata()
+    this._latestVersion = this.getLatestVersion().catch(() => pkg.version)
+    this._npmMetadata = this.getVersionMetadata().catch(() => ({}))
   }
 
   /**
@@ -73,7 +73,7 @@ export class VersionsDataSource {
     if (this.ctx.coreData.currentTestingType !== this._currentTestingType) {
       debug('resetting latest version telemetry call due to a different testing type')
       this._currentTestingType = this.ctx.coreData.currentTestingType
-      this._latestVersion = this.getLatestVersion()
+      this._latestVersion = this.getLatestVersion().catch(() => pkg.version)
     }
   }
 
