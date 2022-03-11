@@ -226,6 +226,22 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
+
+    it('resize nav and persist the state after refresh', () => {
+      cy.contains('flower.png').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', { clientX: 400 })
+      .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 336)
+
+      cy.reload()
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 336)
+    })
   })
 
   context('as component testing type', () => {
