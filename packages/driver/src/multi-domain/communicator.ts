@@ -113,14 +113,14 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     try {
       if (hasMultiDomainError) {
         try {
+          // give the `err` truthiness if it's a falsey value like undefined/null/false
+          if (!err) {
+            err = new Error(`${err}`)
+          }
+
           err = preprocessForSerialization(err)
         } catch (e) {
           err = e
-        }
-
-        // give the `err` truthiness if it's a falsey value like undefined/null/false
-        if (hasMultiDomainError && !err) {
-          err = new Error(`${err}`)
         }
       }
 
