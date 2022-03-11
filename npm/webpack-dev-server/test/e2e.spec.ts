@@ -97,6 +97,25 @@ describe('#startDevServer', () => {
     })
   })
 
+  it('serves a file with spaces via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('foo bar.spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile(encodeURI('/test/fixtures/foo bar.spec.js'), port as number)
+
+    expect(response).to.eq(`it('this is a spec with a path containing a space', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
   it('emits dev-server:compile:success event on successful compilation', async () => {
     const devServerEvents = new EventEmitter()
     const { close } = await startDevServer({
