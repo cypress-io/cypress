@@ -11,12 +11,10 @@
     "strict": true,
     "allowJs": false,
     "rootDir": "src",
-    "outDir": "dist",
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
-    "types": []
+    "importsNotUsedAsValues": "error"
   }
 }
