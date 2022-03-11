@@ -1108,10 +1108,5 @@ describe('visual error templates', () => {
         default: ['custom.config.js', 'custom.json'],
       }
     },
-    TEST_FILES_DEPRECATION: () => {
-      return {
-        default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
-      }
-    },
   })
 })
