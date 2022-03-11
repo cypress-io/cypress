@@ -1,6 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import path from 'path'
-import { ChildProcess, fork } from 'child_process'
+import { fork } from 'child_process'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
 import type { DataContext } from '..'
@@ -24,39 +24,8 @@ import {
   getIntegrationTestFilesGlobs,
   getSpecPattern,
 } from '../sources/migration'
-import EventEmitter from 'events'
-import type { CypressError } from '@packages/errors'
 import { makeCoreData } from '../data'
-
-class LegacyPluginsIpc extends EventEmitter {
-  constructor (readonly childProcess: ChildProcess) {
-    super()
-    childProcess.on('message', (msg: { event: string, args: any[] }) => {
-      this.emit(msg.event, ...msg.args)
-    })
-
-    childProcess.once('disconnect', () => {
-      this.emit('disconnect')
-    })
-  }
-
-  send(event: 'loadLegacyPlugins', legacyConfig: LegacyCypressConfigJson): boolean
-  send (event: string, ...args: any[]) {
-    if (this.childProcess.killed) {
-      return false
-    }
-
-    return this.childProcess.send({ event, args })
-  }
-
-  on(event: 'ready', listener: () => void): this
-  on(event: 'loadLegacyPlugins:error', listener: (error: CypressError) => void): this
-  on(event: 'childProcess:unhandledError', listener: (legacyConfig: LegacyCypressConfigJson) => void): this
-  on(event: 'loadLegacyPlugins:reply', listener: (legacyConfig: LegacyCypressConfigJson) => void): this
-  on (evt: string, listener: (...args: any[]) => void) {
-    return super.on(evt, listener)
-  }
-}
+import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
 
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
@@ -96,6 +65,7 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     ipc.on('childProcess:unhandledError', (error) => {
       reject(error)
+      ipc.childProcess.kill()
     })
   })
 }
