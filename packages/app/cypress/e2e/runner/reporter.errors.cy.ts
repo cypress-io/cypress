@@ -337,11 +337,9 @@ describe('errors ui', {
 
     verify('fails when erroneous response is received while awaiting response', {
       column: 6,
-      // TODO: determine why code frame output is different in run/open mode
       // this fails the active test because it's an asynchronous
       // response failure from the network
-      // codeFrameText: '.wait(1000)',
-      hasCodeFrame: false,
+      codeFrameText: '.then(()=>{|^',
       message: [
         'A callback was provided to intercept the upstream response, but a network error occurred while making the request',
       ],
@@ -806,15 +804,13 @@ describe('errors ui', {
   it('unexpected errors', () => {
     const verify = loadErrorSpec({
       fileName: 'unexpected.cy.js',
-      failCount: 1,
+      failCount: 2,
     })
 
-    // FIXME: the eval doesn't seem to take effect and overwrite the method
-    // so it ends up not failing properly
-    // verify('Cypress method error', {
-    //   verifyFn: verifyInternalFailure,
-    //   method: 'Cypress.LocalStorage._isSpecialKeyword',
-    // })
+    verify('Cypress method error', {
+      verifyFn: verifyInternalFailure,
+      method: 'Cypress.LocalStorage.clear',
+    })
 
     verify('internal cy error', {
       verifyFn: verifyInternalFailure,

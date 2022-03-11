@@ -20,7 +20,6 @@
           :class="{'pointer-events-none': isDragging}"
         />
       </template>
-      <!-- TODO(mark): UNIFY-1078 - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel2>
         <HideDuringScreenshot
           class="h-full"

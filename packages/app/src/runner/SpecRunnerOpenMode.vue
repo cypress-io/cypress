@@ -14,7 +14,6 @@
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <!-- TODO(mark): - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel1="{isDragging}">
         <HideDuringScreenshotOrRunMode
           v-if="props.gql.currentProject"
