@@ -5,6 +5,7 @@ export const e2eProjectDirs = [
   'busted-support-file',
   'chrome-browser-preferences',
   'component-tests',
+  'config-with-base-url-warning',
   'config-with-custom-file-js',
   'config-with-custom-file-ts',
   'config-with-import-error',
