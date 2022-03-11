@@ -7,7 +7,7 @@ let proc
 
 process.on('message', (msg) => {
   if (msg.msg === 'spawn') {
-    proc = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', msg.data.projectRoot, '--configFilePath', path.join(msg.data.projectRoot, 'cypress.config.js')])
+    proc = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', msg.data.projectRoot, '--file', path.join(msg.data.projectRoot, 'cypress.config.js')])
     proc.on('message', (msg) => {
       process.send({ childMessage: msg })
     })

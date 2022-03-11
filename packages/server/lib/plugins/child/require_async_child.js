@@ -11,6 +11,6 @@ const util = require('../util')
 const ipc = util.wrapIpc(process)
 const run = require('./run_require_async_child')
 
-const { configFilePath, projectRoot } = require('minimist')(process.argv.slice(2))
+const { file, projectRoot } = require('minimist')(process.argv.slice(2))
 
-run(ipc, configFilePath, projectRoot)
+run(ipc, file, projectRoot)
