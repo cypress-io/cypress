@@ -1,5 +1,5 @@
 <template>
-  <div v-if="specStore.activeSpec && activeSpecTouched && false">
+  <div v-if="specStore.activeSpec && activeSpecTouched">
     <SpecRunnerOpenMode
       v-if="initialized"
       :gql="props.gql"

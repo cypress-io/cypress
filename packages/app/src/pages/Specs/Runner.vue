@@ -21,6 +21,11 @@
       v-else-if="query.data.value?.currentProject?.specs"
       :gql="query.data.value"
     />
+
+    <div v-else>
+      Runner page debug <br>
+      {{ query.data.value?.currentProject }}
+    </div>
   </div>
 </template>
 
