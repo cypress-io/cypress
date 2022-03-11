@@ -12,7 +12,7 @@ exports['src/validation .isValidClientCertificatesSet returns error message for 
 exports['missing https protocol'] = {
   "key": "clientCertificates[0].url",
   "value": "http://url.com",
-  "type": "a valid URL"
+  "type": "an https protocol"
 }
 
 exports['invalid url'] = {
