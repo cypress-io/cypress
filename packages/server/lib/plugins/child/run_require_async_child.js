@@ -83,22 +83,41 @@ function run (ipc, configFile, projectRoot) {
   const loadConfig = async (configFile) => {
     // 1. Try loading the configFile
     // 2. Catch the "ERR_REQUIRE_ESM" error
-    // 3. Try using esbuild via `bundleRequire`
+    // 3. Check if esbuild is installed
+    //   3a. Yes: Use bundleRequire
+    //   3b. No: Continue through to `await import(configFile)`
+    // 4. Use node's dynamic import to import the configFile
 
     try {
       return require(configFile)
     } catch (err) {
-      if (err.stack.includes('[ERR_REQUIRE_ESM]')) {
-        debug('ERR INCLUDES REQUIRE ESM')
-      } else {
+      if (!err.stack.includes('[ERR_REQUIRE_ESM]')) {
         throw err
       }
     }
 
-    debug(`We're loading the configFile via bundleRequire`)
-    const { bundleRequire } = require('bundle-require')
+    debug('User is loading an ESM config file')
 
-    return (await bundleRequire({ filepath: configFile })).mod
+    try {
+      debug('Trying to use esbuild to run their config file.')
+      // We prefer doing this because it supports TypeScript files
+      require.resolve('esbuild')
+
+      debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
+      const { bundleRequire } = require('bundle-require')
+
+      return (await bundleRequire({ filepath: configFile })).mod
+    } catch (err) {
+      if (err.stack.contains(`Cannot find package 'esbuild'`)) {
+        debug(`User doesn't have esbuild. Going to use native node imports.`)
+
+        // We cannot replace the initial `require` with `await import` because
+        // Certain modules cannot be dynamically imported
+        return await import(configFile)
+      }
+
+      throw err
+    }
   }
 
   ipc.on('loadConfig', async () => {

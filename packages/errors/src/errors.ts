@@ -782,6 +782,21 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
   },
+  CONFIG_FILE_IS_ESM_WITHOUT_ESBUILD: (error: Error) => {
+    return errTemplate`
+      Could not load a Cypress configuration file.
+
+      Your configuration file is using ESModule syntax.
+      We support this, but you need to install esbuild in your devDependencies.
+      
+      We've found ${fmt.highlight(filesFound.length)} Cypress configuration files named
+      ${fmt.highlight(filesFound.join(', '))} at the location below:
+
+      ${fmt.listItem(projectRoot)}
+
+      Please delete the conflicting configuration files.
+      `
+  },
   CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, filesFound: string[]) => {
     return errTemplate`
       Could not load a Cypress configuration file because there are multiple matches.
