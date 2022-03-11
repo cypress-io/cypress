@@ -1,6 +1,6 @@
 const debugLib = require('debug')
 
-const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
+const debug = debugLib(`cypress:lifecycle:child:WrapNonMigrated:${process.pid}`)
 const { breakingOptions } = require('@packages/config')
 
 function throwInvalidOptionError (errorKey, name) {
