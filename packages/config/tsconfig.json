@@ -13,6 +13,7 @@
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
+    "declaration": true,
     "sourceMap": true
   }
 }
