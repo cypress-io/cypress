@@ -108,9 +108,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    // TODO: Figure out why test is flaky without wait
-    // see: https://cypress-io.atlassian.net/browse/UNIFY-1294
-    cy.wait(2000)
     cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
 
     cy.contains('Dom Content').should('be.visible')
