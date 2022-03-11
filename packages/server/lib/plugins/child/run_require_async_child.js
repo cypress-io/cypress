@@ -91,7 +91,7 @@ function run (ipc, configFile, projectRoot) {
     try {
       return require(configFile)
     } catch (err) {
-      if (!err.stack.includes('[ERR_REQUIRE_ESM]')) {
+      if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
       }
     }
@@ -108,7 +108,7 @@ function run (ipc, configFile, projectRoot) {
 
       return (await bundleRequire({ filepath: configFile })).mod
     } catch (err) {
-      if (err.stack.contains(`Cannot find package 'esbuild'`)) {
+      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
