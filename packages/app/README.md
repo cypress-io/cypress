@@ -39,6 +39,23 @@ The advantage here is that the route definition is co-located with the component
 
 In such cases, [`extendRoute`](https://github.com/hannoeru/vite-plugin-pages#extendroute) can be used where the `Pages` plugin is added in `vite.config.ts` to extend the route created using regular TypeScript code.
 
+### Some gotchas if you are new to Vue Router
+
+#### `name` vs `path`
+
+With the implicit setup of the router, routes are named based on the file name. This is not always ideal as the route's name is used in the UI as the title. The `name` property can be overridden in the `<route>` block of a single file component.
+
+In addition to sometimes showing a route's name in the UI, we also use the `name` value to push a new route object to the router (either in code directly, or using `RouterLink`s), if that object includes `params`. Otherwise we usually use `path` when pushing to the router.
+
+#### `params` vs `query`
+
+We use `params` when there is temporary state that should be present when a user gets to a route from somewhere else in the App, but shouldn't be present after page refresh or when using the `back` button. Useful for things like the warning if you view a spec right after creating it and we want to show a warning, for example.
+
+For values that should survive a page refresh, which is most cases where we'd put something in the route, we use `query` to put the values into the URL's query parameters.
+
+The terminology can get a bit confusing as Vue Router's `params` are not the query parameters in the url. Vue Router's `params` can be accessed and used to form dynamic parts of a URL's path, but we are not currently using that feature, so for us `params` are used as described above. The option to interpolate values from `params` into a `path` is why the `to` property needs to be the route's `name` in order for `params` to be passed. Vue will warn if you try to do this.
+
+
 ## Using existing, Vite-incompatible modules
 
 Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner-shared` cannot be easily
