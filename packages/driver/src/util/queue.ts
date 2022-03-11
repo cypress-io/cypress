@@ -78,8 +78,8 @@ export class Queue<T> {
       rejectOuterAndCancelInner = (err) => {
         inner.cancel()
 
-        // If this error is thrown after the promise is already fulfilled, we still want to throw the error.
-        if (promise.isFulfilled()) {
+        // If this error is thrown after the promise is not pending, we still want to throw the error.
+        if (!promise.isPending()) {
           onError(err)
         } else {
           reject(err)
