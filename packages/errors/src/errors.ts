@@ -1331,7 +1331,6 @@ export const AllCypressErrors = {
 
     return errTemplate`
     ${message}
-      
     ${fmt.highlight(name)} merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
 
     https://on.cypress.io/migration-guide

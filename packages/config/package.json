@@ -24,6 +24,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@types/mocha": "^8.0.3",
     "@types/node": "14.14.31",
     "chai": "1.10.0",
     "mocha": "7.0.1",

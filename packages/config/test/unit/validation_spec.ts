@@ -1,7 +1,7 @@
-const snapshot = require('snap-shot-it')
-const { expect } = require('chai')
+import snapshot from 'snap-shot-it'
+import { expect } from 'chai'
 
-const validation = require('../../lib/validation')
+import * as validation from '../../lib/validation'
 
 describe('src/validation', () => {
   const mockKey = 'mockConfigKey'
@@ -84,13 +84,13 @@ describe('src/validation', () => {
 
       // data-driven testing - computers snapshot value for each item in the list passed through the function
       // https://github.com/bahmutov/snap-shot-it#data-driven-testing
-      return snapshot.apply(null, [validation.isValidBrowser].concat(browsers))
+      return snapshot.apply(null, [validation.isValidBrowser].concat(browsers as any))
     })
   })
 
   describe('.isValidBrowserList', () => {
     it('does not allow empty or not browsers', () => {
-      snapshot('undefined browsers', validation.isValidBrowserList('browsers'))
+      snapshot('undefined browsers', validation.isValidBrowserList('browsers', undefined))
       snapshot('empty list of browsers', validation.isValidBrowserList('browsers', []))
 
       return snapshot('browsers list with a string', validation.isValidBrowserList('browsers', ['foo']))

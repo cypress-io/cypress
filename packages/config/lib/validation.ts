@@ -155,9 +155,10 @@ export const isOneOf = (...values: any[]): ((key: string, value: any) => ErrResu
  */
 // _key: string, certsForUrls: any[]): ErrResult | true {}
 export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
-  url: string
-  ca: string[]
-  certs: Array<{
+  name?: string
+  url?: string
+  ca?: string[]
+  certs?: Array<{
     key: string
     cert: string
     pfx: string
@@ -245,9 +246,11 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
       }
     }
 
-    for (let k = 0; k < certsForUrl.ca.length; k++) {
-      if (path.isAbsolute(certsForUrl.ca[k] || '')) {
-        return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+    if (certsForUrl.ca) {
+      for (let k = 0; k < certsForUrl.ca.length; k++) {
+        if (path.isAbsolute(certsForUrl.ca[k] || '')) {
+          return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+        }
       }
     }
   }
@@ -285,6 +288,14 @@ export function isString (key: string, value: any): ErrResult | true {
   }
 
   return errMsg(key, value, 'a string')
+}
+
+export function isArray (key: string, value: any) {
+  if (value == null || _.isArray(value)) {
+    return true
+  }
+
+  return errMsg(key, value, 'an array')
 }
 
 export function isNumberOrFalse (key: string, value: any): ErrResult | true {

@@ -1,9 +1,9 @@
-const chai = require('chai')
-const snapshot = require('snap-shot-it')
-const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
+import chai from 'chai'
+import snapshot from 'snap-shot-it'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 
-const configUtil = require('../../lib/index')
+import * as configUtil from '../../lib/index'
 
 chai.use(sinonChai)
 const { expect } = chai
