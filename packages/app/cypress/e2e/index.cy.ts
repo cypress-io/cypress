@@ -204,10 +204,9 @@ describe('App: Index', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
-          cy.percySnapshot('Generator success')
+          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
 
-          cy.get('pre').should('have.class', 'shiki')
-          cy.get('code').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.percySnapshot('Generator success')
 
           cy.get('[aria-label="Close"]').click()
 
@@ -601,15 +600,15 @@ describe('App: Index', () => {
 
         it('shows success modal when spec is created from component', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.findAllByTestId('file-list-row').contains('App.jsx').as('NewSpecFile')
+            cy.findByLabelText('file-name-input').focus().type('App.jsx')
 
             // TODO: assert visibility of secondary text on hover/focus when
             // item is made keyboard accessible
             // https://cypress-io.atlassian.net/browse/UNIFY-864
-            // cy.get('@NewSpecFile).focus()
-            // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
+            // cy.contains('file-list-row', 'App.jsx').focus()
+            // cy.findByText('src/stories/App.jsx').should('be.visible')
 
-            cy.get('@NewSpecFile').click()
+            cy.findAllByTestId('file-list-row').contains('App.jsx').click()
           })
 
           cy.findByRole('dialog', {
@@ -637,14 +636,14 @@ describe('App: Index', () => {
 
         it('navigates to spec runner when selected', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.findAllByTestId('file-list-row').contains('App.jsx').as('NewSpecFile')
-            cy.get('@NewSpecFile').click()
+            cy.findByLabelText('file-name-input').focus().type('App.jsx')
+            cy.findAllByTestId('file-list-row').contains('App.jsx').click()
           })
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('cypress.config.cy.js')).click()
+            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
           })
 
           cy.get('#main-pane').should('be.visible')
@@ -654,14 +653,14 @@ describe('App: Index', () => {
 
         it('displays alert with docs link on new spec', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
-            cy.get('@NewSpecFile').click()
+            cy.findByLabelText('file-name-input').focus().type('App.jsx')
+            cy.findAllByTestId('file-list-row').contains('App.jsx').click()
           })
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('cypress.config.cy.js')).click()
+            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
           })
 
           cy.contains('Review the docs')
