@@ -166,7 +166,7 @@ export const graphqlWS = (httpServer: Server, targetRoute: string) => {
 
   return useServer({
     schema: graphqlSchema,
-    context: getCtx(),
+    context: () => getCtx(),
   }, graphqlWs)
 }
 
