@@ -591,14 +591,14 @@ export class ProjectLifecycleManager {
 
         this.ctx.onWarning(error)
 
-        return getError(type, obj)
+        return error
       },
       (type, obj) => {
         const error = getError(type, obj)
 
         this.ctx.onError(error)
 
-        throw getError(type, obj)
+        throw error
       },
     )
   }
