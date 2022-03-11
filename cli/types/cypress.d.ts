@@ -2698,12 +2698,6 @@ declare namespace Cypress {
      */
     fixturesFolder: string | false
     /**
-     * Path to folder containing integration test files
-     * @default "cypress/integration"
-     * @deprecated
-     */
-    integrationFolder: string
-    /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
      */
@@ -2843,11 +2837,6 @@ declare namespace Cypress {
      * The list of hosts to be blocked
      */
     blockHosts: null | string | string[]
-    /**
-     * Path to folder containing component test files.
-     * @deprecated
-     */
-    componentFolder: false | string
     /**
      * A unique ID for the project used for recording
      */
