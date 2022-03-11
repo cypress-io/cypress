@@ -1738,7 +1738,7 @@ export default {
     },
     failed_to_serialize_or_map_thrown_value: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
+      ${cmd('switchToDomain')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
     // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
     route: {

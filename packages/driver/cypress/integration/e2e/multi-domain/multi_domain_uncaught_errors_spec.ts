@@ -261,7 +261,7 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing dom elements', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
@@ -274,7 +274,7 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing functions', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
@@ -287,7 +287,7 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing symbols', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
@@ -300,7 +300,7 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing promises', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
@@ -464,7 +464,7 @@ describe('multi-domain - uncaught errors', () => {
     it('handles throwing of arbitrary data types that are serializable but cannot be mapped to an error', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
