@@ -537,9 +537,9 @@ export const eventManager = {
     Cypress.multiDomainCommunicator.on('navigation:error', ({ err }) => {
       const r = cy.queue.state('reject')
 
-      delete err.onFail
-
-      r(err)
+      if (r) {
+        r(err)
+      }
     })
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {

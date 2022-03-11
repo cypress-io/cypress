@@ -266,7 +266,7 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
   })
 })
 
-describe('errors', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('errors', { experimentalSessionSupport: true }, () => {
   it('reset top', () => {
     cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
   })

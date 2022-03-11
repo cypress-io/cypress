@@ -424,6 +424,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     // If the command queue has been cleaned up, throw the error ourselves
     if (err?.onFail) {
       err.onFail()
+      delete err.onFail
     }
 
     if (window.specBridgeDomain) {
