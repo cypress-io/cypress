@@ -8,6 +8,7 @@ export const e2eProjectDirs = [
   'config-update-non-migrated-value',
   'config-update-non-migrated-value-clone',
   'config-update-non-migrated-value-e2e',
+  'config-with-base-url-warning',
   'config-with-custom-file-js',
   'config-with-custom-file-ts',
   'config-with-import-error',

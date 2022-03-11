@@ -997,6 +997,9 @@ type Mutation {
   """Open a path in the local file explorer"""
   openInFinder(path: String!): Boolean
 
+  """Ping configured Base URL"""
+  pingBaseUrl: Query
+
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
