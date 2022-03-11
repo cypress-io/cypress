@@ -99,6 +99,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
   const onWindowLoadPrimary = ({ url }) => {
     // no need to set stability here (yet), this may need to change with nested switchToDomain
+    cy.isStable(true, 'primary onload')
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
   }
 
