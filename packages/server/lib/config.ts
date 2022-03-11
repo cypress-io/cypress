@@ -128,7 +128,7 @@ export function mergeDefaults (
   .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
-  .each((val, key) => {
+  .each((val: any, key) => {
     // If users pass in testing-type specific keys (eg, specPattern),
     // we want to merge this with what we've read from the config file,
     // rather than override it entirely.
@@ -511,9 +511,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   envCLI = envCLI != null ? envCLI : {}
 
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgKey: string
-
-    cfgKey = configUtils.matchesConfigKey(key)
+    const cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
       // only change the value if it hasn't been
