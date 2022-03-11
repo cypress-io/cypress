@@ -48,6 +48,33 @@ describe('authChange subscription', () => {
     })
   })
 
+  describe('in app (component testing)', () => {
+    beforeEach(() => {
+      cy.startAppServer('component')
+      cy.visitApp()
+    })
+
+    it('responds to authChange subscription for login', () => {
+      cy.contains('Log In')
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.auth.login()
+      })
+
+      cy.contains('Test User')
+    })
+
+    it('responds to authChange subscription for logout', () => {
+      setActiveUser()
+      cy.reload() // Reload to show the latest state
+      cy.contains('Test User')
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.auth.logout()
+      })
+
+      cy.contains('Log In')
+    })
+  })
+
   describe('in launchpad', () => {
     beforeEach(() => {
       cy.visitLaunchpad()
