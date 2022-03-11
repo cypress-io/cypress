@@ -73,25 +73,7 @@ interface AppUrqlClientConfig {
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 
-function addDiv (id) {
-  const div = document.createElement('div')
-
-  if (id) {
-    div.id = `${id} - ${Date.now()}`
-  }
-
-  div.innerText = `${id} - ${Date.now()}`
-  div.classList.add('absolute')
-  div.classList.add('top-0')
-  div.classList.add('bg-white')
-  div.style.zIndex = '900000'
-
-  document.body.appendChild(div)
-}
-
 export function makeUrqlClient (config: UrqlClientConfig): Client {
-  addDiv('startMakeClient')
-
   let hasError = false
 
   const exchanges: Exchange[] = [dedupExchange]
@@ -150,8 +132,6 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
   }
 
   const url = config.target === 'launchpad' ? `/__launchpad/graphql` : `/${config.namespace}/graphql`
-
-  addDiv('endMakeClient')
 
   return createClient({
     url,
