@@ -50,14 +50,6 @@
           "default": 10000,
           "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts"
         },
-        "testFiles": {
-          "type": [
-            "string",
-            "array"
-          ],
-          "default": "**/*.*",
-          "description": "A String or Array of string glob patterns of the test files to load. See https://on.cypress.io/configuration#Global"
-        },
         "watchForFileChanges": {
           "type": "boolean",
           "default": true,

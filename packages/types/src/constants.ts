@@ -17,4 +17,6 @@ export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
 export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'renameSupport', 'configFile', 'setupComponent'] as const
 
+export type MigrationStep = typeof MIGRATION_STEPS[number]
+
 export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const

@@ -28,7 +28,7 @@ Enable component testing in `cypress.config.js`.
 module.exports = {
   "component": {
     "componentFolder": "src/app",
-    "testFiles": "**/*cy-spec.ts"
+    "specPattern": "**/*cy-spec.ts"
   }
 }
 ```
