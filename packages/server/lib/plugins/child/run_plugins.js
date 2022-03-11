@@ -14,7 +14,7 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const { breakingOptions } = require('@packages/config')
+const wrapNonMigratedOptions = require('./wrap-non-migrated-config')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -262,39 +262,6 @@ class RunPlugins {
       this.execute(event, ids, args)
     })
   }
-}
-
-function throwInvalidOptionError (errorKey, name) {
-  debug('throwing err %s', name)
-  const errInternal = new Error()
-
-  Error.captureStackTrace(errInternal, throwInvalidOptionError)
-  const err = require('@packages/errors').getError(errorKey, { name }, errInternal)
-
-  throw err
-}
-
-// only works if config.myProperty = 'something'
-// this will not throw config = {...config, myProperty: 'something'}
-function setInvalidPropSetterWarning (opts, errorKey, optionName, optionNameForError = optionName) {
-  debug('setting invalid property %s', optionName)
-  Object.defineProperty(opts, optionName, {
-    set: throwInvalidOptionError.bind(null, errorKey, optionNameForError),
-  })
-}
-
-function wrapNonMigratedOptions (options) {
-  debug('wrapping non-migrated options')
-  breakingOptions.filter(({ isWarning }) => !isWarning).forEach(({ name, errorKey }) => {
-    setInvalidPropSetterWarning(options, errorKey, name)
-
-    const testingTypes = ['component', 'e2e']
-
-    testingTypes.forEach((testingType) => {
-      options[testingType] = options[testingType] || {}
-      setInvalidPropSetterWarning(options[testingType], errorKey, name, `${testingType}.${name}`)
-    })
-  })
 }
 
 exports.RunPlugins = RunPlugins
