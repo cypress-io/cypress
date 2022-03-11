@@ -1,9 +1,15 @@
 <template>
-  <div v-if="specStore.activeSpec && activeSpecTouched">
+  <div v-if="specStore.activeSpec && activeSpecTouched && false">
     <SpecRunnerOpenMode
       v-if="initialized"
       :gql="props.gql"
     />
+  </div>
+  <div
+    v-else
+  >
+    Active Spec: {{ specStore.activeSpec?.relative }} <br>
+    Specs: {{ props.gql.currentProject?.specs?.map(spec => spec.name) }}
   </div>
 </template>
 
