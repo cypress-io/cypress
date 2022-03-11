@@ -13,7 +13,7 @@ const requestSpecFile = (file: string, port: number) => {
     const opts = {
       host: 'localhost',
       port,
-      path: '/test/fixtures/foo.spec.js',
+      path: file,
     }
 
     const callback = (response: EventEmitter) => {
@@ -41,13 +41,15 @@ const webpackConfig = {
 
 }
 
-const specs: Cypress.Cypress['spec'][] = [
-  {
-    name: `${root}/test/fixtures/foo.spec.js`,
-    relative: `${root}/test/fixtures/foo.spec.js`,
-    absolute: `${root}/test/fixtures/foo.spec.js`,
-  },
-]
+const createSpecs = (name: string): Cypress.Cypress['spec'][] => {
+  return [
+    {
+      name: `${root}/test/fixtures/${name}`,
+      relative: `${root}/test/fixtures/${name}`,
+      absolute: `${root}/test/fixtures/${name}`,
+    },
+  ]
+}
 
 const config = {
   projectRoot: root,
@@ -62,7 +64,7 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents: new EventEmitter(),
       },
     })
@@ -81,7 +83,7 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('[foo]/bar.spec.js'),
         devServerEvents: new EventEmitter(),
       },
     })
@@ -101,7 +103,7 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents,
       },
     })
@@ -156,7 +158,7 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents,
       },
     })
@@ -191,7 +193,7 @@ describe('#startDevServer', () => {
     const { port, close } = await devServer(
       {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents,
       },
       defineDevServerConfig({ webpackConfig }),
