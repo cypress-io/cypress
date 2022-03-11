@@ -586,7 +586,7 @@ export class ProjectLifecycleManager {
 
     return this.ctx._apis.configApi.validateLaunchpadConfigBreakingChanges(
       config,
-      (errorKey: string, obj: ErrResponse) => {
+      (type, obj) => {
         const error = getError(type, obj)
 
         this.ctx.onWarning(error)
