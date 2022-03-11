@@ -649,5 +649,15 @@ export const mutation = mutationType({
         return {}
       },
     })
+
+    t.field('pingBaseUrl', {
+      type: Query,
+      description: 'Ping configured Base URL',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.project.pingBaseUrl()
+
+        return {}
+      },
+    })
   },
 })
