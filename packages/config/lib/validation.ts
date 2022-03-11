@@ -32,7 +32,7 @@ const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
 }
 
 const isArrayOfStrings = (value: any): ErrResult | boolean => {
-  return _.isArray(value) && _.every(value, isString)
+  return _.isArray(value) && _.every(value, _.isString)
 }
 
 const isFalse = (value: any): boolean => {
