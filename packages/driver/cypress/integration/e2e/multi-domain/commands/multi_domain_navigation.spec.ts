@@ -117,14 +117,14 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
       })
     })
 
-    // TODO: add support for relative links within secondary
-    it.skip('supports relative urls within secondary', () => {
+    it('supports relative urls within secondary', () => {
       cy.visit('/fixtures/multi-domain.html')
 
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
         cy.visit('/fixtures/dom.html')
+        cy.location('href').should('equal', 'http://www.foobar.com:3500/fixtures/dom.html')
       })
     })
 
