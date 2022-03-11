@@ -52,7 +52,7 @@ const isRunMode = window.__CYPRESS_MODE__ === 'run'
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  requestPolicy: 'cache-only',
+  requestPolicy: 'cache-first',
   pause: isRunMode && window.top === window,
 })
 
