@@ -94,35 +94,33 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500 }, () => {
     cy.contains(noSpecErrorTitle).should('not.exist')
   })
 
-  Cypress._.times(30, () => {
-    it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
-      const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+  it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
 
-      const goodFilePath = 'src/TestComponent.spec.jsx'
+    const goodFilePath = 'src/TestComponent.spec.jsx'
 
-      cy.visitApp(`/specs/runner?file=${goodFilePath}`)
+    cy.visitApp(`/specs/runner?file=${goodFilePath}`)
 
-      cy.contains('renders the test component').should('be.visible')
+    cy.contains('renders the test component').should('be.visible')
 
-      cy.withCtx((ctx) => {
+    cy.withCtx((ctx) => {
       // rename relative path for any specs that happen to be found
-        const specs = [...ctx.project.specs]
+      const specs = [...ctx.project.specs]
 
-        specs.forEach((spec) => {
-          spec.relative += '-updated'
-        })
-
-        ctx.actions.project.setSpecs(specs)
-        ctx.emitter.toApp()
-      }).then(() => {
-        cy.contains(noSpecErrorTitle).should('be.visible')
-        cy.contains(noSpecErrorIntro).should('be.visible')
-        cy.contains(noSpecErrorExplainer).should('be.visible')
-        cy.contains(goodFilePath).should('be.visible')
-        cy.location()
-        .its('href')
-        .should('eq', 'http://localhost:4455/__/#/specs')
+      specs.forEach((spec) => {
+        spec.relative += '-updated'
       })
+
+      ctx.actions.project.setSpecs(specs)
+      ctx.emitter.toApp()
+    }).then(() => {
+      cy.contains(noSpecErrorTitle).should('be.visible')
+      cy.contains(noSpecErrorIntro).should('be.visible')
+      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(goodFilePath).should('be.visible')
+      cy.location()
+      .its('href')
+      .should('eq', 'http://localhost:4455/__/#/specs')
     })
   })
 
