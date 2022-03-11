@@ -1310,6 +1310,18 @@ export const AllCypressErrors = {
     `
   },
 
+  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
+    return errTemplate`
+      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
+      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
+
+      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
+      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+
   MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name, setupNodeEvents }: {name: string, setupNodeEvents: boolean}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
@@ -1324,30 +1336,31 @@ export const AllCypressErrors = {
       : errPartial`${fmt.highlight('testFiles')}`
 
     const message = setupNodeEvents ? errPartial`
-    In ${fmt.highlight('setupNodeEvents()')}, you are attempting to update a configuration that is no longer supported: ${fmt.highlight(name)}
+    In ${fmt.highlight('setupNodeEvents()')}, you are attempting to update a the ${fmt.highlight(name)} configuration option. 
+    Its now invalid on the config object in ${fmt.cypressVersion(`10.0.0`)}.
     ` : errPartial`
-    You are attempting to use a configuration that is no longer supported: ${fmt.highlight(name)}
+    The ${fmt.highlight(name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
     `
+
+    const code = errPartial`
+    {
+      e2e: {
+        specPattern: '...',
+      },
+      component: {
+        specPattern: '...',
+      },
+    }`
 
     return errTemplate`
     ${message}
-    ${fmt.highlight(name)} merged with ${mergedOptionKey} into the ${fmt.highlight(`${testingTypePrefix}specPattern`)} option.
+    It is now merged with ${mergedOptionKey} into ${fmt.highlight(`${testingTypePrefix}specPattern`)} option and configured separately as a testing type property
+
+    ${fmt.code(code)}
 
     https://on.cypress.io/migration-guide
 
     ${stackTrace}
-    `
-  },
-
-  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
-    return errTemplate`
-      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
-      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
-
-      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
-      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
-
-      https://on.cypress.io/migration-guide
     `
   },
 
