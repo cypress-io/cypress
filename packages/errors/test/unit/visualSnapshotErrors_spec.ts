@@ -1103,9 +1103,9 @@ describe('visual error templates', () => {
     },
     MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: () => {
       return {
-        default: [{ name: 'integrationFolder', setupNodeEvents: false }, makeErr()],
-        testFiles: [{ name: 'testFiles', setupNodeEvents: false }, makeErr()],
-        componentFolder: [{ name: 'componentFolder', setupNodeEvents: false }, makeErr()],
+        default: [{ name: 'integrationFolder' }, makeErr()],
+        testFiles: [{ name: 'testFiles' }, makeErr()],
+        componentFolder: [{ name: 'componentFolder' }, makeErr()],
         testFilesInSetup: [{ name: 'testFiles', setupNodeEvents: true }, makeErr()],
       }
     },
