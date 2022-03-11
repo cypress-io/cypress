@@ -1167,6 +1167,14 @@ export const AllCypressErrors = {
       `
   },
 
+  LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
+    return errTemplate`
+        Your ${fmt.highlight(file)} at ${fmt.path(`${file}`)} threw an error. ${fmt.stackTrace(error)}
+
+        Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
+      `
+  },
+
   LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
     return errTemplate`
       There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
