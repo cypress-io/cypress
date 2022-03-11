@@ -1,19 +1,24 @@
 {
   "extends": "../ts/tsconfig.json",
   "include": [
-    "lib",
+    "src/*.ts"
+  ],
+  "exclude": [
+    "test",
+    "script"
   ],
   "compilerOptions": {
-    "outDir": "./dist",
-    "noImplicitAny": true,
     "strict": true,
     "allowJs": false,
-    "noUnusedLocals": false,
+    "rootDir": "src",
+    "noImplicitAny": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
-    "declaration": true,
-    "sourceMap": true
+    "types": ["node"],
+    "typeRoots": [
+      "../../node_modules/@types"
+    ],
   }
 }

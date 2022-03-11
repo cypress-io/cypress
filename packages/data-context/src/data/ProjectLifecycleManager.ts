@@ -21,8 +21,8 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { BreakingErrResult, BreakingOptionErrorKey } from '@packages/config'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { BreakingOptionErrorKey, BreakingErrResult } from '@packages/config'
 import type { LegacyCypressConfigJson } from '../sources'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)

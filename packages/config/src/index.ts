@@ -3,7 +3,10 @@ import Debug from 'debug'
 import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
 import type { BreakingOption, BreakingOptionErrorKey } from './options'
 
-export * as validation from './validation'
+// this export has to be done in 2 lines because of a bug in babel typescript
+import * as validation from './validation'
+
+export { validation }
 
 export { breakingOptions, BreakingOption, BreakingOptionErrorKey }
 

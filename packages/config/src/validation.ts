@@ -1,3 +1,4 @@
+import { URL } from 'url'
 import path from 'path'
 import * as _ from 'lodash'
 import * as is from 'check-more-types'
