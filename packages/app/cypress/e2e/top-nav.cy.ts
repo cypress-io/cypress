@@ -1,3 +1,4 @@
+import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 const loginText = defaultMessages.topNav.login
@@ -105,9 +106,8 @@ describe('App Top Nav Workflows', () => {
     context('user version current', () => {
       it('renders link to external docs if version is current', () => {
         cy.findBrowsers()
-        cy.withCtx(async (ctx) => {
-          // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx.versions, 'versionData').resolves({
+        cy.withCtx(async (ctx, o) => {
+          o.sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -135,12 +135,11 @@ describe('App Top Nav Workflows', () => {
     context('user version outdated', () => {
       beforeEach(() => {
         cy.findBrowsers()
-        cy.withCtx(async (ctx) => {
+        cy.withCtx(async (ctx, o) => {
           const currRelease = new Date(Date.UTC(2021, 9, 30))
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
-          // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx.versions, 'versionData').resolves({
+          o.sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -306,9 +305,8 @@ describe('App Top Nav Workflows', () => {
       it('replaces user avatar after logout', () => {
         cy.get('@logInButton').click()
 
-        cy.withCtx((ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
             // resolves
           })
         })
@@ -337,8 +335,7 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+          options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({ browserOpened: true })
 
             return new Promise((resolve) => {
@@ -418,17 +415,15 @@ describe('App Top Nav Workflows', () => {
       })
 
       it('shows correct error when browser cannot launch', () => {
-        cy.withCtx((ctx) => {
-          // @ts-ignore
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({
               name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
               message: 'http://127.0.0.1:0000/redirect-to-auth',
               browserOpened: false,
-
             })
 
-            return Promise.resolve()
+            return Promise.reject()
           })
         })
 
@@ -446,22 +441,21 @@ describe('App Top Nav Workflows', () => {
           cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
 
           // in this state, there is no retry UI, we ask the user to visit the auth url on their own
-          cy.contains('button', loginText.actionTryAgain).should('not.be.visible')
-          cy.contains('button', loginText.actionCancel).should('not.be.visible')
+          cy.contains('button', loginText.actionTryAgain).should('not.exist')
+          cy.contains('button', loginText.actionCancel).should('not.exist')
         })
       })
 
       it('shows correct error when error other than browser-launch happens', () => {
-        cy.withCtx((ctx) => {
-          // @ts-ignore
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({
               name: 'AUTH_ERROR_DURING_LOGIN',
               message: 'An unexpected error occurred',
               browserOpened: false,
             })
 
-            return Promise.resolve()
+            return Promise.reject()
           })
         })
 
@@ -484,8 +478,7 @@ describe('App Top Nav Workflows', () => {
         cy.percySnapshot()
 
         cy.withCtx((ctx) => {
-          // @ts-ignore
-          ctx._apis.authApi.logIn.callsFake(async (onMessage) => {
+          (ctx._apis.authApi.logIn as SinonStub).callsFake(async (onMessage) => {
             onMessage({
               name: 'AUTH_BROWSER_LAUNCHED',
               message: '',
@@ -504,16 +497,15 @@ describe('App Top Nav Workflows', () => {
       })
 
       it('cancel button correctly clears error state', () => {
-        cy.withCtx((ctx) => {
-          // @ts-ignore
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({
               name: 'AUTH_ERROR_DURING_LOGIN',
               message: 'An unexpected error occurred',
               browserOpened: false,
             })
 
-            return Promise.resolve()
+            return Promise.reject()
           })
         })
 
@@ -542,16 +534,15 @@ describe('App Top Nav Workflows', () => {
       })
 
       it('closing modal correctly clears error state', () => {
-        cy.withCtx((ctx) => {
-          // @ts-ignore
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({
               name: 'AUTH_ERROR_DURING_LOGIN',
               message: 'An unexpected error occurred',
               browserOpened: false,
             })
 
-            return Promise.resolve()
+            return Promise.reject()
           })
         })
 
@@ -586,9 +577,8 @@ describe('Growth Prompts Can Open Automatically', () => {
 
   it('CI prompt auto-opens 4 days after first project opened', () => {
     cy.withCtx(
-      (ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+      (ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: {},
@@ -602,9 +592,8 @@ describe('Growth Prompts Can Open Automatically', () => {
 
   it('CI prompt does not auto-open when it has already been dismissed', () => {
     cy.withCtx(
-      (ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+      (ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: { ci1: 1609459200000 },

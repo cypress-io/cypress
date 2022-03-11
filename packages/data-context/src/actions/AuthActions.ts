@@ -11,8 +11,6 @@ export interface AuthApiShape {
 export class AuthActions {
   constructor (private ctx: DataContext) {}
 
-  private cancelActiveLogin?: () => void | undefined
-
   async getUser () {
     return this.authApi.getUser().then((obj) => {
       if (obj.authToken) {
@@ -46,13 +44,13 @@ export class AuthActions {
   }
 
   async login () {
-    const loginPromise = new Promise((resolve, reject) => {
+    const loginPromise = new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
       // if a reset occurs
-      this.cancelActiveLogin = () => {
-        resolve(null)
-      }
+      this.ctx.update((coreData) => {
+        coreData.cancelActiveLogin = () => resolve(null)
+      })
 
       this.authApi.logIn((authState) => {
         this.ctx.update((coreData) => {
@@ -63,11 +61,7 @@ export class AuthActions {
         // are propagated to the clients
         this.ctx.emitter.toApp()
         this.ctx.emitter.toLaunchpad()
-      }).then((user: AuthenticatedUserShape) => {
-        resolve(user)
-      }).catch((e) => {
-        reject(e)
-      })
+      }).then(resolve, reject)
     })
 
     const user = await loginPromise
@@ -81,7 +75,9 @@ export class AuthActions {
 
     this.setAuthenticatedUser(user as AuthenticatedUserShape)
 
-    this.cancelActiveLogin = undefined
+    this.ctx.update((coreData) => {
+      coreData.cancelActiveLogin = null
+    })
 
     this.resetAuthState()
   }
@@ -92,9 +88,12 @@ export class AuthActions {
 
     // if a login mutation is still in progress, we
     // forcefully resolve it so that the mutation does not persist
-    if (this.cancelActiveLogin) {
-      this.cancelActiveLogin()
-      this.cancelActiveLogin = undefined
+    if (this.ctx.coreData.cancelActiveLogin) {
+      this.ctx.coreData.cancelActiveLogin()
+
+      this.ctx.update((coreData) => {
+        coreData.cancelActiveLogin = null
+      })
     }
 
     this.ctx.update((coreData) => {

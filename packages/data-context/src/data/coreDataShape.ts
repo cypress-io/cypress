@@ -123,6 +123,7 @@ export interface CoreDataShape {
   warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
+  cancelActiveLogin: (() => void) | null
 }
 
 /**
@@ -182,5 +183,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     scaffoldedFiles: null,
     packageManager: 'npm',
     forceReconfigureProject: null,
+    cancelActiveLogin: null,
   }
 }
