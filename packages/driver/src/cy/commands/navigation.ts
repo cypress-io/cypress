@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import $Log from '../../cypress/log'
+import { LogUtils } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
 
@@ -1022,7 +1022,7 @@ export default (Commands, Cypress, cy, state, config) => {
           s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
           s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
           s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
-          s.numLogs = $Log.countLogsByTests(s.tests)
+          s.numLogs = LogUtils.countLogsByTests(s.tests)
 
           return Cypress.action('cy:collect:run:state')
           .then((a = []) => {
