@@ -5,6 +5,7 @@ const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
 const { bundleRequire } = require('bundle-require')
+const { loadTsConfig } = require('load-tsconfig')
 
 let tsRegistered = false
 
@@ -79,13 +80,32 @@ function run (ipc, configFile, projectRoot) {
     return false
   }
 
+  // Config file loading of modules is tested within
+  // system-tests/projects/config-cjs-and-esm/*
+  const loadConfig = async (configFile) => {
+    // We try to use `bundleRequire` to handle user-space node imports where possible.
+    // The one exception is that when
+    // - users have a JS config file *and*
+    // - a tsconfig in their project *and*
+    // - that tsconfig has a `target` or es5/es2015/es3
+    const tsConfig = loadTsConfig(process.cwd())?.data
+    const shouldUseNodeImport = tsConfig && !configFile.endsWith('.ts') && tsConfig.compilerOptions?.target?.match(/es(2015|5|3)/ig)
+
+    if (shouldUseNodeImport) {
+      debug(`We're loading the configFile via user's node instead of bundleRequire. TSConfig target is`, tsConfig.compilerOptions?.target, `and the config file ends with .ts`)
+
+      return await import(configFile)
+    }
+
+    debug(`We're loading the configFile via bundleRequire`)
+
+    return (await bundleRequire({ filepath: configFile })).mod
+  }
+
   ipc.on('loadConfig', async () => {
     try {
       debug('try loading', configFile)
-
-      // Config file loading of modules is tested within
-      // system-tests/projects/config-cjs-and-esm/*
-      const configFileExport = (await bundleRequire({ filepath: configFile })).mod
+      const configFileExport = await loadConfig(configFile)
 
       debug('loaded config file', configFile)
       const result = configFileExport.default || configFileExport

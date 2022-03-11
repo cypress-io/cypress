@@ -81,6 +81,7 @@
     "konfig": "0.2.1",
     "launch-editor": "2.3.0",
     "lazy-ass": "1.6.0",
+    "load-tsconfig": "0.2.3",
     "lockfile": "1.0.4",
     "lodash": "^4.17.21",
     "log-symbols": "2.2.0",
