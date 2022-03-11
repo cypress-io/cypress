@@ -369,10 +369,6 @@ export class SocketBase {
               return options.onResetServerState()
             case 'log:memory:pressure':
               return firefoxUtil.log()
-            case 'debug':
-              debug(args[0], ...args.slice(1))
-
-              return true
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
             case 'firefox:window:focus':

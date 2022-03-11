@@ -127,7 +127,6 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            Cypress.backend('debug', err)
             // eslint-disable-next-line no-console
             console.log('assertion error, retrying', err)
           }

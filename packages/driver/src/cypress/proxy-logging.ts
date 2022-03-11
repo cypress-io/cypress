@@ -223,7 +223,6 @@ class ProxyRequest {
     // details on response
     let resBody
 
-    Cypress.backend('debug', 'updateConsoleProps %o', { xhr: this.xhr, xhrDrill: this.xhr?.xhr })
     if (this.xhr) {
       if (!consoleProps['Response Headers']) consoleProps['Response Headers'] = this.xhr.responseHeaders
 
@@ -294,11 +293,9 @@ export default class ProxyLogging {
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
   logInterception (interception: Interception, route: Route): ProxyRequest {
-    Cypress.backend('debug', 'logInterception %o', { interception, route })
     const unloggedPreRequest = take(this.unloggedPreRequests, ({ requestId }) => requestId === interception.browserRequestId)
 
     if (unloggedPreRequest) {
-      Cypress.backend('debug', 'interception matched an unlogged prerequest, logging %o', { unloggedPreRequest, interception })
       debug('interception matched an unlogged prerequest, logging %o', { unloggedPreRequest, interception })
       this.createProxyRequestLog(unloggedPreRequest)
     }
@@ -306,7 +303,6 @@ export default class ProxyLogging {
     let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
-      Cypress.backend('debug', `Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
       // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
       debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
 
@@ -329,12 +325,9 @@ export default class ProxyLogging {
   }
 
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
-    Cypress.backend('debug', 'updateRequestWithResponse %o', responseReceived)
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
 
     if (!proxyRequest) {
-      Cypress.backend('debug', 'unmatched responseReceived event %o', responseReceived)
-
       return debug('unmatched responseReceived event %o', responseReceived)
     }
 
@@ -351,12 +344,9 @@ export default class ProxyLogging {
   }
 
   private updateRequestWithError (error: RequestError): void {
-    Cypress.backend('debug', 'updateRequestWithError %o', error)
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === error.requestId)
 
     if (!proxyRequest) {
-      Cypress.backend('debug', 'unmatched error event %o', error)
-
       return debug('unmatched error event %o', error)
     }
 
@@ -369,13 +359,11 @@ export default class ProxyLogging {
    * Create a Cypress.Log for an incoming proxy request, or store the metadata for later if it is ignored.
    */
   private logIncomingRequest (preRequest: BrowserPreRequest): void {
-    Cypress.backend('debug', 'logIncomingRequest %o', { preRequest, unmatchedXhrLogs: this.unmatchedXhrLogs })
     // if this is an XHR, check to see if it matches an XHR log that is missing a pre-request
     if (preRequest.resourceType === 'xhr') {
       const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
 
       if (unmatchedXhrLog) {
-        Cypress.backend('debug', 'unmatchedXhrLog %o', { unmatchedXhrLog })
         const { log, route } = unmatchedXhrLog
         const proxyRequest = new ProxyRequest(preRequest, unmatchedXhrLog)
 
@@ -401,7 +389,6 @@ export default class ProxyLogging {
   }
 
   private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest {
-    Cypress.backend('debug', 'createProxyRequestLog %o', preRequest)
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
