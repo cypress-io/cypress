@@ -21,7 +21,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BreakingErrResult, BreakingOption } from '@packages/config'
+import type { BreakingErrResult, BreakingOptionErrorKey } from '@packages/config'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 
@@ -40,7 +40,7 @@ export interface SetupFullConfigOptions {
   options: Partial<AllModeOptions>
 }
 
-type BreakingValidationFn<T> = (type: BreakingOption, val: BreakingErrResult) => T
+type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrResult) => T
 
 /**
  * All of the APIs injected from @packages/server & @packages/config
