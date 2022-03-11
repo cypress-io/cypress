@@ -4,7 +4,6 @@ const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
-const { bundleRequire } = require('bundle-require')
 
 let tsRegistered = false
 
@@ -97,6 +96,7 @@ function run (ipc, configFile, projectRoot) {
     }
 
     debug(`We're loading the configFile via bundleRequire`)
+    const { bundleRequire } = require('bundle-require')
 
     return (await bundleRequire({ filepath: configFile })).mod
   }
