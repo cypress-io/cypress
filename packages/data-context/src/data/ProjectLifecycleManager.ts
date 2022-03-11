@@ -1139,6 +1139,8 @@ export class ProjectLifecycleManager {
       return metaState
     }
 
+    metaState.allFoundConfigFiles = []
+
     for (const fileName of potentialConfigFiles) {
       const filePath = this._pathToFile(fileName)
       const fileExists = fs.existsSync(filePath)
