@@ -90,8 +90,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           reject(err)
         }
 
-        const onQueueFinished = ({ err, subject, unserializableSubjectType, hasMultiDomainError }) => {
-          if (hasMultiDomainError) {
+        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
+          if (err) {
             return _reject(reifyCrossDomainError(err, userInvocationStack))
           }
 
@@ -105,11 +105,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         })
 
         communicator.once('ran:domain:fn', (details) => {
-          const { subject, unserializableSubjectType, err, finished, hasMultiDomainError } = details
+          const { subject, unserializableSubjectType, err, finished } = details
 
           sendReadyForDomain()
 
-          if (hasMultiDomainError) {
+          if (err) {
             return _reject(reifyCrossDomainError(err, userInvocationStack))
           }
 

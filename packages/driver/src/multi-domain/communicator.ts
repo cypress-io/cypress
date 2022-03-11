@@ -117,10 +117,15 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
         } catch (e) {
           err = e
         }
+
+        // give the `err` truthiness if it's a falsey value like undefined/null/false
+        if (hasMultiDomainError && !err) {
+          err = new Error(`${err}`)
+        }
       }
 
       // We always want to make sure errors are posted, so clean it up to send.
-      send({ ...rest, subject, err, hasMultiDomainError })
+      send({ ...rest, subject, err })
     } catch (err: any) {
       if (subject && err.name === 'DataCloneError') {
         // Send the type of object that failed to serialize.
