@@ -232,15 +232,23 @@ describe('Sidebar Navigation', () => {
 
       cy.get('.toggle-specs-text').click()
 
+      cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
+
+      const initialWidth = cy.get('[data-cy="reporter-panel"]').invoke('outerWidth')
+
       cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
       .trigger('mousemove', { clientX: 400 })
       .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 336)
+      const updatedWidth = cy.get('[data-cy="reporter-panel"]').invoke('outerWidth')
+
+      expect(initialWidth).not.eq(updatedWidth)
+
+      cy.wait('@setPreferences')
 
       cy.reload()
 
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 336)
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', updatedWidth)
     })
   })
 
