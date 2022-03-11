@@ -36,6 +36,7 @@ describe('<CreateSpecModal />', () => {
               },
             },
             specs: [],
+            hasTypescript: false,
           },
         }}
         show={show.value}
@@ -104,6 +105,7 @@ describe('playground', () => {
               },
             },
             specs: [],
+            hasTypescript: false,
           },
         }}
         show={show.value}

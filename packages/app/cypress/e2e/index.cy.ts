@@ -221,8 +221,15 @@ describe('App: Index', () => {
 
     context('ts project with default spec pattern', () => {
       beforeEach(() => {
-        cy.scaffoldProject('no-specs-no-storybook-typescript')
-        cy.openProject('no-specs-no-storybook-typescript')
+        cy.scaffoldProject('no-specs-no-storybook')
+        cy.openProject('no-specs-no-storybook')
+
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('tsconfig.json', '{}')
+        })
+
+        cy.openProject('no-specs-no-storybook')
+
         cy.startAppServer('e2e')
         cy.__incorrectlyVisitAppWithIntercept()
 
