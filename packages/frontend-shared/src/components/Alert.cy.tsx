@@ -4,6 +4,7 @@ import faker from 'faker'
 import Alert from './Alert.vue'
 import { defaultMessages } from '../locales/i18n'
 import { ref } from 'vue'
+import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const messages = defaultMessages.components.alert
 
@@ -29,6 +30,8 @@ const makeDismissibleProps = () => {
   return { modelValue, methods }
 }
 
+const alertRichTitle = () => <><span class="font-bold">Hello</span> world</>
+
 const prefixIcon = () => <CoffeeIcon data-cy="coffee-icon"/>
 const suffixIcon = () => <LoadingIcon data-cy="loading-icon" class="animate-spin"/>
 
@@ -39,6 +42,16 @@ describe('<Alert />', () => {
       cy.mount(() => <Alert headerClass="underline text-teal-500 bg-teal-100" bodyClass="bg-teal-50" icon={suffixIcon}>test</Alert>)
 
       cy.percySnapshot()
+    })
+  })
+
+  describe('title', () => {
+    it('can accept slot as title slot', () => {
+      cy.mount(() => (<Alert dismissible status="success"
+      // @ts-ignore - doesn't know about vSlots
+        vSlots={{
+          title: alertRichTitle,
+        }}></Alert>))
     })
   })
 
@@ -228,7 +241,12 @@ describe('playground', () => {
             <button class="bg-white rounded ml-2 px-2">Focusable</button>
           </Alert>
           <Alert status="info" collapsible title="An info alert">Just letting you know what's up.</Alert>
-          <Alert status="warning">Nothing good is happening here!</Alert>
+          <Alert
+            status="warning"
+            icon={ErrorOutlineIcon}
+            icon-classes="icon-dark-orange-400 w-16px h-16px"
+          >
+              Nothing good is happening here!</Alert>
           <Alert icon={CoffeeIcon}
             dismissible
             status="error"

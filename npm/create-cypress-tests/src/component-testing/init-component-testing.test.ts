@@ -275,7 +275,7 @@ describe('init component tests script', () => {
     expect(JSON.stringify(injectedCode.default, null, 2)).to.equal(JSON.stringify(
       {
         componentFolder: 'cypress/component',
-        testFiles: '**/*.spec.{js,ts,jsx,tsx}',
+        specPattern: '**/*.spec.{js,ts,jsx,tsx}',
       },
       null,
       2,

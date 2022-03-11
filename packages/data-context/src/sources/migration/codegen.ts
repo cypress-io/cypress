@@ -21,6 +21,11 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+type ResolvedConfigOptions = Cypress.ResolvedConfigOptions & {
+  testFiles: string | string[]
+  ignoreTestFiles: string | string[]
+}
+
 /**
  * config format pre-10.0
  */
@@ -217,7 +222,15 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   }
 
   const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
-  const relPluginsPath = path.normalize(`'./${pluginPath}'`)
+  let relPluginsPath
+
+  const startsWithDotSlash = new RegExp(/^.\//)
+
+  if (startsWithDotSlash.test(pluginPath)) {
+    relPluginsPath = `'${pluginPath}'`
+  } else {
+    relPluginsPath = `'./${pluginPath}'`
+  }
 
   const requirePlugins = hasDefaultExport(pluginFile)
     ? `return require(${relPluginsPath}).default(on, config)`
@@ -353,7 +366,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
     }
 
     if (key === 'e2e' || key === 'component') {
-      const value = val as Cypress.ResolvedConfigOptions
+      const value = val as ResolvedConfigOptions
 
       if (!value) {
         return acc

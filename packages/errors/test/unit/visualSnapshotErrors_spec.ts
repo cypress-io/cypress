@@ -1101,5 +1101,15 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
+    MIGRATION_ALREADY_OCURRED: () => {
+      return {
+        default: ['custom.config.js', 'custom.json'],
+      }
+    },
+    TEST_FILES_DEPRECATION: () => {
+      return {
+        default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
   })
 })

@@ -2,6 +2,7 @@ import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
+import { isListening } from './util/ensure-url'
 
 import type {
   AllModeOptions,
@@ -153,6 +154,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getDevServer () {
         return devServer
       },
+      isListening,
     },
     electronApi: {
       openExternal (url: string) {
