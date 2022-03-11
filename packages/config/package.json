@@ -34,8 +34,8 @@
   },
   "files": [
     "lib",
-    "index.js",
-    "index.d.ts"
+    "dist",
+    "index.js"
   ],
-  "types": "lib/index.ts"
+  "types": "dist/index.ts"
 }

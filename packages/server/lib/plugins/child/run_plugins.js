@@ -264,16 +264,12 @@ class RunPlugins {
   }
 }
 
-function getNonMigratedOptionsErr (name, errorKey, errInternal) {
-  return require('@packages/errors').getError(errorKey, { name }, errInternal)
-}
-
-function throwInvalidOptionError (name, errorKey) {
+function throwInvalidOptionError (errorKey, name) {
   debug('throwing err %s', name)
   const errInternal = new Error()
 
   Error.captureStackTrace(errInternal, throwInvalidOptionError)
-  const err = getNonMigratedOptionsErr(errorKey, name, errInternal)
+  const err = require('@packages/errors').getError(errorKey, { name }, errInternal)
 
   throw err
 }

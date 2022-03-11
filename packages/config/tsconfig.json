@@ -13,5 +13,6 @@
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
+    "sourceMap": true
   }
 }

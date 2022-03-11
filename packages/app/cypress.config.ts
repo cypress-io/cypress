@@ -38,6 +38,7 @@ export default defineConfig({
   },
   'e2e': {
     baseUrl: 'http://localhost:5555',
+    pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {

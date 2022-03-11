@@ -1350,7 +1350,11 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide
     `
   },
+
 } as const
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 type AllCypressErrorObj = typeof AllCypressErrors
 
