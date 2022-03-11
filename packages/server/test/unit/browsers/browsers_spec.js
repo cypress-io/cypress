@@ -10,6 +10,9 @@ const { EventEmitter } = require('events')
 const { sinon } = require('../../spec_helper')
 const { exec } = require('child_process')
 const util = require('util')
+const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
+const electron = require('../../../lib/browsers/electron')
+const Promise = require('bluebird')
 
 const normalizeSnapshot = (str) => {
   return snapshot(stripAnsi(str))
@@ -26,11 +29,15 @@ before(() => {
   process.versions.electron = true
 })
 
+let ctx
+
+beforeEach(() => {
+  ctx = createTestDataContext()
+})
+
 after(() => {
   process.versions.electron = originalElectronVersion
 })
-
-const ctx = { browser: { setBrowserStatus () {} } }
 
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
@@ -237,9 +244,7 @@ describe('lib/browsers/index', () => {
         ee.emit('exit')
       }
 
-      const removeAllListenersSpy = sinon.spy()
-
-      ee.removeAllListeners = removeAllListenersSpy
+      const removeAllListenersSpy = sinon.spy(ee, 'removeAllListeners')
 
       const instance = ee
 
@@ -254,6 +259,33 @@ describe('lib/browsers/index', () => {
       return browsers.close().then(() => {
         expect(exitSpy.calledBefore(removeAllListenersSpy)).to.be.true
         expect(browsers.getBrowserInstance()).to.eq(null)
+      })
+    })
+  })
+
+  context('browserStatus', () => {
+    it('calls setBrowserStatus with correct lifecycle state', () => {
+      const url = 'http://localhost:3000'
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.browser, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+        ['opening', 'open', 'closed'].forEach((status, i) => {
+          expect(ctx.browser.setBrowserStatus.getCall(i).args[0]).eq(status)
+        })
       })
     })
   })
