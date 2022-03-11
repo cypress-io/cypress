@@ -56,6 +56,18 @@ const query = useQuery({
   pause: isRunMode && window.top === window,
 })
 
+const queryInterval = setInterval(() => {
+  // it's possible that this route will render before the cache is populated, especially from tests
+  // that visit this route directly, so we can poll and re-execute this query until the cache has
+  // the value we expect, to avoid getting stuck between the v-ifs.
+
+  if (query.data.value?.currentProject?.specs) {
+    clearInterval(queryInterval)
+  } else {
+    query.executeQuery()
+  }
+}, 100)
+
 // because we are not using GraphQL in run mode, and we still need
 // way to get the specs, we simply attach them to window when
 // serving the initial HTML.
