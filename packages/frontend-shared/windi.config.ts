@@ -5,9 +5,9 @@ import { safelist } from './.windicss/safelist'
 import { colors } from './.windicss/colors'
 import { shortcuts } from './.windicss/shortcuts'
 import path from 'path'
-import type { WindiCssOptions } from '@windicss/config'
+import type { FullConfig } from 'windicss/types/interfaces'
 
-export const defaultConfig: WindiCssOptions = {
+export const defaultConfig: FullConfig = {
   // This adds !important to all utility classes.
   // https://csswizardry.com/2016/05/the-importance-of-important/
   important: true,

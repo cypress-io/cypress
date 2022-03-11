@@ -16,10 +16,10 @@
           src="../assets/logos/cypress-dark.png"
         >
         <a
-          class="font-medium mr-2px hocus-link-default"
-          :class="props.gql?.currentProject ? 'text-indigo-500' :
+          class="font-medium mr-2px"
+          :class="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'text-indigo-500 hocus-link-default' :
             'text-gray-700'"
-          :href="props.gql?.currentProject ? 'global-mode' : undefined"
+          :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
           @click.prevent="clearCurrentProject"
         >
           {{ t('topNav.global.projects') }}
@@ -136,6 +136,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     config
     savedState
   }
+  projectRootFromCI
   ...TopNav
   ...Auth
 }
@@ -157,7 +158,7 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  if (props.gql.currentProject) {
+  if (props.gql.currentProject && !props.gql.projectRootFromCI) {
     clearCurrentProjectMutation.executeMutation({})
   }
 }

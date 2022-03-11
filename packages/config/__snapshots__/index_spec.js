@@ -8,7 +8,8 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "experimentalStudio",
   "firefoxGcInterval",
   "nodeVersion",
-  "nodeVersion"
+  "nodeVersion",
+  "testFiles"
 ]
 
 exports['src/index .getDefaultValues returns list of public config keys 1'] = {
