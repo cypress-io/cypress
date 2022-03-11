@@ -26,6 +26,7 @@ import {
 } from '../sources/migration'
 import EventEmitter from 'events'
 import type { CypressError } from '@packages/errors'
+import { makeCoreData } from '../data'
 
 class LegacyPluginsIpc extends EventEmitter {
   constructor (readonly childProcess: ChildProcess) {
@@ -337,16 +338,9 @@ export class MigrationActions {
 
   resetFlags () {
     this.ctx.update((coreData) => {
-      coreData.migration.flags = {
-        hasCustomIntegrationFolder: false,
-        hasCustomIntegrationTestFiles: false,
-        hasCustomComponentFolder: false,
-        hasCustomComponentTestFiles: false,
-        hasCustomSupportFile: false,
-        hasComponentTesting: true,
-        hasE2ESpec: true,
-        hasPluginsFile: true,
-      }
+      const defaultFlags = makeCoreData().migration.flags
+
+      coreData.migration.flags = defaultFlags
     })
   }
 }
