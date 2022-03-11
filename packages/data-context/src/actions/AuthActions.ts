@@ -48,9 +48,9 @@ export class AuthActions {
       this.ctx.update((coreData) => {
         coreData.authState = authState
       })
-
-      this.ctx.emitter.authChange()
     }))
+
+    this.ctx.emitter.authChange()
   }
 
   resetAuthState () {
