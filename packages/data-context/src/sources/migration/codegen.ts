@@ -22,6 +22,11 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+type ResolvedConfigOptions = Cypress.ResolvedConfigOptions & {
+  testFiles: string | string[]
+  ignoreTestFiles: string | string[]
+}
+
 export class NonStandardMigrationError extends Error {
   constructor (fileType: 'support' | 'config') {
     super()
@@ -343,7 +348,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
     }
 
     if (key === 'e2e' || key === 'component') {
-      const value = val as Cypress.ResolvedConfigOptions
+      const value = val as ResolvedConfigOptions
 
       if (!value) {
         return acc
