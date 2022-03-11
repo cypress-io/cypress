@@ -20,7 +20,8 @@ import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/e
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
-import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { BreakingErrResult, BreakingOption } from '@packages/config'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 

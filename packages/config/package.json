@@ -3,10 +3,13 @@
   "version": "0.0.0-development",
   "description": "Config contains the configuration types and validation function used in the cypress electron application.",
   "private": true,
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
-    "clean": "rm lib/options.js || echo 'ok'",
+    "watch": "yarn build --watch",
+    "build": "tsc --project .",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
+    "clean": "rm lib/*.js || echo 'ok'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register -extension=.js,.ts test/unit/*spec.* --exit"
@@ -20,6 +23,9 @@
   "devDependencies": {
     "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
+    "@types/mocha": "^8.0.3",
+    "@types/node": "14.14.31",
     "chai": "1.10.0",
     "mocha": "7.0.1",
     "sinon": "7.3.1",
@@ -27,6 +33,9 @@
     "snap-shot-it": "7.9.3"
   },
   "files": [
-    "lib"
-  ]
+    "lib",
+    "dist",
+    "index.js"
+  ],
+  "types": "dist/index.d.ts"
 }
