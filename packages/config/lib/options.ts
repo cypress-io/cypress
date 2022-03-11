@@ -526,10 +526,13 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
-  },
-  {
+  }, {
     name: 'pluginsFile',
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+  }, {
+    name: 'testFiles',
+    errorKey: 'TEST_FILES_DEPRECATION',
+    isWarning: false,
   },
 ]
 

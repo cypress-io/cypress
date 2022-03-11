@@ -1166,6 +1166,14 @@ export const AllCypressErrors = {
       `
   },
 
+  LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
+    return errTemplate`
+        Your ${fmt.highlight(file)} at ${fmt.path(`${file}`)} threw an error. ${fmt.stackTrace(error)}
+
+        Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
+      `
+  },
+
   LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
     return errTemplate`
       There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
@@ -1340,6 +1348,27 @@ export const AllCypressErrors = {
 
       https://on.cypress.io/migration-guide
     `
+  },
+
+  TEST_FILES_DEPRECATION: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        specPattern: '...',
+      },
+      component: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a testing type property: ${fmt.highlightSecondary('e2e.specPattern')} and ${fmt.highlightSecondary('component.specPattern')}
+
+      ${fmt.code(code)}
+
+      https://on.cypress.io/migration-guide`
   },
 
 } as const

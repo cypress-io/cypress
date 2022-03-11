@@ -475,7 +475,7 @@ export const mutation = mutationType({
       description: 'Initialize the migration wizard to the first step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.initialize()
+        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
 
         return {}
       },
@@ -646,6 +646,16 @@ export const mutation = mutationType({
       type: Query,
       description: `Dismisses a warning displayed by the frontend`,
       resolve: (source) => {
+        return {}
+      },
+    })
+
+    t.field('pingBaseUrl', {
+      type: Query,
+      description: 'Ping configured Base URL',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.project.pingBaseUrl()
+
         return {}
       },
     })

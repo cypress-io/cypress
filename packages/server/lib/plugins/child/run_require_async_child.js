@@ -8,14 +8,14 @@ const { RunPlugins } = require('./run_plugins')
 let tsRegistered = false
 
 /**
- * Executes and returns the passed `configFile` file in the ipc `loadConfig` event
+ * Executes and returns the passed `file` (usually `configFile`) file in the ipc `loadConfig` event
  * @param {*} ipc Inter Process Communication protocol
- * @param {*} configFile the file we are trying to load
+ * @param {*} file the file we are trying to load
  * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)
  * @returns
  */
-function run (ipc, configFile, projectRoot) {
-  debug('configFile:', configFile)
+function run (ipc, file, projectRoot) {
+  debug('configFile:', file)
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
@@ -23,7 +23,7 @@ function run (ipc, configFile, projectRoot) {
 
   if (!tsRegistered) {
     debug('register typescript for required file')
-    tsNodeUtil.register(projectRoot, configFile)
+    tsNodeUtil.register(projectRoot, file)
 
     // ensure typescript is only registered once
     tsRegistered = true
@@ -55,7 +55,7 @@ function run (ipc, configFile, projectRoot) {
   const isValidSetupNodeEvents = (config, testingType) => {
     if (config[testingType] && config[testingType].setupNodeEvents && typeof config[testingType].setupNodeEvents !== 'function') {
       ipc.send('setupTestingType:error', util.serializeError(
-        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, testingType, config[testingType].setupNodeEvents),
+        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', file, testingType, config[testingType].setupNodeEvents),
       ))
 
       return false
@@ -72,16 +72,73 @@ function run (ipc, configFile, projectRoot) {
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
-      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config),
+      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', file, config),
     ))
 
     return false
   }
 
+  ipc.on('loadLegacyPlugins', async (legacyConfig) => {
+    try {
+      let legacyPlugins = require(file)
+
+      if (legacyPlugins && typeof legacyPlugins.default === 'function') {
+        legacyPlugins = legacyPlugins.default
+      }
+
+      // invalid or empty plugins file
+      if (typeof legacyPlugins !== 'function') {
+        ipc.send('loadLegacyPlugins:reply', legacyConfig)
+
+        return
+      }
+
+      // we do not want to execute any tasks - the purpose
+      // of this is to get any modified config returned
+      // by plugins.
+      const noop = () => {}
+      const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
+
+      // pluginsFile did not return the config - this is allowed, although
+      // we recommend returning it in our docs.
+      if (!legacyPluginsConfig) {
+        ipc.send('loadLegacyPlugins:reply', legacyConfig)
+
+        return
+      }
+
+      // match merging strategy from 9.x
+      const mergedLegacyConfig = {
+        ...legacyConfig,
+        ...legacyPluginsConfig,
+      }
+
+      if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
+        mergedLegacyConfig.e2e = {
+          ...(legacyConfig.e2e || {}),
+          ...(legacyPluginsConfig.e2e || {}),
+        }
+      }
+
+      if (legacyConfig.component || legacyPluginsConfig.component) {
+        mergedLegacyConfig.component = {
+          ...(legacyConfig.component || {}),
+          ...(legacyPluginsConfig.component || {}),
+        }
+      }
+
+      ipc.send('loadLegacyPlugins:reply', mergedLegacyConfig)
+    } catch (e) {
+      ipc.send('loadLegacyPlugins:error', util.serializeError(
+        require('@packages/errors').getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', file, e),
+      ))
+    }
+  })
+
   ipc.on('loadConfig', () => {
     try {
-      debug('try loading', configFile)
-      const exp = require(configFile)
+      debug('try loading', file)
+      const exp = require(file)
 
       const result = exp.default || exp
 
@@ -102,7 +159,7 @@ function run (ipc, configFile, projectRoot) {
 
         debug(`setupTestingType %s %o`, testingType, options)
 
-        const runPlugins = new RunPlugins(ipc, projectRoot, configFile)
+        const runPlugins = new RunPlugins(ipc, projectRoot, file)
 
         if (!isValidSetupNodeEvents(result, testingType)) {
           return
@@ -134,7 +191,7 @@ function run (ipc, configFile, projectRoot) {
         }
       })
 
-      debug('loaded config from %s %o', configFile, result)
+      debug('loaded config from %s %o', file, result)
     } catch (err) {
       if (err.name === 'TSError') {
         // because of this https://github.com/TypeStrong/ts-node/issues/1418
@@ -153,7 +210,7 @@ function run (ipc, configFile, projectRoot) {
       }
 
       ipc.send('loadConfig:error', util.serializeError(
-        require('@packages/errors').getError('CONFIG_FILE_REQUIRE_ERROR', configFile, err),
+        require('@packages/errors').getError('CONFIG_FILE_REQUIRE_ERROR', file, err),
       ))
     }
   })

@@ -4,7 +4,7 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="overflow-hidden rounded-t rounded-b outline-none group"
+    class="rounded-t rounded-b outline-none overflow-hidden group"
     :class="[
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
@@ -137,7 +137,7 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     ring: 'hocus:(ring-info-200 border-info-300)',
   },
   warning: {
-    headerClass: 'text-warning-500 bg-warning-100',
+    headerClass: 'text-warning-600 bg-warning-100',
     suffixIconClass: 'icon-dark-warning-500',
     suffixButtonClass: 'text-warning-500',
     bodyClass: 'bg-warning-50',
