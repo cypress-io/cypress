@@ -10,14 +10,34 @@ This is the front-end for the Cypress App.
 3. Open chrome (or another browser)
 4. It will show the new Vite powered app 
 
-## How it works
+## How the App works
 
 Cypress has two modes: `run` and `open`. We want run mode to be as light and fast as possible, since this is the mode used to run on CI machines, etc. Open mode is the interactive experience, with the command log, snapshots, selector playground, etc.
 
 - **`open`** mode is driven using GraphQL and urql. It shows the full Cypress app, include the top nav, side nav, spec list, etc. You can change between testing types, check your latest runs on the Cypress dashboard, updating settings, etc.
-- **`run`** mode is does not rely on GraphQL. This is so we can be as performant as possible. It only renders the "runner" part of the UI, which is comprised of the command log and AUT iframe.
+- **`run`** mode is does not rely on GraphQL. This is so we can be as performant as possible. It only renders the "runner" part of the UI, which is comprised of the command log, Spec Runner header, and AUT iframe.
 
 The two modes are composed using the same logic, but have slightly different components. You can see where the differences are in `Runner.vue`(src/pages/Specs/Runner.vue). Notice that `<SpecRunnerOpenMode>` receives a `gql` prop, since it uses GraphQL, and `<SpecRunnerRunMode>` does not.
+
+## Router
+
+[`vite-plugin-pages`](https://github.com/hannoeru/vite-plugin-pages) is used to generate routes based on the page-level Vue components contained in `src/pages`. Route configuration that might typically appear in `router.ts` can be set in a `<route>` block in these page components, for example:
+
+```ts
+<route>
+  {
+    name: 'SpecsRunner',
+    meta: {
+      header: false,
+      navBarExpandedAllowed: false
+    }
+  }
+</route>
+```
+
+The advantage here is that the route definition is co-located with the component. The route block will be parsed as JSON5 by default, which means that certain options aren't valid, such as if a function is needed to be the value.
+
+In such cases, [`extendRoute`](https://github.com/hannoeru/vite-plugin-pages#extendroute) can be used where the `Pages` plugin is added in `vite.config.ts` to extend the route created using regular TypeScript code.
 
 ## Using existing, Vite-incompatible modules
 
@@ -59,10 +79,10 @@ Cy has a very custom icon library.
  */
 
 <i-cy-book_x16 class="
-  hover:icon-dark-pink-500
-  hover:icon-light-purple-300
   icon-dark-pink-300
   icon-dark-purple-50
+  hover:icon-dark-pink-500
+  hover:icon-light-purple-300
 " />
 ```
 
@@ -79,7 +99,4 @@ If an icon path doesn't define a class, nothing bad will happen, it just won't g
 
 2. Finally, you don't need to expose anything. `./src/assets/icons` is automatically watched and loaded 😮
 
-## Diagram
-
-![](./unified-runner-diagram.png)]
 
