@@ -249,6 +249,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
+    name: 'pluginsFile',
+    defaultValue: 'cypress/plugins',
+    validation: validate.isStringOrFalse,
+    isFolder: true,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
