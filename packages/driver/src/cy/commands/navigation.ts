@@ -420,16 +420,6 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     if (r) {
       return r(err)
     }
-
-    // If the command queue has been cleaned up, throw the error ourselves
-    if (err?.onFail) {
-      err.onFail()
-      delete err.onFail
-    }
-
-    if (window.specBridgeDomain) {
-      Cypress.specBridgeCommunicator.toPrimary('navigation:error', { err })
-    }
   }
 
   try {

@@ -380,11 +380,7 @@ export class CommandQueue extends Queue<Command> {
     const { promise, reject, cancel } = super.run({
       onRun: next,
       onError,
-      onFinish: () => {
-        // By removing the reject state, we can handle navigation timeouts after the command queue has finished.
-        this.state('reject', undefined)
-        this.cleanup()
-      },
+      onFinish: this.cleanup,
     })
 
     this.state('promise', promise)
