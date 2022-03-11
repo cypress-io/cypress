@@ -17,7 +17,7 @@ module.exports = (on, config) => {
     )
   })
 
-  config.testFiles = '**/smoke.spec.ts'
+  config.component.specPattern = '**/smoke.spec.ts'
 
   return config
 }
