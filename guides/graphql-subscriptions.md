@@ -50,7 +50,7 @@ subscription MyAppSubscription {
 The distinction between subscriptions & queries is that subscriptions can only have a single top-level field. You can think of the subscription like an "event name" in socket.io, except that it's strongly typed & part of the overall GraphQL schema, meaning that you don't need to do any extra work for it to merge into the normalized cache & refresh affected parts of the view. 
 
 ```ts
-// will merge & update any views that depend on `isLoadingConfig`
+// will merge & update any views that depend on `isLoadingConfig` / `isLoadingSetupNodeEvents`
 useSubscription({ query: MyAppSubscriptionDocument })
 ```
 
@@ -85,7 +85,7 @@ useSubscription({ query: OnSpecChangeDocument }, (prev, next) => {
 
 Subscriptions are implemented on the server as an `AsyncIterator`. This is handled for us by the [graphql-ws](https://github.com/enisdenjo/graphql-ws) package.
 
-- [API Docs](https://github.com/enisdenjo/graphql-ws/tree/master/docs) & a 
+- [API Docs](https://github.com/enisdenjo/graphql-ws/tree/master/docs)
 - [Transport layer protcol specification](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
 
 ### Testing
