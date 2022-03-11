@@ -81,17 +81,38 @@ useSubscription({ query: OnSpecChangeDocument }, (prev, next) => {
 - [API Docs for useSubscription](https://formidable.com/open-source/urql/docs/api/urql/#usesubscription)
 - [Subscriptions overview](https://formidable.com/open-source/urql/docs/advanced/subscriptions/)
 
+ One thing to be aware of, is the subscription is only mounted/responded to when the containing component is mounted on the page.
+
 ### Server Docs
 
 Subscriptions are implemented on the server as an `AsyncIterator`. This is handled for us by the [graphql-ws](https://github.com/enisdenjo/graphql-ws) package.
+
+To add a new Subscription field, add a new entry in the [`gql-Subscriptions`](../packages/graphql/src/schemaTypes/objectTypes/gql-Subscription.ts):
+
+```ts
+t.field('browserStatusChange', {
+  type: CurrentProject,
+  description: 'Status of the currently opened browser',
+  subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('browserStatusChange'),
+  resolve: (source, args, ctx) => ({}),
+})
+```
+
+And then add the corresponding method in [DataEmitterActions](../packages/data-context/src/actions/DataEmitterActions.ts)
+
+
+```ts
+browserStatusChange () {
+  this._emit('browserStatusChange')
+}
+```
 
 - [API Docs](https://github.com/enisdenjo/graphql-ws/tree/master/docs)
 - [Transport layer protcol specification](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
 
 ### Testing
 
-We should add one spec file per-subscription in the `/app/cypress/e2e/subscription` directory. This file can cover both the app & launchpad handling of a given subscription.
+If you want to TDD the subscription being added & working directly in isolation, one recommended approach is to add one spec file per-subscription in the `/app/cypress/e2e/subscription` directory. This file can cover both the app & launchpad handling of a given subscription.
 
 Example: [authChange-subscription.cy.ts](../packages/app/cypress/e2e/subscriptions/authChange-subscription.cy.ts)
-
 
