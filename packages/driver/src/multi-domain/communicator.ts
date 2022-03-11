@@ -1,7 +1,7 @@
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import { preprocessConfig, preprocessEnv } from '../util/config'
-import { preprocessForSerialization } from '../util/serialization'
+import { preprocessForSerialization, reifyCrossDomainError } from '../util/serialization'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
@@ -25,6 +25,7 @@ declare global {
 export class PrimaryDomainCommunicator extends EventEmitter {
   private windowReference: Window | undefined
   private crossDomainDriverWindows: {[key: string]: Window} = {}
+  private userInvocationStack?: string
 
   /**
    * Initializes the event handler to receive messages from the spec bridge.
@@ -50,6 +51,10 @@ export class PrimaryDomainCommunicator extends EventEmitter {
         // communicate back to the iframe
         if (messageName === 'bridge:ready' && source) {
           this.crossDomainDriverWindows[data.domain] = source as Window
+        }
+
+        if (data?.data?.err) {
+          data.data.err = reifyCrossDomainError(data.data.err, this.userInvocationStack as string)
         }
 
         this.emit(messageName, data.data, data.domain)
@@ -78,6 +83,11 @@ export class PrimaryDomainCommunicator extends EventEmitter {
   }
 
   toSpecBridge (domain: string, event: string, data?: any) {
+    if (data?.userInvocationStack) {
+      this.userInvocationStack = data.userInvocationStack
+      delete data.userInvocationStack
+    }
+
     debug('=> to spec bridge', domain, event, data)
     // If there is no crossDomainDriverWindow, there is no need to send the message.
     this.crossDomainDriverWindows[domain]?.postMessage({

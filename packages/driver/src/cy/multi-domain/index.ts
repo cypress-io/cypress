@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
-import { reifyCrossDomainError, serializeRunnable } from './util'
+import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
@@ -92,7 +92,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
           if (err) {
-            return _reject(reifyCrossDomainError(err, userInvocationStack))
+            return _reject(err)
           }
 
           _resolve({ subject, unserializableSubjectType })
@@ -110,7 +110,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           sendReadyForDomain()
 
           if (err) {
-            return _reject(reifyCrossDomainError(err, userInvocationStack))
+            return _reject(err)
           }
 
           // if there are not commands and a synchronous return from the callback,
@@ -164,6 +164,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
                 isStable: state('isStable'),
+                userInvocationStack,
               })
             } catch (err: any) {
               const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
