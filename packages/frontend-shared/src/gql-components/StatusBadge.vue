@@ -54,7 +54,8 @@
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
-import { TestingTypeSelectionAndReconfigureDocument, TestingTypeEnum } from '../generated/graphql'
+import { TestingTypeSelectionAndReconfigureDocument } from '../generated/graphql'
+import type { TestingTypeEnum } from '../generated/graphql'
 import { computed } from 'vue'
 
 const props = defineProps<{

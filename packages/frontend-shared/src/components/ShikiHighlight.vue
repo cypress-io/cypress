@@ -46,12 +46,13 @@ shikiWrapperClasses computed property.
           'inline': props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
-          'p-8px': !props.lineNumbers && !props.inline,
+          'p-8px': !props.lineNumbers && !props.inline && !props.codeframe,
+          'p-2px': props.codeframe,
         },
 
         props.class,
       ]"
-      @click="copyOnClick && isSupported ? () => copyCode() : () => {}"
+      @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
     <pre
@@ -60,7 +61,7 @@ shikiWrapperClasses computed property.
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
     >{{ trimmedCode }}</pre>
     <CopyButton
-      v-if="copyButton && isSupported"
+      v-if="copyButton"
       variant="outline"
       tabindex="-1"
       class="bg-white absolute"
@@ -106,8 +107,8 @@ export { highlighter, inheritAttrs }
 <script lang="ts" setup>
 import type { Ref } from 'vue'
 import { computed, onBeforeMount, ref } from 'vue'
-import { useClipboard } from '@vueuse/core'
-import CopyButton from './CopyButton.vue'
+import CopyButton from '../gql-components/CopyButton.vue'
+import { useClipboard } from '../gql-components/useClipboard'
 
 const highlighterInitialized = ref(false)
 
@@ -118,12 +119,14 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string
+  initialLine?: number
   lang: CyLangType | undefined
   lineNumbers?: boolean
   inline?: boolean
   wrap?: boolean
   copyOnClick?: boolean
   copyButton?: boolean
+  codeframe?: boolean
   skipTrim?: boolean
   class?: string | string[] | Record<string, any>
 }>(), {
@@ -131,6 +134,8 @@ const props = withDefaults(defineProps<{
   inline: false,
   wrap: false,
   copyOnClick: false,
+  codeframe: false,
+  initialLine: 1,
   copyButton: false,
   skipTrim: false,
   class: undefined,
@@ -153,7 +158,7 @@ const highlightedCode = computed(() => {
 
 const codeEl: Ref<HTMLElement | null> = ref(null)
 
-const { copy, isSupported } = useClipboard()
+const { copy } = useClipboard()
 
 const copyCode = () => {
   if (codeEl.value) {
@@ -196,7 +201,7 @@ $offset: 1.1em;
     @apply py-8px;
     code {
       counter-reset: step;
-      counter-increment: step 0;
+      counter-increment: step calc(v-bind('props.initialLine') - 1);
 
       // Keep bg-gray-50 synced with the box-shadows.
       .line::before, .line:first-child::before {

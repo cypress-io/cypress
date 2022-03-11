@@ -91,13 +91,28 @@ export class VersionsDataSource {
   }
 
   private async getVersionMetadata (): Promise<Record<string, string>> {
-    if (this.ctx.isRunMode) {
-      return {
-        [pkg.version]: new Date().toISOString(),
-      }
+    const DEFAULT_RESPONSE = {
+      [pkg.version]: new Date().toISOString(),
     }
 
-    const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+    if (this.ctx.isRunMode) {
+      return DEFAULT_RESPONSE
+    }
+
+    let response
+
+    try {
+      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+    } catch (e) {
+      // ignore any error from this fetch, they are gracefully handled
+      // by showing the current version only
+      debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
+    }
+
+    if (!response) {
+      return DEFAULT_RESPONSE
+    }
+
     const responseJson = await response.json() as { time: Record<string, string>}
 
     debug('NPM release dates %o', responseJson.time)
@@ -129,9 +144,21 @@ export class VersionsDataSource {
       manifestHeaders['x-machine-id'] = id
     }
 
-    const manifestResponse = await this.ctx.util.fetch(url, {
-      headers: manifestHeaders,
-    })
+    let manifestResponse
+
+    try {
+      manifestResponse = await this.ctx.util.fetch(url, {
+        headers: manifestHeaders,
+      })
+    } catch (e) {
+      // ignore any error from this fetch, they are gracefully handled
+      // by showing the current version only
+      debug('Error fetching %o', url, e)
+    }
+
+    if (!manifestResponse) {
+      return pkg.version
+    }
 
     debug('retrieving latest version information with headers: %o', manifestHeaders)
 

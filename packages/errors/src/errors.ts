@@ -10,7 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, ConfigValidationError, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -695,7 +695,7 @@ export const AllCypressErrors = {
       ${fmt.highlight(validationMsg)}`
   },
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationError) => {
+  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
     const { key, type, value, list } = validationResult
 
     if (!fileType) {
@@ -1166,13 +1166,13 @@ export const AllCypressErrors = {
       `
   },
 
-  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string) => {
+  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
     return errTemplate`
-      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(`cypress.json`)} file at the location below:
+      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
 
       ${fmt.path(projectRoot)}
 
-      Cypress no longer supports cypress.json, please remove it from your project.
+      Cypress no longer supports ${fmt.off(legacyConfigFile)}, please remove it from your project.
     `
   },
 
@@ -1280,6 +1280,66 @@ export const AllCypressErrors = {
 
       Learn more: https://on.cypress.io/dev-server
     `
+  },
+
+  UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
+    return errTemplate`
+      An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
+
+      ${fmt.stringify(args)}
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
+  DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
+    return errTemplate`
+      We received an unexpected error response from the request to the Cypress dashboard:
+
+      ${fmt.stringify(err.message)}
+    `
+  },
+
+  UNEXPECTED_INTERNAL_ERROR: (err: Error) => {
+    return errTemplate`
+      We encountered an unexpected internal error. Please check GitHub or open a new issue 
+      if you don't see one already with the details below:
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
+  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
+    return errTemplate`
+      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
+      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
+
+      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
+      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+
+  TEST_FILES_DEPRECATION: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        specPattern: '...',
+      },
+      component: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a testing type property: ${fmt.highlightSecondary('e2e.specPattern')} and ${fmt.highlightSecondary('component.specPattern')}
+
+      ${fmt.code(code)}
+
+      https://on.cypress.io/migration-guide`
   },
 
 } as const

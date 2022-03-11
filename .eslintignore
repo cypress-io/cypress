@@ -28,6 +28,7 @@ system-tests/lib/scaffold/support/commands.js
 system-tests/test/support/projects/e2e/cypress/
 system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
 system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
+system-tests/projects/config-with-ts-syntax-error/**
 
 
 **/test/fixtures
@@ -67,18 +68,21 @@ packages/data-context/test/unit/codegen/files
 # community templates we test against, no need to lint
 system-tests/projects/create-react-app-configured/**/*
 system-tests/projects/create-react-app-unconfigured/**/*
+system-tests/projects/create-react-app-custom-index-html
 
 system-tests/projects/vueclivue2-unconfigured/**/*
 system-tests/projects/vueclivue2-configured/**/*
 
 system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
+system-tests/projects/vueclivue3-custom-index-html
 
 system-tests/projects/vuecli5vue3-unconfigured/**/*
 system-tests/projects/vuecli5vue3-configured/**/*
 
 system-tests/projects/vue3-vite-ts-unconfigured/**/*
 system-tests/projects/vue3-vite-ts-configured/**/*
+system-tests/projects/vue3-vite-ts-custom-index-html
 
 system-tests/projects/nextjs-unconfigured/**/*
 system-tests/projects/nextjs-configured/**/*

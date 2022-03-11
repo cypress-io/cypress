@@ -22,7 +22,7 @@ const ciProvider = require(`../../lib/util/ci_provider`)
 const settings = require(`../../lib/util/settings`)
 const Events = require(`../../lib/gui/events`)
 const Windows = require(`../../lib/gui/windows`)
-const interactiveMode = require(`../../lib/modes/interactive-e2e`)
+const interactiveMode = require(`../../lib/modes/interactive`)
 const runMode = require(`../../lib/modes/run`)
 const api = require(`../../lib/api`)
 const cwd = require(`../../lib/cwd`)
@@ -411,7 +411,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
+    it('runs project by limiting spec files via config.e2e.specPattern string glob pattern', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
@@ -419,7 +419,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
+    it('runs project by limiting spec files via config.e2e.specPattern as a JSON array of string glob patterns', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })

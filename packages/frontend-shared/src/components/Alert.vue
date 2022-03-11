@@ -30,6 +30,14 @@
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"
         >
           <template
+            v-if="$slots.title"
+            #title
+          >
+            <slot
+              name="title"
+            />
+          </template>
+          <template
             v-if="$slots.prefixIcon"
             #prefixIcon="slotProps"
           >

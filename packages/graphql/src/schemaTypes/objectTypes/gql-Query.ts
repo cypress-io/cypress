@@ -1,5 +1,4 @@
 import { objectType } from 'nexus'
-import { BaseError } from '.'
 import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -8,19 +7,19 @@ import { LocalSettings } from './gql-LocalSettings'
 import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
-import { Warning } from './gql-Warning'
+import { ErrorWrapper } from './gql-ErrorWrapper'
 
 export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
     t.field('baseError', {
-      type: BaseError,
+      type: ErrorWrapper,
       resolve: (root, args, ctx) => ctx.baseError,
     })
 
     t.nonNull.list.nonNull.field('warnings', {
-      type: Warning,
+      type: ErrorWrapper,
       description: 'A list of warnings',
       resolve: (source, args, ctx) => {
         return ctx.coreData.warnings
@@ -74,6 +73,11 @@ export const Query = objectType({
     t.nonNull.boolean('isInGlobalMode', {
       description: 'Whether the app is in global mode or not',
       resolve: (source, args, ctx) => !ctx.currentProject,
+    })
+
+    t.nonNull.boolean('projectRootFromCI', {
+      description: 'Whether the project was specified from the --project flag',
+      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.projectRoot),
     })
 
     t.nonNull.field('authState', {

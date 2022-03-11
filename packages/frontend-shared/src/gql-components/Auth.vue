@@ -64,8 +64,10 @@ import {
   Auth_LoginDocument,
   Auth_LogoutDocument,
   Auth_ResetAuthStateDocument,
-  AuthFragment,
   Auth_BrowserOpenedDocument,
+} from '../generated/graphql'
+import type {
+  AuthFragment,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'

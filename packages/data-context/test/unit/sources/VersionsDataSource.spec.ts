@@ -121,7 +121,7 @@ describe('VersionsDataSource', () => {
       expect(latestVersion).to.eql('16.0.0')
     })
 
-    it('handles network failures on the initial load', async () => {
+    it('handles errors fetching version data', async () => {
       nmiStub.resolves('abcd123')
 
       fetchStub
@@ -136,56 +136,15 @@ describe('VersionsDataSource', () => {
           'x-testing-type': 'e2e',
         },
       })
-      .throws(new Error('Network error'))
+      .rejects()
       .withArgs('https://registry.npmjs.org/cypress')
-      .throws(new Error('Network error'))
+      .rejects()
 
       versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
 
-      expect(versionInfo).to.eql({
-        current: {
-          id: currentCypressVersion,
-          version: currentCypressVersion,
-          released: mockNow.toISOString(),
-        },
-        latest: {
-          id: currentCypressVersion,
-          version: currentCypressVersion,
-          released: mockNow.toISOString(),
-        },
-      })
-    })
-
-    it('resets telemetry data triggering a new erroring call to get the latest version', async () => {
-      const currentCypressVersion = pkg.version
-
-      nmiStub.throws()
-      ctx.coreData.currentTestingType = 'component'
-
-      fetchStub
-      .withArgs('https://download.cypress.io/desktop.json', {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-cypress-version': currentCypressVersion,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-          'x-initial-launch': String(false),
-          'x-testing-type': 'component',
-        },
-      })
-      .throws(new Error('Network error'))
-
-      const privateVersionsDataSource = versionsDataSource as any
-
-      privateVersionsDataSource.ctx.coreData.currentTestingType = 'component'
-
-      versionsDataSource.resetLatestVersionTelemetry()
-
-      const latestVersion = await privateVersionsDataSource._latestVersion
-
-      expect(latestVersion).to.eql(currentCypressVersion)
+      expect(versionInfo.current).to.eql(versionInfo.latest)
     })
   })
 })

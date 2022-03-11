@@ -53,6 +53,7 @@
     "data-uri-to-buffer": "2.0.1",
     "dayjs": "^1.9.3",
     "debug": "^4.3.2",
+    "dependency-tree": "8.1.2",
     "duplexify": "4.1.1",
     "electron-context-menu": "3.1.1",
     "errorhandler": "1.5.1",
@@ -119,7 +120,7 @@
     "ts-node": "^10.2.1",
     "tslib": "2.3.1",
     "underscore.string": "3.3.5",
-    "url-parse": "1.5.6",
+    "url-parse": "1.5.9",
     "uuid": "8.3.2",
     "which": "2.0.2",
     "widest-line": "3.1.0"

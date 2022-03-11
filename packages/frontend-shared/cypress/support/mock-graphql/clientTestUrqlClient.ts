@@ -1,19 +1,27 @@
 import _ from 'lodash'
 import { pipe, map } from 'wonka'
-import type { Client } from '@urql/core'
+import type { Client, TypedDocumentNode } from '@urql/core'
 import { createClient, dedupExchange, errorExchange } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { clientTestSchema } from './clientTestSchema'
 import type { ClientTestContext } from './clientTestContext'
-import type { FieldNode, GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver } from 'graphql'
+import type { GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver, FieldNode } from 'graphql'
 import { defaultTypeResolver, introspectionFromSchema, isNonNullType } from 'graphql'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
+import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
-import { GQLStubRegistry } from './stubgql-Registry'
 
-export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
+export type MutationResolverCallback<T extends TypedDocumentNode> = (
+  defineResult: (input: ResultType<T>) => ResultType<T>,
+  variables: Exclude<T['__variablesType'], undefined>) => ResultType<T> | void
+
+export type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
+
+export function testUrqlClient (context: ClientTestContext,
+  onResult?: (result: any, context: ClientTestContext) => any,
+  mutationResolvers?: Map<string, MutationResolverCallback<any>>): Client {
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [
@@ -37,6 +45,22 @@ export function testUrqlClient (context: ClientTestContext, onResult?: (result: 
                   return result
                 },
               }).end()
+
+              if (mutationResolvers && result.operation.kind === 'mutation') {
+                const firstMutation = result.operation.query.definitions[0]
+
+                if (firstMutation.kind === 'OperationDefinition') {
+                  const mutationName = firstMutation.name?.value
+
+                  if (mutationName && mutationResolvers[mutationName]) {
+                    const val = mutationResolvers[mutationName]((conf: any) => (conf), result.operation.variables)
+
+                    if (val) {
+                      result.data = val
+                    }
+                  }
+                }
+              }
 
               if (onResult) {
                 if (result.data.testFragmentMember) {

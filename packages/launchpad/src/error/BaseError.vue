@@ -1,29 +1,23 @@
 <template>
-  <div class="mx-auto space-y-32px text-center min-w-476px max-w-848px py-16px children:text-center">
+  <div
+    v-if="baseError"
+    class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center"
+  >
     <div>
       <h1
-        class="font-medium leading-snug text-32px text-gray-900"
+        v-if="baseError.title"
+        class="font-medium leading-snug pb-24px text-32px text-gray-900"
         data-testid="error-header"
       >
         <slot name="header">
-          {{ headerText }}
+          {{ baseError.title }}
         </slot>
       </h1>
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
 
       <slot name="message">
-        <!-- Can't pull this out because of the i18n-t component -->
-        <i18n-t
-          scope="global"
-          keypath="launchpadErrors.generic.message"
-          tag="p"
-          class="font-light pb-24px"
-          data-testid="error-message"
-        >
-          <OpenConfigFileInIDE />
-        </i18n-t>
         <Alert
-          :title="props.gql.title ?? ''"
+          :title="baseError.errorName"
           status="error"
           body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
@@ -32,25 +26,31 @@
           icon-classes="icon-dark-red-400"
           max-height="none"
         >
-          <p
-            v-if="errorMessage"
-            class="border-b-1 border-b-red-100 p-16px pt-0 text-red-500"
-          >
-            {{ errorMessage }}
-          </p>
-          <p
-            v-if="stack"
+          <div class="border-b-1 border-b-red-100 p-16px pt-0">
+            <div
+              ref="markdownTarget"
+              class="text-red-500"
+              data-testid="error-message"
+              v-html="markdown"
+            />
+            <ErrorCodeFrame
+              v-if="baseError.codeFrame"
+              :gql="baseError.codeFrame"
+            />
+          </div>
+          <div
             class="m-16px mb-0 overflow-hidden"
           >
             <Collapsible
               disable
               max-height="none"
-              initially-open
+              :initially-open="baseError.isUserCodeError"
             >
               <template #target="{open, toggle}">
                 <p
                   class="gap-8px inline-flex items-center justify-center"
                   :class="{'pb-8px': open}"
+                  :data-cy="`stack-open-${open}`"
                 >
                   <i-cy-chevron-right-small_x16
                     class="min-w-8px min-h-8px transform duration-150 icon-dark-red-400"
@@ -65,12 +65,12 @@
                 </p>
               </template>
               <pre
-                v-if="stack"
+                data-testid="error-header"
                 class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
-                v-html="stack"
+                v-html="baseError.errorStack"
               />
             </Collapsible>
-          </p>
+          </div>
         </Alert>
       </slot>
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
@@ -80,7 +80,7 @@
     <div class="w-full gap-16px inline-flex">
       <slot name="footer">
         <Button
-          v-if="retry"
+          v-if="props.retry"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
@@ -90,52 +90,47 @@
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          data-testid="error-read-the-docs-button"
-          @click="openDocs"
-        >
-          {{ t('launchpadErrors.generic.readTheDocsButton') }}
-        </Button>
       </slot>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
-import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import type { BaseError_DataFragment } from '../generated/graphql'
+import type { BaseErrorFragment } from '../generated/graphql'
 import Alert from '@cy/components/Alert.vue'
-import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
-import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
+import ErrorCodeFrame from './ErrorCodeFrame.vue'
 
 gql`
-fragment BaseError_Data on BaseError {
+fragment BaseError on ErrorWrapper {
   title
-  message
-  stack
+  errorName
+  errorStack
+  errorType
+  errorMessage
+  isUserCodeError
+  codeFrame {
+    ...ErrorCodeFrame
+  }
 }
 `
-
-const openDocs = useExternalLink('https://on.cypress.io/')
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  gql: BaseError_DataFragment
+  gql: BaseErrorFragment
   retry?: () => void
   onReadDocs?: () => void
 }>()
 
-const headerText = computed(() => t('launchpadErrors.generic.header'))
-const errorMessage = computed(() => props.gql.message ?? null)
-const stack = computed(() => props.gql.stack ?? null)
-
+const markdownTarget = ref()
+const baseError = computed(() => props.gql)
+const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
 </script>

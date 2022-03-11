@@ -25,7 +25,7 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
 }
 
 /**
- * Creates a object maping a spec file to an object mapping
+ * Creates a object mapping a spec file to an object mapping
  * the spec name to the result of `makeImport`.
  *
  * @returns {Record<string, ReturnType<makeImport>}

@@ -110,6 +110,14 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
         '@urql/vue',
       ],
     },
+    server: {
+      fs: {
+        // Since we're in a monorepo, we're going to serve packages from
+        // npm/vue/dist/* and other local places. This enables us to do that.
+        // https://vitejs.dev/config/#server-fs-strict
+        strict: false,
+      },
+    },
 
     // You cannot add or remove arbitrary options from shared plugins.
     // Please use the PluginsOverride option for this.

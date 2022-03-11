@@ -2,8 +2,11 @@ import { objectType } from 'nexus'
 import path from 'path'
 
 export interface FilePartsShape {
+  line?: number
+  column?: number
   absolute: string
-  // For when we're merging the file
+  // For when we're merging / creating the file and might not have the file contents on-disk yet
+  // used in the scaffolding
   contents?: string
 }
 
@@ -56,6 +59,14 @@ export const FileParts = objectType({
       resolve (root, args, ctx) {
         return root.contents || ctx.file.readFile(root.absolute)
       },
+    })
+
+    t.int('line', {
+      description: 'If provided, used to specify the line of the file to open in openFileInIDE',
+    })
+
+    t.int('column', {
+      description: 'If provided, used to specify the column of the file to open in openFileInIDE',
     })
   },
   sourceType: {

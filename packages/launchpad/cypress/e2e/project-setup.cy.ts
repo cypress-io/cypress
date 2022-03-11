@@ -2,12 +2,10 @@ import { BUNDLERS, FRONTEND_FRAMEWORKS, AllPackagePackages } from '@packages/sca
 import { CODE_LANGUAGES } from '@packages/types/src'
 
 function fakeInstalledDeps () {
-  cy.withCtx(async (ctx) => {
+  cy.withCtx(async (ctx, o) => {
     const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
 
-    ctx.update((coreData) => {
-      coreData.wizard.__fakeInstalledPackagesForTesting = deps
-    })
+    o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
   })
 }
 
@@ -187,14 +185,14 @@ describe('Launchpad: Setup Project', () => {
 
     // project has a cypress.configuration file with component testing configured
     describe('project that has not been configured for e2e', () => {
-      // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
-      it.skip('shows the configuration setup page when selecting e2e tests', () => {
+      it('shows the configuration setup page when selecting e2e tests', () => {
         scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
@@ -217,23 +215,20 @@ describe('Launchpad: Setup Project', () => {
         ])
       })
 
-      // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
-      it.skip('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
-        scaffoldAndOpenProject('pristine-with-ct-testing')
+      it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
@@ -307,6 +302,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'JavaScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -347,6 +343,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -456,14 +453,14 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
         })
 
         verifyFiles([
           'cypress.config.js',
-          'cypress/component/index.html',
+          'cypress/support/component-index.html',
           'cypress/support/component.ts',
           'cypress/support/commands.ts',
         ])
@@ -618,10 +615,6 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    beforeEach(() => {
-      fakeInstalledDeps()
-    })
-
     const hasStorybookPermutations = [false, true]
 
     FRONTEND_FRAMEWORKS.forEach((framework) => {
@@ -745,7 +738,7 @@ describe('Launchpad: Setup Project', () => {
               cy.contains('[data-cy=changes]', `cypress.config.js`)
 
               cy.get('[data-cy=valid]').within(() => {
-                cy.containsPath('cypress/component/index.html')
+                cy.containsPath('cypress/support/component-index.html')
                 cy.containsPath(`cypress/support/component.${lang.type}`)
                 cy.containsPath(`cypress/support/commands.${lang.type}`)
                 cy.containsPath('cypress/fixtures/example.json')
@@ -753,7 +746,7 @@ describe('Launchpad: Setup Project', () => {
 
               verifyFiles([
                 'cypress.config.js',
-                'cypress/component/index.html',
+                'cypress/support/component-index.html',
                 `cypress/support/component.${lang.type}`,
                 `cypress/support/commands.${lang.type}`,
                 'cypress/fixtures/example.json',
@@ -818,7 +811,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath(`cypress/support/component.ts`)
           cy.containsPath(`cypress/support/commands.ts`)
           cy.containsPath('cypress/fixtures/example.json')
@@ -851,13 +844,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles(['cypress.config.ts', 'cypress/component/index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
+        verifyFiles(['cypress.config.ts', 'cypress/support/component-index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
 
         cy.findByRole('button', { name: 'Continue' }).click()
         cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
@@ -912,7 +905,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Nuxt.js (v2)').click()
-      cy.findByText('Next Step').click()
+      cy.findByRole('button', { name: 'Next Step' }).should('not.be.disabled').click()
       fakeInstalledDeps()
       cy.findByRole('button', { name: 'Continue' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')

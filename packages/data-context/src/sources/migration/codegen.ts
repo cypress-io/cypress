@@ -21,6 +21,11 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+type ResolvedConfigOptions = Cypress.ResolvedConfigOptions & {
+  testFiles: string | string[]
+  ignoreTestFiles: string | string[]
+}
+
 /**
  * config format pre-10.0
  */
@@ -211,13 +216,21 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   if (!createConfigOptions.hasPluginsFile) {
     return dedent`
       e2e: {
-        setupNodeEvents(on, config) {}
+        setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
       }
     `
   }
 
   const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
-  const relPluginsPath = path.normalize(`'./${pluginPath}'`)
+  let relPluginsPath
+
+  const startsWithDotSlash = new RegExp(/^.\//)
+
+  if (startsWithDotSlash.test(pluginPath)) {
+    relPluginsPath = `'${pluginPath}'`
+  } else {
+    relPluginsPath = `'./${pluginPath}'`
+  }
 
   const requirePlugins = hasDefaultExport(pluginFile)
     ? `return require(${relPluginsPath}).default(on, config)`
@@ -259,13 +272,13 @@ export async function hasSpecFile (projectRoot: string, folder: string, glob: st
 }
 
 export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
-  const files = await globby('cypress/plugins/index.*', { cwd: projectRoot })
+  const files = await globby('cypress/plugins/index.*', { cwd: projectRoot, ignore: ['cypress/plugins/index.d.ts'] })
 
   return files[0]
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
-  const files = await globby('cypress/support/index.*', { cwd: projectRoot })
+  const files = await globby('cypress/support/index.*', { cwd: projectRoot, ignore: ['cypress/support/index.d.ts'] })
 
   debug('tryGetDefaultLegacySupportFile: files %O', files)
 
@@ -329,7 +342,7 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
-      throw Error(`Failed to remove ${integrationPath}`)
+      throw e
     }
   }
 }
@@ -353,7 +366,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
     }
 
     if (key === 'e2e' || key === 'component') {
-      const value = val as Cypress.ResolvedConfigOptions
+      const value = val as ResolvedConfigOptions
 
       if (!value) {
         return acc
