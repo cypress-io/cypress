@@ -1,4 +1,6 @@
 import { expect } from 'chai'
+import fs from 'fs-extra'
+import path from 'path'
 import { processConfigViaLegacyPlugins } from '../../../../src/actions'
 import { getSystemTestProject } from '../../helper'
 
@@ -11,6 +13,14 @@ describe('processConfigViaLegacyPlugins', () => {
       integrationFolder: 'tests/e2e',
       testFiles: '**/*.spec.js',
     })
+  })
+
+  it('executes legacy plugins and returns without change if pluginsFile returns nothing', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-defaults')
+    const configFile = fs.readJsonSync(path.join(projectRoot, 'cypress.json'))
+    const result = await processConfigViaLegacyPlugins(projectRoot, configFile)
+
+    expect(result).to.eql(configFile)
   })
 
   it('works with cypress/plugins/index.ts and export default', async () => {

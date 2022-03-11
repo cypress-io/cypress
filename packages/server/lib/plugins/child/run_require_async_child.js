@@ -99,6 +99,14 @@ function run (ipc, file, projectRoot) {
       const noop = () => {}
       const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
 
+      // pluginsFile did not return the config - this is allowed, although
+      // we recommend returning it in our docs.
+      if (!legacyPluginsConfig) {
+        ipc.send('loadLegacyPlugins:reply', legacyConfig)
+
+        return
+      }
+
       // match merging strategy from 9.x
       const mergedLegacyConfig = {
         ...legacyConfig,
