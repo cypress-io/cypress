@@ -1322,7 +1322,7 @@ export const AllCypressErrors = {
     `
   },
 
-  MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name, setupNodeEvents }: {name: string, setupNodeEvents: boolean}, err?: Error) => {
+  MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name, setupNodeEvents = false }: {name: string, setupNodeEvents?: boolean}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced

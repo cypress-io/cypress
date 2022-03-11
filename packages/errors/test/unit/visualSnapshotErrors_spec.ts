@@ -1096,16 +1096,17 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
-    MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: () => {
-      return {
-        default: [{ name: 'integrationFolder' }, makeErr()],
-        testFiles: [{ name: 'testFiles' }, makeErr()],
-        componentFolder: [{ name: 'componentFolder' }, makeErr()],
-      }
-    },
     MIGRATION_ALREADY_OCURRED: () => {
       return {
         default: ['custom.config.js', 'custom.json'],
+      }
+    },
+    MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: () => {
+      return {
+        default: [{ name: 'integrationFolder', setupNodeEvents: false }, makeErr()],
+        testFiles: [{ name: 'testFiles', setupNodeEvents: false }, makeErr()],
+        componentFolder: [{ name: 'componentFolder', setupNodeEvents: false }, makeErr()],
+        testFilesInSetup: [{ name: 'testFiles', setupNodeEvents: true }, makeErr()],
       }
     },
   })
