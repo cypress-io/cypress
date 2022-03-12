@@ -336,7 +336,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 100,
+      defaultCommandTimeout: 50,
     }, () => {
       it('is a child command', (done) => {
         cy.on('fail', (err) => {
