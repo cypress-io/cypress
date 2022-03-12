@@ -46,6 +46,29 @@ export async function makeGraphQLServer () {
     })
   })
 
+  app.get('/cloud-notification', (req, res) => {
+    const ctx = getCtx()
+
+    const operationName = req.query.operationName
+
+    if (!operationName || Array.isArray(operationName)) {
+      res.sendStatus(200)
+
+      return
+    }
+
+    switch (operationName) {
+      case 'orgCreated':
+        ctx.emitter.cloudViewerChange()
+        break
+
+      default:
+        break
+    }
+
+    res.sendStatus(200)
+  })
+
   app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
 
   function makeProxy (): express.Handler {

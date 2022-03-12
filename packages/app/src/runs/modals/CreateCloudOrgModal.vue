@@ -35,13 +35,6 @@
           {{ t('runs.connect.modal.createOrg.waitingButton') }}
         </Button>
         <Button
-          v-else
-          size="lg"
-          @click="startPolling()"
-        >
-          {{ t('runs.connect.modal.createOrg.refreshButton') }}
-        </Button>
-        <Button
           variant="outline"
           size="lg"
           @click="emit('cancel')"
@@ -55,8 +48,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
-import { useIntervalFn } from '@vueuse/core'
+import { gql, useSubscription } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
@@ -84,12 +76,14 @@ fragment CreateCloudOrgModal on CloudUser {
 `
 
 gql`
-query CheckCloudOrganizations {
-  cloudViewer {
-    id
-    organizations (first:1) {
-      nodes {
-        id
+subscription CheckCloudOrganizations {
+  cloudViewerChange {
+    cloudViewer {
+      id
+      organizations (first:1) {
+        nodes {
+          id
+        }
       }
     }
   }
@@ -100,31 +94,12 @@ const props = defineProps<{
   gql: CreateCloudOrgModalFragment
 }>()
 
-const query = useQuery({
-  query: CheckCloudOrganizationsDocument,
-  requestPolicy: 'network-only',
-})
+useSubscription({ query: CheckCloudOrganizationsDocument })
 
 const polling = ref(false)
 
-const { pause, resume } = useIntervalFn(() => {
-  if (props?.gql?.organizationControl?.nodes?.length || 0 > 0) {
-    pause()
-  } else {
-    query.executeQuery()
-  }
-}, 5000)
-
 function startPolling () {
-  if (!polling.value) {
-    resume()
-    polling.value = true
-  }
-
-  setTimeout(() => {
-    pause()
-    polling.value = false
-  }, 60000)
+  polling.value = true
 }
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')

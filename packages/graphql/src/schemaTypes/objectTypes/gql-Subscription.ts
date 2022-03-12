@@ -17,5 +17,12 @@ export const Subscription = subscriptionType({
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('devChange'),
       resolve: (source, args, ctx) => ctx.coreData.dev,
     })
+
+    t.field('cloudViewerChange', {
+      type: Query,
+      description: '',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
+      resolve: (source, args, ctx) => ({}),
+    })
   },
 })

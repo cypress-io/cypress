@@ -1239,6 +1239,9 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
+  """"""
+  cloudViewerChange: Query
+
   """Issued for internal development changes"""
   devChange: DevState
 }
