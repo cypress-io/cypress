@@ -211,11 +211,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     }
 
     for (let j = 0; j < certsForUrl.certs.length; j++) {
-      let certInfo = certsForUrl.certs[j]
-
-      if (!certInfo) {
-        continue
-      }
+      let certInfo = certsForUrl.certs[j]!
 
       // Only one of PEM or PFX cert allowed
       if (certInfo.cert && certInfo.pfx) {
