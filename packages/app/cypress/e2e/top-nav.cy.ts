@@ -453,7 +453,7 @@ describe('App Top Nav Workflows', () => {
               browserOpened: false,
             })
 
-            return Promise.reject()
+            throw new Error()
           })
         })
 
@@ -471,8 +471,8 @@ describe('App Top Nav Workflows', () => {
           cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
 
           // in this state, there is no retry UI, we ask the user to visit the auth url on their own
-          cy.contains('button', loginText.actionTryAgain).should('not.exist')
-          cy.contains('button', loginText.actionCancel).should('not.exist')
+          cy.contains('button', loginText.actionTryAgain).should('not.be.visible')
+          cy.contains('button', loginText.actionCancel).should('not.be.visible')
         })
       })
 
@@ -485,7 +485,7 @@ describe('App Top Nav Workflows', () => {
               browserOpened: false,
             })
 
-            return Promise.reject()
+            throw new Error()
           })
         })
 
@@ -535,7 +535,7 @@ describe('App Top Nav Workflows', () => {
               browserOpened: false,
             })
 
-            return Promise.reject()
+            throw new Error()
           })
         })
 
@@ -572,7 +572,7 @@ describe('App Top Nav Workflows', () => {
               browserOpened: false,
             })
 
-            return Promise.reject()
+            throw new Error()
           })
         })
 
