@@ -16,7 +16,7 @@ export type BreakingOptionErrorKey =
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
-  | 'TEST_FILES_DEPRECATION'
+  | 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN'
 
 type TestingType = 'e2e' | 'component'
 
@@ -513,6 +513,21 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
  */
 export const breakingOptions: Array<BreakingOption> = [
   {
+    name: 'integrationFolder',
+    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
+    isWarning: false,
+  },
+  {
+    name: 'componentFolder',
+    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
+    isWarning: false,
+  },
+  {
+    name: 'testFiles',
+    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
+    isWarning: false,
+  },
+  {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
@@ -550,11 +565,6 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
-  },
-  {
-    name: 'testFiles',
-    errorKey: 'TEST_FILES_DEPRECATION',
-    isWarning: false,
   },
 ]
 

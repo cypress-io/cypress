@@ -1,7 +1,7 @@
 const debugLib = require('debug')
 
 const debug = debugLib(`cypress:lifecycle:child:WrapNonMigrated:${process.pid}`)
-const { breakingOptions } = require('@packages/config')
+const { breakingOptions, breakingRootOptions } = require('@packages/config')
 
 /**
  * Throw the error with the proper codeFrame
@@ -13,7 +13,7 @@ function throwInvalidOptionError (errorKey, name) {
   const errInternal = new Error()
 
   Error.captureStackTrace(errInternal, throwInvalidOptionError)
-  const err = require('@packages/errors').getError(errorKey, { name }, errInternal)
+  const err = require('@packages/errors').getError(errorKey, { name, setupNodeEvents: true }, errInternal)
 
   throw err
 }
@@ -50,5 +50,9 @@ module.exports = function wrapNonMigratedOptions (options) {
       options[testingType] = options[testingType] || {}
       setInvalidPropSetterWarning(options[testingType], errorKey, name, `${testingType}.${name}`)
     })
+  })
+
+  breakingRootOptions.filter(({ isWarning }) => !isWarning).forEach(({ name, errorKey }) => {
+    setInvalidPropSetterWarning(options, errorKey, name)
   })
 }
