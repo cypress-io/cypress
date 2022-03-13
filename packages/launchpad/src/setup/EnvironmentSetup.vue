@@ -137,6 +137,10 @@ mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {
       id
       type
     }
+    packagesToInstall {
+      id
+      package
+    }
   }
 }
 `
