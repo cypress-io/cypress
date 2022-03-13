@@ -27,6 +27,17 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
         color: transparent!important;
         width: 60px;
         display: inline-block;
+      }
+      
+      body:after{
+        position: absolute;
+        display:block;
+        content: "hello test";
+        top:50%;
+        left:50%;
+        z-index:100;
+        background-color: hotpink;
+        padding:7px;
       }`,
     })
 
