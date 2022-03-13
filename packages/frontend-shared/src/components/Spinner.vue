@@ -44,12 +44,12 @@
   stroke-dasharray: 30 115;
   stroke-dashoffset: 145;
   animation: dash linear 1s infinite;
-  stroke:#69D3A7;
+  @apply stroke-jade-300;
 }
 
 .spinner > path,
 .spinner > rect {
-  fill:#1B1E2E
+  @apply fill-gray-1000;
 }
 
 @keyframes dash {
