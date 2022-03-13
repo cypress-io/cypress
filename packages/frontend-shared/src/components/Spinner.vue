@@ -45,7 +45,6 @@
   stroke-dashoffset: 145;
   animation: dash linear 1s infinite;
   stroke:#69D3A7;
-  stroke-linecap: round;
 }
 
 .spinner > path,
