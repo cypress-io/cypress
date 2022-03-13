@@ -22,24 +22,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').should('be.visible')
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
 
-    cy.percySnapshot('e2e normalized', {
-      percyCSS: `[data-cy="spec-duration"]{
-        color: transparent!important;
-        width: 60px;
-        display: inline-block;
-      }
-      
-      body:after{
-        position: absolute;
-        display:block;
-        content: "hello test";
-        top:50%;
-        left:50%;
-        z-index:100;
-        background-color: hotpink;
-        padding:7px;
-      }`,
-    })
+    cy.percySnapshot()
 
     // confirm no interactions are implemented
     cy.findByTestId('viewport').click()
