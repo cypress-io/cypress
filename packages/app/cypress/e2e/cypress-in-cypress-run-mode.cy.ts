@@ -1,5 +1,3 @@
-import { snapshotReporter } from './runner/support/snapshot-reporter'
-
 describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
   it('e2e run mode spec runner header is correct', () => {
     cy.scaffoldProject('cypress-in-cypress')
@@ -24,7 +22,14 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').should('be.visible')
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
 
-    snapshotReporter()
+    //@ts-ignore
+    cy.percySnapshot({
+      elementOverrides: {
+        '.runnable-header .duration': ($el) => {
+          $el.text('XX:XX')
+        },
+      },
+    })
 
     // confirm no interactions are implemented
     cy.findByTestId('viewport').click()
@@ -52,7 +57,14 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('500x500').should('be.visible')
     cy.contains('Chrome 1').should('be.visible')
 
-    snapshotReporter()
+    //@ts-ignore
+    cy.percySnapshot({
+      elementOverrides: {
+        '.runnable-header .duration': ($el) => {
+          $el.text('XX:XX')
+        },
+      },
+    })
 
     // confirm no interactions are implemented
     cy.findByTestId('viewport').click()
