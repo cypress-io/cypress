@@ -129,10 +129,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     }),
     namedRouteExchange,
     fetchExchange,
-  )
-
-  if (socketClient) {
-    exchanges.push(subscriptionExchange({
+    subscriptionExchange({
       forwardSubscription (op) {
         return {
           subscribe: (sink) => {
@@ -145,8 +142,8 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
           },
         }
       },
-    }))
-  }
+    }),
+  )
 
   if (import.meta.env.DEV) {
     exchanges.unshift(devtoolsExchange)
@@ -192,16 +189,13 @@ function getPubSubSource (config: PubSubConfig) {
 }
 
 function getSocketSource (config: UrqlClientConfig) {
-  if (config.target === 'launchpad') {
-    return createWsClient({
-      url: `ws://${window.location.host}/__launchpad/graphql-ws`,
-    })
-  }
-
   // http: -> ws:  &  https: -> wss:
   const protocol = window.location.protocol.replace('http', 'ws')
+  const wsUrl = config.target === 'launchpad'
+    ? `ws://${window.location.host}/__launchpad/graphql-ws`
+    : `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`
 
   return createWsClient({
-    url: `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`,
+    url: wsUrl,
   })
 }
