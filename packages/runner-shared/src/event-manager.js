@@ -524,6 +524,7 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
       // Sync stable if the expected domain has loaded.
+      //TODO: We should track stability per domain
       cy.isStable(true, 'load')
       // Prints out the newly loaded URL
       Cypress.emit('internal:window:load', { type: 'cross:domain', url })
@@ -531,6 +532,7 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.on('before:unload', () => {
       // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+      //TODO: We should track stability per domain
       cy.state('isStable', false)
     })
 

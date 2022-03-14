@@ -116,6 +116,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
 
     // Stability is sync'd with the primary stability
     // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+    //TODO: We should track stability per domain
     cy.state('isStable', isStable)
 
     try {

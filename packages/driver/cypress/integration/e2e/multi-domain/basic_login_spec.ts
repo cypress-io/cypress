@@ -370,4 +370,27 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     .invoke('text')
     .should('equal', 'Welcome BJohnson')
   })
+
+  it('fails in switchToDomain when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
+      //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+      expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+      expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+      done()
+    })
+
+    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+    cy.switchToDomain('idp.com', () => {
+      cy.get('[data-cy="username"]').type('BJohnson')
+      cy.get('[data-cy="login"]').click()
+      cy.get('[data-cy="cannot_find"]') // Timeout here on command stability achieved by primary domain, this command times out.
+    })
+
+    // Verify that the user has logged in on localhost
+    cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
+    .invoke('text')
+    .should('equal', 'Welcome BJohnson')
+  })
 })
