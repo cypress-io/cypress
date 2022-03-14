@@ -48,7 +48,16 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/cypress_runner.css`,
     `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
     `/${namespace}/runner/favicon.ico`,
-    new RegExp(`/${namespace}/assets/.+`),
+
+    // the reason this is not namespace is because we don't launch the vite
+    // dev server from inside of the cypress code - it's statically generating the
+    // assets in dev, which is launched as a separate process outside of the server
+    // code. ideally we could use the config.namespace (__cypress-app) to configure
+    // it's separate namespace, but the process management would have to be significantly
+    // changed to accommodate that. since this is all just dealing with static assets
+    // with no state management, it's fine for vite to serve static assets on the same namespace
+    // scripts/gulp/tasks/gulpVite.ts:24
+    new RegExp(`/__cypress/assets/.+`),
   ]
 
   const isAllowedBypassUrl = (url) => {
