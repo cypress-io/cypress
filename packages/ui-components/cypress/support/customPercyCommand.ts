@@ -272,5 +272,5 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
     })
   }
 
-  Cypress.Commands.overwrite('percySnapshot', customPercySnapshot as any)
+  Cypress.Commands.overwrite('percySnapshot', customPercySnapshot)
 }
