@@ -12,7 +12,7 @@ This is the front-end for the Cypress App.
 
 ## How the App works
 
-Cypress has two modes: `run` and `open`. We want run mode to be as light and fast as possible, since this is the mode used to run on CI machines, etc. Open mode is the interactive experience, with the command log, snapshots, selector playground, etc.
+Cypress has two modes: `run` and `open`. We want run mode to be as light and fast as possible, since this is the mode used to run on CI machines, etc. Run mode has minimal UI showing only what is necessary. Open mode is the interactive experience.
 
 - **`open`** mode is driven using GraphQL and urql. It shows the full Cypress app, include the top nav, side nav, spec list, etc. You can change between testing types, check your latest runs on the Cypress dashboard, update settings, etc.
 - **`run`** mode is does not rely on GraphQL. This is so we can be as performant as possible. It only renders the "runner" part of the UI, which is comprised of the command log, Spec Runner header, and AUT iframe.
@@ -23,7 +23,7 @@ The two modes are composed using the same logic, but have slightly different com
 
 The App's routing doesn't need to be touched often, because it is almost all auto-generated based on the file structure. There's so little code that it helps to describe the approach here so that when we do want to modify a route or do some other route-specific behavior, we can get our bearings.
 
-[`vite-plugin-pages`](https://github.com/hannoeru/vite-plugin-pages) is used to generate routes based on the page-level Vue components contained in `src/pages`. These generated routes are pulled into a standard [Vue Router](https://router.vuejs.org/) setup using `createRouter()` in `router.ts`.
+[`vite-plugin-pages`](https://github.com/hannoeru/vite-plugin-pages) is used to generate routes based on the page-level Vue components contained in `src/pages`. These generated routes are pulled into a standard [Vue Router](https://router.vuejs.org/) setup using `createRouter()` in [`router.ts`](src/router/router.ts).
 
 Route configuration that might typically appear in `router.ts` can be set in a `<route>` block in these page components, for example `name` and `meta` properties (documented in Vue Router docs):
 
