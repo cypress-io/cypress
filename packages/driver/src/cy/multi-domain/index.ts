@@ -35,9 +35,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating multi-domain
     // @ts-ignore
-    cy.isAnticipatingMultiDomain(request.href)
+    cy.isAnticipatingMultiDomainFor(request.href)
 
-    // cy.isAnticipatingMultiDomain(href) will free the queue to move forward.
+    // cy.isAnticipatingMultiDomainFor(href) will free the queue to move forward.
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(sendReadyForDomain, 2000)
@@ -191,7 +191,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               reject(wrappedErr)
             } finally {
               // @ts-ignore
-              cy.isAnticipatingMultiDomain(undefined)
+              cy.isAnticipatingMultiDomainFor(undefined)
             }
           }
         })

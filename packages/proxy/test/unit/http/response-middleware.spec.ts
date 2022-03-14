@@ -181,9 +181,7 @@ describe('http/response-middleware', function () {
         },
         req: {
           isAUTFrame: true,
-          get: () => 'host/',
-          protocol: 'protocol',
-          originalUrl: 'originalUrl',
+          proxiedUrl: 'protocol://host/originalUrl',
         },
         config: {
           experimentalMultiDomain: true,
@@ -209,9 +207,7 @@ describe('http/response-middleware', function () {
             ],
           },
           isAUTFrame: true,
-          get: () => 'host/',
-          protocol: 'protocol',
-          originalUrl: 'originalUrl',
+          proxiedUrl: 'protocol://host/originalUrl',
         },
         config: {
           experimentalMultiDomain: true,

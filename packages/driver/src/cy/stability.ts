@@ -39,7 +39,7 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingMultiDomain (href: string): void {
+  isAnticipatingMultiDomainFor (href: string): void {
     if (state('anticipatingMultiDomain') === href) {
       return
     }
