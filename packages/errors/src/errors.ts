@@ -649,7 +649,7 @@ export const AllCypressErrors = {
     return errTemplate`
       Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(configFilePath)}
 
-      You must pass a valid event name when registering either a node event or plugin.
+      You must pass a valid event name when registering a plugin.
 
       You passed: ${fmt.highlight(invalidEventName)}
 
@@ -658,6 +658,8 @@ export const AllCypressErrors = {
       ${fmt.listItems(validEventNames)}
 
       ${fmt.stackTrace(err)}
+
+      Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
     `
   },
   BUNDLE_ERROR: (filePath: string, arg2: string) => {

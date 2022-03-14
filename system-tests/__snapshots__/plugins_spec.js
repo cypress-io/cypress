@@ -362,7 +362,7 @@ Error: Async error from plugins file
 exports['e2e plugins fails when invalid event is registered 1'] = `
 Your configFile threw a validation error from: /foo/bar/.projects/plugin-validation-error/cypress.config.js
 
-You must pass a valid event name when registering either a node event or plugin.
+You must pass a valid event name when registering a plugin.
 
 You passed: invalid:event
 
@@ -380,6 +380,8 @@ The following are valid events:
 
 InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]
+
+Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
 `
 
 exports['e2e plugins does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot 1'] = `
