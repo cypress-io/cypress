@@ -4,6 +4,7 @@ module.exports = defineConfig({
   retries: 2,
   defaultCommandTimeout: 5000,
   fixturesFolder: false,
+  test: 'value',
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.

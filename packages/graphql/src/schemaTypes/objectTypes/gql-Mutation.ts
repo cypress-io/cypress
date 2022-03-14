@@ -247,9 +247,6 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
-        ctx.emitter.toApp()
-        ctx.emitter.toLaunchpad()
-
         return {}
       },
     })
@@ -259,9 +256,6 @@ export const mutation = mutationType({
       description: 'Log out of Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
-
-        ctx.emitter.toApp()
-        ctx.emitter.toLaunchpad()
 
         return {}
       },
@@ -475,7 +469,7 @@ export const mutation = mutationType({
       description: 'Initialize the migration wizard to the first step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.initialize()
+        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
 
         return {}
       },

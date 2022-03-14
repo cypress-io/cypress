@@ -137,6 +137,10 @@ mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {
       id
       type
     }
+    packagesToInstall {
+      id
+      package
+    }
   }
 }
 `
@@ -156,7 +160,6 @@ const onWizardSetup = <K extends keyof WizardUpdateInput>(key: K, val: WizardUpd
 gql`
 mutation EnvironmentSetup_ClearTestingType {
   clearCurrentTestingType {
-    currentTestingType
     currentProject {
       id
       currentTestingType
