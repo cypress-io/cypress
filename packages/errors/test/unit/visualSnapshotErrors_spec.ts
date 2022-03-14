@@ -792,8 +792,7 @@ describe('visual error templates', () => {
       return {
         default: [
           '/path/to/project/root',
-          'cypress.config.js',
-          'cypress.config.ts',
+          ['cypress.config.js', 'cypress.config.ts', 'cypress.config.mjs'],
         ],
       }
     },
