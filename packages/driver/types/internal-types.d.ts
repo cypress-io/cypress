@@ -49,10 +49,12 @@ declare namespace Cypress {
     utils: CypressUtils
     state: State
     events: Events
-    emit: ((event: string, payload?: any) => void)
+    emit: (event: string, payload?: any) => void
     multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
     specBridgeCommunicator: import('../src/multi-domain/communicator').SpecBridgeDomainCommunicator
     mocha: $Mocha
+    configure: (config: Cypress.ObjectLike) => void
+    isMultiDomain: boolean
   }
 
   interface CypressUtils {

@@ -106,7 +106,7 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
-  private handleSubjectAndErr = (data: any = {}, send: (data: any) => void) => {
+  private handleSubjectAndErr = (data: Cypress.ObjectLike = {}, send: (data: Cypress.ObjectLike) => void) => {
     let { subject, err, ...rest } = data
 
     // check to see if the 'err' key is defined, and if it is, we have an error of any type
@@ -149,9 +149,6 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
       env: preprocessEnv(Cypress.env()),
-      state: {
-        hasVisitedAboutBlank: Cypress.state('hasVisitedAboutBlank'),
-      },
     })
   }
 
@@ -175,13 +172,13 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   /**
    * Events to be sent to the primary communicator instance.
    * @param {string} event - the name of the event to be sent.
-   * @param {any} data - any meta data to be sent with the event.
+   * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: any, options = { syncGlobals: false }) {
+  toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
     debug('<= to Primary ', event, data, document.domain)
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
-    this.handleSubjectAndErr(data, (data: any) => {
+    this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
       this.windowReference.top.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,

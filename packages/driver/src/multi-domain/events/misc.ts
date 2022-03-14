@@ -1,22 +1,21 @@
 import type { $Cy } from '../../cypress/cy'
-import type { SpecBridgeDomainCommunicator } from '../communicator'
 
-export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
+export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   Cypress.on('viewport:changed', (viewport, callbackFn) => {
-    specBridgeCommunicator.once('viewport:changed:end', () => {
+    Cypress.specBridgeCommunicator.once('viewport:changed:end', () => {
       callbackFn()
     })
 
-    specBridgeCommunicator.toPrimary('viewport:changed', viewport)
+    Cypress.specBridgeCommunicator.toPrimary('viewport:changed', viewport)
   })
 
   // TODO: Should state syncing be built into cy.state instead of being explicitly called?
-  specBridgeCommunicator.on('sync:state', (state) => {
+  Cypress.specBridgeCommunicator.on('sync:state', (state) => {
     cy.state(state)
   })
 
   // Listen for window load events from the primary window to resolve page loads
-  specBridgeCommunicator.on('window:load', ({ url }) => {
+  Cypress.specBridgeCommunicator.on('window:load', ({ url }) => {
     cy.isStable(true, 'load')
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
   })
@@ -24,6 +23,6 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCo
   // Forward url:changed Message to the primary domain to enable changing the url displayed in the AUT
   // @ts-ignore
   Cypress.on('url:changed', (url) => {
-    specBridgeCommunicator.toPrimary('url:changed', url)
+    Cypress.specBridgeCommunicator.toPrimary('url:changed', { url })
   })
 }
