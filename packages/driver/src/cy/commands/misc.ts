@@ -5,6 +5,11 @@ import $Command from '../../cypress/command'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 
+interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: any
+  timeout: number
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'optional' }, {
     end () {
@@ -49,11 +54,8 @@ export default (Commands, Cypress, cy, state) => {
       return null
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    wrap (arg, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    wrap (arg, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const _options: InternalWrapOptions = _.defaults({}, options, {
         log: true,
         timeout: Cypress.config('defaultCommandTimeout'),
       })
@@ -61,32 +63,32 @@ export default (Commands, Cypress, cy, state) => {
       // we'll handle the timeout ourselves
       cy.clearTimeout()
 
-      if (options.log !== false) {
-        options._log = Cypress.log({
+      if (_options.log !== false) {
+        _options._log = Cypress.log({
           message: arg,
-          timeout: options.timeout,
+          timeout: _options.timeout,
         })
 
         if ($dom.isElement(arg)) {
-          options._log.set({ $el: arg })
+          _options._log.set({ $el: arg })
         }
       }
 
       return Promise.resolve(arg)
-      .timeout(options.timeout)
+      .timeout(_options.timeout)
       .catch(Promise.TimeoutError, () => {
         $errUtils.throwErrByPath('wrap.timed_out', {
-          args: { timeout: options.timeout },
+          args: { timeout: _options.timeout },
         })
       })
       .catch((err) => {
         $errUtils.throwErr(err, {
-          onFail: options._log,
+          onFail: _options._log,
         })
       })
       .then((subject) => {
         const resolveWrap = () => {
-          return cy.verifyUpcomingAssertions(subject, options, {
+          return cy.verifyUpcomingAssertions(subject, _options, {
             onRetry: resolveWrap,
           })
           .return(subject)
