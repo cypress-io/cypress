@@ -1,7 +1,22 @@
 import os from 'os'
-import validate from './validation'
+import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
+
+export type BreakingOptionErrorKey =
+  | 'RENAMED_CONFIG_OPTION'
+  | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
+  | 'EXPERIMENTAL_SAMESITE_REMOVED'
+  | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
+  | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
+  | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
+  | 'FIREFOX_GC_INTERVAL_REMOVED'
+  | 'NODE_VERSION_DEPRECATION_SYSTEM'
+  | 'NODE_VERSION_DEPRECATION_BUNDLED'
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
+  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
+  | 'TEST_FILES_DEPRECATION'
 
 type TestingType = 'e2e' | 'component'
 
@@ -29,7 +44,7 @@ interface RuntimeConfigOption {
   canUpdateDuringTestTime?: boolean
 }
 
-interface BreakingOption {
+export interface BreakingOption {
   /**
    * The non-passive configuration option.
    */
@@ -37,7 +52,7 @@ interface BreakingOption {
   /**
    * String to summarize the error messaging that is logged.
    */
-  errorKey: string
+  errorKey: BreakingOptionErrorKey
   /**
    * Array of testing types this config option is valid for
    */
@@ -487,6 +502,9 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...runtimeOptions,
 ]
 
+/**
+ * Values not allowed in 10.X+ in the root, e2e and component config
+ */
 export const breakingOptions: Array<BreakingOption> = [
   {
     name: 'blacklistHosts',
