@@ -10,7 +10,7 @@ context.skip('multi-domain session', { experimentalSessionSupport: true }, () =>
   })
 
   beforeEach(() => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.session('multi-domain', () => {
         localStorage.setItem('foo', 'bar')
       })
@@ -21,13 +21,13 @@ context.skip('multi-domain session', { experimentalSessionSupport: true }, () =>
   })
 
   it('verify new session', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       expect(localStorage.getItem('foo')).to.equal('bar')
     })
   })
 
   it('verify saved session', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       expect(localStorage.getItem('foo')).to.equal('bar')
     })
   })

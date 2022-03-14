@@ -6,37 +6,37 @@ context('multi-domain misc', { experimentalSessionSupport: true }, () => {
   })
 
   it('.end()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').end().should('be.null')
     })
   })
 
   it('.exec()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
     })
   })
 
   it('.focused()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
     })
   })
 
   it('.wrap()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap({ foo: 'bar' }).should('deep.equal', { foo: 'bar' })
     })
   })
 
   it('.debug()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').debug().should('have.id', 'button')
     })
   })
 
   it('.log()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         cy.once('log:added', () => {
           resolve()
@@ -49,7 +49,7 @@ context('multi-domain misc', { experimentalSessionSupport: true }, () => {
   })
 
   it('.pause()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
         cy.once('paused', () => {
           Cypress.emit('resume:all')
@@ -66,7 +66,7 @@ context('multi-domain misc', { experimentalSessionSupport: true }, () => {
   })
 
   it('.task()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.task('return:arg', 'works').should('eq', 'works')
     })
   })

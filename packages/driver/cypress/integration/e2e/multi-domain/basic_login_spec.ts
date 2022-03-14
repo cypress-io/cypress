@@ -5,7 +5,7 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-      cy.switchToDomain('idp.com', () => {
+      cy.switchToDomain('http://idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       }) // Trailing edge wait, waiting to return to the primary domain
@@ -24,7 +24,7 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
         win.location.href = 'http://www.idp.com:3500/fixtures/auth/idp.html'
       })
 
-      cy.switchToDomain('idp.com', () => {
+      cy.switchToDomain('http://idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('FJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -39,7 +39,7 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
     it.skip('visits foobar first', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html') // Establishes Primary Domain
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-      cy.switchToDomain('idp.com', () => {
+      cy.switchToDomain('http://idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       }) // Trailing edge wait, waiting to return to the primary domain
@@ -182,9 +182,9 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.url() //fail
-    cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
+    cy.switchToDomain('http://foobar.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
-      cy.switchToDomain('idp.com', () => { // Parent domain is foobar.com
+      cy.switchToDomain('http://idp.com:3500', () => { // Parent domain is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to localhost
       }) // Does not wait on foobar.com because there are no subsequent commands (would wait forever)
@@ -220,7 +220,7 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
     cy.createDomain('foobar.com', { primaryDomain: 'localhost' }, () => { // Parent Domain is localhost
       cy.visit('http://www.foobar.com:3500/fixtures/auth/approval.html')
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
-      cy.switchToDomain('idp.com', () => { // Parent domain is foobar.com
+      cy.switchToDomain('http://idp.com:3500', () => { // Parent domain is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to localhost
       }) // Does not wait on foobar.com because there are no subsequent commands (would wait forever)
@@ -236,9 +236,9 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
   it.skip('final auth redirects back to approval page - nested', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
-    cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
+    cy.switchToDomain('http://foobar.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-me"]').click() // takes you to idp.com
-      cy.switchToDomain('idp.com', () => { // Parent domain is foobar.com
+      cy.switchToDomain('http://idp.com:3500', () => { // Parent domain is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to foobar.com.../approval
       }) // Waits on foobar because there are subsequent commands
@@ -256,16 +256,16 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
   it.skip('final auth redirects back to approval page - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
-    cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
+    cy.switchToDomain('http://foobar.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
     }) // waits on localhost forever, this breaks
 
-    cy.switchToDomain('idp.com', () => { // Parent Domain is localhost
+    cy.switchToDomain('http://idp.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="username"]').type('MarkyMark')
       cy.get('[data-cy="login"]').click() // Takes you back to foobar.com.../approval
     }) // waits on foobar forever, this breaks
 
-    cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
+    cy.switchToDomain('http://foobar.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="login-success"]').click() // Takes you back to localhost
     }) // Waits on localhost because there are subsequent commands
 

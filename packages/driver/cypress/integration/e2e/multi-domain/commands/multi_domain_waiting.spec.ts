@@ -6,7 +6,7 @@ context('multi-domain waiting', { experimentalSessionSupport: true }, () => {
   })
 
   it('.wait()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wait(500)
     })
   })

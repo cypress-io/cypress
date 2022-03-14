@@ -6,7 +6,7 @@ context('multi-domain aliasing', { experimentalSessionSupport: true }, () => {
   })
 
   it('.as()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]').as('checkbox')
       cy.get('@checkbox').click().should('be.checked')
     })

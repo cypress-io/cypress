@@ -6,7 +6,7 @@ context('multi-domain local storage', { experimentalSessionSupport: true }, () =
   })
 
   it('.clearLocalStorage()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.window().then((win) => {
         win.localStorage.setItem('foo', 'bar')
         expect(win.localStorage.getItem('foo')).to.equal('bar')

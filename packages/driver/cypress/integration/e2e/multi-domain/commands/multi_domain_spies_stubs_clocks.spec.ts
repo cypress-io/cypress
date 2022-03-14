@@ -6,7 +6,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
   })
 
   it('spy()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.spy(foo, 'bar')
@@ -16,7 +16,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
   })
 
   it('stub()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.stub(foo, 'bar')
@@ -27,7 +27,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
 
   context('resets stubs', () => {
     it('creates the stub', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const stubEnv = cy.stub(Cypress, 'env').withArgs('foo').returns('bar')
 
         expect(Cypress.env('foo')).to.equal('bar')
@@ -38,7 +38,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
     })
 
     it('verifies the stub got restored', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         expect(Cypress.env('foo')).to.be.undefined
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
@@ -48,7 +48,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
 
   context('resets spies', () => {
     it('creates the spy', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const stubEnv = cy.spy(Cypress, 'env')
 
         Cypress.env()
@@ -59,7 +59,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
     })
 
     it('verifies the spy got restored', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
       })
@@ -67,7 +67,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
   })
 
   it('clock() and tick()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
       cy.clock(now)
