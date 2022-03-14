@@ -21,7 +21,11 @@ The two modes are composed using the same logic, but have slightly different com
 
 ## Router
 
-[`vite-plugin-pages`](https://github.com/hannoeru/vite-plugin-pages) is used to generate routes based on the page-level Vue components contained in `src/pages`. Route configuration that might typically appear in `router.ts` can be set in a `<route>` block in these page components, for example:
+The App's routing doesn't need to be touched often, because it is almost all auto-generated based on the file structure. There's so little code that it helps to describe the approach here so that when we do want to modify a route or do some other route-specific behavior, we can get our bearings.
+
+[`vite-plugin-pages`](https://github.com/hannoeru/vite-plugin-pages) is used to generate routes based on the page-level Vue components contained in `src/pages`. These generated routes are pulled into a standard [Vue Router](https://router.vuejs.org/) setup using `createRouter()` in `router.ts`.
+
+Route configuration that might typically appear in `router.ts` can be set in a `<route>` block in these page components, for example `name` and `meta` properties (documented in Vue Router docs):
 
 ```ts
 <route>
@@ -35,9 +39,9 @@ The two modes are composed using the same logic, but have slightly different com
 </route>
 ```
 
-The advantage here is that the route definition is co-located with the component. The route block will be parsed as JSON5 by default, which means that certain options aren't valid, such as if a function is needed to be the value.
+The advantage here is that the route definition is co-located with the component. The route block will be parsed as JSON5 by default, which means that certain Vue Router properties aren't valid in the `<route>` block, such as if a function is needed to be the value. 
 
-In such cases, [`extendRoute`](https://github.com/hannoeru/vite-plugin-pages#extendroute) can be used where the `Pages` plugin is added in `vite.config.ts` to extend the route created using regular TypeScript code.
+So far, we haven't needed to use any such properties, but if we do, [`extendRoute`](https://github.com/hannoeru/vite-plugin-pages#extendroute) can be used where the `Pages` plugin is added in `vite.config.ts` to extend the generated route objects, using regular TypeScript. 
 
 ### Some gotchas if you are new to Vue Router
 
