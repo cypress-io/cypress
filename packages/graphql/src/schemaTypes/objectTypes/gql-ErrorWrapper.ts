@@ -48,7 +48,12 @@ export const ErrorWrapper = objectType({
     t.field('codeFrame', {
       type: CodeFrame,
       description: 'The code frame to display in relation to the error',
-      resolve: (source, args, ctx) => ctx.error.codeFrame(source),
+      resolve: (source, args, ctx) => {
+        return ctx.error.codeFrame(source).catch(
+          // Don't worry if we try to get a non-existent file
+          () => null,
+        )
+      },
     })
   },
   sourceType: {
