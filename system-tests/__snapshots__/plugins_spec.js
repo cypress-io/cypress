@@ -378,10 +378,10 @@ The following are valid events:
  - file:preprocessor
  - task
 
+Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
+
 InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]
-
-Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
 `
 
 exports['e2e plugins does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot 1'] = `

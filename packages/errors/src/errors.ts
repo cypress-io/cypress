@@ -657,9 +657,9 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(validEventNames)}
 
-      ${fmt.stackTrace(err)}
-
       Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
+
+      ${fmt.stackTrace(err)}
     `
   },
   BUNDLE_ERROR: (filePath: string, arg2: string) => {
