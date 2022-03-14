@@ -48,7 +48,22 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/cypress_runner.css`,
     `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
     `/${namespace}/runner/favicon.ico`,
+    new RegExp(`/${namespace}/assets/.+`),
   ]
+
+  const isAllowedBypassUrl = (url) => {
+    return _.some(ALLOWED_PROXY_BYPASS_URLS, (bypassUrl) => {
+      if (_.isString(bypassUrl)) {
+        return bypassUrl === url
+      }
+
+      if (_.isRegExp(bypassUrl)) {
+        return bypassUrl.test(url)
+      }
+
+      return
+    })
+  }
 
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
@@ -56,7 +71,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedBypassUrl(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
