@@ -23,7 +23,7 @@ query Runs {
   ...RunsContainer
 }`
 
-const query = useQuery({ query: RunsDocument, requestPolicy: 'network-only' })
+const query = useQuery({ query: RunsDocument, requestPolicy: 'cache-and-network' })
 
 function reexecuteRunsQuery () {
   query.executeQuery()

@@ -93,29 +93,23 @@ export class CloudDataSource {
         subscribe((res) => {
           debug('executeRemoteGraphQL subscribe res %o', res)
 
-          if (!resolvedData) {
-            resolvedData = res
-
+          if (!_.isEqual(resolvedData?.data, res.data) || !_.isEqual(resolvedData?.error, res.error)) {
             // Ignore the error when there's no internet connection
             if (res.error?.networkError) {
               debug('executeRemoteGraphQL network error', res.error)
               dfd.resolve({ ...res, error: undefined, data: null })
             } else if (res.error) {
-              dfd.reject(res.error)
-            } else {
-              dfd.resolve(res)
-            }
-          } else if ((!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) && !res.error?.networkError) {
-            if (res.error) {
               this.ctx.coreData.dashboardGraphQLError = {
                 cypressError: getError('DASHBOARD_GRAPHQL_ERROR', res.error),
               }
+
+              dfd.reject(res.error)
             } else {
               this.ctx.coreData.dashboardGraphQLError = null
+
+              dfd.resolve(res)
             }
 
-            // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
-            // since we know we're up-to-date
             this.ctx.deref.emitter.toApp()
             this.ctx.deref.emitter.toLaunchpad()
           }
