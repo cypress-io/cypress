@@ -102,7 +102,6 @@ fragment MainLaunchpadQueryData on Query {
   baseError {
     ...BaseError
   }
-  currentTestingType
   currentProject {
     id
     isCTConfigured

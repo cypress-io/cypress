@@ -463,13 +463,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: '__socket.io',
+    defaultValue: '__socket',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
-    defaultValue: '/__socket.io',
+    defaultValue: '/__socket',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -532,6 +532,11 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+  {
+    name: 'testFiles',
+    errorKey: 'TEST_FILES_DEPRECATION',
+    isWarning: false,
   },
 ]
 

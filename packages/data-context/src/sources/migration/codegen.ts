@@ -12,6 +12,7 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
+import type { LegacyCypressConfigJson } from '..'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -19,26 +20,6 @@ type ConfigOptions = {
   global: Record<string, unknown>
   e2e: Record<string, unknown>
   component: Record<string, unknown>
-}
-
-/**
- * config format pre-10.0
- */
-export interface OldCypressConfig {
-  // limited subset of properties, used for unit tests
-  viewportWidth?: number
-  baseUrl?: string
-  retries?: number
-  slowTestThreshold?: number
-
-  component?: Omit<OldCypressConfig, 'component' | 'e2e'>
-  e2e?: Omit<OldCypressConfig, 'component' | 'e2e'>
-  pluginsFile?: string | false
-  supportFile?: string | false
-  componentFolder?: string | false
-  integrationFolder?: string | false
-  testFiles?: string | string[]
-  ignoreTestFiles?: string
 }
 
 export class NonStandardMigrationError extends Error {
@@ -56,7 +37,7 @@ export interface CreateConfigOptions {
   hasTypescript: boolean
 }
 
-export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
+export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
   const newConfig = reduceConfig(cfg)
   const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
 
@@ -152,8 +133,8 @@ export async function initComponentTestingMigration (
   })
 }
 
-async function getPluginRelativePath (cfg: OldCypressConfig, projectRoot: string): Promise<string> {
-  return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot) || ''
+async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot: string): Promise<string | undefined> {
+  return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
 }
 
 // If they are running an old version of Cypress
@@ -174,7 +155,7 @@ function defineConfigAvailable (projectRoot: string) {
   }
 }
 
-function createCypressConfig (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
+function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
   const e2eString = options.hasE2ESpec
@@ -208,8 +189,8 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
-  if (!createConfigOptions.hasPluginsFile) {
+function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+  if (!createConfigOptions.hasPluginsFile || !pluginPath) {
     return dedent`
       e2e: {
         setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
@@ -353,7 +334,7 @@ export function renameSupportFilePath (relative: string) {
   return relative.slice(0, res.index) + relative.slice(res.index).replace(res.groups.supportFileName, 'e2e')
 }
 
-export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
+export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
   return Object.entries(cfg).reduce((acc, [key, val]) => {
     switch (key) {
       case 'pluginsFile':
@@ -437,7 +418,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-export function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
+export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 

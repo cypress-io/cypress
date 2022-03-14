@@ -9,7 +9,6 @@ import {
   supportFilesForMigration,
   reduceConfig,
   renameSupportFilePath,
-  OldCypressConfig,
 } from '../../../../src/sources/migration'
 import { expect } from 'chai'
 import { MigrationFile } from '../../../../src/sources'
@@ -19,7 +18,7 @@ const projectRoot = getSystemTestProject('migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
-    const config: OldCypressConfig = {
+    const config: Partial<Cypress.Config> = {
       viewportWidth: 300,
     }
 
@@ -35,7 +34,7 @@ describe('cypress.config.js generation', () => {
   })
 
   it('should create a string when passed only a e2e options', async () => {
-    const config: OldCypressConfig = {
+    const config: Partial<Cypress.Config> = {
       e2e: {
         baseUrl: 'localhost:3000',
       },
@@ -53,7 +52,7 @@ describe('cypress.config.js generation', () => {
   })
 
   it('should create a string when passed only a component options', async () => {
-    const config: OldCypressConfig = {
+    const config: Partial<Cypress.Config> = {
       component: {
         retries: 2,
       },
@@ -157,6 +156,21 @@ describe('cypress.config.js generation', () => {
   it('should handle export default in plugins file', async () => {
     const projectRoot = getSystemTestProject('migration-e2e-export-default')
     const config = fs.readJsonSync(path.join(projectRoot, 'cypress.json'))
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should maintain both root level and nested non-breaking options during migration', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-component-default-everything')
+    const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,

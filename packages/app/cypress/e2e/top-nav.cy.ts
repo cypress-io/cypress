@@ -1,6 +1,8 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { AuthStateShape } from '@packages/data-context/src/data'
 
+const pkg = require('@packages/root')
+
 const loginText = defaultMessages.topNav.login
 
 describe('App Top Nav Workflows', () => {
@@ -106,9 +108,8 @@ describe('App Top Nav Workflows', () => {
     context('user version current', () => {
       it('renders link to external docs if version is current', () => {
         cy.findBrowsers()
-        cy.withCtx(async (ctx) => {
-          // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx.versions, 'versionData').resolves({
+        cy.withCtx(async (ctx, o) => {
+          o.sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -124,7 +125,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
@@ -136,12 +137,11 @@ describe('App Top Nav Workflows', () => {
     context('user version outdated', () => {
       beforeEach(() => {
         cy.findBrowsers()
-        cy.withCtx(async (ctx) => {
+        cy.withCtx(async (ctx, o) => {
           const currRelease = new Date(Date.UTC(2021, 9, 30))
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
-          // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx.versions, 'versionData').resolves({
+          o.sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -203,6 +203,34 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.findAllByRole('dialog').should('not.exist')
+      })
+    })
+
+    context('version data unreachable', () => {
+      it('treats unreachable data as current version', () => {
+        cy.withCtx((ctx, o) => {
+          const oldFetch = ctx.util.fetch
+
+          o.sinon.stub(ctx.util, 'fetch').get(() => {
+            return async (url: RequestInfo, init?: RequestInit) => {
+              if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+                throw new Error(String(url))
+              }
+
+              return oldFetch(url, init)
+            }
+          })
+        })
+
+        cy.findBrowsers()
+        cy.openProject('launchpad')
+        cy.startAppServer()
+        cy.visitApp()
+
+        cy.findByTestId('app-header-bar').validateExternalLink({
+          name: `v${pkg.version}`,
+          href: `https://github.com/cypress-io/cypress/releases/tag/v${pkg.version}`,
+        })
       })
     })
   })
@@ -307,9 +335,8 @@ describe('App Top Nav Workflows', () => {
       it('replaces user avatar after logout', () => {
         cy.get('@logInButton').click()
 
-        cy.withCtx((ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
             // resolves
           })
         })
@@ -338,8 +365,7 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+          options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({ browserOpened: true } as AuthStateShape)
 
             return new Promise((resolve) => {
@@ -541,9 +567,8 @@ describe('Growth Prompts Can Open Automatically', () => {
 
   it('CI prompt auto-opens 4 days after first project opened', () => {
     cy.withCtx(
-      (ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+      (ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: {},
@@ -557,9 +582,8 @@ describe('Growth Prompts Can Open Automatically', () => {
 
   it('CI prompt does not auto-open when it has already been dismissed', () => {
     cy.withCtx(
-      (ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+      (ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
           firstOpened: 1609459200000,
           lastOpened: 1609459200000,
           promptsShown: { ci1: 1609459200000 },
