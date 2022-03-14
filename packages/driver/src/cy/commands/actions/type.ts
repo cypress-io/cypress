@@ -11,20 +11,29 @@ import $Keyboard from '../../../cy/keyboard'
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
 
+interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
+  _log?: any
+  $el: JQuery
+  ensure?: object
+  verify: boolean
+  interval?: number
+}
+
+interface InternalClearOptions extends Partial<Cypress.ClearOptions> {
+  _log?: any
+  ensure?: object
+}
+
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  // Note: These "change type of `any` to X" comments are written instead of changing them directly
-  //       because Cypress extends user-given options with Cypress internal options.
-  //       These comments will be removed after removing `// @ts-nocheck` comments in `packages/driver`.
-  // TODO: change the type of `any` to `Partial<Cypress.TypeOptions>`
-  function type (subject, chars, options: any = {}) {
+  function type (subject, chars, options: Partial<Cypress.TypeOptions> = {}) {
     const userOptions = options
     let updateTable
 
     // allow the el we're typing into to be
     // changed by options -- used by cy.clear()
-    options = _.defaults({}, userOptions, {
+    const _options: InternalTypeOptions = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -36,9 +45,9 @@ export default function (Commands, Cypress, cy, state, config) {
       animationDistanceThreshold: config('animationDistanceThreshold'),
     })
 
-    if (options.log) {
+    if (_options.log) {
       // figure out the options which actually change the behavior of clicks
-      const deltaOptions = $utils.filterOutOptions(options)
+      const deltaOptions = $utils.filterOutOptions(_options)
 
       const table = {}
 
@@ -87,14 +96,14 @@ export default function (Commands, Cypress, cy, state, config) {
         , {})
       }
 
-      options._log = Cypress.log({
+      _options._log = Cypress.log({
         message: [chars, deltaOptions],
-        $el: options.$el,
-        timeout: options.timeout,
+        $el: _options.$el,
+        timeout: _options.timeout,
         consoleProps () {
           return {
             'Typed': chars,
-            'Applied To': $dom.getElements(options.$el),
+            'Applied To': $dom.getElements(_options.$el),
             'Options': deltaOptions,
             'table': {
               // mouse events tables will take up slot 1 if they're present
@@ -110,26 +119,26 @@ export default function (Commands, Cypress, cy, state, config) {
         },
       })
 
-      options._log.snapshot('before', { next: 'after' })
+      _options._log.snapshot('before', { next: 'after' })
     }
 
-    if (options.$el.length > 1) {
+    if (_options.$el.length > 1) {
       $errUtils.throwErrByPath('type.multiple_elements', {
-        onFail: options._log,
-        args: { num: options.$el.length },
+        onFail: _options._log,
+        args: { num: _options.$el.length },
       })
     }
 
     if (!(_.isString(chars) || _.isFinite(chars))) {
       $errUtils.throwErrByPath('type.wrong_type', {
-        onFail: options._log,
+        onFail: _options._log,
         args: { chars },
       })
     }
 
     if (_.isString(chars) && _.isEmpty(chars)) {
       $errUtils.throwErrByPath('type.empty_string', {
-        onFail: options._log,
+        onFail: _options._log,
         args: { chars },
       })
     }
@@ -140,7 +149,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     if (isInvalidDelay(userOptions.delay)) {
       $errUtils.throwErrByPath('keyboard.invalid_delay', {
-        onFail: options._log,
+        onFail: _options._log,
         args: {
           cmd: 'type',
           docsPath: 'type',
@@ -153,7 +162,7 @@ export default function (Commands, Cypress, cy, state, config) {
     // specific error if test config keystrokeDelay is invalid
     if (isInvalidDelay(config('keystrokeDelay'))) {
       $errUtils.throwErrByPath('keyboard.invalid_per_test_delay', {
-        onFail: options._log,
+        onFail: _options._log,
         args: { delay: config('keystrokeDelay') },
       })
     }
@@ -175,7 +184,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     const type = function () {
       const simulateSubmitHandler = function () {
-        const form = options.$el.parents('form')
+        const form = _options.$el.parents('form')
 
         if (!form.length) {
           return
@@ -272,8 +281,8 @@ export default function (Commands, Cypress, cy, state, config) {
       // see comment in updateValue below
       let typed = ''
 
-      const isContentEditable = $elements.isContentEditable(options.$el.get(0))
-      const isTextarea = $elements.isTextarea(options.$el.get(0))
+      const isContentEditable = $elements.isContentEditable(_options.$el.get(0))
+      const isTextarea = $elements.isTextarea(_options.$el.get(0))
 
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
@@ -285,14 +294,14 @@ export default function (Commands, Cypress, cy, state, config) {
       let keydownEvents: any[] = []
 
       return keyboard.type({
-        $el: options.$el,
+        $el: _options.$el,
         chars,
-        delay: options.delay,
-        release: options.release,
-        parseSpecialCharSequences: options.parseSpecialCharSequences,
+        delay: _options.delay,
+        release: _options.release,
+        parseSpecialCharSequences: _options.parseSpecialCharSequences,
         window: win,
-        force: options.force,
-        onFail: options._log,
+        force: _options.force,
+        onFail: _options._log,
 
         updateValue (el, key, charsToType) {
           // in these cases, the value must only be set after all
@@ -310,7 +319,7 @@ export default function (Commands, Cypress, cy, state, config) {
         },
 
         onAfterType () {
-          if (options.release === true) {
+          if (_options.release === true) {
             state('keyboardModifiers', null)
           }
         },
@@ -319,8 +328,8 @@ export default function (Commands, Cypress, cy, state, config) {
           // for the total number of keys we're about to
           // type, ensure we raise the timeout to account
           // for the delay being added to each keystroke
-          if (options.delay) {
-            return cy.timeout(totalKeys * options.delay, true, 'type')
+          if (_options.delay) {
+            return cy.timeout(totalKeys * _options.delay, true, 'type')
           }
         },
 
@@ -425,11 +434,11 @@ export default function (Commands, Cypress, cy, state, config) {
 
         onNoMatchingSpecialChars (chars, allChars) {
           if (chars === 'tab') {
-            $errUtils.throwErrByPath('type.tab', { onFail: options._log })
+            $errUtils.throwErrByPath('type.tab', { onFail: _options._log })
           }
 
           $errUtils.throwErrByPath('type.invalid', {
-            onFail: options._log,
+            onFail: _options._log,
             args: { chars: `{${chars}}`, allChars },
           })
         },
@@ -439,7 +448,7 @@ export default function (Commands, Cypress, cy, state, config) {
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
       // (unless it can be modified i.e we're in designMode or contenteditable)
-      const isBody = options.$el.is('body') && !$elements.isContentEditable(options.$el[0])
+      const isBody = _options.$el.is('body') && !$elements.isContentEditable(_options.$el[0])
 
       if (isBody) {
         debug('typing into body')
@@ -447,7 +456,7 @@ export default function (Commands, Cypress, cy, state, config) {
         return type()
       }
 
-      options.ensure = {
+      _options.ensure = {
         position: true,
         visibility: true,
         notDisabled: true,
@@ -461,14 +470,14 @@ export default function (Commands, Cypress, cy, state, config) {
       // and seeing if that is focused
       // Checking first if element is focusable accounts for focusable els inside
       // of contenteditables
-      if ($elements.isFocusedOrInFocused(options.$el.get(0))) {
+      if ($elements.isFocusedOrInFocused(_options.$el.get(0))) {
         debug('element is already focused, only checking readOnly property')
-        options.ensure = {
+        _options.ensure = {
           notReadonly: true,
         }
       }
 
-      return $actionability.verify(cy, options.$el, config, options, {
+      return $actionability.verify(cy, _options.$el, config, _options, {
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -490,19 +499,19 @@ export default function (Commands, Cypress, cy, state, config) {
             $el: $elToClick,
             log: false,
             verify: false,
-            _log: options._log,
+            _log: _options._log,
             force: true, // force the click, avoid waiting
-            timeout: options.timeout,
-            interval: options.interval,
+            timeout: _options.timeout,
+            interval: _options.interval,
             errorOnSelect: false,
-            scrollBehavior: options.scrollBehavior,
+            scrollBehavior: _options.scrollBehavior,
           })
           .then(() => {
             let activeElement = $elements.getActiveElByDocument($elToClick)
 
-            if (!options.force && activeElement === null) {
+            if (!_options.force && activeElement === null) {
               const node = $dom.stringify($elToClick)
-              const onFail = options._log
+              const onFail = _options._log
 
               if ($dom.isTextLike($elToClick[0])) {
                 $errUtils.throwErrByPath('type.not_actionable_textlike', {
@@ -533,12 +542,12 @@ export default function (Commands, Cypress, cy, state, config) {
         // command which consume cy.type may
         // want to handle verification themselves
 
-        if (options.verify === false) {
-          return options.$el
+        if (_options.verify === false) {
+          return _options.$el
         }
 
         const verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(options.$el, options, {
+          return cy.verifyUpcomingAssertions(_options.$el, _options, {
             onRetry: verifyAssertions,
           })
         }
@@ -548,11 +557,8 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  // TODO: change the type of `any` to `Partial<ClearOptions>`
-  function clear (subject, options: any = {}) {
-    const userOptions = options
-
-    options = _.defaults({}, userOptions, {
+  function clear (subject, options: Partial<Cypress.ClearOptions> = {}) {
+    const _options: InternalClearOptions = _.defaults({}, options, {
       log: true,
       force: false,
       waitForAnimations: config('waitForAnimations'),
@@ -564,14 +570,14 @@ export default function (Commands, Cypress, cy, state, config) {
     const clear = function (el) {
       const $el = $dom.wrap(el)
 
-      if (options.log) {
+      if (_options.log) {
         // figure out the options which actually change the behavior of clicks
-        const deltaOptions = $utils.filterOutOptions(options)
+        const deltaOptions = $utils.filterOutOptions(_options)
 
-        options._log = Cypress.log({
+        _options._log = Cypress.log({
           message: deltaOptions,
           $el,
-          timeout: options.timeout,
+          timeout: _options.timeout,
           consoleProps () {
             return {
               'Applied To': $dom.getElements($el),
@@ -587,16 +593,16 @@ export default function (Commands, Cypress, cy, state, config) {
           $el,
           log: false,
           verify: false, // handle verification ourselves
-          _log: options._log,
-          force: options.force,
-          timeout: options.timeout,
-          interval: options.interval,
-          waitForAnimations: options.waitForAnimations,
-          animationDistanceThreshold: options.animationDistanceThreshold,
-          scrollBehavior: options.scrollBehavior,
+          _log: _options._log,
+          force: _options.force,
+          timeout: _options.timeout,
+          interval: _options.interval,
+          waitForAnimations: _options.waitForAnimations,
+          animationDistanceThreshold: _options.animationDistanceThreshold,
+          scrollBehavior: _options.scrollBehavior,
         }).then(() => {
-          if (options._log) {
-            options._log.snapshot().end()
+          if (_options._log) {
+            _options._log.snapshot().end()
           }
 
           return null
@@ -608,13 +614,13 @@ export default function (Commands, Cypress, cy, state, config) {
         const word = $utils.plural(subject, 'contains', 'is')
 
         $errUtils.throwErrByPath('clear.invalid_element', {
-          onFail: options._log,
+          onFail: _options._log,
           args: { word, node },
         })
       }
 
       if (!$dom.isTextLike($el.get(0))) {
-        options.ensure = {
+        _options.ensure = {
           position: true,
           visibility: true,
           notDisabled: true,
@@ -623,7 +629,7 @@ export default function (Commands, Cypress, cy, state, config) {
           notReadonly: true,
         }
 
-        return $actionability.verify(cy, $el, config, options, {
+        return $actionability.verify(cy, $el, config, _options, {
           onScroll ($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },
@@ -631,7 +637,7 @@ export default function (Commands, Cypress, cy, state, config) {
           onReady ($elToClick) {
             let activeElement = $elements.getActiveElByDocument($elToClick)
 
-            if (!options.force && activeElement === null || !$dom.isTextLike($elToClick.get(0))) {
+            if (!_options.force && activeElement === null || !$dom.isTextLike($elToClick.get(0))) {
               throwError($el)
             }
 
@@ -648,7 +654,7 @@ export default function (Commands, Cypress, cy, state, config) {
     .each(clear)
     .then(() => {
       const verifyAssertions = () => {
-        return cy.verifyUpcomingAssertions(subject, options, {
+        return cy.verifyUpcomingAssertions(subject, _options, {
           onRetry: verifyAssertions,
         })
       }
