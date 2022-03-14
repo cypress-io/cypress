@@ -4,18 +4,23 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 const { throwErrByPath } = $errUtils
 
+interface InternalUrlOptions extends Partial<Cypress.UrlOptions> {
+  _log?: any
+}
+
+interface InternalHashOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: any
+}
+
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    // TODO: change the type of `any` to `Partial<Cypress.UrlOptions>`
-    url (options: any = {}) {
-      const userOptions = options
+    url (options: Partial<Cypress.UrlOptions> = {}) {
+      const _options: InternalUrlOptions = _.defaults({}, options, { log: true })
 
-      options = _.defaults({}, userOptions, { log: true })
-
-      if (options.log !== false) {
-        options._log = Cypress.log({
+      if (_options.log !== false) {
+        _options._log = Cypress.log({
           message: '',
-          timeout: options.timeout,
+          timeout: _options.timeout,
         })
       }
 
@@ -25,11 +30,11 @@ export default (Commands, Cypress, cy) => {
 
       const resolveHref = () => {
         return Promise.try(getHref).then((href) => {
-          if (options.decode) {
+          if (_options.decode) {
             href = decodeURI(href)
           }
 
-          return cy.verifyUpcomingAssertions(href, options, {
+          return cy.verifyUpcomingAssertions(href, _options, {
             onRetry: resolveHref,
           })
         })
@@ -38,16 +43,13 @@ export default (Commands, Cypress, cy) => {
       return resolveHref()
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    hash (options: any = {}) {
-      const userOptions = options
+    hash (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const _options: InternalHashOptions = _.defaults({}, options, { log: true })
 
-      options = _.defaults({}, userOptions, { log: true })
-
-      if (options.log !== false) {
-        options._log = Cypress.log({
+      if (_options.log !== false) {
+        _options._log = Cypress.log({
           message: '',
-          timeout: options.timeout,
+          timeout: _options.timeout,
         })
       }
 
@@ -57,7 +59,7 @@ export default (Commands, Cypress, cy) => {
 
       const resolveHash = () => {
         return Promise.try(getHash).then((hash) => {
-          return cy.verifyUpcomingAssertions(hash, options, {
+          return cy.verifyUpcomingAssertions(hash, _options, {
             onRetry: resolveHash,
           })
         })
