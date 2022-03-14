@@ -93,7 +93,7 @@ export async function codeGenerator (
         content: content.toString(),
       } as const
     } catch (e) {
-      return e instanceof Error ? e : new Error(e)
+      return e instanceof Error ? e : new Error(String(e))
     }
   }))
 
