@@ -227,28 +227,51 @@ describe('Sidebar Navigation', () => {
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
 
-    it('resize nav and persist the state after refresh', () => {
-      cy.contains('flower.png').click()
+    it('use saved state for nav size', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
+      })
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.startAppServer()
+      cy.__incorrectlyVisitAppWithIntercept()
+
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        expect($initialWidth).eq(100)
+      })
+    })
+
+    // NOTE: Remove skip when we fix cy.reload() in Cypress in Cypress
+    it.skip('resize nav and persist the state after refresh', () => {
+      cy.contains('fixture.js').click()
 
       cy.get('.toggle-specs-text').click()
 
       cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
 
-      const initialWidth = cy.get('[data-cy="reporter-panel"]').invoke('outerWidth')
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { clientX: 400 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 
-      cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
-      .trigger('mousemove', { clientX: 400 })
-      .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+        cy.wait('@setPreferences')
 
-      const updatedWidth = cy.get('[data-cy="reporter-panel"]').invoke('outerWidth')
+        cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($updatedWidth) => {
+          expect($updatedWidth).not.to.eq($initialWidth)
 
-      expect(initialWidth).not.eq(updatedWidth)
+          cy.reload()
+          cy.contains('fixture.js').click()
 
-      cy.wait('@setPreferences')
-
-      cy.reload()
-
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', updatedWidth)
+          cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should(($refreshedWidth) => {
+            expect($refreshedWidth).eq($updatedWidth)
+          })
+        })
+      })
     })
   })
 
