@@ -114,11 +114,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
 
     cy.withCtx((ctx) => {
       // rename relative path for any specs that happen to be found
-      const specs = [...ctx.project.specs]
 
-      specs.forEach((spec) => {
-        spec.relative += '-updated'
-      })
+      const specs = ctx.project.specs.map((spec) => ({ ...spec, relative: `${spec.relative}-updated` }))
 
       ctx.actions.project.setSpecs(specs)
       ctx.emitter.toApp()
