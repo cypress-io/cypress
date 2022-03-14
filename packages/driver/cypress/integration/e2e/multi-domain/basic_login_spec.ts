@@ -289,7 +289,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome FJohnson')
   })
 
-  it('never redirects to the subDomain', { defaultCommandTimeout: 50 }, (done) => {
+  it('never redirects to the subdomain', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="username"]\`, but never found it`)
       //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
@@ -310,7 +310,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('redirects to the wrong subDomain', { pageLoadTimeout: 5000 }, (done) => {
+  it('redirects to the wrong subdomain', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load.`)
       done()

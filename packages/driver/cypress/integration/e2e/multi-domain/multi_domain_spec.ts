@@ -26,7 +26,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('runs commands in secondary domain', () => {
-      cy.switchToDomain(''http://foobar.com:3500', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
@@ -161,7 +161,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
             resolve(undefined)
           })
 
-          cy.switchToDomain('foobar.com', () => {
+          cy.switchToDomain('http://foobar.com:3500', () => {
           // done is not defined on purpose here as we want to test the error gets sent back to the primary domain correctly
           // @ts-ignore
             done()
@@ -187,7 +187,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
             resolve(undefined)
           })
 
-          cy.switchToDomain('foobar.com', () => {
+          cy.switchToDomain('http://foobar.com:3500', () => {
             throw 'oops'
           })
         })
@@ -204,7 +204,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           done()
         })
 
-        cy.switchToDomain('foobar.com', [timeout], ([timeout]) => {
+        cy.switchToDomain('http://foobar.com:3500', [timeout], ([timeout]) => {
           cy.get('#doesnt-exist', {
             timeout,
           })
