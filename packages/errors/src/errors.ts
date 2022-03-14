@@ -1213,7 +1213,7 @@ export const AllCypressErrors = {
     `
   },
 
-  PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
+  PLUGINS_FILE_CONFIG_OPTION_REMOVED: (_errShape: BreakingErrResult) => {
     const code = errPartial`
     {
       e2e: {

@@ -1064,7 +1064,7 @@ describe('visual error templates', () => {
     },
     PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
       return {
-        default: [],
+        default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
