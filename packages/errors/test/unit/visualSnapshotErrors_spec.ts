@@ -297,6 +297,13 @@ describe('visual error templates', () => {
 
   // testVisualErrors('CANNOT_RECORD_NO_PROJECT_ID', {
   testVisualErrors(errorType, {
+    LEGACY_CONFIG_ERROR_DURING_MIGRATION: () => {
+      const err = makeErr()
+
+      return {
+        default: ['cypress/plugins/index.js', err],
+      }
+    },
     CANNOT_TRASH_ASSETS: () => {
       const err = makeErr()
 

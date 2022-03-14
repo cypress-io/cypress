@@ -181,7 +181,7 @@ export class ProjectActions {
     }
 
     if (args.open) {
-      await this.setCurrentProject(projectRoot)
+      this.setCurrentProject(projectRoot).catch(this.ctx.onError)
     }
   }
 
