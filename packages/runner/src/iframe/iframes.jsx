@@ -191,7 +191,8 @@ export default class Iframes extends Component {
       // meaning they won't be able to communicate. Need ability for
       // multi-domain command to specify http or https and utilize that here
       // (i.e use `https://${domain}` or `http://${domain}` instead of `//${domain}`)
-      src: `//${domain}/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,
+      // TODO: Update this to the correct origin once we decide on string vs object
+      src: `//${domain}:3500/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,
     })
   }
 

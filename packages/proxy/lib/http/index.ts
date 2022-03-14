@@ -55,7 +55,7 @@ export const defaultMiddleware = {
 }
 
 export type ServerCtx = Readonly<{
-  config: CyServer.Config
+  config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState

@@ -1,17 +1,13 @@
 import type { $Cy } from '../../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from '../communicator'
 
-let viewportChangedCallbackFn
-
 export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
-  Cypress.on('viewport:changed', (viewport, fn) => {
-    viewportChangedCallbackFn = fn
+  Cypress.on('viewport:changed', (viewport, callbackFn) => {
+    specBridgeCommunicator.once('viewport:changed:end', () => {
+      callbackFn()
+    })
 
     specBridgeCommunicator.toPrimary('viewport:changed', viewport)
-  })
-
-  specBridgeCommunicator.on('viewport:changed:end', () => {
-    if (viewportChangedCallbackFn) viewportChangedCallbackFn()
   })
 
   // TODO: Should state syncing be built into cy.state instead of being explicitly called?

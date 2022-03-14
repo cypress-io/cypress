@@ -1,5 +1,5 @@
 // @ts-nocheck / session support is needed for visiting about:blank between tests
-describe('basic login', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('basic login', { experimentalSessionSupport: true }, () => {
   // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary domain, login and redirect back to site.
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
@@ -176,7 +176,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
 })
 
 // session support is needed for visiting about:blank between tests
-describe('Multi-step Auth', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
   // TODO: Switch to domain does not work in switch to domain yet.
   it.skip('final auth redirects back to localhost - nested', () => {
     cy.visit('/fixtures/auth/index.html')

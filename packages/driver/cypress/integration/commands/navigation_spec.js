@@ -825,7 +825,7 @@ describe('src/cy/commands/navigation', () => {
         onLoad,
       })
       .then((win) => {
-        expect(win.bar).to.not.exist
+        expect(win.foo).to.equal('bar')
         expect(onLoad).not.to.have.been.called
       })
     })
@@ -2132,34 +2132,6 @@ describe('src/cy/commands/navigation', () => {
 
         // make get timeout after only 200ms
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')
-      })
-
-      // TODO: This test is currently being skipped for multidomain and needs to be fixed. See issue #19632.
-      it.skip('captures cross origin failures', function (done) {
-        cy.once('fail', (err) => {
-          const { lastLog } = this
-
-          assertLogLength(this.logs, 2)
-          expect(err.message).to.include('Cypress detected a cross origin error happened on page load')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
-          expect(lastLog.get('name')).to.eq('page load')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(cy.state('onPageLoadErr')).to.be.null
-
-          done()
-        })
-
-        cy
-        .visit('/fixtures/jquery.html')
-        .window({ log: false }).then((win) => {
-          const url = 'http://localhost:3501/fixtures/generic.html'
-
-          const $a = win.$(`<a href='${url}'>jquery</a>`)
-          .appendTo(win.document.body)
-
-          causeSynchronousBeforeUnload($a)
-        })
       })
 
       return null

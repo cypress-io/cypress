@@ -81,7 +81,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = 'full'
+    this.res.wantsInjection = buffer.isMultiDomain ? 'fullMultiDomain' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }

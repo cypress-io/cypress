@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('multi-domain', { experimentalSessionSupport: true }, () => {
   it('window:before:load event', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.on('window:before:load', (win: {testPrimaryDomainBeforeLoad: boolean}) => {
@@ -21,11 +21,10 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       .should('equal', 'Window Before Load Called')
     })
 
-    // TODO enable once we can re-visit the primary domain.
-    // cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/multi-domain.html')
 
-    // cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
-    // cy.window().its('testSecondaryWindowBeforeLoad').should('be.undefined')
+    cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
+    cy.window().its('testSecondaryWindowBeforeLoad').should('be.undefined')
   })
 
   describe('post window load events', () => {
@@ -54,14 +53,13 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('foobar.com', () => {
         const afterWindowBeforeUnload = new Promise<void>((resolve) => {
           Cypress.once('window:before:unload', () => {
-            expect(location.host).to.equal('foobar.com')
+            expect(location.host).to.equal('foobar.com:3500')
             resolve()
           })
         })
 
-        cy.window().then((window) => {
-          window.location.href = '/fixtures/multi-domain.html'
-        })
+        // TODO: update to use relative path once available
+        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain.html')
 
         cy.wrap(afterWindowBeforeUnload)
       })
@@ -71,14 +69,13 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('foobar.com', () => {
         const afterWindowUnload = new Promise<void>((resolve) => {
           Cypress.once('window:unload', () => {
-            expect(location.host).to.equal('foobar.com')
+            expect(location.host).to.equal('foobar.com:3500')
             resolve()
           })
         })
 
-        cy.window().then((window) => {
-          window.location.href = '/fixtures/multi-domain.html'
-        })
+        // TODO: update to use relative path once available
+        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain.html')
 
         cy.wrap(afterWindowUnload)
       })
@@ -88,7 +85,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('foobar.com', () => {
         const afterWindowAlert = new Promise<void>((resolve) => {
           Cypress.once('window:alert', (text) => {
-            expect(location.host).to.equal('foobar.com')
+            expect(location.host).to.equal('foobar.com:3500')
             expect(`window:alert ${text}`).to.equal('window:alert the alert text')
             resolve()
           })
@@ -103,7 +100,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('foobar.com', () => {
         const afterWindowConfirm = new Promise<void>((resolve) => {
           Cypress.once('window:confirm', (text) => {
-            expect(location.host).to.equal('foobar.com')
+            expect(location.host).to.equal('foobar.com:3500')
             expect(`window:confirm ${text}`).to.equal('window:confirm the confirm text')
             resolve()
           })
@@ -118,7 +115,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('foobar.com', () => {
         const afterWindowConfirmed = new Promise<void>((resolve) => {
           Cypress.once('window:confirmed', (text, returnedFalse) => {
-            expect(location.host).to.equal('foobar.com')
+            expect(location.host).to.equal('foobar.com:3500')
             expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - true')
             resolve()
           })
@@ -138,7 +135,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('foobar.com', () => {
         const afterWindowConfirmed = new Promise<void>((resolve) => {
           Cypress.once('window:confirmed', (text, returnedFalse) => {
-            expect(location.host).to.equal('foobar.com')
+            expect(location.host).to.equal('foobar.com:3500')
             expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - false')
             resolve()
           })
