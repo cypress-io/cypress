@@ -39,7 +39,7 @@ export const iframesController = {
     // attach header data for webservers
     // to properly intercept and serve assets from the correct src root
     // TODO: define a contract for dev-server plugins to configure this behavior
-    req.headers.__cypress_spec_path = req.params[0]
+    req.headers.__cypress_spec_path = encodeURI(req.params[0])
     req.url = `${config.devServerPublicPathRoute}/index.html`
 
     // user the node proxy here instead of the network proxy
