@@ -2281,8 +2281,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('does not wait stability at the end of the command queue when not stable with experimentalMultiDomain', (done) => {
-      const onLoad = cy.spy(() => {})
+    it('does not wait for stability at the end of the command queue when not stable with experimentalMultiDomain', (done) => {
+      const onLoad = cy.spy()
 
       cy
       .visit('/fixtures/generic.html')

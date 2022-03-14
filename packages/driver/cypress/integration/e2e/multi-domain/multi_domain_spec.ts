@@ -26,7 +26,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('runs commands in secondary domain', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(''http://foobar.com:3500', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
@@ -87,7 +87,6 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
         expect(actualRunnable.timeout).to.exist
         expect(actualRunnable.parent.title).to.equal(expectedRunnable.parent.title)
         expect(actualRunnable.parent.type).to.equal(expectedRunnable.parent.type)
-      // expect(actualRunnable).to.deep.equal(expectedRunnable)
       })
     })
 
