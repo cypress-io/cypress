@@ -70,7 +70,7 @@ class ElementOverrideManager {
    *   }
    * }
    */
-  performOverrides (cy, overrides) {
+  performOverrides (cy: Cypress.cy, overrides: NonNullable<CustomSnapshotOptions['elementOverrides']>) {
     const observer = new MutationObserver((mutations) => {
       this.mutationStack ??= []
       this.mutationStack.push(...mutations)
@@ -155,17 +155,15 @@ const applySnapshotMutations = ({
   defaultWidth,
   defaultHeight,
 }: SnapshotMutationOptions): Cypress.Chainable<() => void> => {
-  let elementOverrideManager
-
-  if (Object.keys(snapshotElementOverrides).length) {
-    elementOverrideManager = new ElementOverrideManager()
+  if (!Object.keys(snapshotElementOverrides).length) {
+    return cy.then(() => () => {})
   }
+
+  const elementOverrideManager = new ElementOverrideManager()
 
   return cy.viewport(snapshotWidth, snapshotHeight, { log: false })
   .then(() => {
-    if (elementOverrideManager) {
-      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
-    }
+    elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
 
     if (log) {
       Cypress.log({
@@ -179,9 +177,7 @@ const applySnapshotMutations = ({
     return () => {
       cy.viewport(defaultWidth, defaultHeight, { log: false })
       .then(() => {
-        if (elementOverrideManager) {
-          elementOverrideManager.resetOverrides()
-        }
+        elementOverrideManager.resetOverrides()
       })
     }
   })
@@ -199,7 +195,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
    * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
    *   precedence over the global override defined when the command was installed.
    */
-  const customPercySnapshot = (percySnapshot, name?: string, options: CustomSnapshotOptions = {}) => {
+  const customPercySnapshot = (percySnapshot: (name?: string, options?: SnapshotOptions) => Cypress.Chainable<any>, name?: string, options: CustomSnapshotOptions = {}) => {
     if (name && typeof name === 'object') {
       options = name
       name = undefined
@@ -258,12 +254,14 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
     .then((reset) => {
       // Wrap in cy.then here to ensure that the original command is
       // enqueued appropriately.
-      cy.then(() => {
+      cy
+      .then(() => {
         return percySnapshot(screenshotName, {
           ...options,
           widths: [snapshotWidth],
         })
-      }).then(() => {
+      })
+      .then(() => {
         return reset()
       })
       .then(() => {
