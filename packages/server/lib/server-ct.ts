@@ -4,6 +4,7 @@ import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import type { SocketCt } from './socket-ct'
 import type { Cfg } from '@packages/server/lib/project-base'
+import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
 
 type WarningErr = Record<string, any>
 
@@ -19,6 +20,8 @@ export class ServerCt extends ServerBase<SocketCt> {
       this._server = this._createHttpServer(app)
       this.server.on('connect', this.onConnect.bind(this))
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+      graphqlWS(this.server, `${socketIoRoute}-graphql`)
 
       return this._listen(port, (err) => {
         if (err.code === 'EADDRINUSE') {
