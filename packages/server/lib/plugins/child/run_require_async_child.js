@@ -123,9 +123,9 @@ function run (ipc, file, projectRoot) {
   ipc.on('loadConfig', async () => {
     try {
       debug('try loading', file)
-      const configFileExport = await loadConfig(configFile)
+      const configFileExport = await loadConfig(file)
 
-      debug('loaded config file', configFile)
+      debug('loaded config file', file)
       const result = configFileExport.default || configFileExport
 
       const replacer = (_key, val) => {
