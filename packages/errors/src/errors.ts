@@ -782,14 +782,17 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
   },
-  // TODO: verify these are configBaseName and not configPath
-  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
+  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, filesFound: string[]) => {
     return errTemplate`
-      There is both a ${fmt.highlight(configFileBaseName1)} and a ${fmt.highlight(configFileBaseName2)} at the location below:
+      Could not load a Cypress configuration file because there are multiple matches.
+      
+      We've found ${fmt.highlight(filesFound.length)} Cypress configuration files named
+      ${fmt.highlight(filesFound.join(', '))} at the location below:
 
       ${fmt.listItem(projectRoot)}
 
-      Cypress does not know which one to read for config. Please remove one of the two and try again.`
+      Please delete the conflicting configuration files.
+      `
   },
   CONFIG_FILE_NOT_FOUND: (configFileBaseName: string, projectRoot: string) => {
     return errTemplate`\
@@ -1163,6 +1166,14 @@ export const AllCypressErrors = {
         ${fmt.cypressVersion('10.0.0')} no longer supports cypress.json.
 
         Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
+      `
+  },
+
+  LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
+    return errTemplate`
+        Your ${fmt.highlight(file)} at ${fmt.path(`${file}`)} threw an error. ${fmt.stackTrace(error)}
+
+        Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
       `
   },
 
