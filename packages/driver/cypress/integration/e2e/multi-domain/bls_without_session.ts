@@ -145,7 +145,7 @@ describe('Multi-step Auth without session', { experimentalSessionSupport: true }
     .should('equal', 'Welcome MarkyMark')
   })
 
-  it('final-auth redirects back to localhost - flat', { pageLoadTimeout: 5000 }, () => {
+  it('final-auth redirects back to localhost - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost

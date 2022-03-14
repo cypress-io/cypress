@@ -1,5 +1,5 @@
 // @ts-nocheck / session support is needed for visiting about:blank between tests
-describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
+describe('Multi-step Auth in isolation', { experimentalSessionSupport: true }, () => {
   // TODO: Switch to domain does not work in switch to domain yet.
   it.skip('final auth redirects back to localhost - nested', () => {
     cy.visit('/fixtures/auth/index.html')
@@ -19,7 +19,7 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome MarkyMark')
   })
 
-  it('final-auth redirects back to localhost - flat', { pageLoadTimeout: 5000 }, () => {
+  it('final-auth redirects back to localhost - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
