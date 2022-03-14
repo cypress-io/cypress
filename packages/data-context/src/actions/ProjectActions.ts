@@ -66,6 +66,7 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
+      d.app.browserStatus = 'closed'
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()

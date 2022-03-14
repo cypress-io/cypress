@@ -782,14 +782,17 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
   },
-  // TODO: verify these are configBaseName and not configPath
-  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
+  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, filesFound: string[]) => {
     return errTemplate`
-      There is both a ${fmt.highlight(configFileBaseName1)} and a ${fmt.highlight(configFileBaseName2)} at the location below:
+      Could not load a Cypress configuration file because there are multiple matches.
+      
+      We've found ${fmt.highlight(filesFound.length)} Cypress configuration files named
+      ${fmt.highlight(filesFound.join(', '))} at the location below:
 
       ${fmt.listItem(projectRoot)}
 
-      Cypress does not know which one to read for config. Please remove one of the two and try again.`
+      Please delete the conflicting configuration files.
+      `
   },
   CONFIG_FILE_NOT_FOUND: (configFileBaseName: string, projectRoot: string) => {
     return errTemplate`\
