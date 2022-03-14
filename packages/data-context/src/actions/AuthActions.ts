@@ -49,6 +49,8 @@ export class AuthActions {
         coreData.authState = authState
       })
     }))
+
+    this.ctx.emitter.authChange()
   }
 
   resetAuthState () {
@@ -69,6 +71,7 @@ export class AuthActions {
     } finally {
       this.setAuthenticatedUser(null)
       this.ctx.cloud.reset()
+      this.ctx.emitter.authChange()
     }
   }
 

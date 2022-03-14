@@ -1,5 +1,6 @@
 // @ts-ignore
 import pkg from '@packages/root'
+import debugLib from 'debug'
 
 import type { DataContext } from '..'
 import pDefer from 'p-defer'
@@ -19,6 +20,7 @@ import {
 import _ from 'lodash'
 import { getError } from '@packages/errors'
 
+const debug = debugLib('cypress:data-context:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 
 const REMOTE_SCHEMA_URLS = {
@@ -89,14 +91,14 @@ export class CloudDataSource {
       const pipeline = pipe(
         executingQuery,
         subscribe((res) => {
-          this.ctx.debug('executeRemoteGraphQL subscribe res %o', res)
+          debug('executeRemoteGraphQL subscribe res %o', res)
 
           if (!resolvedData) {
             resolvedData = res
 
             // Ignore the error when there's no internet connection
             if (res.error?.networkError) {
-              this.ctx.debug('executeRemoteGraphQL network error', res.error)
+              debug('executeRemoteGraphQL network error', res.error)
               dfd.resolve({ ...res, error: undefined, data: null })
             } else if (res.error) {
               dfd.reject(res.error)
@@ -128,7 +130,7 @@ export class CloudDataSource {
     }
 
     return pipe(executingQuery, toPromise).then((data) => {
-      this.ctx.debug('executeRemoteGraphQL toPromise res %o', data)
+      debug('executeRemoteGraphQL toPromise res %o', data)
 
       if (data.error) {
         throw data.error
