@@ -550,6 +550,7 @@ enum ErrorTypeEnum {
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
   INVOKED_BINARY_OUTSIDE_NPM_MODULE
+  LEGACY_CONFIG_ERROR_DURING_MIGRATION
   LEGACY_CONFIG_FILE
   MIGRATION_ALREADY_OCURRED
   MULTIPLE_SUPPORT_FILES_FOUND
@@ -580,6 +581,7 @@ enum ErrorTypeEnum {
   SUPPORT_FILE_NOT_FOUND
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
+  TEST_FILES_DEPRECATION
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
@@ -1139,9 +1141,6 @@ type Query {
   """The currently opened project"""
   currentProject: CurrentProject
 
-  """The mode the interactive runner was launched in"""
-  currentTestingType: TestingTypeEnum
-
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
@@ -1234,6 +1233,14 @@ type Storybook implements Node {
 
   """Folder containing storybook configuration files"""
   storybookRoot: String!
+}
+
+type Subscription {
+  """Triggered when the auth state changes"""
+  authChange: Query
+
+  """Issued for internal development changes"""
+  devChange: DevState
 }
 
 """The bundlers that we can use with Cypress"""

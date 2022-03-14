@@ -22,6 +22,7 @@ import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } f
 import assert from 'assert'
 import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
+import type { LegacyCypressConfigJson } from '../sources'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -118,6 +119,7 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
+  _pendingMigrationInitialize?: pDefer.DeferredPromise<void>
 
   constructor (private ctx: DataContext) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
@@ -259,6 +261,7 @@ export class ProjectLifecycleManager {
 
     this._projectRoot = projectRoot
     this._initializedProject = undefined
+    this._pendingMigrationInitialize = pDefer()
     this.legacyPluginGuard()
     Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
@@ -271,6 +274,22 @@ export class ProjectLifecycleManager {
     })
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
+
+    const legacyConfigPatah = path.join(projectRoot, this.legacyConfigFile)
+
+    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPatah)) {
+      // we run the legacy plugins/index.js in a child process
+      // and mutate the config based on the return value for migration
+      // only used in open mode (cannot migrate via terminal)
+      const legacyConfig = this.ctx.fs.readJsonSync(legacyConfigPatah) as LegacyCypressConfigJson
+
+      // should never throw, unless there existing pluginsFile errors out,
+      // in which case they are attempting to migrate an already broken project.
+      this.ctx.actions.migration.initialize(legacyConfig)
+      .then(this._pendingMigrationInitialize?.resolve)
+      .finally(() => this._pendingMigrationInitialize = undefined)
+      .catch(this.onLoadError)
+    }
 
     this.configFileWarningCheck()
 
@@ -814,13 +833,6 @@ export class ProjectLifecycleManager {
 
     this._eventsIpcResult = { state: 'loading', value: promise }
 
-    // This is a terrible hack until we land GraphQL subscriptions which will
-    // allow for more granular concurrent notifications then our current
-    // notify the frontend & refetch approach
-    const toLaunchpad = this.ctx.emitter.toLaunchpad
-
-    this.ctx.emitter.toLaunchpad = () => {}
-
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
         // If we're handling the events, we don't want any notifications
@@ -839,7 +851,6 @@ export class ProjectLifecycleManager {
       throw err
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad = toLaunchpad
       this.ctx.emitter.toLaunchpad()
     })
   }
