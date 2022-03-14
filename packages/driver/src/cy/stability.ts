@@ -62,7 +62,7 @@ export const create = (Cypress, state) => ({
     return new Promise((resolve, reject) => {
       let fulfilled = false
 
-      const onSignal = (type) => {
+      const onSignal = () => {
         if (fulfilled) return
 
         fulfilled = true
