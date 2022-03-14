@@ -180,13 +180,7 @@ export class OpenProject {
           return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
         }
 
-        this._ctx?.browser.setBrowserStatus('opening')
-
         return browsers.open(browser, options, automation, this._ctx)
-      }).then((browserInstance) => {
-        this._ctx?.browser.setBrowserStatus('open')
-
-        return browserInstance
       })
     }
 
