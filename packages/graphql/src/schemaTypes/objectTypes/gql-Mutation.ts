@@ -133,8 +133,8 @@ export const mutation = mutationType({
       type: 'Query',
       description: 'Clears the currently active project',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.clearCurrentProject()
         ctx.actions.wizard.resetWizard()
+        await ctx.actions.project.clearCurrentProject()
 
         return {}
       },
@@ -143,7 +143,7 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.lifecycleManager.setCurrentTestingType(null)
+        ctx.lifecycleManager?.setCurrentTestingType(null)
 
         return {}
       },
@@ -216,7 +216,7 @@ export const mutation = mutationType({
       resolve (_, args, ctx) {
         ctx.actions.app.setActiveBrowserById(args.id)
 
-        return ctx.lifecycleManager
+        return ctx.lifecycleManager ?? null
       },
     })
 
@@ -277,7 +277,7 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
 
-        return ctx.lifecycleManager
+        return ctx.lifecycleManager ?? null
       },
     })
 
@@ -580,7 +580,7 @@ export const mutation = mutationType({
 
     t.field('setProjectIdInConfigFile', {
       description: 'Set the projectId field in the config file of the current project',
-      type: Query,
+      type: CurrentProject,
       args: {
         projectId: nonNull(stringArg()),
       },
@@ -592,9 +592,9 @@ export const mutation = mutationType({
         }
 
         // Wait for the project config to be reloaded
-        await ctx.lifecycleManager.reloadConfig()
+        await ctx.lifecycleManager?.reloadConfig()
 
-        return {}
+        return
       },
     })
 

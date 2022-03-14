@@ -2,21 +2,19 @@ import os from 'os'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
 import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
-import minimatch from 'minimatch'
-import { debounce, isEqual } from 'lodash'
+import { debounce } from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
+import chokidar from 'chokidar'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
 
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
-import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import { STORIES_GLOB } from '.'
-import { getDefaultSpecPatterns } from '../util/config-options'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -112,7 +110,7 @@ export class ProjectDataSource {
   }
 
   projectId () {
-    return this.ctx.lifecycleManager.getProjectId()
+    return this.ctx.lifecycleManager?.getProjectId()
   }
 
   projectTitle (projectRoot: string) {
@@ -120,7 +118,7 @@ export class ProjectDataSource {
   }
 
   async getConfig () {
-    return await this.ctx.lifecycleManager.getFullInitialConfig()
+    return await this.ctx.lifecycleManager?.getFullInitialConfig()
   }
 
   getCurrentProjectSavedState () {
@@ -137,20 +135,6 @@ export class ProjectDataSource {
 
   setRelaunchBrowser (relaunchBrowser: boolean) {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
-  }
-
-  async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
-    specPattern?: string[]
-    excludeSpecPattern?: string[]
-  }> {
-    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
-
-    const config = await this.getConfig()
-
-    return {
-      specPattern: toArray(config[testingType]?.specPattern),
-      excludeSpecPattern: toArray(config[testingType]?.excludeSpecPattern),
-    }
   }
 
   async findSpecs (
@@ -205,33 +189,13 @@ export class ProjectDataSource {
       this.ctx.emitter.toApp()
     })
 
-    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
+    this._specWatcher = chokidar.watch(specPattern, {
+      cwd: projectRoot,
+      ignoreInitial: true,
+    })
+
     this._specWatcher.on('add', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
-  }
-
-  async matchesSpecPattern (specFile: string): Promise<boolean> {
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-      return false
-    }
-
-    const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
-
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
-
-    for (const pattern of excludeSpecPattern) {
-      if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
-        return false
-      }
-    }
-
-    for (const pattern of specPattern) {
-      if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
-        return true
-      }
-    }
-
-    return false
   }
 
   stopSpecWatcher () {
@@ -280,65 +244,5 @@ export class ProjectDataSource {
       component: framework?.glob ?? looseComponentGlob,
       story: STORIES_GLOB,
     }
-  }
-
-  async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
-    const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
-
-    interface ResolvedFromWithField extends ResolvedFromConfig {
-      field: typeof RESOLVED_FROM[number]
-    }
-
-    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
-      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
-        return {
-          ...acc,
-          value: { ...acc.value, [field]: value.value },
-        }
-      }, {
-        value: {},
-        field: 'env',
-        from: 'env',
-      })
-    }
-
-    return Object.entries(config ?? {}).map(([key, value]) => {
-      if (key === 'env' && value) {
-        return mapEnvResolvedConfigToObj(value)
-      }
-
-      return { ...value, field: key }
-    }) as ResolvedFromConfig[]
-  }
-
-  async getCodeGenCandidates (glob: string): Promise<FilePartsShape[]> {
-    if (!glob.startsWith('**/')) {
-      glob = `**/${glob}`
-    }
-
-    const projectRoot = this.ctx.currentProject
-
-    if (!projectRoot) {
-      throw Error(`Cannot find components without currentProject.`)
-    }
-
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
-
-    return codeGenCandidates.map((absolute) => ({ absolute }))
-  }
-
-  async getIsDefaultSpecPattern () {
-    assert(this.ctx.currentProject)
-    assert(this.ctx.coreData.currentTestingType)
-
-    const { e2e, component } = getDefaultSpecPatterns()
-
-    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
-
-    if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return isEqual(specPattern, [e2e])
-    }
-
-    return isEqual(specPattern, [component])
   }
 }

@@ -10,6 +10,7 @@ import Debug from 'debug'
 const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
+import type { ProjectLifecycleManager } from '../data'
 
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
@@ -17,12 +18,10 @@ interface WizardGetCodeComponent {
 }
 
 export class WizardActions {
-  constructor (private ctx: DataContext) {}
+  constructor (private ctx: DataContext, private lifecycleManager: ProjectLifecycleManager) {}
 
   private get projectRoot () {
-    assert(this.ctx.currentProject)
-
-    return this.ctx.currentProject
+    return this.lifecycleManager.projectRoot
   }
 
   private get data () {
@@ -56,13 +55,17 @@ export class WizardActions {
   }
 
   setBundler (bundler: Bundler | null) {
-    this.ctx.coreData.wizard.chosenBundler = bundler
+    this.ctx.update((d) => {
+      d.wizard.chosenBundler = bundler
+    })
 
     return this.data
   }
 
   setCodeLanguage (lang: NexusGenEnums['CodeLanguageEnum']) {
-    this.ctx.coreData.wizard.chosenLanguage = lang
+    this.ctx.update((d) => {
+      d.wizard.chosenLanguage = lang
+    })
 
     return this.data
   }
@@ -73,7 +76,7 @@ export class WizardActions {
     // before returning. This should not penalize users but
     // allow for tests, too fast for this last step to pass.
     // NOTE: if the config is already initialized, this will be instant
-    await this.ctx.lifecycleManager.initializeConfig()
+    await this.lifecycleManager.initialize()
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
@@ -81,9 +84,11 @@ export class WizardActions {
 
   /// reset wizard status, useful for when changing to a new project
   resetWizard () {
-    this.data.chosenBundler = null
-    this.data.chosenFramework = null
-    this.data.chosenLanguage = 'js'
+    this.ctx.update((d) => {
+      d.wizard.chosenBundler = null
+      d.wizard.chosenFramework = null
+      d.wizard.chosenLanguage = 'js'
+    })
 
     return this.data
   }
@@ -127,11 +132,11 @@ export class WizardActions {
   }
 
   private async detectLanguage () {
-    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+    const { hasTypescript } = this.lifecycleManager.metaState
 
     if (
       hasTypescript ||
-      (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
+      (this.lifecycleManager.configFile && /.ts$/.test(this.lifecycleManager.configFile))) {
       this.ctx.wizardData.detectedLanguage = 'ts'
     } else {
       this.ctx.wizardData.detectedLanguage = 'js'
@@ -150,14 +155,14 @@ export class WizardActions {
     switch (currentTestingType) {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
-        this.ctx.lifecycleManager.refreshMetaState()
+        this.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
-        this.ctx.lifecycleManager.refreshMetaState()
+        this.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
         return chosenLanguage
@@ -233,8 +238,8 @@ export class WizardActions {
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
 
-    if (this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
-      const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+    if (this.lifecycleManager.metaState.hasValidConfigFile) {
+      const { ext } = path.parse(this.lifecycleManager.configFilePath)
       const foundLanguage = ext === '.ts' ? 'ts' : 'js'
       const configCode = this.configCode(testingType, foundLanguage)
 
@@ -242,7 +247,7 @@ export class WizardActions {
         status: 'changes',
         description: 'Merge this code with your existing config file',
         file: {
-          absolute: this.ctx.lifecycleManager.configFilePath,
+          absolute: this.lifecycleManager.configFilePath,
           contents: configCode,
         },
       }
@@ -251,10 +256,10 @@ export class WizardActions {
     const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
 
     // only do this if config file doesn't exist
-    this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
+    this.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
     return this.scaffoldFile(
-      this.ctx.lifecycleManager.configFilePath,
+      this.lifecycleManager.configFilePath,
       configCode,
       'Created a new config file',
     )

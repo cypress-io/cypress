@@ -83,20 +83,20 @@ export const CurrentProject = objectType({
           return false
         }
 
-        return ctx.lifecycleManager.isTestingTypeConfigured('component')
+        return ctx.lifecycleManager?.isTestingTypeConfigured('component') ?? null
       },
     })
 
     t.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
         // If the forceReconfigureProject for e2e is set, we want to notify
         // the client side that the wizard has to start from the beginning
         if (ctx.coreData.forceReconfigureProject?.e2e) {
           return false
         }
 
-        return ctx.lifecycleManager.isTestingTypeConfigured('e2e')
+        return ctx.lifecycleManager?.isTestingTypeConfigured('e2e') ?? null
       },
     })
 
@@ -129,10 +129,10 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.nonNull.json('config', {
+    t.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
-        return ctx.project.getResolvedConfigFields()
+        return ctx.configuredProject?.getResolvedConfigFields()
       },
     })
 
@@ -144,16 +144,16 @@ export const CurrentProject = objectType({
     })
 
     t.string('configFile', {
-      description: 'Config File, specified by the CLI or ',
+      description: 'Config File, specified by the CLI or inferred based on the project',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.configFile.toString()
+        return ctx.lifecycleManager?.configFile.toString()
       },
     })
 
     t.string('configFileAbsolutePath', {
       description: 'Config File Absolute Path',
       resolve: async (source, args, ctx) => {
-        return ctx.lifecycleManager.configFilePath
+        return ctx.lifecycleManager?.configFilePath ?? null
       },
     })
 

@@ -31,6 +31,7 @@ export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
 }
 
 export interface WithCtxInjected extends WithCtxOptions {
+  assert: typeof import('assert')
   require: typeof require
   process: typeof process
   sinon: typeof sinon
@@ -232,12 +233,14 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
+        assert(ctx.lifecycleManager, 'Can only execute startAppServer within an open project')
+
         ctx.actions.project.setCurrentTestingType(o.mode)
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
         // @ts-expect-error - errors b/c it's a private method
-        const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
+        const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onError')
         const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
         function restoreStubs () {

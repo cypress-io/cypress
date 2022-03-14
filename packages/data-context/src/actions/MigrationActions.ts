@@ -73,6 +73,12 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
 
+  get lifecycleManager () {
+    assert(this.ctx.lifecycleManager, 'Cannot run MigrationAction outside of project')
+
+    return this.ctx.lifecycleManager
+  }
+
   async initialize (config: LegacyCypressConfigJson) {
     const legacyConfigForMigration = await this.setLegacyConfigForMigration(config)
 
@@ -85,7 +91,7 @@ export class MigrationActions {
 
     await this.initializeFlags()
 
-    const legacyConfigFileExist = await this.ctx.lifecycleManager.checkIfLegacyConfigFileExist()
+    const legacyConfigFileExist = await this.lifecycleManager.checkIfLegacyConfigFileExist()
     const filteredSteps = await getStepsForMigration(this.ctx.currentProject, legacyConfigForMigration, Boolean(legacyConfigFileExist))
 
     this.ctx.update((coreData) => {
@@ -154,25 +160,20 @@ export class MigrationActions {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
+    return this.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
   }
 
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
 
-    this.ctx.lifecycleManager.setConfigFilePath(this.configFileNameAfterMigration)
-
-    await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
-      throw error
-    })
-
-    await this.ctx.actions.file.removeFileInProject(this.ctx.lifecycleManager.legacyConfigFile).catch((error) => {
-      throw error
-    })
-
+    this.lifecycleManager.setConfigFilePath(this.configFileNameAfterMigration)
     // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
     // with the new file, instead of the deleted one which is not supported anymore
     this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
+
+    await this.ctx.fs.writeFile(this.lifecycleManager.configFilePath, config)
+
+    await this.ctx.actions.file.removeFileInProject('cypress.json')
   }
 
   async setLegacyConfigForMigration (config: LegacyCypressConfigJson) {
@@ -242,10 +243,8 @@ export class MigrationActions {
     )
   }
 
-  async finishReconfigurationWizard () {
-    this.ctx.lifecycleManager.initializeConfigWatchers()
-    this.ctx.lifecycleManager.refreshMetaState()
-    await this.ctx.lifecycleManager.reloadConfig()
+  finishReconfigurationWizard () {
+    this.lifecycleManager.reloadConfig()
   }
 
   async nextStep () {

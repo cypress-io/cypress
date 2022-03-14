@@ -1,4 +1,4 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, FullConfig, MIGRATION_STEPS, MigrationStep } from '@packages/types'
 import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
@@ -7,6 +7,10 @@ import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { LegacyCypressConfigJson } from '../sources'
+import type { ProjectConfigManager, ProjectLifecycleManager } from '.'
+import type { ProjectMetaState } from '../sources/project/getProjectMetaState'
+import type pDefer from 'p-defer'
+import type { ConfiguredProjectDataSource } from '../sources/ConfiguredProjectDataSource'
 
 export type Maybe<T> = T | null | undefined
 
@@ -53,6 +57,7 @@ export interface ConfigChildProcessShape {
 }
 
 export interface AppDataShape {
+  isReloadingConfigProcess: boolean
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
@@ -108,6 +113,16 @@ export interface ForceReconfigureProjectDataShape {
   component?: boolean | null
 }
 
+export interface CurrentProjectState {
+  manager: ProjectLifecycleManager | null
+  state: 'pending' | 'loadingConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
+  initialConfig: FullConfig | null
+  finalConfig: FullConfig | null
+  initializedProject: object | null // open_project
+  metaState: ProjectMetaState
+  configManager: ProjectConfigManager
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -128,6 +143,8 @@ export interface CoreDataShape {
   localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: string | null
+  currentProjectState: CurrentProjectState | null
+  currentConfiguredProject?: ConfiguredProjectDataSource
   currentTestingType: TestingType | null
   wizard: WizardDataShape
   migration: MigrationDataShape
@@ -136,8 +153,9 @@ export interface CoreDataShape {
   authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: ErrorWrapperSource[]
-  packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
+  runModeExitEarly: ((err: Error) => void) | null
+  pendingRunModeInitialize?: pDefer.DeferredPromise<FullConfig>
 }
 
 /**
@@ -156,6 +174,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       refreshState: null,
     },
     app: {
+      isReloadingConfigProcess: false,
       isInGlobalMode: Boolean(modeOptions.global),
       refreshingBrowsers: null,
       browsers: null,
@@ -174,6 +193,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
+    currentProjectState: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
       chosenBundler: null,
@@ -207,7 +227,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserWindow: null,
     },
     scaffoldedFiles: null,
-    packageManager: 'npm',
     forceReconfigureProject: null,
+    runModeExitEarly: null,
   }
 }

@@ -15,6 +15,8 @@ import pathHelpers from './util/path_helpers'
 import type { ConfigValidationFailureInfo } from '@packages/errors'
 
 import { getCtx } from './makeDataContext'
+import { ProjectConfigManager } from '@packages/data-context/src/data'
+import assert from 'assert'
 
 const debug = Debug('cypress:server:config')
 
@@ -79,7 +81,7 @@ export function isValidCypressInternalEnvValue (value) {
 }
 
 export async function get (
-  projectRoot,
+  projectRoot: string,
   // Options are only used in testing
   options?: Partial<AllModeOptions>,
 ): Promise<FullConfig> {
@@ -87,9 +89,15 @@ export async function get (
 
   options ??= ctx.modeOptions
 
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
+  // If we already have a lifecycleManager, we'll just use that, otherwise we'll create a temporary one
+  const hasLifecycleManager = Boolean(ctx.lifecycleManager)
+  const lifecycleManager = ctx.lifecycleManager ?? new ProjectConfigManager(ProjectConfigManager.stubConfig(projectRoot))
 
-  return ctx.lifecycleManager.getFullInitialConfig(options, false)
+  if (!hasLifecycleManager) {
+    lifecycleManager.destroy()
+  }
+
+  return lifecycleManager.getFullInitialConfig(options, false)
 }
 
 export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
@@ -236,6 +244,10 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
 }
 
 export function updateWithPluginValues (cfg, overrides) {
+  const lifecycleManager = getCtx().lifecycleManager
+
+  assert(lifecycleManager, 'Expected updateWithPluginValues to be called within a project')
+
   if (!overrides) {
     overrides = {}
   }
@@ -244,18 +256,18 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
-    let configFile = getCtx().lifecycleManager.configFile
+  configUtils.validate(overrides, (validationErrorResult: ConfigValidationFailureInfo | string) => {
+    let configFile = lifecycleManager.configFile
 
     if (configFile === false) {
       configFile = '--config file set to "false" via CLI--'
     }
 
-    if (_.isString(validationResult)) {
-      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
+    if (_.isString(validationErrorResult)) {
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationErrorResult)
     }
 
-    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationErrorResult)
     // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 

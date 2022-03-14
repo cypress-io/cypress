@@ -130,6 +130,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.cfg.state
   }
 
+  // TODO: Look into moving this into ProjectConfigManager
   injectCtSpecificConfig (cfg) {
     cfg.resolved.testingType = { value: 'component' }
 
@@ -507,9 +508,9 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
+    this.ctx.lifecycleManager?.setCurrentTestingType(this.testingType)
     let theCfg: Cfg = {
-      ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
+      ...(await this.ctx.lifecycleManager?.getFullInitialConfig()),
       testingType: this.testingType,
     } as Cfg // ?? types are definitely wrong here I think
 
@@ -586,7 +587,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   // These methods are not related to start server/sockets/runners
 
   async getProjectId () {
-    return getCtx().lifecycleManager.getProjectId()
+    return getCtx().lifecycleManager?.getProjectId()
   }
 
   // For testing

@@ -5,6 +5,7 @@ import { fs } from '../util/fs'
 import type { SettingsOptions } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import * as errors from '../errors'
+import { makeStubConfigManagerOptions, ProjectConfigManager } from '@packages/data-context/src/data'
 
 const debug = Debug('cypress:server:settings')
 
@@ -69,31 +70,20 @@ export async function read (projectRoot: string) {
 
   // For testing purposes, no-op if the projectRoot is already the same
   // as the one set in the DataContext, as it would be in normal execution
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
+  if (ctx.currentProject === projectRoot && ctx.lifecycleManager) {
+    return ctx.lifecycleManager.getConfigFileContents()
+  }
 
-  return ctx.lifecycleManager.getConfigFileContents()
-}
+  const configManager = new ProjectConfigManager(makeStubConfigManagerOptions(projectRoot))
+  const initialConfig = await configManager.getFullInitialConfig()
 
-export async function readEnv (projectRoot: string) {
-  const ctx = getCtx()
+  configManager.destroy()
 
-  // For testing purposes, no-op if the projectRoot is already the same
-  // as the one set in the DataContext, as it would be in normal execution
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.loadCypressEnvFile()
+  return initialConfig
 }
 
 export function writeForTesting (projectRoot, objToWrite = {}) {
   const file = path.join(projectRoot, 'cypress.config.js')
 
   return _write(file, objToWrite)
-}
-
-export function pathToConfigFile (projectRoot) {
-  const ctx = getCtx()
-
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.configFilePath
 }

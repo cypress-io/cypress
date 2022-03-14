@@ -374,9 +374,9 @@ type CurrentProject implements Node & ProjectLike {
   codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
-  config: JSON!
+  config: JSON
 
-  """Config File, specified by the CLI or """
+  """Config File, specified by the CLI or inferred based on the project"""
   configFile: String
 
   """Config File Absolute Path"""
@@ -501,6 +501,7 @@ enum ErrorTypeEnum {
   CONFIG_FILE_REQUIRE_ERROR
   CONFIG_FILE_SETUP_NODE_EVENTS_ERROR
   CONFIG_FILE_UNEXPECTED_ERROR
+  CONFIG_FILE_UNEXPECTED_EXIT
   CONFIG_VALIDATION_ERROR
   CONFIG_VALIDATION_MSG_ERROR
   COULD_NOT_FIND_SYSTEM_NODE

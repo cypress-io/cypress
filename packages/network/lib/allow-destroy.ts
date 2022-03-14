@@ -1,5 +1,11 @@
 import type net from 'net'
 
+declare module 'net' {
+  interface Server {
+    destroy(cb: Parameters<Server['close']>[0]): void
+  }
+}
+
 /**
  * `allowDestroy` adds a `destroy` method to a `net.Server`. `destroy(cb)`
  * will kill all open connections and call `cb` when the server is closed.
@@ -21,7 +27,6 @@ export function allowDestroy (server: net.Server) {
   server.on('connection', trackConn)
   server.on('secureConnection', trackConn)
 
-  // @ts-ignore Property 'destroy' does not exist on type 'Server'.
   server.destroy = function (cb) {
     server.close(cb)
     connections.map((connection) => connection.destroy())

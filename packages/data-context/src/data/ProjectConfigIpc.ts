@@ -1,27 +1,10 @@
 /* eslint-disable no-dupe-class-members */
 import type { CypressError } from '@packages/errors'
-import type { TestingType } from '@packages/types'
+import type { SerializedLoadConfigReply, SetupNodeEventsReply, TestingType } from '@packages/types'
 import type { ChildProcess } from 'child_process'
 import EventEmitter from 'events'
-import { autoBindDebug } from '../util'
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
-
-export interface SetupNodeEventsReply {
-  setupConfig: Cypress.ConfigOptions | null
-  requires: string[]
-  registrations: Array<{event: string, eventId: string}>
-}
-
-export interface LoadConfigReply {
-  initialConfig: Cypress.ConfigOptions
-  requires: string[]
-}
-
-export interface SerializedLoadConfigReply {
-  initialConfig: string // stringified Cypress.ConfigOptions
-  requires: string[]
-}
 
 /**
  * The ProjectConfigIpc is an EventEmitter wrapping the childProcess,
@@ -29,22 +12,19 @@ export interface SerializedLoadConfigReply {
  *
  */
 export class ProjectConfigIpc extends EventEmitter {
+  private _destroyed = false
+
   constructor (readonly childProcess: ChildProcess) {
     super()
-    childProcess.on('error', (err) => {
-      // this.emit('error', err)
-    })
 
     childProcess.on('message', (msg: { event: string, args: any[] }) => {
       this.emit(msg.event, ...msg.args)
     })
+  }
 
-    childProcess.once('disconnect', () => {
-      // console.log('Disconnected')
-      this.emit('disconnect')
-    })
-
-    return autoBindDebug(this)
+  destroy () {
+    this._destroyed = true
+    this.removeAllListeners()
   }
 
   // TODO: options => Cypress.TestingTypeOptions
@@ -52,11 +32,17 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
   send(event: 'loadConfig'): boolean
   send (event: string, ...args: any[]) {
-    if (this.childProcess.killed) {
+    if (this._destroyed) {
       return false
     }
 
-    return this.childProcess.send({ event, args })
+    try {
+      return this.childProcess.send({ event, args })
+    } catch (e) {
+      this.emit('error', e)
+
+      return false
+    }
   }
 
   on(evt: 'childProcess:unhandledError', listener: (err: CypressError) => void): this
@@ -76,9 +62,7 @@ export class ProjectConfigIpc extends EventEmitter {
   once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
   once(evt: 'loadConfig:error', listener: (err: CypressError) => void): this
 
-  /**
-   * When
-   */
+  once(evt: 'error', listener: (err: Error) => void): this
   once(evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
   once(evt: 'setupTestingType:error', listener: (error: CypressError) => void): this
   once (evt: string, listener: (...args: any[]) => void) {

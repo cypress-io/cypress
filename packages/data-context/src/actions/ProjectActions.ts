@@ -60,7 +60,9 @@ export class ProjectActions {
 
   async clearCurrentProject () {
     this.ctx.update((d) => {
+      d.currentProjectState?.manager?.destroy()
       d.currentProject = null
+      d.currentProjectState = null
       d.currentTestingType = null
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
@@ -68,7 +70,6 @@ export class ProjectActions {
       d.warnings = []
     })
 
-    this.ctx.lifecycleManager.clearCurrentProject()
     await this.api.closeActiveProject()
   }
 
@@ -95,19 +96,26 @@ export class ProjectActions {
   }
 
   setCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setCurrentTestingType(type)
+    this.ctx.lifecycleManager?.setCurrentTestingType(type)
   }
 
-  async setCurrentProject (projectRoot: string) {
-    await this.clearCurrentProject()
-    this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+  async setCurrentProject (projectRoot: string, clearCurrent = false) {
+    if (projectRoot === this.ctx.currentProject) {
+      return
+    }
+
+    if (clearCurrent) {
+      await this.clearCurrentProject()
+    }
+
+    //
   }
 
   // Temporary: remove after other refactor lands
   setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
-    this.ctx.lifecycleManager.clearCurrentProject()
-    this.ctx.lifecycleManager.setCurrentProject(projectRoot)
-    this.ctx.lifecycleManager.setCurrentTestingType('e2e')
+    this.clearCurrentProject()
+    this.setCurrentProject(projectRoot)
+    this.ctx.lifecycleManager?.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
   }
@@ -257,16 +265,8 @@ export class ProjectActions {
     return this.api.removeProjectFromCache(projectRoot)
   }
 
-  syncProjects () {
-    //
-  }
-
   async createConfigFile (type?: 'component' | 'e2e' | null) {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot create config file without currentProject.`)
-    }
+    assert(this.ctx.lifecycleManager, `Cannot create config file without currentProject.`)
 
     let obj: { [k: string]: object } = {
       e2e: {},
@@ -283,6 +283,8 @@ export class ProjectActions {
   }
 
   async setProjectIdInConfigFile (projectId: string) {
+    assert(this.ctx.lifecycleManager, `Cannot create config file without currentProject.`)
+
     return insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
       return Error(id)
     } })
@@ -313,7 +315,9 @@ export class ProjectActions {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
+    if (this.ctx.lifecycleManager?.projectTitle) {
+      this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
+    }
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {

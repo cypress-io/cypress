@@ -635,13 +635,20 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
-  CONFIG_FILE_UNEXPECTED_ERROR: (configFilePath: string, err: ErrorLike) => {
+  CONFIG_FILE_UNEXPECTED_ERROR: (configFilePath: string, err: ErrorLike, isRunMode = false) => {
     return errTemplate`
       Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
-      We stopped running your tests because your config file crashed.
+      ${fmt.off(isRunMode ? `We stopped running your tests because your config file crashed.` : `Click "Try Again" to restart the process.`)}
 
       ${fmt.stackTrace(err)}
+    `
+  },
+  CONFIG_FILE_UNEXPECTED_EXIT: (exitCode: number, isRunMode = false) => {
+    return errTemplate`
+      Your ${fmt.highlight(`configFile`)} unexpectedly exited with exit code: ${fmt.highlightSecondary(exitCode)}
+
+      ${fmt.off(isRunMode ? `We stopped running your tests` : `Click "Try Again" to restart the process.`)}
     `
   },
   // TODO: make this relative path, not absolute

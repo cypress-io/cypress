@@ -1,3 +1,4 @@
+import assert from 'assert'
 import type { DataContext } from '.'
 import {
   LocalSettingsActions,
@@ -42,9 +43,10 @@ export class DataActions {
     return new LocalSettingsActions(this.ctx)
   }
 
-  @cached
   get wizard () {
-    return new WizardActions(this.ctx)
+    assert(this.ctx.lifecycleManager, 'Cannot call wizard actions outside of a project')
+
+    return new WizardActions(this.ctx, this.ctx.lifecycleManager)
   }
 
   @cached

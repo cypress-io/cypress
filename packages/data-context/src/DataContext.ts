@@ -74,7 +74,7 @@ export class DataContext {
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
-  readonly lifecycleManager: ProjectLifecycleManager
+  private _lifecycleManager?: ProjectLifecycleManager
 
   constructor (_config: DataContextConfig) {
     const { modeOptions, ...rest } = _config
@@ -82,7 +82,13 @@ export class DataContext {
     this._config = rest
     this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
-    this.lifecycleManager = new ProjectLifecycleManager(this)
+    if (modeOptions.projectRoot) {
+      this._lifecycleManager = new ProjectLifecycleManager(this, modeOptions.projectRoot)
+    }
+  }
+
+  get lifecycleManager () {
+    return this._lifecycleManager
   }
 
   get isRunMode () {
@@ -185,6 +191,10 @@ export class DataContext {
     return new ProjectDataSource(this)
   }
 
+  get configuredProject () {
+    return this.coreData.currentConfiguredProject
+  }
+
   @cached
   get cloud () {
     return new CloudDataSource(this)
@@ -225,6 +235,51 @@ export class DataContext {
 
   get projectsList () {
     return this.coreData.app.projects
+  }
+
+  // When we set the current project, we need to cleanup the
+  // previous project that might have existed. We use this as the
+  // single location we should use to set the `projectRoot`, because
+  // we can call it from legacy code and it'll be a no-op if the `projectRoot`
+  // is already the same, otherwise it'll do the necessary cleanup
+  setCurrentProject (projectRoot: string) {
+    if (this.lifecycleManager?.projectRoot === projectRoot) {
+      return
+    }
+
+    this.lifecycleManager?.destroy()
+
+    // this._lifecycleManager = new
+
+    // this.ctx.update((s) => {
+    //   s.currentProject = projectRoot
+    //   s.packageManager = packageManagerUsed
+    // })
+
+    // const { needsCypressJsonMigration } = this.refreshMetaState()
+
+    // this.configFileWarningCheck(projectRoot)
+
+    // // at this point, there is not a cypress configuration file to initialize
+    // // the project will be scaffolded and when the user selects the testing type
+    // // the would like to setup
+    // if (metaState.hasValidConfigFile) {
+    //   this.initializeConfig().catch(this.onError)
+    // }
+
+    // if (this.ctx.coreData.currentTestingType) {
+    //   this.setCurrentTestingType(this.ctx.coreData.currentTestingType)
+    // }
+
+    // // If migration is needed only initialize the watchers
+    // // when the migration is done.
+    // //
+    // // NOTE: If we watch the files while initializing,
+    // // the config will be loaded before the migration is complete.
+    // // The migration screen will disappear see `Main.vue` & `MigrationAction.ts`
+    // if (!needsCypressJsonMigration) {
+    //   // this.initializeConfigWatchers()
+    // }
   }
 
   // Servers
@@ -346,8 +401,8 @@ export class DataContext {
 
   onError = (cypressError: CypressError, title?: string) => {
     if (this.isRunMode) {
-      if (this.lifecycleManager?.runModeExitEarly) {
-        this.lifecycleManager.runModeExitEarly(cypressError)
+      if (this.coreData.runModeExitEarly) {
+        this.coreData.runModeExitEarly(cypressError)
       } else {
         throw cypressError
       }
@@ -406,8 +461,10 @@ export class DataContext {
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
-    // @ts-expect-error - we've already cleaned up, this is for testing only
-    this.lifecycleManager = new ProjectLifecycleManager(this)
+    if (modeOptions.projectRoot) {
+      // @ts-expect-error - we've already cleaned up, this is for testing only
+      this.lifecycleManager = new ProjectLifecycleManager(this, modeOptions.projectRoot)
+    }
 
     globalPubSub.emit('reset:data-context', this)
   }
@@ -417,7 +474,7 @@ export class DataContext {
     this.setGqlSocketServer(undefined)
 
     return Promise.all([
-      this.lifecycleManager.destroy(),
+      this.lifecycleManager?.destroy(),
       this.cloud.reset(),
       this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
@@ -429,7 +486,7 @@ export class DataContext {
     assert(!this.coreData.hasInitializedMode)
     this.coreData.hasInitializedMode = this._config.mode
     if (this._config.mode === 'run') {
-      await this.lifecycleManager.initializeRunMode()
+      await this.lifecycleManager?.initializeRunMode()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
     } else {
@@ -447,10 +504,11 @@ export class DataContext {
       this.actions.auth.getUser(),
       // and grab the user device settings
       this.actions.localSettings.refreshLocalSettings(),
+      // load projects from cache on start
+      this.actions.project.loadProjects(),
     ]
 
-    // load projects from cache on start
-    toAwait.push(this.actions.project.loadProjects())
+    this.lifecycleManager?.initializeOpenMode().catch(this.onError)
 
     return Promise.all(toAwait)
   }
