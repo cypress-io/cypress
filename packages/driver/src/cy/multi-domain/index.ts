@@ -89,8 +89,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       validator.validateLocation(location, originOrDomain)
 
-      Cypress.state('multiDomainBaseUrl', location.origin)
-
       const domain = location.superDomain
 
       return new Bluebird((resolve, reject) => {
@@ -183,7 +181,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: state('hookId'),
                   hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
-                  multiDomainBaseUrl: state('multiDomainBaseUrl'),
+                  multiDomainBaseUrl: location.origin,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
