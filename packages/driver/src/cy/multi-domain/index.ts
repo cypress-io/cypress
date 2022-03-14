@@ -119,10 +119,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           _resolve({ subject, unserializableSubjectType })
         }
 
-        communicator.once('sync:globals', ({ config, env, state }) => {
+        communicator.once('sync:globals', ({ config, env }) => {
           syncConfigToCurrentDomain(config)
           syncEnvToCurrentDomain(env)
-          Cypress.state(state)
         })
 
         communicator.once('ran:domain:fn', (details) => {

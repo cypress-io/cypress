@@ -58,7 +58,7 @@ const throwPrivateCommandInterface = (method) => {
 }
 
 class $Cypress {
-  constructor (config = {}) {
+  constructor () {
     this.cy = null
     this.chai = null
     this.mocha = null
@@ -74,11 +74,9 @@ class $Cypress {
     this.$ = jqueryProxyFn.bind(this)
 
     _.extend(this.$, $)
-
-    this.setConfig(config)
   }
 
-  setConfig (config = {}) {
+  configure (config: Cypress.ObjectLike = {}) {
     // config.remote
     // {
     //   origin: "http://localhost:2020"
@@ -126,6 +124,9 @@ class $Cypress {
     // slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
+    // true if this Cypress belongs to multi-domain
+    this.isMultiDomain = config.isMultiDomain || false
+
     // enable long stack traces when
     // we not are running headlessly
     // for debuggability but disable
@@ -138,18 +139,16 @@ class $Cypress {
 
     // TODO: env is unintentionally preserved between soft reruns unlike config.
     // change this in the NEXT_BREAKING
-    const { env, __isMultiDomain } = config
+    const { env } = config
 
-    const isMultiDomainCypress: boolean = __isMultiDomain || false
-
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', '__isMultiDomain')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isMultiDomain')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (isMultiDomainCypress ? !window.__cySkipValidateConfig : !window.top.__cySkipValidateConfig) {
+      if (this.isMultiDomain ? !window.__cySkipValidateConfig : !window.top.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
@@ -682,7 +681,11 @@ class $Cypress {
   }
 
   static create (config) {
-    return new $Cypress(config)
+    const cypress = new $Cypress()
+
+    cypress.configure(config)
+
+    return cypress
   }
 }
 

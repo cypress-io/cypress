@@ -1,15 +1,13 @@
-import type { SpecBridgeDomainCommunicator } from '../communicator'
-
-export const handleScreenshots = (Cypress: Cypress.Cypress, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
+export const handleScreenshots = (Cypress: Cypress.Cypress) => {
   Cypress.on('before:screenshot', (config, callbackFn) => {
-    specBridgeCommunicator.once('before:screenshot:end', () => {
+    Cypress.specBridgeCommunicator.once('before:screenshot:end', () => {
       callbackFn()
     })
 
-    specBridgeCommunicator.toPrimary('before:screenshot', config)
+    Cypress.specBridgeCommunicator.toPrimary('before:screenshot', config)
   })
 
   Cypress.on('after:screenshot', (config) => {
-    specBridgeCommunicator.toPrimary('after:screenshot', config)
+    Cypress.specBridgeCommunicator.toPrimary('after:screenshot', config)
   })
 }
