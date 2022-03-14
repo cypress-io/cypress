@@ -1,7 +1,5 @@
 import { subscriptionType } from 'nexus'
-import { CurrentProject } from '.'
-import { DevState } from './gql-DevState'
-import { Query } from './gql-Query'
+import { CurrentProject, DevState, Query } from '.'
 
 export const Subscription = subscriptionType({
   definition (t) {
