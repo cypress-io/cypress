@@ -1,31 +1,6 @@
-# example: tailwind
+# React Tailwind
 
 > Component testing when using [Tailwind CSS](https://tailwindcss.com/), example created following the blog post [Using Tailwind CSS With React](https://medium.com/codingthesmartway-com-blog/using-tailwind-css-with-react-ced163d0e9e9) and Tailwind's own documentation.
-
-## Usage
-
-1. Make sure the root project has been built .
-
-```bash
-# in the root of the project
-npm install
-npm run build
-```
-
-2. Run `npm install` in this folder to symlink the `@cypress/react` dependency.
-
-```bash
-# in this folder
-npm install
-```
-
-3. Start Cypress
-
-```bash
-npm run cy:open
-# or just run headless tests
-npm test
-```
 
 ## Run tests
 
@@ -39,11 +14,11 @@ npm test
 
 ## Tests
 
-- [src/App.cy-spec.js](src/App.cy-spec.js) tests component [src/App.js](src/App.js) that uses Tailwind style bundle `src/styles/main.generated.css`
+- [src/App.cy.js](src/App.cy.js) tests component [src/App.js](src/App.js) that uses Tailwind style bundle `src/styles/main.generated.css`
 
 ![Tailwind test](./images/tailwind.png)
 
-- [src/playground.cy-spec.js](src/playground.cy-spec.js) imports the CSS directly and shows off different available classes, allowing you to experiment with them from the test
+- [src/playground.cy.js](src/playground.cy.js) imports the CSS directly and shows off different available classes, allowing you to experiment with them from the test
 
 ![Playground](images/playground.png)
 

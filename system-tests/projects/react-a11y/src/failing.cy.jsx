@@ -10,28 +10,8 @@ describe('Accessibility', () => {
 
   // https://www.w3.org/WAI/standards-guidelines/aria/
   context('aria', () => {
-    // NOTE: skip a failing test on purpose
-    it.skip('catches missing aria-* label', () => {
+    it('catches missing aria-* label', () => {
       mount(<input type="text" value="John Smith" name="name" />)
-      cy.checkA11y('input', {
-        runOnly: {
-          type: 'tag',
-          values: ['wcag2a'],
-        },
-      })
-    })
-
-    it('passes', () => {
-      mount(
-        <input
-          type="text"
-          aria-label="label text"
-          aria-required="true"
-          value="John Smith"
-          name="name"
-        />,
-      )
-
       cy.checkA11y('input', {
         runOnly: {
           type: 'tag',
