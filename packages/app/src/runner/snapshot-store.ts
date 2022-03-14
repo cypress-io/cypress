@@ -28,12 +28,12 @@ export const useSnapshotStore = defineStore({
       this.isSnapshotPinned = isSnapshotPinned
     },
 
-    pinSnapshot (snapshotProps: AutSnapshot) {
+    pinSnapshot (snapshotProps: AutSnapshot, showingHighlights: boolean) {
       this.messageTitle = defaultMessages.runner.snapshot.pinnedTitle
       this.isSnapshotPinned = true
       this.snapshotProps = snapshotProps
       this.snapshot = {
-        showingHighlights: true,
+        showingHighlights,
         stateIndex: 0,
       }
     },

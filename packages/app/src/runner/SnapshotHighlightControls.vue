@@ -23,7 +23,7 @@ const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   value?: boolean
-}>(), { value: false })
+}>(), { value: true })
 
 const emits = defineEmits<{
   (e: 'update:value', value: boolean): void

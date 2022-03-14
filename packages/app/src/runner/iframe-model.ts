@@ -227,7 +227,11 @@ export class IframeModel {
       return
     }
 
-    snapshotStore.pinSnapshot(snapshotProps)
+    snapshotStore.pinSnapshot(snapshotProps, snapshotStore.snapshot?.showingHighlights ?? true)
+
+    if (snapshotStore.snapshot?.showingHighlights) {
+      snapshotStore.snapshot.showingHighlights = true
+    }
 
     clearInterval(this.intervalId)
 
