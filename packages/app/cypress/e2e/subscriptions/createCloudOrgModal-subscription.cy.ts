@@ -1,5 +1,4 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { createCloudOrganization } from '../../../../frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
@@ -17,25 +16,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      // TODO: Update with query count to change the returned value after the
-      // subscription is called
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
-          obj.result.data.cloudViewer.organizations.nodes = []
-        } else if (obj.result.data?.cloudViewer?.organizations && !obj.result.data?.cloudViewer?.organizations?.nodes.length) {
-          obj.result.data.cloudViewer.organizations = {
-            __typename: 'CloudOrganizationConnection',
-            nodes: [createCloudOrganization({})],
-            edges: [{
-              __typename: 'CloudOrganizationEdge',
-              cursor: 'cursor',
-              node: createCloudOrganization({}),
-            }],
-            pageInfo: {
-              __typename: 'PageInfo',
-              hasNextPage: false,
-              hasPreviousPage: false,
-            },
+        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer') && obj.callCount < 2) {
+          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+            obj.result.data.cloudViewer.organizations.nodes = []
           }
         }
 
@@ -55,7 +39,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         await ctx.util.fetch(`http://127.0.0.1:${ctx.gqlServerPort}/cloud-notification?operationName=orgCreated`)
       })
 
-      cy.pause()
+      cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
     })
   })
 })
