@@ -162,7 +162,10 @@ const {
   windowWidth,
   reporterWidth,
   specListWidth,
-} = useRunnerStyle()
+} = useRunnerStyle({
+  initialReporterWidth: props.gql.localSettings.preferences.reporterWidth,
+  initialSpecsListWidth: props.gql.localSettings.preferences.specListWidth,
+})
 
 const {
   handlePanelWidthUpdated,
@@ -184,8 +187,8 @@ onMounted(() => {
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
-preferences.update('reporterWidth', props.gql.localSettings.preferences.reporterWidth ?? reporterWidth.value)
-preferences.update('specListWidth', props.gql.localSettings.preferences.specListWidth ?? specListWidth.value)
+preferences.update('reporterWidth', reporterWidth.value)
+preferences.update('specListWidth', specListWidth.value)
 
 let fileToOpen: FileDetails
 

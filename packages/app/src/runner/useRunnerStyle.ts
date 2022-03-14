@@ -16,19 +16,16 @@ const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
 
 interface UseRunnerUI {
-  initialSpecsListWidth: number
-  initialReporterWidth: number
+  initialSpecsListWidth: number | null
+  initialReporterWidth: number | null
 }
 
 export const useRunnerStyle = ({
   initialReporterWidth,
   initialSpecsListWidth,
-}: UseRunnerUI = {
-  initialReporterWidth: runnerConstants.defaultReporterWidth,
-  initialSpecsListWidth: runnerConstants.defaultSpecListWidth,
-}) => {
-  reporterWidth.value = initialReporterWidth
-  specListWidth.value = initialSpecsListWidth
+}: UseRunnerUI) => {
+  reporterWidth.value = initialReporterWidth ?? runnerConstants.defaultReporterWidth
+  specListWidth.value = initialSpecsListWidth ?? runnerConstants.defaultSpecListWidth
 
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
