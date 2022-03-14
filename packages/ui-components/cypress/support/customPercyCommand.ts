@@ -142,6 +142,13 @@ export interface CustomSnapshotOptions{
   /**
    * The desired snapshot overrides. These will be merged with and take
    * precedence over the global override defined when the command was installed.
+   * @example
+   * ```ts
+   * {
+   *  '.element-to-hide': true,
+   *  '#element-to-replace-content': ($el) => { $el.text('new content') },
+   * }
+   * ```
    */
   elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
 }
@@ -166,13 +173,6 @@ declare global {
       /**
        * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
        * reset after snapshot generation so that the AUT is not polluted after the command executes.
-       *
-       * @param {string} name The name of the snapshot to generate. Will be generated from test's titlePath by default.
-       * @param {Object} options Object containing options for the snapshot command, including:
-       * @param {number} options.width The desired snapshot width. The test's viewportWidth will be used by default.
-       * @param {number} options.height The desired snapshot height. The test's viewportHeight will be used by default.
-       * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
-       *   precedence over the global override defined when the command was installed.
        */
       percySnapshot(name: string, options?: CustomSnapshotOptions): Chainable<() => void>
     }
