@@ -827,10 +827,14 @@ export default (Commands, Cypress, cy, state, config) => {
 
       url = $Location.normalize(url)
 
-      const baseUrl = config('baseUrl')
+      if (Cypress.state('isMultiDomain')) {
+        url = $Location.qualifyWithBaseUrl(Cypress.state('multiDomainBaseUrl'), url)
+      } else {
+        const baseUrl = config('baseUrl')
 
-      if (baseUrl) {
-        url = $Location.qualifyWithBaseUrl(baseUrl, url)
+        if (baseUrl) {
+          url = $Location.qualifyWithBaseUrl(baseUrl, url)
+        }
       }
 
       const qs = options.qs
