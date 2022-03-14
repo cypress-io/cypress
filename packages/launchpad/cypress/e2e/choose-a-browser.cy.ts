@@ -135,6 +135,12 @@ describe('Choose a Browser Page', () => {
       })
 
       cy.contains('button', 'Running Chrome')
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('closed')
+      })
+
+      cy.contains('button', 'Start E2E Testing in Chrome')
     })
 
     it('performs mutation to change selected browser when browser item is clicked', () => {
