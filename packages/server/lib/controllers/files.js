@@ -52,7 +52,7 @@ module.exports = {
 
   handleMultiDomainIframe (req, res) {
     const iframePath = cwd('lib', 'html', 'multi-domain-iframe.html')
-    const domain = decodeURI(req.params.domain)
+    const domain = req.hostname
 
     const iframeOptions = {
       domain,

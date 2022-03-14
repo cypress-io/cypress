@@ -6,7 +6,7 @@ context('multi-domain shadow dom', { experimentalSessionSupport: true }, () => {
   })
 
   it('.shadow()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#shadow-element-1').shadow().find('p.shadow-1')
       .should('have.text', 'Shadow Content 1')
     })

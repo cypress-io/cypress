@@ -7,7 +7,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.type()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#input').type('foo')
       .should('have.value', 'foo')
     })
@@ -16,7 +16,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.focus()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#input').focus()
       .should('be.focused')
     })
@@ -25,7 +25,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.blur()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#input').type('foo').blur()
       .should('not.be.focused')
     })
@@ -34,7 +34,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.clear()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#input')
       .type('foo').should('have.value', 'foo')
       .clear().should('have.value', '')
@@ -44,7 +44,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.submit()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       const afterFormSubmitted = new Promise<void>((resolve) => {
         cy.once('form:submitted', resolve)
       })
@@ -57,7 +57,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.click()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const onClick = new Promise<void>((resolve) => {
           $btn.on('click', () => resolve())
@@ -72,7 +72,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.dblclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterDblClick = new Promise<void>((resolve) => {
           $btn.on('dblclick', () => resolve())
@@ -87,7 +87,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.rightclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterContextmenu = new Promise<void>((resolve) => {
           $btn.on('contextmenu', () => resolve())
@@ -102,7 +102,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.check()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .check().should('be.checked')
     })
@@ -111,7 +111,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.uncheck()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .check().should('be.checked')
       .uncheck().should('not.be.checked')
@@ -121,7 +121,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.select()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('select[name="foods"]')
       .select('Japanese').should('have.value', 'Japanese')
     })
@@ -130,7 +130,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.scrollIntoView()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5')
       .should('not.be.visible')
       .scrollIntoView().should('be.visible')
@@ -140,7 +140,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.scrollTo()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
       cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       cy.get('#scroll-into-view-vertical h5').should('be.visible')
@@ -150,7 +150,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.trigger()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterClick = new Promise<void>((resolve) => {
           $btn.on('click', () => resolve())
@@ -165,7 +165,7 @@ context('multi-domain actions', { experimentalSessionSupport: true }, () => {
   it('.selectFile()', () => {
     cy.get('a[data-cy="files-form-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap(Cypress.Buffer.from('foo')).as('foo')
 
       cy.get('#basic')

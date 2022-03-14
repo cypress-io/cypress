@@ -16,7 +16,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields a value', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -24,7 +24,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields the cy value even if a return is present', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -46,7 +46,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -56,13 +56,13 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields synchronously', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       return 'From a secondary domain'
     }).should('equal', 'From a secondary domain')
   })
 
   it('yields asynchronously', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       return new Promise((resolve: (val: string) => any, reject) => {
         setTimeout(() => {
           resolve('From a secondary domain')
@@ -72,7 +72,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('succeeds if subject cannot be serialized and is not accessed synchronously', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       return {
         symbol: Symbol(''),
       }
@@ -90,7 +90,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       return {
         symbol: Symbol(''),
       }
@@ -101,7 +101,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('succeeds if subject cannot be serialized and is not accessed', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {
@@ -119,7 +119,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then((subject) => subject.text())
@@ -135,7 +135,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap({
         key: () => {
           return 'whoops'
@@ -155,7 +155,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap({
         key: Symbol('whoops'),
       })
@@ -172,7 +172,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap(() => {
         return 'text'
       })
@@ -192,7 +192,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap(Symbol('symbol'))
     })
     .should('equal', 'symbol')
@@ -212,7 +212,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap({
         key: new Error('Boom goes the dynamite'),
       })
@@ -224,7 +224,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields an object containing valid types', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.wrap({
         array: [
           1,

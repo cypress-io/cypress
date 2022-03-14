@@ -6,7 +6,7 @@ context('multi-domain assertions', { experimentalSessionSupport: true }, () => {
   })
 
   it('.should() and .and()', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .should('not.be.checked').and('not.be.disabled')
     })

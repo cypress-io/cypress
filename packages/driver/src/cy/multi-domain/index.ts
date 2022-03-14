@@ -4,6 +4,18 @@ import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
+import { $Location } from '../../cypress/location'
+
+const reHttp = /^https?:\/\//
+
+const normalizeDomain = (domain) => {
+  // add the protocol if it's not present
+  if (!reHttp.test(domain)) {
+    domain = `https://${domain}`
+  }
+
+  return $Location.normalize(domain)
+}
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -32,7 +44,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   })
 
   Commands.addAll({
-    switchToDomain<T> (domain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+    switchToDomain<T> (originOrDomain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
       // domain run, so it can't have its own timeout
@@ -56,7 +68,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const log = Cypress.log({
         name: 'switchToDomain',
         type: 'parent',
-        message: domain,
+        message: originOrDomain,
         end: true,
       })
 
@@ -68,8 +80,16 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       validator.validate({
         callbackFn,
         data,
-        domain,
+        originOrDomain,
       })
+
+      // use URL to ensure unicode characters are correctly handled
+      const url = new URL(normalizeDomain(originOrDomain)).toString()
+      const location = $Location.create(url)
+
+      validator.validateLocation(location, originOrDomain)
+
+      const domain = location.superDomain
 
       return new Bluebird((resolve, reject) => {
         const cleanup = () => {
@@ -99,10 +119,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           _resolve({ subject, unserializableSubjectType })
         }
 
-        communicator.once('sync:globals', ({ config, env, state }) => {
+        communicator.once('sync:globals', ({ config, env }) => {
           syncConfigToCurrentDomain(config)
           syncEnvToCurrentDomain(env)
-          Cypress.state(state)
         })
 
         communicator.once('ran:domain:fn', (details) => {
@@ -177,9 +196,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           }
         })
 
-        // this signals to the runner to create the spec bridge for
-        // the specified domain
-        communicator.emit('expect:domain', domain)
+        // this signals to the runner to create the spec bridge for the specified origin policy
+        communicator.emit('expect:domain', location)
       })
     },
   })

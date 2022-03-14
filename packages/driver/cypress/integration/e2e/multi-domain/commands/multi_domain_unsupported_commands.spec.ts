@@ -11,7 +11,7 @@ context('multi-domain unsupported commands', { experimentalSessionSupport: true 
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.route('api')
     })
   })
@@ -22,7 +22,7 @@ context('multi-domain unsupported commands', { experimentalSessionSupport: true 
       done()
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.server()
     })
   })
