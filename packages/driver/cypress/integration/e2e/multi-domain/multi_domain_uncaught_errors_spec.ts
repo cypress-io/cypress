@@ -46,7 +46,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('.trigger-sync-error').click()
       })
     })
@@ -59,7 +59,7 @@ describe('multi-domain - uncaught errors', () => {
 
       cy.on('fail', failureSpy)
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.on('uncaught:exception', () => false)
         cy.get('.trigger-sync-error').click()
       }).then(() => {
@@ -80,7 +80,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => true)
         cy.get('.trigger-sync-error').click()
       })
@@ -89,7 +89,7 @@ describe('multi-domain - uncaught errors', () => {
     // if we mutate the error, the app's listeners for 'error' or
     // 'unhandledrejection' will have our wrapped error instead of the original
     it('original error is not mutated for "error" in the switchToDomain', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-sync-error').click()
@@ -109,7 +109,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -140,7 +140,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('.trigger-async-error').click()
 
         // add the cy.wait here to keep commands streaming in,
@@ -157,7 +157,7 @@ describe('multi-domain - uncaught errors', () => {
 
       cy.on('fail', failureSpy)
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
         cy.get('.trigger-async-error').click()
       }).then(() => {
@@ -175,7 +175,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -187,7 +187,7 @@ describe('multi-domain - uncaught errors', () => {
 
   describe('unhandled rejections', () => {
     it('unhandled rejection triggers uncaught:exception and has promise as third argument', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const r = cy.state('runnable')
 
         const afterUncaughtException = new Promise<void>((resolve) => {
@@ -211,7 +211,7 @@ describe('multi-domain - uncaught errors', () => {
     })
 
     it('original error is not mutated for "unhandledrejection"', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-unhandled-rejection').click()
@@ -230,7 +230,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
 
         // add the cy.wait here to keep commands streaming in, forcing the
@@ -249,7 +249,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
       })
 
@@ -348,7 +348,9 @@ describe('multi-domain - uncaught errors', () => {
         // make sure the name property is read-only before serializing it through postMessage
         expect(writable).to.be.false
 
-        throw customErrorInstance
+        cy.then(() => {
+          throw customErrorInstance
+        })
       })
     })
 

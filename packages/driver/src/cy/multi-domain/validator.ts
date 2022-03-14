@@ -1,8 +1,6 @@
 import type $Log from '../../cypress/log'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import isValidDomain from 'is-valid-domain'
-import { isIP } from 'is-ip'
 import { isString } from 'lodash'
 
 export class Validator {
@@ -14,13 +12,13 @@ export class Validator {
     this.onFailure = onFailure
   }
 
-  validate ({ callbackFn, data, domain }) {
-    if (!isString(domain) || domain !== 'localhost' && !isIP(domain) && !isValidDomain(domain, { allowUnicode: true, subdomain: false })) {
+  validate ({ callbackFn, data, originOrDomain }) {
+    if (!isString(originOrDomain)) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
+      $errUtils.throwErrByPath('switchToDomain.invalid_origin_argument', {
         onFail: this.log,
-        args: { arg: $utils.stringify(domain) },
+        args: { arg: $utils.stringify(originOrDomain) },
       })
     }
 
@@ -39,6 +37,18 @@ export class Validator {
       $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(callbackFn) },
+      })
+    }
+  }
+
+  validateLocation (location, originOrDomain) {
+    // we don't support query params, hashes, or paths (except for '/')
+    if (location.search.length > 0 || location.pathname.length > 1 || location.hash.length > 0) {
+      this.onFailure()
+
+      $errUtils.throwErrByPath('switchToDomain.invalid_origin_argument', {
+        onFail: this.log,
+        args: { arg: $utils.stringify(originOrDomain) },
       })
     }
   }

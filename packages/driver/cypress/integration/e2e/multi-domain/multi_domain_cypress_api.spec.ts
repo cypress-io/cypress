@@ -7,7 +7,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
 
   context('Commands', () => {
     it('adds a custom command', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         Cypress.Commands.add('foo', () => 'bar')
 
@@ -16,14 +16,14 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
       })
 
       // persists added command through spec bridge
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         cy.foo().should('equal', 'bar')
       })
     })
 
     it('overwrites an existing command in the spec bridge', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         Cypress.Commands.overwrite('foo', () => 'baz')
 
@@ -32,7 +32,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
       })
 
       // persists overwritten command through spec bridge
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         cy.foo().should('equal', 'baz')
       })
@@ -45,7 +45,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
         keystrokeDelay: 30,
       })
 
-      cy.switchToDomain('foobar.com', [defaults], ([primaryKeyboardDefaults]) => {
+      cy.switchToDomain('http://foobar.com:3500', [defaults], ([primaryKeyboardDefaults]) => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({})
 
         expect(multiDomainKeyboardDefaults).to.not.deep.equal(primaryKeyboardDefaults)
@@ -53,7 +53,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
     })
 
     it('allows a user to configure defaults', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({
           keystrokeDelay: 60,
         })
@@ -64,7 +64,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
       })
 
       // persists default configuration changes through spec bridge
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({})
 
         expect(multiDomainKeyboardDefaults).to.deep.include({
@@ -83,7 +83,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
         onAfterScreenshot: () => undefined,
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({})
 
         expect(multiDomainScreenshotDefaults).to.not.deep.include({
@@ -96,7 +96,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
     })
 
     it('allows a user to configure defaults', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({
           blackout: ['foo'],
           overwrite: true,
@@ -109,7 +109,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
       })
 
       // persists default configuration changes through spec bridge
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({})
 
         expect(multiDomainScreenshotDefaults).to.deep.include({
@@ -122,7 +122,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
 
   context('dom', () => {
     it('provides a sanity check that the dom API exists on Cypress.*', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('[data-cy="dom-check"]').then(($el) => {
           expect(Cypress.dom.isAttached($el)).to.be.true
         })
@@ -133,7 +133,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
   // TODO: Before implementing, understand how Cypress.session.* and cy.session() are supposed to function within the context of multi-domain
   context.skip('session', () => {
     it('clearAllSavedSessions() functions as expected', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Cypress.session.clearAllSavedSessions()
       })
     })
@@ -141,37 +141,37 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
 
   context('properties', () => {
     it('has arch property synced from primary', () => {
-      cy.switchToDomain('foobar.com', [Cypress.arch], ([theArch]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.arch], ([theArch]) => {
         expect(Cypress.arch).to.equal(theArch)
       })
     })
 
     it('has browser property synced from primary', () => {
-      cy.switchToDomain('foobar.com', [Cypress.browser], ([theBrowser]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.browser], ([theBrowser]) => {
         expect(Cypress.browser).to.deep.equal(theBrowser)
       })
     })
 
     it('has currentTest property synced from primary', () => {
-      cy.switchToDomain('foobar.com', [Cypress.currentTest], ([theCurrentTest]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.currentTest], ([theCurrentTest]) => {
         expect(Cypress.currentTest).to.deep.equal(theCurrentTest)
       })
     })
 
     it('has platform property synced from primary', () => {
-      cy.switchToDomain('foobar.com', [Cypress.platform], ([thePlatform]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.platform], ([thePlatform]) => {
         expect(Cypress.platform).to.equal(thePlatform)
       })
     })
 
     it('has testingType property synced from primary', () => {
-      cy.switchToDomain('foobar.com', [Cypress.testingType], ([theTestingType]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.testingType], ([theTestingType]) => {
         expect(Cypress.testingType).to.deep.equal(theTestingType)
       })
     })
 
     it('has spec property synced from primary', () => {
-      cy.switchToDomain('foobar.com', [Cypress.spec], ([theSpec]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.spec], ([theSpec]) => {
         expect(Cypress.spec).to.deep.equal(theSpec)
       })
     })
@@ -179,20 +179,20 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
 
   context('methods', () => {
     it('isCy()', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         expect(Cypress.isCy(cy)).to.be.true
       })
     })
 
     it('isBrowser()', () => {
-      cy.switchToDomain('foobar.com', [Cypress.browser], ([theBrowser]) => {
+      cy.switchToDomain('http://foobar.com:3500', [Cypress.browser], ([theBrowser]) => {
         expect(Cypress.isBrowser(theBrowser.name)).to.equal(true)
       })
     })
 
     // FIXME: convert to cypress-in-cypress tests once possible
     it('log()', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Cypress.log({
           message: 'test log',
         })
@@ -222,7 +222,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Cypress.Server.defaults({})
       })
     })
@@ -233,7 +233,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         Cypress.Cookies.preserveOnce({})
       })

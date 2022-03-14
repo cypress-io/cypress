@@ -28,7 +28,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 
   describe('navigation:changed', () => {
     it('navigation:changed via hashChange', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const afterNavigationChanged = new Promise<void>((resolve) => {
           const listener = () => {
             cy.location().should((loc) => {
@@ -50,7 +50,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 
     // TODO: this test should work but there seems to be a problem where the command queue ends prematurely
     it.skip('navigates forward and back using history', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('a[data-cy="multi-domain-page"]').click()
         .window().then((win) => {
           return new Promise((resolve) => {
@@ -71,7 +71,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 
   describe('window:load', () => {
     it('reloads', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
@@ -107,7 +107,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
     })
 
     it('navigates to a new page', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
@@ -152,7 +152,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 
   describe('url:changed', () => {
     it('reloads', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const afterUrlChanged = new Promise<void>((resolve) => {
           cy.once('url:changed', (url) => {
             expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
@@ -166,7 +166,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
     })
 
     it('navigates to a new page', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const afterUrlChanged = new Promise<void>((resolve) => {
           let times = 0
           const listener = (url) => {
@@ -192,7 +192,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 
     // TODO: this test should re revisited with the cypress in cypress tests available in 10.0
     it.skip('the runner url updates appropriately', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('a[data-cy="multi-domain-page"]').click()
       })
     })
