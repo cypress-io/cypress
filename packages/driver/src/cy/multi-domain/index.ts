@@ -45,6 +45,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   Commands.addAll({
     switchToDomain<T> (originOrDomain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+      // store the invocation stack in the case that `switchToDomain` errors
+      communicator.userInvocationStack = state('current').get('userInvocationStack')
+
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
       // domain run, so it can't have its own timeout
@@ -104,10 +107,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         const _reject = (err) => {
           cleanup()
           log.error(err)
-          if (typeof err === 'object') {
-            err.onFail = () => {}
-          }
-
           reject(err)
         }
 
@@ -178,6 +177,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: state('hookId'),
                   hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
+                  multiDomainBaseUrl: location.origin,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
