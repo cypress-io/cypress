@@ -467,13 +467,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: '__socket.io',
+    defaultValue: '__socket',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
-    defaultValue: '/__socket.io',
+    defaultValue: '/__socket',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,

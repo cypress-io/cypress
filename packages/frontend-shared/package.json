@@ -15,11 +15,7 @@
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "postinstall": "patch-package"
   },
-  "dependencies": {
-    "@toycode/markdown-it-class": "1.2.3",
-    "markdown-it": "12.2.0",
-    "shiki": "^0.9.12"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
     "@cypress/vite-dev-server": "0.0.0-development",
@@ -31,6 +27,7 @@
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
     "@percy/cypress": "^3.1.0",
     "@testing-library/cypress": "8.0.0",
+    "@toycode/markdown-it-class": "1.2.3",
     "@types/faker": "5.5.8",
     "@urql/core": "2.3.1",
     "@urql/exchange-execute": "1.1.0",
@@ -52,13 +49,16 @@
     "graphql": "^15.5.1",
     "graphql-relay": "^0.9.0",
     "graphql-tag": "^2.12.5",
+    "graphql-ws": "^5.5.5",
     "human-interval": "1.0.0",
     "javascript-time-ago": "2.3.8",
     "just-my-luck": "3.0.0",
     "lodash": "4.17.21",
+    "markdown-it": "12.2.0",
     "modern-normalize": "1.1.0",
     "patch-package": "6.4.7",
     "rimraf": "3.0.2",
+    "shiki": "^0.9.12",
     "spin.js": "^4.1.1",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.15.4",
