@@ -144,7 +144,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     // runner-ct overrides
     defaultValue: {
       specPattern: '**/*.cy.{js,jsx,ts,tsx}',
-      slowTestThreshold: 250,
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -164,7 +163,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     // e2e runner overrides
     defaultValue: {
       specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-      slowTestThreshold: 10000,
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -324,6 +322,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'slowTestThreshold',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
