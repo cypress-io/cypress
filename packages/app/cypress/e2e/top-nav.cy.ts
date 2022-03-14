@@ -366,12 +366,14 @@ describe('App Top Nav Workflows', () => {
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
-            onMessage({ browserOpened: true })
+            setTimeout(() => {
+              onMessage({ browserOpened: true })
+            }, 500)
 
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(options.user)
-              }, 2000) // timeout ensures full auth browser lifecycle is testable
+              }, 1000)
             })
           })
         }, { user })
