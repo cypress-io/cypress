@@ -78,7 +78,7 @@ useSubscription({ query: OnSpecChangeDocument }, (prev, next) => {
 
 ### Client Details:
 
-- [API Docs for useSubscription](https://formidable.com/open-source/urql/docs/api/urql/#usesubscription)
+- [API Docs for useSubscription](https://formidable.com/open-source/urql/docs/api/vue/#usesubscription)
 - [Subscriptions overview](https://formidable.com/open-source/urql/docs/advanced/subscriptions/)
 
  One thing to be aware of, is the subscription is only mounted/responded to when the containing component is mounted on the page.
