@@ -1,4 +1,4 @@
-import { options } from '@packages/config/lib/options'
+import { options } from '@packages/config'
 
 export const getDefaultSpecPatterns = () => {
   return {
