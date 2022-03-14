@@ -32,6 +32,14 @@ const getNextQueuedCommand = (state, queue) => {
   return search(state('index'))
 }
 
+interface InternalPauseOptions extends Partial<Cypress.Loggable> {
+  _log?: any
+}
+
+interface InternalDebugOptions extends Partial<Cypress.Loggable> {
+  _log?: any
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   Cypress.on('resume:next', () => {
     return resume(state, false)
@@ -42,21 +50,18 @@ export default (Commands, Cypress, cy, state, config) => {
   })
 
   Commands.addAll({ type: 'utility', prevSubject: 'optional' }, {
-    // TODO: change the options type from `any` to `Loggable`.
     // pause should indefinitely pause until the user
     // presses a key or clicks in the UI to continue
-    pause (subject, options: any = {}) {
+    pause (subject, options: Partial<Cypress.Loggable> = {}) {
       // bail if we're in run mode, unless --headed and --no-exit flags are passed
       if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
         return subject
       }
 
-      const userOptions = options
+      const _options: InternalPauseOptions = _.defaults({}, options, { log: true })
 
-      options = _.defaults({}, userOptions, { log: true })
-
-      if (options.log) {
-        options._log = Cypress.log({
+      if (_options.log) {
+        _options._log = Cypress.log({
           snapshot: true,
           autoEnd: false,
           timeout: 0,
@@ -72,8 +77,8 @@ export default (Commands, Cypress, cy, state, config) => {
           // pause on the very next one
             state('onPaused', null)
 
-            if (options.log) {
-              options._log.end()
+            if (_options.log) {
+              _options._log.end()
             }
           }
 
@@ -103,16 +108,13 @@ export default (Commands, Cypress, cy, state, config) => {
       return subject
     },
 
-    // TODO: change `any` to Loggable
-    debug (subject, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    debug (subject, options: Partial<Cypress.Loggable> = {}) {
+      const _options: InternalDebugOptions = _.defaults({}, options, {
         log: true,
       })
 
-      if (options.log) {
-        options._log = Cypress.log({
+      if (_options.log) {
+        _options._log = Cypress.log({
           snapshot: true,
           end: true,
           timeout: 0,
