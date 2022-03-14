@@ -1,7 +1,59 @@
 import '@percy/cypress'
+import { SnapshotOptions } from '@percy/core'
+
+export interface CustomSnapshotOptions extends SnapshotOptions{
+  /**
+   * width of the snapshot taken from the left edge of the viewport
+   * @default - The test's viewportWidth
+   */
+  width?: number
+  /**
+   * height of the snapshot taken from the top edge of the viewport
+   * @default - The test's viewportHeight
+   */
+  height?: number
+  /**
+   * The desired snapshot overrides. These will be merged with and take
+   * precedence over the global override defined when the command was installed.
+   * @example
+   * ```ts
+   * {
+   *  '.element-to-hide': true,
+   *  '#element-to-replace-content': ($el) => { $el.text('new content') },
+   * }
+   * ```
+   */
+  elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
+}
+
+interface SnapshotMutationOptions{
+  log?: string
+  defaultWidth: number
+  defaultHeight: number
+  snapshotWidth: number
+  snapshotHeight: number
+  snapshotElementOverrides: NonNullable<CustomSnapshotOptions['elementOverrides']>
+}
+
+declare global {
+  namespace Cypress {
+    interface Chainable{
+      /**
+       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+       * reset after snapshot generation so that the AUT is not polluted after the command executes.
+       */
+      percySnapshot(options?: CustomSnapshotOptions): Chainable<() => void>
+      /**
+       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+       * reset after snapshot generation so that the AUT is not polluted after the command executes.
+       */
+      percySnapshot(name: string, options?: CustomSnapshotOptions): Chainable<() => void>
+    }
+  }
+}
 
 class ElementOverrideManager {
-  mutationStack: Array<MutationRecord> | undefined = undefined
+  private mutationStack: Array<MutationRecord> | undefined = undefined
 
   /**
    * overrides are defined in selector/override pairs.
@@ -22,7 +74,12 @@ class ElementOverrideManager {
       this.mutationStack.push(...mutations)
     })
 
-    observer.observe(cy.$$('html')[0], { childList: true, subtree: true, attributes: true, attributeOldValue: true })
+    observer.observe(cy.$$('html')[0], {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+    })
 
     Object.entries(overrides).forEach(([k, v]) => {
       // eslint-disable-next-line cypress/no-assigning-return-values
@@ -55,8 +112,8 @@ class ElementOverrideManager {
       addedNodes,
       removedNodes,
     }) => {
-      if (type === 'attributes' && attributeName && oldValue) {
-        (target as HTMLElement).setAttribute(attributeName, oldValue)
+      if (type === 'attributes' && attributeName) {
+        (target as HTMLElement).setAttribute(attributeName, oldValue || '')
 
         return
       }
@@ -128,57 +185,6 @@ const applySnapshotMutations = ({
   })
 }
 
-export interface CustomSnapshotOptions{
-  /**
-   * width of the snapshot taken from the left edge of the viewport
-   * @default - The test's viewportWidth
-   */
-  width?: number
-  /**
-   * height of the snapshot taken from the top edge of the viewport
-   * @default - The test's viewportHeight
-   */
-  height?: number
-  /**
-   * The desired snapshot overrides. These will be merged with and take
-   * precedence over the global override defined when the command was installed.
-   * @example
-   * ```ts
-   * {
-   *  '.element-to-hide': true,
-   *  '#element-to-replace-content': ($el) => { $el.text('new content') },
-   * }
-   * ```
-   */
-  elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
-}
-
-interface SnapshotMutationOptions{
-  log?: string
-  defaultWidth: number
-  defaultHeight: number
-  snapshotWidth: number
-  snapshotHeight: number
-  snapshotElementOverrides: NonNullable<CustomSnapshotOptions['elementOverrides']>
-}
-
-declare global {
-  namespace Cypress {
-    interface Chainable{
-      /**
-       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
-       * reset after snapshot generation so that the AUT is not polluted after the command executes.
-       */
-      percySnapshot(options?: CustomSnapshotOptions): Chainable<() => void>
-      /**
-       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
-       * reset after snapshot generation so that the AUT is not polluted after the command executes.
-       */
-      percySnapshot(name: string, options?: CustomSnapshotOptions): Chainable<() => void>
-    }
-  }
-}
-
 export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'] } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
@@ -191,7 +197,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
    * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
    *   precedence over the global override defined when the command was installed.
    */
-  const customPercySnapshot = (origFn, name?: string, options: CustomSnapshotOptions = {}) => {
+  const customPercySnapshot = (percySnapshot, name?: string, options: CustomSnapshotOptions = {}) => {
     if (name && typeof name === 'object') {
       options = name
       name = undefined
@@ -251,7 +257,8 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
       // Wrap in cy.then here to ensure that the original command is
       // enqueued appropriately.
       cy.then(() => {
-        return origFn(screenshotName, {
+        return percySnapshot(screenshotName, {
+          ...options,
           widths: [snapshotWidth],
         })
       }).then(() => {
