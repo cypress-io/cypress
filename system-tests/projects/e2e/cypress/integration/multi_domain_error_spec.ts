@@ -6,7 +6,7 @@ describe('multi-domain', () => {
   })
 
   it('tries to find an element that doesn\'t exist and fails', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:4466', () => {
       cy.get('#doesnotexist', {
         timeout: 1000,
       })

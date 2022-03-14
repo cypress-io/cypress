@@ -10,13 +10,14 @@ describe('multi-domain - uncaught errors', () => {
   })
 
   describe('sync errors', () => {
-    it('appropriately reports negative assertions', () => {
+    it('appropriately reports negative assertions', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('AssertionError')
         expect(err.message).to.include('expected true to be false')
+        done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.then(() => {
           expect(true).to.be.false
         })
@@ -266,7 +267,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw document.createElement('h1')
       })
     })
@@ -279,7 +280,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw () => undefined
       })
     })
@@ -292,7 +293,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw Symbol('foo')
       })
     })
@@ -305,7 +306,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw new Promise(() => {})
       })
     })
@@ -327,7 +328,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         class CustomError extends Error {
           private _name = 'CustomError'
           get name () {
@@ -364,7 +365,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         class FooBar {
           private _metasyntaticList = ['foo']
           get metasyntaticList (): string[] {
@@ -393,7 +394,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw 'oops'
       })
     })
@@ -406,7 +407,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw ['why would anyone do this?', 'this is odd']
       })
     })
@@ -419,7 +420,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw 2
       })
     })
@@ -432,7 +433,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw true
       })
     })
@@ -445,7 +446,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw null
       })
     })
@@ -458,7 +459,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw undefined
       })
     })
@@ -471,7 +472,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw new Date()
       })
     })
