@@ -12,7 +12,7 @@ const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
 
 let instance = null
 
-const kill = function (unbind, isProcessExit) {
+const kill = function (unbind = true, isProcessExit = false) {
   // Clean up the instance when the browser is closed
   if (!instance) {
     debug('browsers.kill called with no active instance')
@@ -24,12 +24,12 @@ const kill = function (unbind, isProcessExit) {
 
   instance = null
 
-  if (unbind) {
-    _instance.removeAllListeners()
-  }
-
   return new Promise((resolve) => {
     _instance.once('exit', () => {
+      if (unbind) {
+        _instance.removeAllListeners()
+      }
+
       debug('browser process killed')
 
       resolve()
@@ -149,6 +149,8 @@ module.exports = {
         onBrowserClose () {},
       })
 
+      ctx.browser.setBrowserStatus('opening')
+
       const browserLauncher = getBrowserLauncher(browser)
 
       if (!browserLauncher) {
@@ -195,7 +197,12 @@ module.exports = {
         // the browser opening
         return Promise.delay(1000)
         .then(() => {
+          if (instance === null) {
+            return null
+          }
+
           options.onBrowserOpen()
+          ctx.browser.setBrowserStatus('open')
 
           return instance
         })
