@@ -20,12 +20,9 @@ interface UseRunnerUI {
   initialReporterWidth: number | null
 }
 
-export const useRunnerStyle = ({
-  initialReporterWidth,
-  initialSpecsListWidth,
-}: UseRunnerUI) => {
-  reporterWidth.value = initialReporterWidth ?? runnerConstants.defaultReporterWidth
-  specListWidth.value = initialSpecsListWidth ?? runnerConstants.defaultSpecListWidth
+export const useRunnerStyle = (initialValues?: UseRunnerUI) => {
+  reporterWidth.value = initialValues?.initialReporterWidth ?? runnerConstants.defaultReporterWidth
+  specListWidth.value = initialValues?.initialSpecsListWidth ?? runnerConstants.defaultSpecListWidth
 
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
