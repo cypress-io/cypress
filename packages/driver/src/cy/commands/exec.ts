@@ -3,13 +3,15 @@ import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 
+interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
+  _log?: any
+  cmd?: string
+}
+
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    // TODO: change the type of `any` to `Partical<Cypress.ExecOptions>`
-    exec (cmd, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    exec (cmd: string, options: Partial<Cypress.ExecOptions> = {}) {
+      const _options: InternalExecOptions = _.defaults({}, options, {
         log: true,
         timeout: Cypress.config('execTimeout'),
         failOnNonZeroExit: true,
@@ -18,12 +20,12 @@ export default (Commands, Cypress, cy) => {
 
       let consoleOutput
 
-      if (options.log) {
+      if (_options.log) {
         consoleOutput = {}
 
-        options._log = Cypress.log({
+        _options._log = Cypress.log({
           message: _.truncate(cmd, { length: 25 }),
-          timeout: options.timeout,
+          timeout: _options.timeout,
           consoleProps () {
             return consoleOutput
           },
@@ -32,27 +34,27 @@ export default (Commands, Cypress, cy) => {
 
       if (!cmd || !_.isString(cmd)) {
         $errUtils.throwErrByPath('exec.invalid_argument', {
-          onFail: options._log,
+          onFail: _options._log,
           args: { cmd: cmd ?? '' },
         })
       }
 
-      options.cmd = cmd
+      _options.cmd = cmd
 
       // need to remove the current timeout
       // because we're handling timeouts ourselves
       cy.clearTimeout()
 
-      return Cypress.backend('exec', _.pick(options, 'cmd', 'timeout', 'env'))
-      .timeout(options.timeout)
+      return Cypress.backend('exec', _.pick(_options, 'cmd', 'timeout', 'env'))
+      .timeout(_options.timeout)
       .then((result) => {
-        if (options._log) {
+        if (_options._log) {
           _.extend(consoleOutput, { Yielded: _.omit(result, 'shell') })
 
           consoleOutput['Shell Used'] = result.shell
         }
 
-        if ((result.code === 0) || !options.failOnNonZeroExit) {
+        if ((result.code === 0) || !_options.failOnNonZeroExit) {
           return result
         }
 
@@ -67,14 +69,14 @@ export default (Commands, Cypress, cy) => {
         }
 
         return $errUtils.throwErrByPath('exec.non_zero_exit', {
-          onFail: options._log,
+          onFail: _options._log,
           args: { cmd, output, code: result.code },
         })
       })
       .catch(Promise.TimeoutError, { timedOut: true }, () => {
         return $errUtils.throwErrByPath('exec.timed_out', {
-          onFail: options._log,
-          args: { cmd, timeout: options.timeout },
+          onFail: _options._log,
+          args: { cmd, timeout: _options.timeout },
         })
       })
       .catch((error) => {
@@ -84,7 +86,7 @@ export default (Commands, Cypress, cy) => {
         }
 
         return $errUtils.throwErrByPath('exec.failed', {
-          onFail: options._log,
+          onFail: _options._log,
           args: { cmd, error },
         })
       })
