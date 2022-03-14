@@ -1,5 +1,7 @@
+/// <reference types="cypress" />
+
 import '@percy/cypress'
-import { SnapshotOptions } from '@percy/core'
+import type { SnapshotOptions } from '@percy/core'
 
 export interface CustomSnapshotOptions extends SnapshotOptions{
   /**
@@ -47,7 +49,7 @@ declare global {
        * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
        * reset after snapshot generation so that the AUT is not polluted after the command executes.
        */
-      percySnapshot(name: string, options?: CustomSnapshotOptions): Chainable<() => void>
+      percySnapshot(name?: string, options?: CustomSnapshotOptions): Chainable<() => void>
     }
   }
 }
@@ -270,5 +272,5 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
     })
   }
 
-  Cypress.Commands.overwrite('percySnapshot', customPercySnapshot)
+  Cypress.Commands.overwrite('percySnapshot', customPercySnapshot as any)
 }
