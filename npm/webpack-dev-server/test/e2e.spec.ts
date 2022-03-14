@@ -13,7 +13,7 @@ const requestSpecFile = (file: string, port: number) => {
     const opts = {
       host: 'localhost',
       port,
-      path: file,
+      path: encodeURI(file),
     }
 
     const callback = (response: EventEmitter) => {
@@ -97,6 +97,44 @@ describe('#startDevServer', () => {
     })
   })
 
+  it('serves specs in directory with non English chars via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('サイプレス.spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/サイプレス.spec.js', port as number)
+
+    expect(response).to.eq(`it('サイプレス', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
+  it('serves specs in directory with ... in the file name via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('[...bar].spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/[...bar].spec.js', port as number)
+
+    expect(response).to.eq(`it('...bar', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
   it('serves a file with spaces via a webpack dev server', async () => {
     const { port, close } = await startDevServer({
       webpackConfig,
@@ -107,7 +145,7 @@ describe('#startDevServer', () => {
       },
     })
 
-    const response = await requestSpecFile(encodeURI('/test/fixtures/foo bar.spec.js'), port as number)
+    const response = await requestSpecFile('/test/fixtures/foo bar.spec.js', port as number)
 
     expect(response).to.eq(`it('this is a spec with a path containing a space', () => {})\n`)
 
