@@ -5,20 +5,21 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
 
+interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: any
+}
+
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    task (task, arg, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    task (task, arg, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const _options: InternalTaskOptions = _.defaults({}, options, {
         log: true,
         timeout: Cypress.config('taskTimeout'),
       })
 
       let consoleOutput
 
-      if (options.log) {
+      if (_options.log) {
         consoleOutput = {
           task,
           arg,
@@ -30,9 +31,9 @@ export default (Commands, Cypress, cy) => {
           message += `, ${$utils.stringify(arg)}`
         }
 
-        options._log = Cypress.log({
+        _options._log = Cypress.log({
           message,
-          timeout: options.timeout,
+          timeout: _options.timeout,
           consoleProps () {
             return consoleOutput
           },
@@ -41,7 +42,7 @@ export default (Commands, Cypress, cy) => {
 
       if (!task || !_.isString(task)) {
         $errUtils.throwErrByPath('task.invalid_argument', {
-          onFail: options._log,
+          onFail: _options._log,
           args: { task: task || '' },
         })
       }
@@ -53,11 +54,11 @@ export default (Commands, Cypress, cy) => {
       return Cypress.backend('task', {
         task,
         arg,
-        timeout: options.timeout,
+        timeout: _options.timeout,
       })
-      .timeout(options.timeout)
+      .timeout(_options.timeout)
       .then((result) => {
-        if (options._log) {
+        if (_options._log) {
           _.extend(consoleOutput, { Yielded: result })
         }
 
@@ -65,14 +66,14 @@ export default (Commands, Cypress, cy) => {
       })
       .catch(Promise.TimeoutError, () => {
         $errUtils.throwErrByPath('task.timed_out', {
-          onFail: options._log,
-          args: { task, timeout: options.timeout },
+          onFail: _options._log,
+          args: { task, timeout: _options.timeout },
         })
       })
       .catch({ timedOut: true }, (error) => {
         $errUtils.throwErrByPath('task.server_timed_out', {
-          onFail: options._log,
-          args: { task, timeout: options.timeout, error: error.message },
+          onFail: _options._log,
+          args: { task, timeout: _options.timeout, error: error.message },
         })
       })
       .catch((err) => {
@@ -85,13 +86,13 @@ export default (Commands, Cypress, cy) => {
 
         if (err?.isKnownError) {
           $errUtils.throwErrByPath('task.known_error', {
-            onFail: options._log,
+            onFail: _options._log,
             args: { task, error: err.message },
           })
         }
 
         $errUtils.throwErrByPath('task.failed', {
-          onFail: options._log,
+          onFail: _options._log,
           args: { task, error: err?.message || err },
           errProps: {
             appendToStack: {
