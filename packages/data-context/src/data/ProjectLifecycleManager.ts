@@ -833,13 +833,6 @@ export class ProjectLifecycleManager {
 
     this._eventsIpcResult = { state: 'loading', value: promise }
 
-    // This is a terrible hack until we land GraphQL subscriptions which will
-    // allow for more granular concurrent notifications then our current
-    // notify the frontend & refetch approach
-    const toLaunchpad = this.ctx.emitter.toLaunchpad
-
-    this.ctx.emitter.toLaunchpad = () => {}
-
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
         // If we're handling the events, we don't want any notifications
@@ -858,7 +851,6 @@ export class ProjectLifecycleManager {
       throw err
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad = toLaunchpad
       this.ctx.emitter.toLaunchpad()
     })
   }
