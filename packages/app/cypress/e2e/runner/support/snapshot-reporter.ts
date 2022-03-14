@@ -1,6 +1,5 @@
 // Takes percy snapshot with navigation/AUT hidden and run duration mocked
 export const snapshotReporter = () => {
-  // @ts-ignore
   cy.percySnapshot({
     width: 450,
     elementOverrides: {

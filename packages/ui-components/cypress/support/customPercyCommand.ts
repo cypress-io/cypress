@@ -1,8 +1,7 @@
-require('@percy/cypress')
-const _ = require('lodash')
+import '@percy/cypress'
 
 class ElementOverrideManager {
-  mutationStack = undefined
+  mutationStack: Array<MutationRecord> | undefined = undefined
 
   /**
    * overrides are defined in selector/override pairs.
@@ -25,11 +24,11 @@ class ElementOverrideManager {
 
     observer.observe(cy.$$('html')[0], { childList: true, subtree: true, attributes: true, attributeOldValue: true })
 
-    _.each(overrides, (v, k) => {
+    Object.entries(overrides).forEach(([k, v]) => {
       // eslint-disable-next-line cypress/no-assigning-return-values
       const $el = cy.$$(k)
 
-      if (_.isFunction(v)) {
+      if (typeof v === 'function') {
         v($el)
 
         return
@@ -46,7 +45,9 @@ class ElementOverrideManager {
   }
 
   resetOverrides () {
-    _.forEachRight(this.mutationStack, ({
+    if (!this.mutationStack) return
+
+    [...this.mutationStack].reverse().forEach(({
       type,
       target,
       attributeName,
@@ -54,8 +55,8 @@ class ElementOverrideManager {
       addedNodes,
       removedNodes,
     }) => {
-      if (type === 'attributes') {
-        target.setAttribute(attributeName, oldValue)
+      if (type === 'attributes' && attributeName && oldValue) {
+        (target as HTMLElement).setAttribute(attributeName, oldValue)
 
         return
       }
@@ -94,7 +95,7 @@ const applySnapshotMutations = ({
   snapshotElementOverrides,
   defaultWidth,
   defaultHeight,
-}) => {
+}: SnapshotMutationOptions): Cypress.Chainable<() => void> => {
   let elementOverrideManager
 
   if (Object.keys(snapshotElementOverrides).length) {
@@ -110,6 +111,7 @@ const applySnapshotMutations = ({
     if (log) {
       Cypress.log({
         message: log,
+        // @ts-ignore
         snapshot: true,
         end: true,
       })
@@ -126,7 +128,52 @@ const applySnapshotMutations = ({
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
+interface CustomSnapshotOptions{
+  width?: number
+  height?: number
+  elementOverrides?: Record<string, ((el$: any) => void) | true>
+}
+
+interface SnapshotMutationOptions{
+  log?: string
+  defaultWidth: number
+  defaultHeight: number
+  snapshotWidth: number
+  snapshotHeight: number
+  snapshotElementOverrides: NonNullable<CustomSnapshotOptions['elementOverrides']>
+}
+
+declare global {
+  namespace Cypress {
+    interface Chainable{
+      /**
+       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+       * reset after snapshot generation so that the AUT is not polluted after the command executes.
+       *
+       * @param {Object} options Object containing options for the snapshot command, including:
+       * @param {number} options.width The desired snapshot width. The test's viewportWidth will be used by default.
+       * @param {number} options.height The desired snapshot height. The test's viewportHeight will be used by default.
+       * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
+       *   precedence over the global override defined when the command was installed.
+       */
+      percySnapshot(options?: CustomSnapshotOptions): Chainable<() => void>
+      /**
+       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+       * reset after snapshot generation so that the AUT is not polluted after the command executes.
+       *
+       * @param {string} name The name of the snapshot to generate. Will be generated from test's titlePath by default.
+       * @param {Object} options Object containing options for the snapshot command, including:
+       * @param {number} options.width The desired snapshot width. The test's viewportWidth will be used by default.
+       * @param {number} options.height The desired snapshot height. The test's viewportHeight will be used by default.
+       * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
+       *   precedence over the global override defined when the command was installed.
+       */
+      percySnapshot(name: string, options?: CustomSnapshotOptions): Chainable<() => void>
+    }
+  }
+}
+
+export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'] } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -138,28 +185,27 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
    * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
    *   precedence over the global override defined when the command was installed.
    */
-  const customPercySnapshot = (origFn, name, options = {}) => {
-    if (_.isObject(name)) {
+  const customPercySnapshot = (origFn, name?: string, options: CustomSnapshotOptions = {}) => {
+    if (name && typeof name === 'object') {
       options = name
-      name = null
+      name = undefined
     }
 
-    /**
-     * @type {Mocha.Test}
-     */
-    const test = cy.state('test')
+    // @ts-ignore
+    const test: Mocha.Test = cy.state('test')
 
     const titlePath = test.titlePath()
 
-    const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
+    const screenshotName = name ? titlePath.concat(name).filter(Boolean).join(' > ') : ''
 
     // viewport data is read from test state rather than config to ensure that
     // the snapshot is presented at the test's expected size.
-    const { viewportWidth, viewportHeight } = cy.state()
-    const snapshotWidth = !_.isNil(options.width) ? options.width : viewportWidth
-    const snapshotHeight = !_.isNil(options.height) ? options.height : viewportHeight
+    // @ts-ignore
+    const { viewportWidth, viewportHeight } = cy.state() as Cypress.Config
+    const snapshotWidth = options.width ? options.width : viewportWidth
+    const snapshotHeight = options.height ? options.height : viewportHeight
 
-    const snapshotMutationOptions = {
+    const snapshotMutationOptions: SnapshotMutationOptions = {
       defaultWidth: viewportWidth,
       defaultHeight: viewportHeight,
       snapshotWidth,
@@ -181,7 +227,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
       }).then((reset) => reset())
     }
 
-    if (_.isFunction(before)) {
+    if (before && typeof before === 'function') {
       before()
     }
 
