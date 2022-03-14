@@ -3,6 +3,7 @@ import { isBinaryFile } from 'isbinaryfile'
 import * as path from 'path'
 import * as ejs from 'ejs'
 import fm from 'front-matter'
+import _ from 'lodash'
 
 export interface Action {
   templateDir: string
@@ -133,7 +134,7 @@ async function allFilesInDir (parent: string): Promise<string[]> {
     return isDir ? await allFilesInDir(child) : child
   }))
 
-  return result.flat()
+  return _.flatten(result)
 }
 
 function frontMatter (content: string, args: { [key: string]: any }) {
