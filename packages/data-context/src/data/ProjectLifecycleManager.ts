@@ -30,6 +30,13 @@ const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/ch
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
+const potentialConfigFiles = [
+  'cypress.config.ts',
+  'cypress.config.mjs',
+  'cypress.config.cjs',
+  'cypress.config.js',
+]
+
 export interface SetupFullConfigOptions {
   projectName: string
   projectRoot: string
@@ -78,7 +85,7 @@ export interface ProjectMetaState {
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean
   hasSpecifiedConfigViaCLI: false | string
-  hasMultipleConfigPaths: boolean
+  allFoundConfigFiles: string[]
   needsCypressJsonMigration: boolean
 }
 
@@ -86,7 +93,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasFrontendFramework: false,
   hasTypescript: false,
   hasLegacyCypressJson: false,
-  hasMultipleConfigPaths: false,
+  allFoundConfigFiles: [],
   hasCypressEnvFile: false,
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
@@ -628,8 +635,7 @@ export class ProjectLifecycleManager {
 
     const legacyFileWatcher = this.addWatcher([
       this._pathToFile(this.legacyConfigFile),
-      this._pathToFile('cypress.config.js'),
-      this._pathToFile('cypress.config.ts'),
+      ...potentialConfigFiles.map((f) => this._pathToFile(f)),
     ])
 
     legacyFileWatcher.on('all', (event, file) => {
@@ -1144,23 +1150,28 @@ export class ProjectLifecycleManager {
       return metaState
     }
 
-    const configFileTs = this._pathToFile('cypress.config.ts')
-    const configFileJs = this._pathToFile('cypress.config.js')
+    metaState.allFoundConfigFiles = []
 
-    if (fs.existsSync(configFileTs)) {
-      metaState.hasValidConfigFile = true
-      this.setConfigFilePath('cypress.config.ts')
-    }
+    for (const fileName of potentialConfigFiles) {
+      const filePath = this._pathToFile(fileName)
+      const fileExists = fs.existsSync(filePath)
 
-    if (fs.existsSync(configFileJs)) {
-      metaState.hasValidConfigFile = true
-      if (this._configFilePath) {
-        metaState.hasMultipleConfigPaths = true
-      } else {
-        this.setConfigFilePath('cypress.config.js')
+      if (fileExists) {
+        // We'll collect all the found config files.
+        // If we found more than one, this list will be used in an error message.
+        metaState.allFoundConfigFiles.push(fileName)
+
+        // We've found our first config file! We'll continue looping to make sure there's
+        // only one. Looping over all config files is done so we can provide rich errors and warnings.
+        if (!this._configFilePath) {
+          metaState.hasValidConfigFile = true
+          this.setConfigFilePath(fileName)
+        }
       }
     }
 
+    // We finished looping through all of the possible config files
+    // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!this._configFilePath) {
       this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
     }
@@ -1359,8 +1370,8 @@ export class ProjectLifecycleManager {
       this.onLoadError(getError('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
     }
 
-    if (this.metaState.hasMultipleConfigPaths) {
-      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, 'cypress.config.js', 'cypress.config.ts'))
+    if (this.metaState.allFoundConfigFiles.length > 1) {
+      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles))
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
