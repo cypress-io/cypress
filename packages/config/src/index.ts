@@ -6,9 +6,13 @@ import type { BreakingOption, BreakingOptionErrorKey } from './options'
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
 
-export { validation }
-
-export { breakingOptions, BreakingOption, BreakingOptionErrorKey }
+export {
+  validation,
+  options,
+  breakingOptions,
+  BreakingOption,
+  BreakingOptionErrorKey,
+}
 
 const debug = Debug('cypress:config:validator')
 
@@ -118,8 +122,6 @@ export const matchesConfigKey = (key: string) => {
 
   return
 }
-
-export { options }
 
 export const validate = (cfg: any, onErr: (property: string) => void) => {
   debug('validating configuration', cfg)
