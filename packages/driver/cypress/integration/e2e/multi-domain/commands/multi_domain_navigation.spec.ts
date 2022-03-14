@@ -4,7 +4,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
 
       cy.go('back')
@@ -19,7 +19,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]').check().should('be.checked')
       cy.reload()
       cy.get(':checkbox[name="colors"][value="blue"]').should('not.be.checked')
@@ -46,7 +46,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
         expect(primaryVisitLoadSpy).to.be.calledOnce
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const secondaryCyBeforeLoadSpy = cy.spy()
         const secondaryCyLoadSpy = cy.spy()
         const secondaryVisitBeforeLoadSpy = cy.spy()
@@ -75,7 +75,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     it('supports visiting primary first', () => {
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
@@ -83,7 +83,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     })
 
     it('supports skipping visiting primary first', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
@@ -94,12 +94,12 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     it.skip('supports nesting a third domain', () => {
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
 
-        cy.switchToDomain('idp.com', () => {
+        cy.switchToDomain('http://idp.com:3500', () => {
           cy.visit('http://www.idp.com:3500/fixtures/dom.html')
         })
       })
@@ -110,7 +110,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
 
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
 
         cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
@@ -123,7 +123,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
 
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('/fixtures/dom.html')
       })
     })
@@ -133,7 +133,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
 
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html#hashchange')
 
         cy.location('hash').should('equal', '#hashchange')
@@ -141,7 +141,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     })
 
     it('navigates back to primary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
       })
@@ -163,7 +163,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
       cy.visit('/fixtures/multi-domain.html')
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // this call should error since we can't visit a cross-domain
         cy.visit('http://www.idp.com:3500/fixtures/dom.html')
       })
@@ -172,7 +172,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     it('supports the query string option', () => {
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html', { qs: { foo: 'bar' } })
 
         cy.location('search').should('equal', '?foo=bar')
@@ -180,7 +180,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     })
 
     it('can send a POST request', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/post-only', {
           method: 'POST',
           headers: {
@@ -201,7 +201,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
 
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
@@ -210,7 +210,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
 
     it('succeeds when the secondary is already defined but the AUT is still on the primary', () => {
       // setup the secondary to be on the secondary domain
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
@@ -220,7 +220,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
       cy.visit('/fixtures/multi-domain.html')
 
       // verify there aren't any issues when the AUT is on primary but the spec bridge is on secondary (cross-origin)
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
@@ -230,7 +230,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     it('does not navigate to about:blank in secondary if already visited in primary', () => {
       Cypress.state('hasVisitedAboutBlank', true)
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const urlChangedSpy = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
         const aboutBlankSpy = cy.spy(Cypress.specBridgeCommunicator, 'toPrimary').log(false).withArgs('visit:about:blank')
 
@@ -249,7 +249,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     it('navigates to about:blank in secondary if not already visited in primary', () => {
       Cypress.state('hasVisitedAboutBlank', false)
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const urlChangedSpy = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
         const aboutBlankSpy = cy.spy(Cypress.specBridgeCommunicator, 'toPrimary').log(false).withArgs('visit:about:blank')
 
@@ -271,7 +271,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
 
     // TODO: un-skip once multiple remote states are supported
     it.skip('supports auth options and adding auth to subsequent requests', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/basic_auth', {
           auth: {
             username: 'cypress',
@@ -307,7 +307,7 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.window().then((win) => {
         win.location.href = 'http://www.foobar.com:3500/fixtures/dom.html'
       })

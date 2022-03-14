@@ -6,7 +6,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
   })
 
   it('runs commands in secondary domain', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -51,7 +51,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       ctx: {},
     }
 
-    cy.switchToDomain('foobar.com', [expectedRunnable], ([expectedRunnable]) => {
+    cy.switchToDomain('http://foobar.com:3500', [expectedRunnable], ([expectedRunnable]) => {
       const actualRunnable = cy.state('runnable')
 
       expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
@@ -79,7 +79,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       expect(primaryViewport).to.deep.equal(expectedViewport)
     })
 
-    cy.switchToDomain('foobar.com', [expectedViewport], ([expectedViewport]) => {
+    cy.switchToDomain('http://foobar.com:3500', [expectedViewport], ([expectedViewport]) => {
       const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
 
       expect(secondaryViewport).to.deep.equal(expectedViewport)
@@ -87,7 +87,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
   })
 
   it('handles querying nested elements', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy
       .get('form button')
       .invoke('text')
@@ -98,7 +98,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
   })
 
   it('sets up window.Cypress in secondary domain', () => {
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="cypress-check"]')
       .invoke('text')
@@ -108,39 +108,39 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
   describe('data argument', () => {
     it('passes object to callback function', () => {
-      cy.switchToDomain('foobar.com', [{ foo: 'foo', bar: 'bar' }], ([{ foo, bar }]) => {
+      cy.switchToDomain('http://foobar.com:3500', [{ foo: 'foo', bar: 'bar' }], ([{ foo, bar }]) => {
         expect(foo).to.equal('foo')
         expect(bar).to.equal('bar')
       })
     })
 
     it('passes array to callback function', () => {
-      cy.switchToDomain('foobar.com', ['foo', 'bar'], ([foo, bar]) => {
+      cy.switchToDomain('http://foobar.com:3500', ['foo', 'bar'], ([foo, bar]) => {
         expect(foo).to.equal('foo')
         expect(bar).to.equal('bar')
       })
     })
 
     it('passes string to callback function', () => {
-      cy.switchToDomain('foobar.com', ['foo'], ([foo]) => {
+      cy.switchToDomain('http://foobar.com:3500', ['foo'], ([foo]) => {
         expect(foo).to.equal('foo')
       })
     })
 
     it('passes number to callback function', () => {
-      cy.switchToDomain('foobar.com', [1], ([num]) => {
+      cy.switchToDomain('http://foobar.com:3500', [1], ([num]) => {
         expect(num).to.equal(1)
       })
     })
 
     it('passes boolean to callback function', () => {
-      cy.switchToDomain('foobar.com', [true], ([bool]) => {
+      cy.switchToDomain('http://foobar.com:3500', [true], ([bool]) => {
         expect(bool).to.be.true
       })
     })
 
     it('passes mixed types to callback function', () => {
-      cy.switchToDomain('foobar.com', ['foo', 1, true], ([foo, num, bool]) => {
+      cy.switchToDomain('http://foobar.com:3500', ['foo', 1, true], ([foo, num, bool]) => {
         expect(foo).to.equal('foo')
         expect(num).to.equal(1)
         expect(bool).to.be.true
@@ -157,7 +157,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           resolve(undefined)
         })
 
-        cy.switchToDomain('foobar.com', () => {
+        cy.switchToDomain('http://foobar.com:3500', () => {
           // done is not defined on purpose here as we want to test the error gets sent back to the primary domain correctly
           // @ts-ignore
           done()
@@ -171,7 +171,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         throw 'oops'
       })
     })
@@ -183,7 +183,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           resolve(undefined)
         })
 
-        cy.switchToDomain('foobar.com', () => {
+        cy.switchToDomain('http://foobar.com:3500', () => {
           throw 'oops'
         })
       })
@@ -200,7 +200,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', [timeout], ([timeout]) => {
+      cy.switchToDomain('http://foobar.com:3500', [timeout], ([timeout]) => {
         cy.get('#doesnt-exist', {
           timeout,
         })
@@ -216,7 +216,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('#doesnt-exist')
       })
     })
@@ -231,7 +231,7 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
       win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('[data-cy="username"]').type('TJohnson')
       cy.get('[data-cy="login"]').click()
     })
@@ -244,7 +244,7 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
   it('uses switchToDomain twice', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
     cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-    cy.switchToDomain('idp.com', () => {
+    cy.switchToDomain('http://idp.com:3500', () => {
       cy.get('[data-cy="username"]').type('BJohnson')
       cy.get('[data-cy="login"]').click()
     }) // Trailing edge wait, waiting to return to the primary domain
@@ -260,7 +260,7 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
       win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('[data-cy="username"]').type('TJohnson')
       cy.get('[data-cy="login"]').click()
     }) // Trailing edge wait, waiting to return to the primary domain

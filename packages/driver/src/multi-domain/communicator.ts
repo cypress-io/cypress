@@ -9,10 +9,6 @@ const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
-declare global {
-  interface Window { specBridgeDomain: string }
-}
-
 const preprocessErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
@@ -199,14 +195,14 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {any} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: any, options = { syncGlobals: false }) {
-    debug('<= to Primary ', event, data, window.specBridgeDomain)
+    debug('<= to Primary ', event, data, document.domain)
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: any) => {
       this.windowReference.top.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,
-        domain: window.specBridgeDomain,
+        domain: document.domain,
       }, '*')
     })
   }
