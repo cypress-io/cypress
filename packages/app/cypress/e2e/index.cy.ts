@@ -146,7 +146,6 @@ describe('App: Index', () => {
 
           // Dismisses dialog with close button press
           cy.findByRole('dialog').should('not.exist')
-          cy
         })
       })
 
