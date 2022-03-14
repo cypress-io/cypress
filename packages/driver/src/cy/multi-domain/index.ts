@@ -46,7 +46,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   Commands.addAll({
     switchToDomain<T> (originOrDomain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       // store the invocation stack in the case that `switchToDomain` errors
-      const userInvocationStack = state('current').get('userInvocationStack')
+      communicator.userInvocationStack = state('current').get('userInvocationStack')
 
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
@@ -183,7 +183,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
                 isStable: state('isStable'),
-                userInvocationStack,
               })
             } catch (err: any) {
               const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {

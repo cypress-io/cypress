@@ -21,7 +21,7 @@ const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 export class PrimaryDomainCommunicator extends EventEmitter {
   private windowReference: Window | undefined
   private crossDomainDriverWindows: {[key: string]: Window} = {}
-  private userInvocationStack?: string
+  userInvocationStack?: string
 
   /**
    * Initializes the event handler to receive messages from the spec bridge.
@@ -79,11 +79,6 @@ export class PrimaryDomainCommunicator extends EventEmitter {
   }
 
   toSpecBridge (domain: string, event: string, data?: any) {
-    if (data?.userInvocationStack) {
-      this.userInvocationStack = data.userInvocationStack
-      delete data.userInvocationStack
-    }
-
     debug('=> to spec bridge', domain, event, data)
     // If there is no crossDomainDriverWindow, there is no need to send the message.
     this.crossDomainDriverWindows[domain]?.postMessage({
