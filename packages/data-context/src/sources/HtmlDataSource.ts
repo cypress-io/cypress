@@ -16,7 +16,6 @@ export class HtmlDataSource {
 
     await Promise.all([
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
-      graphql.executeQuery('AppQueryDocument', {}),
       graphql.executeQuery('MainLaunchpadQueryDocument', {}),
     ])
 
