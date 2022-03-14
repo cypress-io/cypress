@@ -5,11 +5,13 @@ import {
   errorExchange,
   fetchExchange,
   ssrExchange,
+  subscriptionExchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import type { Socket } from '@packages/socket/lib/browser'
 import { client } from '@packages/socket/lib/browser'
+import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
@@ -80,11 +82,13 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const io = window.ws ?? getPubSubSource(config)
 
+  const socketClient = getSocketSource(config)
+
   // GraphQL and urql are not used in app + run mode, so we don't add the
   // pub sub exchange.
   if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
     // If we're in the launchpad, we connect to the known GraphQL Socket port,
-    // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
+    // otherwise we connect to the /__socket of the current domain, unless we've explicitly
 
     exchanges.push(pubSubExchange(io))
   }
@@ -125,6 +129,20 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     }),
     namedRouteExchange,
     fetchExchange,
+    subscriptionExchange({
+      forwardSubscription (op) {
+        return {
+          subscribe: (sink) => {
+            // @ts-ignore
+            const dispose = socketClient.subscribe(op, sink)
+
+            return {
+              unsubscribe: dispose,
+            }
+          },
+        }
+      },
+    }),
   )
 
   if (import.meta.env.DEV) {
@@ -159,7 +177,7 @@ type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
     return client({
-      path: '/__gqlSocket',
+      path: '/__launchpad/socket',
       transports: ['websocket'],
     })
   }
@@ -167,5 +185,17 @@ function getPubSubSource (config: PubSubConfig) {
   return client({
     path: config.socketIoRoute,
     transports: ['websocket'],
+  })
+}
+
+function getSocketSource (config: UrqlClientConfig) {
+  // http: -> ws:  &  https: -> wss:
+  const protocol = window.location.protocol.replace('http', 'ws')
+  const wsUrl = config.target === 'launchpad'
+    ? `ws://${window.location.host}/__launchpad/graphql-ws`
+    : `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`
+
+  return createWsClient({
+    url: wsUrl,
   })
 }
