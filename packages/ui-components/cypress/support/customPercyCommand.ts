@@ -128,10 +128,22 @@ const applySnapshotMutations = ({
   })
 }
 
-interface CustomSnapshotOptions{
+export interface CustomSnapshotOptions{
+  /**
+   * width of the snapshot taken from the left edge of the viewport
+   * @default - The test's viewportWidth
+   */
   width?: number
+  /**
+   * height of the snapshot taken from the top edge of the viewport
+   * @default - The test's viewportHeight
+   */
   height?: number
-  elementOverrides?: Record<string, ((el$: any) => void) | true>
+  /**
+   * The desired snapshot overrides. These will be merged with and take
+   * precedence over the global override defined when the command was installed.
+   */
+  elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
 }
 
 interface SnapshotMutationOptions{
@@ -149,12 +161,6 @@ declare global {
       /**
        * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
        * reset after snapshot generation so that the AUT is not polluted after the command executes.
-       *
-       * @param {Object} options Object containing options for the snapshot command, including:
-       * @param {number} options.width The desired snapshot width. The test's viewportWidth will be used by default.
-       * @param {number} options.height The desired snapshot height. The test's viewportHeight will be used by default.
-       * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
-       *   precedence over the global override defined when the command was installed.
        */
       percySnapshot(options?: CustomSnapshotOptions): Chainable<() => void>
       /**
