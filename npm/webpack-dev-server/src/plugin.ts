@@ -41,6 +41,7 @@ export default class CypressCTOptionsPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string
   private errorEmitted = false
+  private compilation: Webpack45Compilation | null = null
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
@@ -52,85 +53,98 @@ export default class CypressCTOptionsPlugin {
     this.devServerEvents = options.devServerEvents
   }
 
-  private pluginFunc = (context: CypressCTWebpackContext) => {
-    context._cypress = {
+  private addLoaderContext = (loaderContext: object, module: any) => {
+    (loaderContext as CypressCTWebpackContext)._cypress = {
       files: this.files,
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
     }
   };
 
-  private setupCustomHMR = (compiler: webpack.Compiler) => {
-    compiler.hooks.afterCompile.tap(
-      'CypressCTOptionsPlugin',
-      (compilation) => {
-        const stats = compilation.getStats()
+  /*
+   * After compiling, we check for errors and inform the server of them.
+   */
+  private afterCompile = () => {
+    if (!this.compilation) {
+      return
+    }
 
-        if (stats.hasErrors()) {
-          this.errorEmitted = true
+    const stats = this.compilation.getStats()
 
-          // webpack 4: string[]
-          // webpack 5: Error[]
-          const errors = stats.toJson().errors as Array<Error | string> | undefined
+    if (stats.hasErrors()) {
+      this.errorEmitted = true
 
-          if (!errors || !errors.length) {
-            return
-          }
+      // webpack 4: string[]
+      // webpack 5: Error[]
+      const errors = stats.toJson().errors as Array<Error | string> | undefined
 
-          this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-        } else if (this.errorEmitted) {
-          // compilation succeed but assets haven't emitted to the output yet
-          this.devServerEvents.emit('dev-server:compile:error', null)
-        }
-      },
-    )
+      if (!errors || !errors.length) {
+        return
+      }
 
-    compiler.hooks.afterEmit.tap(
-      'CypressCTOptionsPlugin',
-      (compilation) => {
-        if (!compilation.getStats().hasErrors()) {
-          this.devServerEvents.emit('dev-server:compile:success')
-        }
-      },
-    )
+      this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
+    } else if (this.errorEmitted) {
+      // compilation succeed but assets haven't emitted to the output yet
+      this.devServerEvents.emit('dev-server:compile:error', null)
+    }
+  }
+
+  // After emitting assets, we tell the server complitation was successful
+  // so it can trigger a reload the AUT iframe.
+  private afterEmit = () => {
+    if (!this.compilation?.getStats().hasErrors()) {
+      this.devServerEvents.emit('dev-server:compile:success')
+    }
+  }
+
+  /*
+   * `webpack --watch` watches the existing specs and their dependencies for changes,
+   * but we also need to add additional dependencies to our dynamic "browser.js" (generated
+   * using loader.ts) when new specs are created. This hook informs webpack that browser.js
+   * has been "updated on disk", causing a recompliation (and pulling the new specs in as
+   * dependencies).
+   */
+  private onSpecsChange = (specs: Cypress.Cypress['spec'][]) => {
+    if (!this.compilation || _.isEqual(specs, this.files)) {
+      return
+    }
+
+    this.files = specs
+    const inputFileSystem = this.compilation.inputFileSystem
+    const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
+
+    utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
   }
 
   /**
+   * The webpack compiler generates a new `compilation` each time it compiles, so
+   * we have to apply hooks to it fresh each time
    *
    * @param compilation webpack 4 `compilation.Compilation`, webpack 5
    *   `Compilation`
    */
-  private plugin = (compilation: Webpack45Compilation) => {
-    this.devServerEvents.on('dev-server:specs:changed', (specs) => {
-      if (_.isEqual(specs, this.files)) return
+  private addCompilationHooks = (compilation: Webpack45Compilation) => {
+    this.compilation = compilation
 
-      this.files = specs
-      const inputFileSystem = compilation.inputFileSystem
-      const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
-
-      utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
-    })
-
-    // Webpack 5
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {
-      webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
-        'CypressCTOptionsPlugin',
-        (context) => this.pluginFunc(context as CypressCTWebpackContext),
-      )
+      // Webpack 5
+      const loader = webpack.NormalModule.getCompilationHooks(compilation).loader
 
-      return
+      loader.tap('CypressCTOptionsPlugin', this.addLoaderContext)
+    } else {
+      // Webpack 4
+      compilation.hooks.normalModuleLoader.tap('CypressCTOptionsPlugin', this.addLoaderContext)
     }
-
-    // Webpack 4
-    compilation.hooks.normalModuleLoader.tap(
-      'CypressCTOptionsPlugin',
-      (context) => this.pluginFunc(context as CypressCTWebpackContext),
-    )
   };
 
+  /**
+   * The plugin's entrypoint, called once by webpack when the compiler is initialized.
+   */
   apply (compiler: Compiler): void {
-    this.setupCustomHMR(compiler)
-    compiler.hooks.compilation.tap('CypressCTOptionsPlugin', (compilation) => this.plugin(compilation as Webpack45Compilation))
+    this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
+    compiler.hooks.afterCompile.tap('CypressCTOptionsPlugin', this.afterCompile)
+    compiler.hooks.afterEmit.tap('CypressCTOptionsPlugin', this.afterEmit)
+    compiler.hooks.compilation.tap('CypressCTOptionsPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
   }
 }

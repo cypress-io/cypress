@@ -170,11 +170,15 @@ Instead the value was:
 `
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
-There is both a cypress.config.js and a cypress.config.ts at the location below:
+Could not load a Cypress configuration file because there are multiple matches.
+
+We've found 2 Cypress configuration files named
+cypress.config.ts, cypress.config.js at the location below:
 
   > /foo/bar/.projects/pristine-with-e2e-testing
 
-Cypress does not know which one to read for config. Please remove one of the two and try again.
+Please delete the conflicting configuration files.
+
 
 `
 
