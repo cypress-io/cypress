@@ -59,8 +59,7 @@ export class AuthActions {
 
         // Ensure auth state changes during the login lifecycle
         // are propagated to the clients
-        this.ctx.emitter.toApp()
-        this.ctx.emitter.toLaunchpad()
+        this.ctx.emitter.authChange()
       }).then(resolve, reject)
     })
 
@@ -99,6 +98,8 @@ export class AuthActions {
     this.ctx.update((coreData) => {
       coreData.authState = { browserOpened: false }
     })
+
+    this.ctx.emitter.authChange()
   }
 
   async logout () {
@@ -113,6 +114,7 @@ export class AuthActions {
     } finally {
       this.setAuthenticatedUser(null)
       this.ctx.cloud.reset()
+      this.ctx.emitter.authChange()
     }
   }
 
