@@ -36,7 +36,7 @@ export async function codeGenerator (
   const templateFiles = await allFilesInDir(action.templateDir)
   const codeGenResults: CodeGenResults = { files: [], failed: [] }
 
-  for (const file of templateFiles) {
+  const scaffoldResults = await Promise.all(templateFiles.map(async (file) => {
     const isBinary = await isBinaryFile(file)
     const parsedFile = path.parse(file)
 
@@ -85,18 +85,26 @@ export async function codeGenerator (
         await fs.outputFile(computedPath, content)
       }
 
-      codeGenResults.files.push({
+      return {
         file: computedPath,
         type,
         status,
         content: content.toString(),
-      })
+      } as const
     } catch (e) {
-      codeGenResults.failed.push(e as Error)
+      return e instanceof Error ? e : new Error(e)
     }
-  }
+  }))
 
-  return codeGenResults
+  return scaffoldResults.reduce((accum, result) => {
+    if (result instanceof Error) {
+      accum.failed.push(result)
+    } else {
+      accum.files.push(result)
+    }
+
+    return accum
+  }, codeGenResults)
 }
 
 function computePath (
@@ -116,20 +124,16 @@ function computePath (
 }
 
 async function allFilesInDir (parent: string): Promise<string[]> {
-  let res: string[] = []
+  const dirs = await fs.readdir(parent)
 
-  for (const dir of await fs.readdir(parent)) {
+  const result = await Promise.all(dirs.map(async (dir) => {
     const child = path.join(parent, dir)
     const isDir = (await fs.stat(child)).isDirectory()
 
-    if (!isDir) {
-      res.push(child)
-    } else {
-      res = [...res, ...(await allFilesInDir(child))]
-    }
-  }
+    return isDir ? await allFilesInDir(child) : child
+  }))
 
-  return res
+  return result.flat()
 }
 
 function frontMatter (content: string, args: { [key: string]: any }) {
