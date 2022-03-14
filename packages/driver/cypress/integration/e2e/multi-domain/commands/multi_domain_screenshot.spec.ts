@@ -21,6 +21,20 @@ context('multi-domain screenshot', { experimentalSessionSupport: true }, () => {
       cy.get('a[data-cy="screenshots-link"]').click()
     })
 
+    it('captures the fullPage', () => {
+      cy.switchToDomain('http://foobar.com:3500', [this.serverResult], ([serverResult]) => {
+        const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
+
+        cy.screenshot({ capture: 'fullPage' })
+        .then(() => {
+          expect(automationStub).to.be.calledThrice
+          expect(automationStub.args[0][1].capture).to.equal('fullPage')
+          expect(automationStub.args[1][1].capture).to.equal('fullPage')
+          expect(automationStub.args[2][1].capture).to.equal('fullPage')
+        })
+      })
+    })
+
     it('captures the runner', () => {
       cy.switchToDomain('http://foobar.com:3500', [this.serverResult], ([serverResult]) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
