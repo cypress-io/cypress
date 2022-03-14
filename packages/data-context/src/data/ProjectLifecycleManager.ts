@@ -128,8 +128,6 @@ export class ProjectLifecycleManager {
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
   _pendingMigrationInitialize?: pDefer.DeferredPromise<void>
 
-  private _configFile: string | false = 'cypress.config.js'
-
   constructor (private ctx: DataContext) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.watchers = new Set()
@@ -181,7 +179,7 @@ export class ProjectLifecycleManager {
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? this._configFile
+    return this.ctx.modeOptions.configFile ?? path.basename(this.configFilePath) ?? 'cypress.config.js'
   }
 
   get configFilePath () {
@@ -226,6 +224,10 @@ export class ProjectLifecycleManager {
 
   get projectTitle () {
     return path.basename(this.projectRoot)
+  }
+
+  get fileExtensionToUse () {
+    return this.metaState.hasTypescript ? 'ts' : 'js'
   }
 
   async checkIfLegacyConfigFileExist () {
@@ -1188,8 +1190,6 @@ export class ProjectLifecycleManager {
   }
 
   setConfigFilePath (fileName: string) {
-    this._configFile = fileName
-
     this._configFilePath = this._pathToFile(fileName)
   }
 
