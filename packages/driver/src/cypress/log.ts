@@ -91,18 +91,19 @@ const countLogsByTests = function (tests = {}) {
     return 0
   }
 
+  // Counts the number of logs by determining the greatest counter among all test attempts and logs.
   return _
-  .chain(tests) // Creates a lodash wrapper instance that wraps value with explicit method chain sequences enabled. The result of such sequences must be unwrapped with _#value.
-  .flatMap((test) => { // Creates a flattened array of values by running each element in collection thru iteratee and flattening the mapped results. The iteratee is invoked with three arguments: (value, index|key, collection).
+  .chain(tests)
+  .flatMap((test) => {
     return [test, test.prevAttempts]
   })
-  .flatMap((tests) => { // Creates a flattened array of values by running each element in collection thru iteratee and flattening the mapped results. The iteratee is invoked with three arguments: (value, index|key, collection).
+  .flatMap((tests) => {
     return [].concat(tests.agents, tests.routes, tests.commands)
-  }).compact() // Creates an array with all falsey values removed. The values false, null, 0, "", undefined, and NaN are falsey.
-  .union([{ counter: 0 }]) // Creates an array of unique values, in order, from all given arrays using SameValueZero for equality comparisons.
+  }).compact()
+  .union([{ counter: 0 }])
   .map('counter')
-  .max() // Computes the maximum value of array. If array is empty or falsey, undefined is returned.
-  .value() // Executes the chain sequence to resolve the unwrapped value.
+  .max()
+  .value()
 }
 
 const setCounter = (num) => {
