@@ -8,10 +8,15 @@ import $elements from '../../../dom/elements'
 
 const newLineRe = /\n/g
 
+interface InternalSelectOptions extends Partial<Cypress.SelectOptions> {
+  _log?: any
+  $el: JQuery<HTMLSelectElement>
+  error?: any
+}
+
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    // TODO: any -> Partial<Cypress.SelectOptions>
-    select (subject, valueOrTextOrIndex, options: any = {}) {
+    select (subject, valueOrTextOrIndex, options: Partial<Cypress.SelectOptions> = {}) {
       if (
         !_.isNumber(valueOrTextOrIndex)
         && !_.isString(valueOrTextOrIndex)
@@ -28,9 +33,7 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+      const _options: InternalSelectOptions = _.defaults({}, options, {
         $el: subject,
         log: true,
         force: false,
@@ -38,24 +41,24 @@ export default (Commands, Cypress, cy) => {
 
       const consoleProps: Record<string, any> = {}
 
-      if (options.log) {
+      if (_options.log) {
         // figure out the options which actually change the behavior of clicks
-        const deltaOptions = $utils.filterOutOptions(options)
+        const deltaOptions = $utils.filterOutOptions(_options)
 
-        options._log = Cypress.log({
+        _options._log = Cypress.log({
           message: deltaOptions,
-          $el: options.$el,
-          timeout: options.timeout,
+          $el: _options.$el,
+          timeout: _options.timeout,
           consoleProps () {
             // merge into consoleProps without mutating it
             return _.extend({}, consoleProps, {
-              'Applied To': $dom.getElements(options.$el),
+              'Applied To': $dom.getElements(_options.$el),
               'Options': deltaOptions,
             })
           },
         })
 
-        options._log.snapshot('before', { next: 'after' })
+        _options._log.snapshot('before', { next: 'after' })
       }
 
       let node
@@ -71,13 +74,13 @@ export default (Commands, Cypress, cy) => {
       // or texts and clear the previous selections which matches jQuery's
       // behavior
 
-      if (!options.$el.is('select')) {
-        node = $dom.stringify(options.$el)
+      if (!_options.$el.is('select')) {
+        node = $dom.stringify(_options.$el)
         $errUtils.throwErrByPath('select.invalid_element', { args: { node } })
       }
 
-      if (options.$el.length && options.$el.length > 1) {
-        $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
+      if (_options.$el.length && _options.$el.length > 1) {
+        $errUtils.throwErrByPath('select.multiple_elements', { args: { num: _options.$el.length } })
       }
 
       // normalize valueOrTextOrIndex if its not an array
@@ -92,7 +95,7 @@ export default (Commands, Cypress, cy) => {
         return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
       })
 
-      const multiple = options.$el.prop('multiple')
+      const multiple = _options.$el.prop('multiple')
 
       // throw if we're not a multiple select and we've
       // passed an array of values
@@ -104,14 +107,14 @@ export default (Commands, Cypress, cy) => {
         let notAllUniqueValues
 
         // throw if <select> is disabled
-        if (!options.force && options.$el.prop('disabled')) {
-          node = $dom.stringify(options.$el)
+        if (!_options.force && _options.$el.prop('disabled')) {
+          node = $dom.stringify(_options.$el)
           $errUtils.throwErrByPath('select.disabled', { args: { node } })
         }
 
         const values: string[] = []
         const optionEls: JQuery<any>[] = []
-        const optionsObjects = options.$el.find('option').map((index, el) => {
+        const optionsObjects = _options.$el.find('option').map((index, el) => {
           // push the value in values array if its
           // found within the valueOrText
           const value = $elements.getNativeProp(el, 'value')
@@ -195,9 +198,9 @@ export default (Commands, Cypress, cy) => {
         return Promise
         .try(getOptions)
         .catch((err) => {
-          options.error = err
+          _options.error = err
 
-          return cy.retry(retryOptions, options)
+          return cy.retry(retryOptions, _options)
         })
       }
 
@@ -209,15 +212,15 @@ export default (Commands, Cypress, cy) => {
         // preserve the selected values
         consoleProps.Selected = values
 
-        return cy.now('click', options.$el, {
-          $el: options.$el,
+        return cy.now('click', _options.$el, {
+          $el: _options.$el,
           log: false,
           verify: false,
           errorOnSelect: false, // prevent click errors since we want the select to be clicked
-          _log: options._log,
-          force: options.force,
-          timeout: options.timeout,
-          interval: options.interval,
+          _log: _options._log,
+          force: _options.force,
+          timeout: _options.timeout,
+          interval: _options.interval,
         }).then(() => {
           // TODO:
           // 1. test cancelation
@@ -228,11 +231,11 @@ export default (Commands, Cypress, cy) => {
           // 6. test that option actually receives click event
           // 7. test that select still has focus (i think it already does have a test)
           // 8. test that multiple=true selects receive option event for each selected option
-          const activeElement = $elements.getActiveElByDocument(options.$el)
+          const activeElement = $elements.getActiveElByDocument(_options.$el)
 
-          if (!options.force && activeElement === null) {
-            const node = $dom.stringify(options.$el)
-            const onFail = options._log
+          if (!_options.force && activeElement === null) {
+            const node = $dom.stringify(_options.$el)
+            const onFail = _options._log
 
             $errUtils.throwErrByPath('select.disabled', {
               onFail,
@@ -248,11 +251,11 @@ export default (Commands, Cypress, cy) => {
               log: false,
               verify: false,
               force: true, // always force the click to happen on the <option>
-              timeout: options.timeout,
-              interval: options.interval,
+              timeout: _options.timeout,
+              interval: _options.interval,
             })
           }).then(() => {
-            const oldValue = options.$el[0].selectedIndex
+            const oldValue = _options.$el[0].selectedIndex
 
             // reset the selects value after we've
             // fired all the proper click events
@@ -260,7 +263,7 @@ export default (Commands, Cypress, cy) => {
             // TODO: shouldn't we be updating the values
             // as we click the <option> instead of
             // all afterwards?
-            options.$el.val(values)
+            _options.$el.val(values)
 
             if (notAllUniqueValues) {
               // if all the values are the same and the user is trying to
@@ -278,12 +281,12 @@ export default (Commands, Cypress, cy) => {
                 return $el.prop('selected', 'selected')
               })
 
-              options.$el[0].selectedIndex = selectedIndex
+              _options.$el[0].selectedIndex = selectedIndex
             }
 
             // https://github.com/cypress-io/cypress/issues/19494
             // When user selects the same option again, `input`, `change` events should not be fired.
-            if (options.$el[0].selectedIndex === oldValue) {
+            if (_options.$el[0].selectedIndex === oldValue) {
               return
             }
 
@@ -292,7 +295,7 @@ export default (Commands, Cypress, cy) => {
               cancelable: false,
             })
 
-            options.$el.get(0).dispatchEvent(input)
+            _options.$el.get(0).dispatchEvent(input)
 
             // yup manually create this change event
             // 1.6.5. HTML event types
@@ -301,11 +304,11 @@ export default (Commands, Cypress, cy) => {
 
             change.initEvent('change', true, false)
 
-            options.$el.get(0).dispatchEvent(change)
+            _options.$el.get(0).dispatchEvent(change)
           })
         }).then(() => {
           const verifyAssertions = () => {
-            return cy.verifyUpcomingAssertions(options.$el, options, {
+            return cy.verifyUpcomingAssertions(_options.$el, _options, {
               onRetry: verifyAssertions,
             })
           }
