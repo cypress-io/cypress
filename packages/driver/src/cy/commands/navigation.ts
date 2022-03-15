@@ -325,23 +325,20 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   const loading = () => {
-    // The window state will not exist if the the window that has loaded is cross origin
-    if (state('window')) {
-      const href = state('window').location.href
-      const count = getRedirectionCount(href)
-      const limit = config('redirectionLimit')
+    const href = state('window').location.href
+    const count = getRedirectionCount(href)
+    const limit = config('redirectionLimit')
 
-      if (count === limit) {
-        $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
-          args: {
-            href,
-            limit,
-          },
-        })
-      }
-
-      updateRedirectionCount(href)
+    if (count === limit) {
+      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+        args: {
+          href,
+          limit,
+        },
+      })
     }
+
+    updateRedirectionCount(href)
 
     debug('waiting for window:load')
 

@@ -60,8 +60,6 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     const stateUpdates = {
       ...state,
       redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
-      window: undefined, // reset the window and document, these will be reset when the AUT loads.
-      document: undefined, // If the document is not reset you can still query the document when it is not loaded in the AUT
     }
 
     // Setup the runnable

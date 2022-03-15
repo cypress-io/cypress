@@ -100,7 +100,6 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   cy.overrides.wrapNativeMethods(autWindow)
 
   const onWindowLoadPrimary = ({ url }) => {
-    //TODO: cy.window and cy.document need to be reset when the AUT window has loaded in another domain.
     // If the primary domain has indicated a load event, set stability to undefined, not true since the load happened in another domain.
     cy.isStable(undefined, 'primary onload')
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
