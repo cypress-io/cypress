@@ -2,7 +2,7 @@ import type { SpecFile } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 export interface SpecState {
-  activeSpec: SpecFile | null
+  activeSpec: SpecFile | null | undefined
 }
 
 export const useSpecStore = defineStore({
@@ -10,7 +10,7 @@ export const useSpecStore = defineStore({
 
   state (): SpecState {
     return {
-      activeSpec: null,
+      activeSpec: undefined,
     }
   },
 
