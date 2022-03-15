@@ -325,7 +325,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw new Error('Cannot set specs without current project')
     }
 

@@ -72,7 +72,7 @@ export const Query = objectType({
 
     t.nonNull.boolean('isInGlobalMode', {
       description: 'Whether the app is in global mode or not',
-      resolve: (source, args, ctx) => !ctx.currentProject,
+      resolve: (source, args, ctx) => !ctx.currentProjectRoot,
     })
 
     t.nonNull.boolean('projectRootFromCI', {

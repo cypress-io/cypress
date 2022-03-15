@@ -102,7 +102,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return !this.currentProject
+    return !this.currentProjectRoot
   }
 
   get modeOptions () {
@@ -176,7 +176,7 @@ export class DataContext {
     return this.coreData.wizard
   }
 
-  get currentProject () {
+  get currentProjectRoot () {
     return this.coreData.currentProject
   }
 

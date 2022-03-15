@@ -61,7 +61,7 @@ export class MigrationDataSource {
     debug('getComponentTestingMigrationStatus: start')
     const componentFolder = getComponentFolder(this.legacyConfig)
 
-    if (!this.legacyConfig || !this.ctx.currentProject) {
+    if (!this.legacyConfig || !this.ctx.currentProjectRoot) {
       throw Error('Need currentProject and config to continue')
     }
 
@@ -90,7 +90,7 @@ export class MigrationDataSource {
       }
 
       const { status, watcher } = await initComponentTestingMigration(
-        this.ctx.currentProject,
+        this.ctx.currentProjectRoot,
         componentFolder,
         getComponentTestFilesGlobs(this.legacyConfig),
         onFileMoved,
@@ -109,21 +109,21 @@ export class MigrationDataSource {
   }
 
   async supportFilesForMigrationGuide (): Promise<MigrationFile | null> {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error('Need this.ctx.currentProject')
     }
 
     debug('supportFilesForMigrationGuide: config %O', this.legacyConfig)
-    if (!await shouldShowRenameSupport(this.ctx.currentProject, this.legacyConfig)) {
+    if (!await shouldShowRenameSupport(this.ctx.currentProjectRoot, this.legacyConfig)) {
       return null
     }
 
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error(`Need this.ctx.projectRoot!`)
     }
 
     try {
-      const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
+      const supportFiles = await supportFilesForMigration(this.ctx.currentProjectRoot)
 
       debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
 
@@ -136,11 +136,11 @@ export class MigrationDataSource {
   }
 
   async getSpecsForMigrationGuide (): Promise<MigrationFile[]> {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    const specs = await getSpecs(this.ctx.currentProject, this.legacyConfig)
+    const specs = await getSpecs(this.ctx.currentProjectRoot, this.legacyConfig)
 
     const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
 
@@ -155,7 +155,7 @@ export class MigrationDataSource {
   }
 
   async createConfigString () {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error('Need currentProject!')
     }
 
@@ -165,7 +165,7 @@ export class MigrationDataSource {
       hasComponentTesting: this.ctx.coreData.migration.flags.hasComponentTesting,
       hasE2ESpec: this.ctx.coreData.migration.flags.hasE2ESpec,
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
-      projectRoot: this.ctx.currentProject,
+      projectRoot: this.ctx.currentProjectRoot,
       hasTypescript,
     })
   }

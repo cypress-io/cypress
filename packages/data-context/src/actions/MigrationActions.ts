@@ -79,14 +79,14 @@ export class MigrationActions {
     // for testing mainly, we want to ensure the flags are reset each test
     this.resetFlags()
 
-    if (!this.ctx.currentProject || !legacyConfigForMigration) {
+    if (!this.ctx.currentProjectRoot || !legacyConfigForMigration) {
       throw Error('cannot do migration without currentProject!')
     }
 
     await this.initializeFlags()
 
     const legacyConfigFileExist = await this.ctx.lifecycleManager.checkIfLegacyConfigFileExist()
-    const filteredSteps = await getStepsForMigration(this.ctx.currentProject, legacyConfigForMigration, Boolean(legacyConfigFileExist))
+    const filteredSteps = await getStepsForMigration(this.ctx.currentProjectRoot, legacyConfigForMigration, Boolean(legacyConfigFileExist))
 
     this.ctx.update((coreData) => {
       if (!filteredSteps[0]) {
@@ -105,7 +105,7 @@ export class MigrationActions {
   private async initializeFlags () {
     const legacyConfigForMigration = this.ctx.coreData.migration.legacyConfigForMigration
 
-    if (!this.ctx.currentProject || !legacyConfigForMigration) {
+    if (!this.ctx.currentProjectRoot || !legacyConfigForMigration) {
       throw Error('Need currentProject to do migration')
     }
 
@@ -116,7 +116,7 @@ export class MigrationActions {
     const hasCustomIntegrationTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'integration')
 
     let hasE2ESpec = integrationFolder
-      ? await hasSpecFile(this.ctx.currentProject, integrationFolder, integrationTestFiles)
+      ? await hasSpecFile(this.ctx.currentProjectRoot, integrationFolder, integrationTestFiles)
       : false
 
     // if we don't find specs in the 9.X scope,
@@ -126,7 +126,7 @@ export class MigrationActions {
     if (!hasE2ESpec && (!hasCustomIntegrationTestFiles || !hasCustomIntegrationFolder)) {
       const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e')
 
-      hasE2ESpec = await hasSpecFile(this.ctx.currentProject, '', newE2eSpecPattern)
+      hasE2ESpec = await hasSpecFile(this.ctx.currentProjectRoot, '', newE2eSpecPattern)
     }
 
     const componentFolder = getComponentFolder(legacyConfigForMigration)
@@ -136,7 +136,7 @@ export class MigrationActions {
     const hasCustomComponentTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'component')
 
     const hasComponentTesting = componentFolder
-      ? await hasSpecFile(this.ctx.currentProject, componentFolder, componentTestFiles)
+      ? await hasSpecFile(this.ctx.currentProjectRoot, componentFolder, componentTestFiles)
       : false
 
     this.ctx.update((coreData) => {
@@ -176,8 +176,8 @@ export class MigrationActions {
   }
 
   async setLegacyConfigForMigration (config: LegacyCypressConfigJson) {
-    assert(this.ctx.currentProject)
-    const legacyConfigForMigration = await processConfigViaLegacyPlugins(this.ctx.currentProject, config)
+    assert(this.ctx.currentProjectRoot)
+    const legacyConfigForMigration = await processConfigViaLegacyPlugins(this.ctx.currentProjectRoot, config)
 
     this.ctx.update((coreData) => {
       coreData.migration.legacyConfigForMigration = legacyConfigForMigration
@@ -187,11 +187,11 @@ export class MigrationActions {
   }
 
   async renameSpecsFolder () {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error('Need to set currentProject before you can rename specs folder')
     }
 
-    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+    const projectRoot = this.ctx.path.join(this.ctx.currentProjectRoot)
     const from = path.join(projectRoot, 'cypress', 'integration')
     const to = path.join(projectRoot, 'cypress', 'e2e')
 
@@ -199,7 +199,7 @@ export class MigrationActions {
   }
 
   async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error('Need to set currentProject before you can rename files')
     }
 
@@ -216,18 +216,18 @@ export class MigrationActions {
       specsToMove.push({ from, to })
     }
 
-    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+    const projectRoot = this.ctx.path.join(this.ctx.currentProjectRoot)
 
     await moveSpecFiles(projectRoot, specsToMove)
-    await cleanUpIntegrationFolder(this.ctx.currentProject)
+    await cleanUpIntegrationFolder(this.ctx.currentProjectRoot)
   }
 
   async renameSupportFile () {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error(`Need current project before starting migration!`)
     }
 
-    const result = await supportFilesForMigration(this.ctx.currentProject)
+    const result = await supportFilesForMigration(this.ctx.currentProjectRoot)
 
     const beforeRelative = result.before.relative
     const afterRelative = result.after.relative
@@ -237,8 +237,8 @@ export class MigrationActions {
     }
 
     this.ctx.fs.renameSync(
-      path.join(this.ctx.currentProject, beforeRelative),
-      path.join(this.ctx.currentProject, afterRelative),
+      path.join(this.ctx.currentProjectRoot, beforeRelative),
+      path.join(this.ctx.currentProjectRoot, afterRelative),
     )
   }
 
@@ -287,7 +287,7 @@ export class MigrationActions {
   }
 
   async assertSuccessfulConfigScaffold (configFile: `cypress.config.${'js'|'ts'}`) {
-    assert(this.ctx.currentProject)
+    assert(this.ctx.currentProjectRoot)
 
     // we assert the generated configuration file against one from a project that has
     // been verified to run correctly.
@@ -295,7 +295,7 @@ export class MigrationActions {
     // for example vueclivue2-configured and vueclivue2-unconfigured.
     // after setting the project up with the launchpad, the two projects should contain the same files.
 
-    const configuredProject = this.ctx.project.projectTitle(this.ctx.currentProject).replace('unconfigured', 'configured')
+    const configuredProject = this.ctx.project.projectTitle(this.ctx.currentProjectRoot).replace('unconfigured', 'configured')
     const expectedProjectConfig = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', configuredProject, configFile)
 
     const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))

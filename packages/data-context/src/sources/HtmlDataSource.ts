@@ -61,7 +61,7 @@ export class HtmlDataSource {
 
         return html.replace(
           '<title>Cypress</title>',
-          `<title>${this.ctx.project.projectTitle(this.ctx.currentProject || '')}</title>`,
+          `<title>${this.ctx.project.projectTitle(this.ctx.currentProjectRoot || '')}</title>`,
         )
       } catch (e) {
         err = e

@@ -68,14 +68,14 @@ export class WizardDataSource {
   async installedPackages (): Promise<string[]> {
     const packagesInitial = await this.packagesToInstall() || []
 
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error('currentProject is not defined')
     }
 
-    debug('packages to install: %O in %s', packagesInitial, this.ctx.currentProject)
+    debug('packages to install: %O in %s', packagesInitial, this.ctx.currentProjectRoot)
 
     const installedPackages: Array<string | null> = packagesInitial.map((p) => {
-      if (this.ctx.currentProject) {
+      if (this.ctx.currentProjectRoot) {
         debug('package checked: %s', p.package)
 
         // At startup, node will only resolve the main files of packages it knows of.
@@ -88,7 +88,7 @@ export class WizardDataSource {
         debug('package.json path: %s', packageJsonPath)
 
         try {
-          resolve(this.ctx.currentProject, packageJsonPath)
+          resolve(this.ctx.currentProjectRoot, packageJsonPath)
 
           return p.package
         } catch (e) {

@@ -18,9 +18,9 @@ export class FileDataSource {
   }
 
   readFileInProject (relativeFilePath: string) {
-    assert(this.ctx.currentProject, 'Cannot readFileInProject without currentProject')
+    assert(this.ctx.currentProjectRoot, 'Cannot readFileInProject without currentProject')
 
-    return this.readFile(path.join(this.ctx.currentProject, relativeFilePath))
+    return this.readFile(path.join(this.ctx.currentProjectRoot, relativeFilePath))
   }
 
   readJsonFile<Result = unknown> (absoluteFilePath: string) {

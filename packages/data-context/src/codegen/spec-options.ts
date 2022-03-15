@@ -25,14 +25,14 @@ export class SpecOptions {
   }
 
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
-    assert(this.ctx.currentProject)
+    assert(this.ctx.currentProjectRoot)
     this.parsedPath = this.ctx.path.parse(options.codeGenPath)
     if (options.erroredCodegenCandidate) {
       this.parsedErroredCodegenCandidate = this.ctx.path.parse(options.erroredCodegenCandidate)
     }
 
     // Should always be defined
-    this.projectRoot = this.ctx.currentProject
+    this.projectRoot = this.ctx.currentProjectRoot
   }
 
   getCodeGenOptions () {

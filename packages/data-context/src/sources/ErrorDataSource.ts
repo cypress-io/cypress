@@ -20,7 +20,7 @@ export class ErrorDataSource {
   }
 
   async codeFrame (source: ErrorWrapperSource): Promise<CodeFrameShape | null> {
-    if (!this.ctx.currentProject || !this.isUserCodeError(source)) {
+    if (!this.ctx.currentProjectRoot || !this.isUserCodeError(source)) {
       return null
     }
 
@@ -34,7 +34,7 @@ export class ErrorDataSource {
     if (tsErrorLocation) {
       line = tsErrorLocation.line
       column = tsErrorLocation.column
-      absolute = path.join(this.ctx.currentProject, tsErrorLocation.filePath)
+      absolute = path.join(this.ctx.currentProjectRoot, tsErrorLocation.filePath)
     } else {
       // Skip any stack trace lines which come from node:internal code
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')

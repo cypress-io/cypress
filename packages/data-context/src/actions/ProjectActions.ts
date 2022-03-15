@@ -125,12 +125,12 @@ export class ProjectActions {
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
+    assert(this.ctx.currentProjectRoot, 'Cannot initialize project without an active project')
     assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
-      projectRoot: this.ctx.currentProject,
+      projectRoot: this.ctx.currentProjectRoot,
       testingType: this.ctx.coreData.currentTestingType,
     }
 
@@ -203,7 +203,7 @@ export class ProjectActions {
   }
 
   async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string | null) {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       return null
     }
 
@@ -263,7 +263,7 @@ export class ProjectActions {
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
-    const project = this.ctx.currentProject
+    const project = this.ctx.currentProjectRoot
 
     if (!project) {
       throw Error(`Cannot create config file without currentProject.`)
@@ -310,7 +310,7 @@ export class ProjectActions {
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
@@ -318,7 +318,7 @@ export class ProjectActions {
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
-    const project = this.ctx.currentProject
+    const project = this.ctx.currentProjectRoot
 
     if (!project) {
       throw Error(`Cannot create spec without currentProject.`)
@@ -368,7 +368,7 @@ export class ProjectActions {
 
     if ((codeGenType === 'component' || codeGenType === 'story') && !erroredCodegenCandidate) {
       const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
-      const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
+      const filePathRelative = path.relative(this.ctx.currentProjectRoot || '', filePathAbsolute)
 
       let foundExt
 
@@ -409,11 +409,11 @@ export class ProjectActions {
 
     const cfg = await this.ctx.project.getConfig()
 
-    if (cfg && this.ctx.currentProject) {
+    if (cfg && this.ctx.currentProjectRoot) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
       const { specs } = await this.setSpecsFoundBySpecPattern({
-        path: this.ctx.currentProject,
+        path: this.ctx.currentProjectRoot,
         testingType,
         specPattern: cfg[testingType]?.specPattern,
         excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
@@ -485,7 +485,7 @@ export class ProjectActions {
   }
 
   get defaultE2EPath () {
-    const projectRoot = this.ctx.currentProject
+    const projectRoot = this.ctx.currentProjectRoot
 
     assert(projectRoot, `Cannot create e2e directory without currentProject.`)
 
@@ -493,7 +493,7 @@ export class ProjectActions {
   }
 
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
-    const projectRoot = this.ctx.currentProject
+    const projectRoot = this.ctx.currentProjectRoot
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 

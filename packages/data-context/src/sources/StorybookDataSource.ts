@@ -16,9 +16,9 @@ export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 
   async loadStorybookInfo () {
-    assert(this.ctx.currentProject)
+    assert(this.ctx.currentProjectRoot)
 
-    return this.storybookInfoLoader.load(this.ctx.currentProject)
+    return this.storybookInfoLoader.load(this.ctx.currentProjectRoot)
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))

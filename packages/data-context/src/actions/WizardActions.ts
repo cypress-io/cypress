@@ -20,9 +20,9 @@ export class WizardActions {
   constructor (private ctx: DataContext) {}
 
   private get projectRoot () {
-    assert(this.ctx.currentProject)
+    assert(this.ctx.currentProjectRoot)
 
-    return this.ctx.currentProject
+    return this.ctx.currentProjectRoot
   }
 
   private get data () {
@@ -89,7 +89,7 @@ export class WizardActions {
   }
 
   async initialize () {
-    if (!this.ctx.currentProject) {
+    if (!this.ctx.currentProjectRoot) {
       return
     }
 
@@ -104,7 +104,7 @@ export class WizardActions {
     this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
     try {
-      const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
+      const detected = detect(await fs.readJson(path.join(this.ctx.currentProjectRoot, 'package.json')))
 
       debug('detected %o', detected)
 

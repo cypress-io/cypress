@@ -61,7 +61,7 @@ export const mutation = mutationType({
         specFile: nonNull(stringArg()),
       },
       resolve: (source, args, ctx) => {
-        if (!ctx.currentProject) {
+        if (!ctx.currentProjectRoot) {
           return false
         }
 

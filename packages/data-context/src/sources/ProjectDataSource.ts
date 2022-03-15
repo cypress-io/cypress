@@ -187,7 +187,7 @@ export class ProjectDataSource {
   ) {
     this.stopSpecWatcher()
 
-    const currentProject = this.ctx.currentProject
+    const currentProject = this.ctx.currentProjectRoot
 
     if (!currentProject) {
       throw new Error('Cannot start spec watcher without current project')
@@ -211,13 +211,13 @@ export class ProjectDataSource {
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+    if (!this.ctx.currentProjectRoot || !this.ctx.coreData.currentTestingType) {
       return false
     }
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProjectRoot, this.ctx.coreData.currentTestingType)
 
     for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
@@ -270,11 +270,11 @@ export class ProjectDataSource {
   }
 
   async getCodeGenGlobs () {
-    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
+    assert(this.ctx.currentProjectRoot, `Cannot find glob without currentProject.`)
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
 
-    const framework = await this.frameworkLoader.load(this.ctx.currentProject)
+    const framework = await this.frameworkLoader.load(this.ctx.currentProjectRoot)
 
     return {
       component: framework?.glob ?? looseComponentGlob,
@@ -316,7 +316,7 @@ export class ProjectDataSource {
       glob = `**/${glob}`
     }
 
-    const projectRoot = this.ctx.currentProject
+    const projectRoot = this.ctx.currentProjectRoot
 
     if (!projectRoot) {
       throw Error(`Cannot find components without currentProject.`)
@@ -328,12 +328,12 @@ export class ProjectDataSource {
   }
 
   async getIsDefaultSpecPattern () {
-    assert(this.ctx.currentProject)
+    assert(this.ctx.currentProjectRoot)
     assert(this.ctx.coreData.currentTestingType)
 
     const { e2e, component } = getDefaultSpecPatterns()
 
-    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProjectRoot, this.ctx.coreData.currentTestingType)
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
       return isEqual(specPattern, [e2e])
