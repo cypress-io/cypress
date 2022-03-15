@@ -115,7 +115,7 @@ describe('App: Index', () => {
           })
 
           cy.withCtx(async (ctx, options) => {
-            const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'e2e', ['**/*.cy.js'], [], [])).map((spec) => spec.relative)
+            const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProjectRoot ?? '', 'e2e', ['**/*.cy.js'], [], [])).map((spec) => spec.relative)
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {
@@ -883,7 +883,7 @@ describe('App: Index', () => {
 
         cy.withCtx(async (ctx, o) => {
           const spec = (
-            await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], [])
+            await ctx.project.findSpecs(ctx.currentProjectRoot ?? '', 'component', ['**/*.cy.jsx'], [], [])
           ).find((spec) => spec.relative === o.path)
 
           expect(spec).to.exist
@@ -907,7 +907,7 @@ describe('App: Index', () => {
         cy.percySnapshot('Story Generator Success')
 
         cy.withCtx(async (ctx, o) => {
-          const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], []))
+          const spec = (await ctx.project.findSpecs(ctx.currentProjectRoot ?? '', 'component', ['**/*.cy.jsx'], [], []))
           .find((spec) => spec.relative === o.path)
 
           expect(spec).to.exist
