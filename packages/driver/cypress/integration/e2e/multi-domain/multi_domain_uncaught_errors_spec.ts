@@ -3,7 +3,8 @@
 // To reproduce, just add "experimentalSessionSupport" = true into the describe block below
 
 // @ts-ignore
-describe('multi-domain - uncaught errors', () => {
+// TODO: run in firefox too after we fix error serialization for firefox.
+describe('multi-domain - uncaught errors', { browser: '!firefox' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="errors-link"]').click()
@@ -24,8 +25,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    // TODO: run in firefox too after we fix error serialization for firefox.
-    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', { browser: '!firefox' }, (done) => {
+    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
@@ -168,8 +168,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    // TODO: run in firefox too after we fix error serialization for firefox.
-    it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', { browser: '!firefox' }, (done) => {
+    it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', (done) => {
       cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
