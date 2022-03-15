@@ -108,14 +108,6 @@
           "default": "cypress/downloads",
           "description": "Path to folder where files downloaded during a test are saved"
         },
-        "componentFolder": {
-          "type": [
-            "string",
-            "boolean"
-          ],
-          "default": false,
-          "description": "Path to folder containing component test files (Pass false to disable)"
-        },
         "pluginsFile": {
           "type": [
             "string",
