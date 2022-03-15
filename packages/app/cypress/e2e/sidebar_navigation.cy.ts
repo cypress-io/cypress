@@ -1,4 +1,25 @@
 describe('Sidebar Navigation', () => {
+  context('as e2e testing type with localSettings', () => {
+    it('use saved state for nav size', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
+      })
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.startAppServer()
+      cy.__incorrectlyVisitAppWithIntercept()
+
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        expect($initialWidth).eq(100)
+      })
+    })
+  })
+
   context('as e2e testing type', () => {
     beforeEach(() => {
       cy.scaffoldProject('todos')
@@ -225,25 +246,6 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Settings').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
-    })
-
-    it('use saved state for nav size', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
-      })
-
-      cy.scaffoldProject('todos')
-      cy.openProject('todos')
-      cy.startAppServer()
-      cy.__incorrectlyVisitAppWithIntercept()
-
-      cy.contains('fixture.js').click()
-
-      cy.get('.toggle-specs-text').click()
-
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
-        expect($initialWidth).eq(100)
-      })
     })
 
     // TODO: Remove skip when we fix cy.reload() in Cypress in Cypress - UNIFY-1346
