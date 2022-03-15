@@ -2714,11 +2714,6 @@ declare namespace Cypress {
      */
     nodeVersion: 'system' | 'bundled'
     /**
-     * Path to plugins file. (Pass false to disable)
-     * @default "cypress/plugins/index.js"
-     */
-    pluginsFile: string | false
-    /**
      * The application under test cannot redirect more than this limit.
      * @default 20
      */
@@ -2818,11 +2813,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
-    /**
-     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
-     * @default false
-     */
-    experimentalStudio: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
