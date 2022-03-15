@@ -11,7 +11,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e multi domain errors', () => {
+describe('e2e multi domain retries', () => {
   systemTests.setup({
     servers: [{
       port: 4466,
@@ -24,7 +24,7 @@ describe('e2e multi domain errors', () => {
     },
   })
 
-  systemTests.it('captures the stack trace correctly for multi-domain errors to point users to their "switchToDomain" callback', {
+  systemTests.it('Appropriately displays test retry errors without other side effects', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'multi_domain_retries_spec.ts',
