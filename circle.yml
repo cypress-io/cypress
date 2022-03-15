@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - fix-next-version-in-test-repos
+        - fix-beta-build-caching
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-next-version-in-test-repos, << pipeline.git.branch >> ]
+    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-next-version-in-test-repos, << pipeline.git.branch >> ]
+    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -81,6 +81,7 @@ executors:
     macos:
       # Executor should have Node >= required version
       xcode: "13.0.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: mac
 
@@ -1632,7 +1633,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-next-version-in-test-repos" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-beta-build-caching" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2301,12 +2302,13 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
+        resource_class: macos.x86.medium.gen2
         only-cache-for-root-user: true
 
     - build:
         name: darwin-build
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-node-modules-install
 
@@ -2325,7 +2327,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-build
 
