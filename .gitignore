@@ -9,6 +9,9 @@ _test-output
 cypress.zip
 .babel-cache
 
+# from config, compiled .js files
+packages/config/src/*.js
+
 # from extension
 Cached Theme.pak
 Cached Theme Material Design.pak
