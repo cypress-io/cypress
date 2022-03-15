@@ -48,7 +48,7 @@ context('multi-domain viewport', { experimentalSessionSupport: true }, () => {
       })
 
       it('resets the viewport between tests', () => {
-        cy.switchToDomain('foobar.com', () => {
+        cy.switchToDomain('http://foobar.com:3500', () => {
           cy.window().then((win) => {
             expect(win.innerHeight).to.equal(660)
             expect(win.innerWidth).to.equal(1000)
