@@ -24,8 +24,8 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    // TODO: enable after we fix error serialization for firefox.
-    it.skip('fails the current test/command if sync errors are thrown from the switchToDomain callback', (done) => {
+    // TODO: run in firefox too after we fix error serialization for firefox.
+    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', { browser: '!firefox' }, (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
