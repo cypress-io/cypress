@@ -69,21 +69,37 @@ export class PrimaryDomainCommunicator extends EventEmitter {
    */
   toAllSpecBridges (event: string, data?: any) {
     debug('=> to all spec bridges', event, data)
+
+    const preprocessedData = preprocessForSerialization<any>(data)
+
+    // if user defined data is passed in, do NOT sanitize it.
+    if (data?.data) {
+      preprocessedData.data = data.data
+    }
+
     // If there is no crossDomainDriverWindow, there is no need to send the message.
     Object.values(this.crossDomainDriverWindows).forEach((win: Window) => {
       win.postMessage({
         event,
-        data: preprocessForSerialization(data),
+        data: preprocessedData,
       }, '*')
     })
   }
 
   toSpecBridge (domain: string, event: string, data?: any) {
     debug('=> to spec bridge', domain, event, data)
+
+    const preprocessedData = preprocessForSerialization<any>(data)
+
+    // if user defined data is passed in, do NOT sanitize it.
+    if (data?.data) {
+      preprocessedData.data = data.data
+    }
+
     // If there is no crossDomainDriverWindow, there is no need to send the message.
     this.crossDomainDriverWindows[domain]?.postMessage({
       event,
-      data: preprocessForSerialization(data),
+      data: preprocessedData,
     }, '*')
   }
 }
