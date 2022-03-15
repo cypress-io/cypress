@@ -16588,10 +16588,10 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@1.15.2:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.15.2.tgz#325015726291a5e1e0d0cf89177eb9dec1c13e19"
-  integrity sha512-Ni/xbpMEllrNBrDVxh9juu7W4sbyBGpENuWvFdiojjBxzyvCCHaYCJIdF5kgGNzE5aP4AkoGW/jEk1KiKQzALA==
+cypress-example-kitchensink@1.15.3:
+  version "1.15.3"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.15.3.tgz#eb02804ef834d0c9caa921bf0e35c81dfdabcdbf"
+  integrity sha512-axv9tGGcXJBlULGpodiviIcEv9jsOxZagTWh4NIu4N4iD3a3YqkEJZUGOxcL+6ejjN65TJ6cCEqeUtoJUO8kjQ==
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
@@ -40037,18 +40037,10 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@1.5.9:
+url-parse@1.5.9, url-parse@^1.4.3, url-parse@^1.4.7:
   version "1.5.9"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.9.tgz#05ff26484a0b5e4040ac64dcee4177223d74675e"
   integrity sha512-HpOvhKBvre8wYez+QhHcYiVvVmeF6DVnuSOOPhe3cTum3BnqHhvKaZm8FU5yTiOu/Jut2ZpB2rA/SbBA1JIGlQ==
-  dependencies:
-    querystringify "^2.1.1"
-    requires-port "^1.0.0"
-
-url-parse@^1.4.3, url-parse@^1.4.7:
-  version "1.5.6"
-  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.6.tgz#b2a41d5a233645f3c31204cc8be60e76a15230a2"
-  integrity sha512-xj3QdUJ1DttD1LeSfvJlU1eiF1RvBSBfUu8GplFGdUzSO28y5yUtEl7wb//PI4Af6qh0o/K8545vUmucRrfWsw==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
