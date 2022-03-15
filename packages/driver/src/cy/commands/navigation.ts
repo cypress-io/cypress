@@ -827,7 +827,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       url = $Location.normalize(url)
 
-      if (Cypress.state('isMultiDomain')) {
+      if (Cypress.isMultiDomain) {
         url = $Location.qualifyWithBaseUrl(Cypress.state('multiDomainBaseUrl'), url)
       } else {
         const baseUrl = config('baseUrl')
