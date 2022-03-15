@@ -5,9 +5,11 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
   "experimentalShadowDomSupport",
+  "experimentalStudio",
   "firefoxGcInterval",
   "nodeVersion",
   "nodeVersion",
+  "pluginsFile",
   "testFiles"
 ]
 
@@ -40,7 +42,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "modifyObstructiveCode": true,
   "numTestsKeptInMemory": 50,
   "pageLoadTimeout": 60000,
-  "pluginsFile": "cypress/plugins",
   "port": null,
   "projectId": null,
   "redirectionLimit": 20,
@@ -116,7 +117,6 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "numTestsKeptInMemory",
   "platform",
   "pageLoadTimeout",
-  "pluginsFile",
   "port",
   "projectId",
   "redirectionLimit",
