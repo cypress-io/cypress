@@ -181,7 +181,7 @@ export class ProjectLifecycleManager {
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? 'cypress.config.js'
+    return this.ctx.modeOptions.configFile ?? path.basename(this.configFilePath) ?? 'cypress.config.js'
   }
 
   get configFilePath () {
@@ -226,6 +226,10 @@ export class ProjectLifecycleManager {
 
   get projectTitle () {
     return path.basename(this.projectRoot)
+  }
+
+  get fileExtensionToUse () {
+    return this.metaState.hasTypescript ? 'ts' : 'js'
   }
 
   async checkIfLegacyConfigFileExist () {
