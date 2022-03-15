@@ -48,13 +48,12 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
-import { CheckCloudOrganizationsDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -75,26 +74,9 @@ fragment CreateCloudOrgModal on CloudUser {
 }
 `
 
-gql`
-subscription CheckCloudOrganizations {
-  cloudViewerChange {
-    cloudViewer {
-      id
-      organizations (first:1) {
-        nodes {
-          id
-        }
-      }
-    }
-  }
-}
-`
-
 const props = defineProps<{
   gql: CreateCloudOrgModalFragment
 }>()
-
-useSubscription({ query: CheckCloudOrganizationsDocument })
 
 const polling = ref(false)
 

@@ -22,7 +22,11 @@ export const Subscription = subscriptionType({
       type: Query,
       description: '',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
-      resolve: (source, args, ctx) => ({}),
+      resolve: (source, args, ctx) => {
+        return {
+          requestPolicy: 'network-only',
+        }
+      },
     })
   },
 })

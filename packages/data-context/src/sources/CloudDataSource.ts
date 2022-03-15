@@ -5,7 +5,7 @@ import debugLib from 'debug'
 import type { DataContext } from '..'
 import pDefer from 'p-defer'
 import getenv from 'getenv'
-import { pipe, subscribe, toPromise } from 'wonka'
+import { pipe, subscribe, toPromise, take } from 'wonka'
 import type { DocumentNode, OperationTypeNode } from 'graphql'
 import {
   createClient,
@@ -93,23 +93,29 @@ export class CloudDataSource {
         subscribe((res) => {
           debug('executeRemoteGraphQL subscribe res %o', res)
 
-          if (!_.isEqual(resolvedData?.data, res.data) || !_.isEqual(resolvedData?.error, res.error)) {
+          if (!resolvedData) {
+            resolvedData = res
+
             // Ignore the error when there's no internet connection
             if (res.error?.networkError) {
               debug('executeRemoteGraphQL network error', res.error)
               dfd.resolve({ ...res, error: undefined, data: null })
             } else if (res.error) {
+              dfd.reject(res.error)
+            } else {
+              dfd.resolve(res)
+            }
+          } else if ((!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) && !res.error?.networkError) {
+            if (res.error) {
               this.ctx.coreData.dashboardGraphQLError = {
                 cypressError: getError('DASHBOARD_GRAPHQL_ERROR', res.error),
               }
-
-              dfd.reject(res.error)
             } else {
               this.ctx.coreData.dashboardGraphQLError = null
-
-              dfd.resolve(res)
             }
 
+            // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
+            // since we know we're up-to-date
             this.ctx.deref.emitter.toApp()
             this.ctx.deref.emitter.toLaunchpad()
           }
@@ -123,7 +129,7 @@ export class CloudDataSource {
       return dfd.promise
     }
 
-    return pipe(executingQuery, toPromise).then((data) => {
+    return pipe(executingQuery, take(1), toPromise).then((data) => {
       debug('executeRemoteGraphQL toPromise res %o', data)
 
       if (data.error) {
