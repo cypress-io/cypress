@@ -7,20 +7,30 @@ import $errUtils from '../../../cypress/error_utils'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 
+interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> {
+  _log?: any
+  _retries?: number
+  filter?: any
+  onRetry?: Function
+  verify?: boolean
+}
+
+interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> {
+  _log?: any
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>
-    get (selector, options: any = {}) {
-      const userOptions = options
+    get (selector, options: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> = {}) {
       const ctx = this
 
-      if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
+      if ((options === null) || _.isArray(options) || !_.isPlainObject(options)) {
         return $errUtils.throwErrByPath('get.invalid_options', {
-          args: { options: userOptions },
+          args: { options },
         })
       }
 
-      options = _.defaults({}, userOptions, {
+      const _options: InternalGetOptions = _.defaults({}, options, {
         retry: true,
         withinSubject: state('withinSubject'),
         log: true,
@@ -28,21 +38,21 @@ export default (Commands, Cypress, cy, state) => {
         verify: true,
       })
 
-      options.includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
+      _options.includeShadowDom = resolveShadowDomInclusion(Cypress, _options.includeShadowDom)
 
       let aliasObj
       const consoleProps: Record<string, any> = {}
       const start = (aliasType) => {
-        if (options.log === false) {
+        if (_options.log === false) {
           return
         }
 
-        if (options._log == null) {
-          options._log = Cypress.log({
+        if (_options._log == null) {
+          _options._log = Cypress.log({
             message: selector,
             referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
             aliasType,
-            timeout: options.timeout,
+            timeout: _options.timeout,
             consoleProps: () => {
               return consoleProps
             },
@@ -51,11 +61,11 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       const log = (value, aliasType = 'dom') => {
-        if (options.log === false) {
+        if (_options.log === false) {
           return
         }
 
-        if (!_.isObject(options._log)) {
+        if (!_.isObject(_options._log)) {
           start(aliasType)
         }
 
@@ -64,7 +74,7 @@ export default (Commands, Cypress, cy, state) => {
         if (aliasType === 'dom') {
           _.extend(obj, {
             $el: value,
-            numRetries: options._retries,
+            numRetries: _options._retries,
           })
         }
 
@@ -100,7 +110,7 @@ export default (Commands, Cypress, cy, state) => {
           return consoleProps
         }
 
-        options._log.set(obj)
+        _options._log.set(obj)
       }
 
       let allParts
@@ -176,7 +186,7 @@ export default (Commands, Cypress, cy, state) => {
 
             log(subject)
 
-            return cy.verifyUpcomingAssertions(subject, options, {
+            return cy.verifyUpcomingAssertions(subject, _options, {
               onFail (err) {
                 // if we are failing because our aliased elements
                 // are less than what is expected then we know we
@@ -241,7 +251,7 @@ export default (Commands, Cypress, cy, state) => {
           log(subject, 'primitive')
 
           const verifyAssertions = () => {
-            return cy.verifyUpcomingAssertions(subject, options, {
+            return cy.verifyUpcomingAssertions(subject, _options, {
               ensureExistenceFor: false,
               onRetry: verifyAssertions,
             })
@@ -256,24 +266,24 @@ export default (Commands, Cypress, cy, state) => {
       start('dom')
 
       const setEl = ($el) => {
-        if (options.log === false) {
+        if (_options.log === false) {
           return
         }
 
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
-        options._log.set({ $el })
+        _options._log.set({ $el })
       }
 
       const getElements = () => {
         let $el
 
         try {
-          let scope = options.withinSubject
+          let scope: (typeof _options.withinSubject) | Node[] = _options.withinSubject
 
-          if (options.includeShadowDom) {
-            const root = options.withinSubject ? options.withinSubject[0] : cy.state('document')
+          if (_options.includeShadowDom) {
+            const root = _options.withinSubject ? _options.withinSubject[0] : cy.state('document')
             const elementsWithShadow = $dom.findAllShadowRoots(root)
 
             scope = elementsWithShadow.concat(root)
@@ -291,11 +301,11 @@ export default (Commands, Cypress, cy, state) => {
         } catch (err: any) {
           // this is usually a sizzle error (invalid selector)
           err.onFail = () => {
-            if (options.log === false) {
+            if (_options.log === false) {
               return err
             }
 
-            options._log.error(err)
+            _options._log.error(err)
           }
 
           throw err
@@ -304,8 +314,8 @@ export default (Commands, Cypress, cy, state) => {
         // if that didnt find anything and we have a within subject
         // and we have been explictly told to filter
         // then just attempt to filter out elements from our within subject
-        if (!$el.length && options.withinSubject && options.filter) {
-          const filtered = options.withinSubject.filter(selector)
+        if (!$el.length && _options.withinSubject && _options.filter) {
+          const filtered = (_options.withinSubject as JQuery).filter(selector)
 
           // reset $el if this found anything
           if (filtered.length) {
@@ -318,8 +328,8 @@ export default (Commands, Cypress, cy, state) => {
 
         // allow retry to be a function which we ensure
         // returns truthy before returning its
-        if (_.isFunction(options.onRetry)) {
-          const ret = options.onRetry.call(ctx, $el)
+        if (_.isFunction(_options.onRetry)) {
+          const ret = _options.onRetry.call(ctx, $el)
 
           if (ret) {
             log($el)
@@ -335,11 +345,11 @@ export default (Commands, Cypress, cy, state) => {
 
       const resolveElements = () => {
         return Promise.try(getElements).then(($el) => {
-          if (options.verify === false) {
+          if (_options.verify === false) {
             return $el
           }
 
-          return cy.verifyUpcomingAssertions($el, options, {
+          return cy.verifyUpcomingAssertions($el, _options, {
             onRetry: resolveElements,
           })
         })
@@ -350,8 +360,7 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
-    contains (subject, filter, text, options: any = {}) {
+    contains (subject, filter, text, options: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> = {}) {
       let userOptions = options
 
       // nuke our subject if its present but not an element.
@@ -389,7 +398,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('contains.regex_conflict')
       }
 
-      options = _.defaults({}, userOptions, { log: true, matchCase: true })
+      const _options: InternalContainsOptions = _.defaults({}, userOptions, { log: true, matchCase: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
         $errUtils.throwErrByPath('contains.invalid_argument')
@@ -435,16 +444,16 @@ export default (Commands, Cypress, cy, state) => {
 
       let consoleProps
 
-      if (options.log !== false) {
+      if (_options.log !== false) {
         consoleProps = {
           Content: text,
           'Applied To': $dom.getElements(subject || state('withinSubject')),
         }
 
-        options._log = Cypress.log({
+        _options._log = Cypress.log({
           message: _.compact([filter, text]),
           type: subject ? 'child' : 'parent',
-          timeout: options.timeout,
+          timeout: _options.timeout,
           consoleProps: () => {
             return consoleProps
           },
@@ -452,22 +461,22 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       const setEl = ($el) => {
-        if (options.log === false) {
+        if (_options.log === false) {
           return
         }
 
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
-        options._log.set({ $el })
+        _options._log.set({ $el })
       }
 
       // find elements by the :cy-contains psuedo selector
       // and any submit inputs with the attributeContainsWord selector
-      const selector = $dom.getContainsSelector(text, filter, options)
+      const selector = $dom.getContainsSelector(text, filter, _options)
 
       const resolveElements = () => {
-        const getOptions = _.extend({}, options, {
+        const getOptions = _.extend({}, _options, {
           // error: getErr(text, phrase)
           withinSubject: subject || state('withinSubject') || cy.$$('body'),
           filter: true,
@@ -483,13 +492,13 @@ export default (Commands, Cypress, cy, state) => {
 
           setEl($el)
 
-          return cy.verifyUpcomingAssertions($el, options, {
+          return cy.verifyUpcomingAssertions($el, _options, {
             onRetry: resolveElements,
             onFail (err) {
               switch (err.type) {
                 case 'length':
                   if (err.expected > 1) {
-                    return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
+                    return $errUtils.throwErrByPath('contains.length_option', { onFail: _options._log })
                   }
 
                   break
