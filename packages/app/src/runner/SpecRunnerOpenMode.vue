@@ -6,8 +6,8 @@
     <ResizablePanels
       :offset-left="64"
       :max-total-width="windowWidth"
-      :initial-panel1-width="specsListWidthPreferences"
-      :initial-panel2-width="reporterWidthPreferences"
+      :initial-panel1-width="specListWidth"
+      :initial-panel2-width="reporterWidth"
       :min-panel3-width="340"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -235,14 +235,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cleanupRunner()
-})
-
-const specsListWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.specListWidth ?? specListWidth.value
-})
-
-const reporterWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.reporterWidth ?? reporterWidth.value
 })
 
 </script>
