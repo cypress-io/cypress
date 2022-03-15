@@ -248,7 +248,7 @@ describe('Sidebar Navigation', () => {
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
 
-    it('resize nav and persist sends the correct value on the mutation', () => {
+    it('resize nav sends the correct value on the mutation', () => {
       cy.contains('fixture.js').click()
 
       cy.get('.toggle-specs-text').click()
