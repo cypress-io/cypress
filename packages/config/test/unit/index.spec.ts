@@ -1,9 +1,9 @@
-const chai = require('chai')
-const snapshot = require('snap-shot-it')
-const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
+import chai from 'chai'
+import snapshot from 'snap-shot-it'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 
-const configUtil = require('../../lib/index')
+import * as configUtil from '../../src/index'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -142,6 +142,27 @@ describe('src/index', () => {
         value: undefined,
         configFile: 'config.js',
       })
+    })
+  })
+
+  describe('.validateNoBreakingConfigLaunchpad', () => {
+    it('calls warning callback if config contains breaking option that should be shown in launchpad', () => {
+      const warningFn = sinon.spy()
+      const errorFn = sinon.spy()
+
+      configUtil.validateNoBreakingConfigLaunchpad({
+        'experimentalStudio': 'should break',
+        configFile: 'config.js',
+      }, warningFn, errorFn)
+
+      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_STUDIO_REMOVED', {
+        name: 'experimentalStudio',
+        newName: undefined,
+        value: undefined,
+        configFile: 'config.js',
+      })
+
+      expect(errorFn).to.have.callCount(0)
     })
   })
 
