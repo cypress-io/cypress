@@ -412,19 +412,13 @@ export class ProjectActions {
     if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
-      const { specs } = await this.setSpecsFoundBySpecPattern({
+      await this.setSpecsFoundBySpecPattern({
         path: this.ctx.currentProject,
         testingType,
         specPattern: cfg[testingType]?.specPattern,
         excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
         additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
       })
-
-      if (specs) {
-        if (testingType === 'component') {
-          this.api.getDevServer().updateSpecs(specs)
-        }
-      }
     }
 
     return {
@@ -458,7 +452,13 @@ export class ProjectActions {
 
     this.ctx.actions.project.setSpecs(specs)
 
-    return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
+    this.ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
+
+    if (testingType === 'component') {
+      this.api.getDevServer().updateSpecs(specs)
+    }
+
+    this.ctx.emitter.specsChange()
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {

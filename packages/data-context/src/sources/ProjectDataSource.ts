@@ -202,7 +202,7 @@ export class ProjectDataSource {
         this.api.getDevServer().updateSpecs(specs)
       }
 
-      this.ctx.emitter.toApp()
+      this.ctx.emitter.specsChange()
     })
 
     this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)

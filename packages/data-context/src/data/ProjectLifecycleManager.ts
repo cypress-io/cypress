@@ -577,8 +577,21 @@ export class ProjectLifecycleManager {
         this._configResult = { state: 'loaded', value: result }
         this.validateConfigFile(this.configFilePath, result.initialConfig)
         this.onConfigLoaded(child, ipc, result)
+
+        if (this._currentTestingType) {
+          return this.ctx.actions.project.setSpecsFoundBySpecPattern({
+            path: this.projectRoot,
+            testingType: this._currentTestingType || 'e2e',
+            specPattern: this._currentTestingType ? result.initialConfig[this._currentTestingType]?.specPattern : '',
+            excludeSpecPattern: this._currentTestingType ? result.initialConfig[this._currentTestingType]?.excludeSpecPattern : '',
+            additionalIgnorePattern: this._currentTestingType === 'component' ? result.initialConfig.e2e?.specPattern : undefined,
+          })
+        }
       }
 
+      return Promise.resolve()
+    })
+    .then(() => {
       this.ctx.emitter.toLaunchpad()
     })
     .catch((err) => {

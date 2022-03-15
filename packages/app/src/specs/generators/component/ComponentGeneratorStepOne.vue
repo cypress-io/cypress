@@ -79,9 +79,8 @@ import { useI18n } from '@cy/i18n'
 import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
-import { gql, useQuery, useMutation } from '@urql/vue'
-import type { GeneratorSuccessFileFragment } from '../../../generated/graphql'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { gql, useQuery, useMutation, useSubscription } from '@urql/vue'
+import { ComponentGeneratorStepOne_SpecsChangeDocument, GeneratorSuccessFileFragment, ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -153,6 +152,20 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
     }
   }
 }`
+
+gql`
+subscription ComponentGeneratorStepOne_specsChange {
+  specsChange {
+    id
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
+  }
+}
+`
+
+useSubscription({ query: ComponentGeneratorStepOne_SpecsChangeDocument })
 
 const mutation = useMutation(ComponentGeneratorStepOne_GenerateSpecDocument)
 

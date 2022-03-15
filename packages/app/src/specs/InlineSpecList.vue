@@ -23,8 +23,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { gql } from '@urql/vue'
-import type { Specs_InlineSpecListFragment } from '../generated/graphql'
+import { gql, useSubscription } from '@urql/vue'
+import { Specs_InlineSpecListFragment, Specs_SpecsChangeDocument } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
@@ -60,6 +60,20 @@ fragment Specs_InlineSpecList on Query {
   }
 }
 `
+
+gql`
+subscription Specs_specsChange {
+  specsChange {
+    id
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
+  }
+}
+`
+
+useSubscription({ query: Specs_SpecsChangeDocument })
 
 const props = defineProps<{
   gql: Specs_InlineSpecListFragment
