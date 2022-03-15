@@ -388,6 +388,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """File extension to use based on if the project has typescript or not"""
+  fileExtensionToUse: FileExtensionEnum
+
   """Whether the project has Typescript"""
   hasTypescript: Boolean
 
@@ -532,6 +535,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
+  EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
   FIREFOX_GC_INTERVAL_REMOVED
@@ -565,7 +569,7 @@ enum ErrorTypeEnum {
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN
   PLAN_EXCEEDS_MONTHLY_TESTS
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED
-  PLUGINS_INVALID_EVENT_NAME_ERROR
+  PLUGINS_FILE_CONFIG_OPTION_REMOVED
   PLUGINS_RUN_EVENT_ERROR
   PORT_IN_USE_LONG
   PORT_IN_USE_SHORT
@@ -577,6 +581,7 @@ enum ErrorTypeEnum {
   RENDERER_CRASHED
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
   SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER
+  SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION
   SUPPORT_FILE_NOT_FOUND
   TESTS_DID_NOT_START_FAILED
@@ -626,6 +631,11 @@ input FileDetailsInput {
   """
   filePath: String!
   line: Int
+}
+
+enum FileExtensionEnum {
+  js
+  ts
 }
 
 """Represents a file on the file system"""
@@ -1141,9 +1151,6 @@ type Query {
   """The currently opened project"""
   currentProject: CurrentProject
 
-  """The mode the interactive runner was launched in"""
-  currentTestingType: TestingTypeEnum
-
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
@@ -1236,6 +1243,14 @@ type Storybook implements Node {
 
   """Folder containing storybook configuration files"""
   storybookRoot: String!
+}
+
+type Subscription {
+  """Triggered when the auth state changes"""
+  authChange: Query
+
+  """Issued for internal development changes"""
+  devChange: DevState
 }
 
 """The bundlers that we can use with Cypress"""

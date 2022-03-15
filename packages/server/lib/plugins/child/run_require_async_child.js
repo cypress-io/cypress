@@ -78,69 +78,55 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
-  ipc.on('loadLegacyPlugins', async (legacyConfig) => {
+  // Config file loading of modules is tested within
+  // system-tests/projects/config-cjs-and-esm/*
+  const loadConfig = async (configFile) => {
+    // 1. Try loading the configFile
+    // 2. Catch the "ERR_REQUIRE_ESM" error
+    // 3. Check if esbuild is installed
+    //   3a. Yes: Use bundleRequire
+    //   3b. No: Continue through to `await import(configFile)`
+    // 4. Use node's dynamic import to import the configFile
+
     try {
-      let legacyPlugins = require(file)
-
-      if (legacyPlugins && typeof legacyPlugins.default === 'function') {
-        legacyPlugins = legacyPlugins.default
+      return require(configFile)
+    } catch (err) {
+      if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
+        throw err
       }
-
-      // invalid or empty plugins file
-      if (typeof legacyPlugins !== 'function') {
-        ipc.send('loadLegacyPlugins:reply', legacyConfig)
-
-        return
-      }
-
-      // we do not want to execute any tasks - the purpose
-      // of this is to get any modified config returned
-      // by plugins.
-      const noop = () => {}
-      const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
-
-      // pluginsFile did not return the config - this is allowed, although
-      // we recommend returning it in our docs.
-      if (!legacyPluginsConfig) {
-        ipc.send('loadLegacyPlugins:reply', legacyConfig)
-
-        return
-      }
-
-      // match merging strategy from 9.x
-      const mergedLegacyConfig = {
-        ...legacyConfig,
-        ...legacyPluginsConfig,
-      }
-
-      if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
-        mergedLegacyConfig.e2e = {
-          ...(legacyConfig.e2e || {}),
-          ...(legacyPluginsConfig.e2e || {}),
-        }
-      }
-
-      if (legacyConfig.component || legacyPluginsConfig.component) {
-        mergedLegacyConfig.component = {
-          ...(legacyConfig.component || {}),
-          ...(legacyPluginsConfig.component || {}),
-        }
-      }
-
-      ipc.send('loadLegacyPlugins:reply', mergedLegacyConfig)
-    } catch (e) {
-      ipc.send('loadLegacyPlugins:error', util.serializeError(
-        require('@packages/errors').getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', file, e),
-      ))
     }
-  })
 
-  ipc.on('loadConfig', () => {
+    debug('User is loading an ESM config file')
+
+    try {
+      debug('Trying to use esbuild to run their config file.')
+      // We prefer doing this because it supports TypeScript files
+      require.resolve('esbuild')
+
+      debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
+      const { bundleRequire } = require('bundle-require')
+
+      return (await bundleRequire({ filepath: configFile })).mod
+    } catch (err) {
+      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
+        debug(`User doesn't have esbuild. Going to use native node imports.`)
+
+        // We cannot replace the initial `require` with `await import` because
+        // Certain modules cannot be dynamically imported
+        return await import(configFile)
+      }
+
+      throw err
+    }
+  }
+
+  ipc.on('loadConfig', async () => {
     try {
       debug('try loading', file)
-      const exp = require(file)
+      const configFileExport = await loadConfig(file)
 
-      const result = exp.default || exp
+      debug('loaded config file', file)
+      const result = configFileExport.default || configFileExport
 
       const replacer = (_key, val) => {
         return typeof val === 'function' ? `[Function ${val.name}]` : val
@@ -211,6 +197,63 @@ function run (ipc, file, projectRoot) {
 
       ipc.send('loadConfig:error', util.serializeError(
         require('@packages/errors').getError('CONFIG_FILE_REQUIRE_ERROR', file, err),
+      ))
+    }
+  })
+
+  ipc.on('loadLegacyPlugins', async (legacyConfig) => {
+    try {
+      let legacyPlugins = require(file)
+
+      if (legacyPlugins && typeof legacyPlugins.default === 'function') {
+        legacyPlugins = legacyPlugins.default
+      }
+
+      // invalid or empty plugins file
+      if (typeof legacyPlugins !== 'function') {
+        ipc.send('loadLegacyPlugins:reply', legacyConfig)
+
+        return
+      }
+
+      // we do not want to execute any tasks - the purpose
+      // of this is to get any modified config returned
+      // by plugins.
+      const noop = () => {}
+      const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
+
+      // pluginsFile did not return the config - this is allowed, although
+      // we recommend returning it in our docs.
+      if (!legacyPluginsConfig) {
+        ipc.send('loadLegacyPlugins:reply', legacyConfig)
+
+        return
+      }
+
+      // match merging strategy from 9.x
+      const mergedLegacyConfig = {
+        ...legacyConfig,
+        ...legacyPluginsConfig,
+      }
+
+      if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
+        mergedLegacyConfig.e2e = {
+          ...(legacyConfig.e2e || {}),
+          ...(legacyPluginsConfig.e2e || {}),
+        }
+      }
+
+      if (legacyConfig.component || legacyPluginsConfig.component) {
+        mergedLegacyConfig.component = {
+          ...(legacyConfig.component || {}),
+          ...(legacyPluginsConfig.component || {}),
+        }
+      }
+
+      ipc.send('loadLegacyPlugins:reply', mergedLegacyConfig)
+    } catch (e) {
+      ipc.send('loadLegacyPlugins:error', util.serializeError(
+        require('@packages/errors').getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', file, e),
       ))
     }
   })

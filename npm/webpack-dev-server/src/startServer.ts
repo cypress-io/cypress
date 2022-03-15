@@ -4,6 +4,7 @@ import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
 import type { CypressWebpackDevServerConfig } from '.'
+import { normalizeError } from './plugin'
 
 export interface StartDevServer extends UserWebpackDevServerOptions, CypressWebpackDevServerConfig {
   /* this is the Cypress dev server configuration object */
@@ -43,6 +44,9 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtmlFile, 
   if (isTextTerminal) {
     compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
       if (stats.hasErrors()) {
+        const errors = stats.compilation.errors
+
+        options.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
         exitProcess(1)
       }
     })

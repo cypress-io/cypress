@@ -683,7 +683,7 @@ describe('visual error templates', () => {
         default: ['/path/to/cypress.config.js', err],
       }
     },
-    PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
+    SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
       return {
@@ -729,11 +729,6 @@ describe('visual error templates', () => {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: [1, 2, 3],
-        }],
-        pluginsFile: ['pluginsFile', 'cypress/plugins/index.js', {
-          key: 'defaultCommandTimeout',
-          type: 'a number',
-          value: false,
         }],
         noFileType: [null, null, {
           key: 'defaultCommandTimeout',
@@ -797,8 +792,7 @@ describe('visual error templates', () => {
       return {
         default: [
           '/path/to/project/root',
-          'cypress.config.js',
-          'cypress.config.ts',
+          ['cypress.config.js', 'cypress.config.ts', 'cypress.config.mjs'],
         ],
       }
     },
@@ -1007,6 +1001,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_STUDIO_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     FIREFOX_GC_INTERVAL_REMOVED: () => {
       return {
         default: [],
@@ -1066,6 +1065,11 @@ describe('visual error templates', () => {
     MULTIPLE_SUPPORT_FILES_FOUND: () => {
       return {
         default: ['spec.{ts,js}', ['support.ts', 'support.js']],
+      }
+    },
+    PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
+      return {
+        default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
