@@ -61,6 +61,7 @@ export interface InjectedConfigApi {
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
   validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
+  validateLaunchpadConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
   validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
 }
 
@@ -627,6 +628,24 @@ export class ProjectLifecycleManager {
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     })
+
+    return this.ctx._apis.configApi.validateLaunchpadConfigBreakingChanges(
+      config,
+      (type, obj) => {
+        const error = getError(type, obj)
+
+        this.ctx.onWarning(error)
+
+        return error
+      },
+      (type, obj) => {
+        const error = getError(type, obj)
+
+        this.ctx.onError(error)
+
+        throw error
+      },
+    )
   }
 
   /**
