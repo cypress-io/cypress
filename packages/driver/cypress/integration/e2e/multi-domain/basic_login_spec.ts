@@ -394,4 +394,72 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     .invoke('text')
     .should('equal', 'Welcome BJohnson')
   })
+
+  describe('Pre established spec bridge', () => {
+    // These next three tests test and edge case where we want to prevent a load event from an established spec bridge that is not part of the test.
+    // This test removes the foobar spec bridge, navigates to idp, then navigates to foobar and attempts to access selectors on localhost.
+    it('times out in switchToDomain with foobar spec bridge undefined', { pageLoadTimeout: 5000 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load.`)
+        done()
+      })
+
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.window().then(() => {
+      // Force remove the spec bridge
+        window?.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
+      })
+
+      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+      cy.switchToDomain('http://idp.com:3500', () => {
+        cy.get('[data-cy="username"]').type('BJohnson')
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/fixtures/auth/index.html'
+        })//
+      })
+
+      // Verify that the user has logged in on localhost
+      cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
+      .invoke('text')
+      .should('equal', 'Welcome BJohnson')
+    })
+
+    // this test just needs to establish the foobar spec bridge.
+    it('establishes foobar spec bridge', () => {
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.get('[data-cy="login-foobar"]').click() // Takes you to idp.com
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.get('[data-cy="username"]').type('BJohnson')
+        cy.get('[data-cy="login"]').click()
+      })
+
+      // Verify that the user has logged in on localhost
+      cy.get('[data-cy="welcome"]')
+      .invoke('text')
+      .should('equal', 'Welcome BJohnson')
+    })
+
+    // This test is the same as the first test but the foobar spec bridge has been established and we expect it to behave the same as the first test.
+    // The primary domain should ignore the load event from the foobar spec bridge and load should timeout in the idp switchToDomain command..
+    it('times out in switchToDomain with foobar spec bridge defined', { pageLoadTimeout: 5000 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load.`)
+        done()
+      })
+
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+      cy.switchToDomain('http://idp.com:3500', () => {
+        cy.get('[data-cy="username"]').type('BJohnson')
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/fixtures/auth/index.html'
+        })
+      })
+
+      // Verify that the user has logged in on localhost
+      cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
+      .invoke('text')
+      .should('equal', 'Welcome BJohnson')
+    })
+  })
 })

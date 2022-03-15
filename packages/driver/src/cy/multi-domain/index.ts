@@ -94,6 +94,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       const domain = location.superDomain
 
+      cy.state('latestActiveDomain', domain)
+
       return new Bluebird((resolve, reject) => {
         const cleanup = () => {
           communicator.off('queue:finished', onQueueFinished)
