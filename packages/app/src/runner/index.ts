@@ -282,7 +282,7 @@ function runSpecE2E (spec: SpecFile) {
 
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
-  autIframe.showInitialBlankContents()
+  autIframe.showInitialBlankContentsE2E()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
