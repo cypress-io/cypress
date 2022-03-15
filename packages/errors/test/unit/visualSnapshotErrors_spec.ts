@@ -1001,6 +1001,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_STUDIO_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     FIREFOX_GC_INTERVAL_REMOVED: () => {
       return {
         default: [],

@@ -5,6 +5,7 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
   "experimentalShadowDomSupport",
+  "experimentalStudio",
   "firefoxGcInterval",
   "nodeVersion",
   "nodeVersion",

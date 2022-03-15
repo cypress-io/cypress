@@ -1421,6 +1421,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
     })
 
+    it('warns if experimentalStudio is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalStudio', true, {
+        experimentalStudio: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_STUDIO_REMOVED')
+    })
+
     // @see https://github.com/cypress-io/cypress/pull/9185
     it('warns if experimentalNetworkStubbing is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
