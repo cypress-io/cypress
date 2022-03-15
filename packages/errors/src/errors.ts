@@ -646,9 +646,9 @@ export const AllCypressErrors = {
     `
   },
   // TODO: make this relative path, not absolute
-  PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
+  SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
-      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(configFilePath)}
 
       You must pass a valid event name when registering a plugin.
 
@@ -657,6 +657,8 @@ export const AllCypressErrors = {
       The following are valid events:
 
       ${fmt.listItems(validEventNames)}
+
+      Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
 
       ${fmt.stackTrace(err)}
     `
@@ -682,7 +684,7 @@ export const AllCypressErrors = {
   },
   // happens when there is an error in configuration file like "cypress.json"
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
+  CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | null, fileName: string | null, validationMsg: string) => {
     if (!fileType) {
       return errTemplate`
         An invalid configuration value was set:
@@ -696,7 +698,7 @@ export const AllCypressErrors = {
       ${fmt.highlight(validationMsg)}`
   },
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
+  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
     const { key, type, value, list } = validationResult
 
     if (!fileType) {
@@ -1209,6 +1211,27 @@ export const AllCypressErrors = {
 
       Learn more: https://on.cypress.io/dev-server
     `
+  },
+
+  PLUGINS_FILE_CONFIG_OPTION_REMOVED: (_errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        setupNodeEvents()
+      },
+      component: {
+        setupNodeEvents()
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight('pluginsFile')} configuration option you have supplied has been replaced with ${fmt.highlightSecondary('setupNodeEvents')}.
+        
+        This new option is not a one-to-one correlation and it must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
+        
+        ${fmt.code(code)}
+        
+        https://on.cypress.io/migration-guide`
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG: (errShape: BreakingErrResult) => {

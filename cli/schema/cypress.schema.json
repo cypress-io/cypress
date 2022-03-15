@@ -116,14 +116,6 @@
           "default": false,
           "description": "Path to folder containing component test files (Pass false to disable)"
         },
-        "pluginsFile": {
-          "type": [
-            "string",
-            "boolean"
-          ],
-          "default": "cypress/plugins/index.js",
-          "description": "Path to plugins file. (Pass false to disable)"
-        },
         "screenshotOnRunFailure": {
           "type": "boolean",
           "default": true,
