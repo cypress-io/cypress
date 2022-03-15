@@ -314,8 +314,7 @@ describe('App: Index', () => {
 
           cy.percySnapshot('Generator success')
 
-          // TODO: code rendering is flaky in CI
-          // cy.get('code').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.get('pre').should('contain', 'describe(\'MyTest.cy.ts\'')
 
           cy.get('[aria-label="Close"]').click()
 
