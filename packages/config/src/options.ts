@@ -1,7 +1,24 @@
 import os from 'os'
-import validate from './validation'
+import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
+
+export type BreakingOptionErrorKey =
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
+  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
+  | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
+  | 'EXPERIMENTAL_SAMESITE_REMOVED'
+  | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
+  | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
+  | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
+  | 'EXPERIMENTAL_STUDIO_REMOVED'
+  | 'FIREFOX_GC_INTERVAL_REMOVED'
+  | 'NODE_VERSION_DEPRECATION_SYSTEM'
+  | 'NODE_VERSION_DEPRECATION_BUNDLED'
+  | 'PLUGINS_FILE_CONFIG_OPTION_REMOVED'
+  | 'RENAMED_CONFIG_OPTION'
+  | 'TEST_FILES_DEPRECATION'
 
 type TestingType = 'e2e' | 'component'
 
@@ -29,7 +46,7 @@ interface RuntimeConfigOption {
   canUpdateDuringTestTime?: boolean
 }
 
-interface BreakingOption {
+export interface BreakingOption {
   /**
    * The non-passive configuration option.
    */
@@ -37,7 +54,7 @@ interface BreakingOption {
   /**
    * String to summarize the error messaging that is logged.
    */
-  errorKey: string
+  errorKey: BreakingOptionErrorKey
   /**
    * Array of testing types this config option is valid for
    */
@@ -54,6 +71,10 @@ interface BreakingOption {
    * Whether to log the error message as a warning instead of throwing an error.
    */
   isWarning?: boolean
+  /**
+    * Whether to show the error message in the launchpad
+    */
+  showInLaunchpad?: boolean
 }
 
 const isValidConfig = (key: string, config: any) => {
@@ -233,12 +254,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'pluginsFile',
-    defaultValue: 'cypress/plugins',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'port',
     defaultValue: null,
@@ -493,6 +508,9 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...runtimeOptions,
 ]
 
+/**
+ * Values not allowed in 10.X+ in the root, e2e and component config
+ */
 export const breakingOptions: Array<BreakingOption> = [
   {
     name: 'blacklistHosts',
@@ -519,6 +537,11 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+    showInLaunchpad: true,
+  }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
@@ -532,8 +555,10 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
-  },
-  {
+  }, {
+    name: 'pluginsFile',
+    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+  }, {
     name: 'testFiles',
     errorKey: 'TEST_FILES_DEPRECATION',
     isWarning: false,
@@ -557,6 +582,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  },
+  {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
     testingTypes: ['component', 'e2e'],
   },
   {

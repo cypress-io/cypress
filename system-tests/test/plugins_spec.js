@@ -106,23 +106,6 @@ describe('e2e plugins', function () {
     snapshot: true,
   })
 
-  it('handles absolute path to pluginsFile', function () {
-    const pluginsAbsolutePath = Fixtures.projectPath('plugins-absolute-path')
-
-    return systemTests.exec(this, {
-      spec: 'absolute.cy.js',
-      config: {
-        pluginsFile: path.join(
-          pluginsAbsolutePath,
-          'cypress/plugins/index.js',
-        ),
-      },
-      project: 'plugins-absolute-path',
-      sanitizeScreenshotDimensions: true,
-      snapshot: true,
-    })
-  })
-
   const pluginAfterScreenshot = 'plugin-after-screenshot'
 
   it('calls after:screenshot for cy.screenshot() and failure screenshots', function () {

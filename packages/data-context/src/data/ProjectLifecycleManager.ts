@@ -20,7 +20,8 @@ import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/e
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
-import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { BreakingErrResult, BreakingOptionErrorKey } from '@packages/config'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 
@@ -46,7 +47,7 @@ export interface SetupFullConfigOptions {
   options: Partial<AllModeOptions>
 }
 
-type BreakingValidationFn<T> = (type: BreakingOption, val: BreakingErrResult) => T
+type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrResult) => T
 
 /**
  * All of the APIs injected from @packages/server & @packages/config
@@ -60,6 +61,7 @@ export interface InjectedConfigApi {
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
   validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
+  validateLaunchpadConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
   validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
 }
 
@@ -179,7 +181,7 @@ export class ProjectLifecycleManager {
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? 'cypress.config.js'
+    return this.ctx.modeOptions.configFile ?? path.basename(this.configFilePath) ?? 'cypress.config.js'
   }
 
   get configFilePath () {
@@ -224,6 +226,10 @@ export class ProjectLifecycleManager {
 
   get projectTitle () {
     return path.basename(this.projectRoot)
+  }
+
+  get fileExtensionToUse () {
+    return this.metaState.hasTypescript ? 'ts' : 'js'
   }
 
   async checkIfLegacyConfigFileExist () {
@@ -622,6 +628,24 @@ export class ProjectLifecycleManager {
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     })
+
+    return this.ctx._apis.configApi.validateLaunchpadConfigBreakingChanges(
+      config,
+      (type, obj) => {
+        const error = getError(type, obj)
+
+        this.ctx.onWarning(error)
+
+        return error
+      },
+      (type, obj) => {
+        const error = getError(type, obj)
+
+        this.ctx.onError(error)
+
+        throw error
+      },
+    )
   }
 
   /**

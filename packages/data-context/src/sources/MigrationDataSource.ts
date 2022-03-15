@@ -187,6 +187,6 @@ export class MigrationDataSource {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
+    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
   }
 }

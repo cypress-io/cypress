@@ -30,6 +30,7 @@
           <Spinner />
         </template>
         <template v-else-if="!currentProject?.currentTestingType">
+          <WarningList :gql="query.data.value" />
           <LaunchpadHeader
             :title="t('welcomePage.title')"
             description=""
@@ -79,6 +80,7 @@ import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
+import WarningList from './warning/WarningList.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -114,6 +116,7 @@ fragment MainLaunchpadQueryData on Query {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
+  ...WarningList
 }
 `
 

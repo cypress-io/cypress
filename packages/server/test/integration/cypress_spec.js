@@ -14,7 +14,7 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
-const v = require('@packages/config/lib/validation')
+const { validation: v } = require('@packages/config')
 
 const argsUtil = require(`../../lib/util/args`)
 const { fs } = require(`../../lib/util/fs`)

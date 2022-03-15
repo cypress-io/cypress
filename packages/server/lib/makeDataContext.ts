@@ -1,7 +1,7 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
 
 import type {
@@ -63,6 +63,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
       validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
+      validateLaunchpadConfigBreakingChanges: configUtils.validateNoBreakingConfigLaunchpad,
       validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
@@ -92,7 +93,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return user.logOut()
       },
       resetAuthState () {
-        return ctx.actions.auth.resetAuthState()
+        auth.stopServer()
       },
     },
     projectApi: {
