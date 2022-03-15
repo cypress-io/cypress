@@ -36,6 +36,7 @@ describe('<CreateSpecModal />', () => {
               },
             },
             specs: [],
+            fileExtensionToUse: 'js',
           },
         }}
         show={show.value}
@@ -104,6 +105,7 @@ describe('playground', () => {
               },
             },
             specs: [],
+            fileExtensionToUse: 'js',
           },
         }}
         show={show.value}
