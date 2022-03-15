@@ -1,0 +1,13 @@
+diff --git a/node_modules/@types/jquery.scrollto/index.d.ts b/node_modules/@types/jquery.scrollto/index.d.ts
+index 0a00c69..1707682 100755
+--- a/node_modules/@types/jquery.scrollto/index.d.ts
++++ b/node_modules/@types/jquery.scrollto/index.d.ts
+@@ -6,7 +6,7 @@
+ 
+ /// <reference types="jquery"/>
+ 
+-interface ScrollToOptions {
++interface ScrollToOptions extends JQuery.EffectsOptions<any> {
+     /**
+     * Which axis must be scrolled, use 'x', 'y', 'xy' or 'yx'.
+     */

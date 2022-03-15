@@ -129,9 +129,6 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
-          // TODO: done() came from jQuery animate(), specifically, EffectsOptions at misc.d.ts
-          // The type definition should be fixed at @types/jquery.scrollto.
-          // @ts-ignore
           return $(_options.$parent).scrollTo(_options.$el, {
             axis: _options.axis,
             easing: _options.easing,
@@ -374,10 +371,7 @@ export default (Commands, Cypress, cy, state) => {
 
       const scrollTo = () => {
         return new Promise((resolve, reject) => {
-          // scroll our axis'
-          // TODO: done() came from jQuery animate(), specifically, EffectsOptions at misc.d.ts
-          // The type definition should be fixed at @types/jquery.scrollto.
-          // @ts-ignore
+          // scroll our axis
           $(_options.$el).scrollTo({ left: x, top: y }, {
             axis: _options.axis,
             easing: _options.easing,
