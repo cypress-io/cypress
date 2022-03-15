@@ -36,7 +36,7 @@ namespace CypressConfigTests {
   Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectType void
   Cypress.config({ e2e: { baseUrl: null }}) // $ExpectType void
   Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectType void
-  Cypress.config({ component: { devServer: () => ({}, baseUrl: '.') } })
+  Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
