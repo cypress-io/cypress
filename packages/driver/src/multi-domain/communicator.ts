@@ -73,7 +73,7 @@ export class PrimaryDomainCommunicator extends EventEmitter {
     Object.values(this.crossDomainDriverWindows).forEach((win: Window) => {
       win.postMessage({
         event,
-        data,
+        data: preprocessForSerialization(data),
       }, '*')
     })
   }
@@ -83,7 +83,7 @@ export class PrimaryDomainCommunicator extends EventEmitter {
     // If there is no crossDomainDriverWindow, there is no need to send the message.
     this.crossDomainDriverWindows[domain]?.postMessage({
       event,
-      data,
+      data: preprocessForSerialization(data),
     }, '*')
   }
 }
