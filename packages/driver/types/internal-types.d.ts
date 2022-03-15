@@ -33,6 +33,7 @@ declare namespace Cypress {
     // But in many cases like cy/commands/screenshot.ts, it's called with a timeout id string.
     // We should decide whether calling with id is correct or not.
     clearTimeout: <T>(timeoutId?: string) => Cypress.Chainable<T>
+    isStable: (boolean, string) => void
   }
 
   interface Cypress {

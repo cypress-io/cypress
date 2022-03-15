@@ -133,8 +133,8 @@ export const eventManager = {
       })
     })
 
-    ws.on('cross:domain:delaying:html', () => {
-      Cypress.multiDomainCommunicator.emit('delaying:html')
+    ws.on('cross:domain:delaying:html', (request) => {
+      Cypress.multiDomainCommunicator.emit('delaying:html', request)
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -512,6 +512,8 @@ export const eventManager = {
       }
     })
 
+    Cypress.multiDomainCommunicator.initialize(window)
+
     Cypress.on('test:before:run', (...args) => {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
@@ -520,10 +522,27 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.multiDomainCommunicator.initialize(window)
+    Cypress.multiDomainCommunicator.on('window:load', ({ url }, domain) => {
+      // Sync stable if the expected domain has loaded.
+      // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
+      // established spec bridge, but one that is not the current or next switchToDomain command.
+      if (cy.state('latestActiveDomain') === domain) {
+        // Since stability was established in another domain set stable to undefined, not true. Undefined and true are treated the same stability.ts, but
+        // it allows us to distinguish between a load event that ocurred in this domain and some that didn't (or the initial state)
+        cy.isStable(undefined, 'load')
+        // Prints out the newly loaded URL
+        Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+      }
+    })
 
-    Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
-      Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+    Cypress.multiDomainCommunicator.on('before:unload', (_unused, domain) => {
+      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+      // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
+      // established spec bridge, but one that is not the current or next switchToDomain command.
+      if (cy.state('latestActiveDomain') === domain) {
+        // Unstable is unstable regardless of where it initiated from.
+        cy.state('isStable', false)
+      }
     })
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
