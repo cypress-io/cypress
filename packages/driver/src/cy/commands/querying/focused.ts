@@ -3,27 +3,29 @@ import Promise from 'bluebird'
 
 import $dom from '../../../dom'
 
+interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
+  _log?: any
+  verify: boolean
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    focused (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const _options: InternalFocusedOptions = _.defaults({}, options, {
         verify: true,
         log: true,
       })
 
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
+      if (_options.log) {
+        _options._log = Cypress.log({ timeout: _options.timeout })
       }
 
       const log = ($el) => {
-        if (options.log === false) {
+        if (_options.log === false) {
           return
         }
 
-        options._log.set({
+        _options._log.set({
           $el,
           consoleProps () {
             const ret = $el ? $dom.getElements($el) : '--nothing--'
@@ -48,7 +50,7 @@ export default (Commands, Cypress, cy, state) => {
         return Promise
         .try(getFocused)
         .then(($el) => {
-          if (options.verify === false) {
+          if (_options.verify === false) {
             return $el
           }
 
@@ -58,7 +60,7 @@ export default (Commands, Cypress, cy, state) => {
           }
 
           // pass in a null jquery object for assertions
-          return cy.verifyUpcomingAssertions($el, options, {
+          return cy.verifyUpcomingAssertions($el, _options, {
             onRetry: resolveFocused,
           })
         })
