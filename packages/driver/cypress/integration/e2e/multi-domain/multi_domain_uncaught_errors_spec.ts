@@ -168,7 +168,8 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', (done) => {
+    // TODO: run in firefox too after we fix error serialization for firefox.
+    it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', { browser: '!firefox' }, (done) => {
       cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
