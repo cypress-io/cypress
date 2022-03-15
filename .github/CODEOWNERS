@@ -1,32 +1,32 @@
 # Each line is a file pattern followed by one or more owners.
 
 # End-to-end team are owners of code within root packages concerning e2e testing, cli, and other utils
-# Component eam are owners of code within packages concerning component testing
+# Component-testing team are owners of code within packages concerning component testing
 
 /.github/  @cypress-io/end-to-end
-/browser-versions.json  @cypress-io/end-to-end @cypress-io/component
+/browser-versions.json  @cypress-io/end-to-end @cypress-io/component-testing
 
 /cli/  @cypress-io/end-to-end
 
 /guides/  @cypress-io/end-to-end
 
-/npm/angular @cypress-io/component
-/npm/create-cypress-tests @cypress-io/component
-/npm/cypress-schematic @cypress-io/component
-/npm/design-system @cypress-io/component
-/npm/eslint-plugin-dev @cypress-io/end-to-end @cypress-io/component
-/npm/mount-utils @cypress-io/component
-/npm/react @cypress-io/component
-/npm/vue @cypress-io/component
-/npm/webpack-batteries-included-preprocessor @cypress-io/end-to-end @cypress-io/component
-/npm/webpack-dev-server @cypress-io/component
-/npm/webpack-preprocessor @cypress-io/end-to-end @cypress-io/component
+/npm/angular @cypress-io/component-testing
+/npm/create-cypress-tests @cypress-io/component-testing
+/npm/cypress-schematic @cypress-io/component-testing
+/npm/design-system @cypress-io/component-testing
+/npm/eslint-plugin-dev @cypress-io/end-to-end @cypress-io/component-testing
+/npm/mount-utils @cypress-io/component-testing
+/npm/react @cypress-io/component-testing
+/npm/vue @cypress-io/component-testing
+/npm/webpack-batteries-included-preprocessor @cypress-io/end-to-end @cypress-io/component-testing
+/npm/webpack-dev-server @cypress-io/component-testing
+/npm/webpack-preprocessor @cypress-io/end-to-end @cypress-io/component-testing
 
 /packages/config/  @cypress-io/end-to-end
 /packages/desktop-gui/  @cypress-io/end-to-end
 /packages/driver/  @cypress-io/end-to-end
 /packages/electron/  @cypress-io/end-to-end
-/packages/errors/  @cypress-io/end-to-end @cypress-io/component
+/packages/errors/  @cypress-io/end-to-end @cypress-io/component-testing
 /packages/example/  @cypress-io/end-to-end
 /packages/extension/  @cypress-io/end-to-end
 /packages/https-proxy/  @cypress-io/end-to-end
@@ -39,7 +39,7 @@
 /packages/rewriter/  @cypress-io/end-to-end
 /packages/root/  @cypress-io/end-to-end
 /packages/runner/  @cypress-io/end-to-end
-/packages/runner-ct/  @cypress-io/component
+/packages/runner-ct/  @cypress-io/component-testing
 /packages/runner-shared/  @cypress-io/end-to-end
 /packages/server/  @cypress-io/end-to-end
 /packages/socket/  @cypress-io/end-to-end
@@ -52,4 +52,4 @@
 
 /scripts/  @cypress-io/end-to-end
 
-/system-tests/ @cypress-io/end-to-end @cypress-io/component
+/system-tests/ @cypress-io/end-to-end @cypress-io/component-testing
