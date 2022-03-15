@@ -267,6 +267,22 @@ const addCypressRunCommand = (program) => {
   .option('--dev', text('dev'), coerceFalse)
 }
 
+const addCypressOpenCommand = (program) => {
+  return program
+  .command('open')
+  .usage('[options]')
+  .description('Opens Cypress in the interactive GUI.')
+  .option('-b, --browser <browser-path>', text('browserOpenMode'))
+  .option('-c, --config <config>', text('config'))
+  .option('-C, --config-file <config-file>', text('configFile'))
+  .option('-d, --detached [bool]', text('detached'), coerceFalse)
+  .option('-e, --env <env>', text('env'))
+  .option('--global', text('global'))
+  .option('-p, --port <port>', text('port'))
+  .option('-P, --project <project-path>', text('project'))
+  .option('--dev', text('dev'), coerceFalse)
+}
+
 /**
  * Casts known command line options for "cypress run" to their intended type.
  * For example if the user passes "--port 5005" the ".port" property should be
@@ -384,23 +400,12 @@ module.exports = {
       showVersions(args)
     })
 
-    program
-    .command('open')
-    .usage('[options]')
-    .description('Opens Cypress in the interactive GUI.')
-    .option('-b, --browser <browser-path>', text('browserOpenMode'))
-    .option('-c, --config <config>', text('config'))
-    .option('-C, --config-file <config-file>', text('configFile'))
-    .option('-d, --detached [bool]', text('detached'), coerceFalse)
-    .option('-e, --env <env>', text('env'))
-    .option('--global', text('global'))
-    .option('-p, --port <port>', text('port'))
-    .option('-P, --project <project-path>', text('project'))
-    .option('--dev', text('dev'), coerceFalse)
+    addCypressOpenCommand(program)
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')
       .start(util.parseOpts(opts))
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 
@@ -430,6 +435,7 @@ module.exports = {
       debug('opening Cypress')
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 
