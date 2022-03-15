@@ -1,5 +1,8 @@
+/// <reference path="../../../cli/types/cypress.d.ts" />
 import _ from 'lodash'
 import Debug from 'debug'
+import type { CypressError } from '@packages/errors'
+
 import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
 import type { BreakingOption, BreakingOptionErrorKey } from './options'
 
@@ -47,9 +50,14 @@ export type BreakingErrResult = {
 type ErrorHandler = (
   key: BreakingOptionErrorKey,
   options: BreakingErrResult
-) => void
+) => never
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+type WarningHandler = (
+  key: BreakingOptionErrorKey,
+  options: BreakingErrResult
+) => CypressError
+
+const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: WarningHandler, onErr: ErrorHandler) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
@@ -80,6 +88,8 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
         configFile: cfg.configFile,
       })
     }
+
+    return
   })
 }
 
@@ -123,7 +133,7 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: string) => void) => {
+export const validate = <T extends Cypress.ConfigOptions>(cfg: Partial<T>, onErr: (property: string) => void) => {
   debug('validating configuration', cfg)
 
   return _.each(cfg, (value, key) => {
@@ -140,25 +150,25 @@ export const validate = (cfg: any, onErr: (property: string) => void) => {
   })
 }
 
-export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingConfigRoot = <T extends Cypress.ConfigOptions>(cfg: Partial<T>, onWarning: WarningHandler, onErr: ErrorHandler) => {
   return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr)
 }
 
-export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingConfig = <T extends Cypress.ConfigOptions>(cfg: Partial<T>, onWarning: WarningHandler, onErr: ErrorHandler) => {
   return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
 }
 
-export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingConfigLaunchpad = <T extends Cypress.ConfigOptions>(cfg: Partial<T>, onWarning: WarningHandler, onErr: ErrorHandler) => {
   return validateNoBreakingOptions(breakingOptions.filter((option) => option.showInLaunchpad), cfg, onWarning, onErr)
 }
 
-export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof typeof testingTypeBreakingOptions, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingTestingTypeConfig = <T extends Cypress.ConfigOptions>(cfg: Partial<T>, testingType: keyof typeof testingTypeBreakingOptions, onWarning: WarningHandler, onErr: ErrorHandler) => {
   const options = testingTypeBreakingOptions[testingType]
 
   return validateNoBreakingOptions(options, cfg, onWarning, onErr)
 }
 
-export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {
+export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => never) => {
   let errProperty
 
   Object.keys(config).some((option) => {
@@ -168,4 +178,6 @@ export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) 
   if (errProperty) {
     return onErr(errProperty)
   }
+
+  return
 }

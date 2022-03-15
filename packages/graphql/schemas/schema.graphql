@@ -501,6 +501,7 @@ enum ErrorTypeEnum {
   CONFIG_FILE_REQUIRE_ERROR
   CONFIG_FILE_SETUP_NODE_EVENTS_ERROR
   CONFIG_FILE_UNEXPECTED_ERROR
+  CONFIG_FILE_UNEXPECTED_EXIT
   CONFIG_VALIDATION_ERROR
   CONFIG_VALIDATION_MSG_ERROR
   COULD_NOT_FIND_SYSTEM_NODE
@@ -986,9 +987,6 @@ type Mutation {
 
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
-
-  """Initialize the migration wizard to the first step"""
-  migrateStart: Query
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean

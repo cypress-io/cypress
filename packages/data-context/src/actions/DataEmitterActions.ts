@@ -21,6 +21,13 @@ abstract class DataEmitterEvents {
     this._emit('devChange')
   }
 
+  /**
+   * Emitted when have modified the project config / config loading state
+   */
+  projectChange () {
+    this._emit('projectChange')
+  }
+
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
     this.pub.emit(evt, ...args)
   }

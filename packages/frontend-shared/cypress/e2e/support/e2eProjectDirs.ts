@@ -20,6 +20,7 @@ export const e2eProjectDirs = [
   'create-react-app-configured',
   'create-react-app-custom-index-html',
   'create-react-app-unconfigured',
+  'custom-reporter',
   'cypress-in-cypress',
   'default-layout',
   'devServer-dynamic-import',

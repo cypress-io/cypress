@@ -2,7 +2,6 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import { fs } from '../util/fs'
-import type { SettingsOptions } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import * as errors from '../errors'
 
@@ -60,10 +59,6 @@ function _write (file, obj: any = {}) {
   })
 }
 
-export function isComponentTesting (options: SettingsOptions = {}) {
-  return options.testingType === 'component'
-}
-
 export async function read (projectRoot: string) {
   const ctx = getCtx()
 
@@ -74,26 +69,8 @@ export async function read (projectRoot: string) {
   return ctx.lifecycleManager.getConfigFileContents()
 }
 
-export async function readEnv (projectRoot: string) {
-  const ctx = getCtx()
-
-  // For testing purposes, no-op if the projectRoot is already the same
-  // as the one set in the DataContext, as it would be in normal execution
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.loadCypressEnvFile()
-}
-
 export function writeForTesting (projectRoot, objToWrite = {}) {
   const file = path.join(projectRoot, 'cypress.config.js')
 
   return _write(file, objToWrite)
-}
-
-export function pathToConfigFile (projectRoot) {
-  const ctx = getCtx()
-
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.configFilePath
 }

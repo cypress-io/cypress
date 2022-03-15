@@ -59,12 +59,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getServerPluginHandlers: plugins.getServerPluginHandlers,
       allowedConfig: configUtils.allowed,
       cypressVersion: pkg.version,
-      validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
-      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
-      validateLaunchpadConfigBreakingChanges: configUtils.validateNoBreakingConfigLaunchpad,
-      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,

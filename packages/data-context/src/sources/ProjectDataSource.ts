@@ -8,6 +8,7 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
+import chokidar from 'chokidar'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
@@ -205,7 +206,11 @@ export class ProjectDataSource {
       this.ctx.emitter.toApp()
     })
 
-    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
+    this._specWatcher = chokidar.watch(specPattern, {
+      cwd: projectRoot,
+      ignoreInitial: true,
+    })
+
     this._specWatcher.on('add', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
   }
@@ -239,7 +244,8 @@ export class ProjectDataSource {
       return
     }
 
-    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
+    this._specWatcher.close().catch(() => {})
+    this._specWatcher = null
   }
 
   getCurrentSpecByAbsolute (absolute: string) {
