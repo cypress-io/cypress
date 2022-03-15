@@ -3,7 +3,8 @@
 // To reproduce, just add "experimentalSessionSupport" = true into the describe block below
 
 // @ts-ignore
-describe('multi-domain - uncaught errors', () => {
+// TODO: run in firefox too after we fix error serialization for firefox.
+describe('multi-domain - uncaught errors', { browser: '!firefox' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="errors-link"]').click()
