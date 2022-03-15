@@ -23,7 +23,7 @@ describe('e2e downloads', () => {
 
   systemTests.it('allows changing the downloads folder', {
     project: 'downloads',
-    spec: 'downloads_spec.ts',
+    spec: 'downloads.cy.ts',
     config: {
       downloadsFolder: 'cypress/dls',
       video: false,
