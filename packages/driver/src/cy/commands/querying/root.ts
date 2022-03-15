@@ -1,23 +1,24 @@
 import _ from 'lodash'
 
+interface InternalRootOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: any
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    root (options: any = {}) {
-      const userOptions = options
+    root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const _options: InternalRootOptions = _.defaults({}, options, { log: true })
 
-      options = _.defaults({}, userOptions, { log: true })
-
-      if (options.log !== false) {
-        options._log = Cypress.log({
+      if (_options.log !== false) {
+        _options._log = Cypress.log({
           message: '',
-          timeout: options.timeout,
+          timeout: _options.timeout,
         })
       }
 
       const log = ($el) => {
-        if (options.log) {
-          options._log.set({ $el })
+        if (_options.log) {
+          _options._log.set({ $el })
         }
 
         return $el
