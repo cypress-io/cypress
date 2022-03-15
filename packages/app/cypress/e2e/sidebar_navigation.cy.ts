@@ -248,6 +248,22 @@ describe('Sidebar Navigation', () => {
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
 
+    it('resize nav and persist sends the correct value on the mutation', () => {
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { clientX: 400 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+        cy.wait('@setPreferences').its('request.body.variables.value').should('include', '{"reporterWidth":')
+      })
+    })
+
     // TODO: Remove skip when we fix cy.reload() in Cypress in Cypress - UNIFY-1346
     it.skip('resize nav and persist the state after refresh', () => {
       cy.contains('fixture.js').click()
