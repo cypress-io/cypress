@@ -3,7 +3,6 @@
   "builders": {
     "cypress": {
       "implementation": "./cypress",
-      "schema": "./cypress/schema.json",
       "description": "Run Cypress tests"
     }
   }
