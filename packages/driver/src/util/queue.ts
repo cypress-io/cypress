@@ -79,11 +79,7 @@ export class Queue<T> {
         inner.cancel()
 
         // If this error is thrown after the promise is fulfilled, we still want to throw the error.
-        if (promise.isPending()) {
-          reject(err)
-        } else {
-          onError(err)
-        }
+        promise.isPending() ? reject(err) : onError(err)
       }
     })
     .catch(onError)

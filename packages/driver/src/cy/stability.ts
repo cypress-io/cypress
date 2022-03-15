@@ -54,8 +54,10 @@ export const create = (Cypress, state) => ({
   },
 
   whenStableOrAnticipatingMultiDomain (fn, command) {
+    const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
+
     // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingMultiDomain') && command?.get('name') === 'switchToDomain') || state('isStable') !== false) {
+    if ((!!state('anticipatingMultiDomain') && commandIsSwitchToDomain) || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -78,7 +80,7 @@ export const create = (Cypress, state) => ({
       state('whenStable', onSignal)
 
       // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
-      if (command?.get('name') === 'switchToDomain') {
+      if (commandIsSwitchToDomain) {
         state('whenAnticipatingMultiDomain', onSignal)
       }
     })
