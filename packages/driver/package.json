@@ -80,7 +80,7 @@
     "text-mask-addons": "3.8.0",
     "underscore.string": "3.3.5",
     "unfetch": "4.1.0",
-    "url-parse": "1.5.8",
+    "url-parse": "1.5.9",
     "vanilla-text-mask": "5.1.1",
     "vite": "^2.4.4",
     "webpack": "4.41.2",
