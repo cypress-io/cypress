@@ -44,7 +44,7 @@ type HttpMiddlewareCtx<T> = {
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'>
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getPreRequest: (cb: GetPreRequestCb) => void
   getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
   setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
@@ -59,7 +59,7 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'>
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
@@ -199,7 +199,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'>
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
