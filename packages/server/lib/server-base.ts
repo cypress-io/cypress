@@ -139,12 +139,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._baseUrl = null
     this._fileServer = null
 
-    this._eventBus.on('cross:domain:delaying:html', () => {
+    this._eventBus.on('cross:domain:delaying:html', (request) => {
       this.socket.localBus.once('ready:for:domain', () => {
         this._eventBus.emit('ready:for:domain')
       })
 
-      this.socket.toDriver('cross:domain:delaying:html')
+      this.socket.toDriver('cross:domain:delaying:html', request)
     })
   }
 

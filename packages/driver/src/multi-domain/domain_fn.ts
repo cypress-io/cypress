@@ -88,9 +88,6 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     reset(state)
 
-    // Stability is sync'd with the primary stability
-    cy.isStable(isStable, 'multi:domain:fn')
-
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
 
@@ -111,6 +108,18 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       cy.stop()
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
+
+    // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+    // If stability is true in this domain, that means this domain has loaded itself, in that case trust the domain and run the next command.
+    if (cy.state('isStable') !== true) {
+      if (isStable) {
+        // If stability is established in a different domain, set this domain to undefined
+        cy.state('isStable', undefined)
+      } else {
+        // If the calling domain is unstable set this domain to also be unstable. It indicates that a load even occurred prior to running this domain.
+        cy.state('isStable', isStable)
+      }
+    }
 
     try {
       const value = window.eval(`(${fn})`)(data)

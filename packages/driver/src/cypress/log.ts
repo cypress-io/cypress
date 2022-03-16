@@ -91,6 +91,7 @@ const countLogsByTests = function (tests = {}) {
     return 0
   }
 
+  // Counts the number of logs by determining the greatest counter among all test attempts and logs.
   return _
   .chain(tests)
   .flatMap((test) => {
@@ -99,8 +100,8 @@ const countLogsByTests = function (tests = {}) {
   .flatMap((tests) => {
     return [].concat(tests.agents, tests.routes, tests.commands)
   }).compact()
-  .union([{ id: 0 }])
-  .map('id')
+  .union([{ counter: 0 }])
+  .map('counter')
   .max()
   .value()
 }

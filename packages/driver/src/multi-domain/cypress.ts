@@ -99,6 +99,12 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
   cy.overrides.wrapNativeMethods(autWindow)
 
+  const onWindowLoadPrimary = ({ url }) => {
+    // If the primary domain has indicated a load event, set stability to undefined, not true since the load happened in another domain.
+    cy.isStable(undefined, 'primary onload')
+    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+  }
+
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
     onError: handleErrorEvent(cy, 'app'),
@@ -115,6 +121,8 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
       Cypress.action('app:window:before:unload', e)
 
+      Cypress.specBridgeCommunicator.toPrimary('before:unload')
+
       // return undefined so our beforeunload handler
       // doesn't trigger a confirmation dialog
       return undefined
@@ -127,8 +135,14 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
       cy.isStable(true, 'load')
+
+      // If load happened in this spec bridge stop listening.
+      Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
     },
     onUnload (e) {
+      // We only need to listen to this if we've started an unload event and the load happens in another spec bridge.
+      Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
+
       return Cypress.action('app:window:unload', e)
     },
     // TODO: this currently only works on hashchange, but needs work
