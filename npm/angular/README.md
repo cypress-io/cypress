@@ -155,15 +155,21 @@ module.exports = {
 
 `npm install -D @cypress/code-coverage`
 
-- Then add the code below to your supportFile and pluginsFile
+- Then add the code below to your component support file
 
 ```javascript
-// cypress/support/component.js
 import '@cypress/code-coverage/support';
-// cypress/plugins/index.js
-module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config);
-  return config;
+```
+- Then add the code below to your cypress configuration
+```js
+{
+  ...
+  component: {
+    setupNodeEvents(on, config) {
+      require('@cypress/code-coverage/task')(on, config);
+      return config;
+    }
+  }
 };
 ```
 
