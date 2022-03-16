@@ -10,7 +10,7 @@ interface RunDomainFnOptions {
   env: Cypress.ObjectLike
   fn: string
   skipConfigValidation: boolean
-  state: {}
+  state: { isStable: boolean | undefined }
   isStable: boolean
 }
 
@@ -82,9 +82,24 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
-    const { config, data, env, fn, state, skipConfigValidation, isStable } = options
+    const { config, data, env, fn, state, skipConfigValidation } = options
 
     let queueFinished = false
+
+    // If stability is true in this domain, that means this domain has loaded itself, in that case trust the domain and run the next command.
+    // We also wish to preserve the stability state through the state refresh.
+    if (cy.state('isStable')) {
+      // If this state is stable there is a good chance that the primary domain was not listening, resend the load event.
+      Cypress.specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
+
+      state.isStable = true
+    } else {
+      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+      if (state.isStable) {
+        // If stability is established in a different domain, set this domain to undefined
+        state.isStable = undefined
+      }
+    }
 
     reset(state)
 
@@ -108,18 +123,6 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       cy.stop()
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
-
-    // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
-    // If stability is true in this domain, that means this domain has loaded itself, in that case trust the domain and run the next command.
-    if (cy.state('isStable') !== true) {
-      if (isStable) {
-        // If stability is established in a different domain, set this domain to undefined
-        cy.state('isStable', undefined)
-      } else {
-        // If the calling domain is unstable set this domain to also be unstable. It indicates that a load even occurred prior to running this domain.
-        cy.state('isStable', isStable)
-      }
-    }
 
     try {
       const value = window.eval(`(${fn})`)(data)

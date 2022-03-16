@@ -180,10 +180,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   hookId: state('hookId'),
                   hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
                   multiDomainBaseUrl: location.origin,
+                  isStable: state('isStable'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
-                isStable: state('isStable'),
               })
             } catch (err: any) {
               const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
