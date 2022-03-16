@@ -129,8 +129,10 @@ describe('App: Index', () => {
           cy.get('@CloseDialogButton').click()
           cy.findByRole('dialog').should('not.exist')
 
-          // assert presence of specs list now that specs are found
-          cy.get('.spec-list-container').should('be.visible')
+          expectedScaffoldPaths.forEach((spec) => {
+            // Validate that links for each generated spec are rendered
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
+          })
         })
 
         it('dismisses scaffold dialog with action button press', () => {
