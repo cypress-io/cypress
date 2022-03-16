@@ -8,6 +8,24 @@ const debug = debugFn('cypress:driver:multi-domain')
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 let primaryDomainCommunicatorSingleton: PrimaryDomainCommunicator | null = null
 
+export class PrimaryDomainCommunicatorFactory {
+  static create () {
+    // There should only be one PrimaryDomainCommunicator per Cypress instance (Ex: primary domain, specbridge1, specbridge2, ...).
+    // Spec Bridges will create a PrimaryDomainCommunicator instance, but will never initialize the window.top message listener
+    // this means that methods that communicate through postMessage can send, but spec bridge PrimaryDomainCommunicator
+    // will never receive any events.
+    if (!primaryDomainCommunicatorSingleton) {
+      primaryDomainCommunicatorSingleton = new PrimaryDomainCommunicator()
+    }
+
+    // for the primary domain, the PrimaryDomainCommunicator needs to be a singleton.
+    // multiple PrimaryDomainCommunicator instances recreated on test refreshes/reloads cause dangling instances
+    // of the window.top message listener, stacking message events multiple times.
+    // The window.top instance does not change between test reloads, and we only need to bind it once
+    return primaryDomainCommunicatorSingleton
+  }
+}
+
 /**
  * Primary domain communicator. Responsible for sending/receiving events throughout
  * the driver responsible for multi-domain communication, as well as sending/receiving events to/from the
@@ -23,24 +41,6 @@ export class PrimaryDomainCommunicator extends EventEmitter {
   private windowReference: Window | undefined
   private crossDomainDriverWindows: {[key: string]: Window} = {}
   userInvocationStack?: string
-
-  constructor () {
-    // There should only be one PrimaryDomainCommunicator per Cypress instance (Ex: primary domain, specbridge1, specbridge2, ...).
-    // Spec Bridges will create a PrimaryDomainCommunicator instance, but will never initialize the window.top message listener
-    // this means that methods that communicate through postMessage can send, but spec bridge PrimaryDomainCommunicator
-    // will never receive any events.
-    if (!primaryDomainCommunicatorSingleton) {
-      // @ts-ignore
-      super()
-      primaryDomainCommunicatorSingleton = this
-    }
-
-    // for the primary domain, the PrimaryDomainCommunicator needs to be a singleton.
-    // multiple PrimaryDomainCommunicator instances recreated on test refreshes/reloads cause dangling instances
-    // of the window.top message listener, stacking message events multiple times.
-    // The window.top instance does not change between test reloads, and we only need to bind it once
-    return primaryDomainCommunicatorSingleton
-  }
 
   /**
    * Initializes the event handler to receive messages from the spec bridge.
