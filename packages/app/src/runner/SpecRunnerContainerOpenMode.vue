@@ -1,14 +1,17 @@
 <template>
-  <div v-if="specStore.activeSpec">
+  <template v-if="specStore.activeSpec">
     <SpecRunnerOpenMode
       v-if="initialized"
       :gql="props.gql"
     />
-  </div>
+  </template>
+  <template v-else>
+    Hello, no spec is found, watcher should catch this and redirect
+  </template>
 </template>
 
 <script lang="ts" setup>
-import { computed, watchEffect } from 'vue'
+import { computed } from 'vue'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
@@ -30,13 +33,21 @@ const specs = computed(() => {
 
 watchSpec(specs)
 
-watchEffect(() => {
-  const specPath = router.currentRoute.value.query.file
-
-  if (specPath && specStore.activeSpec === null) {
-    router.push({ name: 'Specs', params: {
+const redirectToError = () => {
+  router.push({
+    name: 'Specs',
+    params: {
       unrunnable: router.currentRoute.value.query.file as string,
-    } })
+    },
+  })
+}
+
+specStore.$subscribe((mutation, state) => {
+  if (state.activeSpec === null) {
+    redirectToError()
   }
+}, {
+  immediate: true,
 })
+
 </script>
