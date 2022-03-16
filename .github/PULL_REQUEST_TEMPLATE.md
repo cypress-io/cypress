@@ -35,4 +35,3 @@ DO NOT DELETE the PR checklist.
 - [ ] Has the original issue (or this PR, if no issue exists) been tagged with a release in ZenHub? (user-facing changes only)
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?
-- [ ] Have new configuration options been added to the [`cypress.schema.json`](https://github.com/cypress-io/cypress/blob/develop/cli/schema/cypress.schema.json)?
