@@ -5,6 +5,8 @@ import stream from 'stream'
 import { expect } from './spec_helper'
 import { dockerSpawner } from './docker'
 import Express from 'express'
+import Fixtures from './fixtures'
+import * as DepInstaller from './dep-installer'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -17,7 +19,6 @@ const morgan = require('morgan')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
-const Fixtures = require('./fixtures')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -59,6 +60,14 @@ export type ItOptions = ExecOptions & {
 }
 
 type ExecOptions = {
+  /**
+   * Callback that runs after the project has been scaffolded but before installing node modules or running tests.
+   */
+  onAfterScaffold?: () => void | Promise<void>
+  /**
+   * Callback that runs after the execution has ended.
+   */
+  onAfterExec?: () => void | Promise<void>
   /**
    * If set, `docker exec` will be used to run this test. Requires Docker.
    */
@@ -701,10 +710,6 @@ const systemTests = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
-      // // after installing node modules copying all of the fixtures
-      // // can take a long time (5-15 secs)
-      // this.timeout(human('2 minutes'))
-
       Fixtures.remove()
 
       sinon.stub(process, 'exit')
@@ -932,9 +937,9 @@ const systemTests = {
 
     if (!options.skipScaffold) {
       // symlinks won't work via docker
-      options.dockerImage || await Fixtures.scaffoldCommonNodeModules()
+      options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       Fixtures.scaffoldProject(options.project)
-      await Fixtures.scaffoldProjectNodeModules(options.project)
+      await DepInstaller.scaffoldProjectNodeModules(options.project)
     }
 
     if (process.env.NO_EXIT) {

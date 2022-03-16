@@ -38,4 +38,6 @@
   // Volar is the main extension that powers Vue's language features.
   // "volar.autoCompleteRefs": false,
   "volar.takeOverMode.enabled": true,
+
+  "editor.tabSize": 2,
 }
