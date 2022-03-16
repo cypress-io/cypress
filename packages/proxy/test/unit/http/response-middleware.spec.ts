@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
+import { debugVerbose } from '../../../lib/http'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import {
@@ -415,6 +416,31 @@ describe('http/response-middleware', function () {
       })
     })
 
+    it('does not set Origin-Agent-Cluster header to false when injection is not expected', function () {
+      prepareContext({})
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).not.to.be.calledWith('Origin-Agent-Cluster', '?0')
+      })
+    })
+
+    it('sets Origin-Agent-Cluster header to false when injection is expected', function () {
+      prepareContext({
+        incomingRes: {
+          headers: {
+            // simplest way to make injection expected
+            'x-cypress-file-server-error': true,
+          },
+        },
+      })
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).to.be.calledWith('Origin-Agent-Cluster', '?0')
+      })
+    })
+
     function prepareContext (props) {
       ctx = {
         incomingRes: {
@@ -423,11 +449,15 @@ describe('http/response-middleware', function () {
         },
         res: {
           headers: {},
+          setHeader: sinon.stub(),
           ...props.res,
         },
         req: {
           proxiedUrl: 'http://127.0.0.1:3501/multi-domain.html',
           headers: {},
+          cookies: {
+            '__cypress.initial': true,
+          },
           ...props.req,
         },
         getRemoteState () {
@@ -438,7 +468,9 @@ describe('http/response-middleware', function () {
             },
           }
         },
-        debug () {},
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
         onError (error) {
           throw error
         },
@@ -807,3 +839,33 @@ describe('http/response-middleware', function () {
     }
   })
 })
+
+// beforeEach(function () {
+//   ctx = {
+//     req: {
+//       proxiedUrl: 'http://proxy.com',
+//       cookies: {
+//         '__cypress.initial': true,
+//       },
+//       headers: {
+//         accept: ['text/html', 'application/xhtml+xml'],
+//       },
+//     },
+//     res: {
+//       setHeader: sinon.stub(),
+//     },
+//     getRemoteState: () => {
+//       return {
+//         strategy: 'http',
+//         props: {
+//           domain: 'proxy',
+//           port: '80',
+//           tld: 'com',
+//         },
+//       }
+//     },
+//     getRenderedHTMLOrigins: () => {
+//       return {}
+//     },
+//   }
+// })

@@ -1,10 +1,9 @@
-import type $Log from '../../cypress/log'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { isString } from 'lodash'
 
 export class Validator {
-  log: typeof $Log
+  log: Cypress.Log
   onFailure: () => {}
 
   constructor ({ log, onFailure }) {

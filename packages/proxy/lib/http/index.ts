@@ -20,7 +20,7 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { Browser } from '@packages/server/lib/browsers/types'
 
-const debugRequests = Debug('cypress-verbose:proxy:http')
+export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
 export enum HttpStages {
   IncomingRequest,
@@ -247,7 +247,7 @@ export class Http {
       socket: this.socket,
       serverBus: this.serverBus,
       debug: (formatter, ...args) => {
-        debugRequests(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
       },
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({
