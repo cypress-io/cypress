@@ -8,6 +8,7 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
+import parseGlob from 'parse-glob'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
@@ -208,6 +209,57 @@ export class ProjectDataSource {
     this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
     this._specWatcher.on('add', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
+  }
+
+  private formatGlob (s: string, fallback: string) {
+    let [cleanedVal] = s.replace('{', '').replace('}', '').split(',')
+
+    if (cleanedVal?.includes('*')) {
+      cleanedVal = cleanedVal.replace(/\*/g, fallback)
+    }
+
+    return cleanedVal
+  }
+
+  async defaultSpecFileName () {
+    const defaultFileName = 'cypress/e2e/filename.cy.js'
+
+    try {
+      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+        return false
+      }
+
+      let specPatternSet: string | undefined
+      const { specPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+
+      if (Array.isArray(specPattern)) {
+        specPatternSet = specPattern[0]
+      }
+
+      if (!specPatternSet) {
+        return defaultFileName
+      }
+
+      const parsedGlob = parseGlob(specPatternSet)
+
+      let dirname = parsedGlob.path.dirname
+
+      if (dirname.startsWith('**')) {
+        dirname = dirname.replace('**', 'cypress')
+      }
+
+      const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => this.formatGlob(x, 'e2e')).join('/')
+      const fileName = this.formatGlob(parsedGlob.path.filename, 'filename')
+
+      const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+      const extname = this.formatGlob(extnameWithoutExt, 'cy')
+
+      const ext = this.ctx.lifecycleManager.fileExtensionToUse && parsedGlob.path.ext.includes(this.ctx.lifecycleManager.fileExtensionToUse) ? this.ctx.lifecycleManager.fileExtensionToUse : this.formatGlob(parsedGlob.path.ext, 'js')
+
+      return splittedDirname + fileName + extname + ext
+    } catch {
+      return defaultFileName
+    }
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {
