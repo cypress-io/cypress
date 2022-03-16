@@ -21,6 +21,10 @@ abstract class DataEmitterEvents {
     this._emit('devChange')
   }
 
+  browserStatusChange () {
+    this._emit('browserStatusChange')
+  }
+
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
     this.pub.emit(evt, ...args)
   }
