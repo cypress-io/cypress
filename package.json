@@ -108,7 +108,7 @@
     "ascii-table": "0.0.9",
     "aws-sdk": "2.814.0",
     "babel-eslint": "10.1.0",
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "bluebird-retry": "0.11.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",

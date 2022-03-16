@@ -28,7 +28,7 @@ config.plugins = [
 config.resolve = {
   ...config.resolve,
   alias: {
-    'bluebird': require.resolve('bluebird'),
+    'bluebird': require.resolve('bluebird/js/browser/bluebird.js'),
     'lodash$': require.resolve('lodash'),
     'mobx': require.resolve('mobx'),
     'mobx-react': require.resolve('mobx-react'),

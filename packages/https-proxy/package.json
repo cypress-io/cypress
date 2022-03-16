@@ -14,7 +14,7 @@
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "debug": "^4.3.2",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",

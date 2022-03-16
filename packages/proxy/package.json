@@ -12,7 +12,7 @@
     "test-unit": "yarn run-mocha \"test/unit/**/*.spec.ts\""
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "charset": "1.0.1",
     "common-tags": "1.8.0",
     "debug": "^4.3.2",
