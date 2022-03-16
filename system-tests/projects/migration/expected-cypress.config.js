@@ -18,7 +18,7 @@ module.exports = defineConfig({
   },
   component: {
     setupNodeEvents (on, config) {},
-    slowTestThreshold: 5000,
+    slowTestThreshold: 500,
     retries: 1,
     specPattern: 'src/**/*.spec.{tsx,js}',
   },
