@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - fix-darwin-win32-node-modules-install
+        - fix-beta-build-caching
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-darwin-win32-node-modules-install, << pipeline.git.branch >> ]
+    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-darwin-win32-node-modules-install, << pipeline.git.branch >> ]
+    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -81,6 +81,7 @@ executors:
     macos:
       # Executor should have Node >= required version
       xcode: "13.0.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: mac
 
@@ -265,7 +266,7 @@ commands:
       - run:
           name: Bail if cache exists
           command: |
-            if [[ -f "/tmp/node_modules_installed" ]]; then
+            if [[ -f "node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
@@ -300,12 +301,12 @@ commands:
                 key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
-      - run: touch /tmp/node_modules_installed
+      - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
-            - /tmp/node_modules_installed
+            - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
@@ -586,10 +587,16 @@ commands:
     steps:
       - restore_cached_binary
       - run:
-          name: "Cloning test project: <<parameters.repo>>"
+          name: "Cloning test project and checking out release branch: <<parameters.repo>>"
+          working_directory: ~/
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version.js) || true)
+
+            # install some deps for get-next-version
+            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
+            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+
+            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
 
   test-binary-against-rwa:
     description: |
@@ -1626,7 +1633,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-darwin-win32-node-modules-install" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-beta-build-caching" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1697,39 +1704,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-test-tiny --record
-      - store-npm-logs
-
-  test-binary-and-npm-against-other-projects:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium
-    resource_class: << parameters.resource_class >>
-    steps:
-      # needs uploaded NPM and test binary
-      - restore_cached_workspace
-      - run: ls -la
-      # make sure JSON files with uploaded urls are present
-      - run: ls -la binary-url.json npm-package-url.json
-      - run: cat binary-url.json
-      - run: cat npm-package-url.json
-      - run:
-          # install NPM from unique urls
-          name: Install Cypress Binary in Dummy Package
-          command: |
-            node scripts/test-unique-npm-and-binary.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --cwd /tmp/testing
-      - run:
-          name: Running other test projects with new NPM package and binary
-          command: |
-            node scripts/test-other-projects.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --provider circle
       - store-npm-logs
 
   test-npm-module-and-verify-binary:
@@ -2272,11 +2246,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
@@ -2333,12 +2302,13 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
+        resource_class: macos.x86.medium.gen2
         only-cache-for-root-user: true
 
     - build:
         name: darwin-build
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-node-modules-install
 
@@ -2357,7 +2327,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-build
 
@@ -2366,13 +2336,6 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - darwin-build
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: darwin-test-binary-and-npm-against-other-projects
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
 
 windows-workflow: &windows-workflow
   jobs:
@@ -2412,14 +2375,6 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: windows-test-binary-and-npm-against-other-projects
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-create-build-artifacts
 
 workflows:
   linux:

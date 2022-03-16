@@ -275,17 +275,14 @@ export default function (Commands, Cypress, cy, state, config) {
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
 
-      // click event is only fired on button, image, submit, reset elements.
-      // That's why we cannot use $elements.isButtonLike() here.
-      const type = (type) => $elements.isInputType(options.$el.get(0), type)
-      const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
-
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
         const event = new ctor('click')
 
         el.dispatchEvent(event)
       }
+
+      let keydownEvents: any[] = []
 
       return keyboard.type({
         $el: options.$el,
@@ -332,21 +329,29 @@ export default function (Commands, Cypress, cy, state, config) {
             updateTable(id, key, event, value)
           }
 
+          if (event.type === 'keydown') {
+            keydownEvents.push(event.target)
+          }
+
           if (
             // Firefox sends a click event when the Space key is pressed.
-            // We don't want send it twice.
+            // We don't want to send it twice.
             !Cypress.isBrowser('firefox') &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
+            // When event is prevented, the click event should not be emitted
+            !event.defaultPrevented &&
             // Click events should be only sent to button-like elements.
             // event.target is null when used with shadow DOM.
             (event.target && $elements.isButtonLike(event.target)) &&
             // When a space key is pressed for input radio elements, the click event is only fired when it's not checked.
             !(event.target.tagName === 'INPUT' && event.target.type === 'radio' && event.target.checked === true) &&
-            // When event is prevented, the click event should not be emitted
-            !event.defaultPrevented
+            // When a space key is pressed on another element, the click event should not be fired.
+            keydownEvents.includes(event.target)
           ) {
             fireClickEvent(event.target)
+
+            keydownEvents = []
           }
         },
 
@@ -390,6 +395,11 @@ export default function (Commands, Cypress, cy, state, config) {
           if (isTextarea || isContentEditable) {
             return
           }
+
+          // click event is only fired on button, image, submit, reset elements.
+          // That's why we cannot use $elements.isButtonLike() here.
+          const type = (type) => $elements.isInputType(el, type)
+          const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
 
           // https://github.com/cypress-io/cypress/issues/19541
           // Send click event on type('{enter}')
