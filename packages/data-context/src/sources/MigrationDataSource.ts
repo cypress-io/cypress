@@ -25,6 +25,7 @@ export type LegacyCypressConfigJson = Partial<{
   e2e: Omit<LegacyCypressConfigJson, 'component' | 'e2e'>
   pluginsFile: string | false
   supportFile: string | false
+  slowTestThreshold: number
   componentFolder: string | false
   integrationFolder: string
   testFiles: string | string[]
