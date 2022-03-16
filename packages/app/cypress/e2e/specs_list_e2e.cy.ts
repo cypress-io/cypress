@@ -40,20 +40,20 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('3 Matches')
+    cy.get('button').contains('4 Matches')
 
     cy.get('input').type('content', { force: true })
 
-    cy.get('[data-cy="spec-item"]').should('have.length', 1)
+    cy.get('[data-cy="spec-item"]').should('have.length', 2)
     .should('contain', 'dom-content.spec.js')
 
-    cy.get('button').contains('1 of 3 Matches')
+    cy.get('button').contains('2 of 4 Matches')
 
     cy.get('input').clear().type('asdf', { force: true })
 
     cy.get('[data-cy="spec-item"]').should('have.length', 0)
 
-    cy.get('button').contains('0 of 3 Matches')
+    cy.get('button').contains('0 of 4 Matches')
   })
 
   it('shows a git status for each spec', () => {
