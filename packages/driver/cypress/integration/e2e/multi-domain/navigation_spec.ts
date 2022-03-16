@@ -200,7 +200,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('delayed navigation', { experimentalSessionSupport: true }, () => {
+describe('delayed navigation', { experimentalSessionSupport: true, defaultCommandTimeout: 2000 }, () => {
   it('localhost -> localhost', () => {
     cy.visit('/fixtures/auth/delayedNavigate.html')
     cy.get('[data-cy="to-localhost"]').click()
