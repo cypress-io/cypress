@@ -596,6 +596,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   },
+  {
+    name: 'slowTestThreshold',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
