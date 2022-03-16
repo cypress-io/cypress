@@ -44,7 +44,7 @@ type HttpMiddlewareCtx<T> = {
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getCurrentBrowser: () => Browser
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'>
   getPreRequest: (cb: GetPreRequestCb) => void
   getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
   setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
@@ -199,7 +199,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getCurrentBrowser: () => Browser
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'>
   getFileServerToken: () => string
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
