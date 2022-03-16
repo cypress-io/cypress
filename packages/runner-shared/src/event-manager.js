@@ -540,7 +540,7 @@ export const eventManager = {
       }
     })
 
-    Cypress.multiDomainCommunicator.on('before:unload', (args, domain) => {
+    Cypress.multiDomainCommunicator.on('before:unload', () => {
       // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
       // Unstable is unstable regardless of where it initiated from.
       cy.state('isStable', false)
