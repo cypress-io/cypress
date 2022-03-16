@@ -94,14 +94,19 @@ export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: 
 // because of this, we preprocess native errors to objects and postprocess them once they come back to the primary domain
 
   if (_.isArray(valueToSanitize)) {
-    return _.filter(valueToSanitize, preprocessForSerialization) as unknown as T
+    return _.map(valueToSanitize, preprocessForSerialization) as unknown as T
   }
 
   if (_.isObject(valueToSanitize)) {
     try {
-      const sanitizedValue = convertObjectToSerializableLiteral(valueToSanitize) as T
+      const sanitizedValueAsLiteral = convertObjectToSerializableLiteral(valueToSanitize) as T
 
-      return sanitizedValue
+      // convert any nested structures as well, if objects or arrays, to literals. This is needed in the case of Proxy objects
+      _.forEach(sanitizedValueAsLiteral as any, (value, key) => {
+        sanitizedValueAsLiteral[key] = preprocessForSerialization(value)
+      })
+
+      return sanitizedValueAsLiteral
     } catch (err) {
       // if its not serializable, tell the primary to inform the user that the value thrown could not be serialized
       throw UNSERIALIZABLE

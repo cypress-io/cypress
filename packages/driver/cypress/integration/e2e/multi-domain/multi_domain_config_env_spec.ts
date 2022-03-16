@@ -284,7 +284,9 @@
           // @ts-ignore
           const isErrorObj = Cypress[fnName](USED_KEYS.error)
 
-          expect(isErrorObj).to.be.an.instanceof(Error)
+          // We preserve the error structure, but on preprocessing to the spec bridge, the error is converted to a flat object
+          expect(isErrorObj).to.be.an.instanceof(Object)
+          expect(isErrorObj.message).to.eq('error')
         })
       })
     })
