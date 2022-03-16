@@ -95,7 +95,7 @@ export const LogUtils = {
     .flatMap((test) => {
       return [test, test.prevAttempts]
     })
-    .flatMap<{id: number}>((tests) => {
+    .flatMap<{counter: number}>((tests) => {
       return [].concat(tests.agents, tests.routes, tests.commands)
     }).compact()
     .union([{ counter: 0 }])
