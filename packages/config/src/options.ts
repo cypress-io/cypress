@@ -4,6 +4,7 @@ import * as validate from './validation'
 import pkg from '@packages/root'
 
 export type BreakingOptionErrorKey =
+  | 'COMPONENT_FOLDER_DEPRICATION'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
@@ -515,6 +516,10 @@ export const breakingOptions: Array<BreakingOption> = [
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
+  }, {
+    name: 'componentFolder',
+    errorKey: 'COMPONENT_FOLDER_DEPRICATION',
+    isWarning: false,
   }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',

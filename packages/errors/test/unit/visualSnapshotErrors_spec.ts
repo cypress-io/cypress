@@ -1117,5 +1117,10 @@ describe('visual error templates', () => {
         default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    COMPONENT_FOLDER_DEPRICATION: () => {
+      return {
+        default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
   })
 })
