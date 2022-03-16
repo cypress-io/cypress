@@ -133,11 +133,11 @@ describe('exec open', function () {
     })
 
     it('throws if --testing-type is invalid', () => {
-      expect(() => open.start({ testingType: 'randomTestingType' })).to.throw()
+      expect(() => open.processOpenOptions({ testingType: 'randomTestingType' })).to.throw()
     })
 
     it('throws if --config-file is false', () => {
-      expect(() => open.start({ configFile: 'false' })).to.throw()
+      expect(() => open.processOpenOptions({ configFile: 'false' })).to.throw()
     })
   })
 })
