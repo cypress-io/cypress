@@ -1,9 +1,10 @@
 const snapshot = require('snap-shot-it')
 
-import { SpawnOptions } from 'child_process'
+import type { SpawnOptions } from 'child_process'
 import stream from 'stream'
 import { expect } from './spec_helper'
 import { dockerSpawner } from './docker'
+import Express from 'express'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -13,7 +14,6 @@ const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
-const express = require('express')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
@@ -30,7 +30,8 @@ require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
-type BrowserName = 'electron' | 'firefox' | 'chrome'
+export type BrowserName = 'electron' | 'firefox' | 'chrome'
+| '!electron' | '!chrome' | '!firefox'
 
 type ExecResult = {
   code: number
@@ -496,7 +497,7 @@ const startServer = function (obj) {
 
   ensurePort(port)
 
-  const app = express()
+  const app = Express()
 
   const srv = https ? httpsProxy.httpsServer(app) : new http.Server(app)
 
@@ -509,7 +510,7 @@ const startServer = function (obj) {
   }
 
   if (obj.static) {
-    app.use(express.static(path.join(__dirname, '../projects/e2e'), {}))
+    app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
   }
 
   return new Bluebird((resolve) => {
@@ -692,6 +693,7 @@ const systemTests = {
     args = _.compact(args)
 
     // avoid snapshot cwd issue - see /patches/snap-shot* for more information
+    // @ts-ignore
     global.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
     return snapshot.apply(null, args)

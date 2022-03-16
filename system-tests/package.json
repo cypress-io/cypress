@@ -5,6 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "type-check": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
     "test:ci": "node ./scripts/run.js"
@@ -27,6 +28,8 @@
     "@packages/server": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
+    "@types/chai": "4.2.15",
+    "@types/mocha": "9.1.0",
     "babel-loader": "8.1.0",
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",
@@ -44,7 +47,7 @@
     "dayjs": "^1.9.3",
     "debug": "^4.3.2",
     "dockerode": "3.3.1",
-    "execa": "1.0.0",
+    "execa": "4",
     "express": "4.17.1",
     "express-session": "1.16.1",
     "express-useragent": "1.0.15",

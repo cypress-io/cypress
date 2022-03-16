@@ -30,6 +30,7 @@ import * as settings from './util/settings'
 import specsUtil from './util/specs'
 import system from './util/system'
 import Watchers from './watchers'
+import stripAnsi from 'strip-ansi'
 
 import type { LaunchArgs } from './open_project'
 
@@ -704,7 +705,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
         return {
           ...browser,
-          warning: browser.warning || errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
+          warning: browser.warning || stripAnsi(errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name)),
         }
       })
     }

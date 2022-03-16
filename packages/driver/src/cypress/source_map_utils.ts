@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import { SourceMapConsumer } from 'source-map'
 import Promise from 'bluebird'
@@ -16,6 +15,7 @@ let sourceMapConsumers = {}
 const initializeSourceMapConsumer = (file, sourceMap) => {
   if (!sourceMap) return Promise.resolve(null)
 
+  // @ts-ignore
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': mappingsWasm,
   })
@@ -32,7 +32,7 @@ const extractSourceMap = (file, fileContents) => {
 
   if (!sourceMapMatch) return null
 
-  const url = _.last(sourceMapMatch)
+  const url = _.last(sourceMapMatch) as any
   const dataUrlMatch = url.match(regexDataUrl)
 
   if (!dataUrlMatch) return null

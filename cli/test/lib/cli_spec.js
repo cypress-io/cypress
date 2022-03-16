@@ -28,6 +28,7 @@ describe('cli', () => {
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
+    sinon.stub(util, 'pkgBuildInfo').returns({ stable: true })
     this.exec = (args) => {
       const cliArgs = `node test ${args}`.split(' ')
 

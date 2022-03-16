@@ -56,6 +56,7 @@ declare namespace Cypress {
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void
     isMultiDomain: boolean
+    originalConfig: Cypress.ObjectLike
   }
 
   interface CypressUtils {
