@@ -522,6 +522,11 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
+    // Inform all spec bridges that the primary domain has begun to unload.
+    Cypress.on('window:before:unload', () => {
+      Cypress.multiDomainCommunicator.toAllSpecBridges('before:unload')
+    })
+
     Cypress.multiDomainCommunicator.on('window:load', ({ url }, domain) => {
       // Sync stable if the expected domain has loaded.
       // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
@@ -535,14 +540,12 @@ export const eventManager = {
       }
     })
 
-    Cypress.multiDomainCommunicator.on('before:unload', (_unused, domain) => {
+    Cypress.multiDomainCommunicator.on('before:unload', () => {
       // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
-      // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
-      // established spec bridge, but one that is not the current or next switchToDomain command.
-      if (cy.state('latestActiveDomain') === domain) {
-        // Unstable is unstable regardless of where it initiated from.
-        cy.state('isStable', false)
-      }
+      // Unstable is unstable regardless of where it initiated from.
+      cy.state('isStable', false)
+      // Re-broadcast to any other specBridges.
+      Cypress.multiDomainCommunicator.toAllSpecBridges('before:unload')
     })
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {

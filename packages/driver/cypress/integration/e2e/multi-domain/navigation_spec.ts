@@ -198,3 +198,42 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
     })
   })
 })
+
+// @ts-ignore / session support is needed for visiting about:blank between tests
+describe('delayed navigation', { experimentalSessionSupport: true, defaultCommandTimeout: 2000 }, () => {
+  it('localhost -> localhost', () => {
+    cy.visit('/fixtures/auth/delayedNavigate.html')
+    cy.get('[data-cy="to-localhost"]').click()
+    cy.get('[data-cy="login-idp"]')
+  })
+
+  it('localhost -> foobar, delay in', () => {
+    cy.visit('/fixtures/auth/delayedNavigate.html')
+    cy.get('[data-cy="to-foobar"]').click()
+    cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.get('[data-cy="login-idp"]')
+    })
+  })
+
+  it('foobar -> localhost, delay out', () => {
+    cy.visit('/fixtures/auth/index.html')
+    cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.visit('http://www.foobar.com:3500/fixtures/auth/delayedNavigate.html')
+      cy.get('[data-cy="to-localhost"]').click()
+    })
+
+    cy.get('[data-cy="login-idp"]')
+  })
+
+  it('foobar -> idp, delay out', () => {
+    cy.visit('/fixtures/auth/index.html')
+    cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.visit('http://www.foobar.com:3500/fixtures/auth/delayedNavigate.html')
+      cy.get('[data-cy="to-idp"]').click()
+    })
+
+    cy.switchToDomain('http://idp.com:3500', () => {
+      cy.get('[data-cy="login-idp"]')
+    })
+  })
+})
