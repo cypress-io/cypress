@@ -209,14 +209,10 @@ const RunnerCt = namedObserver('RunnerCt',
             state.specs.length < 1 ? (
               <NoSpec message="No specs found">
                 <p className={runnerCtStyles.noSpecsDescription}>
-                  Create a new spec file in
+                  Create a new spec file matching
                   {' '}
-                  <span className={runnerCtStyles.folder}>
-                    {
-                      props.config.componentFolder
-                        ? props.config.componentFolder.replace(props.config.projectRoot, '')
-                        : 'the component specs folder'
-                    }
+                  <span className={runnerCtStyles.pattern}>
+                    {props.config.specPattern.replace(props.config.projectRoot, '')}
                   </span>
                   {' '}
                   and it will immediately appear here.
