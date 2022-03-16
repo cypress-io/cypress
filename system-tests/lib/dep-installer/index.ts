@@ -3,7 +3,14 @@ import path from 'path'
 import cachedir from 'cachedir'
 import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
-import tempDir from 'temp-dir'
+import { getYarnCommand } from './yarn'
+
+/**
+* Given a package name, returns the path to the module directory on disk.
+*/
+export function pathToPackage (pkg: string): string {
+  return path.dirname(require.resolve(`${pkg}/package.json`))
+}
 
 /**
  * Symlink the cached `node_modules` directory to the temp project directory's `node_modules`.
@@ -26,13 +33,62 @@ async function symlinkNodeModulesFromCache (project: string, cacheDir: string): 
   console.log(`📦 node_modules symlink created at ${from}`)
 }
 
+type Dependencies = Record<string, string>
+
 /**
- * Given a package name, returns the path to the module directory on disk.
+ * Type for package.json files for system-tests example projects.
  */
-function pathToPackage (pkg: string): string {
-  return path.dirname(require.resolve(`${pkg}/package.json`))
+type SystemTestPkgJson = {
+  /**
+   * By default, scaffolding will run `yarn install` if there is a `package.json`.
+   * This option, if set, disables that.
+   */
+  _cySkipDepInstall?: boolean
+  /**
+   * Run the yarn v2-style install command instead of yarn v1-style.
+   */
+  _cyYarnV311?: boolean
+  /**
+   * By default, the automatic `yarn install` will not run postinstall scripts. This
+   * option, if set, will cause postinstall scripts to run for this project.
+   */
+  _cyRunScripts?: boolean
+  dependencies?: Dependencies
+  devDependencies?: Dependencies
+  optionalDependencies?: Dependencies
 }
 
+async function getLockFilename (dir: string) {
+  const hasYarnLock = !!await fs.stat(path.join(dir, 'yarn.lock')).catch(() => false)
+  const hasNpmLock = !!await fs.stat(path.join(dir, 'package-lock.json')).catch(() => false)
+
+  if (hasYarnLock && hasNpmLock) throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
+
+  if (hasYarnLock) return 'yarn.lock'
+
+  if (hasNpmLock) return 'package-lock.json'
+}
+
+function getRelativePathToProjectDir (projectDir: string) {
+  return path.relative(projectDir, path.join(root, '..'))
+}
+
+async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFilePath: string, relativePathToMonorepoRoot: string }) {
+  const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
+  const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
+  .replaceAll(opts.relativePathToMonorepoRoot, relativePathToProjectDir)
+
+  await fs.writeFile(opts.lockFilePath, lockFileContents)
+}
+
+async function normalizeLockFileRelativePaths (opts: { project: string, projectDir: string, lockFilePath: string, lockFilename: string, relativePathToMonorepoRoot: string }) {
+  const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
+  const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
+  .replaceAll(relativePathToProjectDir, opts.relativePathToMonorepoRoot)
+
+  // write back to the original project dir, not the tmp copy
+  await fs.writeFile(path.join(projects, opts.project, 'yarn.lock'), lockFileContents)
+}
 
 /**
  * Given a path to a `package.json`, convert any references to development
@@ -64,68 +120,10 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
   return updatedDeps
 }
 
-function getYarnCommand (opts: {
-  yarnV311: boolean
-  updateYarnLock: boolean
-  isCI: boolean
-  runScripts: boolean
-}): string {
-  let cmd = `yarn install`
-
-  if (opts.yarnV311) {
-    // @see https://yarnpkg.com/cli/install
-    if (!opts.runScripts) cmd += ' --mode=skip-build'
-
-    if (!opts.updateYarnLock) cmd += ' --immutable'
-
-    return cmd
-  }
-
-  cmd += ' --prefer-offline'
-
-  if (!opts.runScripts) cmd += ' --ignore-scripts'
-
-  if (!opts.updateYarnLock) cmd += ' --frozen-lockfile'
-
-  // yarn v1 has a bug with integrity checking and local cache/dependencies
-  // @see https://github.com/yarnpkg/yarn/issues/6407
-  cmd += ' --update-checksums'
-
-  // in CircleCI, this offline cache can be used
-  if (opts.isCI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
-  else cmd += ` --cache-folder=${path.join(tempDir, 'cy-system-tests-yarn-cache', String(Date.now()))}`
-
-  return cmd
-}
-
-type Dependencies = Record<string, string>
-
-/**
- * Type for package.json files for system-tests example projects.
- */
-type SystemTestPkgJson = {
-  /**
-   * By default, scaffolding will run `yarn install` if there is a `package.json`.
-   * This option, if set, disables that.
-   */
-  _cySkipYarnInstall?: boolean
-  /**
-   * Run the yarn v2-style install command instead of yarn v1-style.
-   */
-  _cyYarnV311?: boolean
-  /**
-   * By default, the automatic `yarn install` will not run postinstall scripts. This
-   * option, if set, will cause postinstall scripts to run for this project.
-   */
-  _cyRunScripts?: boolean
-  dependencies?: Dependencies
-  devDependencies?: Dependencies
-  optionalDependencies?: Dependencies
-}
-
 /**
  * Given a `system-tests` project name, detect and install the `node_modules`
  * specified in the project's `package.json`. No-op if no `package.json` is found.
+ * Will use `yarn` or `npm` based on the lockfile present.
  */
 export async function scaffoldProjectNodeModules (project: string, updateYarnLock: boolean = !!process.env.UPDATE_YARN_LOCK): Promise<void> {
   const projectDir = projectPath(project)
@@ -156,40 +154,34 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
     console.log(`📦 Found package.json for project ${project}.`)
 
-    if (pkgJson._cySkipYarnInstall) {
-      return console.log(`📦 cySkipYarnInstall set in package.json, skipping yarn steps`)
+    if (pkgJson._cySkipDepInstall) {
+      return console.log(`📦 _cySkipDepInstall set in package.json, skipping dep-installer steps`)
     }
 
     if (!pkgJson.dependencies && !pkgJson.devDependencies && !pkgJson.optionalDependencies) {
-      return console.log(`📦 No dependencies found, skipping yarn steps`)
+      return console.log(`📦 No dependencies found, skipping dep-installer steps`)
     }
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await symlinkNodeModulesFromCache(project, cacheDir)
 
-    // 2. Before running `yarn`, resolve workspace deps to absolute paths.
+    // 2. Before running the package installer, resolve workspace deps to absolute paths.
     // This is required to fix `yarn install` for workspace-only packages.
     const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
 
     await removeWorkspacePackages(workspaceDeps)
 
-    // 3. Fix relative paths in temp dir's `yarn.lock`.
-    const relativePathToProjectDir = path.relative(projectDir, path.join(root, '..'))
-    const yarnLockPath = path.join(projectDir, 'yarn.lock')
+    const lockFilename = await getLockFilename(projectDir)
 
-    console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
-    try {
-      const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
-      .replaceAll(relativePathToMonorepoRoot, relativePathToProjectDir)
+    if (!lockFilename) throw new Error(`package.json exists, but missing a lockfile for example project in '${projectDir}'`)
 
-      await fs.writeFile(yarnLockPath, yarnLock)
-    } catch (err) {
-      if (err.code !== 'ENOENT' || !updateYarnLock) throw err
+    // 3. Fix relative paths in temp dir's lockfile.
+    const lockFilePath = path.join(projectDir, lockFilename)
 
-      console.log('📦 No yarn.lock found, continuing')
-    }
+    console.log(`📦 Writing ${lockFilename} with fixed relative paths to temp dir`)
+    await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
-    // 4. Run `yarn install`.
+    // 4. Run `yarn/npm install`.
     const cmd = getYarnCommand({
       updateYarnLock,
       yarnV311: pkgJson._cyYarnV311,
@@ -199,17 +191,13 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
     await runCmd(cmd)
 
-    console.log(`📦 Copying yarn.lock and fixing relative paths for ${project}`)
+    // 5. Now that the lockfile is up to date, update workspace dependency paths in the lockfile with monorepo
+    // relative paths so it can be the same for all developers
+    console.log(`📦 Copying ${lockFilename} and fixing relative paths for ${project}`)
+    await normalizeLockFileRelativePaths({ project, projectDir, lockFilePath, lockFilename, relativePathToMonorepoRoot })
 
-    // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
-    // for all developers
-    const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
-    .replaceAll(relativePathToProjectDir, relativePathToMonorepoRoot)
-
-    await fs.writeFile(path.join(projects, project, 'yarn.lock'), yarnLock)
-
-    // 5. After `yarn install`, we must now symlink *over* all workspace dependencies, or else
-    // `require` calls from `yarn install`'d workspace deps to peer deps will fail.
+    // 6. After install, we must now symlink *over* all workspace dependencies, or else
+    // `require` calls from installed workspace deps to peer deps will fail.
     await removeWorkspacePackages(workspaceDeps)
     for (const dep of workspaceDeps) {
       console.log(`📦 Symlinking workspace dependency: ${dep}`)

@@ -950,6 +950,8 @@ const systemTests = {
       await settings.write(e2ePath, ctx.settings)
     }
 
+    if (options.onAfterScaffold) await options.onAfterScaffold()
+
     let stdout = ''
     let stderr = ''
 
@@ -1089,6 +1091,8 @@ const systemTests = {
       sp.on('error', reject)
       sp.on('exit', resolve)
     })
+
+    if (options.onAfterExec) await options.onAfterExec()
 
     await copy()
 
