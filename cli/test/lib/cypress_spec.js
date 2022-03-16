@@ -53,18 +53,6 @@ describe('cypress', function () {
         expect(args).to.deep.eq({ config: JSON.stringify(config) })
       })
     })
-
-    it('passes configFile: false', () => {
-      const opts = {
-        configFile: false,
-      }
-
-      return cypress.open(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
-      })
-    })
   })
 
   context('.run fails to write results file', function () {

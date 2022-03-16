@@ -3,6 +3,7 @@ const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 const { processTestingType, checkConfigFile } = require('./shared')
+const { exitWithError } = require('../errors')
 
 /**
  * Maps options collected by the CLI
@@ -68,7 +69,17 @@ const processOpenOptions = (options = {}) => {
 module.exports = {
   processOpenOptions,
   start (options = {}) {
-    const args = processOpenOptions(options)
+    let args
+
+    try {
+      args = processOpenOptions(options)
+    } catch (err) {
+      if (err.details) {
+        return exitWithError(err.details)()
+      }
+
+      throw err
+    }
 
     function open () {
       return spawn.start(args, {
