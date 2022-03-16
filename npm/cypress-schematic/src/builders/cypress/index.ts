@@ -79,7 +79,7 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   }
 
   if (userOptions.baseUrl) {
-    options.config = { ...options.config, baseUrl: userOptions.baseUrl }
+    options.config = { ...options.config, e2e: { ...options.config?.e2e, baseUrl: userOptions.baseUrl } }
   }
 
   const { watch, headless } = userOptions

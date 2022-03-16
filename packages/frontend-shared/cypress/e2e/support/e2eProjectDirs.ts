@@ -26,6 +26,7 @@ export const e2eProjectDirs = [
   'downloads',
   'e2e',
   'empty-folders',
+  'experimental-studio',
   'failures',
   'firefox-memory',
   'fixture-subfolder-of-integration',

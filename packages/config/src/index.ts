@@ -148,6 +148,10 @@ export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onEr
   return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
 }
 
+export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+  return validateNoBreakingOptions(breakingOptions.filter((option) => option.showInLaunchpad), cfg, onWarning, onErr)
+}
+
 export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof typeof testingTypeBreakingOptions, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   const options = testingTypeBreakingOptions[testingType]
 

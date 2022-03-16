@@ -585,16 +585,16 @@ describe('src/cy/commands/actions/type - #type events', () => {
 
     describe('triggers', () => {
       const targets = [
-        '#target-button-tag',
-        '#target-input-button',
-        '#target-input-image',
-        '#target-input-reset',
-        '#target-input-submit',
+        'button-tag',
+        'input-button',
+        'input-image',
+        'input-reset',
+        'input-submit',
       ]
 
       targets.forEach((target) => {
         it(target, () => {
-          cy.get(target).focus().type('{enter}')
+          cy.get(`#target-${target}`).focus().type('{enter}')
 
           cy.get('li').should('have.length', 4)
           cy.get('li').eq(0).should('have.text', 'keydown')
@@ -603,22 +603,49 @@ describe('src/cy/commands/actions/type - #type events', () => {
           cy.get('li').eq(3).should('have.text', 'keyup')
         })
       })
+
+      describe('keydown triggered on another element', () => {
+        targets.forEach((target) => {
+          it(target, () => {
+            cy.get('#focus-options').select(target)
+            cy.get('#input-text').focus().type('{enter}')
+
+            cy.get('li').should('have.length', 3)
+            cy.get('li').eq(0).should('have.text', 'keypress')
+            cy.get('li').eq(1).should('have.text', 'click')
+            cy.get('li').eq(2).should('have.text', 'keyup')
+          })
+        })
+      })
     })
 
     describe('does not trigger', () => {
       const targets = [
-        '#target-input-checkbox',
-        '#target-input-radio',
+        'input-checkbox',
+        'input-radio',
       ]
 
       targets.forEach((target) => {
         it(target, () => {
-          cy.get(target).focus().type('{enter}')
+          cy.get(`#target-${target}`).focus().type('{enter}')
 
           cy.get('li').should('have.length', 3)
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
           cy.get('li').eq(2).should('have.text', 'keyup')
+        })
+      })
+
+      describe('keydown triggered on another element', () => {
+        targets.forEach((target) => {
+          it(target, () => {
+            cy.get('#focus-options').select(target)
+            cy.get('#input-text').focus().type('{enter}')
+
+            cy.get('li').should('have.length', 2)
+            cy.get('li').eq(0).should('have.text', 'keypress')
+            cy.get('li').eq(1).should('have.text', 'keyup')
+          })
         })
       })
     })
@@ -768,6 +795,29 @@ describe('src/cy/commands/actions/type - #type events', () => {
         cy.get('li').eq(3).should('have.text', 'keyup')
 
         cy.get('#target-input-radio').should('be.checked')
+      })
+    })
+
+    describe('keydown on another element does not trigger click', () => {
+      const targets = [
+        'button-tag',
+        'input-button',
+        'input-image',
+        'input-reset',
+        'input-submit',
+        'input-checkbox',
+        'input-radio',
+      ]
+
+      targets.forEach((target) => {
+        it(target, () => {
+          cy.get('#focus-options').select('button-tag')
+          cy.get('#input-text').focus().type(' ')
+
+          cy.get('li').should('have.length', 2)
+          cy.get('li').eq(0).should('have.text', 'keypress')
+          cy.get('li').eq(1).should('have.text', 'keyup')
+        })
       })
     })
   })

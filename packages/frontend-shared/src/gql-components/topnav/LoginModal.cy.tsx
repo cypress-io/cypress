@@ -62,8 +62,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         },
       })
 
-      cy.findByRole('button', { name: text.login.actionLogin }).click()
-
+      // The LoginModal immediately shows the "Waiting..." button
+      // if the browser already opened
       cy.findByRole('button', { name: text.login.actionWaiting })
       .should('be.visible')
       .and('be.disabled')
@@ -93,8 +93,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           </div>),
       })
 
-      cy.contains('button', text.login.actionTryAgain).should('not.exist')
-      cy.contains('button', text.login.actionCancel).should('not.exist')
+      cy.contains('button', text.login.actionTryAgain).should('not.be.visible')
+      cy.contains('button', text.login.actionCancel).should('not.be.visible')
       cy.contains(text.login.titleBrowserError).should('be.visible')
       cy.contains(text.login.bodyBrowserError).should('be.visible')
       cy.contains(text.login.bodyBrowserErrorDetails).should('be.visible')

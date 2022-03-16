@@ -6,10 +6,8 @@ const pluginConfig: Cypress.PluginConfig = (on, config) => {}
 // allows synchronous returns
 const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config // $ExpectType PluginConfigOptions
-  config.baseUrl // $ExpectType string | null
   config.configFile // $ExpectType string | false
   config.fixturesFolder // $ExpectType string | false
-  config.pluginsFile // $ExpectType string | false
   config.screenshotsFolder // $ExpectType string | false
   config.videoCompression // $ExpectType number | false
   config.projectRoot // $ExpectType string
@@ -67,7 +65,9 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   })
 
   return {
-    baseUrl: 'http://localhost:3000'
+    e2e: {
+      baseUrl: 'http://localhost:3000'
+    }
   }
 }
 
@@ -106,7 +106,9 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
   })
 
   return Promise.resolve({
-    baseUrl: 'http://localhost:3000'
+    e2e: {
+      baseUrl: 'http://localhost:3000'
+    }
   })
 }
 

@@ -129,4 +129,21 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       .should('eq', 'http://localhost:4455/__/#/specs')
     })
   })
+
+  it('should show blank page', () => {
+    cy.visitApp()
+    cy.contains('blank-contents.spec')
+    .click()
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the blank page')
+  })
+
+  it('should show visit failure blank page', () => {
+    cy.visitApp()
+    cy.contains('blank-contents.spec')
+    .click()
+
+    cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
+    cy.percySnapshot()
+  })
 })
