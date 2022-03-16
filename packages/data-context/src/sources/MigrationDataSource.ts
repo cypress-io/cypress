@@ -14,6 +14,7 @@ import {
   getComponentTestFilesGlobs,
   getComponentFolder,
 } from './migration'
+import _ from 'lodash'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
@@ -151,7 +152,7 @@ export class MigrationDataSource {
       canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
-    return canBeAutomaticallyMigrated
+    return this.checkAndUpdateDuplicatedSpecs(canBeAutomaticallyMigrated)
   }
 
   async createConfigString () {
@@ -187,5 +188,75 @@ export class MigrationDataSource {
 
   get configFileNameAfterMigration () {
     return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
+  }
+
+  private checkAndUpdateDuplicatedSpecs (specs: MigrationFile[]) {
+    const updatedSpecs: MigrationFile[] = []
+    const updatesCount: Record<string, number> = {}
+
+    const sortedSpecs = this.sortSpecsByExtension(specs)
+
+    sortedSpecs.forEach((spec) => {
+      const specExist = _.find(updatedSpecs, (x) => x.after.relative === spec.after.relative)
+
+      let updatedSpec = spec
+
+      if (specExist) {
+        const updatedParts = spec.after.parts.map((part) => {
+          if (part.group === 'fileName') {
+            const beforePreExtensionProperty = _.find(spec.before.parts, (x) => x.group === 'preExtension')
+            const beforePreExtension = beforePreExtensionProperty?.text?.replace('.', '')
+
+            updatesCount[spec.after.relative] = (updatesCount[spec.after.relative] ?? 1) + 1
+
+            return {
+              ...part,
+              text: `${part.text}${updatesCount[spec.after.relative]}${beforePreExtension}`,
+              highlight: true,
+            }
+          }
+
+          return part
+        })
+
+        updatedSpec = {
+          ...spec,
+          after: {
+            ...spec.after,
+            parts: updatedParts,
+            relative: updatedParts.map((x) => x.text).join(''),
+          },
+        }
+      }
+
+      updatedSpecs.push(updatedSpec)
+    })
+
+    return updatedSpecs
+  }
+
+  private sortSpecsByExtension (specs: MigrationFile[]) {
+    const sortedExtensions = ['.spec.', '.Spec.', '_spec.', '_Spec.', '-spec.', '-Spec.', '.test.', '.Test.', '_test.', '_Test.', '-test.', '-Test.']
+
+    return specs.sort(function (a, b) {
+      function getExtIndex (spec: string) {
+        let index = -1
+
+        // Sort the specs based on the extension, giving priority to .spec
+        sortedExtensions.some((c, i) => {
+          if (~spec.indexOf(c)) {
+            index = i
+
+            return true
+          }
+
+          return false
+        })
+
+        return index
+      }
+
+      return getExtIndex(a.before.relative) - getExtIndex(b.before.relative)
+    })
   }
 }

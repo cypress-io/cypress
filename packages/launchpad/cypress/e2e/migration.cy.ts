@@ -743,6 +743,61 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     migrateAndVerifyConfig()
   })
 
+  it('completes journey for migration-e2e-duplicated-spec-names', () => {
+    startMigrationFor('migration-e2e-duplicated-spec-names')
+    // default testFiles - auto
+    cy.get(renameAutoStep).should('exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/app-spec2.js')
+    cy.contains('cypress/integration/app_spec2.js')
+    cy.contains('cypress/integration/app.spec.js')
+    cy.contains('cypress/integration/app2_spec.js')
+    cy.contains('cypress/integration/app_spec.js')
+    cy.contains('cypress/integration/app-spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/app-spec2.cy.js')
+    cy.contains('cypress/e2e/app_spec2.cy.js')
+    cy.contains('cypress/e2e/app.cy.js')
+    cy.contains('cypress/e2e/app2.cy.js')
+    cy.contains('cypress/e2e/app2_spec.cy.js')
+    cy.contains('cypress/e2e/app3-spec.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+
+    cy.withCtx(async (ctx) => {
+      const specs = [
+        'cypress/e2e/app-spec2.cy.js',
+        'cypress/e2e/app_spec2.cy.js',
+        'cypress/e2e/app.cy.js',
+        'cypress/e2e/app2.cy.js',
+        'cypress/e2e/app2_spec.cy.js',
+        'cypress/e2e/app3-spec.cy.js',
+      ]
+
+      for (const spec of specs) {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      }
+    })
+
+    migrateAndVerifyConfig()
+
+    cy.withCtx(async (ctx) => {
+      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+
+      expect(integrationFolderStats).to.be.null
+    })
+
+    checkOutcome()
+  })
+
   context('migration-e2e-component-default-test-files', () => {
     it('completes journey', () => {
       startMigrationFor('migration-e2e-component-default-test-files')

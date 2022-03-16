@@ -57,6 +57,7 @@ export const e2eProjectDirs = [
   'migration-e2e-custom-test-files',
   'migration-e2e-defaults',
   'migration-e2e-defaults-no-specs',
+  'migration-e2e-duplicated-spec-names',
   'migration-e2e-export-default',
   'migration-e2e-false-plugins-support-file',
   'migration-e2e-fully-custom',
