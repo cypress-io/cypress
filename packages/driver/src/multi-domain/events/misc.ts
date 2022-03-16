@@ -19,4 +19,9 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   Cypress.on('url:changed', (url) => {
     Cypress.specBridgeCommunicator.toPrimary('url:changed', { url })
   })
+
+  // Listen for any unload events in other domains, if any have unloaded we should also become unstable.
+  Cypress.specBridgeCommunicator.on('before:unload', () => {
+    cy.state('isStable', false)
+  })
 }
