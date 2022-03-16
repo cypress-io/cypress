@@ -37,7 +37,7 @@
           {{ props.gql?.currentProject?.title }}
         </span>
         <span
-          v-if="props.gql.currentProject.branch"
+          v-if="props.gql?.currentProject?.branch"
           class="font-normal text-gray-500"
         >
           ({{ props.gql.currentProject.branch }})

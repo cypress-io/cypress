@@ -172,12 +172,32 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
-  it('displays the active project name', () => {
+  it('displays the active project name and testing type', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.contains('test-project').should('be.visible')
+    cy.contains('e2e testing', { matchCase: false }).should('be.visible')
+  })
+
+  it('displays the branch name', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        if (!result.currentProject) {
+          return
+        }
+
+        result.currentProject.branch = 'develop'
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.contains('develop').should('be.visible')
   })
 
   it('the login modal reaches "opening browser" status', () => {
