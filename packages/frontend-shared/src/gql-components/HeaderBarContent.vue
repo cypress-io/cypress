@@ -9,7 +9,7 @@
       </div>
       <div
         v-else
-        class="flex items-center children:font-medium children:leading-24px"
+        class="flex font-medium text-gray-700 items-center children:leading-24px"
       >
         <img
           class="h-32px mr-18px w-32px"
@@ -28,7 +28,28 @@
           v-if="props.gql?.currentProject"
           class="h-16px mr-2px min-w-16px icon-dark-gray-200"
         />
-        <span class="text-body-gray-700">{{ props.gql?.currentProject?.title }}</span>
+        <span
+          class="font-medium mr-2px"
+          :class="props.gql?.currentProject?.currentTestingType ? 'text-indigo-500 hocus-link-default cursor-pointer' :
+            'text-gray-700'"
+          @click.prevent="clearTestingType"
+        >
+          {{ props.gql?.currentProject?.title }}
+        </span>
+        <span
+          v-if="props.gql.currentProject.branch"
+          class="font-normal text-gray-500"
+        >
+          ({{ props.gql.currentProject.branch }})
+        </span>
+        <i-cy-chevron-right_x16
+          v-if="props.gql?.currentProject?.currentTestingType"
+          class="h-16px mr-2px min-w-16px icon-dark-gray-200"
+        />
+        <span
+          v-if="props.gql?.currentProject?.currentTestingType"
+          class="lowercase"
+        >{{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}</span>
       </div>
       <div class="flex gap-6">
         <TopNav
@@ -86,7 +107,7 @@
         </TopNav>
         <div v-if="!props.gql?.cloudViewer">
           <button
-            class="flex text-gray-600 group items-center focus:outline-transparent"
+            class="flex text-gray-600 items-center group focus:outline-transparent"
             @click="openLogin"
           >
             <i-cy-profile_x16
@@ -110,6 +131,7 @@ import { ref, computed } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
   GlobalPageHeader_ClearCurrentProjectDocument,
+  GlobalPageHeader_ClearCurrentTestingTypeDocument,
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
@@ -142,12 +164,25 @@ mutation GlobalPageHeader_clearCurrentProject {
 `
 
 gql`
+mutation GlobalPageHeader_ClearCurrentTestingType {
+  clearCurrentTestingType {
+    currentProject {
+      id
+      currentTestingType
+    }
+  }
+}
+`
+
+gql`
 fragment HeaderBar_HeaderBarContent on Query {
   currentProject {
     id
     title
     config
     savedState
+    currentTestingType
+    branch
   }
   projectRootFromCI
   ...TopNav
@@ -164,6 +199,7 @@ const cloudProjectId = computed(() => {
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
+const clearCurrentTestingTypeMutation = useMutation(GlobalPageHeader_ClearCurrentTestingTypeDocument)
 const email = computed(() => props.gql.cloudViewer?.email || undefined)
 
 const openLogin = () => {
@@ -174,6 +210,10 @@ const clearCurrentProject = () => {
   if (props.gql.currentProject && !props.gql.projectRootFromCI) {
     clearCurrentProjectMutation.executeMutation({})
   }
+}
+
+const clearTestingType = () => {
+  clearCurrentTestingTypeMutation.executeMutation({})
 }
 
 const props = defineProps<{
