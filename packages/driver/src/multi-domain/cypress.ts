@@ -8,7 +8,7 @@ import './websocket'
 import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
-import $Log from '../cypress/log'
+import { create as createLog } from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { handleDomainFn } from './domain_fn'
 import { handleLogs } from './events/logs'
@@ -53,7 +53,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
   // @ts-ignore
-  Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
+  Cypress.log = createLog(Cypress, cy, Cypress.state, Cypress.config)
 
   Cypress.mocha = $Mocha.create(window, Cypress, Cypress.config)
 
