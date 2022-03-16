@@ -475,7 +475,7 @@ commands:
             [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec:start --debug --verbose --parallel -- --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec:start --debug --verbose --parallel --') || true
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
