@@ -220,65 +220,6 @@ exports['e2e plugins / works with user extensions'] = `
 
 `
 
-exports['e2e plugins handles absolute path to pluginsFile 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (absolute.cy.js)                                                           │
-  │ Searched:   cypress/e2e/absolute.cy.js                                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  absolute.cy.js                                                                  (1 of 1)
-
-
-  ✓ uses the plugins file
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     absolute.cy.js                                                                   │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/absolute.cy.js.mp4                  (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  absolute.cy.js                           XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
 exports['e2e plugins calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
 
 ====================================================================================================
@@ -436,6 +377,8 @@ The following are valid events:
  - dev-server:start
  - file:preprocessor
  - task
+
+Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
 
 InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]

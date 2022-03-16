@@ -16,7 +16,7 @@ function getRunnerHref (specPath: string) {
 
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
-    context('project with default spec pattern', () => {
+    context('js project with default spec pattern', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
@@ -215,6 +215,110 @@ describe('App: Index', () => {
           cy.get('[aria-label="Close"]').click()
 
           cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')
+        })
+      })
+    })
+
+    context('ts project with default spec pattern', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('no-specs-no-storybook')
+        cy.openProject('no-specs-no-storybook')
+
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('tsconfig.json', '{}')
+        })
+
+        cy.openProject('no-specs-no-storybook')
+
+        cy.startAppServer('e2e')
+        cy.__incorrectlyVisitAppWithIntercept()
+
+        // With no specs present, the page renders two cards, one for scaffolding example specs,
+        // another for creating a new blank spec.
+        cy.findAllByTestId('card').eq(0).as('ScaffoldCard')
+        .within(() => {
+          cy.findByRole('button', {
+            name: defaultMessages.createSpec.e2e.importFromScaffold.header,
+          }).should('be.visible')
+          .and('not.be.disabled')
+
+          cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description)
+          .should('be.visible')
+        })
+
+        cy.findAllByTestId('card').eq(1).as('EmptySpecCard')
+        .within(() => {
+          cy.findByRole('button', {
+            name: defaultMessages.createSpec.e2e.importEmptySpec.header,
+          }).should('be.visible')
+          .and('not.be.disabled')
+
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.description)
+          .should('be.visible')
+        })
+      })
+
+      context('scaffold empty spec', () => {
+        it('should generate empty spec for a TS project', () => {
+          // Verify the modal can be closed
+          cy.get('@EmptySpecCard').click()
+          cy.get('body').click(0, 0)
+          cy.get('[data-cy="create-spec-modal"]').should('not.exist')
+          cy.get('@EmptySpecCard').click()
+          cy.get('[aria-label="Close"]').click()
+          cy.get('[data-cy="create-spec-modal"]').should('not.exist')
+          cy.get('@EmptySpecCard').click()
+          cy.contains('button', defaultMessages.components.button.back).click()
+          cy.get('[data-cy="create-spec-modal"]').within(() => {
+            cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
+          })
+
+          cy.percySnapshot('Default')
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.ts'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+          cy.get('@enterSpecInput').clear()
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+
+          // Shows entered file does not match spec pattern
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+          cy.percySnapshot('Invalid spec error')
+
+          //Shows extension warning
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.spec.t'))
+          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
+            if (req.body.variables.specFile === getPathForPlatform('cypress/e2e/MyTest.spec.tx')) {
+              req.on('before:response', (res) => {
+                res.body.data.matchesSpecPattern = true
+              })
+            }
+          })
+
+          cy.get('@enterSpecInput').type('x')
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
+          cy.percySnapshot('Non-recommended spec pattern warning')
+          cy.contains('span', '{filename}.cy.tx')
+
+          // Create spec
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.ts')).click()
+
+          cy.percySnapshot('Generator success')
+
+          cy.get('pre').should('contain', 'describe(\'MyTest.cy.ts\'')
+
+          cy.get('[aria-label="Close"]').click()
+
+          cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.ts')
         })
       })
     })
