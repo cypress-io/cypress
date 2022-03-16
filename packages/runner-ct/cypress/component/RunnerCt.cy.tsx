@@ -43,9 +43,8 @@ describe('RunnerCt', () => {
   })
 
   it('shows hint message if no component specs', () => {
-    mountRunnerCt(makeState({ specs: [] }), { ...fakeConfig, projectRoot: '/root', specPattern: '/root/src/**/*.cy.tsx' })
+    mountRunnerCt(makeState({ specs: [] }), { ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' })
     cy.contains('No specs found')
-    cy.contains('Create a new spec file matching /root/src/**/*.cy.tsx')
     cy.percySnapshot()
   })
 

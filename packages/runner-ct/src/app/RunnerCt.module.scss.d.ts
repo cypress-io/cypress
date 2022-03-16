@@ -12,11 +12,11 @@ interface CssExports {
   'ctTogglePluginsSectionButton': string;
   'ctTogglePluginsSectionButtonOpen': string;
   'display-none': string;
+  'folder': string;
   'largerIcon': string;
   'leftNav': string;
   'noSpecAut': string;
   'noSpecsDescription': string;
-  'pattern': string;
   'reporter': string;
   'runner': string;
   'runnerCt': string;
