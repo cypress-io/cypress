@@ -25,6 +25,7 @@ export type LegacyCypressConfigJson = Partial<{
   e2e: Omit<LegacyCypressConfigJson, 'component' | 'e2e'>
   pluginsFile: string | false
   supportFile: string | false
+  slowTestThreshold: number
   componentFolder: string | false
   integrationFolder: string
   testFiles: string | string[]
@@ -186,6 +187,6 @@ export class MigrationDataSource {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
+    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
   }
 }

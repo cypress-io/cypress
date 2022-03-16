@@ -135,6 +135,12 @@ describe('Choose a Browser Page', () => {
       })
 
       cy.contains('button', 'Running Chrome')
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('closed')
+      })
+
+      cy.contains('button', 'Start E2E Testing in Chrome')
     })
 
     it('performs mutation to change selected browser when browser item is clicked', () => {
@@ -179,15 +185,13 @@ describe('Choose a Browser Page', () => {
     })
 
     it('performs mutation to close browser', () => {
-      cy.intercept('query-OpenBrowser', (req) => {
-        req.on('before:response', (res) => {
-          res.body.data.currentProject.browserStatus = 'open'
-        })
-      })
-
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('open')
+      })
 
       cy.contains('button', 'Running Chrome')
 
@@ -197,15 +201,13 @@ describe('Choose a Browser Page', () => {
     })
 
     it('performs mutation to focus open browser when focus button is pressed', () => {
-      cy.intercept('query-OpenBrowser', (req) => {
-        req.on('before:response', (res) => {
-          res.body.data.currentProject.browserStatus = 'open'
-        })
-      })
-
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('open')
+      })
 
       cy.get('h1').should('contain', 'Choose a Browser')
 

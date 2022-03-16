@@ -44,7 +44,6 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
     .should('be.visible')
   })
 
-  // TODO: restore accessibility checks when UNIFY-878 is completed
   it('emits click events bound to it', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
@@ -55,11 +54,6 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
     </div>))
     .get(specCardSelector)
     .click()
-
     .get('@onClickSpy').should('have.been.calledOnce')
-
-    // keyboard checks that should work through focusing a button inside the card:
-    // .type('{enter}')
-    // .type(' ')
   })
 })
