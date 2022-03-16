@@ -388,6 +388,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """File extension to use based on if the project has typescript or not"""
+  fileExtensionToUse: FileExtensionEnum
+
   """Whether the project has Typescript"""
   hasTypescript: Boolean
 
@@ -628,6 +631,11 @@ input FileDetailsInput {
   """
   filePath: String!
   line: Int
+}
+
+enum FileExtensionEnum {
+  js
+  ts
 }
 
 """Represents a file on the file system"""

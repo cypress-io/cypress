@@ -41,6 +41,15 @@ async function getNextWebpackConfig (config) {
 
   checkSWC(nextWebpackConfig, config)
 
+  if (nextWebpackConfig.watchOptions && Array.isArray(nextWebpackConfig.watchOptions.ignored)) {
+    nextWebpackConfig.watchOptions = {
+      ...nextWebpackConfig.watchOptions,
+      ignored: [...nextWebpackConfig.watchOptions.ignored.filter((pattern) => !/node_modules/.test(pattern)), '**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**'],
+    }
+
+    debug('found options next.js watchOptions.ignored %O', nextWebpackConfig.watchOptions.ignored)
+  }
+
   return nextWebpackConfig
 }
 
