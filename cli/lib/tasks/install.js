@@ -1,6 +1,6 @@
 const _ = require('lodash')
+const arch = require('arch')
 const os = require('os')
-const url = require('url')
 const path = require('path')
 const chalk = require('chalk')
 const debug = require('debug')('cypress:cli')
@@ -17,97 +17,10 @@ const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 const verbose = require('../VerboseRenderer')
 
-const getNpmArgv = () => {
-  const json = process.env.npm_config_argv
+const { buildInfo, version } = require('../../package.json')
 
-  if (!json) {
-    return
-  }
-
-  debug('found npm argv json %o', json)
-
-  try {
-    return JSON.parse(json).original || []
-  } catch (e) {
-    return []
-  }
-}
-
-// attempt to discover the version specifier used to install Cypress
-// for example: "^5.0.0", "https://cdn.cypress.io/...", ...
-const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
-  const argv = getNpmArgv()
-
-  if ((process.env.npm_package_resolved || '').endsWith('cypress.tgz')) {
-    return process.env.npm_package_resolved
-  }
-
-  if (argv) {
-    const tgz = _.find(argv, (t) => t.endsWith('cypress.tgz'))
-
-    if (tgz) {
-      return tgz
-    }
-  }
-
-  const getVersionSpecifierFromPkg = (dir) => {
-    debug('looking for versionSpecifier %o', { dir })
-
-    const tryParent = () => {
-      const parentPath = path.resolve(dir, '..')
-
-      if (parentPath === dir) {
-        debug('reached FS root with no versionSpecifier found')
-
-        return
-      }
-
-      return getVersionSpecifierFromPkg(parentPath)
-    }
-
-    return fs.readJSON(path.join(dir, 'package.json'))
-    .catch(() => ({}))
-    .then((pkg) => {
-      const specifier = _.chain(['dependencies', 'devDependencies', 'optionalDependencies'])
-      .map((prop) => _.get(pkg, `${prop}.cypress`))
-      .compact().first().value()
-
-      return specifier || tryParent()
-    })
-  }
-
-  // recurse through parent directories until package.json with `cypress` is found
-  return getVersionSpecifierFromPkg(startDir)
-  .then((versionSpecifier) => {
-    debug('finished looking for versionSpecifier', { versionSpecifier })
-
-    return versionSpecifier
-  })
-}
-
-const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<platformSlug>.+?)\/(?<artifactSlug>.+?)\/cypress\.tgz$/
-
-// convert a prerelease NPM package .tgz URL to the corresponding binary .zip URL
-const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {
-  let parsed
-
-  try {
-    parsed = url.parse(npmUrl)
-  } catch (e) {
-    return
-  }
-
-  const matches = betaNpmUrlRe.exec(parsed.pathname)
-
-  if (parsed.hostname !== 'cdn.cypress.io' || !matches) {
-    return
-  }
-
-  const { version, artifactSlug } = matches.groups
-
-  parsed.pathname = `/beta/binary/${version}/${os.platform()}-${os.arch()}/${artifactSlug}/cypress.zip`
-
-  return parsed.format()
+function _getBinaryUrlFromBuildInfo ({ commitSha, commitBranch }) {
+  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch()}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
 const alreadyInstalledMsg = () => {
@@ -226,42 +139,70 @@ const validateOS = () => {
   })
 }
 
-const start = (options = {}) => {
+/**
+ * Returns the version to install - either a string like `1.2.3` to be fetched
+ * from the download server or a file path or HTTP URL.
+ */
+function getVersionOverride ({ envVarVersion, buildInfo }) {
+  // let this environment variable reset the binary version we need
+  if (envVarVersion) {
+    return envVarVersion
+  }
+
+  if (buildInfo && !buildInfo.stable) {
+    logger.log(
+      chalk.yellow(stripIndent`
+        ${logSymbols.warning} Warning: You are installing a pre-release build of Cypress.
+
+        Bugs may be present which do not exist in production builds.
+
+        This build was created from:
+          * Commit SHA: ${buildInfo.commitSha}
+          * Commit Branch: ${buildInfo.commitBranch}
+          * Commit Timestamp: ${buildInfo.commitDate}
+      `),
+    )
+
+    logger.log()
+
+    return _getBinaryUrlFromBuildInfo(buildInfo)
+  }
+}
+
+function getEnvVarVersion () {
+  if (!util.getEnv('CYPRESS_INSTALL_BINARY')) return
+
+  // because passed file paths are often double quoted
+  // and might have extra whitespace around, be robust and trim the string
+  const trimAndRemoveDoubleQuotes = true
+  const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY', trimAndRemoveDoubleQuotes)
+
+  debug('using environment variable CYPRESS_INSTALL_BINARY "%s"', envVarVersion)
+
+  return envVarVersion
+}
+
+const start = async (options = {}) => {
   debug('installing with options %j', options)
+
+  const envVarVersion = getEnvVarVersion()
+
+  if (envVarVersion === '0') {
+    debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
+    logger.log(
+      stripIndent`
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`,
+    )
+
+    logger.log()
+
+    return
+  }
 
   _.defaults(options, {
     force: false,
+    buildInfo,
   })
-
-  const pkgVersion = util.pkgVersion()
-  let needVersion = pkgVersion
-  let binaryUrlOverride
-
-  debug('version in package.json is', needVersion)
-
-  // let this environment variable reset the binary version we need
-  if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
-    // because passed file paths are often double quoted
-    // and might have extra whitespace around, be robust and trim the string
-    const trimAndRemoveDoubleQuotes = true
-    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY', trimAndRemoveDoubleQuotes)
-
-    debug('using environment variable CYPRESS_INSTALL_BINARY "%s"', envVarVersion)
-
-    if (envVarVersion === '0') {
-      debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
-      logger.log(
-        stripIndent`
-        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`,
-      )
-
-      logger.log()
-
-      return Promise.resolve()
-    }
-
-    binaryUrlOverride = envVarVersion
-  }
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
@@ -277,18 +218,21 @@ const start = (options = {}) => {
     logger.log()
   }
 
-  const installDir = state.getVersionDir(pkgVersion)
+  const pkgVersion = util.pkgVersion()
+  const versionOverride = getVersionOverride({ envVarVersion, buildInfo: options.buildInfo })
+  const versionToInstall = versionOverride || pkgVersion
+
+  debug('version in package.json is %s, version to install is %s', pkgVersion, versionToInstall)
+
+  const installDir = state.getVersionDir(pkgVersion, options.buildInfo)
   const cacheDir = state.getCacheDir()
   const binaryDir = state.getBinaryDir(pkgVersion)
 
-  return validateOS().then((isValid) => {
-    if (!isValid) {
-      return throwFormErrorText(errors.invalidOS)()
-    }
-  })
-  .then(() => {
-    return fs.ensureDirAsync(cacheDir)
-  })
+  if (!(await validateOS())) {
+    return throwFormErrorText(errors.invalidOS)()
+  }
+
+  await fs.ensureDirAsync(cacheDir)
   .catch({ code: 'EACCES' }, (err) => {
     return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
     Failed to access ${chalk.cyan(cacheDir)}:
@@ -296,26 +240,11 @@ const start = (options = {}) => {
     ${err.message}
     `)
   })
-  .then(() => {
-    return Promise.all([
-      state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion),
-      getVersionSpecifier(),
-    ])
-  })
-  .then(([binaryVersion, versionSpecifier]) => {
-    if (!binaryUrlOverride && versionSpecifier) {
-      const computedBinaryUrl = getBinaryUrlFromPrereleaseNpmUrl(versionSpecifier)
 
-      if (computedBinaryUrl) {
-        debug('computed binary url from version specifier %o', { computedBinaryUrl, needVersion })
-        binaryUrlOverride = computedBinaryUrl
-      }
-    }
+  const binaryPkg = await state.getBinaryPkgAsync(binaryDir)
+  const binaryVersion = await state.getBinaryPkgVersion(binaryPkg)
 
-    needVersion = binaryUrlOverride || needVersion
-
-    debug('installed version is', binaryVersion, 'version needed is', needVersion)
-
+  const shouldInstall = () => {
     if (!binaryVersion) {
       debug('no binary installed under cli version')
 
@@ -335,7 +264,7 @@ const start = (options = {}) => {
       return true
     }
 
-    if ((binaryVersion === needVersion) || !util.isSemver(needVersion)) {
+    if ((binaryVersion === versionToInstall) || !util.isSemver(versionToInstall)) {
       // our version matches, tell the user this is a noop
       alreadyInstalledMsg()
 
@@ -343,96 +272,89 @@ const start = (options = {}) => {
     }
 
     return true
-  })
-  .then((shouldInstall) => {
-    // noop if we've been told not to download
-    if (!shouldInstall) {
-      debug('Not downloading or installing binary')
+  }
 
-      return
-    }
+  // noop if we've been told not to download
+  if (!shouldInstall()) {
+    return debug('Not downloading or installing binary')
+  }
 
-    if (needVersion !== pkgVersion) {
-      logger.log(
-        chalk.yellow(stripIndent`
-          ${logSymbols.warning} Warning: Forcing a binary version different than the default.
+  if (envVarVersion) {
+    logger.log(
+      chalk.yellow(stripIndent`
+        ${logSymbols.warning} Warning: Forcing a binary version different than the default.
 
-            The CLI expected to install version: ${chalk.green(pkgVersion)}
+          The CLI expected to install version: ${chalk.green(pkgVersion)}
 
-            Instead we will install version: ${chalk.green(needVersion)}
+          Instead we will install version: ${chalk.green(versionToInstall)}
 
-            These versions may not work properly together.
-        `),
-      )
+          These versions may not work properly together.
+      `),
+    )
 
-      logger.log()
-    }
+    logger.log()
+  }
 
+  const getLocalFilePath = async () => {
     // see if version supplied is a path to a binary
-    return fs.pathExistsAsync(needVersion)
-    .then((exists) => {
-      if (exists) {
-        return path.extname(needVersion) === '.zip' ? needVersion : false
-      }
+    if (await fs.pathExistsAsync(versionToInstall)) {
+      return path.extname(versionToInstall) === '.zip' ? versionToInstall : false
+    }
 
-      const possibleFile = util.formAbsolutePath(needVersion)
+    const possibleFile = util.formAbsolutePath(versionToInstall)
 
-      debug('checking local file', possibleFile, 'cwd', process.cwd())
+    debug('checking local file', possibleFile, 'cwd', process.cwd())
 
-      return fs.pathExistsAsync(possibleFile)
-      .then((exists) => {
-        // if this exists return the path to it
-        // else false
-        if (exists && path.extname(possibleFile) === '.zip') {
-          return possibleFile
-        }
+    // if this exists return the path to it
+    // else false
+    if ((await fs.pathExistsAsync(possibleFile)) && path.extname(possibleFile) === '.zip') {
+      return possibleFile
+    }
 
-        return false
-      })
-    })
-    .then((pathToLocalFile) => {
-      if (pathToLocalFile) {
-        const absolutePath = path.resolve(needVersion)
+    return false
+  }
 
-        debug('found local file at', absolutePath)
-        debug('skipping download')
+  const pathToLocalFile = await getLocalFilePath()
 
-        const rendererOptions = getRendererOptions()
+  if (pathToLocalFile) {
+    const absolutePath = path.resolve(versionToInstall)
 
-        return new Listr([unzipTask({
-          progress: {
-            throttle: 100,
-            onProgress: null,
-          },
-          zipFilePath: absolutePath,
-          installDir,
-          rendererOptions,
-        })], { rendererOptions }).run()
-      }
+    debug('found local file at', absolutePath)
+    debug('skipping download')
 
-      if (options.force) {
-        debug('Cypress already installed at', installDir)
-        debug('but the installation was forced')
-      }
+    const rendererOptions = getRendererOptions()
 
-      debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
+    return new Listr([unzipTask({
+      progress: {
+        throttle: 100,
+        onProgress: null,
+      },
+      zipFilePath: absolutePath,
+      installDir,
+      rendererOptions,
+    })], { rendererOptions }).run()
+  }
 
-      const downloadDir = os.tmpdir()
+  if (options.force) {
+    debug('Cypress already installed at', installDir)
+    debug('but the installation was forced')
+  }
 
-      return downloadAndUnzip({ version: needVersion, installDir, downloadDir })
-    })
-    // delay 1 sec for UX, unless we are testing
-    .then(() => {
-      return Promise.delay(1000)
-    })
-    .then(displayCompletionMsg)
-  })
+  debug('preparing to download and unzip version ', versionToInstall, 'to path', installDir)
+
+  const downloadDir = os.tmpdir()
+
+  await downloadAndUnzip({ version: versionToInstall, installDir, downloadDir })
+
+  // delay 1 sec for UX, unless we are testing
+  await Promise.delay(1000)
+
+  displayCompletionMsg()
 }
 
 module.exports = {
   start,
-  _getVersionSpecifier: getVersionSpecifier,
-  _getBinaryUrlFromPrereleaseNpmUrl: getBinaryUrlFromPrereleaseNpmUrl,
+  _getBinaryUrlFromBuildInfo,
 }
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
