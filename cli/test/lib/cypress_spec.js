@@ -152,18 +152,6 @@ describe('cypress', function () {
       return cypress.run().then(snapshot)
     })
 
-    it('passes configFile: false', () => {
-      const opts = {
-        configFile: false,
-      }
-
-      return cypress.run(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
-      })
-    })
-
     it('rejects if project is an empty string', () => {
       return expect(cypress.run({ project: '' })).to.be.rejected
     })
@@ -223,30 +211,12 @@ describe('cypress', function () {
         })
       })
 
-      it('coerces --config-file false to boolean', async () => {
-        const args = 'cypress run --config-file false'.split(' ')
-        const options = await cypress.cli.parseRunArguments(args)
-
-        expect(options).to.deep.equal({
-          configFile: false,
-        })
-      })
-
       it('coerces --config-file cypress.config.js to string', async () => {
         const args = 'cypress run --config-file cypress.config.js'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
         expect(options).to.deep.equal({
           configFile: 'cypress.config.js',
-        })
-      })
-
-      it('parses config file false', async () => {
-        const args = 'cypress run --config-file false'.split(' ')
-        const options = await cypress.cli.parseRunArguments(args)
-
-        expect(options).to.deep.equal({
-          configFile: false,
         })
       })
 

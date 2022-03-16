@@ -536,10 +536,6 @@ export class ProjectLifecycleManager {
   // }
 
   async getConfigFileContents () {
-    if (this.ctx.modeOptions.configFile === false) {
-      return {}
-    }
-
     if (this._configResult.state === 'loaded') {
       return this._configResult.value.initialConfig
     }
@@ -1124,10 +1120,6 @@ export class ProjectLifecycleManager {
       ...PROJECT_META_STATE,
       hasLegacyCypressJson: fs.existsSync(this._pathToFile(this.legacyConfigFile)),
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
-    }
-
-    if (configFile === false) {
-      return metaState
     }
 
     try {

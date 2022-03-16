@@ -2,7 +2,7 @@ const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
-const { processTestingType } = require('./shared')
+const { processTestingType, checkConfigFile } = require('./shared')
 
 /**
  * Maps options collected by the CLI
@@ -25,6 +25,7 @@ const processOpenOptions = (options = {}) => {
   }
 
   if (options.configFile !== undefined) {
+    checkConfigFile(options)
     args.push('--config-file', options.configFile)
   }
 

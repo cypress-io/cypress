@@ -53,14 +53,6 @@ describe('exec run', function () {
       snapshot(args)
     })
 
-    it('passes --config-file false option', () => {
-      const args = run.processRunOptions({
-        configFile: false,
-      })
-
-      snapshot(args)
-    })
-
     it('does not allow setting paradoxical --headed and --headless flags', () => {
       os.platform.returns('linux')
       process.exit.returns()
@@ -112,6 +104,10 @@ describe('exec run', function () {
     it('throws if both testingType and component are set', () => {
       expect(() => run.processRunOptions({ testingType: 'component', component: true })).to.throw()
     })
+
+    it('throws if --config-file is false', () => {
+      expect(() => run.processRunOptions({ configFile: 'false' })).to.throw()
+    })
   })
 
   context('.start', function () {
@@ -145,15 +141,6 @@ describe('exec run', function () {
       return run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost'])
-      })
-    })
-
-    it('spawns with --config-file false', function () {
-      return run.start({ configFile: false })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--run-project', process.cwd(), '--config-file', false],
-        )
       })
     })
 

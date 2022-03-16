@@ -47,7 +47,14 @@ const processTestingType = (options) => {
   return []
 }
 
+const checkConfigFile = (options) => {
+  if (options.configFile === 'false') {
+    throwInvalidOptionError(errors.invalidConfigFile)
+  }
+}
+
 module.exports = {
   throwInvalidOptionError,
   processTestingType,
+  checkConfigFile,
 }

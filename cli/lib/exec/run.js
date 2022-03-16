@@ -5,7 +5,7 @@ const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 const { exitWithError, errors } = require('../errors')
-const { processTestingType, throwInvalidOptionError } = require('./shared')
+const { processTestingType, throwInvalidOptionError, checkConfigFile } = require('./shared')
 
 /**
  * Typically a user passes a string path to the project.
@@ -58,6 +58,7 @@ const processRunOptions = (options = {}) => {
   }
 
   if (options.configFile !== undefined) {
+    checkConfigFile(options)
     args.push('--config-file', options.configFile)
   }
 
