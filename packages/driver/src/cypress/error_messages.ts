@@ -983,6 +983,25 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
+    switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, origins }) {
+      return stripIndent`\
+
+        Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s): \`${origins.join(', ')}\`.
+
+        Your page did not fire its \`load\` event within \`${ms}ms\`.
+
+        A cross origin request for \`${crossOriginUrl.href}\` was detected.
+
+        To handle cross origin requests, they must be immediately followed by a switchToDomain command:
+
+        \`cy.switchToDomain('${crossOriginUrl.origin}', () => { <cross origin commands go here> })\`
+
+        If the cross origin was an intermediary state, You can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
+
+        Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
+
+        When this \`load\` event occurs, Cypress will continue running commands.`
+    },
   },
 
   net_stubbing: {

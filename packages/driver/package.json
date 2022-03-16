@@ -23,6 +23,7 @@
     "@packages/runner": "0.0.0-development",
     "@packages/runner-shared": "0.0.0-development",
     "@packages/server": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@sinonjs/fake-timers": "8.1.0",
