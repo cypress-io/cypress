@@ -425,7 +425,7 @@ const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }) => {
 
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
-  const needsMultiDomainHandling = determineIfNeedsMultiDomainHandling(this)
+  const needsMultiDomainHandling = this.config.experimentalMultiDomain && determineIfNeedsMultiDomainHandling(this)
   const browser = this.getCurrentBrowser()
   const url = new URL(this.req.proxiedUrl)
   const isLocalhost = uri.isLocalhost(url)

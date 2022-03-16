@@ -655,6 +655,31 @@ describe('http/response-middleware', function () {
         expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
       })
 
+      it('does not force SameSite=None if experimental flag is off', async function () {
+        const appendStub = sinon.stub()
+        const ctx = prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'text/html',
+              'set-cookie': 'cookie=value',
+            },
+          },
+          req: {
+            isAUTFrame: true,
+          },
+          res: {
+            append: appendStub,
+          },
+          config: {
+            experimentalMultiDomain: false,
+          },
+        })
+
+        await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+      })
+
       describe('cookie modification specifics - not Firefox', function () {
         makeVarieties('SameSite=None; Secure', 'Secure; SameSite=None').forEach(([input, output]) => {
           it(`${input} -> ${output}`, async function () {
@@ -738,6 +763,9 @@ describe('http/response-middleware', function () {
           pipe () {
             return { on () {} }
           },
+        },
+        config: {
+          experimentalMultiDomain: true,
         },
         getCurrentBrowser () {
           return { family: 'chromium' }
