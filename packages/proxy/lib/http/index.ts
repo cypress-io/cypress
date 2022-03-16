@@ -18,6 +18,7 @@ import type { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
 const debugRequests = Debug('cypress-verbose:proxy:http')
 
@@ -43,6 +44,7 @@ type HttpMiddlewareCtx<T> = {
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
+  getCurrentBrowser: () => Browser
   getPreRequest: (cb: GetPreRequestCb) => void
   getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
   setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
@@ -57,6 +59,7 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
+  getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'>
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
@@ -196,6 +199,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
+  getCurrentBrowser: () => Browser
   getFileServerToken: () => string
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
@@ -213,6 +217,7 @@ export class Http {
 
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
+    this.getCurrentBrowser = opts.getCurrentBrowser
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
     this.middleware = opts.middleware
@@ -233,6 +238,7 @@ export class Http {
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      getCurrentBrowser: this.getCurrentBrowser,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,

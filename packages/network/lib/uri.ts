@@ -6,7 +6,7 @@
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
 import _ from 'lodash'
-import url from 'url'
+import url, { URL } from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -86,4 +86,16 @@ export function addDefaultPort (urlToCheck) {
 
 export function getPath (urlToCheck) {
   return url.parse(urlToCheck).path
+}
+
+const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
+
+export function isLocalhost (url: URL) {
+  return Boolean(
+    url.hostname === 'localhost'
+  // [::1] is the IPv6 localhost address.
+  || url.hostname === '[::1]'
+  // 127.0.0.0/8 are considered localhost for IPv4.
+  || url.hostname.match(localhostIPRegex),
+  )
 }

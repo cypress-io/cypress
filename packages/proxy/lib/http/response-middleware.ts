@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import charset from 'charset'
 import type { CookieOptions } from 'express'
-import { cors, concatStream, httpUtils } from '@packages/network'
+import { cors, concatStream, httpUtils, uri } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
 import type { HttpMiddleware } from '.'
@@ -11,6 +11,7 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
+import { URL } from 'url'
 
 export type ResponseMiddleware = HttpMiddleware<{
   /**
@@ -368,49 +369,71 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const determineIfNeedsMultiDomainHandling = (ctx) => {
+  const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
+
+  // A cookie needs multi-domain handling if it's an AUT request and
+  // either the request itself is cross-origin or the origins between
+  // requests don't match, since the browser won't set them in that
+  // case and if it's secondary-domain -> primary-domain, we don't
+  // recognize the request as cross-origin
+  return (
+    !!ctx.req.isAUTFrame &&
+    (
+      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
+      || !reqMatchesOriginPolicy(ctx.req, ctx.getRemoteState())
+    )
+  )
+}
+
 const cookieSameSiteRegex = /SameSite=(\w+)/i
 const cookieSecureRegex = /Secure/i
+const cookieSecureSemicolonRegex = /;\s*Secure/i
 
-const forceSameSiteNone = (cookie) => {
+const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }) => {
+  debug('original cookie: %s', cookie)
+
   if (cookieSameSiteRegex.test(cookie)) {
-    debug('set cookie SameSite=None')
+    debug('change cookie to SameSite=None')
     cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
   } else {
-    debug('add cookie SameSite=None')
+    debug('add SameSite=None to cookie')
     cookie += '; SameSite=None'
   }
 
-  // Secure is required browsers for SameSite=None to take effect
-  if (!cookieSecureRegex.test(cookie)) {
-    debug('add cookie Secure')
+  const isFirefox = browser.family === 'firefox'
+
+  // Secure is required in Chrome for SameSite=None cookies to be set, but if
+  // in Firefox and http://localhost, it causes the cookie not to be set,
+  // so we need to ensure there is no Secure in that case
+  if (cookieSecureRegex.test(cookie)) {
+    if (isFirefox && isLocalhost && url.protocol === 'http:') {
+      debug('remove Secure from cookie')
+      cookie = cookie.replace(cookieSecureSemicolonRegex, '')
+    }
+  } else if (!isFirefox || url.protocol === 'https:') {
+    debug('add Secure to cookie')
     cookie += '; Secure'
   }
+
+  debug('resulting cookie: %s', cookie)
 
   return cookie
 }
 
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
-  // for the sake of multi-domain, force SameSite=None when it's an AUT
-  // request and either the request itself is cross-origin or the origins
-  // between requests don't match, since the browser won't set them in that
-  // case and if it's secondary-domain -> primary-domain, we don't recognize
-  // the request as cross-origin
-  const previousAUTRequestUrl = this.getPreviousAUTRequestUrl()
-  const shouldForceSameSiteNone = (
-    !!this.req.isAUTFrame &&
-    (
-      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, this.req.proxiedUrl))
-      || !reqMatchesOriginPolicy(this.req, this.getRemoteState())
-    )
-  )
+  const needsMultiDomainHandling = determineIfNeedsMultiDomainHandling(this)
+  const browser = this.getCurrentBrowser()
+  const url = new URL(this.req.proxiedUrl)
+  const isLocalhost = uri.isLocalhost(url)
 
-  debug('force SameSite=None?', shouldForceSameSiteNone)
+  debug('force SameSite=None?', needsMultiDomainHandling)
 
   if (cookies) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
-      if (shouldForceSameSiteNone) {
-        cookie = forceSameSiteNone(cookie)
+      if (needsMultiDomainHandling) {
+        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url })
       }
 
       try {

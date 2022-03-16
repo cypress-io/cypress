@@ -25,10 +25,7 @@
       const username = document.querySelector('[data-cy=username]').value
       const sameSite = document.querySelector('[data-cy=sameSite]').value
       const secure = document.querySelector('[data-cy=secure]').checked
-      // TODO: Use the following url instead once the multi-domain command
-      // has support for specifying http/https
-      // let url = `https://www.foobar.com:3502/cookie-login?redirect=${redirect}&username=${username}`
-      let url = `${redirect}?username=${username}`
+      let url = `https://www.foobar.com:3502/cookie-login?redirect=${redirect}&username=${username}`
 
       if (sameSite) {
         url += `&sameSite=${sameSite}`

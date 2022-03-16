@@ -3,8 +3,10 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
-import { cors } from '@packages/network'
+import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
+import { URL } from 'url'
+
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
@@ -238,9 +240,15 @@ export class CdpAutomation {
       urls: [url],
     })
     .then((result: Protocol.Network.GetCookiesResponse) => {
+      const isLocalhost = uri.isLocalhost(new URL(url))
+
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {
-        return !(url.startsWith('http:') && cookie.secure)
+        // Chrome returns all cookies for a URL, even if they wouldn't normally
+        // be sent with a request. This standardizes it by filtering out ones
+        // that are secure but not on a secure context (localhost is a secure
+        // context, so it is excepted even if it's http)
+        return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
       })
     })
   }

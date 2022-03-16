@@ -200,9 +200,6 @@ const createApp = (port) => {
     return additions
   }
 
-  // NOTE: /cookie-login & /verify-cookie-login are currently bypassed in the
-  // multi-domain test they're meant for until there's support for specifying
-  // http/https in the multi-domain command
   app.get('/cookie-login', (req, res) => {
     const { username, redirect } = req.query
 
@@ -237,6 +234,10 @@ const createApp = (port) => {
   app.get('/login', (req, res) => {
     const { username } = req.query
 
+    if (!username) {
+      return res.send('<html><body><h1>Must specify username to log in</h1></body></html>')
+    }
+
     // can't use res.cookie() because it won't allow setting an invalid
     // SameSite value, which we want to test
     res
@@ -246,9 +247,7 @@ const createApp = (port) => {
 
   app.get('/welcome', (req, res) => {
     if (!req.cookies.user) {
-      return res
-      .status(403)
-      .send('<html><body><h1>No user found</h1></body></html>')
+      return res.send('<html><body><h1>No user found</h1></body></html>')
     }
 
     res.send(`<html><body><h1>Welcome, ${req.cookies.user}!</h1></body></html>`)
