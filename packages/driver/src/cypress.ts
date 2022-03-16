@@ -104,6 +104,9 @@ class $Cypress {
   emit: any
   emitThen: any
   emitMap: any
+  multiDomainCommunicator: PrimaryDomainCommunicator
+  specBridgeCommunicator: SpecBridgeDomainCommunicator
+  isMultiDomain: boolean
 
   // attach to $Cypress to access
   // all of the constructors
@@ -152,6 +155,7 @@ class $Cypress {
     this.onSpecReady = null
     this.multiDomainCommunicator = new PrimaryDomainCommunicator()
     this.specBridgeCommunicator = new SpecBridgeDomainCommunicator()
+    this.isMultiDomain = false
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
