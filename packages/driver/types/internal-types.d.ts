@@ -33,6 +33,7 @@ declare namespace Cypress {
     // But in many cases like cy/commands/screenshot.ts, it's called with a timeout id string.
     // We should decide whether calling with id is correct or not.
     clearTimeout: <T>(timeoutId?: string) => Cypress.Chainable<T>
+    isStable: (boolean, string) => void
   }
 
   interface Cypress {
@@ -49,10 +50,12 @@ declare namespace Cypress {
     utils: CypressUtils
     state: State
     events: Events
-    emit: ((event: string, payload?: any) => void)
+    emit: (event: string, payload?: any) => void
     multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
     specBridgeCommunicator: import('../src/multi-domain/communicator').SpecBridgeDomainCommunicator
     mocha: $Mocha
+    configure: (config: Cypress.ObjectLike) => void
+    isMultiDomain: boolean
   }
 
   interface CypressUtils {

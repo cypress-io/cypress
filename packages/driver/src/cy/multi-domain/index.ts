@@ -4,6 +4,18 @@ import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
+import { $Location } from '../../cypress/location'
+
+const reHttp = /^https?:\/\//
+
+const normalizeDomain = (domain) => {
+  // add the protocol if it's not present
+  if (!reHttp.test(domain)) {
+    domain = `https://${domain}`
+  }
+
+  return $Location.normalize(domain)
+}
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -17,22 +29,25 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     Cypress.backend('ready:for:domain')
   }
 
-  communicator.on('delaying:html', () => {
+  communicator.on('delaying:html', (request) => {
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating multi-domain
     // @ts-ignore
-    cy.isAnticipatingMultiDomain(true)
+    cy.isAnticipatingMultiDomainFor(request.href)
 
-    // cy.isAnticipatingMultiDomain(true) will free the queue to move forward.
+    // cy.isAnticipatingMultiDomainFor(href) will free the queue to move forward.
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(sendReadyForDomain, 2000)
   })
 
   Commands.addAll({
-    switchToDomain<T> (domain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+    switchToDomain<T> (originOrDomain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+      // store the invocation stack in the case that `switchToDomain` errors
+      communicator.userInvocationStack = state('current').get('userInvocationStack')
+
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
       // domain run, so it can't have its own timeout
@@ -56,7 +71,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const log = Cypress.log({
         name: 'switchToDomain',
         type: 'parent',
-        message: domain,
+        message: originOrDomain,
         end: true,
       })
 
@@ -68,8 +83,18 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       validator.validate({
         callbackFn,
         data,
-        domain,
+        originOrDomain,
       })
+
+      // use URL to ensure unicode characters are correctly handled
+      const url = new URL(normalizeDomain(originOrDomain)).toString()
+      const location = $Location.create(url)
+
+      validator.validateLocation(location, originOrDomain)
+
+      const domain = location.superDomain
+
+      cy.state('latestActiveDomain', domain)
 
       return new Bluebird((resolve, reject) => {
         const cleanup = () => {
@@ -84,10 +109,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         const _reject = (err) => {
           cleanup()
           log.error(err)
-          if (typeof err === 'object') {
-            err.onFail = () => {}
-          }
-
           reject(err)
         }
 
@@ -99,10 +120,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           _resolve({ subject, unserializableSubjectType })
         }
 
-        communicator.once('sync:globals', ({ config, env, state }) => {
+        communicator.once('sync:globals', ({ config, env }) => {
           syncConfigToCurrentDomain(config)
           syncEnvToCurrentDomain(env)
-          Cypress.state(state)
         })
 
         communicator.once('ran:domain:fn', (details) => {
@@ -142,8 +162,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               env: preprocessEnv(Cypress.env()),
             })
 
-            state('readyForMultiDomain', true)
-
             // once the secondary domain page loads, send along the
             // user-specified callback to run in that domain
             try {
@@ -161,6 +179,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: state('hookId'),
                   hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
+                  multiDomainBaseUrl: location.origin,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
@@ -174,14 +193,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               reject(wrappedErr)
             } finally {
               // @ts-ignore
-              cy.isAnticipatingMultiDomain(false)
+              cy.isAnticipatingMultiDomainFor(undefined)
             }
           }
         })
 
-        // this signals to the runner to create the spec bridge for
-        // the specified domain
-        communicator.emit('expect:domain', domain)
+        // this signals to the runner to create the spec bridge for the specified origin policy
+        communicator.emit('expect:domain', location)
       })
     },
   })

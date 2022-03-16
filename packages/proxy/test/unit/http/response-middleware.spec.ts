@@ -181,6 +181,7 @@ describe('http/response-middleware', function () {
         },
         req: {
           isAUTFrame: true,
+          proxiedUrl: 'protocol://host/originalUrl',
         },
         config: {
           experimentalMultiDomain: true,
@@ -189,7 +190,7 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'protocol://host/originalUrl' })
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
@@ -206,6 +207,7 @@ describe('http/response-middleware', function () {
             ],
           },
           isAUTFrame: true,
+          proxiedUrl: 'protocol://host/originalUrl',
         },
         config: {
           experimentalMultiDomain: true,
@@ -214,7 +216,7 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'protocol://host/originalUrl' })
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 

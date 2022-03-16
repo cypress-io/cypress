@@ -1,11 +1,30 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain - uncaught errors', { experimentalSessionSupport: true }, () => {
+// FIXME: sync thrown errors inside of multi-domain cause cross origin errors in firefox when using experimentalSessionSupport
+// This is likely due to cypress being re declared while on a cross origin iframe before the application navigates back.
+// To reproduce, just add "experimentalSessionSupport" = true into the describe block below
+
+// @ts-ignore
+// TODO: run in firefox too after we fix error serialization for firefox.
+describe('multi-domain - uncaught errors', { browser: '!firefox' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="errors-link"]').click()
   })
 
   describe('sync errors', () => {
+    it('appropriately reports negative assertions', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('AssertionError')
+        expect(err.message).to.include('expected true to be false')
+        done()
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.then(() => {
+          expect(true).to.be.false
+        })
+      })
+    })
+
     it('fails the current test/command if sync errors are thrown from the switchToDomain callback', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
@@ -29,7 +48,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('.trigger-sync-error').click()
       })
     })
@@ -42,7 +61,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
 
       cy.on('fail', failureSpy)
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.on('uncaught:exception', () => false)
         cy.get('.trigger-sync-error').click()
       }).then(() => {
@@ -63,7 +82,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => true)
         cy.get('.trigger-sync-error').click()
       })
@@ -72,7 +91,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
     // if we mutate the error, the app's listeners for 'error' or
     // 'unhandledrejection' will have our wrapped error instead of the original
     it('original error is not mutated for "error" in the switchToDomain', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-sync-error').click()
@@ -92,7 +111,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -123,7 +142,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.get('.trigger-async-error').click()
 
         // add the cy.wait here to keep commands streaming in,
@@ -140,7 +159,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
 
       cy.on('fail', failureSpy)
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
         cy.get('.trigger-async-error').click()
       }).then(() => {
@@ -158,7 +177,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -170,7 +189,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
 
   describe('unhandled rejections', () => {
     it('unhandled rejection triggers uncaught:exception and has promise as third argument', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         const r = cy.state('runnable')
 
         const afterUncaughtException = new Promise<void>((resolve) => {
@@ -194,7 +213,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
     })
 
     it('original error is not mutated for "unhandledrejection"', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-unhandled-rejection').click()
@@ -213,7 +232,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
 
         // add the cy.wait here to keep commands streaming in, forcing the
@@ -232,7 +251,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
       })
 
@@ -240,21 +259,222 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true },
     })
   })
 
-  it('does not fail if thrown custom error has a readonly name', (done) => {
-    cy.once('fail', (err) => {
-      expect(err.name).to.include('CustomError')
-      expect(err.message).to.include('custom error')
+  describe('unserializable errors', () => {
+    it('handles users throwing dom elements', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('CypressError')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        done()
+      })
 
-      done()
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw document.createElement('h1')
+      })
     })
 
-    cy.switchToDomain('foobar.com', () => {
-      cy.then(() => {
-        throw new class CustomError extends Error {
+    it('handles users throwing functions', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('CypressError')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw () => undefined
+      })
+    })
+
+    it('handles users throwing symbols', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('CypressError')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw Symbol('foo')
+      })
+    })
+
+    it('handles users throwing promises', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('CypressError')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw new Promise(() => {})
+      })
+    })
+  })
+
+  describe('serializable errors', () => {
+    it('handles users throwing complex errors/classes', (done) => {
+      cy.on('fail', (err: any) => {
+        expect(err.name).to.equal('CustomError')
+        expect(err.message).to.equal('custom error')
+        expect(err._name).to.equal('CustomError')
+        expect(err.foo).to.equal('bar')
+
+        const { writable } = Object.getOwnPropertyDescriptor(err, 'name') as PropertyDescriptor
+
+        // After serialization, read-only properties are now writable
+        expect(writable).to.be.true
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        class CustomError extends Error {
+          private _name = 'CustomError'
           get name () {
-            return 'CustomError'
+            return this._name
           }
-        }('custom error')
+          set name (name: string) {
+            this._name = name
+          }
+        }
+
+        const customErrorInstance = new CustomError('custom error')
+
+        // @ts-ignore
+        customErrorInstance.foo = 'bar'
+
+        const { writable } = Object.getOwnPropertyDescriptor(CustomError, 'name') as PropertyDescriptor
+
+        // make sure the name property is read-only before serializing it through postMessage
+        expect(writable).to.be.false
+
+        cy.then(() => {
+          throw customErrorInstance
+        })
+      })
+    })
+
+    it('handles users throwing complex objects/classes', (done) => {
+      cy.on('fail', (err: any) => {
+        expect(err.customMethod).to.be.undefined
+        expect(err.customProp).to.equal('foobar')
+        expect(err._metasyntaticList).to.deep.equal(['foo', 'bar'])
+        expect(err.metasyntaticList).to.deep.equal(['foo', 'bar'])
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        class FooBar {
+          private _metasyntaticList = ['foo']
+          get metasyntaticList (): string[] {
+            return this._metasyntaticList
+          }
+          set metasyntaticList (itemsToAdd: string[]) {
+            this._metasyntaticList = this._metasyntaticList.concat(itemsToAdd)
+          }
+        }
+
+        const foobarInstance: any = new FooBar
+
+        foobarInstance.customProp = 'foobar'
+        foobarInstance.metasyntaticList = ['bar']
+        foobarInstance.customMethod = () => undefined
+
+        throw foobarInstance
+      })
+    })
+
+    it('handles users throwing strings', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('Error')
+        expect(err.message).to.equal(`oops`)
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw 'oops'
+      })
+    })
+
+    it('handles users throwing arrays', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('Error')
+        expect(err.message).to.equal('why would anyone do this?,this is odd')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw ['why would anyone do this?', 'this is odd']
+      })
+    })
+
+    it('handles users throwing numbers', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('Error')
+        expect(err.message).to.equal('2')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw 2
+      })
+    })
+
+    it('handles users throwing booleans', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('Error')
+        expect(err.message).to.equal('true')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw true
+      })
+    })
+
+    it('handles users throwing null', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('Error')
+        expect(err.message).to.equal('null')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw null
+      })
+    })
+
+    it('handles users throwing undefined', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('Error')
+        expect(err.message).to.equal('undefined')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw undefined
+      })
+    })
+
+    it('handles throwing of arbitrary data types that are serializable but cannot be mapped to an error', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.equal('CypressError')
+        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        throw new Date()
       })
     })
   })

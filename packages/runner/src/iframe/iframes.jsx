@@ -170,12 +170,12 @@ export default class Iframes extends Component {
     return $autIframe
   }
 
-  _addCrossDomainIframe = (domain) => {
-    const id = `Spec Bridge: ${domain}`
+  _addCrossDomainIframe = (location) => {
+    const id = `Spec Bridge: ${location.superDomain}`
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
-      this.props.eventManager.notifyCrossDomainBridgeReady(domain)
+      this.props.eventManager.notifyCrossDomainBridgeReady(location.superDomain)
 
       return
     }
@@ -186,13 +186,7 @@ export default class Iframes extends Component {
       // container since it needs to match the size of the top window for screenshots
       $container: $(document.body),
       className: 'spec-bridge-iframe',
-      // FIXME: If a site can serve both http and https and if the AUT visits
-      // https, the spec bridge will end up on http and the AUT on https,
-      // meaning they won't be able to communicate. Need ability for
-      // multi-domain command to specify http or https and utilize that here
-      // (i.e use `https://${domain}` or `http://${domain}` instead of `//${domain}`)
-      // TODO: Update this to the correct origin once we decide on string vs object
-      src: `//${domain}:3500/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,
+      src: `${location.originPolicy}/${this.props.config.namespace}/multi-domain-iframes`,
     })
   }
 

@@ -1,58 +1,11 @@
-import clone from 'clone'
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
-import _ from 'lodash'
-import $dom from '../dom'
 import { preprocessConfig, preprocessEnv } from '../util/config'
+import { preprocessForSerialization, reifyCrossDomainError } from '../util/serialization'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
-
-declare global {
-  interface Window { specBridgeDomain: string }
-}
-
-const preprocessErrorForPostMessage = (value) => {
-  const { isDom } = $dom
-
-  if (_.isError(value)) {
-    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
-
-    return {
-      ... serializableError,
-      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
-      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
-      name: value.name,
-      message: value.message,
-      stack: value.stack,
-    }
-  }
-
-  if (_.isArray(value)) {
-    return _.map(value, preprocessErrorForPostMessage)
-  }
-
-  if (isDom(value)) {
-    return $dom.stringify(value, 'short')
-  }
-
-  if (_.isFunction(value)) {
-    return value.toString()
-  }
-
-  if (_.isObject(value)) {
-    // clone to nuke circular references
-    // and blow away anything that throws
-    try {
-      return _.mapValues(clone(value), preprocessErrorForPostMessage)
-    } catch (err) {
-      return null
-    }
-  }
-
-  return value
-}
 
 /**
  * Primary domain communicator. Responsible for sending/receiving events throughout
@@ -68,6 +21,7 @@ const preprocessErrorForPostMessage = (value) => {
 export class PrimaryDomainCommunicator extends EventEmitter {
   private windowReference: Window | undefined
   private crossDomainDriverWindows: {[key: string]: Window} = {}
+  userInvocationStack?: string
 
   /**
    * Initializes the event handler to receive messages from the spec bridge.
@@ -93,6 +47,10 @@ export class PrimaryDomainCommunicator extends EventEmitter {
         // communicate back to the iframe
         if (messageName === 'bridge:ready' && source) {
           this.crossDomainDriverWindows[data.domain] = source as Window
+        }
+
+        if (data?.data?.err) {
+          data.data.err = reifyCrossDomainError(data.data.err, this.userInvocationStack as string)
         }
 
         this.emit(messageName, data.data, data.domain)
@@ -143,16 +101,32 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
-  private handleSubjectAndErr = (data: any = {}, send: (data: any) => void) => {
-    const { subject, err, ...rest } = data
+  private handleSubjectAndErr = (data: Cypress.ObjectLike = {}, send: (data: Cypress.ObjectLike) => void) => {
+    let { subject, err, ...rest } = data
 
-    if (!subject && !err) {
+    // check to see if the 'err' key is defined, and if it is, we have an error of any type
+    const hasMultiDomainError = !!Object.getOwnPropertyDescriptor(data, 'err')
+
+    if (!subject && !hasMultiDomainError) {
       return send(rest)
     }
 
     try {
+      if (hasMultiDomainError) {
+        try {
+          // give the `err` truthiness if it's a falsey value like undefined/null/false
+          if (!err) {
+            err = new Error(`${err}`)
+          }
+
+          err = preprocessForSerialization(err)
+        } catch (e) {
+          err = e
+        }
+      }
+
       // We always want to make sure errors are posted, so clean it up to send.
-      send({ ...rest, subject, err: preprocessErrorForPostMessage(err) })
+      send({ ...rest, subject, err })
     } catch (err: any) {
       if (subject && err.name === 'DataCloneError') {
         // Send the type of object that failed to serialize.
@@ -170,9 +144,6 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
       env: preprocessEnv(Cypress.env()),
-      state: {
-        hasVisitedAboutBlank: Cypress.state('hasVisitedAboutBlank'),
-      },
     })
   }
 
@@ -196,18 +167,18 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   /**
    * Events to be sent to the primary communicator instance.
    * @param {string} event - the name of the event to be sent.
-   * @param {any} data - any meta data to be sent with the event.
+   * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: object, options = { syncGlobals: false }) {
-    debug('<= to Primary %s %o %s', event, data, window.specBridgeDomain)
+  toPrimary (event: string, data?: Cypress.ObjectLike, options = { syncGlobals: false }) {
+    debug('<= to Primary %s %o %s', event, data, document.domain)
 
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
-    this.handleSubjectAndErr(data, (data: any) => {
+    this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
       this.windowReference.top.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,
-        domain: window.specBridgeDomain,
+        domain: document.domain,
       }, '*')
     })
   }

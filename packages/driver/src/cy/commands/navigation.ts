@@ -14,6 +14,7 @@ const debug = debugFn('cypress:driver:navigation')
 
 let id = null
 let previousDomainVisited: boolean = false
+let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
 
@@ -33,7 +34,7 @@ const reset = (test: any = {}) => {
 
   // make sure we reset that we haven't
   // visited about blank again
-  Cypress.state('hasVisitedAboutBlank', false)
+  hasVisitedAboutBlank = false
 
   currentlyVisitingAboutBlank = false
 
@@ -95,14 +96,6 @@ const specifyFileByRelativePath = (url, log) => {
 }
 
 const aboutBlank = (cy, win) => {
-  if (Cypress.state('isMultiDomain')) {
-    return new Promise((resolve) => {
-      Cypress.specBridgeCommunicator.once('visit:about:blank:end', resolve)
-
-      Cypress.specBridgeCommunicator.toPrimary('visit:about:blank')
-    })
-  }
-
   return new Promise((resolve) => {
     cy.once('window:load', resolve)
 
@@ -454,7 +447,7 @@ const normalizeOptions = (options) => {
   .pick(REQUEST_URL_OPTS)
   .extend({
     timeout: options.responseTimeout,
-    isMultiDomain: !!Cypress.state('isMultiDomain'),
+    isMultiDomain: Cypress.isMultiDomain,
   })
   .value()
 }
@@ -492,14 +485,6 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('form:submitted', (e) => {
     formSubmitted(Cypress, e)
-  })
-
-  Cypress.multiDomainCommunicator.on('visit:about:blank', (_, domain) => {
-    currentlyVisitingAboutBlank = true
-    aboutBlank(cy, Cypress.state('window')).then(() => {
-      currentlyVisitingAboutBlank = false
-      Cypress.multiDomainCommunicator.toSpecBridge(domain, 'visit:about:blank:end')
-    })
   })
 
   const visitFailedByErr = (err, url, fn) => {
@@ -842,10 +827,14 @@ export default (Commands, Cypress, cy, state, config) => {
 
       url = $Location.normalize(url)
 
-      const baseUrl = config('baseUrl')
+      if (Cypress.isMultiDomain) {
+        url = $Location.qualifyWithBaseUrl(Cypress.state('multiDomainBaseUrl'), url)
+      } else {
+        const baseUrl = config('baseUrl')
 
-      if (baseUrl) {
-        url = $Location.qualifyWithBaseUrl(baseUrl, url)
+        if (baseUrl) {
+          url = $Location.qualifyWithBaseUrl(baseUrl, url)
+        }
       }
 
       const qs = options.qs
@@ -921,7 +910,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // if this is multi-domain, we need to tell the primary to change
           // the AUT iframe since we don't have access to it
-          if (Cypress.state('isMultiDomain')) {
+          if (Cypress.isMultiDomain) {
             return Cypress.specBridgeCommunicator.toPrimary('visit:url', { url })
           }
 
@@ -1092,7 +1081,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // if we are in multi-domain and the origin policies weren't the same,
           // we need to throw an error since the user tried to visit a new
           // domain which isn't allowed within a multi-domain block
-          if (Cypress.state('isMultiDomain') && win) {
+          if (Cypress.isMultiDomain && win) {
             // TODO: need a better error message
             return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
           }
@@ -1212,8 +1201,11 @@ export default (Commands, Cypress, cy, state, config) => {
         // so that we nuke the previous state. subsequent
         // visits will not navigate to about:blank so that
         // our history entries are intact
-        if (!Cypress.state('hasVisitedAboutBlank')) {
-          Cypress.state('hasVisitedAboutBlank', true)
+        // skip for multi-domain since multi-domain requires
+        // experimentalSessionSupport which already visits
+        // about:blank between tests
+        if (!hasVisitedAboutBlank && !Cypress.isMultiDomain) {
+          hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 
           return aboutBlank(cy, win)

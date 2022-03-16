@@ -1693,8 +1693,8 @@ export default {
     experiment_not_enabled: {
       message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
     },
-    invalid_domain_argument: {
-      message: `${cmd('switchToDomain')} requires the first argument to be either 'localhost', an ip address ('127.0.0.1') or a domain name ('example.com'). Domain names must not contain sub domains, ports or paths. You passed: \`{{arg}}\``,
+    invalid_origin_argument: {
+      message: `${cmd('switchToDomain')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
     },
     invalid_data_argument: {
       message: `${cmd('switchToDomain')} requires the 'data' argument to be an array. You passed: \`{{arg}}\``,
@@ -1735,6 +1735,10 @@ export default {
     failed_to_serialize_symbol: {
       message: stripIndent`\
       ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
+    },
+    failed_to_serialize_or_map_thrown_value: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
     // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
     route: {

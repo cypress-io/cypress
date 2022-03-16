@@ -1911,7 +1911,7 @@ declare namespace Cypress {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    switchToDomain(domain: string, fn: () => void): Chainable
+    switchToDomain(originOrDomain: string, fn: () => void): Chainable
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/switchToDomain
@@ -1921,7 +1921,7 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    switchToDomain<T>(domain: string, data: T[], fn: (data: T[]) => void): Chainable
+    switchToDomain<T>(originOrDomain: string, data: T[], fn: (data: T[]) => void): Chainable
 
     /**
      * Run a task in Node via the plugins file.

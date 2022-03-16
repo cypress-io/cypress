@@ -1,75 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', { experimentalSessionSupport: true }, () => {
-  beforeEach(() => {
-    cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
-  })
-
-  it('runs commands in secondary domain', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy
-      .get('[data-cy="dom-check"]')
-      .invoke('text')
-      .should('equal', 'From a secondary domain')
-    })
-
-    cy.log('after switchToDomain')
-  })
-
-  it('passes runnable state to the secondary domain', () => {
-    const runnable = cy.state('runnable')
-    const expectedRunnable = {
-      clearTimeout: null,
-      isPending: null,
-      resetTimeout: null,
-      timeout: null,
-      id: runnable.id,
-      _currentRetry: runnable._currentRetry,
-      _timeout: 4000,
-      type: 'test',
-      title: 'passes runnable state to the secondary domain',
-      titlePath: [
-        'multi-domain',
-        'passes runnable state to the secondary domain',
-      ],
-      parent: {
-        id: runnable.parent.id,
-        type: 'suite',
-        title: 'multi-domain',
-        titlePath: [
-          'multi-domain',
-        ],
-        parent: {
-          id: runnable.parent.parent.id,
-          type: 'suite',
-          title: '',
-          titlePath: undefined,
-          ctx: {},
-        },
-        ctx: {},
-      },
-      ctx: {},
-    }
-
-    cy.switchToDomain('foobar.com', [expectedRunnable], ([expectedRunnable]) => {
-      const actualRunnable = cy.state('runnable')
-
-      expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
-      expectedRunnable.titlePath = actualRunnable.titlePath
-
-      expect(actualRunnable.title).to.equal(expectedRunnable.title)
-      expect(actualRunnable.id).to.equal(expectedRunnable.id)
-      expect(actualRunnable.ctx).to.deep.equal(expectedRunnable.ctx)
-      expect(actualRunnable._timeout).to.equal(expectedRunnable._timeout)
-      expect(actualRunnable.type).to.equal(expectedRunnable.type)
-      expect(actualRunnable.callback).to.exist
-      expect(actualRunnable.timeout).to.exist
-      expect(actualRunnable.parent.title).to.equal(expectedRunnable.parent.title)
-      expect(actualRunnable.parent.type).to.equal(expectedRunnable.parent.type)
-      // expect(actualRunnable).to.deep.equal(expectedRunnable)
-    })
-  })
-
   it('passes viewportWidth/Height state to the secondary domain', () => {
     const expectedViewport = [320, 480]
 
@@ -79,145 +9,220 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       expect(primaryViewport).to.deep.equal(expectedViewport)
     })
 
-    cy.switchToDomain('foobar.com', [expectedViewport], ([expectedViewport]) => {
+    cy.visit('/fixtures/multi-domain.html')
+    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+
+    cy.switchToDomain('http://foobar.com:3500', [expectedViewport], ([expectedViewport]) => {
       const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
 
       expect(secondaryViewport).to.deep.equal(expectedViewport)
     })
   })
 
-  it('handles querying nested elements', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy
-      .get('form button')
-      .invoke('text')
-      .should('equal', 'Submit')
+  context('withBeforeEach', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/multi-domain.html')
+      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
     })
 
-    cy.log('after switchToDomain')
-  })
+    it('runs commands in secondary domain', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy
+        .get('[data-cy="dom-check"]')
+        .invoke('text')
+        .should('equal', 'From a secondary domain')
+      })
 
-  it('sets up window.Cypress in secondary domain', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy
-      .get('[data-cy="cypress-check"]')
-      .invoke('text')
-      .should('equal', 'Has window.Cypress')
+      cy.log('after switchToDomain')
     })
-  })
 
-  describe('data argument', () => {
-    it('passes object to callback function', () => {
-      cy.switchToDomain('foobar.com', [{ foo: 'foo', bar: 'bar' }], ([{ foo, bar }]) => {
-        expect(foo).to.equal('foo')
-        expect(bar).to.equal('bar')
+    it('passes runnable state to the secondary domain', () => {
+      const runnable = cy.state('runnable')
+      const expectedRunnable = {
+        clearTimeout: null,
+        isPending: null,
+        resetTimeout: null,
+        timeout: null,
+        id: runnable.id,
+        _currentRetry: runnable._currentRetry,
+        _timeout: 4000,
+        type: 'test',
+        title: 'passes runnable state to the secondary domain',
+        titlePath: [
+          'multi-domain',
+          'withBeforeEach',
+          'passes runnable state to the secondary domain',
+        ],
+        parent: {
+          id: runnable.parent.id,
+          type: 'suite',
+          title: 'withBeforeEach',
+          titlePath: [
+            'withBeforeEach',
+          ],
+          parent: {
+            id: runnable.parent.parent.id,
+            type: 'suite',
+            title: '',
+            titlePath: undefined,
+            ctx: {},
+          },
+          ctx: {},
+        },
+        ctx: {},
+      }
+
+      cy.switchToDomain('http://foobar.com:3500', [expectedRunnable], ([expectedRunnable]) => {
+        const actualRunnable = cy.state('runnable')
+
+        expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
+        expectedRunnable.titlePath = actualRunnable.titlePath
+
+        expect(actualRunnable.title).to.equal(expectedRunnable.title)
+        expect(actualRunnable.id).to.equal(expectedRunnable.id)
+        expect(actualRunnable.ctx).to.deep.equal(expectedRunnable.ctx)
+        expect(actualRunnable._timeout).to.equal(expectedRunnable._timeout)
+        expect(actualRunnable.type).to.equal(expectedRunnable.type)
+        expect(actualRunnable.callback).to.exist
+        expect(actualRunnable.timeout).to.exist
+        expect(actualRunnable.parent.title).to.equal(expectedRunnable.parent.title)
+        expect(actualRunnable.parent.type).to.equal(expectedRunnable.parent.type)
       })
     })
 
-    it('passes array to callback function', () => {
-      cy.switchToDomain('foobar.com', ['foo', 'bar'], ([foo, bar]) => {
-        expect(foo).to.equal('foo')
-        expect(bar).to.equal('bar')
+    it('handles querying nested elements', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy
+        .get('form button')
+        .invoke('text')
+        .should('equal', 'Submit')
+      })
+
+      cy.log('after switchToDomain')
+    })
+
+    it('sets up window.Cypress in secondary domain', () => {
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy
+        .get('[data-cy="cypress-check"]')
+        .invoke('text')
+        .should('equal', 'Has window.Cypress')
       })
     })
 
-    it('passes string to callback function', () => {
-      cy.switchToDomain('foobar.com', ['foo'], ([foo]) => {
-        expect(foo).to.equal('foo')
-      })
-    })
-
-    it('passes number to callback function', () => {
-      cy.switchToDomain('foobar.com', [1], ([num]) => {
-        expect(num).to.equal(1)
-      })
-    })
-
-    it('passes boolean to callback function', () => {
-      cy.switchToDomain('foobar.com', [true], ([bool]) => {
-        expect(bool).to.be.true
-      })
-    })
-
-    it('passes mixed types to callback function', () => {
-      cy.switchToDomain('foobar.com', ['foo', 1, true], ([foo, num, bool]) => {
-        expect(foo).to.equal('foo')
-        expect(num).to.equal(1)
-        expect(bool).to.be.true
-      })
-    })
-  })
-
-  describe('errors', () => {
-    // TODO: Proper stack trace printing still needs to be addressed here
-    it('propagates secondary domain errors to the primary that occur within the test', () => {
-      return new Promise((resolve) => {
-        cy.on('fail', (e) => {
-          expect(e.message).to.equal('done is not defined')
-          resolve(undefined)
+    describe('data argument', () => {
+      it('passes object to callback function', () => {
+        cy.switchToDomain('http://foobar.com:3500', [{ foo: 'foo', bar: 'bar' }], ([{ foo, bar }]) => {
+          expect(foo).to.equal('foo')
+          expect(bar).to.equal('bar')
         })
+      })
 
-        cy.switchToDomain('foobar.com', () => {
+      it('passes array to callback function', () => {
+        cy.switchToDomain('http://foobar.com:3500', ['foo', 'bar'], ([foo, bar]) => {
+          expect(foo).to.equal('foo')
+          expect(bar).to.equal('bar')
+        })
+      })
+
+      it('passes string to callback function', () => {
+        cy.switchToDomain('http://foobar.com:3500', ['foo'], ([foo]) => {
+          expect(foo).to.equal('foo')
+        })
+      })
+
+      it('passes number to callback function', () => {
+        cy.switchToDomain('http://foobar.com:3500', [1], ([num]) => {
+          expect(num).to.equal(1)
+        })
+      })
+
+      it('passes boolean to callback function', () => {
+        cy.switchToDomain('http://foobar.com:3500', [true], ([bool]) => {
+          expect(bool).to.be.true
+        })
+      })
+
+      it('passes mixed types to callback function', () => {
+        cy.switchToDomain('http://foobar.com:3500', ['foo', 1, true], ([foo, num, bool]) => {
+          expect(foo).to.equal('foo')
+          expect(num).to.equal(1)
+          expect(bool).to.be.true
+        })
+      })
+    })
+
+    describe('errors', () => {
+    // TODO: Proper stack trace printing still needs to be addressed here
+      it('propagates secondary domain errors to the primary that occur within the test', () => {
+        return new Promise((resolve) => {
+          cy.on('fail', (e) => {
+            expect(e.message).to.equal('done is not defined')
+            resolve(undefined)
+          })
+
+          cy.switchToDomain('http://foobar.com:3500', () => {
           // done is not defined on purpose here as we want to test the error gets sent back to the primary domain correctly
           // @ts-ignore
-          done()
+            done()
+          })
         })
       })
-    })
 
-    it('propagates thrown errors in the secondary domain back to the primary w/ done', (done) => {
-      cy.on('fail', (e) => {
-        expect(e.message).to.equal('oops')
-        done()
-      })
-
-      cy.switchToDomain('foobar.com', () => {
-        throw 'oops'
-      })
-    })
-
-    it('propagates thrown errors in the secondary domain back to the primary w/o done', () => {
-      return new Promise((resolve) => {
+      it('propagates thrown errors in the secondary domain back to the primary w/ done', (done) => {
         cy.on('fail', (e) => {
           expect(e.message).to.equal('oops')
-          resolve(undefined)
+          done()
         })
 
-        cy.switchToDomain('foobar.com', () => {
+        cy.switchToDomain('http://foobar.com:3500', () => {
           throw 'oops'
         })
       })
-    })
 
-    it('receives command failures from the secondary domain', (done) => {
-      const timeout = 50
+      it('propagates thrown errors in the secondary domain back to the primary w/o done', () => {
+        return new Promise((resolve) => {
+          cy.on('fail', (e) => {
+            expect(e.message).to.equal('oops')
+            resolve(undefined)
+          })
 
-      cy.on('fail', (err) => {
-        expect(err.message).to.include(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
-        //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
-        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
-        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
-        done()
-      })
-
-      cy.switchToDomain('foobar.com', [timeout], ([timeout]) => {
-        cy.get('#doesnt-exist', {
-          timeout,
+          cy.switchToDomain('http://foobar.com:3500', () => {
+            throw 'oops'
+          })
         })
       })
-    })
 
-    it('receives command failures from the secondary domain with the default timeout', { defaultCommandTimeout: 50 }, (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
-        //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
-        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
-        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
-        done()
+      it('receives command failures from the secondary domain', (done) => {
+        const timeout = 50
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+          expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+          done()
+        })
+
+        cy.switchToDomain('http://foobar.com:3500', [timeout], ([timeout]) => {
+          cy.get('#doesnt-exist', {
+            timeout,
+          })
+        })
       })
 
-      cy.switchToDomain('foobar.com', () => {
-        cy.get('#doesnt-exist')
+      it('receives command failures from the secondary domain with the default timeout', { defaultCommandTimeout: 50 }, (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+          expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+          done()
+        })
+
+        cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.get('#doesnt-exist')
+        })
       })
     })
   })
@@ -231,7 +236,7 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
       win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('[data-cy="username"]').type('TJohnson')
       cy.get('[data-cy="login"]').click()
     })
@@ -244,7 +249,7 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
   it('uses switchToDomain twice', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
     cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-    cy.switchToDomain('idp.com', () => {
+    cy.switchToDomain('http://idp.com:3500', () => {
       cy.get('[data-cy="username"]').type('BJohnson')
       cy.get('[data-cy="login"]').click()
     }) // Trailing edge wait, waiting to return to the primary domain
@@ -260,7 +265,7 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
       win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
     })
 
-    cy.switchToDomain('foobar.com', () => {
+    cy.switchToDomain('http://foobar.com:3500', () => {
       cy.get('[data-cy="username"]').type('TJohnson')
       cy.get('[data-cy="login"]').click()
     }) // Trailing edge wait, waiting to return to the primary domain

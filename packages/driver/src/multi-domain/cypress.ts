@@ -9,7 +9,6 @@ import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
-import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
 import { handleLogs } from './events/logs'
 import { handleSocketEvents } from './events/socket'
@@ -21,30 +20,33 @@ import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import $Mocha from '../cypress/mocha'
 
-const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
+const createCypress = () => {
+  // @ts-ignore
+  const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
-specBridgeCommunicator.initialize(window)
+  Cypress.specBridgeCommunicator.initialize(window)
 
-specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
-  // eventually, setup will get called again on rerun and cy will
-  // get re-created
-  setup(config, env)
-})
+  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
+    // eventually, setup will get called again on rerun and cy will get re-created
+    setup(config, env)
+  })
+
+  Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
+}
 
 const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
-  // @ts-ignore
-  const Cypress = window.Cypress = $Cypress.create({
+  const Cypress = window.Cypress
+
+  Cypress.configure({
     ...cypressConfig,
     env,
-    __isMultiDomain: true,
     // never turn on video for multi-domain when syncing the config. This is handled in the primary.
     video: false,
+    isMultiDomain: true,
     // multi-domain cannot be used in component testing and is only valid for e2e.
     // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
     testingType: 'e2e',
-  }) as Cypress.Cypress
-
-  Cypress.specBridgeCommunicator.initialize(window)
+  })
 
   // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
@@ -71,13 +73,13 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   Cypress.isCy = cy.isCy
 
-  handleDomainFn(Cypress, cy, specBridgeCommunicator)
-  handleLogs(Cypress, specBridgeCommunicator)
+  handleDomainFn(Cypress, cy)
+  handleLogs(Cypress)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
-  handleMiscEvents(Cypress, cy, specBridgeCommunicator)
-  handleScreenshots(Cypress, specBridgeCommunicator)
-  handleTestEvents(Cypress, specBridgeCommunicator)
+  handleMiscEvents(Cypress, cy)
+  handleScreenshots(Cypress)
+  handleTestEvents(Cypress)
   handleUnsupportedAPIs(Cypress, cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
@@ -97,6 +99,12 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
   cy.overrides.wrapNativeMethods(autWindow)
 
+  const onWindowLoadPrimary = ({ url }) => {
+    // If the primary domain has indicated a load event, set stability to undefined, not true since the load happened in another domain.
+    cy.isStable(undefined, 'primary onload')
+    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+  }
+
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
     onError: handleErrorEvent(cy, 'app'),
@@ -113,6 +121,8 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
       Cypress.action('app:window:before:unload', e)
 
+      Cypress.specBridgeCommunicator.toPrimary('before:unload')
+
       // return undefined so our beforeunload handler
       // doesn't trigger a confirmation dialog
       return undefined
@@ -123,10 +133,16 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow)
 
-      specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
+      Cypress.specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
       cy.isStable(true, 'load')
+
+      // If load happened in this spec bridge stop listening.
+      Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
     },
     onUnload (e) {
+      // We only need to listen to this if we've started an unload event and the load happens in another spec bridge.
+      Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
+
       return Cypress.action('app:window:unload', e)
     },
     // TODO: this currently only works on hashchange, but needs work
@@ -150,4 +166,4 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   })
 }
 
-specBridgeCommunicator.toPrimary('bridge:ready')
+createCypress()
