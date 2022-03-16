@@ -1140,7 +1140,7 @@ export class ProjectLifecycleManager {
       // No need to handle
     }
 
-    if (typeof configFile === 'string') {
+    if (configFile) {
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
