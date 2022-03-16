@@ -39,7 +39,6 @@ query OpenBrowser {
     ...OpenBrowserList
   }
   ...WarningList
-  currentTestingType
 }
 `
 
@@ -48,7 +47,6 @@ const query = useQuery({ query: OpenBrowserDocument })
 gql`
 mutation OpenBrowser_ClearTestingType {
   clearCurrentTestingType {
-    currentTestingType
     currentProject {
       id
       currentTestingType
@@ -98,7 +96,7 @@ const resetLatestVersionTelemetry = useMutation(OpenBrowser_ResetLatestVersionTe
 
 const launching = ref(false)
 const launch = async () => {
-  const testingType = query.data.value?.currentTestingType
+  const testingType = query.data.value?.currentProject?.currentTestingType
 
   if (testingType && !launching.value) {
     launching.value = true

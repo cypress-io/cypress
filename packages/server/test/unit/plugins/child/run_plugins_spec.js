@@ -216,7 +216,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       })
     })
 
-    it('sends error if pluginsFile function rejects the promise', function (done) {
+    it('sends error if setupNodeEvents function rejects the promise', function (done) {
       const err = new Error('foo')
       const setupNodeEventsFn = sinon.stub().rejects(err)
 
