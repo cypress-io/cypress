@@ -139,7 +139,7 @@ export class ProjectDataSource {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
   }
 
-  async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
+  async specPatterns (): Promise<{
     specPattern?: string[]
     excludeSpecPattern?: string[]
   }> {
@@ -148,8 +148,8 @@ export class ProjectDataSource {
     const config = await this.getConfig()
 
     return {
-      specPattern: toArray(config[testingType]?.specPattern),
-      excludeSpecPattern: toArray(config[testingType]?.excludeSpecPattern),
+      specPattern: toArray(config.specPattern),
+      excludeSpecPattern: toArray(config.excludeSpecPattern),
     }
   }
 
@@ -217,7 +217,7 @@ export class ProjectDataSource {
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatterns()
 
     for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
@@ -333,7 +333,7 @@ export class ProjectDataSource {
 
     const { e2e, component } = getDefaultSpecPatterns()
 
-    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
       return isEqual(specPattern, [e2e])

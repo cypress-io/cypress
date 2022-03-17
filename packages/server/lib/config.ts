@@ -178,6 +178,17 @@ export function mergeDefaults (
     config.numTestsKeptInMemory = 0
   }
 
+  let additionalIgnorePattern = config.additionalIgnorePattern
+
+  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+    additionalIgnorePattern = config.e2e.specPattern
+  }
+
+  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+
+  delete config['e2e']
+  delete config['component']
+
   config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
 
   if (config.port) {
