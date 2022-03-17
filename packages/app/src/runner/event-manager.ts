@@ -588,7 +588,6 @@ export class EventManager {
     Cypress.stop()
 
     this.studioRecorder.setInactive()
-    this.selectorPlaygroundModel.setOpen(false)
   }
 
   resetReporter () {
