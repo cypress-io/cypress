@@ -7,5 +7,5 @@ const ws = client.connect({
 })
 
 ws.on('cross:domain:delaying:html', (request) => {
-  Cypress.multiDomainCommunicator.emit('delaying:html', request)
+  cy.isAnticipatingMultiDomainFor(request.href)
 })
