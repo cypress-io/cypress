@@ -1,5 +1,6 @@
 import path from 'path'
 import tempDir from 'temp-dir'
+import { homedir } from 'os'
 
 export function getYarnCommand (opts: {
   yarnV311: boolean
@@ -29,7 +30,7 @@ export function getYarnCommand (opts: {
   cmd += ' --update-checksums'
 
   // in CircleCI, this offline cache can be used
-  if (opts.isCI) cmd += ` --cache-folder=~/.yarn`
+  if (opts.isCI) cmd += ` --cache-folder=${homedir()}/.yarn`
   else cmd += ` --cache-folder=${path.join(tempDir, 'cy-system-tests-yarn-cache', String(Date.now()))}`
 
   return cmd

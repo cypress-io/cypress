@@ -16,7 +16,6 @@ export function getNpmCommand (opts: {
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 
-  // homedir() is used instead of '~' because npm does not expand '~'
   if (opts.isCI) cmd += ` --cache=${homedir()}/.cy-npm-cache`
   else cmd += ` --cache=${path.join(tempDir, 'cy-system-tests-npm-cache', String(Date.now()))}`
 
