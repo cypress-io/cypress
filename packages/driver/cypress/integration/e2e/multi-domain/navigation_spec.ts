@@ -246,12 +246,8 @@ describe('sub domain window loads before multi-domain command', { experimentalSe
   })
 
   it('establish a foobar spec bridge', () => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        cy.switchToDomain('http://foobar.com:3500', () => {
-          cy.get('a[data-cy="multi-domain-page"]')
-        }).then(resolve)
-      }, 1000)
+    cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.get('a[data-cy="multi-domain-page"]')
     })
   })
 
