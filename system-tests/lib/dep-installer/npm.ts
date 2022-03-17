@@ -7,7 +7,9 @@ export function getNpmCommand (opts: {
   isCI: boolean
   runScripts: boolean
 }): string {
-  let cmd = `npm ${opts.updateLockFile ? 'install' : 'ci'} --force `
+  // `npm ci` is undesirable here since it won't use our `node_modules` cache
+  // https://github.com/npm/cli/issues/564
+  let cmd = 'npm install --force'
 
   if (opts.yarnV311) throw new Error('_cyYarnV311 is not supported with NPM.')
 

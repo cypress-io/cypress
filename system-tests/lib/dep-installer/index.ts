@@ -65,9 +65,10 @@ async function getLockFilename (dir: string) {
 
   if (hasYarnLock && hasNpmLock) throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
 
-  if (hasYarnLock) return 'yarn.lock'
-
   if (hasNpmLock) return 'package-lock.json'
+
+  // default to yarn
+  return 'yarn.lock'
 }
 
 function getRelativePathToProjectDir (projectDir: string) {
@@ -174,8 +175,6 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     const lockFilename = await getLockFilename(projectDir)
 
-    if (!lockFilename) throw new Error(`package.json exists, but missing a lockfile for example project in '${projectDir}'`)
-
     // 3. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
 
@@ -206,13 +205,14 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
       console.log(`📦 Symlinking workspace dependency: ${dep}`)
       const depDir = path.join(cacheDir, dep)
 
+      await fs.mkdir(path.dirname(depDir), { recursive: true })
       await fs.symlink(pathToPackage(dep), depDir, 'junction')
     }
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
     console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
-    console.error([err.message, err.stack].join('\n'))
+    console.error(err)
     throw err
   }
 }
