@@ -17,6 +17,7 @@
         <SnapshotToggle
           v-if="shouldShowStateControls"
           :messages="snapshotMessages"
+          :active-index="snapshotStore.snapshot?.stateIndex ?? 0"
           @select="changeState"
         />
 

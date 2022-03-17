@@ -33,7 +33,7 @@ export const useSnapshotStore = defineStore({
       this.isSnapshotPinned = true
       this.snapshotProps = snapshotProps
       this.snapshot = {
-        showingHighlights,
+        showingHighlights: true,
         stateIndex: 0,
       }
     },

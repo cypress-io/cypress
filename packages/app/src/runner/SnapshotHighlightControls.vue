@@ -6,16 +6,15 @@
     >{{ t('runner.snapshot.toggleHighlights') }}</label>
     <Switch
       name="toggle-highlights"
-      :value="toggleHighlights"
+      :value="props.value"
       size="sm"
-      @update="toggleHighlights = !toggleHighlights"
+      @update="emits('update:value', !props.value)"
     />
     {{ t('runner.snapshot.highlightsLabel') }}
   </div>
 </template>
 
 <script lang="ts" setup>
-import { watch, ref } from 'vue'
 import Switch from '@cy/components/Switch.vue'
 import { useI18n } from '@cy/i18n'
 
@@ -29,9 +28,4 @@ const emits = defineEmits<{
   (e: 'update:value', value: boolean): void
 }>()
 
-const toggleHighlights = ref(props.value)
-
-watch(toggleHighlights, (val) => {
-  emits('update:value', val)
-})
 </script>

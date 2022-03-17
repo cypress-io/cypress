@@ -107,6 +107,7 @@ export const e2eProjectDirs = [
   'pristine-with-e2e-testing',
   'pristine-with-e2e-testing-and-storybook',
   'pristine-yarn',
+  'private-project',
   'react-app-webpack-5-unconfigured',
   'react-code-gen',
   'react-vite-ts-configured',
