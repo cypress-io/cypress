@@ -144,8 +144,6 @@ export const e2eProjectDirs = [
   'ts-proj-with-module-esnext',
   'ts-proj-with-paths',
   'uncaught-support-file',
-  'unify-onboarding',
-  'unify-onboarding-with-config',
   'unify-plugin-errors',
   'various-file-types',
   'vite-ct',
