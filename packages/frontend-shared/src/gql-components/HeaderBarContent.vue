@@ -1,5 +1,8 @@
 <template>
-  <div class="bg-white border-b border-b-gray-100 h-64px py-15px px-6">
+  <div
+    data-cy="header-bar-content"
+    class="bg-white border-b border-b-gray-100 h-64px py-15px px-6"
+  >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
         v-if="pageName"
