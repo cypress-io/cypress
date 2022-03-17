@@ -6,6 +6,8 @@ import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
 
+const log = (...args) => console.log('📦', ...args)
+
 /**
 * Given a package name, returns the path to the module directory on disk.
 */
@@ -13,25 +15,50 @@ export function pathToPackage (pkg: string): string {
   return path.dirname(require.resolve(`${pkg}/package.json`))
 }
 
-/**
- * Symlink the cached `node_modules` directory to the temp project directory's `node_modules`.
- */
-async function symlinkNodeModulesFromCache (project: string, cacheDir: string): Promise<void> {
-  const from = path.join(projectPath(project), 'node_modules')
-
+async function ensureCacheDir (cacheDir: string) {
   try {
     await fs.stat(cacheDir)
   } catch (err) {
-    console.log(`📦 Creating a new node_modules cache dir at ${cacheDir}`)
+    log(`Creating a new node_modules cache dir at ${cacheDir}`)
     await fs.mkdirp(cacheDir)
   }
+}
 
+/**
+ * Symlink the cached `node_modules` directory to the temp project directory's `node_modules`.
+ */
+async function symlinkNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: string): Promise<void> {
   try {
-    await fs.symlink(cacheDir, from, 'junction')
+    await fs.symlink(cacheDir, tmpNodeModulesDir, 'junction')
   } catch (err) {
+    // TODO: this looks wrong, shouldn't it re-throw sometimes?
     if (err.code !== 'EEXIST') return
   }
-  console.log(`📦 node_modules symlink created at ${from}`)
+
+  log(`node_modules symlink created at ${tmpNodeModulesDir}`)
+}
+
+/**
+ * Copy the cached `node_modules` to the temp project directory's `node_modules`.
+ *
+ * @returns a callback that will copy changed `node_modules` back to the cached `node_modules`.
+ */
+async function copyNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: string): Promise<() => Promise<void>> {
+  await fs.copy(cacheDir, tmpNodeModulesDir, { dereference: true })
+
+  log(`node_modules copied to ${tmpNodeModulesDir} from cache dir ${cacheDir}`)
+
+  return async () => {
+    try {
+      await fs.copy(tmpNodeModulesDir, cacheDir, { dereference: true }).then(() => {})
+    } catch (err) {
+      if (err.message === 'Source and destination must not be the same') return
+
+      throw err
+    }
+
+    log(`node_modules copied from ${tmpNodeModulesDir} to cache dir ${cacheDir}`)
+  }
 }
 
 type Dependencies = Record<string, string>
@@ -109,7 +136,7 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
       if (version.startsWith('file:')) {
         const absPath = pathToPackage(dep)
 
-        console.log(`📦 Setting absolute path in package.json for ${dep}: ${absPath}.`)
+        log(`Setting absolute path in package.json for ${dep}: ${absPath}.`)
 
         deps[dep] = `file:${absPath}`
         updatedDeps.push(dep)
@@ -136,15 +163,15 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
   const projectPkgJsonPath = path.join(projectDir, 'package.json')
 
   const runCmd = async (cmd) => {
-    console.log(`📦 Running "${cmd}" in ${projectDir}`)
+    log(`Running "${cmd}" in ${projectDir}`)
     await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
-  const cacheDir = path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
+  const cacheNodeModulesDir = path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
 
   async function removeWorkspacePackages (packages: string[]): Promise<void> {
     for (const dep of packages) {
-      const depDir = path.join(cacheDir, dep)
+      const depDir = path.join(cacheNodeModulesDir, dep)
 
       await fs.remove(depDir)
     }
@@ -154,18 +181,32 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // this will throw and exit early if the package.json does not exist
     const pkgJson: SystemTestPkgJson = require(projectPkgJsonPath)
 
-    console.log(`📦 Found package.json for project ${project}.`)
+    log(`Found package.json for project ${project}.`)
 
     if (pkgJson._cySkipDepInstall) {
-      return console.log(`📦 _cySkipDepInstall set in package.json, skipping dep-installer steps`)
+      return log(`_cySkipDepInstall set in package.json, skipping dep-installer steps`)
     }
 
     if (!pkgJson.dependencies && !pkgJson.devDependencies && !pkgJson.optionalDependencies) {
-      return console.log(`📦 No dependencies found, skipping dep-installer steps`)
+      return log(`No dependencies found, skipping dep-installer steps`)
     }
 
+    const lockFilename = await getLockFilename(projectDir)
+    const hasYarnLock = lockFilename === 'yarn.lock'
+
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
-    await symlinkNodeModulesFromCache(project, cacheDir)
+    await ensureCacheDir(cacheNodeModulesDir)
+
+    let persistCacheCb: () => Promise<void>
+    const tmpNodeModulesDir = path.join(projectPath(project), 'node_modules')
+
+    if (hasYarnLock) {
+      await symlinkNodeModulesFromCache(tmpNodeModulesDir, cacheNodeModulesDir)
+    } else {
+      // due to an issue in NPM, we cannot have `node_modules` be a symlink. fall back to copying.
+      // https://github.com/npm/npm/issues/10013
+      persistCacheCb = await copyNodeModulesFromCache(tmpNodeModulesDir, cacheNodeModulesDir)
+    }
 
     // 2. Before running the package installer, resolve workspace deps to absolute paths.
     // This is required to fix `yarn install` for workspace-only packages.
@@ -173,17 +214,14 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     await removeWorkspacePackages(workspaceDeps)
 
-    const lockFilename = await getLockFilename(projectDir)
-
     // 3. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
 
-    console.log(`📦 Writing ${lockFilename} with fixed relative paths to temp dir`)
+    log(`Writing ${lockFilename} with fixed relative paths to temp dir`)
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
     // 4. Run `yarn/npm install`.
-    const getCommandFn = lockFilename === 'yarn.lock' ? getYarnCommand : getNpmCommand
-
+    const getCommandFn = hasYarnLock ? getYarnCommand : getNpmCommand
     const cmd = getCommandFn({
       updateLockFile,
       yarnV311: pkgJson._cyYarnV311,
@@ -195,24 +233,27 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     // 5. Now that the lockfile is up to date, update workspace dependency paths in the lockfile with monorepo
     // relative paths so it can be the same for all developers
-    console.log(`📦 Copying ${lockFilename} and fixing relative paths for ${project}`)
+    log(`Copying ${lockFilename} and fixing relative paths for ${project}`)
     await normalizeLockFileRelativePaths({ project, projectDir, lockFilePath, lockFilename, relativePathToMonorepoRoot })
 
     // 6. After install, we must now symlink *over* all workspace dependencies, or else
     // `require` calls from installed workspace deps to peer deps will fail.
     await removeWorkspacePackages(workspaceDeps)
     for (const dep of workspaceDeps) {
-      console.log(`📦 Symlinking workspace dependency: ${dep}`)
-      const depDir = path.join(cacheDir, dep)
+      log(`Symlinking workspace dependency: ${dep}`)
+      const depDir = path.join(cacheNodeModulesDir, dep)
 
       await fs.mkdir(path.dirname(depDir), { recursive: true })
       await fs.symlink(pathToPackage(dep), depDir, 'junction')
     }
+
+    // 7. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
+    if (persistCacheCb) persistCacheCb()
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
-    console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
-    console.error(err)
+    log(`⚠ An error occurred while installing the node_modules for ${project}.`)
+    log(err)
     throw err
   }
 }
