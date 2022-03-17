@@ -539,6 +539,8 @@ export const eventManager = {
         cy.isStable(undefined, 'load')
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+        // Re-broadcast to any other specBridges.
+        Cypress.multiDomainCommunicator.toAllSpecBridges('window:load', { url })
       }
     })
 
