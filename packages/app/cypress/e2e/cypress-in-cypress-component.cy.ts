@@ -119,7 +119,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(goodFilePath).should('be.visible')
+      cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
       cy.location()
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')
