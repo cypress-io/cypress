@@ -55,21 +55,6 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
 
 export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   const reset = (state) => {
-    // If stability is true in this domain, that means this domain has loaded itself, in that case trust the domain and run the next command.
-    // We also wish to preserve the stability state through the state refresh.
-    if (cy.state('isStable')) {
-      // If this state is stable there is a good chance that the primary domain was not listening, resend the load event.
-      Cypress.specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
-
-      state.isStable = true
-    } else {
-      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
-      if (state.isStable) {
-        // If stability is established in a different domain, set this domain to undefined
-        state.isStable = undefined
-      }
-    }
-
     cy.reset({})
 
     const stateUpdates = {
