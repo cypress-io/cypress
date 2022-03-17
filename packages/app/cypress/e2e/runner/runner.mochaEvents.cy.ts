@@ -1,256 +1,97 @@
-import _ from 'lodash'
-import { loadSpec, shouldHaveTestResults } from './support/spec-loader'
 import EventEmitter from 'events'
-import { MochaHookSanitized, MochaInternalSanitized, MochaInternalUnsanitized, MochaLifecycleData, MochaRunnerFailSanitizied, MochaSuiteSantizied, MochaTestFailSanitized, MochaTestPassSanitized, SanitizedFail, SanitizedInvocationDetails, SanitizedMochaLifecycleData, snapshotKeys } from './support/mochaTypes'
+import _ from 'lodash'
+import { loadSpec } from './support/spec-loader'
+import { deepDiff, sanitizeMochaEvents } from './support/mochaEventsUtils'
+import { snapshots } from './runner.mochaEvents.snapshots'
+import type { CypressInCypressMochaEvent } from '../../../src/runner/event-manager'
 
-const hooks = ['before all', 'before each', 'after all', 'after each'] as const
-
-const stringifyShort = (obj) => {
-  const constructorName = _.get(obj, 'constructor.name')
-
-  if (constructorName && !_.includes(['Object', 'Array'], constructorName)) {
-    return `{${constructorName}}`
+declare global {
+  interface Window {
+    bus: EventEmitter
   }
-
-  if (_.isArray(obj)) {
-    return `[Array ${obj.length}]`
-  }
-
-  if (_.isObject(obj)) {
-    return `{Object ${Object.keys(obj).length}}`
-  }
-
-  return obj
 }
 
-const eventCleanseMap = {
-  snapshots: stringifyShort,
-  parent: stringifyShort,
-  tests: stringifyShort,
-  commands: stringifyShort,
-  invocationDetails: stringifyShort,
-  body: () => '[body]',
-  wallClockStartedAt: () => 'match.date',
-  lifecycle: () => 'match.number',
-  fnDuration: () => 'match.number',
-  duration: () => 'match.number',
-  afterFnDuration: () => 'match.number',
-  wallClockDuration: () => 'match.number',
-  stack: () => 'match.string',
-  message: () => '[error message]',
-  sourceMappedStack: () => 'match.string',
-  parsedStack: () => 'match.array',
-  err: () => ({
-    message: "[error message]",
-    name: "AssertionError",
-    stack: "match.string",
-    sourceMappedStack: "match.string",
-    parsedStack: "match.array"
-  }),
-  startTime: new Date(0),
-  start: () => 'match.date',
-  end: () => 'match.date',
-  timings: (arg: MochaLifecycleData): SanitizedMochaLifecycleData => {
-    let sanitizedLifecycleData: SanitizedMochaLifecycleData = {
-      lifecycle: 'match.number',
+// TODO: document how this works!
+function scaffoldCypressInCypressMochaEventsTest (snapToCompare: keyof typeof snapshots, done: Mocha.Done) {
+  const bus = new EventEmitter()
+  const outerRunner = window.top!.window
+  outerRunner.bus = bus
+
+  bus.on('assert:cypress:in:cypress', (snapshot) => {
+    const diff = deepDiff(snapshot, snapshots[snapToCompare])
+
+    if (Object.keys(diff).length) {
+      console.error('snapshot:', JSON.stringify(snapshot, null, 2))
+      console.error('Expected snapshots to be identical, but they were not. Difference:', diff)
     }
 
-    for (const hook of hooks) {
-      const hooksToSanitize = arg[hook]
-      if (!hooksToSanitize) {
-        continue
-      }
+    expect(Object.keys(diff)).to.have.lengthOf(0)
+    done()
+  })
 
-      sanitizedLifecycleData[hook] = hooksToSanitize.map(oldHook => ({
-        ...oldHook,
-        fnDuration: "match.number",
-        afterFnDuration: "match.number"
-      }))
-    }
+  const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {
+    win.getEventManager().on('cypress:in:cypress:done' ,(args: CypressInCypressMochaEvent[]) => {
+      const data = sanitizeMochaEvents(args)
 
-    return sanitizedLifecycleData
-  },
-}
-
-const runnerMochaEventsMap = new Map([
-  ['runner:start', ['mocha', 'start']],
-  ['runner:suite:start', ['mocha', 'suite']],
-  ['runner:suite:start', ['mocha', 'suite']],
-  ['runner:hook:start', ['mocha', 'hook']],
-  ['runner:test:before:run', ['mocha', 'test:before:run']],
-  ['runner:fail', ['mocha', 'fail']],
-  ['runner:suite:end', ['mocha', 'suite end' ]],
-  ['runner:test:end', ['mocha', 'test end']],
-  ['runner:test:after:run', ['mocha', 'test:after:end']],
-  ['runner:suite:end', ['mocha', 'suite end']],
-  ['runner:end', ['mocha', 'end']],
-])
-
-const sanitizedError: SanitizedFail = {
-  message: "[error message]",
-  name: "AssertionError",
-  stack: "match.string",
-  sourceMappedStack: "match.string",
-  parsedStack: "match.array"
-}
-const keysToEliminate = ['codeFrame'] as const
-
-const removeUnusedKeysForTestSnapshot = <T>(obj: T): T => {
-  for (const key of keysToEliminate) {
-    delete obj[key]
+      bus.emit('assert:cypress:in:cypress', data)
+    })
   }
 
-  for (const [key, value] of Object.entries(obj)) {
-    if (key in obj) {
-      const transform = eventCleanseMap[key]?.(value)
-
-      if (!transform) {
-        continue
-      }
-
-      obj[key] = transform
-    } else {
-      delete obj[key]
-    }
-  }
-
-  return obj
+  return { assertMatchingSnapshot }
 }
 
 describe('src/cypress/runner', { retries: 0 }, () => {
   describe('tests finish with correct state', () => {
     describe('hook failures', () => {
       it('fail in [before]', (done) => {
+        const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+          'src/cypress/runner tests finish with correct state hook failures fail in [before] #1', done)
+
         loadSpec({
           fileName: 'fail-with-before.mochaEvents.cy.js',
           passCount: 0,
           failCount: 1
         }).then((win) => {
-          win.getEventManager().on('cypress:in:cypress:done' ,(args: Array<Array<string | Record<string, any>>>) => {
-            // const sanitizeDetails = (invocationDetails: Record<string, any>): SanitizedInvocationDetails => `{Object ${Object.keys(invocationDetails).length}}`
-            const data = args.map(mochaEvent => {
-              return mochaEvent.map(payload => {
-                if (typeof payload === 'string') {
-                  return payload
-                }
-                return removeUnusedKeysForTestSnapshot(payload)
-              })
-            })
+          assertMatchingSnapshot(win)
+        })
+      })
 
-            console.log(JSON.stringify(data, null, 2))
-            done()
+      it('fail in [beforeEach]', (done) => {
+        const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+          'src/cypress/runner tests finish with correct state hook failures fail in [beforeEach] #1', done)
 
-            const sanitize = (event: string, internals: MochaInternalUnsanitized[]): Array<MochaInternalSanitized | undefined> => {
-              return internals.map(_data => {
-                const data = removeUnusedKeysForTestSnapshot(_data)
-                return data
+        loadSpec({
+          fileName: 'fail-with-beforeEach.mochaEvents.cy.js',
+          passCount: 0,
+          failCount: 1
+        }).then((win) => {
+          assertMatchingSnapshot(win)
+        })
+      })
 
-                // switch (data.type) {
-                //   case "suite": 
-                //     const suite: MochaSuiteSantizied = data.invocationDetails
-                //       ? {...data, invocationDetails: sanitizeDetails(data.invocationDetails)}
-                //       : {...data}
-                //     return suite
+      it('fail in [after]', (done) => {
+        const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+          'src/cypress/runner tests finish with correct state hook failures fail in [after] #1', done)
 
-                //   case 'test': 
-                //     if (data.state === "passed") {
-                //       const sanitizedPassed: MochaTestPassSanitized = {
-                //         ...data,
-                //         body: '[body]',
-                //         invocationDetails: sanitizeDetails(data.invocationDetails),
-                //         duration: 'match.number',
-                //         wallClockStartedAt: 'match.number',
-                //         _testConfig: {
-                //           testConfigList: [],
-                //           unverifiedTestConfig: {}
-                //         }
-                //       }
+        loadSpec({
+          fileName: 'fail-with-after.mochaEvents.cy.js',
+          passCount: 0,
+          failCount: 1
+        }).then((win) => {
+          assertMatchingSnapshot(win)
+        })
+      })
 
-                //       return sanitizedPassed
-                //     } else if (data.state === 'failed') {
-                //       const sanitizedFail: MochaTestFailSanitized = {
-                //           ...data,
-                //         body: '[body]',
-                //         invocationDetails: sanitizeDetails(data.invocationDetails),
-                //         duration: 'match.number',
-                //         wallClockStartedAt: 'match.number',
-                //         err: sanitizedError,
-                //         _testConfig: {
-                //           testConfigList: [],
-                //           unverifiedTestConfig: {}
-                //         }
-                //       }
+      it.only('fail in [afterEach]', (done) => {
+        const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+          'src/cypress/runner tests finish with correct state hook failures fail in [afterEach] #1', done)
 
-                //       return sanitizedFail
-                //     } else {
-                //       return {
-                //         ...data,
-                //         invocationDetails: sanitizeDetails(data.invocationDetails),
-                //       }
-                //     }
-
-                //   case 'hook': 
-                //     const hook: MochaHookSanitized = {
-                //       ...data, 
-                //       body: '[body]', 
-                //       invocationDetails: sanitizeDetails(data.invocationDetails)
-                //     }
-                //     return hook
-
-                //   default:
-                //     if (event === 'runner:start') {
-                //       return {
-                //         start: 'match.date'
-                //       }
-                //     }
-
-                //     if (event === 'runner:end') {
-                //       return {
-                //         end: 'match.date'
-                //       }
-                //     }
-
-                //     if (event === 'runner:fail') {
-                //       return sanitizedError
-                //     }
-
-                //     if (data.type === undefined) {
-                //       console.log('Type undefined!', event, data)
-                //       return
-                //     }
-
-                //     throw Error(`Unknown data type received. Got ${data.type}. Payload: ${JSON.stringify(data)}`)
-                // }
-              })
-            }
-
-              // const normalizedEvent = runnerMochaEventsMap.get(event)
-            // const sanitizedMochaEvents = 
-            // args.reduce<Array<any>>((acc, curr) => {
-            //   // const mochaEvent = runnerMochaEventsMap.get(curr.event)
-            //   // console.log(`normalizing ${curr.event} -> ${mochaEvent}`)
-            //   // if (!mochaEvent) {
-            //     // return acc
-            //   // }
-
-            //   acc.push([
-            //     ...curr.event, 
-            //     ...sanitize(curr.event, curr.data)
-            //   ])
-
-            //   return acc
-            // }, [])
-              
-            //   // arg => [arg.event, ...sanitize(arg.event, arg.data)])
-
-            // console.log(JSON.stringify(sanitizedMochaEvents, null , 2))
-            // console.log(sanitizedMochaEvents)
-            // const [f, ...rest] = [...args]
-            // console.log(f, 'rest', [...rest])
-            // expect(f).to.eq('runner:start')
-
-            // console.log(...args)
-          })
+        loadSpec({
+          fileName: 'fail-with-afterEach.mochaEvents.cy.js',
+          passCount: 0,
+          failCount: 1
+        }).then((win) => {
+          assertMatchingSnapshot(win)
         })
       })
     })

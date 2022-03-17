@@ -1,5 +1,6 @@
 import type { FileDetails } from '@packages/types'
 import type { ScriptError } from '../store'
+import type { CypressInCypressMochaEvent } from './event-manager'
 
 interface BeforeScreenshot {
   appOnly: boolean
@@ -21,6 +22,7 @@ export type LocalBusEventMap = {
 
 export type LocalBusEmitsMap = {
   'open:file': FileDetails
+  'cypress:in:cypress:done': CypressInCypressMochaEvent[]
 }
 
 export type SocketToDriverMap = {

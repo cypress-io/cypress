@@ -9,26 +9,22 @@ export type Timing = {
 }
 
 export type SanitizedTiming = {
-  hookId: `h${number}`
+  hookId?: `h${number}`
   fnDuration: "match.number",
   afterFnDuration: "match.number"
 }
 
-export type MochaLifecycleData = {
-  lifecycle: number
-  'before each': Timing[]
-  'after each': Timing[]
-  'before all': Timing[]
-  'after all': Timing[]
+export type MochaLifecycleBase<T> = {
+  'test'?: T
+  'before each'?: T[]
+  'after each'?: T[]
+  'before all'?: T[]
+  'after all'?: T[]
 }
 
-export type SanitizedMochaLifecycleData = {
-  lifecycle: 'match.number'
-  'before each'?: SanitizedTiming[]
-  'after each'?: SanitizedTiming[]
-  'before all'?: SanitizedTiming[]
-  'after all'?: SanitizedTiming[]
-}
+export type MochaLifecycleData = MochaLifecycleBase<Timing> & { lifecycle: number }
+
+export type SanitizedMochaLifecycleData = MochaLifecycleBase<SanitizedTiming> & { lifecycle: string }
 
 interface MochaSuite {
   id: `r${number}`

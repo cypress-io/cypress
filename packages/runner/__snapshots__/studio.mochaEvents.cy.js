@@ -14,7 +14,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -190,7 +190,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -220,7 +220,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -391,7 +391,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -421,7 +421,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -559,7 +559,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -589,7 +589,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -899,7 +899,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -929,7 +929,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1234,7 +1234,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1264,7 +1264,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1468,7 +1468,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1498,7 +1498,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1702,7 +1702,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1732,7 +1732,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1931,7 +1931,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1961,7 +1961,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2160,7 +2160,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2190,7 +2190,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2389,7 +2389,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2419,7 +2419,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2623,7 +2623,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2653,7 +2653,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2857,7 +2857,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "_slow": 10000
     }

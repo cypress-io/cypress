@@ -14,6 +14,8 @@ import type {
   MochaInternalUnsanitized 
 } from '../../cypress/e2e/runner/support/mochaTypes'
 
+export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
+
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
 type $Cypress = any
@@ -45,7 +47,7 @@ export class EventManager {
   Cypress?: $Cypress
   studioRecorder: any
   selectorPlaygroundModel: any
-  cypressInCypressEventLog: Array<string | Record<string, any>> = []
+  cypressInCypressMochaEvents: CypressInCypressMochaEvent[] =  []
 
   constructor (
     // import '@packages/driver'
@@ -532,42 +534,14 @@ export class EventManager {
         this.reporterBus.emit(event, ...args)
       })
     })
-
-    // ;['start', 'suite', 'hook', 'test:before:run', 'fail', 'suite end', 'test end'].forEach(event => {
-    //   Cypress.on(event, (...args) => {
-    //     console.log(event, 'args', ...args)
-    //     // return this.reporterBus.emit(event, ...args)
-    //   })
-    // })
-
+     
     driverToLocalEvents.forEach((event) => {
-
-      const stringifyShort = (obj: any) => {
-        if (Array.isArray(obj)) {
-          return `[Array ${obj.length}]`
-        }
-
-        if (_.isObject(obj)) {
-          return `{Object ${Object.keys(obj).length}}`
-        }
-
-        return obj
-      }
-
       Cypress.on(event, (...args: unknown[]) => {
         if (event === 'cypress:in:cypress') {
-          console.log(...args)
-          // console.log(args)
-          // let [e, payload] = args as [string, MochaInternalUnsanitized[]]
+          this.cypressInCypressMochaEvents.push(args as CypressInCypressMochaEvent[])
 
-          // const data = payload
-
-          // console.log(data)
-          this.cypressInCypressEventLog.push(args)
-
-          console.log(this.cypressInCypressEventLog.length)
-          if (this.cypressInCypressEventLog.length === 11) {
-            this.emit('cypress:in:cypress:done', this.cypressInCypressEventLog)
+          if (args[0] === 'mocha' && args[1] === 'end') {
+            this.emit('cypress:in:cypress:done', this.cypressInCypressMochaEvents)
           }
         }
         // @ts-ignore
