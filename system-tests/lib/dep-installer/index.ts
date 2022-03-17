@@ -6,12 +6,37 @@ import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
 
+type Dependencies = Record<string, string>
+
+/**
+ * Type for package.json files for system-tests example projects.
+ */
+type SystemTestPkgJson = {
+  /**
+   * By default, scaffolding will run install if there is a `package.json`.
+   * This option, if set, disables that.
+   */
+  _cySkipDepInstall?: boolean
+  /**
+   * Run the yarn v3-style install command instead of yarn v1-style.
+   */
+  _cyYarnV311?: boolean
+  /**
+   * By default, the automatic install will not run postinstall scripts. This
+   * option, if set, will cause postinstall scripts to run for this project.
+   */
+  _cyRunScripts?: boolean
+  dependencies?: Dependencies
+  devDependencies?: Dependencies
+  optionalDependencies?: Dependencies
+}
+
 const log = (...args) => console.log('📦', ...args)
 
 /**
 * Given a package name, returns the path to the module directory on disk.
 */
-export function pathToPackage (pkg: string): string {
+function pathToPackage (pkg: string): string {
   return path.dirname(require.resolve(`${pkg}/package.json`))
 }
 
@@ -59,31 +84,6 @@ async function copyNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: st
 
     log(`node_modules copied from ${tmpNodeModulesDir} to cache dir ${cacheDir}`)
   }
-}
-
-type Dependencies = Record<string, string>
-
-/**
- * Type for package.json files for system-tests example projects.
- */
-type SystemTestPkgJson = {
-  /**
-   * By default, scaffolding will run install if there is a `package.json`.
-   * This option, if set, disables that.
-   */
-  _cySkipDepInstall?: boolean
-  /**
-   * Run the yarn v3-style install command instead of yarn v1-style.
-   */
-  _cyYarnV311?: boolean
-  /**
-   * By default, the automatic install will not run postinstall scripts. This
-   * option, if set, will cause postinstall scripts to run for this project.
-   */
-  _cyRunScripts?: boolean
-  dependencies?: Dependencies
-  devDependencies?: Dependencies
-  optionalDependencies?: Dependencies
 }
 
 async function getLockFilename (dir: string) {
@@ -210,7 +210,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     }
 
     // 2. Before running the package installer, resolve workspace deps to absolute paths.
-    // This is required to fix `yarn install` for workspace-only packages.
+    // This is required to fix install for workspace-only packages.
     const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
 
     // 3. Delete cached workspace packages since the pkg manager will create a fresh symlink during install.
@@ -288,7 +288,7 @@ export async function scaffoldCommonNodeModules () {
   ].map(symlinkNodeModule))
 }
 
-export async function symlinkNodeModule (pkg) {
+async function symlinkNodeModule (pkg) {
   const from = path.join(cyTmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 
