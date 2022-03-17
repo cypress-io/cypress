@@ -374,7 +374,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
     debug('waiting for window:load')
 
-    return new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       const onWindowLoad = (win) => {
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
@@ -434,7 +434,16 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       }
 
       cy.once('internal:window:load', onInternalWindowLoad)
+
+      cy.once('test:after:run', () => {
+        if (promise.isPending()) {
+          options._log.set('message', '').end()
+          resolve()
+        }
+      })
     })
+
+    return promise
   }
 
   const reject = (err) => {
