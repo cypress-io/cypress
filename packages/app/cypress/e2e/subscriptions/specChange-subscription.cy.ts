@@ -21,7 +21,8 @@ describe('specChange subscription', () => {
     describe('specs list', () => {
       it('responds to specChange event for an added file', () => {
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 3)
+        .should('have.length', 4)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -31,7 +32,8 @@ describe('specChange subscription', () => {
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 4)
+        .should('have.length', 5)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -40,7 +42,8 @@ describe('specChange subscription', () => {
 
       it('responds to specChange event for a removed file', () => {
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 3)
+        .should('have.length', 4)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -50,7 +53,8 @@ describe('specChange subscription', () => {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 2)
+        .should('have.length', 3)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
       })
@@ -60,6 +64,7 @@ describe('specChange subscription', () => {
           await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
         }, {
           paths: [
+            getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-content.spec.js'),
             getPathForPlatform('cypress/e2e/dom-list.spec.js'),
@@ -83,6 +88,7 @@ describe('specChange subscription', () => {
           await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
         }, {
           paths: [
+            getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-content.spec.js'),
           ],
@@ -102,7 +108,8 @@ describe('specChange subscription', () => {
 
       it('responds to a cypress.config.js file change', () => {
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 3)
+        .should('have.length', 4)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -142,7 +149,8 @@ module.exports = {
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 3)
+        .should('have.length', 4)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -152,7 +160,8 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 4)
+        .should('have.length', 5)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -164,7 +173,8 @@ module.exports = {
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 3)
+        .should('have.length', 4)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -174,7 +184,8 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 2)
+        .should('have.length', 3)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
       })
@@ -187,6 +198,7 @@ module.exports = {
           await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
         }, {
           paths: [
+            getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-list.spec.js'),
           ],
@@ -209,7 +221,8 @@ module.exports = {
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 3)
+        .should('have.length', 4)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
@@ -237,7 +250,8 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 2)
+        .should('have.length', 3)
+        .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
       })
@@ -251,14 +265,14 @@ module.exports = {
         cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '3 Matches')
+        .should('contain', '4 Matches')
 
         cy.withCtx(async (ctx, o) => {
           await ctx.actions.file.writeFileInProject(o.path, '')
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '4 Matches')
+        .should('contain', '5 Matches')
       })
 
       it('responds to specChange event for a removed file', () => {
@@ -268,14 +282,14 @@ module.exports = {
         cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '3 Matches')
+        .should('contain', '4 Matches')
 
         cy.withCtx(async (ctx, o) => {
           await ctx.actions.file.removeFileInProject(o.path)
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '2 Matches')
+        .should('contain', '3 Matches')
       })
 
       it('handles removing the last file', () => {
@@ -288,6 +302,7 @@ module.exports = {
           await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
         }, {
           paths: [
+            getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-content.spec.js'),
           ],
@@ -311,7 +326,7 @@ module.exports = {
         cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '3 Matches')
+        .should('contain', '4 Matches')
 
         cy.withCtx(async (ctx, o) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -336,7 +351,7 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '2 Matches')
+        .should('contain', '3 Matches')
       })
     })
   })
