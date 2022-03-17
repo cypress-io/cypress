@@ -1,6 +1,6 @@
 import { action, observable } from 'mobx'
 import { nanoid } from 'nanoid'
-import { automation, automationStatus } from './automation'
+import { automation, AutomationStatus } from '@packages/app/src/store/runner-ui-store'
 
 export type RunMode = 'single'
 
@@ -23,7 +23,7 @@ export class BaseStore {
   @observable specs: Cypress.Spec[] = []
   @observable specRunId: string | undefined
   @observable runMode: RunMode = 'single'
-  @observable automation: typeof automationStatus[number] = automation.CONNECTING
+  @observable automation: AutomationStatus = automation.CONNECTING
   @observable isLoading = true
   @observable width: number
   @observable height: number

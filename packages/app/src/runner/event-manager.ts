@@ -6,10 +6,9 @@ import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { AutomationElementId, FileDetails } from '@packages/types'
 
-import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import { useRunnerUiStore } from '../store'
+import { automation, useRunnerUiStore } from '../store'
 
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
