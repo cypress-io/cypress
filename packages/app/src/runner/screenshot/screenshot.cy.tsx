@@ -58,8 +58,6 @@ describe('screenshot', () => {
     cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
   })
 
-  // TODO: This will technically pass, but the screenshot is not correct.
-  // AUT transform appears to be buggy for extreme viewports.
   it('screenshot with a really long viewport', () => {
     cy.viewport(200, 2000)
     mount(() => <Layout />, {

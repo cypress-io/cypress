@@ -14,7 +14,7 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
-const v = require('@packages/config/lib/validation')
+const { validation: v } = require('@packages/config')
 
 const argsUtil = require(`../../lib/util/args`)
 const { fs } = require(`../../lib/util/fs`)
@@ -1700,7 +1700,7 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, ...rest } = json
 
         return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, excludeSpecPattern } })
       }).then(() => {
