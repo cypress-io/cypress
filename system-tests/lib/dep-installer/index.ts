@@ -168,11 +168,13 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
   }
 
   const cacheNodeModulesDir = path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
+  const tmpNodeModulesDir = path.join(projectPath(project), 'node_modules')
 
   async function removeWorkspacePackages (packages: string[]): Promise<void> {
     for (const dep of packages) {
-      const depDir = path.join(cacheNodeModulesDir, dep)
+      const depDir = path.join(tmpNodeModulesDir, dep)
 
+      log('Removing', depDir)
       await fs.remove(depDir)
     }
   }
@@ -198,7 +200,6 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     await ensureCacheDir(cacheNodeModulesDir)
 
     let persistCacheCb: () => Promise<void>
-    const tmpNodeModulesDir = path.join(projectPath(project), 'node_modules')
 
     if (hasYarnLock) {
       await symlinkNodeModulesFromCache(tmpNodeModulesDir, cacheNodeModulesDir)
@@ -212,7 +213,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // This is required to fix `yarn install` for workspace-only packages.
     const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
 
-    await removeWorkspacePackages(workspaceDeps)
+    // await removeWorkspacePackages(workspaceDeps)
 
     // 3. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
@@ -240,11 +241,13 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // `require` calls from installed workspace deps to peer deps will fail.
     await removeWorkspacePackages(workspaceDeps)
     for (const dep of workspaceDeps) {
-      log(`Symlinking workspace dependency: ${dep}`)
-      const depDir = path.join(cacheNodeModulesDir, dep)
+      const destDir = path.join(tmpNodeModulesDir, dep)
+      const targetDir = pathToPackage(dep)
 
-      await fs.mkdir(path.dirname(depDir), { recursive: true })
-      await fs.symlink(pathToPackage(dep), depDir, 'junction')
+      log(`Symlinking workspace dependency: ${dep} (${destDir} -> ${targetDir})`)
+
+      await fs.mkdir(path.dirname(destDir), { recursive: true })
+      await fs.symlink(targetDir, destDir, 'junction')
     }
 
     // 7. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
@@ -252,8 +255,8 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
-    log(`⚠ An error occurred while installing the node_modules for ${project}.`)
-    log(err)
+    console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
+    console.error(err)
     throw err
   }
 }
