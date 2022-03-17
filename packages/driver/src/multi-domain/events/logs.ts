@@ -6,7 +6,7 @@ export const handleLogs = (Cypress: Cypress.Cypress) => {
     // - handle printing console props (need to add to runner)
     //     this.runner.addLog(args[0], this.config('isInteractive'))
 
-    Cypress.specBridgeCommunicator.toPrimary('log:added', { attrs: LogUtils.getDisplayProps(attrs) })
+    Cypress.specBridgeCommunicator.toPrimary('log:added', LogUtils.getDisplayProps(attrs))
   }
 
   const onLogChanged = (attrs) => {
@@ -16,7 +16,7 @@ export const handleLogs = (Cypress: Cypress.Cypress) => {
     // - notify runner? maybe not
     //     this.runner.addLog(args[0], this.config('isInteractive'))
 
-    Cypress.specBridgeCommunicator.toPrimary('log:changed', { attrs: LogUtils.getDisplayProps(attrs) })
+    Cypress.specBridgeCommunicator.toPrimary('log:changed', LogUtils.getDisplayProps(attrs))
   }
 
   Cypress.on('log:added', onLogAdded)

@@ -576,11 +576,11 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
 
-    Cypress.multiDomainCommunicator.on('log:added', ({ attrs }) => {
+    Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
       reporterBus.emit('reporter:log:add', attrs)
     })
 
-    Cypress.multiDomainCommunicator.on('log:changed', ({ attrs }) => {
+    Cypress.multiDomainCommunicator.on('log:changed', (attrs) => {
       reporterBus.emit('reporter:log:state:changed', attrs)
     })
   },

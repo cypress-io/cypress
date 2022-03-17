@@ -185,8 +185,8 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: Cypress.ObjectLike, options = { syncGlobals: false }) {
-    debug('<= to Primary %s %o %s', event, data, document.domain)
+  toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
+    debug('<= to Primary ', event, data, document.domain)
 
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
