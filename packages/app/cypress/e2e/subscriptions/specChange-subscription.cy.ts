@@ -250,8 +250,7 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 3)
-        .should('contain', 'blank-contents.spec.js')
+        .should('have.length', 2)
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
       })
@@ -351,7 +350,7 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '3 Matches')
+        .should('contain', '2 Matches')
       })
     })
   })
