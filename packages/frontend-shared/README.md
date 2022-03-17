@@ -68,19 +68,28 @@ To create a new component:
 1. In the spec file, import and mount the component. If the component depends on a GQL fragment, use `mountFragment` to mount the component. If the component depends on a GQL query, create a wrapper that executes the query and passes the result into the child component via the `gql` prop, using a fragment to access the data in the child.
 
 TODO: in light of gql subscriptions, this might already be out of date, revisit.
+TODO 2: write generators that spin up well-formed components that do and do not depend on GQL
 
 ### Welcome to Vue 3!
 
 If you are new to Vue 3, there are some new features we are using in this codebase that you should become familiar with.
 
-But first, if you are coming from React to Vue 3, here's a small potential gotcha: the idea of a `ref` in Vue is similar to a `ref` in React but with a major difference: In React, a when a ref's value changes, it doesn't trigger an update or get "noticed", by default. In Vue, a ref is part of the reactivity system and when the value updates, the component knows this and the updated value is reflected wherever the value is referenced. This can mean DOM updates, watchers firing, etc.
+But first, if you are coming from React to Vue 3, here's a small potential gotcha to note as you read and write Vue code: the idea of a `ref` in Vue is similar to a `ref` in React but with a major difference. In React, a when a ref's value changes, it doesn't trigger an update, or get "noticed" at all, by default. In Vue, a ref is part of the reactivity system and when the value updates, the component knows this and the updated value is reflected wherever the value is referenced. This can mean DOM updates, watchers firing, etc.
 
 ### Vue ideas and packages we are using
 
 #### Composition API `<script setup>`
-Link to docs/tutorials for both.
-#### Pinia
-TS-friendly, modularized state management - this replaces Vuex for the small amount of global state we have.
+We are using the [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) and specifically the [`<script setup>`](https://vuejs.org/api/sfc-script-setup.html#script-setup) syntax in our Vue Single File Components. This removes a lot of boilerplate, and because of that it's not always as obvious reading the code which Vue features are being leveraged. 
+
+If you are familiar with the Options API, which was the main way to write component script sections in Vue 2, the separation of variables and functions into named parts of the Options object like `computed` and `data` provided a familiar, but unwieldy, structure in each component. The Composition API lets us use those features anywhere we like, without dividing things into a predefined structure. `<script setup>` is a way to write Composition API code with less boilerplate and some other advantages described in the docs.
+#### [Pinia](https://pinia.vuejs.org/)
+TS-friendly, modularized state management - this is what we use instead of Vuex for the small amount of global state we have.
+
+#### [VueUse](https://vueuse.org/)
+Broad collection of composable utilities that provides reactive values for various common events and DOM properties, CSS rules, local storage and a lot of other stuff. Very useful if we feel the need to add and tear down low level event listeners, as this library already covers so many and exposes them to Vue correctly. It's like a front-end lodash, so where the VueUse implementation of something works for us, we prefer to use it instead of roll our own.
+
+#### [Headless UI](https://headlessui.dev/)
+We are using some components from Headless UI as the basis for UI patterns like modals, custom dropdowns, and expanding panels. We use Headless UI because it is well documented and the accessibility features are properly thought out. These advantages outweigh the occasional workarounds we have to use in order to get sophisticated behavior working that Headless UI does not support.
 ### Styles
 #### Tailwind and Windi
 #### Explicit Pixel Values
