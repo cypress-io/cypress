@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
+import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'

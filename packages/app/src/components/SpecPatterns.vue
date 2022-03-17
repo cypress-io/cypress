@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import { SpecPatternsFragment } from '../generated/graphql'
+import type { SpecPatternsFragment } from '../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
 
