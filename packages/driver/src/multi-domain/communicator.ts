@@ -187,7 +187,6 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    */
   toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
     debug('<= to Primary ', event, data, document.domain)
-
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
