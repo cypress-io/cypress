@@ -10,6 +10,9 @@ import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { useRunnerUiStore } from '../store'
+import type { 
+  MochaInternalUnsanitized 
+} from '../../cypress/e2e/runner/support/mochaTypes'
 
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
@@ -26,7 +29,7 @@ const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
@@ -42,6 +45,7 @@ export class EventManager {
   Cypress?: $Cypress
   studioRecorder: any
   selectorPlaygroundModel: any
+  cypressInCypressEventLog: Array<string | Record<string, any>> = []
 
   constructor (
     // import '@packages/driver'
@@ -529,8 +533,43 @@ export class EventManager {
       })
     })
 
+    // ;['start', 'suite', 'hook', 'test:before:run', 'fail', 'suite end', 'test end'].forEach(event => {
+    //   Cypress.on(event, (...args) => {
+    //     console.log(event, 'args', ...args)
+    //     // return this.reporterBus.emit(event, ...args)
+    //   })
+    // })
+
     driverToLocalEvents.forEach((event) => {
+
+      const stringifyShort = (obj: any) => {
+        if (Array.isArray(obj)) {
+          return `[Array ${obj.length}]`
+        }
+
+        if (_.isObject(obj)) {
+          return `{Object ${Object.keys(obj).length}}`
+        }
+
+        return obj
+      }
+
       Cypress.on(event, (...args: unknown[]) => {
+        if (event === 'cypress:in:cypress') {
+          console.log(...args)
+          // console.log(args)
+          // let [e, payload] = args as [string, MochaInternalUnsanitized[]]
+
+          // const data = payload
+
+          // console.log(data)
+          this.cypressInCypressEventLog.push(args)
+
+          console.log(this.cypressInCypressEventLog.length)
+          if (this.cypressInCypressEventLog.length === 11) {
+            this.emit('cypress:in:cypress:done', this.cypressInCypressEventLog)
+          }
+        }
         // @ts-ignore
         // TODO: strongly typed event emitter.
         return this.emit(event, ...args)

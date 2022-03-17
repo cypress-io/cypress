@@ -14,7 +14,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -287,7 +287,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -317,7 +317,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -936,7 +936,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -966,7 +966,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1585,7 +1585,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1615,7 +1615,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2423,7 +2423,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2453,7 +2453,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2702,7 +2702,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -2805,7 +2805,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -3029,7 +3029,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -3047,7 +3047,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -3374,7 +3374,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -3392,7 +3392,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -3725,7 +3725,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -3743,7 +3743,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4153,7 +4153,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4171,7 +4171,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4368,7 +4368,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4386,7 +4386,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4517,7 +4517,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4535,7 +4535,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4746,7 +4746,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4764,7 +4764,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
@@ -4908,7 +4908,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -4938,7 +4938,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -5187,7 +5187,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -5217,7 +5217,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -5728,7 +5728,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -5758,7 +5758,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -7081,7 +7081,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -7152,7 +7152,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -7523,7 +7523,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }

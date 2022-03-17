@@ -11,6 +11,24 @@ const match = Cypress.sinon.match
 
 const { stringifyShort } = snapshotCommand
 
+const stringifyShort = (obj) => {
+  const constructorName = _.get(obj, 'constructor.name')
+
+  if (constructorName && !_.includes(['Object', 'Array'], constructorName)) {
+    return `{${constructorName}}`
+  }
+
+  if (_.isArray(obj)) {
+    return `[Array ${obj.length}]`
+  }
+
+  if (_.isObject(obj)) {
+    return `{Object ${Object.keys(obj).length}}`
+  }
+
+  return obj
+}
+
 const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
@@ -287,7 +305,7 @@ function createCypress (defaultOptions = {}) {
         const c = _.extend({}, Cypress.config(), {
           isTextTerminal: false,
           spec: {
-            relative: 'relative/path/to/spec.js',
+            relative: 'cypress/e2e/runner/fail-with-before.mochaEvents.cy.js',
             absolute: '/absolute/path/to/spec.js',
             name: 'empty_spec.js',
           },

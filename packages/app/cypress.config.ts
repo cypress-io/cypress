@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
+import { getSnapshot, saveSnapshot } from './cypress/plugins/snapshot/snapshotPlugin'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -49,6 +50,10 @@ export default defineConfig({
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
+      on('task', {
+        getSnapshot,
+        saveSnapshot,
+      })
 
       return await e2ePluginSetup(on, config)
     },

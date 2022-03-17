@@ -21,7 +21,7 @@ export type LoadSpecOptions = {
   hasPreferredIde?: boolean
 }
 
-export function loadSpec (options: LoadSpecOptions): void {
+export function loadSpec (options: LoadSpecOptions) {
   const {
     fileName,
     setup,
@@ -75,6 +75,7 @@ export function loadSpec (options: LoadSpecOptions): void {
     expect(location.hash).to.contain(fileName)
   })
 
+  return cy.window()
   // Wait for specs to complete
-  shouldHaveTestResults({ passCount, failCount, pendingCount })
+  // shouldHaveTestResults({ passCount, failCount, pendingCount })
 }

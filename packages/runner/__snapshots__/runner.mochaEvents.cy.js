@@ -1,4 +1,4 @@
-exports['src/cypress/runner tests finish with correct state hook failures fail in [before] #1'] = [
+exportr['src/cypress/runner tests finish with correct state hook failures fail in [before] #1'] = [
   [
     "mocha",
     "start",
@@ -14,7 +14,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -214,7 +214,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -244,7 +244,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -464,7 +464,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -494,7 +494,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -722,7 +722,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -752,7 +752,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1115,7 +1115,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1145,7 +1145,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1608,7 +1608,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -1638,7 +1638,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2074,7 +2074,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2160,7 +2160,7 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2336,7 +2336,7 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -2366,7 +2366,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
@@ -3288,21 +3288,21 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
   [
     "mocha",
     "suite end",
+    "mocha",
+    "end",
     {
+  {
       "id": "r1",
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js",
+      "file": "cypress/e2e/runner/fail-with-before.mochaEvents.cy.js",
       "retries": -1,
       "_slow": 10000
     }
   ],
   [
-    "mocha",
-    "end",
-    {
-      "end": "match.date"
+        "end": "match.date"
     }
   ]
 ]
