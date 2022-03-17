@@ -11,10 +11,11 @@ import $ from 'jquery'
 const debug = Debug('plugin:snapshot')
 
 export {
-  stringifyShort
+  stringifyShort,
 }
 
 let sinon = _sinon
+
 /**
  * prints nice assertion error in command log with modified error message
  */

@@ -10,9 +10,6 @@ import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { useRunnerUiStore } from '../store'
-import type { 
-  MochaInternalUnsanitized 
-} from '../../cypress/e2e/runner/support/mochaTypes'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -47,7 +44,7 @@ export class EventManager {
   Cypress?: $Cypress
   studioRecorder: any
   selectorPlaygroundModel: any
-  cypressInCypressMochaEvents: CypressInCypressMochaEvent[] =  []
+  cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
 
   constructor (
     // import '@packages/driver'
@@ -534,7 +531,7 @@ export class EventManager {
         this.reporterBus.emit(event, ...args)
       })
     })
-     
+
     driverToLocalEvents.forEach((event) => {
       Cypress.on(event, (...args: unknown[]) => {
         if (event === 'cypress:in:cypress') {
@@ -544,6 +541,7 @@ export class EventManager {
             this.emit('cypress:in:cypress:done', this.cypressInCypressMochaEvents)
           }
         }
+
         // @ts-ignore
         // TODO: strongly typed event emitter.
         return this.emit(event, ...args)
