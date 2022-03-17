@@ -390,7 +390,6 @@ function convertConfig () {
 gql`
 mutation MigrationWizard_ReconfigureComponentTesting {
   migrateComponentTesting {
-    currentTestingType
     currentProject {
       id
       currentTestingType

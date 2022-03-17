@@ -34,6 +34,8 @@ injectBundle(config.namespace)
 
 app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
+  draggable: false,
+  closeOnClick: false,
 })
 
 app.use(urql, makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }))

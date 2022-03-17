@@ -207,7 +207,7 @@ const sanitizeAndConvertNestedArgs = (str, argName) => {
 /**
  * Parses the '--spec' cli parameter to return an array of valid patterns.
  *
- * @param {Strng} pattern pattern to parse
+ * @param {String} pattern pattern to parse
  * @returns Array of patterns
  */
 const parseSpecArgv = (pattern) => {

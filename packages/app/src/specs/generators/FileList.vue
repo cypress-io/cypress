@@ -6,7 +6,7 @@
       tabindex="0"
     >
       <ul class="h-full">
-        <!-- TODO(jess): up arrow and down arrow navigation -->
+        <!-- TODO: UNIFY-864 - up arrow and down arrow navigation -->
         <li
           v-for="file in files"
           :key="file?.id"

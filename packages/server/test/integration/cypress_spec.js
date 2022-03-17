@@ -14,7 +14,7 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
-const v = require('@packages/config/lib/validation')
+const { validation: v } = require('@packages/config')
 
 const argsUtil = require(`../../lib/util/args`)
 const { fs } = require(`../../lib/util/fs`)
@@ -411,7 +411,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
+    it('runs project by limiting spec files via config.e2e.specPattern string glob pattern', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
@@ -419,7 +419,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
+    it('runs project by limiting spec files via config.e2e.specPattern as a JSON array of string glob patterns', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
@@ -1700,7 +1700,7 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, ...rest } = json
 
         return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, excludeSpecPattern } })
       }).then(() => {
