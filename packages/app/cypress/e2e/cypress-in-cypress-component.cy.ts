@@ -1,6 +1,12 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
+function getPathForPlatform (posixPath: string) {
+  if (Cypress.platform === 'win32') return posixPath.replaceAll('/', '\\')
+
+  return posixPath
+}
+
 describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
@@ -80,7 +86,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'src/DoesNotExist.spec.js'
 
-    cy.visitApp(`/specs/runner?file=${badFilePath}`)
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
@@ -99,7 +105,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     const goodFilePath = 'src/TestComponent.spec.jsx'
 
-    cy.visitApp(`/specs/runner?file=${goodFilePath}`)
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
 
     cy.contains('renders the test component').should('be.visible')
 
