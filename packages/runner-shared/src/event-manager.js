@@ -320,6 +320,12 @@ export const eventManager = {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    // The window.top should not change between test reloads, and we only need to bind the message event once
+    // Forward all message events to the current instance of the multi-domain communicator
+    window.top?.addEventListener('message', ({ data, source }) => {
+      Cypress?.multiDomainCommunicator.onMessage({ data, source })
+    }, false)
   },
 
   start (config) {
@@ -511,8 +517,6 @@ export const eventManager = {
         studioRecorder.testFailed()
       }
     })
-
-    Cypress.multiDomainCommunicator.initialize(window)
 
     Cypress.on('test:before:run', (...args) => {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
