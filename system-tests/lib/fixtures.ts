@@ -6,6 +6,7 @@ import tempDir from 'temp-dir'
 export const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
+
 export const projects = _path.join(root, 'projects')
 
 export const cyTmpDir = _path.join(tempDir, 'cy-projects')
