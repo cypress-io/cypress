@@ -9,6 +9,7 @@ import type { TypedDocumentNode } from '@urql/vue'
 import type { FragmentDefinitionNode } from 'graphql'
 import { print } from 'graphql'
 import { testUrqlClient } from './clientTestUrqlClient'
+import type { MutationResolverCallback as MutationResolver, ResultType } from './clientTestUrqlClient'
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
@@ -33,16 +34,25 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
     // @ts-ignore todo: figure out the correct types
-    <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
-      options.global.stubs.transition = false
+      if (!Array.isArray(options.global.stubs)) {
+        options.global.stubs.transition = false
+      }
+
       options.global.plugins = options.global.plugins || []
       each(plugins, (pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
       })
 
       options.global.plugins.push(createI18n())
+
+      options.global.plugins.push({
+        install (app) {
+          app.use(urql, testUrqlClient(context, undefined, mutationResolvers))
+        },
+      })
 
       const context = makeClientTestContext()
 
@@ -70,7 +80,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           createI18n(),
           {
             install (app) {
-              app.use(urql, testUrqlClient(context, options.onResult))
+              app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers))
             },
           },
         ],
@@ -131,15 +141,35 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     }), mountingOptions).then(() => context)
   }
 
+  const mutationResolvers: Map<string, MutationResolver<any>> = new Map()
+
+  function stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (
+    document: T,
+    resolver: MutationResolver<T>,
+  ) {
+    const definition = document.definitions[0]
+
+    if (definition.kind === 'OperationDefinition' && definition.name) {
+      mutationResolvers[definition.name.value] = resolver
+    } else {
+      throw new Error('only use mutation documents in stubMutationResolver first argument')
+    }
+  }
+
   Cypress.Commands.add('mountFragment', mountFragment)
+
+  Cypress.Commands.add('stubMutationResolver', stubMutationResolver)
 
   Cypress.Commands.add('mountFragmentList', (source, options) => {
     // @ts-expect-error - todo: tim fix
     return mountFragment(source, options, true)
   })
-}
 
-type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
+  beforeEach(() => {
+    // clean all resolvers after each test
+    mutationResolvers.clear()
+  })
+}
 
 type MountFragmentConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
@@ -180,6 +210,16 @@ declare global {
       mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
         fragment: T,
         config: MountFragmentConfig<T>
+      ): Cypress.Chainable<ClientTestContext>
+
+      /**
+       * mock a mutation resolver when needed to spy on it or modify the result
+       * @param document
+       * @param resolver
+       */
+      stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+        document: T,
+        resolver: MutationResolver<T>
       ): Cypress.Chainable<ClientTestContext>
       /**
        * Mount helper for a component with a GraphQL fragment, as a list

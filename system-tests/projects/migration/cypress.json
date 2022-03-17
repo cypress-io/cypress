@@ -1,5 +1,4 @@
 {
-  "$schema": "https://on.cypress.io/cypress.schema.json",
   "baseUrl": "http://localhost:3000",
   "retries": 2,
   "defaultCommandTimeout": 5000,
@@ -12,7 +11,7 @@
     "slowTestThreshold": 5000
   },
   "component": {
-    "slowTestThreshold": 5000,
+    "slowTestThreshold": 500,
     "retries": 1
   }
 }

@@ -42,7 +42,7 @@
         >
           <router-link
             class="outline-none"
-            :to="{ path: '/specs/runner', query: { file: result.file.relative } }
+            :to="{ name: 'SpecsRunner', query: { file: result.file.relative }, params: { shouldShowTroubleRenderingAlert: true } }
             "
           >
             <Button
@@ -127,6 +127,11 @@ query ComponentGeneratorStepOne($glob: String!) {
       absolute
       relative
       baseName
+    }
+    # Add the specs, so we can keep the list up to date with the cache
+    specs {
+      id
+      ...SpecNode_InlineSpecList
     }
   }
 }

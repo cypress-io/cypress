@@ -1,6 +1,6 @@
 ## Migration E2E Component Default Everything
 
-A project with E2E and CT, both using default folders. Everything is default.
+A project with E2E and CT, both using default `integrationFolder`, `componentFolder`, `testFiles`, etc. None of the breaking configuration options are modified. They are all defaults.
 
 The following migration steps will be used during this migration:
 
@@ -26,7 +26,7 @@ The user will need to rename and/or move their only component spec, `button.cy.j
 
 ## Rename supportFile
 
-The project has a default support file, `cypress/support/index.js`. We can rename it for them to `cypress/support/e2e.js`. There is no such `cypress/support/component.js` created here - that's going to part of the componen ttesting reconfiguration workflow.
+The project has a default support file, `cypress/support/index.js`. We can rename it for them to `cypress/support/e2e.js`. There is no such `cypress/support/component.js` created here - that's going to part of the component testing reconfiguration workflow.
 
 | Before | After|
 |---|---|
@@ -34,9 +34,7 @@ The project has a default support file, `cypress/support/index.js`. We can renam
 
 ## Update Config
 
-We can migrate to the new `cypress.config.js`. The expected output is in `expected-cypress.config.js`. The main points are:
-
-The expected output is in [`expected-cypress.config.js`](./expected-cypress.config.js).
+We can migrate to the new `cypress.config.js`. The expected output is in [`expected-cypress.config.js`](./expected-cypress.config.js).
 
 ## Second flow
 

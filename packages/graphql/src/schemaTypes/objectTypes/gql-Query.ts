@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
+import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'
@@ -75,6 +75,11 @@ export const Query = objectType({
       resolve: (source, args, ctx) => !ctx.currentProject,
     })
 
+    t.nonNull.boolean('projectRootFromCI', {
+      description: 'Whether the project was specified from the --project flag',
+      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.projectRoot),
+    })
+
     t.nonNull.field('authState', {
       type: AuthState,
       description: 'The latest state of the auth process',
@@ -87,12 +92,6 @@ export const Query = objectType({
       resolve: (source, args, ctx) => {
         return ctx.coreData.localSettings
       },
-    })
-
-    t.field('currentTestingType', {
-      description: 'The mode the interactive runner was launched in',
-      type: TestingTypeEnum,
-      resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.list.nonNull.field('scaffoldedFiles', {

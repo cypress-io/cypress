@@ -1,9 +1,10 @@
 import globby from 'globby'
 import path from 'path'
 import { MIGRATION_STEPS } from '@packages/types'
-import { applyMigrationTransform, getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
+import { applyMigrationTransform, getSpecs, tryGetDefaultLegacySupportFile } from '.'
+import type { LegacyCypressConfigJson } from '..'
 
-function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
+function getTestFilesGlobs (config: LegacyCypressConfigJson, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
   // the config is `e2e`
   const k = type === 'component' ? 'component' : 'e2e'
@@ -14,26 +15,26 @@ function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integ
     return ([] as string[]).concat(glob)
   }
 
-  return ['**/*']
+  return ['**/*.{js,ts,jsx,tsx,coffee}']
 }
 
-export function getIntegrationTestFilesGlobs (config: OldCypressConfig): string[] {
+export function getIntegrationTestFilesGlobs (config: LegacyCypressConfigJson): string[] {
   return getTestFilesGlobs(config, 'integration')
 }
 
-export function getComponentTestFilesGlobs (config: OldCypressConfig): string[] {
+export function getComponentTestFilesGlobs (config: LegacyCypressConfigJson): string[] {
   return getTestFilesGlobs(config, 'component')
 }
 
-export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' | 'integration') {
+export function isDefaultTestFiles (config: LegacyCypressConfigJson, type: 'component' | 'integration') {
   const testFiles = type === 'component'
     ? getComponentTestFilesGlobs(config)
     : getIntegrationTestFilesGlobs(config)
 
-  return testFiles.length === 1 && testFiles[0] === '**/*'
+  return testFiles.length === 1 && testFiles[0] === '**/*.{js,ts,jsx,tsx,coffee}'
 }
 
-export function getPluginsFile (config: OldCypressConfig) {
+export function getPluginsFile (config: LegacyCypressConfigJson) {
   if (config.e2e?.pluginsFile === false || config.pluginsFile === false) {
     return false
   }
@@ -41,15 +42,11 @@ export function getPluginsFile (config: OldCypressConfig) {
   return config.e2e?.pluginsFile ?? config.pluginsFile ?? 'cypress/plugins/index.js'
 }
 
-export function getIntegrationFolder (config: OldCypressConfig) {
-  if (config.e2e?.integrationFolder === false || config.integrationFolder === false) {
-    return false
-  }
-
+export function getIntegrationFolder (config: LegacyCypressConfigJson) {
   return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
 }
 
-export function getComponentFolder (config: OldCypressConfig) {
+export function getComponentFolder (config: LegacyCypressConfigJson) {
   if (config.component?.componentFolder === false || config.componentFolder === false) {
     return false
   }
@@ -63,7 +60,7 @@ async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: st
   return f.length > 0
 }
 
-export async function shouldShowAutoRenameStep (projectRoot: string, config: OldCypressConfig) {
+export async function shouldShowAutoRenameStep (projectRoot: string, config: LegacyCypressConfigJson) {
   const specsToAutoMigrate = await getSpecs(projectRoot, config)
 
   const integrationCleaned = specsToAutoMigrate.integration.filter((spec) => {
@@ -82,7 +79,7 @@ export async function shouldShowAutoRenameStep (projectRoot: string, config: Old
   return integrationCleaned.length > 0 || componentCleaned.length > 0
 }
 
-async function anyComponentSpecsExist (projectRoot: string, config: OldCypressConfig) {
+async function anyComponentSpecsExist (projectRoot: string, config: LegacyCypressConfigJson) {
   const componentFolder = getComponentFolder(config)
 
   if (componentFolder === false) {
@@ -94,12 +91,8 @@ async function anyComponentSpecsExist (projectRoot: string, config: OldCypressCo
   return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
 }
 
-async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypressConfig) {
+async function anyIntegrationSpecsExist (projectRoot: string, config: LegacyCypressConfigJson) {
   const integrationFolder = getIntegrationFolder(config)
-
-  if (integrationFolder === false) {
-    return false
-  }
 
   const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
@@ -111,7 +104,7 @@ async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypress
 // Also, if there are no **no** integration specs, we are doing a CT only migration,
 // in which case we don't migrate the supportFile - they'll make a new support/component.js
 // when they set CT up.
-export async function shouldShowRenameSupport (projectRoot: string, config: OldCypressConfig) {
+export async function shouldShowRenameSupport (projectRoot: string, config: LegacyCypressConfigJson) {
   if (!await anyIntegrationSpecsExist(projectRoot, config)) {
     return false
   }
@@ -140,7 +133,7 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
 
 // if they have component testing configured using the defaults, they will need to
 // rename/move their specs.
-async function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) {
+async function shouldShowRenameManual (projectRoot: string, config: LegacyCypressConfigJson) {
   const componentFolder = getComponentFolder(config)
 
   const usingAllDefaults = componentFolder === 'cypress/component' && isDefaultTestFiles(config, 'component')
@@ -153,7 +146,7 @@ async function shouldShowRenameManual (projectRoot: string, config: OldCypressCo
 }
 
 // All projects must move from cypress.json to cypress.config.js!
-export function shouldShowConfigFileStep (config: OldCypressConfig) {
+export function shouldShowConfigFileStep (config: LegacyCypressConfigJson) {
   return true
 }
 
@@ -161,7 +154,8 @@ export type Step = typeof MIGRATION_STEPS[number]
 
 export async function getStepsForMigration (
   projectRoot: string,
-  config: OldCypressConfig,
+  config: LegacyCypressConfigJson,
+  configFileExists: boolean,
 ): Promise<Step[]> {
   const steps: Step[] = []
 
@@ -178,7 +172,7 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'configFile' && shouldShowConfigFileStep(config)) {
+    if (step === 'configFile' && configFileExists) {
       steps.push(step)
     }
 

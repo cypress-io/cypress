@@ -7,10 +7,10 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.__incorrectlyVisitAppWithIntercept()
   })
 
   it('test component', () => {
+    cy.__incorrectlyVisitAppWithIntercept()
     cy.contains('TestComponent.spec').click()
     cy.location().should((location) => {
       expect(location.hash).to.contain('TestComponent.spec')
@@ -74,7 +74,53 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
   })
 
+  it('redirects to the specs list with error if a spec is not found', () => {
+    cy.visitApp()
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const badFilePath = 'src/DoesNotExist.spec.js'
+
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${badFilePath}`)
+    cy.contains(noSpecErrorTitle).should('be.visible')
+    cy.contains(noSpecErrorIntro).should('be.visible')
+    cy.contains(noSpecErrorExplainer).should('be.visible')
+    cy.contains(badFilePath).should('be.visible')
+    cy.location()
+    .its('href')
+    .should('eq', 'http://localhost:4455/__/#/specs')
+
+    // should clear after reload
+    cy.reload()
+    cy.contains(noSpecErrorTitle).should('not.exist')
+  })
+
+  it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+
+    const goodFilePath = 'src/TestComponent.spec.jsx'
+
+    // TODO: Figure out why test is flaky without wait
+    // see: https://cypress-io.atlassian.net/browse/UNIFY-1294
+    cy.wait(2000)
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
+
+    cy.contains('renders the test component').should('be.visible')
+
+    cy.withCtx((ctx) => {
+      ctx.actions.project.setSpecs([])
+      ctx.emitter.toApp()
+    }).then(() => {
+      cy.contains(noSpecErrorTitle).should('be.visible')
+      cy.contains(noSpecErrorIntro).should('be.visible')
+      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(goodFilePath).should('be.visible')
+      cy.location()
+      .its('href')
+      .should('eq', 'http://localhost:4455/__/#/specs')
+    })
+  })
+
   it('browser picker in runner calls mutation with current spec path', () => {
+    cy.__incorrectlyVisitAppWithIntercept()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
