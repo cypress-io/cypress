@@ -10,7 +10,7 @@ interface RunDomainFnOptions {
   env: Cypress.ObjectLike
   fn: string
   skipConfigValidation: boolean
-  state: { isStable: boolean | undefined }
+  state: {}
   isStable: boolean
 }
 
