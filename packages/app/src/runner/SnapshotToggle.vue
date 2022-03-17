@@ -8,8 +8,8 @@
       :class="{
         'rounded-l': idx === 0,
         'rounded-r': idx === messages.length - 1,
-        'text-white bg-purple-500': idx === activeIdx,
-        'text-gray-200 bg-gray-900': idx !== activeIdx
+        'text-white bg-purple-500': idx === activeIndex,
+        'text-gray-200 bg-gray-900': idx !== activeIndex
       }"
       @click="select(message, idx)"
       @keypress.enter.space="select(message, idx)"
@@ -20,7 +20,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 
 interface ToggleMessage {
   text: string
@@ -29,15 +28,14 @@ interface ToggleMessage {
 
 defineProps<{
   messages: ToggleMessage[]
+  activeIndex: number
 }>()
 
 const emit = defineEmits<{
   (e: 'select', value: { idx: number, message: ToggleMessage }): void
 }>()
 
-const activeIdx = ref(0)
 const select = (message: ToggleMessage, idx: number) => {
-  activeIdx.value = idx
   emit('select', { idx, message })
 }
 </script>
