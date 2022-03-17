@@ -101,10 +101,10 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
-async function setupRemote (remotePort, automation, onError) {
+async function setupRemote (remotePort, automation, options) {
   const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
-  const criClient = await CriClient.create(wsUrl, onError)
-  const cdpAutomation = new CdpAutomation(criClient.send, criClient.on, automation)
+  const criClient = await CriClient.create(wsUrl, options.onError)
+  const cdpAutomation = new CdpAutomation(criClient.send, criClient.on, automation, options)
 
   await cdpAutomation.enable()
 }
@@ -176,16 +176,16 @@ export default {
   setup ({
     automation,
     extensions,
-    onError,
     url,
     marionettePort,
     foxdriverPort,
     remotePort,
+    options,
   }) {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, onError),
+      remotePort && setupRemote(remotePort, automation, options),
     ])
   },
 

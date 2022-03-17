@@ -177,7 +177,12 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  constructor (
+    private sendDebuggerCommandFn: SendDebuggerCommand,
+    onFn: OnFn,
+    private automation: Automation,
+    private options: any,
+  ) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
@@ -246,9 +251,18 @@ export class CdpAutomation {
       .filter((cookie) => {
         // Chrome returns all cookies for a URL, even if they wouldn't normally
         // be sent with a request. This standardizes it by filtering out ones
-        // that are secure but not on a secure context (localhost is a secure
-        // context, so it is excepted even if it's http)
-        return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
+        // that are secure but not on a secure context
+
+        if (this.options.experimentalMultiDomain) {
+          // localhost is considered a secure context (even when http:)
+          // and it's required for multi-domain when visiting a secondary
+          // domain so that all its cookies are sent. This may be a
+          // breaking change, so put it behind the flag for now. Need to
+          // investigate further when we remove the experimental flag.
+          return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
+        }
+
+        return !(url.startsWith('http:') && cookie.secure)
       })
     })
   }

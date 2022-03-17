@@ -434,8 +434,8 @@ const _handlePausedRequests = async (client) => {
   })
 }
 
-const _setAutomation = async (client, automation) => {
-  const cdpAutomation = new CdpAutomation(client.send, client.on, automation)
+const _setAutomation = async (client, automation, options) => {
+  const cdpAutomation = new CdpAutomation(client.send, client.on, automation, options)
 
   await cdpAutomation.enable()
 
@@ -623,7 +623,7 @@ export = {
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
 
-    await this._setAutomation(criClient, automation)
+    await this._setAutomation(criClient, automation, options)
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill

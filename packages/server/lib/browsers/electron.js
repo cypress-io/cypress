@@ -51,7 +51,7 @@ const _getAutomation = async function (win, options, parent) {
     })
   }
 
-  const automation = new CdpAutomation(sendCommand, on, parent)
+  const automation = new CdpAutomation(sendCommand, on, parent, options)
 
   await automation.enable()
 
