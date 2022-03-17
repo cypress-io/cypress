@@ -26,10 +26,10 @@ interface ToggleMessage {
   id: string
 }
 
-defineProps<{
+withDefaults(defineProps<{
   messages: ToggleMessage[]
-  activeIndex: number
-}>()
+  activeIndex?: number
+}>(), { activeIndex: 0 })
 
 const emit = defineEmits<{
   (e: 'select', value: { idx: number, message: ToggleMessage }): void
