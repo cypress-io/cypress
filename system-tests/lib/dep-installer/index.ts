@@ -213,15 +213,16 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // This is required to fix `yarn install` for workspace-only packages.
     const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
 
-    // await removeWorkspacePackages(workspaceDeps)
+    // 3. Delete cached workspace packages since the pkg manager will create a fresh symlink during install.
+    await removeWorkspacePackages(workspaceDeps)
 
-    // 3. Fix relative paths in temp dir's lockfile.
+    // 4. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
 
     log(`Writing ${lockFilename} with fixed relative paths to temp dir`)
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
-    // 4. Run `yarn/npm install`.
+    // 5. Run `yarn/npm install`.
     const getCommandFn = hasYarnLock ? getYarnCommand : getNpmCommand
     const cmd = getCommandFn({
       updateLockFile,
@@ -232,12 +233,12 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     await runCmd(cmd)
 
-    // 5. Now that the lockfile is up to date, update workspace dependency paths in the lockfile with monorepo
+    // 6. Now that the lockfile is up to date, update workspace dependency paths in the lockfile with monorepo
     // relative paths so it can be the same for all developers
     log(`Copying ${lockFilename} and fixing relative paths for ${project}`)
     await normalizeLockFileRelativePaths({ project, projectDir, lockFilePath, lockFilename, relativePathToMonorepoRoot })
 
-    // 6. After install, we must now symlink *over* all workspace dependencies, or else
+    // 7. After install, we must now symlink *over* all workspace dependencies, or else
     // `require` calls from installed workspace deps to peer deps will fail.
     await removeWorkspacePackages(workspaceDeps)
     for (const dep of workspaceDeps) {
@@ -250,7 +251,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
       await fs.symlink(targetDir, destDir, 'junction')
     }
 
-    // 7. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
+    // 8. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
     if (persistCacheCb) await persistCacheCb()
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
