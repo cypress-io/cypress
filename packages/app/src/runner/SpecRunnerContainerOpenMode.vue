@@ -11,7 +11,7 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
 import { useUnifiedRunner } from './unifiedRunner'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const props = defineProps<{
   gql: SpecRunnerFragment
@@ -19,6 +19,7 @@ const props = defineProps<{
 
 const specStore = useSpecStore()
 const router = useRouter()
+const route = useRoute()
 
 const { initialized, watchSpec } = useUnifiedRunner()
 
@@ -28,18 +29,18 @@ const specs = computed(() => {
 
 watchSpec(specs)
 
-const redirectToError = () => {
-  router.push({
-    name: 'Specs',
-    params: {
-      unrunnable: router.currentRoute.value.query.file as string,
-    },
-  })
-}
-
 specStore.$subscribe((mutation, state) => {
-  if (state.activeSpec === null) {
-    redirectToError()
+  const file = route.query.file as string
+
+  const shouldRedirect = route.name === 'SpecRunner' && file && state.activeSpec === null
+
+  if (shouldRedirect) {
+    router.push({
+      name: 'Specs',
+      params: {
+        unrunnable: file,
+      },
+    })
   }
 }, {
   immediate: true,
