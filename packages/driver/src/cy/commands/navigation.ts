@@ -63,10 +63,10 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     const currentCommand = cy.queue.state('current')
 
     if (currentCommand?.get('name') === 'switchToDomain') {
-      // If the current command is a switchDomain command, we should have gotten a request on the origin it expect.
+      // If the current command is a switchDomain command, we should have gotten a request on the origin it expects.
       origins = [cy.state('latestActiveDomain')]
     } else if (Cypress.isMultiDomain && cy.queue.isOnLastCommand()) {
-      // If this is multi-doman and the we're on the last command, we should have gotten a request on the origin of one of the parents.
+      // If this is multi-domain and the we're on the last command, we should have gotten a request on the origin of one of the parents.
       origins = cy.state('parentOrigins')
     }
 
@@ -76,7 +76,6 @@ const timedOutWaitingForPageLoad = (ms, log) => {
         ms,
         crossOriginUrl: new URL(anticipatedCrossOriginHref),
         origins,
-        parentOrigins: cy.state('parentOrigins'),
       },
       onFail: log,
     })
@@ -435,6 +434,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
       cy.once('internal:window:load', onInternalWindowLoad)
 
+      // If this request is still pending after the test run, resolve it, no commands were waiting on it's result.
       cy.once('test:after:run', () => {
         if (promise.isPending()) {
           options._log.set('message', '').end()
