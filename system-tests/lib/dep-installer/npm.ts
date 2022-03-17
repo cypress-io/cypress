@@ -1,5 +1,6 @@
 import path from 'path'
 import tempDir from 'temp-dir'
+import { homedir } from 'os'
 
 export function getNpmCommand (opts: {
   yarnV311: boolean
@@ -15,7 +16,8 @@ export function getNpmCommand (opts: {
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 
-  if (opts.isCI) cmd += ' --cache=~/.cy-npm-cache'
+  // homedir() is used instead of '~' because npm does not expand '~'
+  if (opts.isCI) cmd += ` --cache=${homedir()}/.cy-npm-cache`
   else cmd += ` --cache=${path.join(tempDir, 'cy-system-tests-npm-cache', String(Date.now()))}`
 
   return cmd
