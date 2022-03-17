@@ -84,7 +84,7 @@ module.exports = (on, config) => {
 
 See [Recipes](./docs/recipes.md) for more examples.
 
-2. You can specify a glom to locate component spec files. For example, to have them located in `src` folder use:
+2. You can specify a glob to locate component spec files. For example, to have them located in `src` folder use:
 
 ```json
 {

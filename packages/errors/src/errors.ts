@@ -1362,7 +1362,7 @@ export const AllCypressErrors = {
     `
   },
 
-  TEST_FILES_DEPRECATION: (errShape: BreakingErrResult) => {
+  TEST_FILES_RENAMED: (errShape: BreakingErrResult) => {
     const code = errPartial`
     {
       e2e: {
@@ -1382,7 +1382,7 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
-  COMPONENT_FOLDER_DEPRICATION: (errShape: BreakingErrResult) => {
+  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult) => {
     const code = errPartial`
     {
       component: {
