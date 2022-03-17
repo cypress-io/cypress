@@ -49,9 +49,38 @@ There are two shared components involved with links - `BaseLink`, and `ExternalL
 See [the readme in the src/public/shiki/themes directory](./src/public/shiki/themes/ReadMe.md)
 
 
-## Front-end Conventions and Underlying Ideas
+## Front-end Conventions, Underlying Ideas, and Gotchas
 
 These apply to this package, `app`, and `launchpad`, as well as any future work in this Vue-Tailwind-GQL stack.
+
+### Development Workflow
+
+We recommend component-based test driven development. More details in the [Testing Practices](guides/testing-strategy-and-styleguide.md) guide. To make changes to an existing component:
+
+1. Open Cypress and got to the spec that covers the component (often it's 1:1 but sometimes components are tested via their parents)
+1. Update the test to reflect the desired change (or part of it)
+1. Update the component to get the change implemented
+1. Add Percy snapshot for any new unique states covered by the change
+
+To create a new component:
+
+1. Add a component spec file and the component file itself as siblings in the desired location
+1. In the spec file, import and mount the component. If the component depends on a GQL fragment, use `mountFragment` to mount the component. If the component depends on a GQL query, create a wrapper that executes the query and passes the result into the child component via the `gql` prop, using a fragment to access the data in the child.
+
+TODO: in light of gql subscriptions, this might already be out of date, revisit.
+
+### Welcome to Vue 3!
+
+If you are new to Vue 3, there are some new features we are using in this codebase that you should become familiar with.
+
+But first, if you are coming from React to Vue 3, here's a small potential gotcha: the idea of a `ref` in Vue is similar to a `ref` in React but with a major difference: In React, a when a ref's value changes, it doesn't trigger an update or get "noticed", by default. In Vue, a ref is part of the reactivity system and when the value updates, the component knows this and the updated value is reflected wherever the value is referenced. This can mean DOM updates, watchers firing, etc.
+
+### Vue ideas and packages we are using
+
+#### Composition API `<script setup>`
+Link to docs/tutorials for both.
+#### Pinia
+TS-friendly, modularized state management - this replaces Vuex for the small amount of global state we have.
 ### Styles
 #### Tailwind and Windi
 #### Explicit Pixel Values
