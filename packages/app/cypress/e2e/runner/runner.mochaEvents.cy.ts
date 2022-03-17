@@ -17,15 +17,16 @@ function scaffoldCypressInCypressMochaEventsTest (snapToCompare: keyof typeof sn
   const outerRunner = window.top!.window
   outerRunner.bus = bus
 
-  bus.on('assert:cypress:in:cypress', (snapshot) => {
-    const diff = deepDiff(snapshot, snapshots[snapToCompare])
+  bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
+    const expected = snapshots[snapToCompare]
+    const diff = deepDiff(snapshot, expected)
 
     if (Object.keys(diff).length) {
       console.error('snapshot:', JSON.stringify(snapshot, null, 2))
       console.error('Expected snapshots to be identical, but they were not. Difference:', diff)
     }
 
-    expect(Object.keys(diff)).to.have.lengthOf(0)
+    expect(Object.keys(diff).length).to.eq(0)
     done()
   })
 
@@ -82,7 +83,7 @@ describe('src/cypress/runner', { retries: 0 }, () => {
         })
       })
 
-      it.only('fail in [afterEach]', (done) => {
+      it('fail in [afterEach]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
           'src/cypress/runner tests finish with correct state hook failures fail in [afterEach] #1', done)
 
@@ -93,6 +94,62 @@ describe('src/cypress/runner', { retries: 0 }, () => {
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
+      })
+    })
+
+    describe('mocha grep', () => {
+      it('fail with [only]', (done) => {
+        const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+          'src/cypress/runner tests finish with correct state mocha grep fail with [only] #1', done)
+
+        loadSpec({
+          fileName: 'fail-with-only.mochaEvents.cy.js',
+          passCount: 0,
+          failCount: 1
+        }).then((win) => {
+          assertMatchingSnapshot(win)
+        })
+      })
+
+      it('pass with [only]', (done) => {
+        const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+          'src/cypress/runner tests finish with correct state mocha grep pass with [only] #1', done)
+
+        loadSpec({
+          fileName: 'pass-with-only.mochaEvents.cy.js',
+          passCount: 1,
+          failCount: 0
+        }).then((win) => {
+          assertMatchingSnapshot(win)
+        })
+      })
+    })
+  })
+
+  describe('mocha events', () => {
+    it('simple single test', (done) => {
+      const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+        'src/cypress/runner mocha events simple single test #1', done)
+
+      loadSpec({
+        fileName: 'simple-single-test.mochaEvents.cy.js',
+        passCount: 1,
+        failCount: 0
+      }).then((win) => {
+        assertMatchingSnapshot(win)
+      })
+    })
+
+    it('simple three tests', (done) => {
+      const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+        'src/cypress/runner mocha events simple three tests #1', done)
+
+      loadSpec({
+        fileName: 'three-tests-with-hooks.mochaEvents.cy.js',
+        passCount: 3,
+        failCount: 0
+      }).then((win) => {
+        assertMatchingSnapshot(win)
       })
     })
   })

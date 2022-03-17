@@ -91,9 +91,6 @@ function removeUnusedKeysForTestSnapshot<T> (obj: T): T {
 
   for (const [key, value] of Object.entries(obj)) {
     if (key in obj) {
-      if (key === 'timings') {
-        console.log(value)
-      }
       const transform = eventCleanseMap[key]?.(value)
 
       if (!transform) {

@@ -3307,4 +3307,4 @@ export const snapshots = {
       }
     ]
   ]
-}
+} as const
