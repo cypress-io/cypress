@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
+import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'
@@ -92,12 +92,6 @@ export const Query = objectType({
       resolve: (source, args, ctx) => {
         return ctx.coreData.localSettings
       },
-    })
-
-    t.field('currentTestingType', {
-      description: 'The mode the interactive runner was launched in',
-      type: TestingTypeEnum,
-      resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.list.nonNull.field('scaffoldedFiles', {

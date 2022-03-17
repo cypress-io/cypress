@@ -484,7 +484,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
-    // bail if this is our own namespaced socket.io request
+    // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
       if (!this.socketAllowed.isRequestAllowed(req)) {
@@ -492,7 +492,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         socket.end()
       }
 
-      // we can return here either way, if the socket is still valid socket.io will hook it up
+      // we can return here either way, if the socket is still valid socket.io or graphql-ws will hook it up
       return
     }
 

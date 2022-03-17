@@ -38,7 +38,6 @@ export default defineConfig({
   },
   'e2e': {
     baseUrl: 'http://localhost:5555',
-    pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
@@ -57,7 +56,7 @@ export default defineConfig({
   // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
-  socketIoRoute: '/__app-socket.io',
-  socketIoCookie: '__app-socket.io',
+  socketIoRoute: '/__app-socket',
+  socketIoCookie: '__app-socket',
   devServerPublicPathRoute: '/__cypress-app/src',
 })

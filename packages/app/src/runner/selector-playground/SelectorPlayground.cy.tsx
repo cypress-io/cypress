@@ -1,5 +1,6 @@
 import { createEventManager, createTestAutIframe } from '../../../cypress/component/support/ctSupport'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
+import { Clipboard_CopyToClipboardDocument } from '../../generated/graphql-test'
 import SelectorPlayground from './SelectorPlayground.vue'
 import { logger } from '../logger'
 
@@ -89,8 +90,17 @@ describe('SelectorPlayground', () => {
     cy.percySnapshot('Invalid playground selector')
   })
 
-  // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
-  it.skip('focuses and copies selector text', () => {
+  it('focuses and copies selector text', () => {
+    const copyStub = cy.stub()
+
+    cy.stubMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
+      copyStub(text)
+
+      return defineResult({
+        copyTextToClipboard: true,
+      })
+    })
+
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
@@ -100,10 +110,10 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    cy.spy(navigator.clipboard, 'writeText').as('clipboardSpy')
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="playground-copy-tooltip"]').should('be.visible').contains('Copied to clipboard')
-    cy.get('@clipboardSpy').should('have.been.called')
+
+    cy.wrap(copyStub).should('have.been.calledWith', '.foo-bar')
   })
 
   it('prints nothing to console when no selected elements found', () => {

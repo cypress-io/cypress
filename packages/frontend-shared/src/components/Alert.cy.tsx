@@ -4,6 +4,7 @@ import faker from 'faker'
 import Alert from './Alert.vue'
 import { defaultMessages } from '../locales/i18n'
 import { ref } from 'vue'
+import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const messages = defaultMessages.components.alert
 
@@ -240,7 +241,12 @@ describe('playground', () => {
             <button class="bg-white rounded ml-2 px-2">Focusable</button>
           </Alert>
           <Alert status="info" collapsible title="An info alert">Just letting you know what's up.</Alert>
-          <Alert status="warning">Nothing good is happening here!</Alert>
+          <Alert
+            status="warning"
+            icon={ErrorOutlineIcon}
+            icon-classes="icon-dark-orange-400 w-16px h-16px"
+          >
+              Nothing good is happening here!</Alert>
           <Alert icon={CoffeeIcon}
             dismissible
             status="error"

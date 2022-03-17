@@ -36,9 +36,6 @@ Here is the `cypress.json` file at work in this project:
   "supportFile": false,
   // Tell Cypress how to recognize spec files  
   "testFiles": "**/*spec.js",
-  // All the component test files are 
-  // located in this directory and its sub-directory
-  "componentFolder": "src"
 }
 ```
 

@@ -27,10 +27,8 @@
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
 import { SpecPageContainerDocument } from '../../generated/graphql'
-import { getAutIframeModel } from '../../runner'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
-import { togglePlayground } from '../../runner/utils'
 
 gql`
 query SpecPageContainer {
@@ -47,7 +45,6 @@ const isRunMode = window.__CYPRESS_MODE__ === 'run'
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  requestPolicy: 'cache-only',
   pause: isRunMode && window.top === window,
 })
 
@@ -57,13 +54,6 @@ const query = useQuery({
 // this works fine - we know that during run mode, no new specs will
 // be added or removed.
 const specs = window.__RUN_MODE_SPECS__
-
-// @ts-ignore - this is used for exposing the selector playground in e2e tests
-// TODO: migrate this to true e2e test w/o the hack using Cypress-in-Cypress when
-// that is supported.
-window.__showSelectorPlaygroundForTestingPurposes = () => {
-  togglePlayground(getAutIframeModel())
-}
 
 </script>
 

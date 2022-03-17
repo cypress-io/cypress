@@ -18,10 +18,14 @@ Cypress.Commands.add('waitForWizard', () => {
   return cy.get('[data-cy="migration-wizard"]')
 })
 
-function startMigrationFor (project: typeof e2eProjectDirs[number], argv?: string[]) {
+function scaffoldAndVisitLaunchpad (project: typeof e2eProjectDirs[number], argv?: string[]) {
   cy.scaffoldProject(project)
   cy.openProject(project, argv)
   cy.visitLaunchpad()
+}
+
+function startMigrationFor (project: typeof e2eProjectDirs[number], argv?: string[]) {
+  scaffoldAndVisitLaunchpad(project, argv)
   cy.waitForWizard()
 }
 
@@ -523,6 +527,21 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-plugins-modify-config', () => {
+    startMigrationFor('migration-e2e-plugins-modify-config')
+    // No rename, integrationFolder and testFiles are custom (via plugins)
+    cy.get(renameAutoStep).should('not.exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
   it('completes journey for migration-e2e-no-plugins-support-file', () => {
     startMigrationFor('migration-e2e-no-plugins-support-file')
     // defaults, rename all the things
@@ -813,6 +832,22 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       migrateAndVerifyConfig()
     })
   })
+
+  it('completes journey for migration-e2e-legacy-plugins-throws-error', () => {
+    scaffoldAndVisitLaunchpad('migration-e2e-legacy-plugins-throws-error')
+    // no steps are shown - we show the error that surfaced when executing pluginsFile.
+    cy.get(renameAutoStep).should('not.exist')
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('not.exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('not.exist')
+
+    cy.contains('Error Loading Config')
+    // correct location of error
+    cy.get('[data-testid="error-code-frame"]').contains(`cypress/plugins/index.js:2:9`)
+    // correct error from pluginsFile
+    cy.contains(`throw Error('Uh oh, there was an error!')`)
+  })
 })
 
 // TODO: toLaunchpad emitter not working in Cypress in Cypress.
@@ -1095,18 +1130,14 @@ describe('Migrate custom config files', () => {
   })
 
   it('shows error for migration-custom-config-file-migration-already-ocurred', () => {
-    cy.scaffoldProject('migration-custom-config-file-migration-already-ocurred')
-    cy.openProject('migration-custom-config-file-migration-already-ocurred', ['--config-file', 'customConfig.json'])
-    cy.visitLaunchpad()
+    scaffoldAndVisitLaunchpad('migration-custom-config-file-migration-already-ocurred', ['--config-file', 'customConfig.json'])
 
     cy.contains('You are attempting to use Cypress with an older config file: customConfig.json')
     cy.contains('When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: customConfig.config.js')
   })
 
   it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
-    cy.scaffoldProject('migration-custom-config-file-with-existing-v10-config-file')
-    cy.openProject('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
-    cy.visitLaunchpad()
+    scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
     cy.contains('ypress no longer supports customConfig.json, please remove it from your project.')

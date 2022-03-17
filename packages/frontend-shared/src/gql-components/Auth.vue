@@ -34,37 +34,45 @@
   </div>
   <div v-else>
     <Button
-      ref="loginButtonRef"
+      v-if="loginMutationIsPending"
       size="lg"
-      :variant="buttonVariant"
-      :disabled="isLoggingIn || !isOnline"
+      variant="pending"
       aria-live="polite"
-      @click="handleAuth"
+      :disabled="true"
     >
       <template
-        v-if="isLoggingIn"
         #prefix
       >
         <i-cy-loading_x16
           class="animate-spin icon-dark-white icon-light-gray-400"
         />
       </template>
-      {{ buttonMessage }}
+      {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
+    </Button>
+    <Button
+      v-else
+      ref="loginButtonRef"
+      size="lg"
+      variant="primary"
+      aria-live="polite"
+      :disabled="!cloudViewer && !isOnline"
+      @click="handleLoginOrContinue"
+    >
+      {{ cloudViewer ? t('topNav.login.actionContinue') : t('topNav.login.actionLogin') }}
     </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { gql } from '@urql/core'
-import { useMutation, useQuery } from '@urql/vue'
+import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import {
   Auth_LoginDocument,
   Auth_LogoutDocument,
   Auth_ResetAuthStateDocument,
-  Auth_BrowserOpenedDocument,
 } from '../generated/graphql'
 import type {
   AuthFragment,
@@ -119,99 +127,76 @@ mutation Auth_ResetAuthState {
 }
 `
 
-gql`
-query Auth_BrowserOpened {
-  authState {
-    browserOpened
-    name
-    message
-  }
-}
-`
-
 const login = useMutation(Auth_LoginDocument)
 const logout = useMutation(Auth_LogoutDocument)
 const reset = useMutation(Auth_ResetAuthStateDocument)
+
 const loginButtonRef = ref(Button)
+const loginInitiated = ref(false)
 
 onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
 })
 
-const clickedOnce = ref(false)
+onBeforeUnmount(() => {
+  // If a log in was initiated from this component instance, then the auth state
+  // may be polluted, due to the mutation still being fetched or due to
+  // errors returned during the login process. So a reset occurs when
+  // this instance unmounts to cover all scenarios where the LoginModal may be dismissed.
+  //
+  // We only perform the reset for the component that triggered a login
+  // to prevent state conflicts when LoginModals are presented within the launchpad
+  // and app simultaneously.
+  if (loginInitiated.value) {
+    reset.executeMutation({})
+  }
+})
 
 const emit = defineEmits<{
   (event: 'continue', value: boolean): void
 }>()
 
-const viewer = computed(() => props.gql.cloudViewer)
-const isBrowserOpened = computed(() => props.gql.authState.browserOpened)
-const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
-
-const query = useQuery({
-  query: Auth_BrowserOpenedDocument,
-  requestPolicy: 'cache-and-network',
+const cloudViewer = computed(() => {
+  return props.gql.cloudViewer
 })
 
-const handleAuth = async () => {
-  if (viewer.value) {
+const browserOpened = computed(() => {
+  return props.gql.authState.browserOpened
+})
+
+// We determine that a login is pending if there is no current cloudViewer and
+// either a login has been initiated from this component, or the browser has been
+// successfully opened.
+//
+// It is possible for the browser to be open but not due to actions by this component,
+// particularly when LoginModals are presented in both the launchpad and app simultaneously.
+const loginMutationIsPending = computed(() => {
+  return !cloudViewer.value && (loginInitiated.value || browserOpened.value)
+})
+
+const handleLoginOrContinue = async () => {
+  if (cloudViewer.value) {
     emit('continue', true)
 
     return
   }
 
-  clickedOnce.value = true
+  loginInitiated.value = true
 
-  const browserCheckInterval = setInterval(async () => {
-    await query.executeQuery({})
-    if (isBrowserOpened.value) {
-      clearInterval(browserCheckInterval)
-    }
-  }, 1500)
-
-  await login.executeMutation({})
+  login.executeMutation({})
 }
 
-const handleLogout = async () => {
-  await logout.executeMutation({})
+const handleLogout = () => {
+  logout.executeMutation({})
 }
 
-const buttonMessage = computed(() => {
-  if (!isBrowserOpened.value && isLoggingIn.value) {
-    return t('topNav.login.actionOpening')
-  }
+const handleTryAgain = async () => {
+  await reset.executeMutation({})
 
-  if (!clickedOnce.value && !viewer.value) {
-    return t('topNav.login.actionLogin')
-  }
-
-  if (isLoggingIn.value) {
-    return t('topNav.login.actionWaiting')
-  }
-
-  if (viewer.value) {
-    return t('topNav.login.actionContinue')
-  }
-
-  // default
-  return t('topNav.login.actionLogin')
-})
-
-const buttonVariant = computed(() => {
-  if (clickedOnce.value && !viewer.value) {
-    return 'pending'
-  }
-
-  return 'primary'
-})
-
-const handleTryAgain = () => {
-  reset.executeMutation({})
   login.executeMutation({})
 }
 
 const handleCancel = () => {
-  reset.executeMutation({})
   emit('continue', true)
 }
 
