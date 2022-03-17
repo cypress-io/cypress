@@ -248,7 +248,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     }
 
     // 7. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
-    if (persistCacheCb) persistCacheCb()
+    if (persistCacheCb) await persistCacheCb()
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
