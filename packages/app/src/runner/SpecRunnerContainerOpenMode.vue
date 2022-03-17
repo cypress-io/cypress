@@ -5,8 +5,12 @@
       :gql="props.gql"
     />
   </template>
-  <template v-else>
+  <template v-else-if="specStore.activeSpec === null">
     Hello, no spec is found, watcher should catch this and redirect
+  </template>
+
+  <template v-else-if="typeof specStore.activeSpec === 'undefined'">
+    activeSpec is undefined, this is the initial state
   </template>
 </template>
 
