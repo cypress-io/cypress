@@ -156,7 +156,7 @@ function run (ipc, file, projectRoot) {
             return
           }
 
-          runPlugins.runSetupNodeEvents(options, (on, config) => {
+          runPlugins.runSetupNodeEvents(options, testingType, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
             const { devServer } = result.component
@@ -168,7 +168,7 @@ function run (ipc, file, projectRoot) {
         } else if (testingType === 'e2e') {
           const setupNodeEvents = result.e2e && result.e2e.setupNodeEvents || ((on, config) => {})
 
-          runPlugins.runSetupNodeEvents(options, setupNodeEvents)
+          runPlugins.runSetupNodeEvents(options, testingType, setupNodeEvents)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('setupTestingType:reply', {

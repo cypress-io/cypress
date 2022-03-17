@@ -86,7 +86,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       return setupNodeEventsFn(on, config)
     })
 
-    runPlugins.runSetupNodeEvents(foo, setupNodeEventsFn)
+    runPlugins.runSetupNodeEvents(foo, 'e2e', setupNodeEventsFn)
 
     this.ipc.on.withArgs('setupTestingType').yield(config)
 
@@ -110,7 +110,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         return config
       }
 
-      runPlugins.runSetupNodeEvents(config, setupNodeEventsFn)
+      runPlugins.runSetupNodeEvents(config, 'e2e', setupNodeEventsFn)
 
       this.ipc.on.withArgs('load:plugins').yield(config)
 
@@ -193,7 +193,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       }
 
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
-      runPlugins.runSetupNodeEvents(config, setupNodeEventsFn)
+      runPlugins.runSetupNodeEvents(config, 'e2e', setupNodeEventsFn)
 
       this.ipc.on.withArgs('load:plugins').yield(config)
 

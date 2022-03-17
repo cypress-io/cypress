@@ -61,7 +61,7 @@ const props = defineProps<{
 }>()
 
 const specPatterns = computed<string[]>(() => {
-  let patterns = props.gql.config.find((x) => x.field === props.gql.currentTestingType)?.value?.specPattern
+  let patterns = props.gql.config.find((x) => x.field === props.gql.currentTestingType)?.specPattern?.value
 
   if (!patterns) {
     return []

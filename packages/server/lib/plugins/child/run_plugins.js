@@ -56,7 +56,7 @@ class RunPlugins {
     return webpackPreprocessor(options)
   }
 
-  load (initialConfig, setupNodeEvents) {
+  load (initialConfig, testingType, setupNodeEvents) {
     debug('Loading the RunPlugins')
 
     // we track the register calls and then send them all at once
@@ -115,7 +115,7 @@ class RunPlugins {
     .try(() => {
       debug('Calling setupNodeEvents')
 
-      return setupNodeEvents(registerChildEvent, initialConfig)
+      return setupNodeEvents(registerChildEvent, initialConfig[testingType])
     })
     .tap(() => {
       if (!this.registeredEventsByName['file:preprocessor']) {
@@ -123,7 +123,9 @@ class RunPlugins {
         registerChildEvent('file:preprocessor', this.getDefaultPreprocessor(initialConfig))
       }
     })
-    .then((modifiedCfg) => {
+    .then((modifiedCfgByTestingType) => {
+      const modifiedCfg = { ...initialConfig, [testingType]: modifiedCfgByTestingType }
+
       debug('plugins file successfully loaded')
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
@@ -244,14 +246,14 @@ class RunPlugins {
    *
    * @param {Function} setupNodeEventsFn
    */
-  runSetupNodeEvents (config, setupNodeEventsFn) {
+  runSetupNodeEvents (config, testingType, setupNodeEventsFn) {
     debug('project root:', this.projectRoot)
     if (!this.projectRoot) {
       throw new Error('Unexpected: projectRoot should be a string')
     }
 
     debug('passing config %o', config)
-    this.load(config, setupNodeEventsFn)
+    this.load(config, testingType, setupNodeEventsFn)
 
     this.ipc.on('execute:plugins', (event, ids, args) => {
       this.execute(event, ids, args)
