@@ -170,6 +170,22 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
       cy.get('[data-cy="runs"]')
     })
+
+    it('inserts a projectId into their `cypress.config.js` file after clicking Create Project', () => {
+      cy.__incorrectlyVisitAppWithIntercept('/runs')
+      cy.intercept('mutation-SelectCloudProjectModal_CreateCloudProjectDocument').as('CreateCloudProject')
+
+      cy.findByText(defaultMessages.runs.errors.notfound.button).click()
+      cy.get('[aria-modal="true"]').should('exist')
+      cy.get('[data-cy="selectProject"] button').click()
+      cy.findByText('Mock Project').click()
+      cy.findByText(defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
+      cy.get('button').contains('Create project').click()
+
+      cy.wait('@CreateCloudProject').then((interception: Interception) => {
+        expect(interception.request.url).to.include('graphql/mutation-SelectCloudProjectModal_CreateCloudProjectDocument')
+      })
+    })
   })
 
   context('Runs - Unauthorized Project', () => {
