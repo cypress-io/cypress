@@ -238,7 +238,7 @@ describe('delayed navigation', { experimentalSessionSupport: true, defaultComman
   })
 })
 
-// @ts-nocheck / session support is needed for visiting about:blank between tests
+// @ts-ignore / session support is needed for visiting about:blank between tests
 describe('errors', { experimentalSessionSupport: true }, () => {
   it('reset top', () => {
     cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
