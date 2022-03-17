@@ -3,7 +3,7 @@ import tempDir from 'temp-dir'
 
 export function getYarnCommand (opts: {
   yarnV311: boolean
-  updateYarnLock: boolean
+  updateLockFile: boolean
   isCI: boolean
   runScripts: boolean
 }): string {
@@ -13,7 +13,7 @@ export function getYarnCommand (opts: {
     // @see https://yarnpkg.com/cli/install
     if (!opts.runScripts) cmd += ' --mode=skip-build'
 
-    if (!opts.updateYarnLock) cmd += ' --immutable'
+    if (!opts.updateLockFile) cmd += ' --immutable'
 
     return cmd
   }
@@ -22,14 +22,14 @@ export function getYarnCommand (opts: {
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 
-  if (!opts.updateYarnLock) cmd += ' --frozen-lockfile'
+  if (!opts.updateLockFile) cmd += ' --frozen-lockfile'
 
   // yarn v1 has a bug with integrity checking and local cache/dependencies
   // @see https://github.com/yarnpkg/yarn/issues/6407
   cmd += ' --update-checksums'
 
   // in CircleCI, this offline cache can be used
-  if (opts.isCI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
+  if (opts.isCI) cmd += ` --cache-folder=~/.yarn`
   else cmd += ` --cache-folder=${path.join(tempDir, 'cy-system-tests-yarn-cache', String(Date.now()))}`
 
   return cmd

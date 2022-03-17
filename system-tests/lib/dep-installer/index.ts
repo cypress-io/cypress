@@ -4,6 +4,7 @@ import cachedir from 'cachedir'
 import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
+import { getNpmCommand } from './npm'
 
 /**
 * Given a package name, returns the path to the module directory on disk.
@@ -40,16 +41,16 @@ type Dependencies = Record<string, string>
  */
 type SystemTestPkgJson = {
   /**
-   * By default, scaffolding will run `yarn install` if there is a `package.json`.
+   * By default, scaffolding will run install if there is a `package.json`.
    * This option, if set, disables that.
    */
   _cySkipDepInstall?: boolean
   /**
-   * Run the yarn v2-style install command instead of yarn v1-style.
+   * Run the yarn v3-style install command instead of yarn v1-style.
    */
   _cyYarnV311?: boolean
   /**
-   * By default, the automatic `yarn install` will not run postinstall scripts. This
+   * By default, the automatic install will not run postinstall scripts. This
    * option, if set, will cause postinstall scripts to run for this project.
    */
   _cyRunScripts?: boolean
@@ -87,12 +88,12 @@ async function normalizeLockFileRelativePaths (opts: { project: string, projectD
   .replaceAll(relativePathToProjectDir, opts.relativePathToMonorepoRoot)
 
   // write back to the original project dir, not the tmp copy
-  await fs.writeFile(path.join(projects, opts.project, 'yarn.lock'), lockFileContents)
+  await fs.writeFile(path.join(projects, opts.project, opts.lockFilename), lockFileContents)
 }
 
 /**
  * Given a path to a `package.json`, convert any references to development
- * versions of packages to absolute paths, so `yarn` will not reach out to
+ * versions of packages to absolute paths, so `yarn`/`npm` will not reach out to
  * the Internet to obtain these packages once it runs in the temp dir.
  * @returns a list of dependency names that were updated
  */
@@ -125,7 +126,7 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  * Will use `yarn` or `npm` based on the lockfile present.
  */
-export async function scaffoldProjectNodeModules (project: string, updateYarnLock: boolean = !!process.env.UPDATE_YARN_LOCK): Promise<void> {
+export async function scaffoldProjectNodeModules (project: string, updateLockFile: boolean = !!process.env.UPDATE_LOCK_FILE): Promise<void> {
   const projectDir = projectPath(project)
   const relativePathToMonorepoRoot = path.relative(
     path.join(projects, project),
@@ -182,8 +183,10 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
     // 4. Run `yarn/npm install`.
-    const cmd = getYarnCommand({
-      updateYarnLock,
+    const getCommandFn = lockFilename === 'yarn.lock' ? getYarnCommand : getNpmCommand
+
+    const cmd = getCommandFn({
+      updateLockFile,
       yarnV311: pkgJson._cyYarnV311,
       isCI: !!process.env.CI,
       runScripts: pkgJson._cyRunScripts,
