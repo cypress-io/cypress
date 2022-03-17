@@ -120,9 +120,9 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import { Specs_SpecsListFragment, SpecListRowFragment, SpecsList_SpecsChangeDocument } from '../generated/graphql'
+import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
@@ -173,20 +173,6 @@ fragment Specs_SpecsList on Query {
   }
 }
 `
-
-gql`
-subscription SpecsList_specsChange {
-  specsChange {
-    id
-    specs {
-      id
-      ...SpecNode_InlineSpecList
-    }
-  }
-}
-`
-
-useSubscription({ query: SpecsList_SpecsChangeDocument })
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment

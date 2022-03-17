@@ -76,6 +76,8 @@ useSubscription({ query: OnSpecChangeDocument }, (prev, next) => {
 })
 ```
 
+One rule of thumb when using subscriptions is to ensure that it is declared in the view that depends on the data in the subscription that is highest in the hierarchy so that the subscription can be active when it needs to be. This location is often alongside a query rather than a fragment.
+
 ### Client Details:
 
 - [API Docs for useSubscription](https://formidable.com/open-source/urql/docs/api/vue/#usesubscription)

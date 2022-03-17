@@ -129,7 +129,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     cy.withCtx((ctx) => {
       ctx.actions.project.setSpecs([])
-      ctx.emitter.toApp()
+      ctx.emitter.specsChange()
     }).then(() => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')

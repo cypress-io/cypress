@@ -32,8 +32,7 @@
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { gql } from '@urql/core'
-import { GeneratorSuccessFileFragment, GeneratorSuccess_SpecsChangeDocument } from '../../generated/graphql'
-import { useSubscription } from '@urql/vue'
+import type { GeneratorSuccessFileFragment } from '../../generated/graphql'
 
 gql`
 fragment GeneratorSuccessFile on ScaffoldedFile {
@@ -66,20 +65,6 @@ fragment GeneratorSuccess on GenerateSpecResponse {
   }
 }
 `
-
-gql`
-subscription GeneratorSuccess_specsChange {
-  specsChange {
-    id
-    specs {
-      id
-      ...SpecNode_InlineSpecList
-    }
-  }
-}
-`
-
-useSubscription({ query: GeneratorSuccess_SpecsChangeDocument })
 
 defineProps<{
   file: GeneratorSuccessFileFragment['file']

@@ -39,10 +39,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import { SpecPatternsFragment, SpecPatterns_SpecsChangeDocument } from '../generated/graphql'
+import { SpecPatternsFragment } from '../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
-import { useSubscription } from '@urql/vue'
 
 gql`
 fragment SpecPatterns on CurrentProject {
@@ -56,19 +55,6 @@ fragment SpecPatterns on CurrentProject {
   }
 }
 `
-
-gql`
-subscription SpecPatterns_specsChange {
-  specsChange {
-    id
-    specs {
-      id
-    }
-  }
-}
-`
-
-useSubscription({ query: SpecPatterns_SpecsChangeDocument })
 
 const props = defineProps<{
   gql: SpecPatternsFragment
