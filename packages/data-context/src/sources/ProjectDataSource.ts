@@ -226,7 +226,7 @@ export class ProjectDataSource {
 
     try {
       if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-        return false
+        return null
       }
 
       let specPatternSet: string | undefined
