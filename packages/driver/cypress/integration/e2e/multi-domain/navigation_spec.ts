@@ -237,3 +237,31 @@ describe('delayed navigation', { experimentalSessionSupport: true, defaultComman
     })
   })
 })
+
+// @ts-ignore / session support is needed for visiting about:blank between tests
+describe('sub domain window loads before multi-domain command', { experimentalSessionSupport: true }, () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/multi-domain.html')
+    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+  })
+
+  it('establish a foobar spec bridge', () => {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.get('a[data-cy="multi-domain-page"]')
+        }).then(resolve)
+      }, 1000)
+    })
+  })
+
+  it('page load before switchToDomain command when spec bridge is already established', () => {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.get('a[data-cy="multi-domain-page"]')
+        }).then(resolve)
+      }, 2100)// this number should be larger than the delay cross origin domains.
+    })
+  })
+})
