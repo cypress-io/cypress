@@ -1,4 +1,7 @@
 <template>
+  <div class="bg-white top-0 left-0 z-20000 absolute">
+    {{ specStore.specSetEvents }}
+  </div>
   <template v-if="specStore.activeSpec">
     <SpecRunnerOpenMode
       v-if="initialized"
@@ -7,6 +10,7 @@
   </template>
   <template v-else-if="specStore.activeSpec === null">
     Hello, no spec is found, watcher should catch this and redirect
+    {{ specStore.specSetEvents }}
   </template>
 
   <template v-else-if="typeof specStore.activeSpec === 'undefined'">
