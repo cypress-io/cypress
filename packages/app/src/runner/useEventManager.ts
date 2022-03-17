@@ -63,7 +63,7 @@ export function useEventManager () {
     // Clean up the AUT and Reporter every time we leave the route.
     empty(getRunnerElement())
 
-    // TODO: this should be handled by whoever starts it, reporter?
+    // TODO: UNIFY-1318 - this should be handled by whoever starts it, reporter?
     window.UnifiedRunner.shortcuts.stop()
 
     empty(getReporterElement())

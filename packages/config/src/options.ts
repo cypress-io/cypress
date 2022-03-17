@@ -100,7 +100,6 @@ const isValidConfig = (key: string, config: any) => {
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
-// - cypress.schema.json
 //
 // Add options in alphabetical order for better readability
 
@@ -595,6 +594,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
+  },
+  {
+    name: 'slowTestThreshold',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
 ]
 

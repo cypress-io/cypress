@@ -1249,6 +1249,9 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
+  """Status of the currently opened browser"""
+  browserStatusChange: CurrentProject
+
   """"""
   cloudViewerChange: Query
 

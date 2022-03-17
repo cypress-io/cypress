@@ -1,4 +1,5 @@
 import { subscriptionType } from 'nexus'
+import { CurrentProject } from '.'
 import { DevState } from './gql-DevState'
 import { Query } from './gql-Query'
 
@@ -27,6 +28,13 @@ export const Subscription = subscriptionType({
           requestPolicy: 'network-only',
         }
       },
+    })
+
+    t.field('browserStatusChange', {
+      type: CurrentProject,
+      description: 'Status of the currently opened browser',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('browserStatusChange'),
+      resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
   },
 })
