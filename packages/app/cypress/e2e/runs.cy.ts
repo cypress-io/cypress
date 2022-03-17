@@ -1,5 +1,6 @@
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
@@ -58,6 +59,37 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')
       .should('equal', 'http://dummy.cypress.io/runs/4')
+    })
+  })
+
+  context('Runs - Connect Org', () => {
+    it('opens create Org modal after clicking Connect Project button', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
+      cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
+
+      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('[aria-modal="true"]').should('not.exist')
     })
   })
 
@@ -261,9 +293,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
-    it('displays a copy button', { browser: 'electron' }, () => {
-      cy.withCtx(async (ctx) => {
+    it('displays a copy button', () => {
+      cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
+        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
       })
 
       cy.loginUser()
@@ -283,6 +316,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+      })
     })
   })
 

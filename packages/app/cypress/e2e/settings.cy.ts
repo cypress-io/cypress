@@ -42,11 +42,20 @@ describe('App: Settings', () => {
 
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
+      cy.withCtx(async (ctx, o) => {
+        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+      })
+
       cy.startAppServer('e2e')
       cy.visitApp()
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
+      cy.findByText('Copy').click()
+      cy.findByText('Copied!').should('be.visible')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('abc123')
+      })
     })
 
     it('shows the Record Keys section', () => {
@@ -153,7 +162,6 @@ describe('App: Settings', () => {
         cy.get('.bg-teal-100').contains('specFilePattern')
         cy.get('.bg-teal-100').contains('supportFile')
         cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
-        cy.get('.bg-yellow-100').contains('KONFIG_ENV')
         cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
         cy.get('.bg-yellow-100').contains('INTERNAL_GRAPHQL_PORT')
         cy.get('.bg-red-50').contains('4455')

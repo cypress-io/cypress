@@ -32,7 +32,9 @@ cypress.run({
 
 // provide only some config options
 const runConfig: Cypress.ConfigOptions = {
-  baseUrl: 'http://localhost:8080',
+  e2e: {
+    baseUrl: 'http://localhost:8080',
+  },
   env: {
     login: false
   },

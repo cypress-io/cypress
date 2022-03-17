@@ -155,7 +155,7 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
-    this.autIframe.showInitialBlankContents()
+    this.autIframe.showInitialBlankContentsE2E()
 
     const $specIframe = $('<iframe />', {
       id: `Your Spec: '${specSrc}'`,

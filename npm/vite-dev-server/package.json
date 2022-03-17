@@ -9,26 +9,30 @@
     "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "cy:run-signature": "yarn cy:run --config=\"{\\\"pluginsFile\\\":\\\"cypress/new-signature/plugins.js\\\"}\"",
-    "test": "yarn cy:run && yarn cy:run-signature",
+    "cy:run-legacy": "yarn cy:run --config-file ./cypress.config.legacy.ts",
+    "test": "yarn cy:run && yarn cy:run-legacy",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "debug": "^4.3.2",
-    "get-port": "^5.1.1"
+    "debug": "4.3.3",
+    "find-up": "6.3.0",
+    "get-port": "5.1.1",
+    "local-pkg": "0.4.1",
+    "pathe": "0.2.0"
   },
   "devDependencies": {
     "@cypress/react": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
     "@testing-library/cypress": "7.0.4",
-    "@vitejs/plugin-vue": "1.2.4",
+    "@vitejs/plugin-vue": "2.2.4",
     "@vue/compiler-sfc": "3.2.31",
     "cypress": "0.0.0-development",
     "eslint-plugin-vue": "7.18.0",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
     "react": "17.0.2",
-    "vite": "2.5.0",
+    "vite": "2.8.4",
+    "vite-plugin-inspect": "0.4.3",
     "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0"
   },

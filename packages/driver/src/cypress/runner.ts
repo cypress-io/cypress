@@ -3,7 +3,7 @@ import _ from 'lodash'
 import dayjs from 'dayjs'
 import Promise from 'bluebird'
 
-import $Log from './log'
+import { LogUtils } from './log'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
@@ -1608,7 +1608,7 @@ export default {
       },
 
       setNumLogs (num) {
-        return $Log.setCounter(num)
+        return LogUtils.setCounter(num)
       },
 
       getEmissions () {
@@ -1663,13 +1663,13 @@ export default {
         _runner.removeAllListeners()
       },
 
-      getDisplayPropsForLog: $Log.getDisplayProps,
+      getDisplayPropsForLog: LogUtils.getDisplayProps,
 
       getConsolePropsForLogById (logId) {
         const attrs = _logsById[logId]
 
         if (attrs) {
-          return $Log.getConsoleProps(attrs)
+          return LogUtils.getConsoleProps(attrs)
         }
       },
 
@@ -1677,7 +1677,7 @@ export default {
         const attrs = _logsById[logId]
 
         if (attrs) {
-          return $Log.getSnapshotProps(attrs)
+          return LogUtils.getSnapshotProps(attrs)
         }
 
         return
@@ -1716,7 +1716,7 @@ export default {
                 // now, so lets store that
                 attrs._hasBeenCleanedUp = true
 
-                return $Log.reduceMemory(attrs)
+                return LogUtils.reduceMemory(attrs)
               })
             })
 
@@ -1791,7 +1791,7 @@ const mixinLogs = (test) => {
     const logs = test[type]
 
     if (logs) {
-      test[type] = _.map(logs, $Log.toSerializedJSON)
+      test[type] = _.map(logs, LogUtils.toSerializedJSON)
     }
   })
 }

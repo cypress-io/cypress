@@ -11,8 +11,21 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('copyTextToClipboard', {
+      type: 'Boolean',
+      description: 'add the passed text to the local clipboard',
+      args: {
+        text: nonNull(stringArg()),
+      },
+      resolve: (_, { text }, ctx) => {
+        ctx.electronApi.copyTextToClipboard(text)
+
+        return true
+      },
+    })
+
     t.field('reinitializeCypress', {
-      type: 'Query',
+      type: Query,
       description: 'Re-initializes Cypress from the initial CLI options',
       resolve: async (_, args, ctx) => {
         await ctx.reinitializeCypress(ctx.modeOptions)
@@ -234,9 +247,6 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
-        ctx.emitter.toApp()
-        ctx.emitter.toLaunchpad()
-
         return {}
       },
     })
@@ -246,9 +256,6 @@ export const mutation = mutationType({
       description: 'Log out of Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
-
-        ctx.emitter.toApp()
-        ctx.emitter.toLaunchpad()
 
         return {}
       },
@@ -339,7 +346,7 @@ export const mutation = mutationType({
       resolve (_, args, ctx) {
         ctx.actions.auth.resetAuthState()
 
-        return ctx.appData
+        return {}
       },
     })
 
@@ -462,7 +469,7 @@ export const mutation = mutationType({
       description: 'Initialize the migration wizard to the first step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.initialize()
+        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
 
         return {}
       },
@@ -633,6 +640,16 @@ export const mutation = mutationType({
       type: Query,
       description: `Dismisses a warning displayed by the frontend`,
       resolve: (source) => {
+        return {}
+      },
+    })
+
+    t.field('pingBaseUrl', {
+      type: Query,
+      description: 'Ping configured Base URL',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.project.pingBaseUrl()
+
         return {}
       },
     })

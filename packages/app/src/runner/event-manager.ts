@@ -84,7 +84,7 @@ export class EventManager {
       const connected = isConnected ? automation.CONNECTED : automation.MISSING
 
       // legacy MobX integration
-      // TODO: can we delete this, or does the driver depend on this somehow?
+      // TODO: UNIFY-1318 - can we delete this, or does the driver depend on this somehow?
       this.Mobx.runInAction(() => {
         state.automation = connected
       })
@@ -460,7 +460,7 @@ export class EventManager {
     })
 
     Cypress.on('log:added', (log) => {
-      // TODO: Race condition in unified runner - we should not need this null check
+      // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
       if (!Cypress.runner) {
         return
       }
@@ -473,7 +473,7 @@ export class EventManager {
     })
 
     Cypress.on('log:changed', (log) => {
-      // TODO: Race condition in unified runner - we should not need this null check
+      // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
       if (!Cypress.runner) {
         return
       }
@@ -532,7 +532,7 @@ export class EventManager {
     driverToLocalEvents.forEach((event) => {
       Cypress.on(event, (...args: unknown[]) => {
         // @ts-ignore
-        // TODO: strongly typed event emitter.
+        // TODO: UNIFY-1318 - strongly typed event emitter.
         return this.emit(event, ...args)
       })
     })

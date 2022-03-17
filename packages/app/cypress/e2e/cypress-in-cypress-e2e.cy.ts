@@ -7,10 +7,10 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
-    cy.visitApp()
   })
 
   it('test e2e', () => {
+    cy.visitApp()
     cy.contains('dom-content.spec').click()
     cy.location().should((location) => {
       expect(location.hash).to.contain('dom-content.spec')
@@ -48,6 +48,18 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     cy.findByTestId('playground-num-elements').contains('3 Matches')
 
+    // This validates that each matching element is covered by the playground highlighting
+    cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+      cy.get('li').each(($highlightedItem) => {
+        const el = $highlightedItem[0]
+        const rect = el.getBoundingClientRect()
+
+        const elAtPoint = el.ownerDocument.elementFromPoint(rect.left, rect.top)
+
+        expect(el).not.eq(elAtPoint)
+      })
+    })
+
     cy.findByLabelText('Selector Methods').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
@@ -64,6 +76,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
   })
 
   it('navigation between specs and other parts of the app works', () => {
+    cy.visitApp()
     cy.contains('dom-content.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
@@ -80,5 +93,68 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.contains('a', 'Specs').click()
     cy.contains('dom-content.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+  })
+
+  it('redirects to the specs list with error if a spec is not found when navigating', () => {
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
+
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${badFilePath}`)
+    cy.contains(noSpecErrorTitle).should('be.visible')
+    cy.contains(noSpecErrorIntro).should('be.visible')
+    cy.contains(noSpecErrorExplainer).should('be.visible')
+    cy.contains(badFilePath).should('be.visible')
+    cy.location()
+    .its('href')
+    .should('eq', 'http://localhost:4455/__/#/specs')
+
+    cy.percySnapshot()
+
+    // should clear after reload
+    cy.reload()
+    cy.contains(noSpecErrorTitle).should('not.exist')
+  })
+
+  it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+
+    const goodFilePath = 'cypress/e2e/dom-content.spec.js'
+
+    // TODO: Figure out why test is flaky without wait
+    // see: https://cypress-io.atlassian.net/browse/UNIFY-1294
+    cy.wait(2000)
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
+
+    cy.contains('Dom Content').should('be.visible')
+
+    cy.withCtx((ctx) => {
+      ctx.actions.project.setSpecs([])
+      ctx.emitter.toApp()
+    }).then(() => {
+      cy.contains(noSpecErrorTitle).should('be.visible')
+      cy.contains(noSpecErrorIntro).should('be.visible')
+      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(goodFilePath).should('be.visible')
+      cy.location()
+      .its('href')
+      .should('eq', 'http://localhost:4455/__/#/specs')
+    })
+  })
+
+  it('should show blank page', () => {
+    cy.visitApp()
+    cy.contains('blank-contents.spec')
+    .click()
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the blank page')
+  })
+
+  it('should show visit failure blank page', () => {
+    cy.visitApp()
+    cy.contains('blank-contents.spec')
+    .click()
+
+    cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
+    cy.percySnapshot()
   })
 })
