@@ -41,7 +41,7 @@ export function useUnifiedRunner () {
         if (!activeSpecInSpecsList) {
           // the specs list no longer contains the spec being shown
           // so set active state to null and let the UI handle it
-          specStore.setActiveSpec(null, 'specs.value watcher')
+          specStore.setActiveSpec(null)
         }
       })
 
@@ -56,7 +56,7 @@ export function useUnifiedRunner () {
           selectorPlaygroundStore.setShow(false)
         }
 
-        specStore.setActiveSpec(spec ?? null, `route.query.file - ${queryParam} - ${specs.value.map((item) => item.relative)}`)
+        specStore.setActiveSpec(spec ?? null)
       }, { immediate: true, flush: 'post' })
     },
   }
