@@ -56,7 +56,7 @@ export function useUnifiedRunner () {
           selectorPlaygroundStore.setShow(false)
         }
 
-        specStore.setActiveSpec(spec ?? null, `route.query.file - ${queryParam} - ${specs.value.map((item) => item.baseName)}`)
+        specStore.setActiveSpec(spec ?? null, `route.query.file - ${queryParam} - ${specs.value.map((item) => item.relative)}`)
       }, { immediate: true, flush: 'post' })
     },
   }
