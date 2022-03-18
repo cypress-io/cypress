@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - fix-beta-build-caching
+        - use-m1-runners
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ use-m1-runners, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ use-m1-runners, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -96,6 +96,10 @@ executors:
     resource_class: windows.medium
     environment:
       PLATFORM: windows
+
+  mac-arm64:
+    machine: true
+    resource_class:  cypress-io/macstadium
 
 commands:
   restore_workspace_binaries:
@@ -1633,7 +1637,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-beta-build-caching" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "use-m1-runners" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2318,8 +2322,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    # maybe run all unit tests?
-
     - create-build-artifacts:
         name: darwin-create-build-artifacts
         context:
@@ -2334,6 +2336,41 @@ mac-workflow: &mac-workflow
     - test-kitchensink:
         name: darwin-test-kitchensink
         executor: mac
+        requires:
+          - darwin-build
+
+mac-arm64-workflow: &mac-arm64-workflow
+  jobs:
+    - node_modules_install:
+        name: darwin-node-modules-install
+        executor: mac-arm64
+        only-cache-for-root-user: true
+
+    - build:
+        name: darwin-build
+        executor: mac-arm64
+        requires:
+          - darwin-node-modules-install
+
+    - lint:
+        name: darwin-lint
+        executor: mac-arm64
+        requires:
+          - darwin-build
+
+    - create-build-artifacts:
+        name: darwin-create-build-artifacts
+        context:
+          - test-runner:sign-mac-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: mac-arm64
+        requires:
+          - darwin-build
+
+    - test-kitchensink:
+        name: darwin-test-kitchensink
+        executor: mac-arm64
         requires:
           - darwin-build
 
