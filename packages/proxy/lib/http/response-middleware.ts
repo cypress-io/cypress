@@ -436,15 +436,19 @@ const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }) => {
 
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
-  const needsMultiDomainHandling = this.config.experimentalMultiDomain && determineIfNeedsMultiDomainHandling(this)
-  const browser = this.getCurrentBrowser() || { family: null }
-  const url = new URL(this.req.proxiedUrl)
-  const isLocalhost = uri.isLocalhost(url)
-
-  debug('force SameSite=None?', needsMultiDomainHandling)
 
   if (cookies) {
-    ([] as string[]).concat(cookies).forEach((cookie) => {
+    const needsMultiDomainHandling = (
+      this.config.experimentalMultiDomain
+      && determineIfNeedsMultiDomainHandling(this)
+    )
+    const browser = this.getCurrentBrowser() || { family: null }
+    const url = new URL(this.req.proxiedUrl)
+    const isLocalhost = uri.isLocalhost(url)
+
+    debug('force SameSite=None?', needsMultiDomainHandling)
+
+    ;([] as string[]).concat(cookies).forEach((cookie) => {
       if (needsMultiDomainHandling) {
         cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url })
       }
