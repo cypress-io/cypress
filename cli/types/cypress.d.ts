@@ -2834,11 +2834,6 @@ declare namespace Cypress {
      */
     blockHosts: null | string | string[]
     /**
-     * Path to folder containing component test files.
-     * @deprecated
-     */
-    componentFolder: false | string
-    /**
      * A unique ID for the project used for recording
      */
     projectId: null | string

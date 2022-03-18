@@ -20,7 +20,6 @@
           :class="{'pointer-events-none': isDragging}"
         />
       </template>
-      <!-- TODO(mark): UNIFY-1078 - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel2>
         <HideDuringScreenshot
           class="h-full"
@@ -55,7 +54,7 @@
           />
           <AutomationElement />
           <!--
-            TODO: Figure out bugs in automation lifecycle
+            TODO: UNIFY-1341 - Figure out bugs in automation lifecycle
             Put these guys back in.
             <AutomationMissing v-if="runnerUiStore.automationStatus === 'MISSING'" />
             <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
