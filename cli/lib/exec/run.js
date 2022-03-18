@@ -165,10 +165,14 @@ module.exports = {
     })
 
     function run () {
-      let args
-
       try {
-        args = processRunOptions(options)
+        const args = processRunOptions(options)
+
+        debug('run to spawn.start args %j', args)
+
+        return spawn.start(args, {
+          dev: options.dev,
+        })
       } catch (err) {
         if (err.details) {
           return exitWithError(err.details)()
@@ -176,12 +180,6 @@ module.exports = {
 
         throw err
       }
-
-      debug('run to spawn.start args %j', args)
-
-      return spawn.start(args, {
-        dev: options.dev,
-      })
     }
 
     if (options.dev) {

@@ -69,24 +69,22 @@ const processOpenOptions = (options = {}) => {
 module.exports = {
   processOpenOptions,
   start (options = {}) {
-    let args
-
-    try {
-      args = processOpenOptions(options)
-    } catch (err) {
-      if (err.details) {
-        return exitWithError(err.details)()
-      }
-
-      throw err
-    }
-
     function open () {
-      return spawn.start(args, {
-        dev: options.dev,
-        detached: Boolean(options.detached),
-        stdio: 'inherit',
-      })
+      try {
+        const args = processOpenOptions(options)
+
+        return spawn.start(args, {
+          dev: options.dev,
+          detached: Boolean(options.detached),
+          stdio: 'inherit',
+        })
+      } catch (err) {
+        if (err.details) {
+          return exitWithError(err.details)()
+        }
+
+        throw err
+      }
     }
 
     if (options.dev) {

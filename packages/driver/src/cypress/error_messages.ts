@@ -25,7 +25,7 @@ function removeLeadingSlash (str: string) {
   return str.substring(li + 1)
 }
 
-const formatConfigFile = (projectRoot: string, configFile: string) => {
+const formatConfigFile = (projectRoot: Cypress.Config['projectRoot'], configFile: Cypress.Config['configFile']) => {
   configFile = removeLeadingSlash(configFile.replace(projectRoot, ''))
 
   return `\`${format(configFile)}\``

@@ -36,11 +36,7 @@ export const getSpecUrl = ({
   return specUrl
 }
 
-export const checkSupportFile = async ({
-  supportFile,
-}: {
-  supportFile?: string | boolean
-}) => {
+export const checkSupportFile = async (supportFile: Cypress.Config['supportFile']) => {
   if (supportFile && typeof supportFile === 'string') {
     const found = await fs.pathExists(supportFile)
 
