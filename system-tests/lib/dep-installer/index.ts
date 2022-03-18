@@ -70,7 +70,7 @@ async function copyNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: st
 
   return async () => {
     try {
-      await fs.copy(tmpNodeModulesDir, cacheDir, { dereference: true }).then(() => {})
+      await fs.copy(tmpNodeModulesDir, cacheDir, { dereference: true })
     } catch (err) {
       if (err.message === 'Source and destination must not be the same') return
 
