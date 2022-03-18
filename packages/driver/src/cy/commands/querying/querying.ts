@@ -279,8 +279,17 @@ export default (Commands, Cypress, cy, state) => {
             scope = elementsWithShadow.concat(root)
           }
 
-          $el = cy.$$(selector, scope)
-
+          try {
+            $el = cy.$$(selector, scope)
+          } catch (err) {
+            if (err?.name === 'SecurityError' && Cypress.isMultiDomain) {
+              // If SecurityErrors happen in multiDomain, it is likely due to having already navigated
+              // away from the document in question. The document in reference here is stale, causing
+              // Security/cross origin errors in some browsers. To work around this, set the $el
+              // to an empty jQuery object to have referencing commands time out as expected.
+              $el = Cypress.$(null)
+            }
+          }
           // jQuery v3 has removed its deprecated properties like ".selector"
           // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
           // but our error messages use this property to actually show the missing element
