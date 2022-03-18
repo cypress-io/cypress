@@ -444,9 +444,7 @@ export default function (Commands, Cypress, cy, state, config) {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window', 'document'] }, {
-    screenshot (subject, name, options: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> = {}) {
-      let userOptions = options
-
+    screenshot (subject, name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> = {}) {
       if (_.isObject(name)) {
         userOptions = name
         name = null
@@ -455,7 +453,7 @@ export default function (Commands, Cypress, cy, state, config) {
       // make sure when we capture the entire test runner
       // we are not limited to "within" subject
       // https://github.com/cypress-io/cypress/issues/14253
-      if (options.capture !== 'runner') {
+      if (userOptions.capture !== 'runner') {
         const withinSubject = state('withinSubject')
 
         if (withinSubject && $dom.isElement(withinSubject)) {
@@ -466,16 +464,16 @@ export default function (Commands, Cypress, cy, state, config) {
       // TODO: handle hook titles
       const runnable = state('runnable')
 
-      const _options: InternalScreenshotOptions = _.defaults({}, userOptions, {
+      const options: InternalScreenshotOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
 
       const isWin = $dom.isWindow(subject)
 
-      let screenshotConfig: any = _.pick(_options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
+      let screenshotConfig: any = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
 
-      screenshotConfig = $Screenshot.validate(screenshotConfig, 'screenshot', _options._log)
+      screenshotConfig = $Screenshot.validate(screenshotConfig, 'screenshot', options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 
       // set this regardless of options.log b/c its used by the
@@ -491,10 +489,10 @@ export default function (Commands, Cypress, cy, state, config) {
         consoleProps.name = name
       }
 
-      if (_options.log) {
-        _options._log = Cypress.log({
+      if (options.log) {
+        options._log = Cypress.log({
           message: name,
-          timeout: _options.timeout,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
@@ -503,7 +501,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (!isWin && subject && subject.length > 1) {
         $errUtils.throwErrByPath('screenshot.multiple_elements', {
-          log: _options._log,
+          log: options._log,
           args: { numElements: subject.length },
         })
       }
@@ -518,8 +516,8 @@ export default function (Commands, Cypress, cy, state, config) {
         name,
         subject,
         runnable,
-        log: _options._log,
-        timeout: _options.timeout,
+        log: options._log,
+        timeout: options.timeout,
       })
       .then((props) => {
         const { duration, path, size } = props

@@ -761,9 +761,9 @@ describe('src/cy/commands/screenshot', () => {
         cy.get('.short-element').within(() => {
           cy.screenshot({ capture: 'runner' })
         }).then(() => {
-          // the runner was captured
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
+          // the runner was captured ("appOnly === true" means to hide the runner UI)
+          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.false
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('runner')
         })
       })
 
