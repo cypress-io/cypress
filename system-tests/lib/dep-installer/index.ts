@@ -53,12 +53,7 @@ async function ensureCacheDir (cacheDir: string) {
  * Symlink the cached `node_modules` directory to the temp project directory's `node_modules`.
  */
 async function symlinkNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: string): Promise<void> {
-  try {
-    await fs.symlink(cacheDir, tmpNodeModulesDir, 'junction')
-  } catch (err) {
-    // TODO: this looks wrong, shouldn't it re-throw sometimes?
-    if (err.code !== 'EEXIST') return
-  }
+  await fs.symlink(cacheDir, tmpNodeModulesDir, 'junction')
 
   log(`node_modules symlink created at ${tmpNodeModulesDir}`)
 }
