@@ -10,9 +10,6 @@ defaults: &defaults
     only-cache-for-root-user:
       type: boolean
       default: false
-    resource_class:
-      type: string
-      default: medium
   executor: <<parameters.executor>>
   environment: &defaultsEnvironment
     ## set specific timezone
@@ -102,7 +99,8 @@ executors:
 
   mac-arm64:
     machine: true
-    resource_class:  cypress-io/macstadium
+    # you may need to add this resource_class to the job itself if it sets a default value for resource_class
+    # resource_class: cypress-io/macstadium
 
 commands:
   restore_workspace_binaries:
@@ -991,6 +989,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - checkout
@@ -1646,6 +1647,11 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
@@ -2344,19 +2350,15 @@ mac-arm64-workflow: &mac-arm64-workflow
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: mac-arm64
+        resource_class: cypress-io/macstadium
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
         executor: mac-arm64
+        resource_class: cypress-io/macstadium
         requires:
           - darwin-arm64-node-modules-install
-
-    - lint:
-        name: darwin-arm64-lint
-        executor: mac-arm64
-        requires:
-          - darwin-arm64-build
 
     - create-build-artifacts:
         name: darwin-arm64-create-build-artifacts
@@ -2365,12 +2367,14 @@ mac-arm64-workflow: &mac-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac-arm64
+        resource_class: cypress-io/macstadium
         requires:
           - darwin-arm64-build
 
     - test-kitchensink:
         name: darwin-arm64-test-kitchensink
         executor: mac-arm64
+        resource_class: cypress-io/macstadium
         requires:
           - darwin-arm64-build
 
