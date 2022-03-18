@@ -14,7 +14,7 @@ import { client } from '@packages/socket/lib/browser'
 import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
-import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys.ts'
 
 import { urqlSchema } from '../generated/urql-introspection.gen'
 
