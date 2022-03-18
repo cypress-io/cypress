@@ -1298,7 +1298,7 @@ export class ProjectLifecycleManager {
       return this.ctx.actions.project.setSpecsFoundBySpecPattern({
         path: this.projectRoot,
         testingType: this._currentTestingType,
-        specPattern: finalConfig[this._currentTestingType]?.specPattern,
+        specPattern: this.ctx.modeOptions.spec || finalConfig[this._currentTestingType]?.specPattern,
         excludeSpecPattern: finalConfig[this._currentTestingType]?.excludeSpecPattern,
         additionalIgnorePattern: this._currentTestingType === 'component' ? finalConfig.e2e?.specPattern : undefined,
       })
