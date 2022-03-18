@@ -60,11 +60,11 @@ export class MigrationDataSource {
 
   async getComponentTestingMigrationStatus () {
     debug('getComponentTestingMigrationStatus: start')
-    const componentFolder = getComponentFolder(this.legacyConfig)
-
     if (!this.legacyConfig || !this.ctx.currentProject) {
       throw Error('Need currentProject and config to continue')
     }
+
+    const componentFolder = getComponentFolder(this.legacyConfig)
 
     // no component folder, so no specs to migrate
     // this should never happen since we never show the
