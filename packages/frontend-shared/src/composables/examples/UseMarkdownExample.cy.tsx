@@ -1,3 +1,4 @@
+import { ExternalLink_OpenExternalDocument } from '../../generated/graphql'
 import UseMarkdownExample from './UseMarkdownExample.vue'
 
 describe('useMarkdown', () => {
@@ -30,6 +31,10 @@ const heres = {
 }
 \`\`\`
 
+[Simple Link](www.test.com)
+[\`Code Link\`](www.code.com)
+
+
     `
 
     cy.mount(<UseMarkdownExample
@@ -39,5 +44,24 @@ const heres = {
 
     cy.get('ul').should('have.class', 'list-disc')
     cy.get('code').first().should('have.class', 'bg-pink-200').and('have.class', 'text-pink-600')
+
+    const openExternalStub = cy.stub()
+
+    cy.stubMutationResolver(ExternalLink_OpenExternalDocument, (defineResult, { url }) => {
+      openExternalStub(url)
+
+      return defineResult({
+        openExternal: true,
+      })
+    })
+
+    cy.contains('a', 'Simple Link').click()
+    cy.wrap(openExternalStub).should('have.been.calledWith', 'www.test.com')
+
+    cy.contains('a', 'Code Link').within(() => {
+      cy.get('code').click()
+    })
+
+    cy.wrap(openExternalStub).should('have.been.calledWith', 'www.code.com')
   })
 })
