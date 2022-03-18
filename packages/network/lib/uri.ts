@@ -91,11 +91,15 @@ export function getPath (urlToCheck) {
 const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
 
 export function isLocalhost (url: URL) {
-  return Boolean(
+  return (
+    // https://datatracker.ietf.org/doc/html/draft-west-let-localhost-be-localhost#section-2
     url.hostname === 'localhost'
-  // [::1] is the IPv6 localhost address.
-  || url.hostname === '[::1]'
-  // 127.0.0.0/8 are considered localhost for IPv4.
-  || url.hostname.match(localhostIPRegex),
+    || url.hostname.endsWith('.localhost')
+    // [::1] is the IPv6 localhost address
+    // See https://datatracker.ietf.org/doc/html/rfc4291#section-2.5.3
+    || url.hostname === '[::1]'
+    // 127.0.0.0/8 are considered localhost for IPv4
+    // See https://datatracker.ietf.org/doc/html/rfc5735 (Page 3)
+    || localhostIPRegex.test(url.hostname)
   )
 }
