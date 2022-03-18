@@ -46,8 +46,6 @@ export const useRunnerStyle = ({
   })
 
   const containerHeight = computed(() => {
-    // TODO: in UNIFY-595 the header's contents will be finalized
-    // at narrow widths content will start to wrap
     const autHeaderHeight = 70
 
     const nonAutHeight = autHeaderHeight + (autMargin * 2)

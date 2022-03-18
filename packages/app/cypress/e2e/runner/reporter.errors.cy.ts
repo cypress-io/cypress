@@ -806,15 +806,13 @@ describe('errors ui', {
   it('unexpected errors', () => {
     const verify = loadErrorSpec({
       fileName: 'unexpected.cy.js',
-      failCount: 1,
+      failCount: 2,
     })
 
-    // FIXME: the eval doesn't seem to take effect and overwrite the method
-    // so it ends up not failing properly
-    // verify('Cypress method error', {
-    //   verifyFn: verifyInternalFailure,
-    //   method: 'Cypress.LocalStorage._isSpecialKeyword',
-    // })
+    verify('Cypress method error', {
+      verifyFn: verifyInternalFailure,
+      method: 'Cypress.LocalStorage.clear',
+    })
 
     verify('internal cy error', {
       verifyFn: verifyInternalFailure,
