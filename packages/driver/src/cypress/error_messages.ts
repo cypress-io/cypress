@@ -994,7 +994,7 @@ export default {
 
         A cross origin request for \`${crossOriginUrl.href}\` was detected.
 
-        To handle cross origin requests, they must be immediately followed by a switchToDomain command:
+        To handle cross origin requests, they must be immediately followed by a ${cmd('switchToDomain')} command:
 
         \`cy.switchToDomain('${crossOriginUrl.origin}', () => { <cross origin commands go here> })\`
 
