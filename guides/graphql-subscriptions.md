@@ -75,12 +75,14 @@ useSubscription({ query: OnSpecChangeDocument }, (prev, next) => {
   return next
 })
 ```
+
 ### Client Details:
 
 - [API Docs for useSubscription](https://formidable.com/open-source/urql/docs/api/vue/#usesubscription)
 - [Subscriptions overview](https://formidable.com/open-source/urql/docs/advanced/subscriptions/)
 
- One thing to be aware of, is the subscription is only mounted/responded to when the containing component is mounted on the page.
+One thing to be aware of, is the subscription is only mounted/responded to when the containing component is mounted on the page. Therefore, one rule of thumb when using subscriptions is to ensure that they are declared in the subscription dependent view that is highest in the hierarchy so that the subscription can be active when it needs to be. This location is often alongside a query rather than a fragment.
+
 
 ### Server Docs
 
