@@ -257,6 +257,18 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
   }
 }
 
+/**
+ * Create symlinks to very commonly used (in example projects) `node_modules`.
+ *
+ * This is done because many `projects` use the same modules, like `lodash`, and it's not worth it
+ * to increase CI install times just to have it explicitly specified by `package.json`. A symlink
+ * is faster than a real `npm install`.
+ *
+ * Adding modules here *decreases the quality of test coverage* because it allows test projects
+ * to make assumptions about what modules are available that don't hold true in the real world. So
+ * *do not add a module here* unless you are really sure that it should be available in every
+ * single test project.
+ */
 export async function scaffoldCommonNodeModules () {
   await Promise.all([
     '@cypress/code-coverage',
