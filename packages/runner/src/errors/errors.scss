@@ -1,0 +1,104 @@
+.runner {
+  &.automation-failure,
+  &.no-spec {
+    background: #f8f8f8;
+    box-shadow: none;
+    left: 0;
+  }
+
+  &.automation-failure,
+  &.no-spec {
+    background: #f8f8f8;
+    box-shadow: none;
+  }
+
+  .automation-message,
+  .no-spec-message {
+    padding: 100px 50px 20px;
+    text-align: center;
+
+    p {
+      color: #333;
+      font-size: 200%;
+
+      &.muted {
+        color: #aaa;
+        font-size: 120%;
+      }
+    }
+
+    button {
+      margin: 20px 0 0;
+
+      i {
+        margin-right: 5px;
+      }
+    }
+
+    .dropdown button i,
+    .dropdown-menu li i {
+      margin-right: 5px;
+    }
+
+    .browser-icon {
+      width: 15px;
+      height: 15px;
+      position: relative;
+      top: -1px;
+
+      &.fa-globe {
+        top: 0;
+      }
+    }
+  }
+
+  &.automation-failure {
+    .browser-icon {
+      margin-right: 5px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    .dropdown-toggle {
+      margin-left: 5px;
+    }
+
+    .dropdown-menu li {
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+  }
+
+  .automation-disconnected button {
+    font-size: 18px;
+    line-height: 1.3;
+    padding: 10px 16px;
+  }
+
+  .helper-line {
+    margin-top: 50px;
+    text-align: center;
+
+    i {
+      margin-right: 5px;
+    }
+  }
+
+  .script-error {
+    color: #d50c26;
+    background-color: #fff;
+    border: none;
+    border-radius: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 2em;
+    width: 100%;
+    height: 100%;
+    white-space: pre-wrap;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
