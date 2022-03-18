@@ -417,7 +417,7 @@ export class ProjectActions {
         testingType,
         specPattern: cfg.specPattern,
         excludeSpecPattern: cfg.excludeSpecPattern,
-        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined, // TODO:
+        additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
 
       if (specs) {
