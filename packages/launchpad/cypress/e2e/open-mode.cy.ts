@@ -140,6 +140,7 @@ describe('Launchpad: Open Mode', () => {
     cy.openProject('todos', ['--e2e'])
     cy.visitLaunchpad()
     cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
+    cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy=header-bar-content]').contains('todos').click()
 
     cy.get('h1').should('contain', 'Welcome to Cypress!')
@@ -150,6 +151,7 @@ describe('Launchpad: Open Mode', () => {
     cy.openProject('launchpad', ['--component'])
     cy.visitLaunchpad()
     cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
+    cy.get('h1').should('contain', 'Project Setup')
     cy.get('[data-cy=header-bar-content]').contains('launchpad').click()
 
     cy.get('h1').should('contain', 'Welcome to Cypress!')
