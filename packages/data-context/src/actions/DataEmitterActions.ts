@@ -74,9 +74,14 @@ export class DataEmitterActions extends DataEmitterEvents {
   subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncIterator<any> {
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
+    let pending: any[] = []
 
     function subscribed (val: any) {
-      dfd?.resolve(val)
+      if (dfd) {
+        dfd.resolve(val)
+      } else {
+        pending.push(val)
+      }
     }
     this.pub.on(evt, subscribed)
 
@@ -88,9 +93,17 @@ export class DataEmitterActions extends DataEmitterEvents {
           return { done: false, value: {} }
         }
 
-        dfd = pDefer()
+        if (pending.length === 0) {
+          dfd = pDefer()
 
-        return { done: false, value: await dfd.promise }
+          const returnValue = { done: false, value: await dfd.promise }
+
+          dfd = undefined
+
+          return returnValue
+        }
+
+        return { done: false, value: pending.shift() }
       },
       return: async () => {
         this.pub.off(evt, subscribed)
