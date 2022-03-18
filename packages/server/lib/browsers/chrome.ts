@@ -435,7 +435,12 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client, automation, options) => {
-  const cdpAutomation = new CdpAutomation(client.send, client.on, automation, options)
+  const cdpAutomation = new CdpAutomation({
+    sendDebuggerCommandFn: client.send,
+    onFn: client.on,
+    automation,
+    experimentalMultiDomain: options.experimentalMultiDomain,
+  })
 
   await cdpAutomation.enable()
 

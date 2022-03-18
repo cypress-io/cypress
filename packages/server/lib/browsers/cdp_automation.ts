@@ -176,15 +176,25 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
+export interface CdpOptions {
+  sendDebuggerCommandFn: SendDebuggerCommand
+  onFn: OnFn
+  automation: Automation
+  experimentalMultiDomain: boolean
+}
+
 export class CdpAutomation {
-  constructor (
-    private sendDebuggerCommandFn: SendDebuggerCommand,
-    onFn: OnFn,
-    private automation: Automation,
-    private options: any,
-  ) {
-    onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
-    onFn('Network.responseReceived', this.onResponseReceived)
+  sendDebuggerCommandFn: SendDebuggerCommand
+  automation: Automation
+  experimentalMultiDomain: boolean
+
+  constructor (options: CdpOptions) {
+    this.sendDebuggerCommandFn = options.sendDebuggerCommandFn
+    this.automation = options.automation
+    this.experimentalMultiDomain = options.experimentalMultiDomain
+
+    options.onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
+    options.onFn('Network.responseReceived', this.onResponseReceived)
   }
 
   async enable () {
