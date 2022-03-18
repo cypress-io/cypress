@@ -1,12 +1,12 @@
 import { runSpec } from './support/spec-loader'
-import { scaffoldCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
+import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './retries.mochaEvents.snapshots'
 
 describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   // NOTE: for test-retries
 
   it('simple retry', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents simple retry #1',
       done,
@@ -20,7 +20,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('test retry with hooks', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents test retry with hooks #1',
       done,
@@ -34,7 +34,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('test retry with hooks', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents test retry with hooks #1',
       done,
@@ -48,7 +48,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('test retry with [only]', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents test retry with [only] #1',
       done,
@@ -62,7 +62,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('can retry from [beforeEach]', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents can retry from [beforeEach] #1',
       done,
@@ -76,7 +76,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('can retry from [afterEach]', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents can retry from [afterEach] #1',
       done,
@@ -90,7 +90,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('cant retry from [before]', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents cant retry from [before] #1',
       done,
@@ -104,7 +104,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   it('three tests with retry', (done) => {
-    const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
       'src/cypress/runner retries mochaEvents three tests with retry #1',
       done,
@@ -119,7 +119,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
 
   describe('cleanses errors before emitting', () => {
     it('does not try to serialize error with err.actual as DOM node', (done) => {
-      const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
+      const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
         snapshots,
         'src/cypress/runner retries mochaEvents cleanses errors before emitting does not try to serialize error with err.actual as DOM node #1',
         done,

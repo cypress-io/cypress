@@ -55,10 +55,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -124,10 +120,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -167,10 +159,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -268,10 +256,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -305,10 +289,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -360,10 +340,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -417,10 +393,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -518,10 +490,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -538,10 +506,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -610,10 +574,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -671,10 +631,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -776,10 +732,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -796,10 +748,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -817,10 +765,6 @@ export const snapshots = {
       'mocha',
       'pass',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -848,10 +792,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -879,10 +819,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -911,10 +847,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -931,10 +863,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -1003,10 +931,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -1064,10 +988,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -1186,10 +1106,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1225,10 +1141,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1316,10 +1228,6 @@ export const snapshots = {
       'mocha',
       'fail',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1458,10 +1366,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1538,10 +1442,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1679,10 +1579,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1718,10 +1614,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1879,10 +1771,6 @@ export const snapshots = {
       'mocha',
       'pass',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -1938,10 +1826,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -2011,10 +1895,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 2',
@@ -2184,10 +2064,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2204,10 +2080,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2225,10 +2097,6 @@ export const snapshots = {
       'mocha',
       'pass',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2256,10 +2124,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2301,10 +2165,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2407,10 +2267,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2446,10 +2302,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2565,10 +2417,6 @@ export const snapshots = {
       'mocha',
       'pass',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2617,10 +2465,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2669,10 +2513,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r3',
         'order': 1,
         'title': 'test 1',
@@ -2722,10 +2562,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -2760,10 +2596,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -2835,10 +2667,6 @@ export const snapshots = {
       'mocha',
       'pass',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -2880,10 +2708,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -2925,10 +2749,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r4',
         'order': 2,
         'title': 'test 2',
@@ -2971,10 +2791,6 @@ export const snapshots = {
       'mocha',
       'test',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r5',
         'order': 3,
         'title': 'test 3',
@@ -3009,10 +2825,6 @@ export const snapshots = {
       'mocha',
       'test:before:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r5',
         'order': 3,
         'title': 'test 3',
@@ -3119,10 +2931,6 @@ export const snapshots = {
       'mocha',
       'pass',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r5',
         'order': 3,
         'title': 'test 3',
@@ -3171,10 +2979,6 @@ export const snapshots = {
       'mocha',
       'test end',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r5',
         'order': 3,
         'title': 'test 3',
@@ -3237,10 +3041,6 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
-        '_testConfig': {
-          'testConfigList': [],
-          'unverifiedTestConfig': {},
-        },
         'id': 'r5',
         'order': 3,
         'title': 'test 3',

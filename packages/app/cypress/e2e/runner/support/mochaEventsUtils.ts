@@ -116,7 +116,7 @@ declare global {
   }
 }
 
-export function scaffoldCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompare: keyof T, done: Mocha.Done) {
+export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompare: keyof T, done: Mocha.Done) {
   const bus = new EventEmitter()
   const outerRunner = window.top!.window
 
