@@ -85,7 +85,7 @@ const eventCleanseMap = {
   },
 }
 
-const keysToEliminate = ['codeFrame'] as const
+const keysToEliminate = ['codeFrame', '_testConfig'] as const
 
 function removeUnusedKeysForTestSnapshot<T> (obj: T): T {
   for (const key of keysToEliminate) {
