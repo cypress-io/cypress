@@ -8,6 +8,7 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
+import { defaultSpecPattern } from '@packages/config'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
@@ -16,7 +17,6 @@ import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import { STORIES_GLOB } from '.'
-import { getDefaultSpecPatterns } from '../util/config-options'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -331,7 +331,7 @@ export class ProjectDataSource {
     assert(this.ctx.currentProject)
     assert(this.ctx.coreData.currentTestingType)
 
-    const { e2e, component } = getDefaultSpecPatterns()
+    const { e2e, component } = defaultSpecPattern
 
     const { specPattern } = await this.ctx.project.specPatterns()
 

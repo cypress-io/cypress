@@ -98,6 +98,11 @@ const isValidConfig = (key: string, config: any) => {
   return true
 }
 
+export const defaultSpecPattern = {
+  e2e: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+  component: '**/*.cy.{js,jsx,ts,tsx}',
+}
+
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -156,7 +161,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'specPattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? '**/*.cy.{js,jsx,ts,tsx}' : 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.component : defaultSpecPattern.e2e,
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: false,
   }, {

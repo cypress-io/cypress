@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
+import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
 import type { BreakingOption, BreakingOptionErrorKey } from './options'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
 
 export {
+  defaultSpecPattern,
   validation,
   options,
   breakingOptions,
