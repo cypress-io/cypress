@@ -24,8 +24,6 @@ const createCypress = () => {
   // @ts-ignore
   const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
-  Cypress.specBridgeCommunicator.initialize(window)
-
   Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
     // eventually, setup will get called again on rerun and cy will get re-created
     setup(config, env)
@@ -100,8 +98,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   cy.overrides.wrapNativeMethods(autWindow)
 
   const onWindowLoadPrimary = ({ url }) => {
-    // If the primary domain has indicated a load event, set stability to undefined, not true since the load happened in another domain.
-    cy.isStable(undefined, 'primary onload')
+    cy.isStable(true, 'primary onload')
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
   }
 
@@ -167,5 +164,10 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     },
   })
 }
+
+// only bind the message handler one time when the spec bridge is created
+window.addEventListener('message', ({ data }) => {
+  Cypress?.specBridgeCommunicator.onMessage({ data })
+}, false)
 
 createCypress()
