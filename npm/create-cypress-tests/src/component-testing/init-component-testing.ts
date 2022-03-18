@@ -57,8 +57,7 @@ async function injectAndShowCypressConfig (
   componentFolder: string,
 ) {
   const configToInject = {
-    componentFolder,
-    specPattern: '**/*.spec.{js,ts,jsx,tsx}',
+    specPattern: `${componentFolder}/**/*.spec.{js,ts,jsx,tsx}`,
   }
 
   await injectOrShowConfigCode(() => insertValuesInConfigFile(cypressJsonPath, configToInject), {
