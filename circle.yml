@@ -10,6 +10,9 @@ defaults: &defaults
     only-cache-for-root-user:
       type: boolean
       default: false
+    resource_class:
+      type: string
+      default: medium
   executor: <<parameters.executor>>
   environment: &defaultsEnvironment
     ## set specific timezone
@@ -988,9 +991,6 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - checkout
