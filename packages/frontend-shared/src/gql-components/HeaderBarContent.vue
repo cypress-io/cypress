@@ -235,11 +235,11 @@ const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
-const hasLinkToProjects: boolean = computed(() => {
+const hasLinkToProjects = computed(() => {
   return props.gql?.currentProject && !props.gql?.projectRootFromCI
 })
 
-const hasLinkToCurrentProject: boolean = computed(() => {
+const hasLinkToCurrentProject = computed(() => {
   return props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
 })
 
