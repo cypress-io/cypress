@@ -131,7 +131,7 @@ describe('App: Index', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
+            cy.get(`a[href="${getRunnerHref(spec)}"`).scrollIntoView().should('exist')
           })
         })
 
