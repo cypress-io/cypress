@@ -67,7 +67,12 @@ const prepend = (urlPath) => {
   const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE')
 
   return pathTemplate
-    ? pathTemplate.replace('${endpoint}', endpoint).replace('${platform}', platform).replace('${arch}', arch())
+    ? (
+      pathTemplate
+      .replace('${endpoint}', endpoint)
+      .replace('${platform}', platform)
+      .replace('${arch}', arch())
+    )
     : `${endpoint}?platform=${platform}&arch=${arch()}`
 }
 
