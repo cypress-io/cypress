@@ -1,53 +1,15 @@
-import EventEmitter from 'events'
 import { runSpec } from './support/spec-loader'
-import { deepDiff, sanitizeMochaEvents } from './support/mochaEventsUtils'
+import { scaffoldCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './runner.mochaEvents.snapshots'
-import type { CypressInCypressMochaEvent } from '../../../src/runner/event-manager'
-
-declare global {
-  interface Window {
-    bus: EventEmitter
-  }
-}
-
-// TODO: document how this works!
-function scaffoldCypressInCypressMochaEventsTest (snapToCompare: keyof typeof snapshots, done: Mocha.Done) {
-  const bus = new EventEmitter()
-  const outerRunner = window.top!.window
-
-  outerRunner.bus = bus
-
-  bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
-    const expected = snapshots[snapToCompare]
-    const diff = deepDiff(snapshot, expected)
-
-    if (Object.keys(diff).length) {
-      // useful for debugging
-      console.error('snapshot:', JSON.stringify(snapshot, null, 2)) // eslint-disable-line no-console
-      console.error('Expected snapshots to be identical, but they were not. Difference:', diff) // eslint-disable-line no-console
-    }
-
-    expect(Object.keys(diff).length).to.eq(0)
-    done()
-  })
-
-  const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {
-    win.getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
-      const data = sanitizeMochaEvents(args)
-
-      bus.emit('assert:cypress:in:cypress', data)
-    })
-  }
-
-  return { assertMatchingSnapshot }
-}
 
 describe('src/cypress/runner', { retries: 0 }, () => {
   describe('tests finish with correct state', () => {
     describe('hook failures', () => {
       it('fail in [before]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-          'src/cypress/runner tests finish with correct state hook failures fail in [before] #1', done,
+          snapshots,
+          'src/cypress/runner tests finish with correct state hook failures fail in [before] #1',
+          done,
         )
 
         runSpec({
@@ -59,7 +21,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
 
       it('fail in [beforeEach]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-          'src/cypress/runner tests finish with correct state hook failures fail in [beforeEach] #1', done,
+          snapshots,
+          'src/cypress/runner tests finish with correct state hook failures fail in [beforeEach] #1',
+          done,
         )
 
         runSpec({
@@ -71,7 +35,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
 
       it('fail in [after]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-          'src/cypress/runner tests finish with correct state hook failures fail in [after] #1', done,
+          snapshots,
+          'src/cypress/runner tests finish with correct state hook failures fail in [after] #1',
+          done,
         )
 
         runSpec({
@@ -83,7 +49,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
 
       it('fail in [afterEach]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-          'src/cypress/runner tests finish with correct state hook failures fail in [afterEach] #1', done,
+          snapshots,
+          'src/cypress/runner tests finish with correct state hook failures fail in [afterEach] #1',
+          done,
         )
 
         runSpec({
@@ -97,7 +65,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
     describe('mocha grep', () => {
       it('fail with [only]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-          'src/cypress/runner tests finish with correct state mocha grep fail with [only] #1', done,
+          snapshots,
+          'src/cypress/runner tests finish with correct state mocha grep fail with [only] #1',
+          done,
         )
 
         runSpec({
@@ -109,7 +79,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
 
       it('pass with [only]', (done) => {
         const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-          'src/cypress/runner tests finish with correct state mocha grep pass with [only] #1', done,
+          snapshots,
+          'src/cypress/runner tests finish with correct state mocha grep pass with [only] #1',
+          done,
         )
 
         runSpec({
@@ -124,7 +96,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
   describe('mocha events', () => {
     it('simple single test', (done) => {
       const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-        'src/cypress/runner mocha events simple single test #1', done,
+        snapshots,
+        'src/cypress/runner mocha events simple single test #1',
+        done,
       )
 
       runSpec({
@@ -136,7 +110,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
 
     it('simple three tests', (done) => {
       const { assertMatchingSnapshot } = scaffoldCypressInCypressMochaEventsTest(
-        'src/cypress/runner mocha events simple three tests #1', done,
+        snapshots,
+        'src/cypress/runner mocha events simple three tests #1',
+        done,
       )
 
       runSpec({

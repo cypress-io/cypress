@@ -1,6 +1,7 @@
 import type { CypressInCypressMochaEvent } from '../../../../src/runner/event-manager'
 import _ from 'lodash'
 import type { MochaLifecycleData, SanitizedMochaLifecycleData } from './mochaTypes'
+import EventEmitter from 'events'
 
 const hooks = ['before all', 'before each', 'after all', 'after each'] as const
 
@@ -109,7 +110,44 @@ function removeUnusedKeysForTestSnapshot<T> (obj: T): T {
   return obj
 }
 
-export function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
+declare global {
+  interface Window {
+    bus: EventEmitter
+  }
+}
+
+export function scaffoldCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompare: keyof T, done: Mocha.Done) {
+  const bus = new EventEmitter()
+  const outerRunner = window.top!.window
+
+  outerRunner.bus = bus
+
+  bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
+    const expected = snapshots[snapToCompare]
+    const diff = deepDiff(snapshot, expected)
+
+    if (Object.keys(diff).length) {
+      // useful for debugging
+      console.error('snapshot:', JSON.stringify(snapshot, null, 2)) // eslint-disable-line no-console
+      console.error('Expected snapshots to be identical, but they were not. Difference:', diff) // eslint-disable-line no-console
+    }
+
+    expect(Object.keys(diff).length).to.eq(0)
+    done()
+  })
+
+  const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {
+    win.getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
+      const data = sanitizeMochaEvents(args)
+
+      bus.emit('assert:cypress:in:cypress', data)
+    })
+  }
+
+  return { assertMatchingSnapshot }
+}
+
+function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
   return args.map((mochaEvent) => {
     return mochaEvent.map((payload) => {
       if (typeof payload === 'string') {
@@ -122,7 +160,7 @@ export function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
 }
 
 // https://gist.github.com/Yimiprod/7ee176597fef230d1451?permalink_comment_id=3415430#gistcomment-3415430
-export function deepDiff (fromObject: any, toObject: any) {
+function deepDiff (fromObject: any, toObject: any) {
   const changes = {}
 
   const buildPath = (obj: any, key: string, path?: string) => {
