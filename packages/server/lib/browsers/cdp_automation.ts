@@ -263,7 +263,7 @@ export class CdpAutomation {
         // be sent with a request. This standardizes it by filtering out ones
         // that are secure but not on a secure context
 
-        if (this.options.experimentalMultiDomain) {
+        if (this.experimentalMultiDomain) {
           // localhost is considered a secure context (even when http:)
           // and it's required for multi-domain when visiting a secondary
           // domain so that all its cookies are sent. This may be a
