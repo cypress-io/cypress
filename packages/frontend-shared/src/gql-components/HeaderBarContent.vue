@@ -18,41 +18,70 @@
           class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
         >
-        <a
-          class="font-medium mr-2px"
-          :class="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'text-indigo-500 hocus-link-default' :
-            'text-gray-700'"
-          :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
-          @click.prevent="clearCurrentProject"
+        <nav
+          role="navigation"
+          aria-label="Breadcrumbs"
         >
-          {{ t('topNav.global.projects') }}
-        </a>
-        <i-cy-chevron-right_x16
-          v-if="props.gql?.currentProject"
-          class="h-16px mr-2px min-w-16px icon-dark-gray-200"
-        />
-        <span
-          class="font-medium mr-2px"
-          :class="props.gql?.currentProject?.currentTestingType ? 'text-indigo-500 hocus-link-default cursor-pointer' :
-            'text-gray-700'"
-          @click.prevent="clearTestingType"
-        >
-          {{ props.gql?.currentProject?.title }}
-        </span>
-        <span
-          v-if="props.gql?.currentProject?.branch"
-          class="font-normal text-gray-500"
-        >
-          ({{ props.gql.currentProject.branch }})
-        </span>
-        <i-cy-chevron-right_x16
-          v-if="props.gql?.currentProject?.currentTestingType"
-          class="h-16px mr-2px min-w-16px icon-dark-gray-200"
-        />
-        <span
-          v-if="props.gql?.currentProject?.currentTestingType"
-          class="lowercase"
-        >{{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}</span>
+          <ol>
+            <li class="inline-block">
+              <a
+                class="font-medium mr-2px"
+                :class="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'text-indigo-500 hocus-link-default' :
+                  'text-gray-700'"
+                role="link"
+                :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
+                :aria-disabled="!props.gql?.currentProject || props.gql?.projectRootFromCI"
+                @click.prevent="clearCurrentProject"
+              >
+                {{ t('topNav.global.projects') }}
+              </a>
+            </li>
+            <li
+              v-if="props.gql?.currentProject"
+              class="mx-2px align-middle inline-block"
+              aria-hidden
+            >
+              <i-cy-chevron-right_x16
+
+                class="icon-dark-gray-200"
+              />
+            </li>
+            <li class="inline-block">
+              <a
+                class="font-medium mr-2px"
+                role="link"
+                :class="props.gql?.currentProject?.currentTestingType ? 'text-indigo-500 hocus-link-default cursor-pointer' :
+                  'text-gray-700'"
+                :aria-disabled="!props.gql?.currentProject?.currentTestingType"
+                @click.prevent="clearTestingType"
+              >
+                {{ props.gql?.currentProject?.title }}
+              </a>
+              <span
+                v-if="props.gql?.currentProject?.branch"
+                class="font-normal text-gray-500"
+              >
+                ({{ props.gql.currentProject.branch }})
+              </span>
+            </li>
+            <li
+              v-if="props.gql?.currentProject?.currentTestingType"
+              class="mx-2px align-middle inline-block"
+              aria-hidden
+            >
+              <i-cy-chevron-right_x16
+
+                class="icon-dark-gray-200"
+              />
+            </li>
+            <li
+              v-if="props.gql?.currentProject?.currentTestingType"
+              class="lowercase inline-block"
+            >
+              {{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}
+            </li>
+          </ol>
+        </nav>
       </div>
       <div class="flex gap-6">
         <TopNav
