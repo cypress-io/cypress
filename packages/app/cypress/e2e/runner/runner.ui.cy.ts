@@ -94,6 +94,33 @@ describe('src/cypress/runner', () => {
       .should('have.class', 'command-is-pinned')
     })
 
+    it('correctly resets highlight toggle state when pinning new command', () => {
+      loadSpec({
+        fileName: 'simple-cy-snapshot.runner.cy.js',
+        passCount: 1,
+        failCount: 0,
+      })
+
+      cy.findByText('clicks button').click()
+
+      cy.contains('li.command-name-click', 'click')
+      .find('.command-wrapper')
+      .should('not.have.class', 'command-is-pinned')
+      .click()
+      .click()
+      .should('have.class', 'command-is-pinned')
+
+      cy.get('[id="toggle-highlights"]').should('have.attr', 'aria-checked', 'true').click()
+
+      cy.contains('li.command-name-get', 'get')
+      .find('.command-wrapper')
+      .should('not.have.class', 'command-is-pinned')
+      .click()
+      .should('have.class', 'command-is-pinned')
+
+      cy.get('[id="toggle-highlights"]').should('have.attr', 'aria-checked', 'true')
+    })
+
     it('renders spec name and runtime in header', () => {
       loadSpec({
         fileName: 'simple-cy-assert.runner.cy.js',
