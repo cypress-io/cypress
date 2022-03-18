@@ -61,14 +61,6 @@ export type ItOptions = ExecOptions & {
 
 type ExecOptions = {
   /**
-   * Callback that runs after the project has been scaffolded but before installing node modules or running tests.
-   */
-  onAfterScaffold?: () => void | Promise<void>
-  /**
-   * Callback that runs after the execution has ended.
-   */
-  onAfterExec?: () => void | Promise<void>
-  /**
    * If set, `docker exec` will be used to run this test. Requires Docker.
    */
   dockerImage?: string
@@ -950,8 +942,6 @@ const systemTests = {
       await settings.write(e2ePath, ctx.settings)
     }
 
-    if (options.onAfterScaffold) await options.onAfterScaffold()
-
     let stdout = ''
     let stderr = ''
 
@@ -1091,8 +1081,6 @@ const systemTests = {
       sp.on('error', reject)
       sp.on('exit', resolve)
     })
-
-    if (options.onAfterExec) await options.onAfterExec()
 
     await copy()
 
