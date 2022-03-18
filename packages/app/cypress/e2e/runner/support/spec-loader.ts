@@ -76,7 +76,6 @@ export function loadSpec (options: LoadSpecOptions) {
   })
 
   // Wait for specs to complete
-
   shouldHaveTestResults({ passCount, failCount, pendingCount })
 }
 

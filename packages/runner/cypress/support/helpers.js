@@ -287,7 +287,7 @@ function createCypress (defaultOptions = {}) {
         const c = _.extend({}, Cypress.config(), {
           isTextTerminal: false,
           spec: {
-            relative: 'cypress/e2e/runner/fail-with-before.mochaEvents.cy.js',
+            relative: 'relative/path/to/spec.js',
             absolute: '/absolute/path/to/spec.js',
             name: 'empty_spec.js',
           },

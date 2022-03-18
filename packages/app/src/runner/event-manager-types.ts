@@ -22,7 +22,7 @@ export type LocalBusEventMap = {
 
 export type LocalBusEmitsMap = {
   'open:file': FileDetails
-  'cypress:in:cypress:done': CypressInCypressMochaEvent[]
+  'cypress:in:cypress:run:complete': CypressInCypressMochaEvent[]
 }
 
 export type SocketToDriverMap = {

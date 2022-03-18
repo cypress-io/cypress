@@ -72,6 +72,7 @@ interface AutomationError extends Error {
   automation: boolean
 }
 
+// Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
 const isCypressInCypress = document.defaultView !== top
 
 class $Cypress {
@@ -375,11 +376,14 @@ class $Cypress {
   }
 
   maybeEmitCypressInCypress (...args: unknown[]) {
+    // emit an event if we are running a Cypress in Cypress E2E Test.
+    // used to assert the runner (mocha) is emitting the expected
+    // events/payload.
     if (!isCypressInCypress) {
       return
     }
 
-    this.emit('cypress:in:cypress', ...args)
+    this.emit('cypress:in:cypress:runner:event', ...args)
   }
 
   action (eventName, ...args) {
@@ -428,6 +432,7 @@ class $Cypress {
         this.emit('run:end')
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'end', args[0])
         }
@@ -437,6 +442,7 @@ class $Cypress {
       case 'runner:suite:start':
         // mocha runner started processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite', ...args)
         }
@@ -446,6 +452,7 @@ class $Cypress {
       case 'runner:suite:end':
         // mocha runner finished processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite end', ...args)
         }
@@ -568,7 +575,6 @@ class $Cypress {
         if (this.config('isTextTerminal')) {
           // needed for calculating wallClockDuration
           // and the timings of after + afterEach hooks
-
           return this.emit('mocha', 'test:after:run', args[0])
         }
 

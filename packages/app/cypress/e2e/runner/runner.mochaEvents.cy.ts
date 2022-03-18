@@ -32,7 +32,7 @@ function scaffoldCypressInCypressMochaEventsTest (snapToCompare: keyof typeof sn
   })
 
   const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {
-    win.getEventManager().on('cypress:in:cypress:done', (args: CypressInCypressMochaEvent[]) => {
+    win.getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
       const data = sanitizeMochaEvents(args)
 
       bus.emit('assert:cypress:in:cypress', data)
