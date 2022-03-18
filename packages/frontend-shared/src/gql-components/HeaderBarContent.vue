@@ -24,13 +24,15 @@
         >
           <ol>
             <li class="inline-block">
+              <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
+              <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
-                class="font-medium mr-2px"
-                :class="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'text-indigo-500 hocus-link-default' :
+                class="font-medium"
+                :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
-                role="link"
-                :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
-                :ariaDisabled="!props.gql?.currentProject || props.gql?.projectRootFromCI"
+                :role="hasLinkToProjects ? undefined : 'link'"
+                :href="hasLinkToProjects ? 'global-mode' : undefined"
+                :ariaDisabled="!hasLinkToProjects"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
@@ -47,12 +49,15 @@
               />
             </li>
             <li class="inline-block">
+              <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
+              <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <a
-                class="font-medium mr-2px"
-                role="link"
-                :class="props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents ? 'text-indigo-500 hocus-link-default cursor-pointer' :
+                class="font-medium"
+                :role="hasLinkToCurrentProject ? undefined : 'link'"
+                :href="hasLinkToCurrentProject ? 'choose-testing-type' : undefined"
+                :class="hasLinkToCurrentProject ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
-                :ariaDisabled="!props.gql?.currentProject?.currentTestingType || props.gql?.currentProject?.isLoadingNodeEvents"
+                :ariaDisabled="!hasLinkToCurrentProject"
                 @click.prevent="clearTestingType"
               >
                 {{ props.gql?.currentProject?.title }}
@@ -230,6 +235,14 @@ const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
+const hasLinkToProjects: boolean = computed(() => {
+  return props.gql?.currentProject && !props.gql?.projectRootFromCI
+})
+
+const hasLinkToCurrentProject: boolean = computed(() => {
+  return props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
+})
+
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
 const clearCurrentTestingTypeMutation = useMutation(GlobalPageHeader_ClearCurrentTestingTypeDocument)
@@ -240,17 +253,15 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  if (props.gql.currentProject && !props.gql.projectRootFromCI) {
+  if (hasLinkToProjects.value) {
     clearCurrentProjectMutation.executeMutation({})
   }
 }
 
 const clearTestingType = () => {
-  if (!props.gql?.currentProject?.currentTestingType || props.gql?.currentProject?.isLoadingNodeEvents) {
-    return
+  if (hasLinkToCurrentProject.value) {
+    clearCurrentTestingTypeMutation.executeMutation({})
   }
-
-  clearCurrentTestingTypeMutation.executeMutation({})
 }
 
 const props = defineProps<{
