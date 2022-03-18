@@ -697,12 +697,10 @@ export default (Commands, Cypress, cy, state, config) => {
       return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
     },
 
-    visit (url, options: Partial<Cypress.VisitOptions> = {}) {
-      if (options.url && url) {
-        $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: options.url, url } })
+    visit (url, userOptions: Partial<Cypress.VisitOptions> = {}) {
+      if (userOptions.url && url) {
+        $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: userOptions.url, url } })
       }
-
-      let userOptions = options
 
       if (_.isObject(url) && _.isEqual(userOptions, {})) {
         // options specified as only argument
@@ -720,7 +718,7 @@ export default (Commands, Cypress, cy, state, config) => {
         consoleProps['Options'] = _.pick(userOptions, VISIT_OPTS)
       }
 
-      const _options: InternalVisitOptions = _.defaults({}, userOptions, {
+      const options: InternalVisitOptions = _.defaults({}, userOptions, {
         auth: null,
         failOnStatusCode: true,
         retryOnNetworkFailure: true,
@@ -736,38 +734,38 @@ export default (Commands, Cypress, cy, state, config) => {
         onLoad () {},
       })
 
-      if (!_.isUndefined(_options.qs) && !_.isObject(_options.qs)) {
-        $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(_options.qs) } })
+      if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
+        $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(options.qs) } })
       }
 
-      if (_options.retryOnStatusCodeFailure && !_options.failOnStatusCode) {
+      if (options.retryOnStatusCodeFailure && !options.failOnStatusCode) {
         $errUtils.throwErrByPath('visit.status_code_flags_invalid')
       }
 
-      if (!isValidVisitMethod(_options.method)) {
-        $errUtils.throwErrByPath('visit.invalid_method', { args: { method: _options.method } })
+      if (!isValidVisitMethod(options.method)) {
+        $errUtils.throwErrByPath('visit.invalid_method', { args: { method: options.method } })
       }
 
-      if (!_.isObject(_options.headers)) {
+      if (!_.isObject(options.headers)) {
         $errUtils.throwErrByPath('visit.invalid_headers')
       }
 
-      const path = whatIsCircular(_options.body)
+      const path = whatIsCircular(options.body)
 
-      if (_.isObject(_options.body) && path) {
+      if (_.isObject(options.body) && path) {
         $errUtils.throwErrByPath('visit.body_circular', { args: { path } })
       }
 
-      if (_options.log) {
+      if (options.log) {
         let message = url
 
-        if (_options.method !== 'GET') {
-          message = `${_options.method} ${message}`
+        if (options.method !== 'GET') {
+          message = `${options.method} ${message}`
         }
 
-        _options._log = Cypress.log({
+        options._log = Cypress.log({
           message,
-          timeout: _options.timeout,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
@@ -782,7 +780,7 @@ export default (Commands, Cypress, cy, state, config) => {
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
       }
 
-      const qs = _options.qs
+      const qs = options.qs
 
       if (qs) {
         url = $Location.mergeUrlWithParams(url, qs)
@@ -810,7 +808,7 @@ export default (Commands, Cypress, cy, state, config) => {
                 configurable: true,
               })
 
-              _options.onBeforeLoad?.call(runnable.ctx, contentWindow)
+              options.onBeforeLoad?.call(runnable.ctx, contentWindow)
             } catch (err: any) {
               err.isCallbackError = true
               onBeforeLoadError = err
@@ -867,7 +865,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // the onLoad callback should only be skipped if specified
         if (runOnLoadCallback !== false) {
           try {
-            _options.onLoad?.call(runnable.ctx, win)
+            options.onLoad?.call(runnable.ctx, win)
           } catch (err: any) {
             // mark these as user callback errors, so they're treated differently
             // than Node.js errors when caught below
@@ -876,8 +874,8 @@ export default (Commands, Cypress, cy, state, config) => {
           }
         }
 
-        if (_options._log) {
-          _options._log.set({
+        if (options._log) {
+          options._log.set({
             url,
             totalTime,
           })
@@ -893,7 +891,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // TODO: $Location.resolve(existing.origin, url)
 
         if ($Location.isLocalFileUrl(url)) {
-          return specifyFileByRelativePath(url, _options._log)
+          return specifyFileByRelativePath(url, options._log)
         }
 
         let remoteUrl
@@ -911,7 +909,7 @@ export default (Commands, Cypress, cy, state, config) => {
         const a = remote.authObj
 
         if (a) {
-          _options.auth = a
+          options.auth = a
         }
 
         // store the existing hash now since
@@ -925,7 +923,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // we also need to disable retries to prevent the endless loop
           $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
-          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, _options._log)
+          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
         }
 
         const current = $Location.create(win.location.href)
@@ -959,7 +957,7 @@ export default (Commands, Cypress, cy, state, config) => {
           url = url.replace(`${existingAuth}@`, '')
         }
 
-        return requestUrl(url, _options)
+        return requestUrl(url, options)
         .then((resp: any = {}) => {
           let { url, originalUrl, cookies, redirects, filePath } = resp
 
@@ -975,14 +973,14 @@ export default (Commands, Cypress, cy, state, config) => {
             }
           }
 
-          if (_options.log) {
-            let message = _options._log.get('message')
+          if (options.log) {
+            let message = options._log.get('message')
 
             if (redirects && redirects.length) {
               message = [message].concat(redirects).join(' -> ')
             }
 
-            _options._log.set({ message })
+            options._log.set({ message })
           }
 
           consoleProps['Resolved Url'] = url
@@ -1009,7 +1007,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // if we've already visited a new origin
           // then die else we'd be in a terrible endless loop
           if (previousDomainVisited) {
-            return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, _options._log)
+            return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
           }
 
           // tell our backend we're changing domains
@@ -1082,7 +1080,7 @@ export default (Commands, Cypress, cy, state, config) => {
               }
 
               $errUtils.throwErrByPath(msg, {
-                onFail: _options._log,
+                onFail: options._log,
                 args,
               })
             })
@@ -1099,7 +1097,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           visitFailedByErr(err, url, () => {
             $errUtils.throwErrByPath('visit.loading_network_failed', {
-              onFail: _options._log,
+              onFail: options._log,
               args: {
                 url,
                 error: err,
@@ -1137,9 +1135,9 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       return visit()
-      .timeout(_options.timeout, 'visit')
+      .timeout(options.timeout, 'visit')
       .catch(Promise.TimeoutError, () => {
-        return timedOutWaitingForPageLoad(_options.timeout, _options._log)
+        return timedOutWaitingForPageLoad(options.timeout, options._log)
       }).finally(() => {
         if (typeof cleanup === 'function') {
           cleanup()

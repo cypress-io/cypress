@@ -6,19 +6,19 @@ interface InternalRootOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalRootOptions = _.defaults({}, options, { log: true })
+    root (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalRootOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log !== false) {
-        _options._log = Cypress.log({
+      if (options.log !== false) {
+        options._log = Cypress.log({
           message: '',
-          timeout: _options.timeout,
+          timeout: options.timeout,
         })
       }
 
       const log = ($el) => {
-        if (_options.log) {
-          _options._log.set({ $el })
+        if (options.log) {
+          options._log.set({ $el })
         }
 
         return $el

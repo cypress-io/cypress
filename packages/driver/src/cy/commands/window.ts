@@ -96,11 +96,11 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    title (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalTitleOptions = _.defaults({}, options, { log: true })
+    title (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalTitleOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log) {
-        _options._log = Cypress.log({ timeout: _options.timeout })
+      if (options.log) {
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const resolveTitle = () => {
@@ -108,7 +108,7 @@ export default (Commands, Cypress, cy, state) => {
 
         const title = (doc && doc.title) || ''
 
-        return cy.verifyUpcomingAssertions(title, _options, {
+        return cy.verifyUpcomingAssertions(title, options, {
           onRetry: resolveTitle,
         })
       }
@@ -116,18 +116,18 @@ export default (Commands, Cypress, cy, state) => {
       return resolveTitle()
     },
 
-    window (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalWindowOptions = _.defaults({}, options, { log: true })
+    window (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalWindowOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log) {
-        _options._log = Cypress.log({ timeout: _options.timeout })
+      if (options.log) {
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const getWindow = () => {
         const window = state('window')
 
         if (!window) {
-          $errUtils.throwErrByPath('window.iframe_undefined', { onFail: _options._log })
+          $errUtils.throwErrByPath('window.iframe_undefined', { onFail: options._log })
         }
 
         return window
@@ -139,15 +139,15 @@ export default (Commands, Cypress, cy, state) => {
         return Promise
         .try(getWindow)
         .catch((err) => {
-          _options.error = err
+          options.error = err
 
-          return cy.retry(retryWindow, _options)
+          return cy.retry(retryWindow, options)
         })
       }
 
       const verifyAssertions = () => {
         return Promise.try(retryWindow).then((win) => {
-          return cy.verifyUpcomingAssertions(win, _options, {
+          return cy.verifyUpcomingAssertions(win, options, {
             onRetry: verifyAssertions,
           })
         })
@@ -156,11 +156,11 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    document (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalDocumentOptions = _.defaults({}, options, { log: true })
+    document (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalDocumentOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log) {
-        _options._log = Cypress.log({ timeout: _options.timeout })
+      if (options.log) {
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const getDocument = () => {
@@ -180,15 +180,15 @@ export default (Commands, Cypress, cy, state) => {
         return Promise
         .try(getDocument)
         .catch((err) => {
-          _options.error = err
+          options.error = err
 
-          return cy.retry(retryDocument, _options)
+          return cy.retry(retryDocument, options)
         })
       }
 
       const verifyAssertions = () => {
         return Promise.try(retryDocument).then((doc) => {
-          return cy.verifyUpcomingAssertions(doc, _options, {
+          return cy.verifyUpcomingAssertions(doc, options, {
             onRetry: verifyAssertions,
           })
         })
@@ -197,25 +197,23 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    viewport (presetOrWidth, heightOrOrientation, options: Partial<Cypress.Loggable> = {}) {
-      const userOptions = options
-
+    viewport (presetOrWidth, heightOrOrientation, userOptions: Partial<Cypress.Loggable> = {}) {
       if (_.isObject(heightOrOrientation)) {
-        options = heightOrOrientation
+        userOptions = heightOrOrientation
       }
 
-      const _options: InternalViewportOptions = _.defaults({}, userOptions, { log: true })
+      const options: InternalViewportOptions = _.defaults({}, userOptions, { log: true })
 
       let height
       let width
 
-      if (_options.log) {
+      if (options.log) {
         // The type of presetOrWidth is either string or number
         // When preset => string
         // When width => number
         const isPreset = typeof presetOrWidth === 'string'
 
-        _options._log = Cypress.log({
+        options._log = Cypress.log({
           consoleProps () {
             const obj: Record<string, string | number> = {}
 
@@ -232,7 +230,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       const throwErrBadArgs = () => {
-        return $errUtils.throwErrByPath('viewport.bad_args', { onFail: _options._log })
+        return $errUtils.throwErrByPath('viewport.bad_args', { onFail: options._log })
       }
 
       const widthAndHeightAreValidNumbers = (width, height) => {
@@ -248,7 +246,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       if (_.isString(presetOrWidth) && _.isBlank(presetOrWidth)) {
-        $errUtils.throwErrByPath('viewport.empty_string', { onFail: _options._log })
+        $errUtils.throwErrByPath('viewport.empty_string', { onFail: options._log })
       } else if (_.isString(presetOrWidth)) {
         const getPresetDimensions = (preset): number[] => {
           try {
@@ -257,7 +255,7 @@ export default (Commands, Cypress, cy, state) => {
             const presets = _.keys(viewports).join(', ')
 
             $errUtils.throwErrByPath('viewport.missing_preset', {
-              onFail: _options._log,
+              onFail: options._log,
               args: { preset, presets },
             })
 
@@ -270,7 +268,7 @@ export default (Commands, Cypress, cy, state) => {
             const all = validOrientations.join('` or `')
 
             $errUtils.throwErrByPath('viewport.invalid_orientation', {
-              onFail: _options._log,
+              onFail: options._log,
               args: { all, orientation },
             })
           }
@@ -296,7 +294,7 @@ export default (Commands, Cypress, cy, state) => {
         height = heightOrOrientation
 
         if (!widthAndHeightAreWithinBounds(width, height)) {
-          $errUtils.throwErrByPath('viewport.dimensions_out_of_range', { onFail: _options._log })
+          $errUtils.throwErrByPath('viewport.dimensions_out_of_range', { onFail: options._log })
         }
       } else {
         throwErrBadArgs()
@@ -304,8 +302,8 @@ export default (Commands, Cypress, cy, state) => {
 
       return setViewportAndSynchronize(width, height)
       .then((viewport) => {
-        if (_options._log) {
-          _options._log.set(viewport)
+        if (options._log) {
+          options._log.set(viewport)
         }
 
         return null

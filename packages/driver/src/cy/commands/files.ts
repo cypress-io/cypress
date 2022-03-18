@@ -14,15 +14,13 @@ interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cy
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    readFile (file, encoding, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      let userOptions = options
-
+    readFile (file, encoding, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
       }
 
-      const _options: InternalReadFileOptions = _.defaults({}, userOptions, {
+      const options: InternalReadFileOptions = _.defaults({}, userOptions, {
         // https://github.com/cypress-io/cypress/issues/1558
         // If no encoding is specified, then Cypress has historically defaulted
         // to `utf8`, because of it's focus on text files. This is in contrast to
@@ -35,10 +33,10 @@ export default (Commands, Cypress, cy, state) => {
 
       const consoleProps = {}
 
-      if (_options.log) {
-        _options._log = Cypress.log({
+      if (options.log) {
+        options._log = Cypress.log({
           message: file,
-          timeout: _options.timeout,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
@@ -47,7 +45,7 @@ export default (Commands, Cypress, cy, state) => {
 
       if (!file || !_.isString(file)) {
         $errUtils.throwErrByPath('files.invalid_argument', {
-          onFail: _options._log,
+          onFail: options._log,
           args: { cmd: 'readFile', file },
         })
       }
@@ -57,19 +55,19 @@ export default (Commands, Cypress, cy, state) => {
       cy.clearTimeout()
 
       const verifyAssertions = () => {
-        return Cypress.backend('read:file', file, _.pick(_options, 'encoding')).timeout(_options.timeout)
+        return Cypress.backend('read:file', file, _.pick(options, 'encoding')).timeout(options.timeout)
         .catch((err) => {
           if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
-              onFail: _options._log,
-              args: { cmd: 'readFile', file, timeout: _options.timeout },
+              onFail: options._log,
+              args: { cmd: 'readFile', file, timeout: options.timeout },
             })
           }
 
           // Non-ENOENT errors are not retried
           if (err.code !== 'ENOENT') {
             return $errUtils.throwErrByPath('files.unexpected_error', {
-              onFail: _options._log,
+              onFail: options._log,
               args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
             })
           }
@@ -83,7 +81,7 @@ export default (Commands, Cypress, cy, state) => {
           // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
           // which socket.io uses to transfer the file over the websocket - into a
           // `Buffer`, which webpack polyfills in the browser.
-          if (_options.encoding === null) {
+          if (options.encoding === null) {
             contents = Buffer.from(contents)
           }
 
@@ -93,7 +91,7 @@ export default (Commands, Cypress, cy, state) => {
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents
 
-          return cy.verifyUpcomingAssertions(contents, _options, {
+          return cy.verifyUpcomingAssertions(contents, options, {
             ensureExistenceFor: 'subject',
             onFail (err) {
               if (err.type !== 'existence') {
@@ -117,15 +115,13 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    writeFile (fileName, contents, encoding, options: Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> = {}) {
-      let userOptions = options
-
+    writeFile (fileName, contents, encoding, userOptions: Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> = {}) {
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
       }
 
-      const _options: InternalWriteFileOptions = _.defaults({}, userOptions, {
+      const options: InternalWriteFileOptions = _.defaults({}, userOptions, {
         // https://github.com/cypress-io/cypress/issues/1558
         // If no encoding is specified, then Cypress has historically defaulted
         // to `utf8`, because of it's focus on text files. This is in contrast to
@@ -139,10 +135,10 @@ export default (Commands, Cypress, cy, state) => {
 
       const consoleProps = {}
 
-      if (_options.log) {
-        _options._log = Cypress.log({
+      if (options.log) {
+        options._log = Cypress.log({
           message: fileName,
-          timeout: _options.timeout,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
@@ -151,14 +147,14 @@ export default (Commands, Cypress, cy, state) => {
 
       if (!fileName || !_.isString(fileName)) {
         $errUtils.throwErrByPath('files.invalid_argument', {
-          onFail: _options._log,
+          onFail: options._log,
           args: { cmd: 'writeFile', file: fileName },
         })
       }
 
       if (!(_.isString(contents) || _.isObject(contents))) {
         $errUtils.throwErrByPath('files.invalid_contents', {
-          onFail: _options._log,
+          onFail: options._log,
           args: { contents },
         })
       }
@@ -171,7 +167,7 @@ export default (Commands, Cypress, cy, state) => {
       // the timeout ourselves
       cy.clearTimeout()
 
-      return Cypress.backend('write:file', fileName, contents, _.pick(_options, 'encoding', 'flag')).timeout(_options.timeout)
+      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag')).timeout(options.timeout)
       .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
@@ -181,13 +177,13 @@ export default (Commands, Cypress, cy, state) => {
       .catch((err) => {
         if (err.name === 'TimeoutError') {
           return $errUtils.throwErrByPath('files.timed_out', {
-            onFail: _options._log,
-            args: { cmd: 'writeFile', file: fileName, timeout: _options.timeout },
+            onFail: options._log,
+            args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
           })
         }
 
         return $errUtils.throwErrByPath('files.unexpected_error', {
-          onFail: _options._log,
+          onFail: options._log,
           args: { cmd: 'writeFile', action: 'write', file: fileName, filePath: err.filePath, error: err.message },
         })
       })

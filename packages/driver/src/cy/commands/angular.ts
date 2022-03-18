@@ -93,7 +93,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    ng (type, selector, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    ng (type, selector, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       // what about requirejs / browserify?
       // we need to intelligently check to see if we're using those
       // and if angular is available through them.  throw a very specific
@@ -103,21 +103,21 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('ng.no_global')
       }
 
-      const _options: InternalNgOptions = _.defaults({}, options, { log: true })
+      const options: InternalNgOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log) {
-        _options._log = Cypress.log({
-          timeout: _options.timeout,
+      if (options.log) {
+        options._log = Cypress.log({
+          timeout: options.timeout,
         })
       }
 
       switch (type) {
         case 'model':
-          return findByNgAttr('model', 'model=', selector, _options)
+          return findByNgAttr('model', 'model=', selector, options)
         case 'repeater':
-          return findByNgAttr('repeater', 'repeat*=', selector, _options)
+          return findByNgAttr('repeater', 'repeat*=', selector, options)
         case 'binding':
-          return findByNgBinding(selector, _options)
+          return findByNgBinding(selector, options)
         default:
           return
       }

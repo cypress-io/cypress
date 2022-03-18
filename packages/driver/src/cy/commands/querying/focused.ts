@@ -10,22 +10,22 @@ interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Time
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalFocusedOptions = _.defaults({}, options, {
+    focused (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalFocusedOptions = _.defaults({}, userOptions, {
         verify: true,
         log: true,
       })
 
-      if (_options.log) {
-        _options._log = Cypress.log({ timeout: _options.timeout })
+      if (options.log) {
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const log = ($el) => {
-        if (_options.log === false) {
+        if (options.log === false) {
           return
         }
 
-        _options._log.set({
+        options._log.set({
           $el,
           consoleProps () {
             const ret = $el ? $dom.getElements($el) : '--nothing--'
@@ -50,7 +50,7 @@ export default (Commands, Cypress, cy, state) => {
         return Promise
         .try(getFocused)
         .then(($el) => {
-          if (_options.verify === false) {
+          if (options.verify === false) {
             return $el
           }
 
@@ -60,7 +60,7 @@ export default (Commands, Cypress, cy, state) => {
           }
 
           // pass in a null jquery object for assertions
-          return cy.verifyUpcomingAssertions($el, _options, {
+          return cy.verifyUpcomingAssertions($el, options, {
             onRetry: resolveFocused,
           })
         })

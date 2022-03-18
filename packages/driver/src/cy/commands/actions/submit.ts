@@ -13,8 +13,8 @@ interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeo
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    submit (subject, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalSubmitOptions = _.defaults({}, options, {
+    submit (subject, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalSubmitOptions = _.defaults({}, userOptions, {
         log: true,
         $el: subject,
       })
@@ -23,37 +23,37 @@ export default (Commands, Cypress, cy) => {
       // to break when they need to be triggered synchronously
       // like with type {enter}.  either convert type to a promise
       // to just create a synchronous submit function
-      const form = _options.$el.get(0)
+      const form = options.$el.get(0)
 
-      if (_options.log) {
-        _options._log = Cypress.log({
-          $el: _options.$el,
-          timeout: _options.timeout,
+      if (options.log) {
+        options._log = Cypress.log({
+          $el: options.$el,
+          timeout: options.timeout,
           consoleProps () {
             return {
-              'Applied To': $dom.getElements(_options.$el),
-              Elements: _options.$el.length,
+              'Applied To': $dom.getElements(options.$el),
+              Elements: options.$el.length,
             }
           },
         })
 
-        _options._log.snapshot('before', { next: 'after' })
+        options._log.snapshot('before', { next: 'after' })
       }
 
-      if (!_options.$el.is('form')) {
-        const node = $dom.stringify(_options.$el)
-        const word = $utils.plural(_options.$el, 'contains', 'is')
+      if (!options.$el.is('form')) {
+        const node = $dom.stringify(options.$el)
+        const word = $utils.plural(options.$el, 'contains', 'is')
 
         $errUtils.throwErrByPath('submit.not_on_form', {
-          onFail: _options._log,
+          onFail: options._log,
           args: { node, word },
         })
       }
 
-      if (_options.$el.length && _options.$el.length > 1) {
+      if (options.$el.length && options.$el.length > 1) {
         $errUtils.throwErrByPath('submit.multiple_forms', {
-          onFail: _options._log,
-          args: { num: _options.$el.length },
+          onFail: options._log,
+          args: { num: options.$el.length },
         })
       }
 
@@ -75,7 +75,7 @@ export default (Commands, Cypress, cy) => {
       .delay($actionability.delay, 'submit')
       .then(() => {
         const verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(_options.$el, _options, {
+          return cy.verifyUpcomingAssertions(options.$el, options, {
             onRetry: verifyAssertions,
           })
         }

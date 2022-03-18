@@ -14,13 +14,13 @@ interface InternalHashOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    url (options: Partial<Cypress.UrlOptions> = {}) {
-      const _options: InternalUrlOptions = _.defaults({}, options, { log: true })
+    url (userOptions: Partial<Cypress.UrlOptions> = {}) {
+      const options: InternalUrlOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log !== false) {
-        _options._log = Cypress.log({
+      if (options.log !== false) {
+        options._log = Cypress.log({
           message: '',
-          timeout: _options.timeout,
+          timeout: options.timeout,
         })
       }
 
@@ -30,11 +30,11 @@ export default (Commands, Cypress, cy) => {
 
       const resolveHref = () => {
         return Promise.try(getHref).then((href) => {
-          if (_options.decode) {
+          if (options.decode) {
             href = decodeURI(href)
           }
 
-          return cy.verifyUpcomingAssertions(href, _options, {
+          return cy.verifyUpcomingAssertions(href, options, {
             onRetry: resolveHref,
           })
         })
@@ -43,13 +43,13 @@ export default (Commands, Cypress, cy) => {
       return resolveHref()
     },
 
-    hash (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalHashOptions = _.defaults({}, options, { log: true })
+    hash (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalHashOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log !== false) {
-        _options._log = Cypress.log({
+      if (options.log !== false) {
+        options._log = Cypress.log({
           message: '',
-          timeout: _options.timeout,
+          timeout: options.timeout,
         })
       }
 
@@ -59,7 +59,7 @@ export default (Commands, Cypress, cy) => {
 
       const resolveHash = () => {
         return Promise.try(getHash).then((hash) => {
-          return cy.verifyUpcomingAssertions(hash, _options, {
+          return cy.verifyUpcomingAssertions(hash, options, {
             onRetry: resolveHash,
           })
         })

@@ -52,16 +52,16 @@ export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({ type: 'utility', prevSubject: 'optional' }, {
     // pause should indefinitely pause until the user
     // presses a key or clicks in the UI to continue
-    pause (subject, options: Partial<Cypress.Loggable> = {}) {
+    pause (subject, userOptions: Partial<Cypress.Loggable> = {}) {
       // bail if we're in run mode, unless --headed and --no-exit flags are passed
       if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
         return subject
       }
 
-      const _options: InternalPauseOptions = _.defaults({}, options, { log: true })
+      const options: InternalPauseOptions = _.defaults({}, userOptions, { log: true })
 
-      if (_options.log) {
-        _options._log = Cypress.log({
+      if (options.log) {
+        options._log = Cypress.log({
           snapshot: true,
           autoEnd: false,
           timeout: 0,
@@ -77,8 +77,8 @@ export default (Commands, Cypress, cy, state, config) => {
           // pause on the very next one
             state('onPaused', null)
 
-            if (_options.log) {
-              _options._log.end()
+            if (options.log) {
+              options._log.end()
             }
           }
 
@@ -108,13 +108,13 @@ export default (Commands, Cypress, cy, state, config) => {
       return subject
     },
 
-    debug (subject, options: Partial<Cypress.Loggable> = {}) {
-      const _options: InternalDebugOptions = _.defaults({}, options, {
+    debug (subject, userOptions: Partial<Cypress.Loggable> = {}) {
+      const options: InternalDebugOptions = _.defaults({}, userOptions, {
         log: true,
       })
 
-      if (_options.log) {
-        _options._log = Cypress.log({
+      if (options.log) {
+        options._log = Cypress.log({
           snapshot: true,
           end: true,
           timeout: 0,

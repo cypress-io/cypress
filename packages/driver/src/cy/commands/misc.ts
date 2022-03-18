@@ -54,8 +54,8 @@ export default (Commands, Cypress, cy, state) => {
       return null
     },
 
-    wrap (arg, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const _options: InternalWrapOptions = _.defaults({}, options, {
+    wrap (arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalWrapOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('defaultCommandTimeout'),
       })
@@ -63,32 +63,32 @@ export default (Commands, Cypress, cy, state) => {
       // we'll handle the timeout ourselves
       cy.clearTimeout()
 
-      if (_options.log !== false) {
-        _options._log = Cypress.log({
+      if (options.log !== false) {
+        options._log = Cypress.log({
           message: arg,
-          timeout: _options.timeout,
+          timeout: options.timeout,
         })
 
         if ($dom.isElement(arg)) {
-          _options._log.set({ $el: arg })
+          options._log.set({ $el: arg })
         }
       }
 
       return Promise.resolve(arg)
-      .timeout(_options.timeout)
+      .timeout(options.timeout)
       .catch(Promise.TimeoutError, () => {
         $errUtils.throwErrByPath('wrap.timed_out', {
-          args: { timeout: _options.timeout },
+          args: { timeout: options.timeout },
         })
       })
       .catch((err) => {
         $errUtils.throwErr(err, {
-          onFail: _options._log,
+          onFail: options._log,
         })
       })
       .then((subject) => {
         const resolveWrap = () => {
-          return cy.verifyUpcomingAssertions(subject, _options, {
+          return cy.verifyUpcomingAssertions(subject, options, {
             onRetry: resolveWrap,
           })
           .return(subject)
