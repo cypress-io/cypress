@@ -536,9 +536,7 @@ export const eventManager = {
       // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
       // established spec bridge, but one that is not the current or next switchToDomain command.
       if (cy.state('latestActiveDomain') === domain) {
-        // Since stability was established in another domain set stable to undefined, not true. Undefined and true are treated the same stability.ts, but
-        // it allows us to distinguish between a load event that ocurred in this domain and some that didn't (or the initial state)
-        cy.isStable(undefined, 'load')
+        cy.isStable(true, 'load')
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })
       }
