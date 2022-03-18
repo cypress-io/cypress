@@ -29,9 +29,6 @@ export class PrimaryDomainCommunicator extends EventEmitter {
    * @returns {Void}
    */
   onMessage ({ data, source }) {
-    // currently used for tests, can be removed later
-    if (data?.actual) return
-
     // check if message is cross domain and if so, feed the message into
     // the cross domain bus with args and strip prefix
     if (data?.event?.includes(CROSS_DOMAIN_PREFIX)) {
