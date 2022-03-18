@@ -193,44 +193,35 @@ export class MigrationDataSource {
 
   private checkAndUpdateDuplicatedSpecs (specs: MigrationFile[]) {
     const updatedSpecs: MigrationFile[] = []
-    const updatesCount: Record<string, number> = {}
 
     const sortedSpecs = this.sortSpecsByExtension(specs)
 
     sortedSpecs.forEach((spec) => {
       const specExist = _.find(updatedSpecs, (x) => x.after.relative === spec.after.relative)
 
-      let updatedSpec = spec
-
       if (specExist) {
-        const updatedParts = spec.after.parts.map((part) => {
-          if (part.group === 'fileName') {
-            const beforePreExtensionProperty = _.find(spec.before.parts, (x) => x.group === 'preExtension')
-            const beforePreExtension = beforePreExtensionProperty?.text?.replace('.', '')
+        const beforeParts: FilePart[] = JSON.parse(JSON.stringify(spec.before.parts))
+        const preExtensionBefore = beforeParts.find((part) => part.group === 'preExtension')
 
-            updatesCount[spec.after.relative] = (updatesCount[spec.after.relative] ?? 1) + 1
-
-            return {
-              ...part,
-              text: `${part.text}${updatesCount[spec.after.relative]}${beforePreExtension}`,
-              highlight: true,
-            }
-          }
-
-          return part
-        })
-
-        updatedSpec = {
-          ...spec,
-          after: {
-            ...spec.after,
-            parts: updatedParts,
-            relative: updatedParts.map((x) => x.text).join(''),
-          },
+        if (preExtensionBefore) {
+          preExtensionBefore.highlight = false
         }
+
+        const afterParts: FilePart[] = JSON.parse(JSON.stringify(spec.after.parts))
+        const fileNameAfter = afterParts.find((part) => part.group === 'fileName')
+
+        if (fileNameAfter && preExtensionBefore) {
+          const beforePreExtension = preExtensionBefore?.text?.replace('.', '')
+
+          fileNameAfter.text = `${fileNameAfter.text}${beforePreExtension}`
+        }
+
+        spec.before.parts = beforeParts
+        spec.after.parts = afterParts
+        spec.after.relative = afterParts.map((x) => x.text).join('')
       }
 
-      updatedSpecs.push(updatedSpec)
+      updatedSpecs.push(spec)
     })
 
     return updatedSpecs

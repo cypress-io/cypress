@@ -763,8 +763,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.contains('cypress/e2e/app_spec2.cy.js')
     cy.contains('cypress/e2e/app.cy.js')
     cy.contains('cypress/e2e/app2.cy.js')
-    cy.contains('cypress/e2e/app2_spec.cy.js')
-    cy.contains('cypress/e2e/app3-spec.cy.js')
+    cy.contains('cypress/e2e/app_spec.cy.js')
+    cy.contains('cypress/e2e/app-spec.cy.js')
 
     runAutoRename()
 
@@ -776,8 +776,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         'cypress/e2e/app_spec2.cy.js',
         'cypress/e2e/app.cy.js',
         'cypress/e2e/app2.cy.js',
-        'cypress/e2e/app2_spec.cy.js',
-        'cypress/e2e/app3-spec.cy.js',
+        'cypress/e2e/app_spec.cy.js',
+        'cypress/e2e/app-spec.cy.js',
       ]
 
       for (const spec of specs) {
