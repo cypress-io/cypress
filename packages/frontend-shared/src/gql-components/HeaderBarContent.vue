@@ -30,7 +30,7 @@
                   'text-gray-700'"
                 role="link"
                 :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
-                :aria-disabled="!props.gql?.currentProject || props.gql?.projectRootFromCI"
+                :ariaDisabled="!props.gql?.currentProject || props.gql?.projectRootFromCI"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
@@ -50,9 +50,9 @@
               <a
                 class="font-medium mr-2px"
                 role="link"
-                :class="props.gql?.currentProject?.currentTestingType ? 'text-indigo-500 hocus-link-default cursor-pointer' :
+                :class="props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents ? 'text-indigo-500 hocus-link-default cursor-pointer' :
                   'text-gray-700'"
-                :aria-disabled="!props.gql?.currentProject?.currentTestingType"
+                :ariaDisabled="!props.gql?.currentProject?.currentTestingType || props.gql?.currentProject?.isLoadingNodeEvents"
                 @click.prevent="clearTestingType"
               >
                 {{ props.gql?.currentProject?.title }}
@@ -215,6 +215,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
+    isLoadingNodeEvents
   }
   projectRootFromCI
   ...TopNav
@@ -245,6 +246,10 @@ const clearCurrentProject = () => {
 }
 
 const clearTestingType = () => {
+  if (!props.gql?.currentProject?.currentTestingType || props.gql?.currentProject?.isLoadingNodeEvents) {
+    return
+  }
+
   clearCurrentTestingTypeMutation.executeMutation({})
 }
 
