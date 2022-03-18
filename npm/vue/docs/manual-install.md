@@ -32,5 +32,4 @@ import '@cypress/vue/dist/support'
   "component": {
     "specPattern": "src/**/*.cy.jsx"
   }
-}
 ```
