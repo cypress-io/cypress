@@ -79,6 +79,7 @@ export class DataEmitterActions extends DataEmitterEvents {
     function subscribed (val: any) {
       if (dfd) {
         dfd.resolve(val)
+        dfd = undefined
       } else {
         pending.push(val)
       }
@@ -97,8 +98,6 @@ export class DataEmitterActions extends DataEmitterEvents {
           dfd = pDefer()
 
           const returnValue = { done: false, value: await dfd.promise }
-
-          dfd = undefined
 
           return returnValue
         }
