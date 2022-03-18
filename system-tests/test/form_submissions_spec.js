@@ -138,7 +138,7 @@ describe('e2e forms', () => {
       })
     })
 
-    systemTests.it.only('passes with https on localhost', {
+    systemTests.it('passes with https on localhost', {
       config: {
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },

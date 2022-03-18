@@ -140,9 +140,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {
-      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
-    },
+    defaultValue: {},
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -159,14 +157,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'specPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? '**/*.cy.{js,jsx,ts,tsx}' : 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    validation: validate.isString,
+    validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: false,
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {
-      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    },
+    defaultValue: {},
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {

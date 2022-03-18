@@ -156,6 +156,17 @@ export function mergeDefaults (
 
   _.defaultsDeep(config, defaultsForRuntime)
 
+  let additionalIgnorePattern = config.additionalIgnorePattern
+
+  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+    additionalIgnorePattern = config.e2e.specPattern
+  }
+
+  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+
+  delete config['e2e']
+  delete config['component']
+
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
@@ -177,17 +188,6 @@ export function mergeDefaults (
     // to zero
     config.numTestsKeptInMemory = 0
   }
-
-  let additionalIgnorePattern = config.additionalIgnorePattern
-
-  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
-    additionalIgnorePattern = config.e2e.specPattern
-  }
-
-  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
-
-  delete config['e2e']
-  delete config['component']
 
   config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
 
