@@ -534,9 +534,7 @@ export const eventManager = {
       if (cy.state('latestActiveDomain') === domain) {
         // We remain in an anticipating state until either a load even happens or a timeout.
         cy.isAnticipatingMultiDomainFor(undefined)
-        // Since stability was established in another domain set stable to undefined, not true. Undefined and true are treated the same stability.ts, but
-        // it allows us to distinguish between a load event that ocurred in this domain and some that didn't (or the initial state)
-        cy.isStable(undefined, 'load')
+        cy.isStable(true, 'load')
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })
         // Re-broadcast to any other specBridges.
