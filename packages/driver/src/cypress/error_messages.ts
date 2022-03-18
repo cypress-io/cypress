@@ -986,7 +986,9 @@ export default {
     switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, origins }) {
       return stripIndent`\
 
-        Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s): \`${origins.join(', ')}\`.
+        Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
+
+        ${origins.map((origin) => `\`${origin}\``).join('\n        ')}
 
         Your page did not fire its \`load\` event within \`${ms}ms\`.
 

@@ -240,41 +240,15 @@ describe('delayed navigation', { experimentalSessionSupport: true, defaultComman
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('errors', { experimentalSessionSupport: true }, () => {
-  it('reset top', () => {
-    cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
-  })
-
-  // This test will fail primary domain not established
-  it('logs in with no primary - fail', { baseUrl: undefined, pageLoadTimeout: 5000 }, (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`http://www.foobar.com:3500\`.`)
-      expect(err.message).to.include(`Your page did not fire its \`load\` event within \`5000ms\`.`)
-      expect(err.message).to.include(`A cross origin request for \`http://localhost:3500/fixtures/auth/index.html\` was detected.`)
-      expect(err.message).to.include(`To handle cross origin requests, they must be immediately followed by a switchToDomain command:`)
-      expect(err.message).to.include(`\`cy.switchToDomain('http://localhost:3500', () => { <cross origin commands go here> })\``)
-      expect(err.message).to.include(`If the cross origin was an intermediary state, You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer`)
-
-      expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
-      expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
-      done()
-    })
-
-    cy.switchToDomain('http://idp.com:3500', () => { // Implicitly primary domain is foobar since the previous test set it to foobar. This command times out because we return to localhost, not foobar.
-      cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
-      cy.get('[data-cy="username"]').type('FJohnson')
-      cy.get('[data-cy="login"]').click() // Redirects to localhost
-    })
-
-    cy.get('[data-cy="welcome"]') // Timeout on command, cannot find element (sorry, your element is in another domain)
-    .invoke('text')
-    .should('equal', 'Welcome FJohnson')
-  })
-
   it('never calls switchToDomain', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`http://localhost:3500\`.`)
+      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
+      expect(err.message).to.include(`\n\`http://localhost:3500\`\n`)
+      expect(err.message).to.include(`Your page did not fire its \`load\` event within \`5000ms\`.`)
       expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
+      expect(err.message).to.include(`To handle cross origin requests, they must be immediately followed by a switchToDomain command:`)
       expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
+      expect(err.message).to.include(`If the cross origin was an intermediary state, You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -309,7 +283,8 @@ describe('errors', { experimentalSessionSupport: true }, () => {
 
   it('redirects to the wrong subdomain', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`idp.com\`.`)
+      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
+      expect(err.message).to.include(`\n\`idp.com\`\n`)
       expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
       expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
 
@@ -354,7 +329,8 @@ describe('errors', { experimentalSessionSupport: true }, () => {
 
   it('redirects to an unexpected subdomain', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`http://localhost:3500\`.`)
+      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
+      expect(err.message).to.include(`\n\`http://localhost:3500\`\n`)
       expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
       expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
 
@@ -373,14 +349,15 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     })
 
     // Verify that the user has logged in on localhost
-    cy.get('[data-cy="welcome"]') // Timeout here on command, cannot find element
+    cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
     .invoke('text')
     .should('equal', 'Welcome BJohnson')
   })
 
   it('redirects to an unexpected subdomain and calls another command in the switchToDomain command', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`http://idp.com:3500\`.`)
+      expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
+      expect(err.message).to.include(`\n\`http://idp.com:3500\`\n`)
       expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
       expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
 
@@ -407,7 +384,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
   })
 
   // TODO: run in firefox too after we fix error serialization for firefox.
-  it('fails in switchToDomain when a command is run after we return to localhost', { browser: '!firefox', defaultCommandTimeout: 50 }, (done) => {
+  it('fails in switchToDomain when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
       //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
@@ -425,7 +402,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     })
 
     // Verify that the user has logged in on localhost
-    cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
+    cy.get('[data-cy="welcome"]')
     .invoke('text')
     .should('equal', 'Welcome BJohnson')
   })
@@ -435,7 +412,8 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     // This test removes the foobar spec bridge, navigates to idp, then navigates to foobar and attempts to access selectors on localhost.
     it('times out in switchToDomain with foobar spec bridge undefined', { pageLoadTimeout: 5000 }, (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`http://localhost:3500\`.`)
+        expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
+        expect(err.message).to.include(`\n\`http://localhost:3500\`\n`)
         expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
         expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
 
@@ -483,7 +461,8 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     // The primary domain should ignore the load event from the foobar spec bridge and load should timeout in the idp switchToDomain command..
     it('times out in switchToDomain with foobar spec bridge defined', { pageLoadTimeout: 5000 }, (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s): \`http://localhost:3500\`.`)
+        expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
+        expect(err.message).to.include(`\n\`http://localhost:3500\`\n`)
         expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
         expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
 
