@@ -287,12 +287,12 @@ describe('lib/util/config-file-updater', () => {
           }
         `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specPattern: 'src/**/*.spec.cy.js' } })
 
           const expectedOutput = stripIndent`\
               module.exports = {
                 component: {
-                  specFilePattern: "src/**/*.spec.cy.js",
+                  specPattern: "src/**/*.spec.cy.js",
                 },
                 foo: 42
               }
@@ -311,12 +311,12 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specPattern: 'src/**/*.spec.cy.js' } })
 
           const expectedOutput = stripIndent`\
             module.exports = {
               component: {
-                specFilePattern: "src/**/*.spec.cy.js",
+                specPattern: "src/**/*.spec.cy.js",
                 viewportWidth: 800
               },
               foo: 42
@@ -331,18 +331,18 @@ describe('lib/util/config-file-updater', () => {
             module.exports = {
               foo: 42,
               component: {
-                specFilePattern: 'components/**/*.spec.cy.js',
+                specPattern: 'components/**/*.spec.cy.js',
                 foo: 82
               }
             }`
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specPattern: 'src/**/*.spec.cy.js' } })
 
           const expectedOutput = stripIndent`\
           module.exports = {
             foo: 42,
             component: {
-              specFilePattern: "src/**/*.spec.cy.js",
+              specPattern: "src/**/*.spec.cy.js",
               foo: 82
             }
           }`

@@ -164,9 +164,6 @@ export function mergeDefaults (
 
   config = { ...config, ...config[options.testingType], additionalIgnorePattern }
 
-  delete config['e2e']
-  delete config['component']
-
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
@@ -213,6 +210,11 @@ export function mergeDefaults (
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw errors.get(err, ...args)
   })
+
+  delete config['e2e']
+  delete config['component']
+  delete config['resolved']['e2e']
+  delete config['resolved']['component']
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
 }
