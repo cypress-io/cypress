@@ -1,10 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-
-function getPathForPlatform (posixPath: string) {
-  if (Cypress.platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
+import { getPathForPlatform } from '../../src/paths'
 
 function getRunnerHref (specPath: string) {
   specPath = getPathForPlatform(specPath)

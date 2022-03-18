@@ -1,11 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
-
-function getPathForPlatform (posixPath: string) {
-  if (Cypress.platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
+import { getPathForPlatform } from '../../src/paths'
 
 describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
