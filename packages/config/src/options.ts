@@ -78,6 +78,26 @@ export interface BreakingOption {
   showInLaunchpad?: boolean
 }
 
+const isValidConfig = (key: string, config: any) => {
+  const status = validate.isPlainObject(key, config)
+
+  if (status !== true) {
+    return status
+  }
+
+  for (const rule of options) {
+    if (rule.name in config && rule.validation) {
+      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+
+      if (status !== true) {
+        return status
+      }
+    }
+  }
+
+  return true
+}
+
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -118,6 +138,14 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isValidClientCertificatesSet,
     canUpdateDuringTestTime: false,
   }, {
+    name: 'component',
+    // runner-ct overrides
+    defaultValue: {
+      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    },
+    validation: isValidConfig,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
@@ -132,6 +160,14 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'specPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? '**/*.cy.{js,jsx,ts,tsx}' : 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     validation: validate.isString,
+    canUpdateDuringTestTime: false,
+  }, {
+    name: 'e2e',
+    // e2e runner overrides
+    defaultValue: {
+      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    },
+    validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
     name: 'env',
