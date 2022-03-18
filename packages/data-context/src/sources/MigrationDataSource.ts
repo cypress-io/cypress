@@ -25,6 +25,7 @@ export type LegacyCypressConfigJson = Partial<{
   e2e: Omit<LegacyCypressConfigJson, 'component' | 'e2e'>
   pluginsFile: string | false
   supportFile: string | false
+  slowTestThreshold: number
   componentFolder: string | false
   integrationFolder: string
   testFiles: string | string[]
@@ -59,11 +60,11 @@ export class MigrationDataSource {
 
   async getComponentTestingMigrationStatus () {
     debug('getComponentTestingMigrationStatus: start')
-    const componentFolder = getComponentFolder(this.legacyConfig)
-
     if (!this.legacyConfig || !this.ctx.currentProject) {
       throw Error('Need currentProject and config to continue')
     }
+
+    const componentFolder = getComponentFolder(this.legacyConfig)
 
     // no component folder, so no specs to migrate
     // this should never happen since we never show the

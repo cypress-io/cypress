@@ -60,11 +60,7 @@ const fileSizeIsSame = (file, index) => {
   })
 }
 
-const componentTestingEnabled = (config) => {
-  const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
-
-  return componentTestingEnabled && !isDefault(config, 'componentFolder')
-}
+const componentTestingEnabled = (config) => _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
 const isNewProject = (config) => {
   return false
