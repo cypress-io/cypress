@@ -290,13 +290,28 @@ exports['e2e config throws an error if testFiles is set on the config file 1'] =
 The testFiles configuration option is now invalid when set on the config object in Cypress version 10.0.0.
 
  It is now renamed to specPattern and configured separately as a testing type property: e2e.specPattern and component.specPattern
-
  
 
 {
   e2e: {
     specPattern: '...',
   },
+  component: {
+    specPattern: '...',
+  },
+}
+
+ https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if componentFolder is set on the config file 1'] = `
+The componentFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.
+
+ It is now renamed to specPattern and configured separately as a component testing property: component.specPattern
+ 
+
+{
   component: {
     specPattern: '...',
   },
