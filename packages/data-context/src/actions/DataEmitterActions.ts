@@ -77,6 +77,8 @@ export class DataEmitterActions extends DataEmitterEvents {
     let pending: any[] = []
 
     function subscribed (val: any) {
+      // We can get events here before next() is called setting up the deferred promise
+      // If that happens, we will queue them up to be handled once next eventually is called
       if (dfd) {
         dfd.resolve(val)
         dfd = undefined
