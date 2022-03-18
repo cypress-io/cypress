@@ -76,7 +76,6 @@ export default (Commands, Cypress, cy, state) => {
           // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
           // which socket.io uses to transfer the file over the websocket - into a `Buffer`.
           if (options.encoding === null && contents !== null) {
-          // if (options.encoding === null && contents !== null) {
             contents = Buffer.from(contents)
           }
 
