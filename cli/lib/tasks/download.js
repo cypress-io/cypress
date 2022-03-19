@@ -69,9 +69,9 @@ const prepend = (urlPath) => {
   return pathTemplate
     ? (
       pathTemplate
-      .replace('${endpoint}', endpoint)
-      .replace('${platform}', platform)
-      .replace('${arch}', arch())
+      .replace(/\\?\$\{endpoint\}/, endpoint)
+      .replace(/\\?\$\{platform\}/, platform)
+      .replace(/\\?\$\{arch\}/, arch())
     )
     : `${endpoint}?platform=${platform}&arch=${arch()}`
 }
