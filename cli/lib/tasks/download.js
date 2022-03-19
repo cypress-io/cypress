@@ -64,7 +64,7 @@ const getCA = () => {
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
-  const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE')
+  const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE', true)
 
   return pathTemplate
     ? (
