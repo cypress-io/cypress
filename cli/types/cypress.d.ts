@@ -2834,11 +2834,6 @@ declare namespace Cypress {
      */
     blockHosts: null | string | string[]
     /**
-     * Path to folder containing component test files.
-     * @deprecated
-     */
-    componentFolder: false | string
-    /**
      * A unique ID for the project used for recording
      */
     projectId: null | string
@@ -2963,7 +2958,7 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -2974,16 +2969,21 @@ declare namespace Cypress {
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
     devServer: DevServerFn<ComponentDevServerOpts>
     devServerConfig?: ComponentDevServerOpts
   }
 
   /**
+   * Config options that can be assigned on cypress.config.{ts|js} file
+   */
+  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern'>
+
+  /**
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
    * so we have proper completion for `devServerConfig`
    */
-  type ConfigOptions<ComponentDevServerOpts = any> = Partial<ResolvedConfigOptions<ComponentDevServerOpts>>
+  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>>
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**

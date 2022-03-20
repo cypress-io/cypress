@@ -4,6 +4,7 @@ import * as validate from './validation'
 import pkg from '@packages/root'
 
 export type BreakingOptionErrorKey =
+  | 'COMPONENT_FOLDER_REMOVED'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
@@ -18,7 +19,7 @@ export type BreakingOptionErrorKey =
   | 'NODE_VERSION_DEPRECATION_BUNDLED'
   | 'PLUGINS_FILE_CONFIG_OPTION_REMOVED'
   | 'RENAMED_CONFIG_OPTION'
-  | 'TEST_FILES_DEPRECATION'
+  | 'TEST_FILES_RENAMED'
 
 type TestingType = 'e2e' | 'component'
 
@@ -100,7 +101,6 @@ const isValidConfig = (key: string, config: any) => {
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
-// - cypress.schema.json
 //
 // Add options in alphabetical order for better readability
 
@@ -517,6 +517,10 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
   }, {
+    name: 'componentFolder',
+    errorKey: 'COMPONENT_FOLDER_REMOVED',
+    isWarning: false,
+  }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
     isWarning: false,
@@ -560,7 +564,7 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
   }, {
     name: 'testFiles',
-    errorKey: 'TEST_FILES_DEPRECATION',
+    errorKey: 'TEST_FILES_RENAMED',
     isWarning: false,
   },
 ]
@@ -595,6 +599,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
+  },
+  {
+    name: 'slowTestThreshold',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
 ]
 

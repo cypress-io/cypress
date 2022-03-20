@@ -8,6 +8,7 @@ export default makeConfig({
     include: [
       '@urql/core',
       'vue-i18n',
+      '@cypress/mount-utils',
       '@cypress/vue',
       'p-defer',
       '@vue/test-utils',

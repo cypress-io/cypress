@@ -48,6 +48,18 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     cy.findByTestId('playground-num-elements').contains('3 Matches')
 
+    // This validates that each matching element is covered by the playground highlighting
+    cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+      cy.get('li').each(($highlightedItem) => {
+        const el = $highlightedItem[0]
+        const rect = el.getBoundingClientRect()
+
+        const elAtPoint = el.ownerDocument.elementFromPoint(rect.left, rect.top)
+
+        expect(el).not.eq(elAtPoint)
+      })
+    })
+
     cy.findByLabelText('Selector Methods').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
@@ -127,5 +139,22 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')
     })
+  })
+
+  it('should show blank page', () => {
+    cy.visitApp()
+    cy.contains('blank-contents.spec')
+    .click()
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the blank page')
+  })
+
+  it('should show visit failure blank page', () => {
+    cy.visitApp()
+    cy.contains('blank-contents.spec')
+    .click()
+
+    cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
+    cy.percySnapshot()
   })
 })

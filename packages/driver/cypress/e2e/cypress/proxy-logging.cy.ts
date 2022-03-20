@@ -102,8 +102,8 @@ describe('Proxy Logging', () => {
       })
     })
 
-    // @see https://github.com/cypress-io/cypress/issues/17656
-    it('xhr log has response body/status code', (done) => {
+    // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
+    it('xhr log has response body/status code when xhr response is logged first', (done) => {
       cy.window()
       .then({ timeout: 10000 }, (win) => {
         cy.on('log:changed', (log) => {
@@ -130,6 +130,59 @@ describe('Proxy Logging', () => {
             // eslint-disable-next-line no-console
             console.log('assertion error, retrying', err)
           }
+        })
+
+        const oldUpdateRequestWithResponse = Cypress.ProxyLogging.updateRequestWithResponse
+
+        cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function (...args) {
+          setTimeout(() => {
+            oldUpdateRequestWithResponse.call(this, ...args)
+          }, 500)
+        })
+
+        const xhr = new win.XMLHttpRequest()
+
+        xhr.open('GET', '/some-url')
+        xhr.send()
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
+    it('xhr log has response body/status code when xhr response is logged second', (done) => {
+      cy.window()
+      .then({ timeout: 10000 }, (win) => {
+        cy.on('log:changed', (log) => {
+          try {
+            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
+            expect(log.consoleProps['Response Headers']).to.include({
+              'x-powered-by': 'Express',
+            })
+
+            expect(log.consoleProps['Response Body']).to.include('Cannot GET /some-url')
+            expect(log.consoleProps['Response Status Code']).to.eq(404)
+
+            expect(log.renderProps).to.include({
+              indicator: 'bad',
+              message: 'GET 404 /some-url',
+            })
+
+            expect(Object.keys(log.consoleProps)).to.deep.eq(
+              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'XHR', 'groups', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
+            )
+
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion error, retrying', err)
+          }
+        })
+
+        const oldOnload = cy.state('server').options.onLoad
+
+        cy.stub(cy.state('server').options, 'onLoad').log(false).callsFake(function (...args) {
+          setTimeout(() => {
+            oldOnload.call(this, ...args)
+          }, 500)
         })
 
         const xhr = new win.XMLHttpRequest()
