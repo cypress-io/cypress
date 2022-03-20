@@ -1,5 +1,4 @@
 import httpProxy from 'http-proxy'
-import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -13,8 +12,6 @@ import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
-
-const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
   config: Cfg
@@ -87,17 +84,6 @@ export const createCommonRoutes = ({
     getCtx().html.appHtml(nonProxied)
     .then((html) => res.send(html))
     .catch((e) => res.status(500).send({ stack: e.stack }))
-  })
-
-  // serve static assets from the dist'd Vite app
-  router.get([
-    `${clientRoute}assets/*`,
-    `${clientRoute}shiki/*`,
-  ], (req, res) => {
-    debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
-    const pathToFile = getPathToDist('app', 'assets', req.params[0])
-
-    return send(req, pathToFile).pipe(res)
   })
 
   router.all('*', (req, res) => {
