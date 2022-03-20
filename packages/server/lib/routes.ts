@@ -43,11 +43,11 @@ export const createCommonRoutes = ({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    router.get('/__cypress/assets/*', (req, res) => {
+    router.get(`/__cypress/app/*`, (req, res) => {
       proxy.web(req, res, {}, (e) => {})
     })
   } else {
-    router.get('/__cypress/assets/*', (req, res) => {
+    router.get(`/__cypress/app/*`, (req, res) => {
       const pathToFile = getPathToDist('app', req.params[0])
 
       return send(req, pathToFile).pipe(res)

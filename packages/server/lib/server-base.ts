@@ -57,7 +57,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     // changed to accommodate that. since this is all just dealing with static assets
     // with no state management, it's fine for vite to serve static assets on the same namespace
     // scripts/gulp/tasks/gulpVite.ts:24
-    new RegExp(`/__cypress/assets/.+`),
+    new RegExp(`/__cypress/app/.+`),
   ]
 
   const isAllowedBypassUrl = (url) => {
