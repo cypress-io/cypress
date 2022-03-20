@@ -137,3 +137,7 @@ export const makeConfig = (config: UserConfigWithBase, plugins: PluginOptions = 
     ...config,
   }
 }
+
+export default makeConfig({
+  base: './',
+})
