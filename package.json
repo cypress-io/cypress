@@ -94,7 +94,7 @@
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/utils": "8.2.3",
     "@graphql-tools/wrap": "8.1.1",
-    "@percy/cli": "1.0.0-beta.76",
+    "@percy/cli": "1.0.0-beta.48",
     "@percy/cypress": "^3.1.0",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
