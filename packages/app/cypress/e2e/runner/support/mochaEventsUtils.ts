@@ -2,8 +2,12 @@ import type { CypressInCypressMochaEvent } from '../../../../src/runner/event-ma
 import _ from 'lodash'
 import type { MochaLifecycleData, SanitizedMochaLifecycleData } from './mochaTypes'
 import EventEmitter from 'events'
+import disparity from 'disparity'
 
-const hooks = ['before all', 'before each', 'after all', 'after each'] as const
+const hooks = {
+  before: ['before all', 'before each'],
+  after: ['after each', 'after all'],
+} as const
 
 const stringifyShort = (obj: Record<string, any>) => {
   const constructorName = _.get(obj, 'constructor.name')
@@ -59,7 +63,7 @@ const eventCleanseMap = {
       lifecycle: 'match.number',
     }
 
-    for (const hook of hooks) {
+    for (const hook of hooks.before) {
       const hooksToSanitize = arg[hook]
 
       if (!hooksToSanitize) {
@@ -80,6 +84,22 @@ const eventCleanseMap = {
         fnDuration: 'match.number',
         afterFnDuration: 'match.number',
       }
+    }
+
+    for (const hook of hooks.after) {
+      const hooksToSanitize = arg[hook]
+
+      if (!hooksToSanitize) {
+        continue
+      }
+
+      sanitizedLifecycleData[hook] = hooksToSanitize.map((oldHook) => {
+        return {
+          hookId: oldHook.hookId,
+          fnDuration: 'match.number',
+          afterFnDuration: 'match.number',
+        }
+      })
     }
 
     return sanitizedLifecycleData
@@ -116,23 +136,32 @@ declare global {
   }
 }
 
+class SnapshotError extends Error {
+  constructor (message: string) {
+    super()
+    this.message = `\n${message}`
+  }
+}
+
 export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompare: keyof T, done: Mocha.Done) {
   const bus = new EventEmitter()
   const outerRunner = window.top!.window
 
   outerRunner.bus = bus
 
+  // TODO: Can we automate writing the snapshots to disk?
+  // For some reason `cy.task('getSnapshot')` has problems when executed in
+  // "cypress in cypress"
   bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
     const expected = snapshots[snapToCompare]
-    const diff = deepDiff(snapshot, expected)
+    const diff = disparity.unifiedNoColor(JSON.stringify(snapshot, null, 2), JSON.stringify(expected, null, 2), {})
 
-    if (Object.keys(diff).length) {
-      // useful for debugging
-      console.error('snapshot:', JSON.stringify(snapshot, null, 2)) // eslint-disable-line no-console
-      console.error('Expected snapshots to be identical, but they were not. Difference:', diff) // eslint-disable-line no-console
+    if (diff !== '') {
+      /* eslint-disable no-console */
+      console.info('Received snapshot:', JSON.stringify(snapshot, null, 2))
+      throw new SnapshotError(diff)
     }
 
-    expect(Object.keys(diff).length).to.eq(0)
     done()
   })
 
@@ -157,45 +186,4 @@ function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
       return removeUnusedKeysForTestSnapshot(payload)
     })
   })
-}
-
-// https://gist.github.com/Yimiprod/7ee176597fef230d1451?permalink_comment_id=3415430#gistcomment-3415430
-function deepDiff (fromObject: any, toObject: any) {
-  const changes = {}
-
-  const buildPath = (obj: any, key: string, path?: string) => {
-    return _.isUndefined(path) ? key : `${path}.${key}`
-  }
-
-  const walk = (fromObject: any, toObject: any, path?: string) => {
-    for (const key of _.keys(fromObject)) {
-      const currentPath = buildPath(fromObject, key, path)
-
-      if (!_.has(toObject, key)) {
-        changes[currentPath] = { from: _.get(fromObject, key) }
-      }
-    }
-
-    for (const [key, to] of _.entries(toObject)) {
-      const currentPath = buildPath(toObject, key, path)
-
-      if (!_.has(fromObject, key)) {
-        changes[currentPath] = { to }
-      } else {
-        const from = _.get(fromObject, key)
-
-        if (!_.isEqual(from, to)) {
-          if (_.isObjectLike(to) && _.isObjectLike(from)) {
-            walk(from, to, currentPath)
-          } else {
-            changes[currentPath] = { from, to }
-          }
-        }
-      }
-    }
-  }
-
-  walk(fromObject, toObject)
-
-  return changes
 }

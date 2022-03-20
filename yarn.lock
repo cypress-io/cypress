@@ -12207,7 +12207,7 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
-ansi-styles@^4.0.0, ansi-styles@^4.1.0:
+ansi-styles@^4.0.0, ansi-styles@^4.1.0, ansi-styles@^4.2.1:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-4.3.0.tgz#edd803628ae71c04c85ae7a0906edad34b648937"
   integrity sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
@@ -19305,6 +19305,14 @@ disparity@3.0.0:
   dependencies:
     ansi-styles "^4.1.0"
     diff "^4.0.1"
+
+disparity@^3.0.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/disparity/-/disparity-3.2.0.tgz#7198eaf7a873a130f8098c93061c1df8934500f2"
+  integrity sha512-8cl9ouncFYE7OQsYwJNiy2e15S0xN80X1Jj/N/YkoiM+VGWSyg1YzPToecKyYx2DQiJapt5IC8yi43GW23TUHQ==
+  dependencies:
+    ansi-styles "^4.2.1"
+    diff "^4.0.2"
 
 dmg-builder@22.13.1:
   version "22.13.1"
