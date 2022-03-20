@@ -478,7 +478,7 @@ commands:
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            $([[ <<parameters.percy>> == 'true' ]] && yarn percy exec:start --debug --verbose) || true
+            ([[ <<parameters.percy>> == 'true' ]] && yarn percy exec:start --debug --verbose --parallel) || true
           background: true
       - run:
           command: |
@@ -2210,17 +2210,17 @@ linux-workflow: &linux-workflow
           - build
     - run-frontend-shared-component-tests-chrome:
         context: test-runner:launchpad-tests
-        percy: false
+        percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
         context: test-runner:launchpad-tests
-        percy: false
+        percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
         context: test-runner:launchpad-tests
-        percy: false
+        percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
@@ -2230,7 +2230,7 @@ linux-workflow: &linux-workflow
           - build
     - run-app-component-tests-chrome:
         context: test-runner:launchpad-tests
-        percy: false
+        percy: true
         requires:
           - build
     - reporter-integration-tests:
