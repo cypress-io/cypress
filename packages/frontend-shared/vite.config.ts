@@ -1,5 +1,4 @@
 import path from 'path'
-import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import WindiCSS from 'vite-plugin-windicss'
@@ -25,7 +24,9 @@ type PluginOptions = {
   componentsOptions?: ArgumentsType<typeof Components>[0]
 }
 
-const base = './'
+interface UserConfigWithBase extends Partial<UserConfig> {
+  base: string
+}
 
 const alias = {
   '@cy/components': path.resolve(__dirname, './src/components'),
@@ -74,12 +75,17 @@ const makePlugins = (plugins) => {
   ])
 }
 
-export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOptions = {}): UserConfig => {
+export const makeConfig = (config: UserConfigWithBase, plugins: PluginOptions = {}): UserConfig => {
   // Don't overwrite plugins
   delete config.plugins
 
+  const { base } = config
+
+  if (!base) {
+    throw new Error('vite.makeConfig({ ... }) must provide a valid base config option; none was given')
+  }
+
   return {
-    base,
     publicDir: path.resolve(__dirname, './src/public'),
 
     // Production-only build options
@@ -131,5 +137,3 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
     ...config,
   }
 }
-
-export default defineConfig(makeConfig())

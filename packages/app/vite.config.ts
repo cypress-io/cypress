@@ -3,6 +3,7 @@ import Layouts from 'vite-plugin-vue-layouts'
 import Pages from 'vite-plugin-pages'
 
 export default makeConfig({
+  base: '/__cypress/app/',
   optimizeDeps: {
     include: [
       '@urql/core',

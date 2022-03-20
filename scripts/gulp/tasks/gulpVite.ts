@@ -21,29 +21,25 @@ import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProces
  *------------------------------------------------------------------------**/
 
 export function viteApp () {
-  const baseSuffix = `--base /__cypress/assets/`
-
   // TODO: remove once we have sourcemap
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const port = process.env.CYPRESS_INTERNAL_VITE_APP_PORT
 
-    return spawnViteDevServer('vite-app', `yarn vite --port ${port} ${baseSuffix}`, {
+    return spawnViteDevServer('vite-app', `yarn vite --port ${port}`, {
       cwd: monorepoPaths.pkgApp,
     })
   }
 
-  return watchViteBuild('vite-app', `yarn vite build --mode development --minify false --watch ${baseSuffix}`, {
+  return watchViteBuild('vite-app', `yarn vite build --mode development --minify false --watch`, {
     cwd: monorepoPaths.pkgApp,
   })
 }
 
 export function viteLaunchpad () {
-  const baseSuffix = `--base /__launchpad/`
-
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const port = process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
 
-    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port} ${baseSuffix}`, {
+    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port}`, {
       cwd: monorepoPaths.pkgLaunchpad,
     })
   }

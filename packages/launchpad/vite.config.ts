@@ -1,3 +1,3 @@
-import ViteConfig from '../frontend-shared/vite.config'
+import { makeConfig } from '../frontend-shared/vite.config'
 
-export default ViteConfig
+export default makeConfig({ base: '/__launchpad/' })
