@@ -3347,7 +3347,7 @@ declare namespace Cypress {
     (chainer: 'be.a', type: string): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.above', 5)
      * @see http://chaijs.com/api/bdd/#method_above
@@ -3367,7 +3367,7 @@ declare namespace Cypress {
     (chainer: 'be.an', value: string): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.at.least', 5)
      * @see http://chaijs.com/api/bdd/#method_least
@@ -3376,7 +3376,7 @@ declare namespace Cypress {
     (chainer: 'be.at.least', value: number | Date): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.below', 5)
      * @see http://chaijs.com/api/bdd/#method_below
@@ -3392,7 +3392,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.arguments'): Chainable<Subject>
     /**
-     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('be.approximately', 5, 0.5)
      * @alias closeTo
@@ -3401,7 +3401,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.approximately', value: number, delta: number): Chainable<Subject>
     /**
-     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('be.closeTo', 5, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
@@ -3435,7 +3435,7 @@ declare namespace Cypress {
     (chainer: 'be.false'): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.greaterThan', 5)
      * @alias above
@@ -3445,7 +3445,7 @@ declare namespace Cypress {
     (chainer: 'be.greaterThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.gt', 5)
      * @alias above
@@ -3455,7 +3455,7 @@ declare namespace Cypress {
     (chainer: 'be.gt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.gte', 5)
      * @alias least
@@ -3465,7 +3465,7 @@ declare namespace Cypress {
     (chainer: 'be.gte', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.lessThan', 5)
      * @alias below
@@ -3475,7 +3475,7 @@ declare namespace Cypress {
     (chainer: 'be.lessThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.lt', 5)
      * @alias below
@@ -3485,7 +3485,7 @@ declare namespace Cypress {
     (chainer: 'be.lt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('be.lte', 5)
      * @alias most
@@ -3494,7 +3494,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.lte', value: number): Chainable<Subject>
     /**
-     * Asserts that the target is loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
+     * Asserts that the target is loosely (`==`) equal to `true`. However, it's often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
      *    cy.wrap(1).should('be.ok')
      * @see http://chaijs.com/api/bdd/#method_ok
@@ -3535,7 +3535,7 @@ declare namespace Cypress {
     (chainer: 'be.NaN'): Chainable<Subject>
     /**
      * Asserts that the target is a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.within', 5, 10)
      * @see http://chaijs.com/api/bdd/#method_within
@@ -3544,8 +3544,8 @@ declare namespace Cypress {
     (chainer: 'be.within', start: number, end: number): Chainable<Subject>
     (chainer: 'be.within', start: Date, end: Date): Chainable<Subject>
     /**
-     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
-     * However, it’s often best to assert that `subject` is equal to its expected value.
+     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it's invoked before the target function compared to when it's invoked afterward.
+     * However, it's often best to assert that `subject` is equal to its expected value.
      * @example
      *    let dots = ''
      *    function addDot() { dots += '.' }
@@ -3575,8 +3575,8 @@ declare namespace Cypress {
      */
     (chainer: 'contain', value: any): Chainable<Subject>
     /**
-     * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
-     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it's invoked after invoking the target function compared to when it's invoked beforehand.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. it's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
      *    let val = 1
      *    function subtractTwo() { val -= 2 }
@@ -3606,7 +3606,7 @@ declare namespace Cypress {
      */
     (chainer: 'deep.equal', value: Subject): Chainable<Subject>
     /**
-     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(1).should('exist')
      * @see http://chaijs.com/api/bdd/#method_exist
@@ -3825,10 +3825,10 @@ declare namespace Cypress {
      */
     (chainer: 'include.members' | 'include.ordered.members' | 'include.deep.ordered.members', value: any[]): Chainable<Subject>
     /**
-     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
-     * invoked after invoking the target function compared to when it’s invoked beforehand.
+     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it's
+     * invoked after invoking the target function compared to when it's invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
-     * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * it's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      *
      * When two arguments are provided, `.increase` asserts that the value of the given object `subject`’s `prop` property is greater after
      * invoking the target function compared to beforehand.
@@ -3875,7 +3875,7 @@ declare namespace Cypress {
     (chainer: 'satisfy', fn: (val: any) => boolean): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
      * @example
      *    function badFn() { throw new TypeError('Illegal salmon!') }
      *    cy.wrap(badFn).should('throw')
@@ -3887,7 +3887,7 @@ declare namespace Cypress {
     (chainer: 'throw', value?: string | RegExp): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that an error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that an error is thrown with a message that contains that string.
      * @example
      *    function badFn() { throw new TypeError('Illegal salmon!') }
      *    cy.wrap(badFn).should('throw')
@@ -3956,7 +3956,7 @@ declare namespace Cypress {
     (chainer: 'not.be.a', type: string): Chainable<Subject>
     /**
      * Asserts that the target is a not number or not a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.above', 10)
      * @see http://chaijs.com/api/bdd/#method_above
@@ -3976,7 +3976,7 @@ declare namespace Cypress {
     (chainer: 'not.be.an', value: string): Chainable<Subject>
     /**
      * Asserts that the target is not a number or not a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.at.least', 10)
      * @see http://chaijs.com/api/bdd/#method_least
@@ -3985,7 +3985,7 @@ declare namespace Cypress {
     (chainer: 'not.be.at.least', value: number | Date): Chainable<Subject>
     /**
      * Asserts that the target is not a number or not a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.below', 1)
      * @see http://chaijs.com/api/bdd/#method_below
@@ -4001,7 +4001,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.arguments'): Chainable<Subject>
     /**
-     * Asserts that the target is a not number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a not number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('not.be.approximately', 6, 0.5)
      * @alias closeTo
@@ -4010,7 +4010,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.approximately', value: number, delta: number): Chainable<Subject>
     /**
-     * Asserts that the target is not a number that’s within a given +/- `delta` range of the given number `expected`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not a number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('not.be.closeTo', 6, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
@@ -4044,7 +4044,7 @@ declare namespace Cypress {
     (chainer: 'not.be.false'): Chainable<Subject>
     /**
      * Asserts that the target is a not number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('be.greaterThan', 7)
      * @alias above
@@ -4054,7 +4054,7 @@ declare namespace Cypress {
     (chainer: 'not.be.greaterThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a not number or a date greater than the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.gt', 7)
      * @alias above
@@ -4064,7 +4064,7 @@ declare namespace Cypress {
     (chainer: 'not.be.gt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is a not number or a `n` date greater than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(6).should('not.be.gte', 7)
      * @alias least
@@ -4074,7 +4074,7 @@ declare namespace Cypress {
     (chainer: 'not.be.gte', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.lessThan', 3)
      * @alias below
@@ -4084,7 +4084,7 @@ declare namespace Cypress {
     (chainer: 'not.be.lessThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.lt', 3)
      * @alias below
@@ -4094,7 +4094,7 @@ declare namespace Cypress {
     (chainer: 'not.be.lt', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a date less than or equal to the given number or date n respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(4).should('not.be.lte', 3)
      * @alias most
@@ -4103,7 +4103,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.lte', value: number): Chainable<Subject>
     /**
-     * Asserts that the target is not loosely (`==`) equal to `true`. However, it’s often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
+     * Asserts that the target is not loosely (`==`) equal to `true`. However, it's often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
      *    cy.wrap(0).should('not.be.ok')
      * @see http://chaijs.com/api/bdd/#method_ok
@@ -4144,7 +4144,7 @@ declare namespace Cypress {
     (chainer: 'not.be.NaN'): Chainable<Subject>
     /**
      * Asserts that the target is not a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
-     * However, it’s often best to assert that the target is equal to its expected value.
+     * However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(3).should('not.be.within', 5, 10)
      * @see http://chaijs.com/api/bdd/#method_within
@@ -4153,8 +4153,8 @@ declare namespace Cypress {
     (chainer: 'not.be.within', start: number, end: number): Chainable<Subject>
     (chainer: 'not.be.within', start: Date, end: Date): Chainable<Subject>
     /**
-     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it’s invoked before the target function compared to when it’s invoked afterward.
-     * However, it’s often best to assert that `subject` is equal to its expected value.
+     * When one argument is provided, `.change` asserts that the given function `subject` returns a different value when it's invoked before the target function compared to when it's invoked afterward.
+     * However, it's often best to assert that `subject` is equal to its expected value.
      * @example
      *    let dots = ''
      *    function addDot() { dots += '.' }
@@ -4184,8 +4184,8 @@ declare namespace Cypress {
      */
     (chainer: 'not.contain', value: any): Chainable<Subject>
     /**
-     * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it’s invoked after invoking the target function compared to when it’s invoked beforehand.
-     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It’s often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it's invoked after invoking the target function compared to when it's invoked beforehand.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. it's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
      *    let val = 1
      *    function subtractTwo() { val -= 2 }
@@ -4214,7 +4214,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.deep.equal', value: Subject): Chainable<Subject>
     /**
-     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(null).should('not.exist')
      * @see http://chaijs.com/api/bdd/#method_exist
@@ -4409,10 +4409,10 @@ declare namespace Cypress {
      */
     (chainer: 'not.include.members' | 'not.include.ordered.members' | 'not.include.deep.ordered.members', value: any[]): Chainable<Subject>
     /**
-     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
-     * invoked after invoking the target function compared to when it’s invoked beforehand.
+     * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it's
+     * invoked after invoking the target function compared to when it's invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
-     * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * it's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      *
      * When two arguments are provided, `.increase` asserts that the value of the given object `subject`’s `prop` property is greater after
      * invoking the target function compared to beforehand.
@@ -4459,7 +4459,7 @@ declare namespace Cypress {
     (chainer: 'not.satisfy', fn: (val: any) => boolean): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
      * @example
      *    function badFn() { console.log('Illegal salmon!') }
      *    cy.wrap(badFn).should('not.throw')
@@ -4471,7 +4471,7 @@ declare namespace Cypress {
     (chainer: 'not.throw', value?: string | RegExp): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
-     * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
+     * When one argument is provided, and it's a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
      * @example
      *    function badFn() { console.log('Illegal salmon!') }
      *    cy.wrap(badFn).should('not.throw')
