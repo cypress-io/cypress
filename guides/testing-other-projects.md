@@ -5,7 +5,7 @@ In `develop`, `master`, and any other branch configured in [`circle.yml`](../cir
 Two main strategies are used to spawn these test projects:
 
 1. `test-binary-against-repo` jobs
-2. Remote CI
+2. `binary-system-tests`
 
 ## `test-binary-against-repo` jobs
 
@@ -13,9 +13,7 @@ A number of CI jobs in `circle.yml` clone test projects and run tests as part of
 
 You can find a list of test projects that do this by searching for usage of the `test-binary-against-repo` step.
 
-Similarly to "Remote CI" test projects, Local CI test projects will attempt to check out a branch that is named after the [next version](./next-version.md) (`X.Y.Z`) if one exists in the test project git repo.
-
-One advantage to local CI is that it does not require creating commits to another repo.
+Local CI test projects will attempt to check out a branch that is named after the [next version](./next-version.md) (`X.Y.Z`) if one exists in the test project git repo. This can be used to test breaking changes in Cypress.
 
 ## `binary-system-tests`
 
