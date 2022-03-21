@@ -2938,6 +2938,7 @@ declare namespace Cypress {
     browserUrl: string
     clientRoute: string
     cypressEnv: string
+    cypressBinaryRoot: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean

@@ -7,6 +7,9 @@ import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
 import { mergeConfig } from 'vite'
+import type * as vite from 'vite'
+import path from 'path'
+
 import { configFiles } from './constants'
 import { Cypress, CypressInspect } from './plugins/index'
 import type { StartDevServer } from './types'
@@ -31,20 +34,36 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     Falling back to Vite\'s defaults.`)
   }
 
-  const config = {
+  const config: Partial<vite.InlineConfig> = {
     root,
     base: `/${options.config.namespace}/src/`,
     configFile,
+    resolve: {
+      alias: [
+        {
+          find: 'cypress/vue',
+          replacement: path.join(options.config.cypressBinaryRoot!, 'npm/vue'),
+        },
+        {
+          find: 'cypress/mount-utils',
+          replacement: path.join(options.config.cypressBinaryRoot!, 'npm/mount-utils'),
+        },
+        {
+          find: 'cypress/react',
+          replacement: path.join(options.config.cypressBinaryRoot!, 'npm/react'),
+        },
+      ],
+    },
     optimizeDeps: {
       entries: [
         ...options.specs.map((s) => relative(root, s.relative)),
         options.config.supportFile ?? resolve(root, options.config.supportFile),
-      ].filter((v) => v != null),
+      ].filter((v) => v != null) as string[],
     },
     plugins: [
       Cypress(options),
       await CypressInspect(),
-    ],
+    ].filter((v) => v !== null),
   }
 
   const finalConfig = mergeConfig(config, viteOverrides)

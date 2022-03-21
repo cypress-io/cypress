@@ -1,3 +1,4 @@
+/// <reference types="cypress" />
 import debugFn from 'debug'
 import getPort from 'get-port'
 import { createServer as viteCreateServer } from 'vite'

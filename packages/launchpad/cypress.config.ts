@@ -18,7 +18,7 @@ export default defineConfig({
     videoCompression: false, // turn off video compression for CI
   },
   'component': {
-    'supportFile': 'cypress/component/support/index.ts',
+    supportFile: 'cypress/component/support/index.ts',
     devServer,
     devServerConfig: {
       optimizeDeps: {

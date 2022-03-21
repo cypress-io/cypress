@@ -20,7 +20,9 @@
   },
   "rules": {
     "no-console": "off",
+    "no-duplicate-imports": "off",
     "mocha/no-global-tests": "off",
+    "@typescript-eslint/no-duplicate-imports": "error",
     "@typescript-eslint/no-unused-vars": "off",
     "react/jsx-filename-extension": [
       "warn",
