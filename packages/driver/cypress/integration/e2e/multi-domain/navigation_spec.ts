@@ -248,7 +248,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
       expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
       expect(err.message).to.include(`To handle cross origin requests, they must be immediately followed by a \`cy.switchToDomain()\` command:`)
       expect(err.message).to.include(`\`cy.switchToDomain('http://www.foobar.com:3500', () => { <cross origin commands go here> })\``)
-      expect(err.message).to.include(`If the cross origin request was an intermediary state, You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer`)
+      expect(err.message).to.include(`If the cross origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
