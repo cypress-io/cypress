@@ -71,7 +71,7 @@
     "mobx-react-lite": "3.0.0",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
-    "next": "^10.1.2",
+    "next": "^12.0.0",
     "pretty": "2.0.0",
     "prop-types": "15.7.2",
     "radioactive-state": "1.3.4",
