@@ -1226,6 +1226,7 @@ describe('src/cy/commands/querying', () => {
 
     // https://github.com/cypress-io/cypress/issues/19116
     it('handles backslashes', () => {
+      $('<div id="backslashes">"&lt;OE_D]dQ\\</div>').appendTo(cy.$$('body'))
       cy.get('#backslashes').contains('"<OE_D]dQ\\')
     })
 
