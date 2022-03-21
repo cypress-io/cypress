@@ -27,7 +27,7 @@ export function useUnifiedRunner () {
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-      watch(() => specs.value, () => {
+      watch(() => specs.value, (newVal) => {
         const fileParam = route.query.file
 
         if (!fileParam) {
@@ -36,7 +36,7 @@ export function useUnifiedRunner () {
           return
         }
 
-        const activeSpecInSpecsList = specs.value.find((x) => x.relative === fileParam)
+        const activeSpecInSpecsList = newVal.find((x) => x.relative === fileParam)
 
         if (!activeSpecInSpecsList) {
           // the specs list no longer contains the spec being shown
