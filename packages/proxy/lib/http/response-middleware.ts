@@ -4,7 +4,7 @@ import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils, uri } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
-import type { HttpMiddleware } from '.'
+import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -12,8 +12,9 @@ import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 import { URL } from 'url'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
-export type ResponseMiddleware = HttpMiddleware<{
+interface ResponseMiddlewareProps {
   /**
    * Before using `res.incomingResStream`, `prepareResStream` can be used
    * to remove any encoding that prevents it from being returned as plain text.
@@ -24,7 +25,9 @@ export type ResponseMiddleware = HttpMiddleware<{
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
-}>
+}
+
+export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
 
 const debug = debugModule('cypress:proxy:http:response-middleware')
 
@@ -382,7 +385,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const determineIfNeedsMultiDomainHandling = (ctx) => {
+const determineIfNeedsMultiDomainHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
 
   // A cookie needs multi-domain handling if it's an AUT request and
@@ -399,11 +402,18 @@ const determineIfNeedsMultiDomainHandling = (ctx) => {
   )
 }
 
+interface EnsureSameSiteNoneProps {
+  cookie: string
+  browser: Browser | { family: string | null }
+  isLocalhost: boolean
+  url: URL
+}
+
 const cookieSameSiteRegex = /SameSite=(\w+)/i
 const cookieSecureRegex = /Secure/i
 const cookieSecureSemicolonRegex = /;\s*Secure/i
 
-const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }) => {
+const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSiteNoneProps) => {
   debug('original cookie: %s', cookie)
 
   if (cookieSameSiteRegex.test(cookie)) {
