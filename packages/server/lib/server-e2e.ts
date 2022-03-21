@@ -209,13 +209,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
         options.headers['x-cypress-authorization'] = this._fileServer.token
 
-        this._remoteVisitingUrl = true
-
         this._onDomainSet(urlStr, options)
 
-        // TODO: instead of joining remoteOrigin here
-        // we can simply join our fileServer origin
-        // and bypass all the remoteState.visiting shit
         urlFile = url.resolve(this._remoteFileServer as string, urlStr)
         urlStr = url.resolve(this._remoteOrigin as string, urlStr)
       }
@@ -251,8 +246,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               domain: cors.getSuperDomain(newUrl),
             })
             .then((cookies) => {
-              this._remoteVisitingUrl = false
-
               const statusIs2xxOrAllowedFailure = () => {
                 // is our status code in the 2xx range, or have we disabled failing
                 // on status code?
@@ -303,9 +296,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // when the server should cache the request buffer
                 // and set the domain vs not
                 if (isOk && details.isHtml) {
-                  // reset the domain to the new url if we're not
-                  // handling a local file and we aren't in multi-domain
-                  if (!handlingLocalFile && !options.isMultiDomain) {
+                  // if we are in multi-domain, add it to the remote states
+                  if (options.isMultiDomain) {
+                    this._addRemoteState(newUrl as string, options)
+                  // if we're not handling a local file set the domain to the new url
+                  } else if (!handlingLocalFile) {
                     this._onDomainSet(newUrl, options)
                   }
 
@@ -345,7 +340,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         this._remoteStrategy = previousState.strategy
         this._remoteFileServer = previousState.fileServer
         this._remoteDomainName = previousState.domainName
-        this._remoteVisitingUrl = previousState.visiting
       }
 
       // if they're POSTing an object, querystringify their POST body

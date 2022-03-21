@@ -55,9 +55,8 @@ declare namespace Cypress {
     domainName: string
     strategy: 'file' | 'http'
     origin: string
-    fileServer: string
+    fileServer: string | null
     props: Record<string, any>
-    visiting: string
   }
 
   interface Backend {
@@ -68,7 +67,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
-    (task: 'ready:for:domain'): Promise<void>
+    (task: 'ready:for:domain', originPolicy: string): boolean
+    (task: 'ready:for:domain:failed', originPolicy: string): boolean
+    (task: 'cross:origin:finished', originPolicy: string): boolean
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 

@@ -415,9 +415,11 @@ export class SocketBase {
               return
             }
             case 'ready:for:domain':
-              this.localBus.emit('ready:for:domain', args[0])
-
-              return
+              return this.localBus.emit('ready:for:domain', args[0])
+            case 'ready:for:domain:failed':
+              return this.localBus.emit('ready:for:domain:failed', args[0])
+            case 'cross:origin:finished':
+              return this.localBus.emit('cross:origin:finished', args[0])
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

@@ -57,6 +57,7 @@ export type ServerCtx = Readonly<{
   shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getOriginStack: CyServer.getOriginStack
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -195,7 +196,8 @@ export class Http {
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
-  getRemoteState: () => any
+  getRemoteState: CyServer.getRemoteState
+  getOriginStack: CyServer.getOriginStack
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()
@@ -212,6 +214,7 @@ export class Http {
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
+    this.getOriginStack = opts.getOriginStack
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.socket = opts.socket
@@ -232,6 +235,7 @@ export class Http {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
+      getOriginStack: this.getOriginStack,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,

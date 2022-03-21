@@ -227,15 +227,24 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
 const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
+  const isPreviousOrigin = this.getOriginStack().includes(cors.getOriginPolicy(this.req.proxiedUrl))
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
   const isAUTFrame = this.req.isAUTFrame
 
-  if (this.config.experimentalMultiDomain && isCrossDomain && isAUTFrame && (isHTML || isRenderedHTML)) {
+  // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
+  if (this.config.experimentalMultiDomain && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
+
+    // if we failed to create the spec bridge, just end this response
+    this.serverBus.once('ready:for:domain:failed', () => {
+      this.end()
+    })
 
     this.serverBus.once('ready:for:domain', () => {
       this.debug('ready for domain, let it go')
+
+      this.res.wantsInjection = 'fullMultiDomain'
 
       this.next()
     })
@@ -271,10 +280,13 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
+    const remoteOriginStack = this.getOriginStack()
+    const isSecondaryOrigin = remoteOriginStack.indexOf(cors.getOriginPolicy(this.req.proxiedUrl), 1) !== -1
+
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalMultiDomain && !isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalMultiDomain && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- multi-domain injection')
 
       return 'fullMultiDomain'

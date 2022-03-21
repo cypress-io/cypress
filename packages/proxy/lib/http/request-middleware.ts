@@ -141,7 +141,8 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
 }
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
-  const remoteState = this.getRemoteState()
+  // get the remote state for the proxied url
+  const remoteState = this.getRemoteState(this.req.proxiedUrl)
 
   if (remoteState.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
     const { auth } = remoteState
@@ -169,7 +170,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
     this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
 
-    requestOptions.url = requestOptions.url.replace(origin, fileServer)
+    requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
   }
 
   if (requestBodyBuffered) {

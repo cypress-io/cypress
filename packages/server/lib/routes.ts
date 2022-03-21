@@ -9,6 +9,7 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+import type CyServer from '..'
 
 const debug = Debug('cypress:server:routes')
 
@@ -19,7 +20,8 @@ export interface InitializeRoutes {
   getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
-  getRemoteState: () => Cypress.RemoteState
+  getRemoteState: CyServer.getRemoteState
+  resetRemoteState: CyServer.resetRemoteState
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
   exit?: boolean
@@ -33,6 +35,7 @@ export const createCommonRoutes = ({
   getCurrentBrowser,
   specsStore,
   getRemoteState,
+  resetRemoteState,
   nodeProxy,
   exit,
 }: InitializeRoutes) => {
@@ -48,6 +51,7 @@ export const createCommonRoutes = ({
 
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
+      resetRemoteState()
       iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
     }
 
@@ -64,6 +68,8 @@ export const createCommonRoutes = ({
 
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
+
+    resetRemoteState()
 
     runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
       config,
