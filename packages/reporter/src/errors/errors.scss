@@ -239,14 +239,14 @@ $code-border-radius: 4px;
       border-top-left-radius: $code-border-radius;
       border-top-right-radius: $code-border-radius;
       display: block;
-      font-size: 13px;
-      line-height: 24px;
-      padding: 3px 10px;
+      font-size: 14px;
+      line-height: 16px;
+      padding: 8px;
       word-break: break-all;
 
       svg {
-        margin-bottom: -2px;
         margin-right: 4px;
+        vertical-align: middle;
       }
     }
 
