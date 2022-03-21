@@ -200,7 +200,7 @@ export class RunnablesStore {
   }
 
   @action
-  setRunningSpec (specPath: string) {
+  setRunningSpec (specPath: string | null) {
     const previousSpec = this.runningSpec
 
     this.runningSpec = specPath

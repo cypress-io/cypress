@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
-import type { BaseStore } from '@packages/runner-shared/src/store'
+import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
@@ -61,7 +61,7 @@ export class EventManager {
     return Cypress
   }
 
-  addGlobalListeners (state: BaseStore, options: AddGlobalListenerOptions) {
+  addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
@@ -130,11 +130,6 @@ export class EventManager {
     })
 
     this.ws.on('specs:changed', ({ specs, testingType }) => {
-      // do not emit the event if e2e runner is not displaying an inline spec list.
-      if (testingType === 'e2e' && state.useInlineSpecList === false) {
-        return
-      }
-
       state.setSpecs(specs)
     })
 
@@ -576,7 +571,7 @@ export class EventManager {
     this.ws.off()
   }
 
-  async teardown (state: BaseStore) {
+  async teardown (state: MobxRunnerStore) {
     if (!Cypress) {
       return
     }
@@ -609,7 +604,7 @@ export class EventManager {
     this.localBus.emit('restart')
   }
 
-  async runSpec (state: BaseStore) {
+  async runSpec (state: MobxRunnerStore) {
     if (!Cypress) {
       return
     }
