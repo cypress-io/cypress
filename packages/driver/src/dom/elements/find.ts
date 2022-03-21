@@ -4,7 +4,8 @@ import $document from '../document'
 import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
-import { normalizeWhitespaces, escapeQuotes } from './utils'
+import { normalizeWhitespaces } from './utils'
+import { escapeQuotes } from '../../util/escape'
 
 /**
  * Find Parents relative to an initial element

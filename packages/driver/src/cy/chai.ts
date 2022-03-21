@@ -8,6 +8,7 @@ import sinonChai from '@cypress/sinon-chai'
 
 import $dom from '../dom'
 import $utils from '../cypress/utils'
+import { escapeBackslashes, escapeQuotes } from '../util/escape'
 import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
@@ -282,8 +283,8 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const escText = $utils.escapeQuotes(
-          $utils.escapeBackslashes(text),
+        const escText = escapeQuotes(
+          escapeBackslashes(text),
         )
 
         const selector = `:contains('${escText}'), [type='submit'][value~='${escText}']`

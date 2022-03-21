@@ -10,8 +10,6 @@ import { $Location } from './location'
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
-const quotesRe = /('|")/g
-const backslashRe = /\\/g
 
 const defaultOptions = {
   delay: 10,
@@ -266,17 +264,6 @@ export default {
     } catch (e) {
       return false
     }
-  },
-
-  escapeQuotes (text) {
-    // convert to str and escape any single
-    // or double quotes
-    return (`${text}`).replace(quotesRe, '\\$1')
-  },
-
-  escapeBackslashes (text) {
-    // convert to str and escape any backslashes
-    return (`${text}`).replace(backslashRe, '\\\\')
   },
 
   normalizeNumber (num) {
