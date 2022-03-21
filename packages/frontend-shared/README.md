@@ -8,7 +8,7 @@ Conceivably, other packages may be created that also import from this shared com
 
 ### For development
 
-We only use Cypress Component Tests in this package, to develop the components in isolation. E2E tests should be written in the packages that consume these components (`app` and `launchpad`).
+In this package, we use Cypress Component Tests to develop the components in isolation, and no E2E tests. E2E tests should be written in the packages that consume these components (`app` and `launchpad`). This means that there is no app to visit for development, instead, we open Cypress:
 
 ```bash
 ## from repo root
@@ -51,11 +51,11 @@ See [the readme in the src/public/shiki/themes directory](./src/public/shiki/the
 
 ## Front-end Conventions, Underlying Ideas, and Gotchas
 
-These apply to this package, `app`, and `launchpad`, as well as any future work in this Vue-Tailwind-GQL stack.
+These apply to this package, `app`, and `launchpad`, as well as any future work in this Vue-Tailwind-GQL stack. The goal is for this to provide useful context for new developers adding features to the codebase, or making changes to existing features. There are pros and cons to all of these decisions, but rather than get into those in detail, this is just a document of what practices we are following.
 
 ### Development Workflow
 
-We recommend component-based test driven development. More details in the [Testing Practices](guides/testing-strategy-and-styleguide.md) guide. To make changes to an existing component:
+We recommend component-based test driven development. More details in the [Testing Practices](../../guides/testing-strategy-and-styleguide.md) guide. To make changes to an existing component:
 
 1. Open Cypress and got to the spec that covers the component (often it's 1:1 but sometimes components are tested via their parents)
 1. Update the test to reflect the desired change (or part of it)
@@ -78,8 +78,8 @@ But first, if you are coming from React to Vue 3, here's a small potential gotch
 
 ### Vue ideas and packages we are using
 
-#### Composition API `<script setup>`
-We are using the [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) and specifically the [`<script setup>`](https://vuejs.org/api/sfc-script-setup.html#script-setup) syntax in our Vue Single File Components. This removes a lot of boilerplate, and because of that it's not always as obvious reading the code which Vue features are being leveraged. 
+#### Composition API and `<script setup>`
+We are using the [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) and specifically the [`<script setup>`](https://vuejs.org/api/sfc-script-setup.html#script-setup) syntax in our Vue Single File Components. This removes a lot of boilerplate, and because of that it's not always obvious reading the code which Vue features are being leveraged, compared to Vue 2.
 
 If you are familiar with the Options API, which was the main way to write component script sections in Vue 2, the separation of variables and functions into named parts of the Options object like `computed` and `data` provided a familiar, but unwieldy, structure in each component. The Composition API lets us use those features anywhere we like, without dividing things into a predefined structure. `<script setup>` is a way to write Composition API code with less boilerplate and some other advantages described in the docs.
 #### [Pinia](https://pinia.vuejs.org/)
@@ -91,14 +91,25 @@ Broad collection of composable utilities that provides reactive values for vario
 #### [Headless UI](https://headlessui.dev/)
 We are using some components from Headless UI as the basis for UI patterns like modals, custom dropdowns, and expanding panels. We use Headless UI because it is well documented and the accessibility features are properly thought out. These advantages outweigh the occasional workarounds we have to use in order to get sophisticated behavior working that Headless UI does not support.
 ### Styles
+
 #### Tailwind and Windi
+We use [Tailwind](https://tailwindcss.com/) through [Windi CSS](https://windicss.org/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
+
 #### Explicit Pixel Values
+WindiCSS can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
+
+`<p class="p-20px">`
+
+This allows us to specify explicit pixel values for measurements. We follow this pattern throughout the Cypress App codebase.
 ### Accessibility
-#### Not a bonus, a core requirement
+
+We consider accessibility a core part of frontend code quality. When possible, interactions should be built out using standard semantic HTML elements. If there are no plain HTML solutions, we can reach for a library like HeadlessUI above that implements known patterns in an accessible way. In rare cases we will augment our HTML with ARIA roles. Tests should use the accessible name or label for interactive elements as described in the [testing guide](../../guides/testing-strategy-and-styleguide.md).
 #### Accessibility Tree
 
+The Accessibility Tree available in your browser's dev tools will show how the nature, structure, and labelling of the elements in the DOM is presented to assistive technology. We can use this to explore the accessibility of our components, especially when creating or reviewing more complex UI interactions.
 ### GraphQL in Vue Components
-#### Queries, Fragments, Mutations
-#### Wrapper pattern for component testing
-#### Mount Fragment
-#### Component testing mutations
+[GraphQL](https://graphql.org/) is the main source of data and state from the server in the app and launchpad. Vue components describe the data they will use in Queries or Fragments, as well as the Mutations they will use, which can set data on the server or trigger side effects like launching a project and opening the the user's browser.
+
+Our GraphQL frontend client is [urql](https://formidable.com/open-source/urql/) using the [urql-vue](https://formidable.com/open-source/urql/docs/basics/vue/) package.
+
+TODO: follow up with examples for using and testing gql
