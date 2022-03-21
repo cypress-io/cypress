@@ -1277,6 +1277,36 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  // TODO: this suite should be merged with the suite above
+  describe('message formatting', () => {
+    const expectMarkdown = (test, message, done) => {
+      cy.then(() => {
+        test()
+      })
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'assert') {
+          cy.removeAllListeners('log:added')
+
+          expect(log.get('message')).to.eq(message)
+
+          done()
+        }
+      })
+    }
+
+    // https://github.com/cypress-io/cypress/issues/19116
+    it('text with backslashes', (done) => {
+      const text = '"<OE_D]dQ\\'
+
+      expectMarkdown(
+        () => expect(text).to.equal(text),
+        `expected **"<OE_D]dQ\\\\** to equal **"<OE_D]dQ\\\\**`,
+        done,
+      )
+    })
+  })
+
   context('chai overrides', () => {
     beforeEach(function () {
       this.$body = cy.$$('body')
@@ -1326,6 +1356,15 @@ describe('src/cy/commands/assertions', () => {
         cy.$$($span).appendTo(cy.$$('body'))
 
         cy.get('#escape-quotes').should('contain', 'shouldn\'t')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/19116
+      it('escapes backslashes', () => {
+        const $span = '<span id="escape-backslashes">"&lt;OE_D]dQ\\</span>'
+
+        cy.$$($span).appendTo(cy.$$('body'))
+
+        cy.get('#escape-backslashes').should('contain', '"<OE_D]dQ\\')
       })
     })
 

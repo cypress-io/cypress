@@ -29,6 +29,8 @@ const trailingWhitespaces = /\s*'\*\*/g
 const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
 const imageMarkdown = /!\[.*?\]\(.*?\)/g
+const doubleslashRe = /\\\\/g
+const escapedDoubleslashRe = /__doulbe_slash__/g
 
 type CreateFunc = ((specWindow, state, assertFn) => ({
   chai: Chai.ChaiStatic
@@ -102,6 +104,9 @@ chai.use((chai, u) => {
 
     return
   })
+
+  const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__doulbe_slash__')
+  const restoreDoubleSlash = (str: string) => str.replace(escapedDoubleslashRe, '\\\\')
 
   // remove any single quotes between our **,
   // except escaped quotes, empty strings and number strings.
@@ -277,7 +282,9 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const escText = $utils.escapeQuotes(text)
+        const escText = $utils.escapeQuotes(
+          $utils.escapeBackslashes(text),
+        )
 
         const selector = `:contains('${escText}'), [type='submit'][value~='${escText}']`
 
@@ -457,7 +464,9 @@ chai.use((chai, u) => {
       let message = chaiUtils.getMessage(this, customArgs as Chai.AssertionArgs)
       const actual = chaiUtils.getActual(this, customArgs as Chai.AssertionArgs)
 
+      message = escapeDoubleSlash(message)
       message = removeOrKeepSingleQuotesBetweenStars(message)
+      message = restoreDoubleSlash(message)
       message = escapeMarkdown(message)
 
       try {
