@@ -434,7 +434,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
       cy.once('internal:window:load', onInternalWindowLoad)
 
-      // If this request is still pending after the test run, resolve it, no commands were waiting on it's result.
+      // If this request is still pending after the test run, resolve it, no commands were waiting on its result.
       cy.once('test:after:run', () => {
         if (promise.isPending()) {
           options._log.set('message', '').end()

@@ -149,8 +149,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
             // @ts-ignore
-            if (err.name === 'CypressError') {
-              // This is a Cypress error thrown from the secondary domain, do not wrap it.
+            if (err?.name === 'CypressError') {
+              // This is a Cypress error thrown from the secondary domain after the command queue has finished, do not wrap it as a spec or app error.
               cy.fail(err, { async: true })
             } else {
               // @ts-ignore

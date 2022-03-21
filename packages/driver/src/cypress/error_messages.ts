@@ -998,7 +998,7 @@ export default {
 
         \`cy.switchToDomain('${crossOriginUrl.origin}', () => { <cross origin commands go here> })\`
 
-        If the cross origin request was an intermediary state, You can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
+        If the cross origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
 
         Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
