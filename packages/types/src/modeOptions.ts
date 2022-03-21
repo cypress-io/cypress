@@ -2,7 +2,7 @@ export interface CommonModeOptions {
   invokedFromCli: boolean
   userNodePath?: string
   userNodeVersion?: string
-  configFile?: false | string | null
+  configFile?: string | null
 }
 
 export interface RunModeOptions extends CommonModeOptions {

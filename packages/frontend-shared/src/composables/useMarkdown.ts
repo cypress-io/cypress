@@ -102,8 +102,15 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, op
 
     whenever(target, () => {
       useEventListener(target, 'click', (e: MouseEvent) => {
+        const link = (e.target as HTMLElement).closest('a[href]')
+
+        if (!link) {
+          return
+        }
+
         e.preventDefault()
-        const url = (e.target as HTMLElement).getAttribute('href')
+
+        const url = link.getAttribute('href')
 
         if (url) {
           open(url)
