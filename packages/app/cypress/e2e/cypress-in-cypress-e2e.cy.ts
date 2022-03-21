@@ -1,7 +1,8 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
+import { getPathForPlatform } from '../../src/paths'
 
-describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
+describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
@@ -99,11 +100,11 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${badFilePath}`)
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
-    cy.contains(badFilePath).should('be.visible')
+    cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
     cy.location()
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
@@ -120,21 +121,22 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    // TODO: Figure out why test is flaky without wait
-    // see: https://cypress-io.atlassian.net/browse/UNIFY-1294
-    cy.wait(2000)
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
 
     cy.contains('Dom Content').should('be.visible')
 
     cy.withCtx((ctx) => {
-      ctx.actions.project.setSpecs([])
+      // rename relative path for any specs that happen to be found
+
+      const specs = ctx.project.specs.map((spec) => ({ ...spec, relative: `${spec.relative}-updated` }))
+
+      ctx.actions.project.setSpecs(specs)
       ctx.emitter.toApp()
     }).then(() => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(goodFilePath).should('be.visible')
+      cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
       cy.location()
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')
