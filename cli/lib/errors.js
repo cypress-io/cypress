@@ -230,6 +230,11 @@ const incompatibleTestingTypeAndFlag = {
   solution: 'Either set `testingType` or pass a testing type flag, but not both.',
 }
 
+const invalidConfigFile = {
+  description: '`--config-file` cannot be false.',
+  solution: 'Either pass a relative path to a valid Cypress config file or remove this option.',
+}
+
 /**
  * This error happens when CLI detects that the child Test Runner process
  * was killed with a signal, like SIGBUS
@@ -424,5 +429,6 @@ module.exports = {
     invalidTestingType,
     incompatibleTestTypeFlags,
     incompatibleTestingTypeAndFlag,
+    invalidConfigFile,
   },
 }
