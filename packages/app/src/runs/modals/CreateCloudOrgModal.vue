@@ -63,6 +63,7 @@ import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
 import { CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import { useDebounceFn } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -98,9 +99,7 @@ const query = useQuery({
   pause: true,
 })
 
-function refetch () {
-  query.executeQuery()
-}
+const refetch = useDebounceFn(() => query.executeQuery(), 1000)
 
 const polling = ref(false)
 
