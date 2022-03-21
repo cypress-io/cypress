@@ -29,6 +29,7 @@ import path from 'path'
 export const monorepoPaths = {
   root: path.join(__dirname, '../..'),
   pkgDir: path.join(__dirname, '../../packages'),
+  systemTestsDir: path.join(__dirname, '../../system-tests'),
 ${dirs
 .filter((f) => f)
 .map((dir) => {

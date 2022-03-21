@@ -97,7 +97,7 @@ export async function checkPackageTsc ({
           `${built} / ${packages.length}`,
         )}`,
       )
-    } catch (e: unknown?) {
+    } catch (e) {
       console.log(
         `${chalk.red(`Failed building`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,

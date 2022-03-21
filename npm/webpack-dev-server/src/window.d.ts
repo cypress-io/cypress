@@ -1,7 +1,7 @@
 /**
  * We need this file to call window.Cypress
  */
-export declare global {
+declare global {
   interface Window {
     Cypress: Cypress.Cypress;
   }

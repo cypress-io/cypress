@@ -19,6 +19,8 @@ import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
+import { crawlDeps } from './tasks/gulpCrawlExamples'
+import { makeSystemTest } from './tasks/gulpMakeSystemTest'
 
 if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
   process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
@@ -278,6 +280,8 @@ gulp.task(openCypressLaunchpad)
 // If we want to run individually, for debugging/testing
 gulp.task('cyOpenLaunchpadOnly', cyOpenLaunchpad)
 gulp.task('cyOpenAppOnly', cyOpenApp)
+gulp.task(crawlDeps)
+gulp.task(makeSystemTest)
 
 // Tapping into:
 // https://github.com/gulpjs/gulp-cli/blob/da8241ecbacd59158deaa5471ff8a7f43901a94b/lib/versioned/%5E4.0.0/log/sync-task.js#L21-L27

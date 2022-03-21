@@ -1,8 +1,16 @@
 import { defineConfig } from 'cypress'
-import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
+import type * as vite from 'vite'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
+
+declare global {
+  namespace Cypress {
+    interface DefineDevServerConfig {
+      viteConfig: vite.InlineConfig
+    }
+  }
+}
 
 export default defineConfig({
   projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : 'sehy69',
@@ -21,18 +29,21 @@ export default defineConfig({
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
-    devServer,
-    devServerConfig: {
-      optimizeDeps: {
-        include: [
-          '@headlessui/vue',
-          'vue3-file-selector',
-          'p-defer',
-          'just-my-luck',
-          'combine-properties',
-          'faker',
-          '@packages/ui-components/cypress/support/customPercyCommand',
-        ],
+    devServer: {
+      framework: 'vue',
+      bundler: 'vite',
+      viteConfig: {
+        optimizeDeps: {
+          include: [
+            '@headlessui/vue',
+            'vue3-file-selector',
+            'p-defer',
+            'just-my-luck',
+            'combine-properties',
+            'faker',
+            '@packages/ui-components/cypress/support/customPercyCommand',
+          ],
+        },
       },
     },
   },

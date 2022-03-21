@@ -66,8 +66,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     ? path.join(devServerPublicPathRoute, posixSeparator)
     // The second line here replaces backslashes on windows with posix compatible slash
     // See https://github.com/cypress-io/cypress/issues/16097
-    : path.join(devServerPublicPathRoute, posixSeparator)
-    .replace(OsSeparatorRE, posixSeparator)
+    : path.join(devServerPublicPathRoute, posixSeparator).replace(OsSeparatorRE, posixSeparator)
 
   const dynamicWebpackConfig = {
     output: {

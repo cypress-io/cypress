@@ -2970,8 +2970,38 @@ declare namespace Cypress {
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+
+  interface DefineDevServerConfig {
+   // This interface can be extended by the user, to inject the types for their
+   // preferred bundler: e.g.
+   //
+   // import type * as webpack from 'webpack'
+   //
+   // declare global {
+   //   namespace Cypress {
+   //     interface DefineConfigOptions {
+   //       webpackConfig?: webpack.Configuration
+   //     }
+   //   }
+   // }
+  }
+
+  type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
+
+  type DevServerObject = {
+    framework: 'react-scripts' | 'react' | 'nuxtjs' | 'nextjs' | 'vue' | 'custom'
+    bundler: 'webpack'
+    webpackConfig?: string | PickConfigOpt<'webpackConfig'>
+    viteConfig?: never
+  } | {
+    framework: 'vue' | 'react'
+    bundler: 'vite'
+    viteConfig?: string | PickConfigOpt<'viteConfig'>
+    webpackConfig?: never
+  }
+
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
-    devServer: DevServerFn<ComponentDevServerOpts>
+    devServer: DevServerFn<ComponentDevServerOpts> | DevServerObject
     devServerConfig?: ComponentDevServerOpts
   }
 
@@ -5427,7 +5457,7 @@ declare namespace Cypress {
 
   interface DevServerConfig {
     specs: Spec[]
-    config: ResolvedConfigOptions & RuntimeConfigOptions
+    config: ComponentConfigOptions & RuntimeConfigOptions
     devServerEvents: NodeJS.EventEmitter
   }
 

@@ -64,11 +64,19 @@ function run (ipc, file, projectRoot) {
     return true
   }
 
-  const isValidDevServer = (config) => {
+  /**
+   * @param {Cypress.ComponentConfigOptions}
+   */
+  const getValidDevServer = (config) => {
     const { devServer } = config
 
     if (devServer && typeof devServer === 'function') {
-      return true
+      return devServer
+    }
+
+    // devServer: { bundler, framework }
+    if (typeof devServer === 'object' && devServer) {
+      //
     }
 
     ipc.send('setupTestingType:error', util.serializeError(

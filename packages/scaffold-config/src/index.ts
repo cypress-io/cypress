@@ -4,4 +4,5 @@
 export * from './constants'
 export * from './detect'
 export * from './frameworks'
+export * from './supportFiles'
 export * from './types'

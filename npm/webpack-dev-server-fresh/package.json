@@ -1,0 +1,13 @@
+{
+  "name": "@cypress/webpack-dev-server-fresh",
+  "version": "0.0.0-development",
+  "main": "index.js",
+  "dependencies": {
+    "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
+    "html-webpack-plugin-5": "npm:html-webpack-plugin@^5"
+  },
+  "devDependencies": {
+    "@types/node": "14.14.31"
+  },
+  "types": "dist/index.d.ts"
+}

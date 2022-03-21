@@ -1,0 +1,7 @@
+{
+  "name": "@cypress/vite-dev-server-fresh",
+  "version": "0.0.0-development",
+  "peerDependencies": {
+    "vite": ">= 2.1.3"
+  }
+}
