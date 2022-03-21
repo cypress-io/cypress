@@ -19,47 +19,38 @@ const CROSS_DOMAIN_PREFIX = 'cross:domain:'
  * @extends EventEmitter
  */
 export class PrimaryDomainCommunicator extends EventEmitter {
-  private windowReference: Window | undefined
   private crossDomainDriverWindows: {[key: string]: Window} = {}
   userInvocationStack?: string
 
   /**
-   * Initializes the event handler to receive messages from the spec bridge.
-   * @param {Window} win - a reference to the window object in the primary domain.
+   * The callback handler that receives messages from secondary domains.
+   * @param {MessageEvent.data} data - a reference to the MessageEvent.data sent through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data
+   * @param {MessageEvent.source} source - a reference to the MessageEvent.source sent through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/source
    * @returns {Void}
    */
-  initialize (win: Window) {
-    if (this.windowReference) return
+  onMessage ({ data, source }) {
+    // check if message is cross domain and if so, feed the message into
+    // the cross domain bus with args and strip prefix
+    if (data?.event?.includes(CROSS_DOMAIN_PREFIX)) {
+      const messageName = data.event.replace(CROSS_DOMAIN_PREFIX, '')
 
-    this.windowReference = win
-
-    this.windowReference.top?.addEventListener('message', ({ data, source }) => {
-      // currently used for tests, can be removed later
-      if (data?.actual) return
-
-      // check if message is cross domain and if so, feed the message into
-      // the cross domain bus with args and strip prefix
-      if (data?.event?.includes(CROSS_DOMAIN_PREFIX)) {
-        const messageName = data.event.replace(CROSS_DOMAIN_PREFIX, '')
-
-        // NOTE: need a special case here for 'bridge:ready'
-        // where we need to set the crossDomainDriverWindow to source to
-        // communicate back to the iframe
-        if (messageName === 'bridge:ready' && source) {
-          this.crossDomainDriverWindows[data.domain] = source as Window
-        }
-
-        if (data?.data?.err) {
-          data.data.err = reifyCrossDomainError(data.data.err, this.userInvocationStack as string)
-        }
-
-        this.emit(messageName, data.data, data.domain)
-
-        return
+      // NOTE: need a special case here for 'bridge:ready'
+      // where we need to set the crossDomainDriverWindow to source to
+      // communicate back to the iframe
+      if (messageName === 'bridge:ready' && source) {
+        this.crossDomainDriverWindows[data.domain] = source as Window
       }
 
-      debug('Unexpected postMessage:', data)
-    }, false)
+      if (data?.data?.err) {
+        data.data.err = reifyCrossDomainError(data.data.err, this.userInvocationStack as string)
+      }
+
+      this.emit(messageName, data.data, data.domain)
+
+      return
+    }
+
+    debug('Unexpected postMessage:', data)
   }
 
   /**
@@ -115,8 +106,6 @@ export class PrimaryDomainCommunicator extends EventEmitter {
  * @extends EventEmitter
  */
 export class SpecBridgeDomainCommunicator extends EventEmitter {
-  private windowReference
-
   private handleSubjectAndErr = (data: Cypress.ObjectLike = {}, send: (data: Cypress.ObjectLike) => void) => {
     let { subject, err, ...rest } = data
 
@@ -164,20 +153,14 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   }
 
   /**
-   * Initializes the event handler to receive messages from the primary domain.
-   * @param {Window} win - a reference to the window object in the spec bridge/iframe.
+   * The callback handler that receives messages from the primary domain.
+   * @param {MessageEvent.data} data - a reference to the MessageEvent.data sent through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data
    * @returns {Void}
    */
-  initialize (win) {
-    if (this.windowReference) return
+  onMessage ({ data }) {
+    if (!data) return
 
-    this.windowReference = win
-
-    this.windowReference.addEventListener('message', ({ data }) => {
-      if (!data) return
-
-      this.emit(data.event, data.data)
-    }, false)
+    this.emit(data.event, data.data)
   }
 
   /**
@@ -190,7 +173,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
-      this.windowReference.top.postMessage({
+      window.top?.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,
         domain: document.domain,
