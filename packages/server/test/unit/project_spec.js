@@ -278,7 +278,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           onFocusTests,
           onSpecChanged: undefined,
         }, {
-          socketIoCookie: '__socketIo',
+          socketIoCookie: '__cypress.socketIo',
           namespace: '__cypress',
           screenshotsFolder: '/foo/bar/cypress/screenshots',
           report: undefined,

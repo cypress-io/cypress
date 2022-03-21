@@ -177,7 +177,7 @@ describe('lib/socket', () => {
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
             { name: '__cypress.foo', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
             { name: '__cypress.bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
-            { name: '__socketIo', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
+            { name: '__cypress.socketIo', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
           ])
 
           return this.client.emit('automation:request', 'get:cookies', { domain: 'localhost' }, (resp) => {
@@ -208,7 +208,7 @@ describe('lib/socket', () => {
           const cookies = [
             { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expiry: 123 },
             { domain: 'localhost', name: '__cypress.initial', value: true },
-            { domain: 'localhost', name: '__socketIo', value: '123abc' },
+            { domain: 'localhost', name: '__cypress.socketIo', value: '123abc' },
           ]
 
           return this.client.emit('automation:request', 'clear:cookies', cookies, (resp) => {
@@ -361,7 +361,7 @@ describe('lib/socket', () => {
           })
         })
 
-        it('does not return __cypress or __socketIo namespaced cookies', () => {})
+        it('does not return __cypress or __cypress.socketIo namespaced cookies', () => {})
 
         it('throws when onAutomationRequest rejects')
 
@@ -609,7 +609,7 @@ describe('lib/socket', () => {
     })
 
     context('constructor', () => {
-      it('listens for \'file:updated\' on preprocessor', function () {
+      it(`listens for 'file:updated' on preprocessor`, function () {
         this.cfg.watchForFileChanges = true
         new SocketE2E(this.cfg)
 

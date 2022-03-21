@@ -478,7 +478,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: '__socketIo',
+    defaultValue: '__cypress.socketIo',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,

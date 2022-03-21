@@ -85,7 +85,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "namespace": "__cypress",
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
-  "socketIoCookie": "__socketIo",
+  "socketIoCookie": "__cypress.socketIo",
   "socketIoRoute": "/__cypress/socket.io",
   "xhrRoute": "/xhrs/"
 }
