@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { action, observable } from 'mobx'
 import type { AutomationStatus } from '../store'
 
 const defaults = {
@@ -12,17 +13,6 @@ const defaults = {
     width: 1000,
   },
 } as const
-
-// We grab MobX from `window.UnifiedRunner`
-// instead of importing it to ensure we
-// use the same instance of MobX across
-// the Vite bundle ("Unified App", 10.x)
-// and the "legacy" code that uses MobX
-// which is `@packages/driver` and `@packages/reporter`.
-const {
-  observable,
-  action,
-} = window.UnifiedRunner.MobX
 
 export class MobxRunnerStore {
   @observable spec?: Cypress.Spec
