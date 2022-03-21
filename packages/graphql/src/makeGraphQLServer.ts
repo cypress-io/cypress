@@ -35,6 +35,8 @@ export async function makeGraphQLServer () {
 
   app.use(cors())
 
+  // TODO: tgriesser: shouldn't these all be namespaced dynamically
+  // instead of using a '/__cypress' string constant?
   app.get('/__cypress/launchpad/preload', (req, res) => {
     const ctx = getCtx()
 
