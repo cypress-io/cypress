@@ -1,6 +1,6 @@
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { isString } from 'lodash'
+import { isObject, isString } from 'lodash'
 
 export class Validator {
   log: Cypress.Log
@@ -21,10 +21,17 @@ export class Validator {
       })
     }
 
-    if (data && !Array.isArray(data)) {
+    if (data && (!isObject(data) || Array.isArray(data))) {
       this.onFailure()
 
       $errUtils.throwErrByPath('switchToDomain.invalid_data_argument', {
+        onFail: this.log,
+        args: { arg: $utils.stringify(data) },
+      })
+    } else if (data && !Object.getOwnPropertyDescriptor(data, 'args')) {
+      this.onFailure()
+
+      $errUtils.throwErrByPath('switchToDomain.incomplete_data_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(data) },
       })

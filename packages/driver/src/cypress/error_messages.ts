@@ -1687,6 +1687,7 @@ export default {
 
   switchToDomain: {
     docsUrl: 'https://on.cypress.io/switchToDomain',
+    // TODO: remove this
     done_reference_mismatch: {
       message: `${cmd('switchToDomain')} must have done as its second argument when three or more arguments are used.`,
     },
@@ -1697,7 +1698,10 @@ export default {
       message: `${cmd('switchToDomain')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
     },
     invalid_data_argument: {
-      message: `${cmd('switchToDomain')} requires the 'data' argument to be an array. You passed: \`{{arg}}\``,
+      message: `${cmd('switchToDomain')} requires the 'data' argument to be an object. You passed: \`{{arg}}\``,
+    },
+    incomplete_data_argument: {
+      message: `${cmd('switchToDomain')} requires the 'data' argument to contain an 'args' key. You passed: \`{{arg}}\``,
     },
     invalid_fn_argument: {
       message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,

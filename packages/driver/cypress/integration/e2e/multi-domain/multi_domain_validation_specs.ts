@@ -179,13 +179,24 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
     it('errors passing non-array to callback function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to be an array. You passed: `foo`')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to be an object. You passed: `foo`')
 
         done()
       })
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', 'foo', () => {})
+    })
+
+    it('errors passing in empty object to callback function', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to contain an \'args\' key. You passed: `{}`')
+
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', {}, () => {})
     })
 
     it('errors if passed a non-serializable data value', (done) => {
@@ -203,7 +214,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
       const el = document.createElement('div')
 
-      cy.switchToDomain('foobar.com', ['foo', '1', el], () => {})
+      cy.switchToDomain('foobar.com', { args: ['foo', '1', el] }, () => {})
     })
 
     it('errors if last argument is absent', (done) => {

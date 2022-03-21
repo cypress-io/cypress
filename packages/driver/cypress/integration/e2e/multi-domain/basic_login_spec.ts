@@ -113,7 +113,7 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
       const login = (name) => {
         cy.session(name, () => {
           // Note, this assumes localhost is the primary domain, ideally we'd be able to specify this directly.
-          cy.switchToDomain('http://idp.com:3500', [name], ([name]) => {
+          cy.switchToDomain('http://idp.com:3500', { args: name }, (name) => {
             cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
             cy.get('[data-cy="username"]').type(name)
             cy.get('[data-cy="login"]').click()

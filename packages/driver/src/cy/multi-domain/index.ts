@@ -44,7 +44,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   })
 
   Commands.addAll({
-    switchToDomain<T> (originOrDomain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+    switchToDomain<T> (originOrDomain: string, dataOrFn: { args: T } | (() => {}), fn?: (data?: T) => {}) {
       // store the invocation stack in the case that `switchToDomain` errors
       communicator.userInvocationStack = state('current').get('userInvocationStack')
 
@@ -65,7 +65,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         data = dataOrFn
       } else {
         callbackFn = dataOrFn
-        data = []
+        data = {
+          args: undefined,
+        }
       }
 
       const log = Cypress.log({
@@ -166,7 +168,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             // user-specified callback to run in that domain
             try {
               communicator.toSpecBridge(domain, 'run:domain:fn', {
-                data,
+                args: data?.args || undefined,
                 fn: callbackFn.toString(),
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
                 // this should only be used for internal testing. Cast to boolean to guarantee serialization

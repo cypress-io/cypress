@@ -45,7 +45,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
         keystrokeDelay: 30,
       })
 
-      cy.switchToDomain('http://foobar.com:3500', [defaults], ([primaryKeyboardDefaults]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: defaults }, (primaryKeyboardDefaults) => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({})
 
         expect(multiDomainKeyboardDefaults).to.not.deep.equal(primaryKeyboardDefaults)
@@ -141,37 +141,37 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
 
   context('properties', () => {
     it('has arch property synced from primary', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.arch], ([theArch]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.arch }, (theArch) => {
         expect(Cypress.arch).to.equal(theArch)
       })
     })
 
     it('has browser property synced from primary', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.browser], ([theBrowser]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.browser }, (theBrowser) => {
         expect(Cypress.browser).to.deep.equal(theBrowser)
       })
     })
 
     it('has currentTest property synced from primary', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.currentTest], ([theCurrentTest]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.currentTest }, (theCurrentTest) => {
         expect(Cypress.currentTest).to.deep.equal(theCurrentTest)
       })
     })
 
     it('has platform property synced from primary', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.platform], ([thePlatform]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.platform }, (thePlatform) => {
         expect(Cypress.platform).to.equal(thePlatform)
       })
     })
 
     it('has testingType property synced from primary', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.testingType], ([theTestingType]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.testingType }, (theTestingType) => {
         expect(Cypress.testingType).to.deep.equal(theTestingType)
       })
     })
 
     it('has spec property synced from primary', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.spec], ([theSpec]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.spec }, (theSpec) => {
         expect(Cypress.spec).to.deep.equal(theSpec)
       })
     })
@@ -185,7 +185,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
     })
 
     it('isBrowser()', () => {
-      cy.switchToDomain('http://foobar.com:3500', [Cypress.browser], ([theBrowser]) => {
+      cy.switchToDomain('http://foobar.com:3500', { args: Cypress.browser }, (theBrowser) => {
         expect(Cypress.isBrowser(theBrowser.name)).to.equal(true)
       })
     })
