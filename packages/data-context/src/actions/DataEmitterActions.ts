@@ -114,6 +114,7 @@ export class DataEmitterActions extends DataEmitterEvents {
       },
       return: async () => {
         this.pub.off(evt, subscribed)
+        // If we are currently waiting on a deferred promise, we need to resolve it and signify we're done to ensure that the async loop terminates
         if (dfd) {
           dfd.resolve({ done: true, value: undefined })
         }
