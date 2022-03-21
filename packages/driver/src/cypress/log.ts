@@ -93,15 +93,15 @@ export const LogUtils = {
     return _
     .chain(tests)
     .flatMap((test) => {
-      return [test, test.prevAttempts]
+      return test.prevAttempts ? [test, ...test.prevAttempts] : [test]
     })
-    .flatMap<{id: number | string}>((tests) => {
+    .flatMap<{id: string}>((tests) => {
       return [].concat(tests.agents, tests.routes, tests.commands)
     }).compact()
-    .union([{ id: 0 }])
+    .union([{ id: '0' }])
     .map(({ id }) => {
-      // If id is not a number it's a string in the form of 'log-domain-#', grab the number off the end.
-      return _.isNumber(id) ? id : parseInt((id.match(/\d*$/) || ['0'])[0])
+      // id is a string in the form of 'log-domain-#', grab the number off the end.
+      return parseInt((id.match(/\d*$/) || ['0'])[0])
     })
     .max()
     .value()
