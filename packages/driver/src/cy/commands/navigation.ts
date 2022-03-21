@@ -50,13 +50,44 @@ const isValidVisitMethod = (method) => {
 const timedOutWaitingForPageLoad = (ms, log) => {
   debug('timedOutWaitingForPageLoad')
 
-  $errUtils.throwErrByPath('navigation.timed_out', {
-    args: {
-      configFile: Cypress.config('configFile'),
-      ms,
-    },
-    onFail: log,
-  })
+  const anticipatedCrossOriginHref = cy.state('anticipatingMultiDomain')
+
+  // Were we anticipating a cross domain page when we timed out?
+  if (anticipatedCrossOriginHref) {
+    // We remain in an anticipating state until either a load even happens or a timeout.
+    cy.isAnticipatingMultiDomainFor(undefined)
+
+    // By default origins is just this location.
+    let origins = [location.origin]
+
+    const currentCommand = cy.queue.state('current')
+
+    if (currentCommand?.get('name') === 'switchToDomain') {
+      // If the current command is a switchDomain command, we should have gotten a request on the origin it expects.
+      origins = [cy.state('latestActiveDomain')]
+    } else if (Cypress.isMultiDomain && cy.queue.isOnLastCommand()) {
+      // If this is multi-domain and the we're on the last command, we should have gotten a request on the origin of one of the parents.
+      origins = cy.state('parentOrigins')
+    }
+
+    $errUtils.throwErrByPath('navigation.switch_to_domain_load_timed_out', {
+      args: {
+        configFile: Cypress.config('configFile'),
+        ms,
+        crossOriginUrl: new URL(anticipatedCrossOriginHref),
+        origins,
+      },
+      onFail: log,
+    })
+  } else {
+    $errUtils.throwErrByPath('navigation.timed_out', {
+      args: {
+        configFile: Cypress.config('configFile'),
+        ms,
+      },
+      onFail: log,
+    })
+  }
 }
 
 const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) => {
@@ -342,7 +373,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
     debug('waiting for window:load')
 
-    return new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       const onWindowLoad = (win) => {
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
@@ -402,7 +433,17 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       }
 
       cy.once('internal:window:load', onInternalWindowLoad)
+
+      // If this request is still pending after the test run, resolve it, no commands were waiting on its result.
+      cy.once('test:after:run', () => {
+        if (promise.isPending()) {
+          options._log.set('message', '').end()
+          resolve()
+        }
+      })
     })
+
+    return promise
   }
 
   const reject = (err) => {
