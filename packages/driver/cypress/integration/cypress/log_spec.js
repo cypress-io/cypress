@@ -100,26 +100,5 @@ describe('src/cypress/log', function () {
 
       expect(LogUtils.countLogsByTests(tests)).to.equal(0)
     })
-
-    it('supports formatted string ids', () => {
-      const tests = {
-        a: {
-          agents: [{
-            id: 'log-idp.com-2',
-          }],
-          routes: [],
-          commands: [{
-            id: 'log-idp.com-20',
-          }],
-          prevAttempts: [{
-            commands: [{
-              id: 'log-idp.com-5',
-            }],
-          }],
-        },
-      }
-
-      expect(LogUtils.countLogsByTests(tests)).to.equal(20)
-    })
   })
 })
