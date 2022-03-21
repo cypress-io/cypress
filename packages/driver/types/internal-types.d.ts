@@ -34,6 +34,8 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: <T>(timeoutId?: string) => Cypress.Chainable<T>
     isStable: (boolean, string) => void
+    isAnticipatingMultiDomainFor: (string) => void
+    fail: (err: Error, options:{ async?: boolean }) => Error
   }
 
   interface Cypress {

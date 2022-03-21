@@ -149,7 +149,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
             // @ts-ignore
-            Cypress.runner.onSpecError('error')({ error: err })
+            if (err?.name === 'CypressError') {
+              // This is a Cypress error thrown from the secondary domain after the command queue has finished, do not wrap it as a spec or app error.
+              cy.fail(err, { async: true })
+            } else {
+              // @ts-ignore
+              Cypress.runner.onSpecError('error')({ error: err })
+            }
           })
         }
 
@@ -180,6 +186,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   hookId: state('hookId'),
                   hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
                   multiDomainBaseUrl: location.origin,
+                  parentOrigins: [window.location.origin],
                   isStable: state('isStable'),
                 },
                 config: preprocessConfig(Cypress.config()),
@@ -191,9 +198,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               })
 
               reject(wrappedErr)
-            } finally {
-              // @ts-ignore
-              cy.isAnticipatingMultiDomainFor(undefined)
             }
           }
         })

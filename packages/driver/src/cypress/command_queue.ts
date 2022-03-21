@@ -123,6 +123,14 @@ export class CommandQueue extends Queue<Command> {
     })
   }
 
+  /**
+   * Check if the current command index is the last command in the queue
+   * @returns boolean
+   */
+  isOnLastCommand (): boolean {
+    return this.state('index') === this.length
+  }
+
   private runCommand (command: Command) {
     // bail here prior to creating a new promise
     // because we could have stopped / canceled
