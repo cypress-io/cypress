@@ -129,7 +129,6 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     cy.withCtx((ctx, o) => {
       ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
-      ctx.emitter.specsChange()
     }, { path: goodFilePath }).then(() => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')

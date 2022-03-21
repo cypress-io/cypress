@@ -307,6 +307,12 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
+
+    if (this.ctx.coreData.currentTestingType === 'component') {
+      this.api.getDevServer().updateSpecs(specs)
+    }
+
+    this.ctx.emitter.specsChange()
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -453,12 +459,6 @@ export class ProjectActions {
     this.ctx.actions.project.setSpecs(specs)
 
     this.ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
-
-    if (testingType === 'component') {
-      this.api.getDevServer().updateSpecs(specs)
-    }
-
-    this.ctx.emitter.specsChange()
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
