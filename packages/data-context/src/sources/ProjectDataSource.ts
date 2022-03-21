@@ -102,6 +102,40 @@ export function transformSpec ({
   }
 }
 
+export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?: 'js' | 'ts') {
+  function formatGlob (s: string, fallback: string) {
+    let [cleanedVal] = s.replace('{', '').replace('}', '').split(',')
+
+    if (cleanedVal?.includes('*')) {
+      cleanedVal = cleanedVal.replace(/\*/g, fallback)
+    }
+
+    return cleanedVal
+  }
+
+  const parsedGlob = parseGlob(specPattern)
+
+  if (!parsedGlob.is.glob) {
+    return specPattern
+  }
+
+  let dirname = parsedGlob.path.dirname
+
+  if (dirname.startsWith('**')) {
+    dirname = dirname.replace('**', 'cypress')
+  }
+
+  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => formatGlob(x, 'e2e')).join('/')
+  const fileName = formatGlob(parsedGlob.path.filename, 'filename')
+
+  const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+  const extname = formatGlob(extnameWithoutExt, 'cy')?.replace(/\./g, '')
+
+  const ext = fileExtensionToUse && parsedGlob.path.ext.includes(fileExtensionToUse) ? fileExtensionToUse : formatGlob(parsedGlob.path.ext, 'js')
+
+  return `${splittedDirname + fileName}.${extname}.${ext}`
+}
+
 export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: FoundSpec[] = []
@@ -211,16 +245,6 @@ export class ProjectDataSource {
     this._specWatcher.on('unlink', onSpecsChanged)
   }
 
-  private formatGlob (s: string, fallback: string) {
-    let [cleanedVal] = s.replace('{', '').replace('}', '').split(',')
-
-    if (cleanedVal?.includes('*')) {
-      cleanedVal = cleanedVal.replace(/\*/g, fallback)
-    }
-
-    return cleanedVal
-  }
-
   async defaultSpecFileName () {
     const defaultFileName = 'cypress/e2e/filename.cy.js'
 
@@ -240,23 +264,7 @@ export class ProjectDataSource {
         return defaultFileName
       }
 
-      const parsedGlob = parseGlob(specPatternSet)
-
-      let dirname = parsedGlob.path.dirname
-
-      if (dirname.startsWith('**')) {
-        dirname = dirname.replace('**', 'cypress')
-      }
-
-      const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => this.formatGlob(x, 'e2e')).join('/')
-      const fileName = this.formatGlob(parsedGlob.path.filename, 'filename')
-
-      const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
-      const extname = this.formatGlob(extnameWithoutExt, 'cy')
-
-      const ext = this.ctx.lifecycleManager.fileExtensionToUse && parsedGlob.path.ext.includes(this.ctx.lifecycleManager.fileExtensionToUse) ? this.ctx.lifecycleManager.fileExtensionToUse : this.formatGlob(parsedGlob.path.ext, 'js')
-
-      return splittedDirname + fileName + extname + ext
+      return getDefaultSpecFileName(specPatternSet, this.ctx.lifecycleManager.fileExtensionToUse)
     } catch {
       return defaultFileName
     }
