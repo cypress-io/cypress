@@ -988,13 +988,13 @@ export default {
 
         Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
 
-        ${origins.map((origin) => `\`${origin}\``).join('\n        ')}
+        - ${origins.map((origin) => `\`${origin}\``).join('\n       -')}
 
         Your page did not fire its \`load\` event within \`${ms}ms\`.
 
         A cross origin request for \`${crossOriginUrl.href}\` was detected.
 
-        To handle cross origin requests, they must be immediately followed by a ${cmd('switchToDomain')} command:
+        A command that triggers cross origin navigation must be immediately followed by a ${cmd('switchToDomain')} command:
 
         \`cy.switchToDomain('${crossOriginUrl.origin}', () => { <cross origin commands go here> })\`
 
