@@ -536,10 +536,6 @@ export class ProjectLifecycleManager {
   // }
 
   async getConfigFileContents () {
-    if (this.ctx.modeOptions.configFile === false) {
-      return {}
-    }
-
     if (this._configResult.state === 'loaded') {
       return this._configResult.value.initialConfig
     }
@@ -1126,10 +1122,6 @@ export class ProjectLifecycleManager {
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 
-    if (configFile === false) {
-      return metaState
-    }
-
     try {
       // Find the suggested framework, starting with meta-frameworks first
       const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
@@ -1148,7 +1140,7 @@ export class ProjectLifecycleManager {
       // No need to handle
     }
 
-    if (typeof configFile === 'string') {
+    if (configFile) {
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
