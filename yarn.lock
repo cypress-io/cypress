@@ -18199,9 +18199,9 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-"cypress-example-kitchensink@https://github.com/cypress-io/cypress-example-kitchensink.git#8bd82de1729999cc0c1a6cb5dc2c9dd7ec2d2f0b":
+"cypress-example-kitchensink@https://github.com/cypress-io/cypress-example-kitchensink.git#5d3e5b54a56d88322f85247de63ffe5abe6d7d4d":
   version "0.0.0-development"
-  resolved "https://github.com/cypress-io/cypress-example-kitchensink.git#8bd82de1729999cc0c1a6cb5dc2c9dd7ec2d2f0b"
+  resolved "https://github.com/cypress-io/cypress-example-kitchensink.git#5d3e5b54a56d88322f85247de63ffe5abe6d7d4d"
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
@@ -29744,9 +29744,9 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-"marionette-client@https://github.com/cypress-io/marionette-client.git#2cddf7d791cca7be5191d7fe103d58be7283957d":
+"marionette-client@https://github.com/cypress-io/marionette-client.git#5fc10cdf6c02627e9a2add98ca52de4d0c2fe74d":
   version "1.9.5"
-  resolved "https://github.com/cypress-io/marionette-client.git#2cddf7d791cca7be5191d7fe103d58be7283957d"
+  resolved "https://github.com/cypress-io/marionette-client.git#5fc10cdf6c02627e9a2add98ca52de4d0c2fe74d"
   dependencies:
     debug "^4.0.1"
     find-port "1.0.1"
