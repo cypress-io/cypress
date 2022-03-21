@@ -180,4 +180,15 @@ describe('e2e config', () => {
       snapshot: true,
     })
   })
+
+  it('throws an error if componentFolder is set on the config file', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-componentFolder-config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
 })

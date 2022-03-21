@@ -1,0 +1,97 @@
+.runner {
+  .iframes-container {
+    position: fixed;
+
+    &.has-error {
+      height: 100%;
+      right: 0;
+    }
+  }
+
+  .size-container {
+    width: 100%;
+    height: 100%;
+    transform: scale(1);
+    transform-origin: 50% 0;
+  }
+
+  .has-error .size-container {
+    display: none;
+  }
+
+  .aut-iframe {
+    background-color: #fff;
+    box-shadow: 0 6px 10px #555;
+    border: none;
+    display: block;
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+  }
+
+  .spec-iframe {
+    border: none;
+    height: 0;
+    position: absolute;
+    visibility: hidden;
+    width: 0;
+  }
+
+  // when the reporter is being resized, cover the iframe or else
+  // mouseover events stop firing if the user mouses over the iframe
+  .cover {
+    bottom: 0;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .is-reporter-resizing & .cover {
+    display: block;
+  }
+
+  .studio-is-open .aut-iframe {
+    border: 4px solid #4997e4;
+    border-radius: 4px;
+  }
+
+  .studio-is-loading .aut-iframe {
+    border: 4px solid #b4d5f8;
+  }
+
+  .studio-is-failed .aut-iframe {
+    border: 4px solid $error;
+  }
+
+  .studio-is-ready .aut-iframe {
+    animation: flash-iframe-border 1.5s linear infinite;
+
+    @keyframes flash-iframe-border {
+      0%, 100% {
+        border-color: #4997e4;
+      }
+
+      50% {
+        border-color: #b4d5f8;
+      }
+    }
+  }
+
+  .studio-loading-cover {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    color: #fff;
+    display: flex;
+    font-size: 6em;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    transform: scale(1);
+    transform-origin: 50% 0;
+    width: 100%;
+  }
+}
