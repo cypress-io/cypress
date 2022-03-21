@@ -383,7 +383,6 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  // TODO: run in firefox too after we fix error serialization for firefox.
   it('fails in switchToDomain when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
