@@ -60,7 +60,7 @@ export interface OpenProjectLaunchOptions {
    */
   skipPluginInitializeForTesting?: boolean
 
-  configFile?: string | false
+  configFile?: string
 
   // spec pattern to use when launching from CLI
   spec?: string
