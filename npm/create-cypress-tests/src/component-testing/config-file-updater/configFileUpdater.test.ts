@@ -44,21 +44,6 @@ const stripIndent = (strings: any, ...args: any) => {
 }
 
 describe('lib/util/config-file-updater', () => {
-  context('with configFile: false', () => {
-    beforeEach(function () {
-      this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
-    })
-
-    it('.insertValuesInConfigFile does not create a file', function () {
-      return insertValuesInConfigFile(this.projectRoot, {})
-      .then(() => {
-        throw Error('file shuold not have been created here')
-      }).catch((err) => {
-        expect(err.code).to.equal('ENOENT')
-      })
-    })
-  })
-
   context('with js files', () => {
     describe('#insertValueInJSString', () => {
       describe('es6 vs es5', () => {

@@ -426,7 +426,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   }, {
     name: 'configFile',
     defaultValue: 'cypress.config.js',
-    validation: validate.isStringOrFalse,
+    validation: validate.isString,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
