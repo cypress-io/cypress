@@ -416,9 +416,14 @@ const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }) => {
 
   const isFirefox = browser.family === 'firefox'
 
-  // Secure is required in Chrome for SameSite=None cookies to be set, but if
-  // in Firefox and http://localhost, it causes the cookie not to be set,
-  // so we need to ensure there is no Secure in that case
+  // Secure is required for SameSite=None cookies to be set in secure contexts
+  // (https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy),
+  // but will not allow the cookie to be set in an insecure context.
+  // Normally http://localhost is considered a secure context (see
+  // https://w3c.github.io/webappsec-secure-contexts/#localhost), but Firefox
+  // does not consider the Cypress-launched browser to be a secure context (see
+  // https://github.com/cypress-io/cypress/issues/18217). For that reason, we
+  // remove Secure from http://localhost cookies in Firefox.
   if (cookieSecureRegex.test(cookie)) {
     if (isFirefox && isLocalhost && url.protocol === 'http:') {
       debug('remove Secure from cookie')
