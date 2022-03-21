@@ -536,9 +536,13 @@ export const eventManager = {
       // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
       // established spec bridge, but one that is not the current or next switchToDomain command.
       if (cy.state('latestActiveDomain') === domain) {
+        // We remain in an anticipating state until either a load even happens or a timeout.
+        cy.isAnticipatingMultiDomainFor(undefined)
         cy.isStable(true, 'load')
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+        // Re-broadcast to any other specBridges.
+        Cypress.multiDomainCommunicator.toAllSpecBridges('window:load', { url })
       }
     })
 
