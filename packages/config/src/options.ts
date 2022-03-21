@@ -478,13 +478,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: '__socket',
+    defaultValue: '__socketIo',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
-    defaultValue: '/__socket',
+    defaultValue: '/__cypress/socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,

@@ -55,7 +55,7 @@ const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'r
 
 export async function preloadLaunchpadData () {
   try {
-    const resp = await fetch('/__launchpad/preload')
+    const resp = await fetch('/__cypress/launchpad/preload')
 
     window.__CYPRESS_INITIAL_DATA__ = await resp.json()
   } catch (e) {
@@ -88,7 +88,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
   // pub sub exchange.
   if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
     // If we're in the launchpad, we connect to the known GraphQL Socket port,
-    // otherwise we connect to the /__socket of the current domain, unless we've explicitly
+    // otherwise we connect to the /__cypress/socket.io of the current domain, unless we've explicitly
 
     exchanges.push(pubSubExchange(io))
   }
@@ -149,7 +149,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     exchanges.unshift(devtoolsExchange)
   }
 
-  const url = config.target === 'launchpad' ? `/__launchpad/graphql` : `/${config.namespace}/graphql`
+  const url = config.target === 'launchpad' ? `/__cypress/launchpad/graphql` : `/${config.namespace}/graphql`
 
   return createClient({
     url,
@@ -177,7 +177,7 @@ type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
     return client({
-      path: '/__launchpad/socket',
+      path: '/__cypress/launchpad/socket.io',
       transports: ['websocket'],
     })
   }
@@ -192,7 +192,7 @@ function getSocketSource (config: UrqlClientConfig) {
   // http: -> ws:  &  https: -> wss:
   const protocol = window.location.protocol.replace('http', 'ws')
   const wsUrl = config.target === 'launchpad'
-    ? `ws://${window.location.host}/__launchpad/graphql-ws`
+    ? `ws://${window.location.host}/__cypress/launchpad/graphql-ws`
     : `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`
 
   return createWsClient({

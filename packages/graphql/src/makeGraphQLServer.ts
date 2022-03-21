@@ -35,7 +35,7 @@ export async function makeGraphQLServer () {
 
   app.use(cors())
 
-  app.get('/__launchpad/preload', (req, res) => {
+  app.get('/__cypress/launchpad/preload', (req, res) => {
     const ctx = getCtx()
 
     ctx.html.fetchLaunchpadInitialData().then((data) => {
@@ -46,7 +46,7 @@ export async function makeGraphQLServer () {
     })
   })
 
-  app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
+  app.use('/__cypress/launchpad/graphql/:operationName?', graphQLHTTP)
 
   function makeProxy (): express.Handler {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -66,7 +66,7 @@ export async function makeGraphQLServer () {
     }
   }
 
-  app.get('/__launchpad/*', makeProxy())
+  app.get('/__cypress/launchpad/*', makeProxy())
 
   const graphqlPort = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
 
@@ -76,7 +76,7 @@ export async function makeGraphQLServer () {
     const ctx = getCtx()
     const port = (srv.address() as AddressInfo).port
 
-    const endpoint = `http://localhost:${port}/__launchpad/graphql`
+    const endpoint = `http://localhost:${port}/__cypress/launchpad/graphql`
 
     if (process.env.NODE_ENV === 'development') {
       /* eslint-disable-next-line no-console */
@@ -97,11 +97,11 @@ export async function makeGraphQLServer () {
   serverDestroy(srv)
 
   gqlSocketServer = new SocketIOServer(srv, {
-    path: '/__launchpad/socket',
+    path: '/__cypress/launchpad/socket.io',
     transports: ['websocket'],
   })
 
-  graphqlWS(srv, '/__launchpad/graphql-ws')
+  graphqlWS(srv, '/__cypress/launchpad/graphql-ws')
 
   gqlSocketServer.on('connection', (socket) => {
     socket.on('graphql:request', handleGraphQLSocketRequest)

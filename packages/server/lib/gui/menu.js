@@ -217,7 +217,7 @@ module.exports = {
         {
           label: 'GraphiQL',
           click () {
-            return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
+            return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__cypress/launchpad/graphql`)
           },
         },
       ])

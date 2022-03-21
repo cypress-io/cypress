@@ -1,3 +1,3 @@
 import { makeConfig } from '../frontend-shared/vite.config'
 
-export default makeConfig({ base: '/__launchpad/' })
+export default makeConfig({ base: '/__cypress/launchpad/' })
