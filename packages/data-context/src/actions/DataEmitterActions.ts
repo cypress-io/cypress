@@ -71,25 +71,30 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncIterator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncGenerator<any> {
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
     let pending: any[] = []
+    let done = false
 
-    function subscribed (val: any) {
+    function subscribed (value: any) {
       // We can get events here before next() is called setting up the deferred promise
       // If that happens, we will queue them up to be handled once next eventually is called
       if (dfd) {
-        dfd.resolve(val)
+        dfd.resolve({ done: false, value })
         dfd = undefined
       } else {
-        pending.push(val)
+        pending.push({ done: false, value })
       }
     }
     this.pub.on(evt, subscribed)
 
     const iterator = {
       async next () {
+        if (done) {
+          return { done: true, value: undefined }
+        }
+
         if (!hasSentInitial && sendInitial) {
           hasSentInitial = true
 
@@ -99,20 +104,26 @@ export class DataEmitterActions extends DataEmitterEvents {
         if (pending.length === 0) {
           dfd = pDefer()
 
-          const returnValue = { done: false, value: await dfd.promise }
-
-          return returnValue
+          return await dfd.promise
         }
 
-        return { done: false, value: pending.shift() }
+        return pending.shift()
+      },
+      throw: async (error: Error) => {
+        throw error
       },
       return: async () => {
         this.pub.off(evt, subscribed)
+        if (dfd) {
+          dfd.resolve({ done: true, value: undefined })
+        }
+
+        done = true
+
         dfd = undefined
 
         return { done: true, value: undefined }
       },
-
       [Symbol.asyncIterator] () {
         return iterator
       },
