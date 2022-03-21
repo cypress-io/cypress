@@ -101,6 +101,9 @@
     "bin",
     "lib",
     "index.js",
+    "vue/**",
+    "react/**",
+    "mount-utils/**",
     "types/**/*.d.ts",
     "types/net-stubbing.ts"
   ],

@@ -57,6 +57,7 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     optimizeDeps: {
       entries: [
         ...options.specs.map((s) => relative(root, s.relative)),
+        // @ts-ignore
         options.config.supportFile ?? resolve(root, options.config.supportFile),
       ].filter((v) => v != null) as string[],
     },
