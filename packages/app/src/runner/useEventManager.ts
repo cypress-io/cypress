@@ -12,7 +12,7 @@ export function useEventManager () {
 
   function runSpec () {
     if (!specStore.activeSpec) {
-      throw Error(`Cannot run spec when specStore.active spec is null!`)
+      throw Error(`Cannot run spec when specStore.active spec is null or undefined!`)
     }
 
     autStore.setScriptError(null)
@@ -54,7 +54,7 @@ export function useEventManager () {
   }
 
   const startSpecWatcher = () => {
-    return watch(() => specStore.activeSpec, (spec) => {
+    return watch(() => specStore.activeSpec, () => {
       runSpec()
     }, { immediate: true, flush: 'post' })
   }
