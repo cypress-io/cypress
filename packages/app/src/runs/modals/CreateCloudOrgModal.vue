@@ -9,7 +9,7 @@
       <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
-      <div @click="startPolling()">
+      <div @click="startWaitingOrgToBeCreated()">
         <ExternalLink
           class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
           :href="createOrgUrl"
@@ -23,7 +23,7 @@
     <template #footer>
       <div class="flex gap-16px">
         <Button
-          v-if="polling"
+          v-if="waitingOrgToBeCreated"
           size="lg"
           variant="pending"
         >
@@ -101,13 +101,13 @@ const query = useQuery({
 
 const refetch = useDebounceFn(() => query.executeQuery(), 1000)
 
-const polling = ref(false)
+const waitingOrgToBeCreated = ref(false)
 
-function startPolling () {
-  polling.value = true
+function startWaitingOrgToBeCreated () {
+  waitingOrgToBeCreated.value = true
 
   setTimeout(() => {
-    polling.value = false
+    waitingOrgToBeCreated.value = false
   }, 60000)
 }
 
