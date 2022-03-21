@@ -1,4 +1,4 @@
-const { create } = require('@packages/driver/src/cypress/log')
+const { create, LogUtils } = require('@packages/driver/src/cypress/log')
 
 describe('src/cypress/log', function () {
   context('#snapshot', function () {
@@ -52,6 +52,12 @@ describe('src/cypress/log', function () {
 
       expect(this.cy.createSnapshot).not.to.be.called
       expect(result).to.equal(log)
+    })
+  })
+
+  context('countLogsByTests', () => {
+    it('counts the logs', () => {
+
     })
   })
 })
