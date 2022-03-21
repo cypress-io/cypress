@@ -749,22 +749,23 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(renameAutoStep).should('exist')
     cy.get(configFileStep).should('exist')
 
-    // Migration workflow
-    // before auto migration
-    cy.contains('cypress/integration/app-spec2.js')
-    cy.contains('cypress/integration/app_spec2.js')
-    cy.contains('cypress/integration/app.spec.js')
-    cy.contains('cypress/integration/app2_spec.js')
-    cy.contains('cypress/integration/app_spec.js')
-    cy.contains('cypress/integration/app-spec.js')
+    cy.get('[data-cy="migrate-before"]').within(() => {
+      cy.get('code').eq(0).should('contain', 'cypress/integration/app-spec2.js')
+      cy.get('code').eq(1).should('contain', 'cypress/integration/app_spec2.js')
+      cy.get('code').eq(2).should('contain', 'cypress/integration/app.spec.js')
+      cy.get('code').eq(3).should('contain', 'cypress/integration/app2_spec.js')
+      cy.get('code').eq(4).should('contain', 'cypress/integration/app_spec.js')
+      cy.get('code').eq(5).should('contain', 'cypress/integration/app-spec.js')
+    })
 
-    // after auto migration
-    cy.contains('cypress/e2e/app-spec2.cy.js')
-    cy.contains('cypress/e2e/app_spec2.cy.js')
-    cy.contains('cypress/e2e/app.cy.js')
-    cy.contains('cypress/e2e/app2.cy.js')
-    cy.contains('cypress/e2e/app_spec.cy.js')
-    cy.contains('cypress/e2e/app-spec.cy.js')
+    cy.get('[data-cy="migrate-after"]').within(() => {
+      cy.get('code').eq(0).should('contain', 'cypress/e2e/app-spec2.cy.js')
+      cy.get('code').eq(1).should('contain', 'cypress/e2e/app_spec2.cy.js')
+      cy.get('code').eq(2).should('contain', 'cypress/e2e/app.cy.js')
+      cy.get('code').eq(3).should('contain', 'cypress/e2e/app2.cy.js')
+      cy.get('code').eq(4).should('contain', 'cypress/e2e/app_spec.cy.js')
+      cy.get('code').eq(5).should('contain', 'cypress/e2e/app-spec.cy.js')
+    })
 
     runAutoRename()
 
