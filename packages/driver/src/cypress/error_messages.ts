@@ -1687,10 +1687,6 @@ export default {
 
   switchToDomain: {
     docsUrl: 'https://on.cypress.io/switchToDomain',
-    // TODO: remove this
-    done_reference_mismatch: {
-      message: `${cmd('switchToDomain')} must have done as its second argument when three or more arguments are used.`,
-    },
     experiment_not_enabled: {
       message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
     },
