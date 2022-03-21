@@ -1,5 +1,6 @@
 import { action, computed, observable } from 'mobx'
-import { automation, BaseStore } from '@packages/runner-shared'
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import { automation } from '@packages/app/src/store/runner-ui-store'
 
 const _defaults = {
   messageTitle: null,
@@ -12,7 +13,7 @@ const _defaults = {
   specs: [],
 }
 
-export default class State extends BaseStore {
+export default class State extends MobxRunnerStore {
   defaults = _defaults
 
   @observable isRunning = false
