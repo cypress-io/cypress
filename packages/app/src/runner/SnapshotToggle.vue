@@ -1,8 +1,12 @@
 <template>
-  <div class="rounded font-medium text-14px overflow-hidden children:leading-20px">
+  <div
+    class="rounded font-medium text-14px overflow-hidden children:leading-20px"
+    data-cy="snapshot-toggle"
+  >
     <button
       v-for="message, idx in messages"
       :key="message.id"
+      :data-cy-active-snapshot-toggle="idx === activeIndex ? 'true' : undefined"
       class="border-transparent font-medium outline-none border-1 my-1 transition duration-150 hocus:border-purple-300"
       style="padding: 1px 12px;"
       :class="{

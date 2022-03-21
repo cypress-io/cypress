@@ -17,14 +17,14 @@
         <SnapshotToggle
           v-if="shouldShowStateControls"
           :messages="snapshotMessages"
-          :active-index="snapshotStore.snapshot?.stateIndex ?? 0"
+          :active-index="snapshotStore.snapshot?.stateIndex"
           @select="changeState"
         />
 
         <SnapshotHighlightControls
           v-if="shouldShowHighlightControls"
           :value="snapshotStore.snapshot?.showingHighlights"
-          @update:value="toggleHighlights"
+          @toggle="toggleHighlights"
         />
 
         <button

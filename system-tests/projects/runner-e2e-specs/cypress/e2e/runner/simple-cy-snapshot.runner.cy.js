@@ -13,5 +13,6 @@ describe('cy assertion', {
 
   it('clicks button', () => {
     cy.get('button').click()
+    cy.get('input').focus().type('foo')
   })
 })

@@ -97,21 +97,26 @@ describe('src/cypress/runner', () => {
     it('correctly resets highlight toggle state when pinning new command', () => {
       loadSpec({
         fileName: 'simple-cy-snapshot.runner.cy.js',
-        passCount: 1,
+        passCount: 3,
         failCount: 0,
       })
 
       cy.findByText('clicks button').click()
 
+      // pin command that features highlights
       cy.contains('li.command-name-click', 'click')
       .find('.command-wrapper')
       .should('not.have.class', 'command-is-pinned')
       .click()
-      .click()
       .should('have.class', 'command-is-pinned')
 
-      cy.get('[id="toggle-highlights"]').should('have.attr', 'aria-checked', 'true').click()
+      // disable highlights
+      cy.get('[id="toggle-highlights"]')
+      .should('have.attr', 'aria-checked', 'true')
+      .click()
+      .should('have.attr', 'aria-checked', 'false')
 
+      // pin another command, expect highlights be enabled for new snapshot
       cy.contains('li.command-name-get', 'get')
       .find('.command-wrapper')
       .should('not.have.class', 'command-is-pinned')
@@ -119,6 +124,35 @@ describe('src/cypress/runner', () => {
       .should('have.class', 'command-is-pinned')
 
       cy.get('[id="toggle-highlights"]').should('have.attr', 'aria-checked', 'true')
+    })
+
+    it('correctly resets named snapshot toggle state when pinning new command', () => {
+      loadSpec({
+        fileName: 'simple-cy-snapshot.runner.cy.js',
+        passCount: 3,
+        failCount: 0,
+      })
+
+      cy.findByText('clicks button').click()
+
+      // pin command that features multiple snapshots
+      cy.contains('li.command-name-click', 'click')
+      .find('.command-wrapper')
+      .click()
+      .should('have.class', 'command-is-pinned')
+
+      // change active snapshot
+      cy.get('[data-cy-active-snapshot-toggle="true"').should('contain', 'before')
+      cy.get('[data-cy="snapshot-toggle"]').contains('after').click()
+      cy.get('[data-cy-active-snapshot-toggle="true"').should('contain', 'after')
+
+      // pin another command, expect active snapshot index to be reset
+      cy.contains('li.command-name-type', 'type')
+      .find('.command-wrapper')
+      .click()
+      .should('have.class', 'command-is-pinned')
+
+      cy.get('[data-cy-active-snapshot-toggle="true"').should('contain', 'before')
     })
 
     it('renders spec name and runtime in header', () => {

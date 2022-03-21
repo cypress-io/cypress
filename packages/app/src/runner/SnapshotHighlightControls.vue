@@ -8,7 +8,7 @@
       name="toggle-highlights"
       :value="props.value"
       size="sm"
-      @update="emits('update:value', !props.value)"
+      @update="emits('toggle')"
     />
     {{ t('runner.snapshot.highlightsLabel') }}
   </div>
@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
 }>(), { value: true })
 
 const emits = defineEmits<{
-  (e: 'update:value', value: boolean): void
+  (e: 'toggle'): void
 }>()
 
 </script>
