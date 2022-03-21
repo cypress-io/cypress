@@ -46,6 +46,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         if (args.action === 'trigger') {
+          console.log('EMILY - devRelaunch')
           await ctx.actions.dev.triggerRelaunch()
         } else {
           ctx.actions.dev.dismissRelaunch()

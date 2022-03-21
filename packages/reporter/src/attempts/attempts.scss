@@ -1,5 +1,7 @@
 .reporter {
   .attempts {
+    padding-left: 20px; 
+
     .attempt-item > .collapsible > .collapsible-header-wrapper {
       display: none;
     }
@@ -10,7 +12,7 @@
   }
 
   .attempt-item {
-    margin-bottom: 7px;
+    // margin-bottom: 7px;
 
     > .collapsible {
       position: relative;
@@ -47,20 +49,20 @@
       }
     }
 
-  .open-close-indicator {
-    svg {
-      margin-right: 3px;
+    .open-close-indicator {
+      svg {
+        margin-right: 3px;
 
-      &.collapse-icon {
-        display: none;
-      }
+        &.collapse-icon {
+          display: none;
+        }
 
-      &.expand-icon {
-        display: block;
+        &.expand-icon {
+          display: block;
+        }
       }
     }
   }
-}
 
   .attempt-state-failed {
     .attempt-name:after {
@@ -72,7 +74,6 @@
       color: $pass;
     }
   }
-
 
   .attempt-name {
     display: flex;

@@ -33,6 +33,7 @@ export class DevActions {
 
   // In a setTimeout so that we flush the triggering response to the client before sending
   triggerRelaunch () {
+    console.log('trigger relaunch')
     setTimeout(async () => {
       try {
         await this.ctx.destroy()

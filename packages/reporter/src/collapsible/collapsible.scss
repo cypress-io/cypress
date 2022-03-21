@@ -1,11 +1,11 @@
 .reporter {
-  .collapsible-content {
-    display: none;
-  }
+  // .collapsible-content {
+  //   display: none;
+  // }
 
-  .is-open > .collapsible-content {
-    display: block;
-  }
+  // .is-open > .collapsible-content {
+  //   display: block;
+  // }
 
   .collapsible-indicator {
     margin-right: 8px;
@@ -13,7 +13,7 @@
     transition: transform 150ms ease-out;
   }
 
-  .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
+  .collapsible-indicator-is-open{
     transform: rotate(0);
   }
 }

@@ -15,90 +15,90 @@ import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 
-import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
-import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
+// import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
+// import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
 import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 // import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
-interface StudioControlsProps {
-  events: Events
-  model: TestModel
-}
+// interface StudioControlsProps {
+//   events: Events
+//   model: TestModel
+// }
 
-interface StudioControlsState {
-  copySuccess: boolean
-}
+// interface StudioControlsState {
+//   copySuccess: boolean
+// }
 
-@observer
-class StudioControls extends Component<StudioControlsProps, StudioControlsState> {
-  static defaultProps = {
-    events,
-  }
+// @observer
+// class StudioControls extends Component<StudioControlsProps, StudioControlsState> {
+//   static defaultProps = {
+//     events,
+//   }
 
-  state = {
-    copySuccess: false,
-  }
+//   state = {
+//     copySuccess: false,
+//   }
 
-  _cancel = (e: MouseEvent) => {
-    e.preventDefault()
+//   _cancel = (e: MouseEvent) => {
+//     e.preventDefault()
 
-    this.props.events.emit('studio:cancel')
-  }
+//     this.props.events.emit('studio:cancel')
+//   }
 
-  _save = (e: MouseEvent) => {
-    e.preventDefault()
+//   _save = (e: MouseEvent) => {
+//     e.preventDefault()
 
-    this.props.events.emit('studio:save')
-  }
+//     this.props.events.emit('studio:save')
+//   }
 
-  _copy = (e: MouseEvent) => {
-    e.preventDefault()
+//   _copy = (e: MouseEvent) => {
+//     e.preventDefault()
 
-    this.props.events.emit('studio:copy:to:clipboard', () => {
-      this.setState({ copySuccess: true })
-    })
-  }
+//     this.props.events.emit('studio:copy:to:clipboard', () => {
+//       this.setState({ copySuccess: true })
+//     })
+//   }
 
-  _endCopySuccess = () => {
-    if (this.state.copySuccess) {
-      this.setState({ copySuccess: false })
-    }
-  }
+//   _endCopySuccess = () => {
+//     if (this.state.copySuccess) {
+//       this.setState({ copySuccess: false })
+//     }
+//   }
 
-  render () {
-    const { studioIsNotEmpty } = this.props.model
-    const { copySuccess } = this.state
+//   render () {
+//     const { studioIsNotEmpty } = this.props.model
+//     const { copySuccess } = this.state
 
-    return (
-      <div className='studio-controls'>
-        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
-        <Tooltip
-          title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
-          className='cy-tooltip'
-          wrapperClassName='studio-copy-wrapper'
-          visible={!studioIsNotEmpty ? false : null}
-          updateCue={copySuccess}
-        >
-          <button
-            className={cs('studio-copy', {
-              'studio-copy-success': copySuccess,
-            })}
-            disabled={!studioIsNotEmpty}
-            onClick={this._copy}
-            onMouseLeave={this._endCopySuccess}
-          >
-            {copySuccess ? (
-              <CheckIcon />
-            ) : (
-              <ClipboardIcon />
-            )}
-          </button>
-        </Tooltip>
-        <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
-      </div>
-    )
-  }
-}
+//     return (
+//       <div className='studio-controls'>
+//         <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+//         <Tooltip
+//           title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
+//           className='cy-tooltip'
+//           wrapperClassName='studio-copy-wrapper'
+//           visible={!studioIsNotEmpty ? false : null}
+//           updateCue={copySuccess}
+//         >
+//           <button
+//             className={cs('studio-copy', {
+//               'studio-copy-success': copySuccess,
+//             })}
+//             disabled={!studioIsNotEmpty}
+//             onClick={this._copy}
+//             onMouseLeave={this._endCopySuccess}
+//           >
+//             {copySuccess ? (
+//               <CheckIcon />
+//             ) : (
+//               <ClipboardIcon />
+//             )}
+//           </button>
+//         </Tooltip>
+//         <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
+//       </div>
+//     )
+//   }
+// }
 
 interface TestProps {
   events: Events
@@ -156,7 +156,7 @@ class Test extends Component<TestProps> {
         containerRef={this.containerRef}
         header={this._header()}
         headerClass='runnable-wrapper'
-        headerStyle={{ paddingLeft: indent(model.level) }}
+        headerStyle={{ paddingLeft: model.level === 0 ? 5 : 16 }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
       >
@@ -166,10 +166,11 @@ class Test extends Component<TestProps> {
   }
 
   _header () {
-    const { appState, model } = this.props
+    const { model } = this.props
 
     return (<>
-      <StateIcon aria-hidden className="runnable-state-icon" state={model.state} isStudio={appState.studioActive} />
+      <StateIcon aria-hidden className="runnable-state-icon" state={model.state} />
+      {/* <StateIcon aria-hidden className="runnable-state-icon" state={model.state} isStudio={appState.studioActive} /> */}
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
@@ -192,12 +193,17 @@ class Test extends Component<TestProps> {
   _contents () {
     const { appState, model } = this.props
 
-    return (
-      <div style={{ paddingLeft: indent(model.level) }}>
-        <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
-        { appState.studioActive && <StudioControls model={model} /> }
-      </div>
-    )
+    { /* <div style={{ paddingLeft: indent(model.level) }}> */ }
+
+    return <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
+
+    // return (
+    //   <>
+
+    //     { appState.studioActive && <StudioControls model={model} /> }
+    //   </>
+    //   // </div>
+    // )
   }
 
   _launchStudio = (e: MouseEvent) => {

@@ -254,9 +254,15 @@
     }
   }
 
+  .test-runnables-wrapper {
+    padding-left: 10px;
+  }
+
   .runnable-instruments {
+    background-color: #171926;
+    // padding-left: 20px;
     border-left: 4px solid transparent;
-    padding-bottom: 5px;
+    // padding-bottom: 5px;
   }
 
   .runnable-title {

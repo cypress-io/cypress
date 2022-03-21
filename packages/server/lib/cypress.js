@@ -67,6 +67,8 @@ module.exports = {
   },
 
   runElectron (mode, options) {
+    debug('run Electron with', mode, options)
+
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
@@ -76,6 +78,7 @@ module.exports = {
       // like in production and we shouldn't spawn a new
       // process
       if (this.isCurrentlyRunningElectron()) {
+        debug('currently running Electron')
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
@@ -116,6 +119,7 @@ module.exports = {
   },
 
   openProject (options) {
+    console.log('open project with', options.project, options)
     // this code actually starts a project
     // and is spawned from nodemon
     openProject.open(options.project, options)

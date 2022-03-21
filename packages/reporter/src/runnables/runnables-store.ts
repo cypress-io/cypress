@@ -10,6 +10,7 @@ import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '..
 import RunnableModel from './runnable-model'
 import SuiteModel, { SuiteProps } from './suite-model'
 import { SessionProps } from '../sessions/sessions-model'
+import { info } from 'console'
 
 const defaults = {
   hasSingleTest: false,
@@ -29,13 +30,11 @@ export type LogProps = AgentProps | CommandProps | RouteProps | SessionProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
 
-export type Log = AgentModel | CommandModel | RouteModel
+export type TestsArray = Array<TestModel>
 
-export interface RootRunnable {
-  hooks?: Array<HookProps>
-  tests?: Array<TestProps>
-  suites?: Array<SuiteProps>
-}
+export type SuitesArray = Array<SuiteModel>
+
+export type Log = AgentModel | CommandModel | RouteModel
 
 type RunnableType = 'test' | 'suite'
 type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
@@ -44,11 +43,11 @@ export class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: RunnableArray = []
   /**
-   * Stores a list of all the runables files where the reporter
+   * Stores a list of all the runnables files where the reporter
    * has passed without any specific order.
    *
    * key: spec FilePath
-   * content: RunableArray
+   * content: RunnableArray
    */
   @observable runnablesHistory: Record<string, RunnableArray> = {}
 
@@ -61,6 +60,8 @@ export class RunnablesStore {
   private scroller: Scroller
   [key: string]: any
 
+  tests: Array<TestModel> = []
+  suites: Array<SuiteModel> = []
   _tests: Record<string, TestModel> = {}
   _logs: Record<string, Log> = {}
   _runnablesQueue: Array<RunnableModel> = []
@@ -73,8 +74,15 @@ export class RunnablesStore {
     this.scroller = scroller
   }
 
-  setRunnables (rootRunnable: RootRunnable) {
-    this.runnables = this._createRunnableChildren(rootRunnable, 0)
+  setRunnables (rootRunnable: SuiteProps) {
+    const children = this._createRunnableChildren(rootRunnable, 0)
+
+    console.log(children)
+    this.tests = children.tests
+    this.suites = children.suites
+
+    // console.log('runnables', this.runnables)
+
     this.isReady = true
 
     const numTests = _.keys(this._tests).length
@@ -85,34 +93,121 @@ export class RunnablesStore {
     this._finishedInitialRendering()
   }
 
-  _createRunnableChildren (runnableProps: RootRunnable, level: number) {
-    return this._createRunnables<TestProps>('test', runnableProps.tests || [], runnableProps.hooks || [], level).concat(
-      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], runnableProps.hooks || [], level),
-    )
+  _createRunnableChildren (runnableProps: SuiteProps, level: number): { tests: Array<TestModel>, suites: Array<SuiteModel>} {
+  // _createRunnableChildren (runnableProps: RootRunnable | SuiteProps, level: number) {
+    console.log('_createRunnableChildren')
+
+    // return this._createTestRunnables(runnableProps, level)
+    // .concat(this._createSuiteRunnables(runnableProps, level))
+    // const EMILY = this._createRunnablesE('test', runnableProps, level).concat(this._createRunnablesE('suite', runnableProps, level))
+
+    // console.log('EMILY', EMILY)
+
+    // return EMILY
+
+    // const ORIGINAL =
+    // .concat
+
+    // console.log('ORIGINAL', ORIGINAL)
+
+    return {
+      suites: this._createRunnables<SuiteProps, SuiteModel>('suite', runnableProps.suites || [], runnableProps.hooks || [], runnableProps, level),
+      tests: this._createRunnables<TestProps, TestModel>('test', runnableProps.tests || [], runnableProps.hooks || [], runnableProps, level),
+    }
+    // return ORIGINAL
   }
 
-  _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, level: number) {
-    return _.map(runnables, (runnableProps) => {
+  _createRunnables<T, R> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, suiteProps: SuiteProps, level: number): Array<TestModel | SuiteModel> {
+    return runnables.map((runnableProps) => {
+      const parents = suiteProps.parents || []
+
+      runnableProps.parents = parents.concat([suiteProps.title || ''])
+
       return this._createRunnable(type, runnableProps, hooks, level)
     })
   }
 
-  _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookProps>, level: number) {
+  // _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, parent: string, level: number) {
+  //   return runnables.map((runnableProps) => {
+  //     console.log('parent', parent)
+  //     console.log('runnableProps.title', runnableProps.title)
+  //     console.log('runnableProps.parent', runnableProps.parents)
+  //     console.log((runnableProps.parents !== undefined && runnableProps.parents.length > 0))
+  //     const parents = (runnableProps.parents === undefined) ? [parent] : runnableProps.parents.concat([parent])
+
+  //     runnableProps.parents = parents
+
+  //     return this._createRunnable(type, runnableProps, hooks, level)
+  //   })
+  // }
+
+  _createRunnablesE (type: RunnableType, suiteProps: SuiteProps, level: number) {
+    console.log('_createRunnablesE', suiteProps)
+    const runnables = suiteProps[`${type}s`] || []
+    const hooks = suiteProps.hooks || []
+
+    console.log('runnables', type, runnables)
+
+    return runnables.map((runnableProps) => {
+      if (type === 'suite' && suiteProps.title !== '') {
+        runnableProps.title = `${suiteProps.title} > ${runnableProps.title}`
+      }
+
+      return this._createRunnable(type, runnableProps, hooks, level)
+    })
+  }
+
+  // _createTestRunnables (runnableProps: RootRunnable, level: number) {
+  //   const tests: Array<TestProps> = runnableProps.tests || []
+  //   const hooks = runnableProps.hooks || []
+
+  //   return tests.map((testProps) => {
+  //     testProps.hooks = _.unionBy(testProps.hooks, hooks, 'hookId')
+
+  //     return this._createTest(testProps, level)
+  //   })
+  // }
+
+  // _createSuiteRunnables (runnableProps: RootRunnable, level: number) {
+  //   const suites: Array<SuiteProps> = runnableProps.suites || []
+  //   const parent = runnableProps.title || ''
+  //   const hooks = runnableProps.hooks || []
+
+  //   return suites.map((suiteProps) => {
+  //     suiteProps.hooks = _.unionBy(suiteProps.hooks, hooks, 'hookId')
+  //     suiteProps.parent = parent
+
+  //     return this._createSuite(suiteProps, level)
+  //   })
+  // }
+
+  // _createRunnables<T> (type: RunnableType, runnableProps: RootRunnable, level: number) {
+  //   // runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, level: number) {
+
+  //   return _.map(runnables, (runnableProps) => {
+  //     return this._createRunnable<TestProps>(type, runnableProps, hooks, level)
+  //   })
+  // }
+
+  _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookProps>, level: number): TestModel | SuiteModel {
     props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
 
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }
 
-  _createSuite (props: SuiteProps, level: number) {
+  _createSuite (props: SuiteProps, level: number): SuiteModel {
     const suite = new SuiteModel(props, level)
 
     this._runnablesQueue.push(suite)
-    suite.children = this._createRunnableChildren(props, ++level)
+    const children = this._createRunnableChildren(props, ++level)
+
+    suite.tests = children.tests
+    suite.suites = children.suites
 
     return suite
   }
 
-  _createTest (props: TestProps, level: number) {
+  _createTest (props: TestProps, level: number): TestModel {
     const test = new TestModel(props, level, this)
 
     this._runnablesQueue.push(test)

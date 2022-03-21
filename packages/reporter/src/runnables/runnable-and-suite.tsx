@@ -32,7 +32,7 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
 
   const _header = () => (
     <>
-      <span className='runnable-title'>{model.title}</span>
+      <span className='runnable-title'>{model.displayTitle}</span>
       <span className='runnable-controls'>
         <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
           <a onClick={_launchStudio} className='runnable-controls-studio'>
@@ -43,18 +43,34 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
     </>
   )
 
+  // if (model.tests.length === 0) {
+  //   return (
+  //     <ul className='runnables'>
+  //       { _.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />) }
+  //     </ul>
+  //   )
+  // }
+
   return (
-    <Collapsible
-      header={_header()}
-      headerClass='runnable-wrapper'
-      headerStyle={{ paddingLeft: indent(model.level) }}
-      contentClass='runnables-region'
-      isOpen={true}
-    >
+    <>
+      {model.tests.length > 0 && (
+        <Collapsible
+          header={_header()}
+          headerClass='runnable-wrapper '
+          // headerStyle={{ paddingLeft: indent(model.level) }}
+          contentClass='runnables-region'
+          isOpen={true}
+        >
+          <ul className='test-runnables'>
+            {_.map(model.tests, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+            {/* {_.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />)} */}
+          </ul>
+        </Collapsible>
+      )}
       <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+        { _.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />) }
       </ul>
-    </Collapsible>
+    </>
   )
 })
 
@@ -74,13 +90,16 @@ class Runnable extends Component<RunnableProps> {
   }
 
   render () {
-    const { appState, model } = this.props
+    const {
+      // appState,
+      model,
+    } = this.props
 
     return (
       <li
         className={cs(`${model.type} runnable runnable-${model.state}`, {
           'runnable-retried': model.hasRetried,
-          'runnable-studio': appState.studioActive,
+          // 'runnable-studio': appState.studioActive,
         })}
         data-model-state={model.state}
       >

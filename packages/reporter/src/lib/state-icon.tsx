@@ -9,15 +9,19 @@ import PassedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/
 import PendingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
 import ProcessingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-processing_x12.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x12.svg'
-import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+// import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 
 interface Props extends React.HTMLProps<HTMLDivElement> {
   state: TestState
-  isStudio?: boolean
+  // isStudio?: boolean
 }
 
 const StateIcon = observer((props: Props) => {
-  const { state, isStudio, ...rest } = props
+  const {
+    state,
+    isStudio,
+    ...rest
+  } = props
 
   if (state === 'active') {
     return (
@@ -32,11 +36,11 @@ const StateIcon = observer((props: Props) => {
   }
 
   if (state === 'passed') {
-    if (isStudio) {
-      return (
-        <WandIcon {...rest} className={cs('wand-icon', rest.className)} viewBox="0 0 16 16" width="12px" height="12px" />
-      )
-    }
+    // if (isStudio) {
+    //   return (
+    //     <WandIcon {...rest} className={cs('wand-icon', rest.className)} viewBox="0 0 16 16" width="12px" height="12px" />
+    //   )
+    // }
 
     return (
       <PassedIcon {...rest} />
@@ -46,17 +50,12 @@ const StateIcon = observer((props: Props) => {
   if (state === 'pending') {
     return (
       <PendingIcon {...rest} />
-    )
-  }
 
-  if (state === 'processing') {
-    return (
-      <ProcessingIcon {...rest} />
     )
   }
 
   return (
-    <PendingIcon />
+    <ProcessingIcon {...rest} />
   )
 })
 

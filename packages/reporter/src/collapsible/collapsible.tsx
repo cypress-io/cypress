@@ -41,7 +41,7 @@ class Collapsible extends Component<Props, State> {
 
   render () {
     return (
-      <div className={cs('collapsible', { 'is-open': this.state.isOpen })} ref={this.props.containerRef}>
+      <div className='collapsible' ref={this.props.containerRef}>
         <div className={cs('collapsible-header-wrapper', this.props.headerClass)}>
           <div
             aria-expanded={this.state.isOpen}
@@ -56,7 +56,7 @@ class Collapsible extends Component<Props, State> {
               style={this.props.headerStyle}
               tabIndex={-1}
             >
-              <ChevronIcon className='collapsible-indicator' />
+              <ChevronIcon className={cs('collapsible-indicator', { 'collapsible-indicator-is-open': this.state.isOpen })} />
               <span className='collapsible-header-text'>
                 {this.props.header}
               </span>
@@ -64,9 +64,11 @@ class Collapsible extends Component<Props, State> {
           </div>
           {this.props.headerExtras}
         </div>
-        <div className={cs('collapsible-content', this.props.contentClass)}>
-          {this.state.isOpen && this.props.children}
-        </div>
+        {this.state.isOpen && (
+          <div className={cs('collapsible-content', this.props.contentClass)}>
+            {this.props.children}
+          </div>
+        )}
       </div>
     )
   }

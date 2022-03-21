@@ -1,5 +1,7 @@
 .reporter {
   .hooks-container {
+    background-color: #171926;
+
     // margin: 5px 0 5px 9px;
     // padding-left: 10px;
     // border-left: 1px dotted $gray-900;
@@ -13,10 +15,13 @@
     }
 
     .hook-header {
+      background-color: #171926;
       display: flex;
       width: 100%;
 
       &:hover {
+        background-color: #2e3247;
+
         .collapsible-header {
           color: $gray-300;
         }

@@ -1,3 +1,4 @@
+console.log('getting app_data')
 const os = require('os')
 const path = require('path')
 const ospath = require('ospath')

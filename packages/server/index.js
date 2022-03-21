@@ -14,6 +14,7 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
 }
 
 const globalExceptionHandler = async (err) => {
+  console.log('server- globalExceptionHandler', err)
   await require('./lib/errors').logException(err)
   process.exit(1)
 }
@@ -22,6 +23,7 @@ process.removeAllListeners('unhandledRejection')
 process.on('unhandledRejection', globalExceptionHandler)
 process.removeAllListeners('uncaughtException')
 process.on('uncaughtException', globalExceptionHandler)
+// process.on('error', globalExceptionHandler)
 
 process.env.UV_THREADPOOL_SIZE = 128
 
@@ -32,6 +34,7 @@ require('graceful-fs').gracefulify(require('fs'))
 require('@packages/ts/register')
 
 if (isRunningElectron) {
+  console.log('server - isRunningElectron')
   require('./lib/util/process_profiler').start()
 }
 

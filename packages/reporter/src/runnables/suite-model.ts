@@ -1,16 +1,22 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 import Runnable, { RunnableProps } from './runnable-model'
-import TestModel, { TestProps, TestState } from '../test/test-model'
+import Test, { TestProps, TestState } from '../test/test-model'
 
 export interface SuiteProps extends RunnableProps {
-  suites: Array<SuiteProps>
-  tests: Array<TestProps>
+  tests: Array<Test>
 }
 
 export default class Suite extends Runnable {
-  @observable children: Array<TestModel | Suite> = []
+  // @observable children: Array<TestModel | Suite> = []
+  @observable tests: Array<Test> = []
   type = 'suite'
+
+  constructor (props: SuiteProps, level: number) {
+    super(props, level)
+
+    this.tests = props.tests
+  }
 
   @computed get state (): TestState {
     if (this._anyChildrenFailed) {
@@ -28,12 +34,22 @@ export default class Suite extends Runnable {
     return 'processing'
   }
 
+  @computed get displayTitle () {
+    return this.parents.concat(this.title || '').filter((opt) => opt !== '').join(' > ')
+  }
+
+  @computed get _children (): Array<Suite | Test> {
+    return [...this.suites, ...this.tests]
+  }
+
   @computed get _childStates () {
-    return _.map(this.children, 'state')
+    return _.map(this._children, 'state')
+
+    // return _.map(this.tests, 'state').concat(this.suites)
   }
 
   @computed get hasRetried (): boolean {
-    return _.some(this.children, (v) => v.hasRetried)
+    return _.some(this._children, (v) => v.hasRetried)
   }
 
   @computed get _anyChildrenFailed () {

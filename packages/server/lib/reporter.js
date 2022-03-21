@@ -329,6 +329,7 @@ class Reporter {
     const runnable = (() => {
       switch (type) {
         case 'suite':
+          console.log('create runnable in server...')
           // eslint-disable-next-line no-case-declarations
           const suite = createSuite(runnableProps, parent)
 

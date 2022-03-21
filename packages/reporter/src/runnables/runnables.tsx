@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
@@ -7,7 +6,7 @@ import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
-import { RunnablesStore, RunnableArray } from './runnables-store'
+import { RunnablesStore, RunnableArray, SuitesArray, TestsArray } from './runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
@@ -74,13 +73,17 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
 }
 
 interface RunnablesListProps {
-  runnables: RunnableArray
+  runnables?: RunnableArray
+  tests: TestsArray
+  suites: SuitesArray
 }
 
-const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
+const RunnablesList = observer(({ runnables, tests, suites }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      {/* {runnables.map((runnable) => <Runnable key={runnable.id} model={runnable} />)} */}
+      {tests.map((runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      {suites.map((runnable) => <Runnable key={runnable.id} model={runnable} />)}
     </ul>
   </div>
 ))
@@ -92,15 +95,15 @@ export interface RunnablesContentProps {
 }
 
 const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesContentProps) => {
-  const { isReady, runnables, runnablesHistory } = runnablesStore
+  const { isReady, tests, suites, runnablesHistory } = runnablesStore
 
   if (!isReady) {
     return <Loading />
   }
 
   // show error if there are no tests, but only if there
-  // there isn't an error passed down that supercedes it
-  if (!error && !runnablesStore.runnables.length) {
+  // there isn't an error passed down that supersedes it
+  if (!error && !tests.length && !suites.length) {
     return <RunnablesEmptyState spec={spec} />
   }
 
@@ -111,6 +114,8 @@ const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesCon
   const specPath = spec.relative
 
   const isRunning = specPath === runnablesStore.runningSpec
+
+  return <RunnablesList tests={tests} suites={suites} />
 
   return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
 })

@@ -82,20 +82,21 @@ class App extends Component {
             left: this.props.state.specListWidth,
           }}
         >
-          {Boolean(NO_COMMAND_LOG) || <Reporter
-            runner={this.props.eventManager.reporterBus}
-            runnerStore={{ spec }}
-            autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
-            experimentalStudioEnabled={this.props.config.experimentalStudio}
-          />}
+          {Boolean(NO_COMMAND_LOG) || (
+            <Reporter
+              runner={this.props.eventManager.reporterBus}
+              runnerStore={{ spec }}
+              autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
+              error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
+              experimentalStudioEnabled={this.props.config.experimentalStudio}
+            />
+          )}
         </div>
         <div
           ref='container'
           className='container runner'
           style={{
-            left: this.props.state.absoluteReporterWidth +
-            this.props.state.specListWidth,
+            left: this.props.state.absoluteReporterWidth + this.props.state.specListWidth,
           }}
         >
           <Header ref='header' runner='e2e' {...this.props} />
