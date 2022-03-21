@@ -38,21 +38,34 @@ export const createCommonRoutes = ({
   const router = Router()
   const { clientRoute, namespace } = config
 
-  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
-    const proxy = httpProxy.createProxyServer({
-      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
-    })
+  const makeAppRoutes = (routes: string[]) => {
+    if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+      const viteProxy = httpProxy.createProxyServer({
+        target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+      })
 
-    router.get(`/__cypress/app/*`, (req, res) => {
-      proxy.web(req, res, {}, (e) => {})
-    })
-  } else {
-    router.get(`/__cypress/app/*`, (req, res) => {
-      const pathToFile = getPathToDist('app', req.params[0])
+      return routes.forEach((route) => {
+        router.get(route, (req, res) => {
+          viteProxy.web(req, res, {}, (e) => {})
+        })
+      })
+    }
 
-      return send(req, pathToFile).pipe(res)
+    return routes.forEach((route) => {
+      router.get(route, (req, res) => {
+        const pathToFile = getPathToDist('app', req.params[0])
+
+        return send(req, pathToFile).pipe(res)
+      })
     })
   }
+
+  // we need to make the dynamic routes but also
+  // the static __cypress/app routes because we
+  // generate vite assets at build time, not runtime
+  // and vite is currently hard coded to generate
+  // assets using __cypress/app as the asset base
+  makeAppRoutes([`/${namespace}/app/*`, `/__cypress/app/*`])
 
   router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
