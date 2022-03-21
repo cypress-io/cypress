@@ -3,7 +3,7 @@
     <!--
       Run Mode is a more minimal UI.
       It does not render things like the SpecList,
-      Side and Top Nav, etc.
+      Side Nav, etc.
       It also has no GraphQL dependency.
     -->
     <SpecRunnerContainerRunMode
@@ -14,7 +14,7 @@
     <!--
       Open Mode is the full Cypress runner UI -
       including things like the SpecList,
-      Side and Top Nav, Selector Playground etc.
+      Side Nav, Selector Playground etc.
       It is driven by GraphQL and urql.
     -->
     <SpecRunnerContainerOpenMode
@@ -73,7 +73,7 @@ const specs = window.__RUN_MODE_SPECS__
 
 <route>
   {
-    name: 'SpecsRunner',
+    name: 'SpecRunner',
     meta: {
       header: false,
       navBarExpandedAllowed: false

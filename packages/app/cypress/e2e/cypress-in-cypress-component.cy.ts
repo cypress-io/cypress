@@ -1,7 +1,8 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { getPathForPlatform } from '../../src/paths'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
-describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
+describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
@@ -56,6 +57,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
   })
 
   it('navigation between specs and other parts of the app works', () => {
+    cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
@@ -79,11 +81,11 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'src/DoesNotExist.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${badFilePath}`)
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
-    cy.contains(badFilePath).should('be.visible')
+    cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
     cy.location()
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
@@ -98,10 +100,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     const goodFilePath = 'src/TestComponent.spec.jsx'
 
-    // TODO: Figure out why test is flaky without wait
-    // see: https://cypress-io.atlassian.net/browse/UNIFY-1294
-    cy.wait(2000)
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
 
     cy.contains('renders the test component').should('be.visible')
 
@@ -111,7 +110,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(goodFilePath).should('be.visible')
+      cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
       cy.location()
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')
