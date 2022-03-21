@@ -243,6 +243,11 @@ $code-border-radius: 4px;
       line-height: 24px;
       padding: 3px 10px;
       word-break: break-all;
+
+      svg {
+        margin-bottom: -2px;
+        margin-right: 4px;
+      }
     }
 
     pre {
