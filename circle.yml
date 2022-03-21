@@ -1689,7 +1689,6 @@ jobs:
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
-          pull_request_id: 528
       - install-required-node
       - run:
           name: Remove cypress.json
@@ -2005,7 +2004,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
-          pull_request_id: 528
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2013,7 +2011,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
-          pull_request_id: 528
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
@@ -2021,7 +2018,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
-          pull_request_id: 528
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
