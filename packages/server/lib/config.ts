@@ -199,7 +199,7 @@ export function mergeDefaults (
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
-  debug('validate that there is no breaking changes before plugins')
+  debug('validate that there is no breaking config options before setupNodeEvents')
 
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw errors.get(err, ...args)
@@ -256,6 +256,8 @@ export function updateWithPluginValues (cfg, overrides) {
     return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
   })
 
+  debug('validate that there is no breaking config options added by setupNodeEvents')
+
   configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
     throw errors.get(err, {
       ...options,
@@ -263,18 +265,10 @@ export function updateWithPluginValues (cfg, overrides) {
     })
   })
 
-  let originalResolvedBrowsers = cfg
-    && cfg.resolved
-    && cfg.resolved.browsers
-    && _.cloneDeep(cfg.resolved.browsers)
-
-  if (!originalResolvedBrowsers) {
-    // have something to resolve with if plugins return nothing
-    originalResolvedBrowsers = {
-      value: cfg.browsers,
-      from: 'default',
-    } as ResolvedFromConfig
-  }
+  const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
+    value: cfg.browsers,
+    from: 'default',
+  } as ResolvedFromConfig
 
   const diffs = deepDiff(cfg, overrides, true)
 
