@@ -278,6 +278,18 @@ export class ProjectLifecycleManager {
     })
   }
 
+  async reloadConfig () {
+    assert(this._configManager)
+
+    return this._configManager.reloadConfig
+  }
+
+  async initializeConfig () {
+    assert(this._configManager)
+
+    return this._configManager.initializeConfig()
+  }
+
   private async setActiveBrowser (cliBrowser: string) {
     // When we're starting up, if we've chosen a browser to run with, check if it exists
     this.ctx.coreData.cliBrowser = null
