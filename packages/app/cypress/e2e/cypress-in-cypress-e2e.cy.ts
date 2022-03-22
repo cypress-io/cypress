@@ -125,14 +125,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.contains('Dom Content').should('be.visible')
 
-    cy.withCtx((ctx) => {
-      // rename relative path for any specs that happen to be found
-
-      const specs = ctx.project.specs.map((spec) => ({ ...spec, relative: `${spec.relative}-updated` }))
-
-      ctx.actions.project.setSpecs(specs)
-      ctx.emitter.toApp()
-    }).then(() => {
+    cy.withCtx((ctx, o) => {
+      ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
+    }, { path: goodFilePath }).then(() => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
