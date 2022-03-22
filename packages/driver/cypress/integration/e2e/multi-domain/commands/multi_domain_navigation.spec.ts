@@ -262,7 +262,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
     it('supports auth options and adding auth to subsequent requests', () => {
       cy.switchToDomain('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/basic_auth', {
+        cy.visit('http://www.foobar.com:3500/basic_auth?request=1', {
           auth: {
             username: 'cypress',
             password: 'password123',
@@ -275,7 +275,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
           return new Cypress.Promise(((resolve, reject) => {
             const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/basic_auth')
+            xhr.open('GET', '/basic_auth?request=2')
             xhr.onload = function () {
               try {
                 expect(this.responseText).to.include('basic auth worked')
@@ -296,7 +296,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
         cy.visit('/fixtures/multi-domain.html')
 
         cy.window().then((win) => {
-          win.location.href = 'http://www.foobar.com:3500/basic_auth'
+          win.location.href = 'http://www.foobar.com:3500/basic_auth?request=3'
         })
       })
 
@@ -308,7 +308,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
       // attaches the auth options for the foobar domain from the top-level
       cy.window().then((win) => {
-        win.location.href = 'http://www.foobar.com:3500/basic_auth'
+        win.location.href = 'http://www.foobar.com:3500/basic_auth?request=4'
       })
 
       cy.switchToDomain('http://foobar.com:3500', () => {
