@@ -77,7 +77,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
       this.server.once('error', onError)
 
-      graphqlWS(this.server, `${socketIoRoute}-graphql`)
+      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
 
       return this._listen(port, (err) => {
         // if the server bombs before starting
