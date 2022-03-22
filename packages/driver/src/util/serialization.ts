@@ -47,8 +47,21 @@ const convertObjectToSerializableLiteral = (obj): typeof obj => {
     const props = Object.getOwnPropertyNames(currentObjectRef)
 
     props.forEach((prop: string) => {
-      if (!allProps.includes(prop) && isSerializableInCurrentBrowser(currentObjectRef[prop])) {
-        allProps.push(prop)
+      try {
+        if (!allProps.includes(prop) && isSerializableInCurrentBrowser(currentObjectRef[prop])) {
+          allProps.push(prop)
+        }
+      } catch (err) {
+      /**
+       * In some browsers, properties of objects on the prototype chain point to the implementation object.
+       * Depending on implementation constraints, these properties may throw an error when accessed.
+       *
+       * ex: DOMException's prototype is Error, and calling the 'name' getter on DOMException's prototype
+       * throws a TypeError since Error does not implement the DOMException interface.
+       */
+        if (err?.name !== 'TypeError') {
+          throw err
+        }
       }
     })
 

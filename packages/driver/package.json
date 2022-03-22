@@ -46,6 +46,7 @@
     "chokidar-cli": "2.1.0",
     "clone": "2.1.2",
     "compression": "1.7.4",
+    "cookie-parser": "1.4.5",
     "core-js-pure": "3.21.0",
     "cors": "2.8.5",
     "cypress-multi-reporters": "1.4.0",

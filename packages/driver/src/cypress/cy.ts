@@ -936,9 +936,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             // TODO: handle no longer error when ended early
             cy.doneEarly()
 
-            // if using multi-domain, unbind any listeners waiting for a done() callback to come from cross domain
-            // @ts-ignore
-            Cypress.multiDomainCommunicator.emit('unbind:done:called')
             originalDone(err)
 
             // return null else we there are situations

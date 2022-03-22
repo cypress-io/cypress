@@ -1,18 +1,20 @@
 import _ from 'lodash'
 import charset from 'charset'
 import type { CookieOptions } from 'express'
-import { cors, concatStream, httpUtils } from '@packages/network'
+import { cors, concatStream, httpUtils, uri } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
-import type { HttpMiddleware } from '.'
+import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
+import { URL } from 'url'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
-export type ResponseMiddleware = HttpMiddleware<{
+interface ResponseMiddlewareProps {
   /**
    * Before using `res.incomingResStream`, `prepareResStream` can be used
    * to remove any encoding that prevents it from being returned as plain text.
@@ -23,7 +25,9 @@ export type ResponseMiddleware = HttpMiddleware<{
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
-}>
+}
+
+export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
 
 const debug = debugModule('cypress:proxy:http:response-middleware')
 
@@ -393,11 +397,89 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const determineIfNeedsMultiDomainHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+  const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
+
+  // A cookie needs multi-domain handling if it's an AUT request and
+  // either the request itself is cross-origin or the origins between
+  // requests don't match, since the browser won't set them in that
+  // case and if it's secondary-domain -> primary-domain, we don't
+  // recognize the request as cross-origin
+  return (
+    !!ctx.req.isAUTFrame &&
+    (
+      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
+      || !reqMatchesOriginPolicy(ctx.req, ctx.getRemoteState())
+    )
+  )
+}
+
+interface EnsureSameSiteNoneProps {
+  cookie: string
+  browser: Browser | { family: string | null }
+  isLocalhost: boolean
+  url: URL
+}
+
+const cookieSameSiteRegex = /SameSite=(\w+)/i
+const cookieSecureRegex = /Secure/i
+const cookieSecureSemicolonRegex = /;\s*Secure/i
+
+const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSiteNoneProps) => {
+  debug('original cookie: %s', cookie)
+
+  if (cookieSameSiteRegex.test(cookie)) {
+    debug('change cookie to SameSite=None')
+    cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
+  } else {
+    debug('add SameSite=None to cookie')
+    cookie += '; SameSite=None'
+  }
+
+  const isFirefox = browser.family === 'firefox'
+
+  // Secure is required for SameSite=None cookies to be set in secure contexts
+  // (https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy),
+  // but will not allow the cookie to be set in an insecure context.
+  // Normally http://localhost is considered a secure context (see
+  // https://w3c.github.io/webappsec-secure-contexts/#localhost), but Firefox
+  // does not consider the Cypress-launched browser to be a secure context (see
+  // https://github.com/cypress-io/cypress/issues/18217). For that reason, we
+  // remove Secure from http://localhost cookies in Firefox.
+  if (cookieSecureRegex.test(cookie)) {
+    if (isFirefox && isLocalhost && url.protocol === 'http:') {
+      debug('remove Secure from cookie')
+      cookie = cookie.replace(cookieSecureSemicolonRegex, '')
+    }
+  } else if (!isFirefox || url.protocol === 'https:') {
+    debug('add Secure to cookie')
+    cookie += '; Secure'
+  }
+
+  debug('resulting cookie: %s', cookie)
+
+  return cookie
+}
+
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (cookies) {
-    ([] as string[]).concat(cookies).forEach((cookie) => {
+    const needsMultiDomainHandling = (
+      this.config.experimentalMultiDomain
+      && determineIfNeedsMultiDomainHandling(this)
+    )
+    const browser = this.getCurrentBrowser() || { family: null }
+    const url = new URL(this.req.proxiedUrl)
+    const isLocalhost = uri.isLocalhost(url)
+
+    debug('force SameSite=None?', needsMultiDomainHandling)
+
+    ;([] as string[]).concat(cookies).forEach((cookie) => {
+      if (needsMultiDomainHandling) {
+        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url })
+      }
+
       try {
         this.res.append('Set-Cookie', cookie)
       } catch (err) {
@@ -513,6 +595,12 @@ const GzipBody: ResponseMiddleware = function () {
 }
 
 const SendResponseBodyToClient: ResponseMiddleware = function () {
+  if (this.req.isAUTFrame) {
+    // track the previous AUT request URL so we know if the next requests
+    // is cross-origin
+    this.setPreviousAUTRequestUrl(this.req.proxiedUrl)
+  }
+
   this.incomingResStream.pipe(this.res).on('error', this.onError)
   this.res.on('end', () => this.end())
 }

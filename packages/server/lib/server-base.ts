@@ -246,7 +246,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         this._resetRemoteState()
       }
 
-      this.createNetworkProxy(config, getRemoteState, getOriginStack, shouldCorrelatePreRequests)
+      this.createNetworkProxy({ config, getCurrentBrowser, getRemoteState, getOriginStack, shouldCorrelatePreRequests })
 
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
@@ -337,7 +337,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState, getOriginStack, shouldCorrelatePreRequests) {
+  createNetworkProxy ({ config, getCurrentBrowser, getRemoteState, getOriginStack, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -347,6 +347,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy = new NetworkProxy({
       config,
       shouldCorrelatePreRequests,
+      getCurrentBrowser,
       getRemoteState,
       getOriginStack,
       getFileServerToken,

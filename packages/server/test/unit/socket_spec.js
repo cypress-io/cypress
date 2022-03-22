@@ -47,6 +47,7 @@ describe('lib/socket', () => {
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(() => {
         this.options = {
@@ -597,6 +598,7 @@ describe('lib/socket', () => {
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
