@@ -15,7 +15,8 @@
 
 // types for the `server` package
 export namespace CyServer {
-  export type getRemoteState = (forUrl?: string) => Cypress.RemoteState
+  export type getRemoteState = () => Cypress.RemoteState
+  export type getRemoteStateFor = (url: string) => Cypress.RemoteState | undefined
   export type resetRemoteState = () => void
   export type getOriginStack = () =>  string[]
 

@@ -62,6 +62,7 @@ export type ServerCtx = Readonly<{
   getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getRemoteStateFor: CyServer.getRemoteStateFor
   getOriginStack: CyServer.getOriginStack
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
@@ -203,6 +204,7 @@ export class Http {
   getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getRemoteStateFor: CyServer.getRemoteStateFor
   getOriginStack: CyServer.getOriginStack
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
@@ -222,6 +224,7 @@ export class Http {
     this.getCurrentBrowser = opts.getCurrentBrowser
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
+    this.getRemoteStateFor = opts.getRemoteStateFor
     this.getOriginStack = opts.getOriginStack
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
@@ -244,6 +247,7 @@ export class Http {
       getCurrentBrowser: this.getCurrentBrowser,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
+      getRemoteStateFor: this.getRemoteStateFor,
       getOriginStack: this.getOriginStack,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),

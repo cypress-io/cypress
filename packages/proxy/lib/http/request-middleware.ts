@@ -142,9 +142,9 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   // get the remote state for the proxied url
-  const remoteState = this.getRemoteState(this.req.proxiedUrl)
+  const remoteState = this.getRemoteStateFor(this.req.proxiedUrl)
 
-  if (remoteState.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
+  if (remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
     const { auth } = remoteState
     const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 
