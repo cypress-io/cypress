@@ -262,7 +262,6 @@ describe('Server', () => {
               auth: undefined,
               origin: 'http://localhost:2000',
               strategy: 'file',
-              visiting: false,
               domainName: 'localhost',
               fileServer: this.fileServer,
               props: null,
@@ -587,7 +586,6 @@ describe('Server', () => {
               auth: undefined,
               origin: 'http://espn.go.com',
               strategy: 'http',
-              visiting: false,
               domainName: 'go.com',
               fileServer: null,
               props: {
@@ -896,7 +894,6 @@ describe('Server', () => {
             auth,
             origin: 'http://google.com',
             strategy: 'http',
-            visiting: false,
             domainName: 'google.com',
             fileServer: null,
             props: {
@@ -920,7 +917,6 @@ describe('Server', () => {
           props: null,
           origin: 'http://localhost:2000',
           strategy: 'file',
-          visiting: undefined,
           domainName: 'localhost',
           fileServer: this.fileServer,
         })
@@ -951,7 +947,6 @@ describe('Server', () => {
             props: null,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
           })
@@ -1022,7 +1017,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'http://www.google.com',
             strategy: 'http',
-            visiting: false,
             domainName: 'google.com',
             fileServer: null,
             props: {
@@ -1057,7 +1051,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1104,7 +1097,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'http://www.google.com',
             strategy: 'http',
-            visiting: false,
             domainName: 'google.com',
             fileServer: null,
             props: {
@@ -1143,7 +1135,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1177,7 +1168,6 @@ describe('Server', () => {
               auth: undefined,
               origin: 'http://www.google.com',
               strategy: 'http',
-              visiting: false,
               domainName: 'google.com',
               fileServer: null,
               props: {
@@ -1221,7 +1211,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'https://www.foobar.com:8443',
             strategy: 'http',
-            visiting: false,
             domainName: 'foobar.com',
             fileServer: null,
             props: {
@@ -1260,7 +1249,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1294,7 +1282,6 @@ describe('Server', () => {
               auth: undefined,
               origin: 'https://www.foobar.com:8443',
               strategy: 'http',
-              visiting: false,
               fileServer: null,
               domainName: 'foobar.com',
               props: {
@@ -1346,7 +1333,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'https://s3.amazonaws.com',
             strategy: 'http',
-            visiting: false,
             domainName: 's3.amazonaws.com',
             fileServer: null,
             props: {
@@ -1385,7 +1371,6 @@ describe('Server', () => {
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1425,7 +1410,6 @@ describe('Server', () => {
               auth: undefined,
               origin: 'https://s3.amazonaws.com',
               strategy: 'http',
-              visiting: false,
               fileServer: null,
               domainName: 's3.amazonaws.com',
               props: {

@@ -564,13 +564,13 @@ describe('lib/socket', () => {
 
     context('on(ready:for:domain)', () => {
       it('emits ready:for:domain on local bus', function (done) {
-        this.server.socket.localBus.once('ready:for:domain', (arg) => {
-          expect(arg).to.deep.equal({ shouldInject: true })
+        this.server.socket.localBus.once('ready:for:domain', (originPolicy) => {
+          expect(originPolicy).to.equal('http://foobar.com')
 
           done()
         })
 
-        this.client.emit('backend:request', 'ready:for:domain', { shouldInject: true }, () => {})
+        this.client.emit('backend:request', 'ready:for:domain', 'http://foobar.com', () => {})
       })
     })
   })

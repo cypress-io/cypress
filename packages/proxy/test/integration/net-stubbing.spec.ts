@@ -39,6 +39,7 @@ context('network stubbing', () => {
       config,
       middleware: defaultMiddleware,
       getRemoteState: () => remoteState,
+      getOriginStack: () => [],
       getFileServerToken: () => 'fake-token',
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),

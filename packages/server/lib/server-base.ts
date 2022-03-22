@@ -503,7 +503,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       strategy: this._remoteStrategy,
       domainName: this._remoteDomainName,
       fileServer: this._remoteFileServer,
-      isMultiDomain: false,
     }) as Cypress.RemoteState
 
     debug('Getting remote state: %o', props)
@@ -523,7 +522,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       strategy: 'http',
       domainName: cors.getDomainNameFromParsedHost(remoteProps),
       fileServer: null,
-      isMultiDomain: true,
     } as Cypress.RemoteState
 
     this._remoteStates.set(remoteOriginPolicy, secondaryState)

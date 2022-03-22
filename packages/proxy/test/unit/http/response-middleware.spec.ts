@@ -221,7 +221,7 @@ describe('http/response-middleware', function () {
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
-      expect(ctx.res.wantsInjection).to.be.undefined
+      expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
 
       return promise
     })
@@ -353,6 +353,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
+        originStack: ['http://foobar.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -468,6 +469,9 @@ describe('http/response-middleware', function () {
             },
           }
         },
+        getOriginStack () {
+          return ['http://127.0.0.1:3501'].concat(props.originStack)
+        },
         debug: (formatter, ...args) => {
           debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
         },
@@ -479,33 +483,3 @@ describe('http/response-middleware', function () {
     }
   })
 })
-
-// beforeEach(function () {
-//   ctx = {
-//     req: {
-//       proxiedUrl: 'http://proxy.com',
-//       cookies: {
-//         '__cypress.initial': true,
-//       },
-//       headers: {
-//         accept: ['text/html', 'application/xhtml+xml'],
-//       },
-//     },
-//     res: {
-//       setHeader: sinon.stub(),
-//     },
-//     getRemoteState: () => {
-//       return {
-//         strategy: 'http',
-//         props: {
-//           domain: 'proxy',
-//           port: '80',
-//           tld: 'com',
-//         },
-//       }
-//     },
-//     getRenderedHTMLOrigins: () => {
-//       return {}
-//     },
-//   }
-// })
