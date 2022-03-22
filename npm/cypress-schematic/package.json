@@ -29,7 +29,7 @@
     "@angular-devkit/schematics-cli": "^12.2.10",
     "@angular/cli": "^12",
     "@types/chai-enzyme": "0.6.7",
-    "@types/mocha": "^8.0.3",
+    "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
     "chai": "4.2.0",
     "cypress": "0.0.0-development",
