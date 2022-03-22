@@ -52,7 +52,7 @@ export function testUrqlClient (context: ClientTestContext,
                 if (firstMutation.kind === 'OperationDefinition') {
                   const mutationName = firstMutation.name?.value
 
-                  let mutationResolver = mutationResolvers.get(mutationName || '')
+                  let mutationResolver = mutationName && mutationResolvers.get(mutationName)
 
                   if (mutationResolver) {
                     const val = mutationResolver((conf: any) => (conf), result.operation.variables)
