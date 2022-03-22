@@ -29,6 +29,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // ahead because we're anticipating multi-domain
     // @ts-ignore
     cy.isAnticipatingMultiDomainFor(request.href)
+
+    // If we haven't seen a switchToDomain and cleared the timeout within 300ms,
+    // go ahead and inform the server 'ready:for:domain' failed and to release the
+    // response. This typically happens during a redirect where the user does
+    // not have a switchToDomain for the intermediary domain.
+    timeoutId = setTimeout(() => {
+      Cypress.backend('ready:for:domain:failed')
+    }, 300)
   })
 
   Commands.addAll({

@@ -173,6 +173,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         this._eventBus.emit('ready:for:domain')
       })
 
+      this.socket.localBus.once('ready:for:domain:failed', () => {
+        this._eventBus.emit('ready:for:domain:failed')
+      })
+
       this.socket.toDriver('cross:domain:delaying:html', request)
     })
 

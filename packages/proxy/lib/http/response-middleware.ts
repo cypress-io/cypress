@@ -242,7 +242,7 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
 
     // if we failed to create the spec bridge, just end this response
     this.serverBus.once('ready:for:domain:failed', () => {
-      this.end()
+      this.next()
     })
 
     this.serverBus.once('ready:for:domain', () => {
@@ -409,7 +409,7 @@ const determineIfNeedsMultiDomainHandling = (ctx: HttpMiddlewareThis<ResponseMid
     !!ctx.req.isAUTFrame &&
     (
       (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
-      || !reqMatchesOriginPolicy(ctx.req, ctx.getRemoteState())
+      || !cors.urlOriginsMatch(ctx.getOriginStack()[0], ctx.req.proxiedUrl)
     )
   )
 }
