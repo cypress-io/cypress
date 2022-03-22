@@ -32,7 +32,8 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
 
   const _header = () => (
     <>
-      <span className='runnable-title'>{model.displayTitle}</span>
+      <span className='runnable-title-line-block' style={{ width: indent(model.level) }} />
+      <span className='runnable-title'>{model.title}</span>
       <span className='runnable-controls'>
         <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
           <a onClick={_launchStudio} className='runnable-controls-studio'>
@@ -63,13 +64,13 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
         >
           <ul className='test-runnables'>
             {_.map(model.tests, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-            {/* {_.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />)} */}
+            {_.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
           </ul>
         </Collapsible>
       )}
-      <ul className='runnables'>
-        { _.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />) }
-      </ul>
+      { _.map(model.suites, (runnable) => <Runnable key={runnable.id} model={runnable} />) }
+      {/* <ul className='runnables'>
+      </ul> */}
     </>
   )
 })

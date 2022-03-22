@@ -156,7 +156,8 @@ class Test extends Component<TestProps> {
         containerRef={this.containerRef}
         header={this._header()}
         headerClass='runnable-wrapper'
-        headerStyle={{ paddingLeft: model.level === 0 ? 5 : 16 }}
+        headerStyle={{ paddingLeft: 5 }}
+        // headerStyle={{ paddingLeft: model.level === 0 ? 5 : 16 }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
       >
@@ -172,6 +173,7 @@ class Test extends Component<TestProps> {
       <StateIcon aria-hidden className="runnable-state-icon" state={model.state} />
       {/* <StateIcon aria-hidden className="runnable-state-icon" state={model.state} isStudio={appState.studioActive} /> */}
       <span className='runnable-title'>
+        <span className='runnable-title-line-block' style={{ width: indent(model.level) }} />
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
       </span>

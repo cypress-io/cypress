@@ -58,4 +58,41 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
   )
 })
 
-export default Suite
+export interface RunnableProps {
+  model: TestModel | SuiteModel
+  appState: AppState
+}
+
+// NOTE: some of the driver tests dig into the React instance for this component
+// in order to mess with its internal state. converting it to a functional
+// component breaks that, so it needs to stay a Class-based component or
+// else the driver tests need to be refactored to support it being functional
+@observer
+class Runnable extends Component<RunnableProps> {
+  static defaultProps = {
+    appState,
+  }
+
+  render () {
+    const {
+      // appState,
+      model,
+    } = this.props
+
+    return (
+      <li
+        className={cs(`${model.type} runnable runnable-${model.state}`, {
+          'runnable-retried': model.hasRetried,
+          // 'runnable-studio': appState.studioActive,
+        })}
+        data-model-state={model.state}
+      >
+        {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+      </li>
+    )
+  }
+}
+
+export { Suite }
+
+export default Runnable
