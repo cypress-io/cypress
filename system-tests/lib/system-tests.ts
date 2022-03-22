@@ -5,6 +5,8 @@ import stream from 'stream'
 import { expect } from './spec_helper'
 import { dockerSpawner } from './docker'
 import Express from 'express'
+import Fixtures from './fixtures'
+import * as DepInstaller from './dep-installer'
 
 const isCi = require('is-ci')
 
@@ -19,7 +21,6 @@ const morgan = require('morgan')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
-const Fixtures = require('./fixtures')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -715,10 +716,6 @@ const systemTests = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
-      // // after installing node modules copying all of the fixtures
-      // // can take a long time (5-15 secs)
-      // this.timeout(human('2 minutes'))
-
       Fixtures.remove()
 
       sinon.stub(process, 'exit')
@@ -942,9 +939,9 @@ const systemTests = {
 
     if (!options.skipScaffold) {
       // symlinks won't work via docker
-      options.dockerImage || await Fixtures.scaffoldCommonNodeModules()
-      await Fixtures.scaffoldProject(options.project)
-      await Fixtures.scaffoldProjectNodeModules(options.project)
+      options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
+      Fixtures.scaffoldProject(options.project)
+      await DepInstaller.scaffoldProjectNodeModules(options.project)
     }
 
     if (process.env.NO_EXIT) {

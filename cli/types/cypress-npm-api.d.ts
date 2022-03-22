@@ -114,7 +114,7 @@ declare namespace CypressCommandLine {
    */
   interface CypressOpenOptions extends CypressCommonOptions {
     /**
-    * Specify browser to run tests in, either by name or by filesystem path
+     * Specify browser to run tests in, either by name or by filesystem path
      */
     browser: string
     /**

@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
+import { scaffoldCommonNodeModules } from '@tooling/system-tests/lib/dep-installer'
 
 describe('e2e readonly fs', function () {
   systemTests.setup()
@@ -23,8 +24,8 @@ describe('e2e readonly fs', function () {
   }
 
   const onRun = async (exec) => {
-    await Fixtures.scaffoldProject('read-only-project-root')
-    await Fixtures.scaffoldCommonNodeModules()
+    Fixtures.scaffoldProject('read-only-project-root')
+    await scaffoldCommonNodeModules()
     chmodr(projectPath, 0o500)
 
     await exec()

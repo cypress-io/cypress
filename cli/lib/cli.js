@@ -271,7 +271,7 @@ const addCypressOpenCommand = (program) => {
   .command('open')
   .usage('[options]')
   .description('Opens Cypress in the interactive GUI.')
-  .option('-b, --browser <browser-path>', text('browser'))
+  .option('-b, --browser <browser-path>', text('browserOpenMode'))
   .option('--component', text('component'))
   .option('-c, --config <config>', text('config'))
   .option('-C, --config-file <config-file>', text('configFile'))
@@ -494,6 +494,7 @@ module.exports = {
 
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 
