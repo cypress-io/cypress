@@ -66,6 +66,7 @@ interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
   scaffoldCommonNodeModules(): Promise<void>
+  scaffoldProjectNodeModules(project: string): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -116,6 +117,8 @@ async function makeE2ETasks () {
     await Fixtures.scaffoldProject(projectName)
 
     await Fixtures.scaffoldCommonNodeModules()
+
+    await Fixtures.scaffoldProjectNodeModules(projectName)
 
     scaffoldedProjects.add(projectName)
 
