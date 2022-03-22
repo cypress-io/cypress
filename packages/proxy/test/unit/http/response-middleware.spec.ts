@@ -250,6 +250,9 @@ describe('http/response-middleware', function () {
             strategy: 'foo',
           }
         },
+        getOriginStack () {
+          return ['http://127.0.0.1:3501']
+        },
         debug () {},
         onError (error) {
           throw error
