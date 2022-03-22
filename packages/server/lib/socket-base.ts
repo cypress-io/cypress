@@ -417,7 +417,7 @@ export class SocketBase {
             case 'ready:for:domain':
               return this.localBus.emit('ready:for:domain', args[0])
             case 'ready:for:domain:failed':
-              return this.localBus.emit('ready:for:domain:failed', args[0])
+              return this.localBus.emit('ready:for:domain:failed')
             case 'cross:origin:finished':
               return this.localBus.emit('cross:origin:finished', args[0])
             default:

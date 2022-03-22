@@ -66,7 +66,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const validator = new Validator({
         log,
         onFailure: () => {
-          Cypress.backend('ready:for:domain', location.originPolicy)
+          Cypress.backend('ready:for:domain:failed')
         },
       })
 

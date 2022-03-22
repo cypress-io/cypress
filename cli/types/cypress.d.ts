@@ -68,7 +68,7 @@ declare namespace Cypress {
      */
     (task: 'firefox:force:gc'): Promise<void>
     (task: 'ready:for:domain', originPolicy: string): boolean
-    (task: 'ready:for:domain:failed', originPolicy: string): boolean
+    (task: 'ready:for:domain:failed'): boolean
     (task: 'cross:origin:finished', originPolicy: string): boolean
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
