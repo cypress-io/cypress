@@ -82,9 +82,16 @@ export const mutation = mutationType({
       type: 'Boolean',
       args: {
         url: nonNull(stringArg()),
+        includeGraphqlPort: booleanArg(),
       },
       resolve: (_, args, ctx) => {
-        ctx.actions.electron.openExternal(args.url)
+        let url = args.url
+
+        if (args.includeGraphqlPort && process.env.CYPRESS_INTERNAL_GRAPHQL_PORT) {
+          url = `${args.url}?port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`
+        }
+
+        ctx.actions.electron.openExternal(url)
 
         return true
       },

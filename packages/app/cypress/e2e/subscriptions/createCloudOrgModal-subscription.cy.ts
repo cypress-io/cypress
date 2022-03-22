@@ -14,7 +14,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
 
       cy.loginUser()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
+
+      cy.intercept('mutation-ExternalLink_OpenExternal').as('OpenExternal')
 
       cy.remoteGraphQLIntercept(async (obj) => {
         if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer') && obj.callCount < 2) {
@@ -32,6 +34,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[aria-modal="true"]').should('exist')
 
       cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
+
+      cy.wait('@OpenExternal')
+      .its('request.body.variables.includeGraphqlPort')
+      .should('equal', true)
+
       cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
       cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
 

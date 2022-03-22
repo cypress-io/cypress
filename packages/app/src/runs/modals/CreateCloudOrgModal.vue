@@ -14,6 +14,7 @@
           class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
           :href="createOrgUrl"
           :prefix-icon="OrganizationIcon"
+          :include-graphql-port="true"
           prefix-icon-class="icon-light-transparent icon-dark-white"
         >
           {{ t('runs.connect.modal.createOrg.button') }}

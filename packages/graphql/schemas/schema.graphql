@@ -1001,7 +1001,7 @@ type Mutation {
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
-  openExternal(url: String!): Boolean
+  openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
 
   """Open a file on specified line and column in preferred IDE"""
   openFileInIDE(input: FileDetailsInput!): Boolean
