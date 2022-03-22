@@ -148,8 +148,10 @@ To support selecting specific paths while keeping Tailwind's incredibly helpful 
 
 ### Accessibility
 We consider accessibility a core part of front-end code quality. When possible, components should be built out using standard semantic HTML elements. If there are no plain HTML solutions for a particular interaction, we can reach for a library (like HeadlessUI above) that implements known patterns in an accessible way. In rare cases we will augment our HTML with ARIA roles. Tests should use the accessible name or label for interactive elements as described in the [testing guide](../../guides/testing-strategy-and-styleguide.md).
+
 #### The Accessibility Tree
 The [Accessibility Tree](https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree) available in your browser's dev tools will show how the nature, structure, and labelling of the elements in the DOM is presented to assistive technology. We can use this to explore the accessibility of our components, especially when creating or reviewing more complex UI interactions, to make sure the content that appears there makes sense.
+
 ### GraphQL in Vue Components
 [GraphQL](https://graphql.org/) is the main source of data and state from the server in the app and launchpad. In their `<script>` block, Vue components describe the data they will receive in Queries or Fragments, as well as the Mutations they will trigger, which can set data on the server or trigger side effects like launching a project and opening the the user's browser.
 
