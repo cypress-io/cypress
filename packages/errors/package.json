@@ -25,7 +25,7 @@
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",
-    "@types/mocha": "8.2.2",
+    "@types/mocha": "^8.0.3",
     "@types/node": "14.14.31",
     "@types/pixelmatch": "^5.2.4",
     "@types/pngjs": "^6.0.1",
