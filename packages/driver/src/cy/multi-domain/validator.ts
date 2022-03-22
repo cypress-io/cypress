@@ -1,6 +1,6 @@
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { isObject, isString } from 'lodash'
+import { isPlainObject, isString } from 'lodash'
 
 export class Validator {
   log: Cypress.Log
@@ -21,7 +21,7 @@ export class Validator {
       })
     }
 
-    if (options && (!isObject(options) || Array.isArray(options))) {
+    if (options && !isPlainObject(options)) {
       this.onFailure()
 
       $errUtils.throwErrByPath('switchToDomain.invalid_options_argument', {
