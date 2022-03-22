@@ -137,6 +137,8 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
     },
     onUnload (e) {
+      cy.state('window', undefined)
+      cy.state('document', undefined)
       // We only need to listen to this if we've started an unload event and the load happens in another spec bridge.
       Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
 
