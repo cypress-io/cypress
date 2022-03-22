@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
+import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
 import type { BreakingOption, BreakingOptionErrorKey } from './options'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
@@ -32,7 +32,7 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 

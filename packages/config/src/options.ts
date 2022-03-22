@@ -519,6 +519,13 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...runtimeOptions,
 ]
 
+export const additionalOptionsToResolveConfig = [
+  {
+    name: 'specPattern',
+    isInternal: false,
+  },
+]
+
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
