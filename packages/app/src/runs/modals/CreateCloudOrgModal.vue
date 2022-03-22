@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
@@ -103,13 +103,19 @@ const refetch = useDebounceFn(() => query.executeQuery(), 1000)
 
 const waitingOrgToBeCreated = ref(false)
 
+let timer
+
 function startWaitingOrgToBeCreated () {
   waitingOrgToBeCreated.value = true
 
-  setTimeout(() => {
+  timer = setTimeout(() => {
     waitingOrgToBeCreated.value = false
   }, 60000)
 }
+
+onBeforeUnmount(() => {
+  window.clearTimeout(timer)
+})
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
 </script>
