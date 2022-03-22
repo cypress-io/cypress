@@ -249,10 +249,6 @@ export function updateWithPluginValues (cfg, overrides) {
   configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
     let configFile = getCtx().lifecycleManager.configFile
 
-    if (configFile === false) {
-      configFile = '--config file set to "false" via CLI--'
-    }
-
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
     }

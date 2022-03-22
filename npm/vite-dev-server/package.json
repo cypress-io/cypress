@@ -9,8 +9,8 @@
     "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "cy:run-signature": "yarn cy:run --config=\"{\\\"pluginsFile\\\":\\\"cypress/new-signature/plugins.js\\\"}\"",
-    "test": "yarn cy:run && yarn cy:run-signature",
+    "cy:run-legacy": "yarn cy:run --config-file ./cypress.config.legacy.ts",
+    "test": "yarn cy:run && yarn cy:run-legacy",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -31,7 +31,7 @@
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
     "react": "17.0.2",
-    "vite": "2.8.4",
+    "vite": "2.9.0-beta.3",
     "vite-plugin-inspect": "0.4.3",
     "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0"

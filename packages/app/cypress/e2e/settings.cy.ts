@@ -104,6 +104,13 @@ describe('App: Settings', () => {
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('2 Matches')
       cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
+
+      cy.get('[data-cy="settings-specPatterns"').within(() => {
+        cy.validateExternalLink({
+          name: 'Learn more.',
+          href: 'https://on.cypress.io/test-type-options',
+        })
+      })
     })
 
     it('shows the Spec Patterns section (edited specPattern value)', () => {
@@ -125,10 +132,53 @@ describe('App: Settings', () => {
       cy.findByText('Settings').click()
       cy.findByText('Project Settings').click()
       cy.get('[data-cy="settings-experiments"]').within(() => {
-        cy.get('[data-cy="experiment-experimentalFetchPolyfill"]')
-        cy.get('[data-cy="experiment-experimentalInteractiveRunEvents"]')
-        cy.get('[data-cy="experiment-experimentalSessionSupport"]')
-        cy.get('[data-cy="experiment-experimentalSourceRewriting"]')
+        cy.validateExternalLink({
+          name: 'Learn more.',
+          href: 'https://on.cypress.io/experiments',
+        })
+
+        cy.get('[data-cy="experiment-experimentalFetchPolyfill"]').within(() => {
+          cy.validateExternalLink({
+            name: 'cy.intercept()',
+            href: 'https://on.cypress.io/intercept',
+          })
+        })
+
+        cy.get('[data-cy="experiment-experimentalInteractiveRunEvents"]').within(() => {
+          cy.validateExternalLink({
+            name: 'before:run',
+            href: 'https://on.cypress.io/before-run',
+          })
+
+          cy.validateExternalLink({
+            name: 'after:run',
+            href: 'https://on.cypress.io/after-run',
+          })
+
+          cy.validateExternalLink({
+            name: 'before:spec',
+            href: 'https://on.cypress.io/before-spec',
+          })
+
+          cy.validateExternalLink({
+            name: 'after:spec',
+            href: 'https://on.cypress.io/after-spec',
+          })
+        })
+
+        cy.get('[data-cy="experiment-experimentalSessionSupport"]').within(() => {
+          cy.validateExternalLink({
+            name: 'cy.session()',
+            href: 'https://on.cypress.io/session',
+          })
+        })
+
+        cy.get('[data-cy="experiment-experimentalSourceRewriting"]').within(() => {
+          cy.validateExternalLink({
+            name: '#5273',
+            href: 'https://github.com/cypress-io/cypress/issues/5273',
+          })
+        })
       })
     })
 
@@ -162,7 +212,6 @@ describe('App: Settings', () => {
         cy.get('.bg-teal-100').contains('specFilePattern')
         cy.get('.bg-teal-100').contains('supportFile')
         cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
-        cy.get('.bg-yellow-100').contains('KONFIG_ENV')
         cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
         cy.get('.bg-yellow-100').contains('INTERNAL_GRAPHQL_PORT')
         cy.get('.bg-red-50').contains('4455')

@@ -3,14 +3,18 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "componentFolder",
   "testFiles",
   "blacklistHosts",
+  "componentFolder",
   "experimentalComponentTesting",
   "experimentalGetCookiesSameSite",
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
   "experimentalShadowDomSupport",
+  "experimentalStudio",
   "firefoxGcInterval",
   "nodeVersion",
-  "nodeVersion"
+  "nodeVersion",
+  "pluginsFile",
+  "testFiles"
 ]
 
 exports['src/index .getDefaultValues returns list of public config keys 1'] = {
@@ -42,7 +46,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "modifyObstructiveCode": true,
   "numTestsKeptInMemory": 50,
   "pageLoadTimeout": 60000,
-  "pluginsFile": "cypress/plugins",
   "port": null,
   "projectId": null,
   "redirectionLimit": 20,
@@ -85,8 +88,8 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "namespace": "__cypress",
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
-  "socketIoCookie": "__socket.io",
-  "socketIoRoute": "/__socket.io",
+  "socketIoCookie": "__socket",
+  "socketIoRoute": "/__socket",
   "xhrRoute": "/xhrs/"
 }
 
@@ -118,7 +121,6 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "numTestsKeptInMemory",
   "platform",
   "pageLoadTimeout",
-  "pluginsFile",
   "port",
   "projectId",
   "redirectionLimit",

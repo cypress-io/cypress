@@ -5,7 +5,7 @@ export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
   logIn(onMessage: (message: AuthStateShape) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
-  resetAuthState(): Promise<void>
+  resetAuthState(): void
 }
 
 export class AuthActions {
@@ -44,17 +44,62 @@ export class AuthActions {
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn((authState) => {
+    const loginPromise = new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
+      // A resolver is exposed to the instance so that we can
+      // resolve this promise and the original mutation promise
+      // if a reset occurs
       this.ctx.update((coreData) => {
-        coreData.authState = authState
+        coreData.cancelActiveLogin = () => resolve(null)
       })
-    }))
+
+      this.authApi.logIn((authState) => {
+        this.ctx.update((coreData) => {
+          coreData.authState = authState
+        })
+
+        // Ensure auth state changes during the login lifecycle
+        // are propagated to the clients
+        this.ctx.emitter.authChange()
+      }).then(resolve, reject)
+    })
+
+    const user = await loginPromise
+
+    if (!user) {
+      // if the user is null, this promise is resolving due to a
+      // login mutation cancellation. the state should already
+      // be reset, so abort early.
+      return
+    }
+
+    this.setAuthenticatedUser(user as AuthenticatedUserShape)
+
+    this.ctx.update((coreData) => {
+      coreData.cancelActiveLogin = null
+    })
+
+    this.resetAuthState()
   }
 
   resetAuthState () {
+    // closes the express server opened during login, if it's still open
+    this.authApi.resetAuthState()
+
+    // if a login mutation is still in progress, we
+    // forcefully resolve it so that the mutation does not persist
+    if (this.ctx.coreData.cancelActiveLogin) {
+      this.ctx.coreData.cancelActiveLogin()
+
+      this.ctx.update((coreData) => {
+        coreData.cancelActiveLogin = null
+      })
+    }
+
     this.ctx.update((coreData) => {
       coreData.authState = { browserOpened: false }
     })
+
+    this.ctx.emitter.authChange()
   }
 
   async logout () {
@@ -69,11 +114,14 @@ export class AuthActions {
     } finally {
       this.setAuthenticatedUser(null)
       this.ctx.cloud.reset()
+      this.ctx.emitter.authChange()
     }
   }
 
   private setAuthenticatedUser (authUser: AuthenticatedUserShape | null) {
-    this.ctx.coreData.user = authUser
+    this.ctx.update((coreData) => {
+      coreData.user = authUser
+    })
 
     return this
   }

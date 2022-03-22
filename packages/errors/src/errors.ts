@@ -497,7 +497,7 @@ export const AllCypressErrors = {
         https://on.cypress.io/dashboard`
   },
   // TODO: make this relative path, not absolute
-  NO_PROJECT_ID: (configFilePath: string | false) => {
+  NO_PROJECT_ID: (configFilePath: string) => {
     return errTemplate`Can't find ${fmt.highlight(`projectId`)} in the config file: ${fmt.path(configFilePath || '')}`
   },
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
@@ -646,9 +646,9 @@ export const AllCypressErrors = {
     `
   },
   // TODO: make this relative path, not absolute
-  PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
+  SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
-      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(configFilePath)}
 
       You must pass a valid event name when registering a plugin.
 
@@ -657,6 +657,8 @@ export const AllCypressErrors = {
       The following are valid events:
 
       ${fmt.listItems(validEventNames)}
+
+      Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
 
       ${fmt.stackTrace(err)}
     `
@@ -682,7 +684,7 @@ export const AllCypressErrors = {
   },
   // happens when there is an error in configuration file like "cypress.json"
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
+  CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | null, fileName: string | null, validationMsg: string) => {
     if (!fileType) {
       return errTemplate`
         An invalid configuration value was set:
@@ -696,7 +698,7 @@ export const AllCypressErrors = {
       ${fmt.highlight(validationMsg)}`
   },
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
+  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
     const { key, type, value, list } = validationResult
 
     if (!fileType) {
@@ -783,14 +785,17 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
   },
-  // TODO: verify these are configBaseName and not configPath
-  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
+  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, filesFound: string[]) => {
     return errTemplate`
-      There is both a ${fmt.highlight(configFileBaseName1)} and a ${fmt.highlight(configFileBaseName2)} at the location below:
+      Could not load a Cypress configuration file because there are multiple matches.
+      
+      We've found ${fmt.highlight(filesFound.length)} Cypress configuration files named
+      ${fmt.highlight(filesFound.join(', '))} at the location below:
 
       ${fmt.listItem(projectRoot)}
 
-      Cypress does not know which one to read for config. Please remove one of the two and try again.`
+      Please delete the conflicting configuration files.
+      `
   },
   CONFIG_FILE_NOT_FOUND: (configFileBaseName: string, projectRoot: string) => {
     return errTemplate`\
@@ -1058,6 +1063,12 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.`
   },
+  EXPERIMENTAL_STUDIO_REMOVED: () => {
+    return errTemplate`\
+        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)} and have learned a lot. Stay tuned for updates on Studio's official release in the future. You can leave feedback here: http://on.cypress.io/studio-beta.
+
+        You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
@@ -1208,6 +1219,27 @@ export const AllCypressErrors = {
     `
   },
 
+  PLUGINS_FILE_CONFIG_OPTION_REMOVED: (_errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        setupNodeEvents()
+      },
+      component: {
+        setupNodeEvents()
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight('pluginsFile')} configuration option you have supplied has been replaced with ${fmt.highlightSecondary('setupNodeEvents')}.
+        
+        This new option is not a one-to-one correlation and it must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
+        
+        ${fmt.code(code)}
+        
+        https://on.cypress.io/migration-guide`
+  },
+
   CONFIG_FILE_INVALID_ROOT_CONFIG: (errShape: BreakingErrResult) => {
     const code = errPartial`
       {
@@ -1330,7 +1362,7 @@ export const AllCypressErrors = {
     `
   },
 
-  MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN: ({ name, setupNodeEvents = false }: {name: string, setupNodeEvents?: boolean}, err?: Error) => {
+  RENAMED_TO_SPEC_PATTERN: ({ name, setupNodeEvents = false }: {name: string, setupNodeEvents?: boolean}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced

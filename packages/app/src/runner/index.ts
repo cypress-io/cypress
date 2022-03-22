@@ -191,7 +191,7 @@ export async function teardown () {
  *
  */
 function runSpecCT (spec: SpecFile) {
-  // TODO: figure out how to manage window.config.
+  // TODO: UNIFY-1318 - figure out how to manage window.config.
   const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
@@ -220,7 +220,7 @@ function runSpecCT (spec: SpecFile) {
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
-  autIframe.showInitialBlankContents()
+  autIframe.showInitialBlankContentsCT()
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
@@ -254,7 +254,7 @@ function setSpecForDriver (spec: SpecFile) {
  * initialize Cypress on the AUT.
  */
 function runSpecE2E (spec: SpecFile) {
-  // TODO: manage config with GraphQL, don't put it on window.
+  // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
   const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
@@ -282,7 +282,7 @@ function runSpecE2E (spec: SpecFile) {
 
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
-  autIframe.showInitialBlankContents()
+  autIframe.showInitialBlankContentsE2E()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
@@ -318,7 +318,7 @@ async function initialize () {
 
   const autStore = useAutStore()
 
-  // TODO(lachlan): use GraphQL to get the viewport dimensions
+  // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
   // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
   autStore.updateDimensions(config.viewportWidth, config.viewportHeight)

@@ -170,11 +170,15 @@ Instead the value was:
 `
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
-There is both a cypress.config.js and a cypress.config.ts at the location below:
+Could not load a Cypress configuration file because there are multiple matches.
+
+We've found 2 Cypress configuration files named
+cypress.config.ts, cypress.config.js at the location below:
 
   > /foo/bar/.projects/pristine-with-e2e-testing
 
-Cypress does not know which one to read for config. Please remove one of the two and try again.
+Please delete the conflicting configuration files.
+
 
 `
 
@@ -286,13 +290,28 @@ exports['e2e config throws an error if testFiles is set on the config file 1'] =
 The testFiles configuration option is now invalid when set on the config object in Cypress version 10.0.0.
 
  It is now renamed to specPattern and configured separately as a testing type property: e2e.specPattern and component.specPattern
-
  
 
 {
   e2e: {
     specPattern: '...',
   },
+  component: {
+    specPattern: '...',
+  },
+}
+
+ https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if componentFolder is set on the config file 1'] = `
+The componentFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.
+
+ It is now renamed to specPattern and configured separately as a component testing property: component.specPattern
+ 
+
+{
   component: {
     specPattern: '...',
   },

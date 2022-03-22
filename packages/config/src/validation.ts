@@ -211,7 +211,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     }
 
     for (let j = 0; j < certsForUrl.certs.length; j++) {
-      let certInfo = certsForUrl.certs[j]
+      let certInfo = certsForUrl.certs[j]!
 
       if (!certInfo) {
         continue

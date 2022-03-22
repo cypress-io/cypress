@@ -21,7 +21,7 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Please remove one of the two and try again')
+    cy.get('body').should('contain.text', 'Could not load a Cypress configuration file because there are multiple matches')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')

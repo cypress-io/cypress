@@ -14,6 +14,8 @@ const app = createApp(App)
 
 app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
+  draggable: false,
+  closeOnClick: false,
 })
 
 app.use(createI18n())
