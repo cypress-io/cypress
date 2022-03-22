@@ -211,6 +211,10 @@ export function mergeDefaults (
     throw errors.get(err, ...args)
   })
 
+  // We need to remove the nested propertied by testing type because it has been
+  // flattened/compacted based on the current testing type that is selected
+  // making the config only available with the properties that are valid,
+  // also, having the correct values that can be used in the setupNodeEvents
   delete config['e2e']
   delete config['component']
   delete config['resolved']['e2e']

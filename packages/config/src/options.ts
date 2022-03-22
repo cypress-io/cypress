@@ -506,8 +506,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
+    // Internal config field, useful to ignore the e2e specPattern set by the user
+    // or the default one when looking fot CT, it needs to be a config property because after
+    // having the final config that has the e2e property flattened/compacted
+    // we may not be able to get the value to ignore.
     name: 'additionalIgnorePattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}' : undefined,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -519,6 +523,8 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...runtimeOptions,
 ]
 
+// These properties are going to be added to the resolved properties of the
+// config, but do not mean that are valid config properties coming from the user.
 export const additionalOptionsToResolveConfig = [
   {
     name: 'specPattern',
