@@ -1,10 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-
-function getPathForPlatform (posixPath: string) {
-  if (Cypress.platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
+import { getPathForPlatform } from '../../../src/paths'
 
 describe('specChange subscription', () => {
   beforeEach(() => {
@@ -114,7 +109,7 @@ describe('specChange subscription', () => {
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
 
-        cy.withCtx(async (ctx, o) => {
+        cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `const { devServer } = require('@cypress/react/plugins/load-webpack')
     
@@ -134,7 +129,7 @@ module.exports = {
     supportFile: false,
   },
 }`)
-        }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
+        })
 
         cy.get('[data-cy="spec-item-link"]')
         .should('have.length', 2)
@@ -227,7 +222,7 @@ module.exports = {
         .should('contain', 'dom-content.spec.js')
         .should('contain', 'dom-list.spec.js')
 
-        cy.withCtx(async (ctx, o) => {
+        cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `const { devServer } = require('@cypress/react/plugins/load-webpack')
     
@@ -247,7 +242,7 @@ module.exports = {
     supportFile: false,
   },
 }`)
-        }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
+        })
 
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 2)
@@ -327,7 +322,7 @@ module.exports = {
         cy.get('[data-cy="file-match-indicator"]')
         .should('contain', '4 Matches')
 
-        cy.withCtx(async (ctx, o) => {
+        cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `const { devServer } = require('@cypress/react/plugins/load-webpack')
     
@@ -347,7 +342,7 @@ module.exports = {
     supportFile: false,
   },
 }`)
-        }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
+        })
 
         cy.get('[data-cy="file-match-indicator"]')
         .should('contain', '2 Matches')
