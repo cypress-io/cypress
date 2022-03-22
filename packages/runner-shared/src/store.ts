@@ -1,5 +1,5 @@
 import { action, observable } from 'mobx'
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid/non-secure'
 
 export type RunMode = 'single' | 'multi'
 
