@@ -1,14 +1,12 @@
-const debugLib = require('debug')
+import debugLib from 'debug'
+import { breakingOptions, breakingRootOptions } from './options'
 
-const debug = debugLib(`cypress:lifecycle:child:WrapNonMigrated:${process.pid}`)
-const { breakingOptions, breakingRootOptions } = require('@packages/config')
+const debug = debugLib(`cypress:config:child:wrap-plugin-errors:${process.pid}`)
 
 /**
  * Throw the error with the proper codeFrame
- * @param {string} errorKey
- * @param {string} name
  */
-function throwInvalidOptionError (errorKey, name) {
+function throwInvalidOptionError (errorKey: string, name: string) {
   debug('throwing err %s', name)
   const errInternal = new Error()
 
@@ -20,7 +18,7 @@ function throwInvalidOptionError (errorKey, name) {
 
 // only works if config.myProperty = 'something'
 // this will not throw config = {...config, myProperty: 'something'}
-function setInvalidPropSetterWarning (opts, errorKey, optionName, optionNameForError = optionName) {
+function setInvalidPropSetterWarning (opts: Record<string, any>, errorKey: string, optionName: string, optionNameForError = optionName) {
   debug('setting invalid property %s', optionName)
   Object.defineProperty(opts, optionName, {
     set: throwInvalidOptionError.bind(null, errorKey, optionNameForError),
@@ -39,7 +37,7 @@ function setInvalidPropSetterWarning (opts, errorKey, optionName, optionNameForE
  * has generated. Cypress opens the file and they can fix the problem.
  * @param {Cypress.Config} options the config object passed to setupNodeEvents
  */
-module.exports = function wrapNonMigratedOptions (options) {
+export function wrapInvalidPluginOptions (options: Record<string, any>) {
   debug('wrapping non-migrated options')
   breakingOptions.filter(({ isWarning }) => !isWarning).forEach(({ name, errorKey }) => {
     setInvalidPropSetterWarning(options, errorKey, name)

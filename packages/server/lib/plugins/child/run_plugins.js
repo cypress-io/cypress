@@ -5,6 +5,7 @@
 const debugLib = require('debug')
 const Promise = require('bluebird')
 const _ = require('lodash')
+const { wrapInvalidPluginOptions } = require('@packages/config')
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
@@ -14,7 +15,6 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const wrapNonMigratedOptions = require('./wrap-non-migrated-config')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -116,7 +116,9 @@ class RunPlugins {
     .try(() => {
       debug('Calling setupNodeEvents')
       // setup all setters for 10.X+ non-supported config options
-      wrapNonMigratedOptions(initialConfig)
+      // so that where setters are called they error. This will
+      // help users find the issue and fix it.
+      wrapInvalidPluginOptions(initialConfig)
 
       return setupNodeEvents(registerChildEvent, initialConfig)
     })
