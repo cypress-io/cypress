@@ -1,5 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
+import { Automation } from '../../../lib/automation'
 import {
   CdpAutomation,
   _cookieMatches,
@@ -71,7 +72,12 @@ context('lib/browsers/cdp_automation', () => {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn)
+      this.automation = new CdpAutomation({
+        sendDebuggerCommandFn: this.sendDebuggerCommand,
+        onFn: this.onFn,
+        automation: {} as Automation,
+        experimentalMultiDomain: false,
+      })
 
       await this.automation.enable()
 

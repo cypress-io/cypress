@@ -1,4 +1,4 @@
-const { create } = require('@packages/driver/src/cypress/log')
+const { create, LogUtils } = require('@packages/driver/src/cypress/log')
 
 describe('src/cypress/log', function () {
   context('#snapshot', function () {
@@ -52,6 +52,53 @@ describe('src/cypress/log', function () {
 
       expect(this.cy.createSnapshot).not.to.be.called
       expect(result).to.equal(log)
+    })
+  })
+
+  context('countLogsByTests', () => {
+    it('returns zero if tests is empty', () => {
+      const tests = {}
+
+      expect(LogUtils.countLogsByTests(tests)).to.equal(0)
+    })
+
+    it('finds the highest id amongst the different types', () => {
+      const tests = {
+        a: {
+          agents: [{
+            id: 'log-idp.com-1',
+          }],
+          routes: [{
+            id: 'log-idp.com-2',
+          }],
+          commands: [{
+            id: 'log-idp.com-3',
+          }],
+          prevAttempts: [{
+            agents: [{
+              id: 'log-idp.com-4',
+            }],
+            routes: [{
+              id: 'log-idp.com-5',
+            }],
+            commands: [{
+              id: 'log-idp.com-6',
+            }],
+          }],
+        },
+      }
+
+      expect(LogUtils.countLogsByTests(tests)).to.equal(6)
+    })
+
+    it('returns zero if there are no agents routes or commands', () => {
+      const tests = {
+        a: {
+          notAThing: true,
+        },
+      }
+
+      expect(LogUtils.countLogsByTests(tests)).to.equal(0)
     })
   })
 })

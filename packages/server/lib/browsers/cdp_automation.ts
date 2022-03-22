@@ -3,8 +3,10 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
-import { cors } from '@packages/network'
+import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
+import { URL } from 'url'
+
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
@@ -174,10 +176,25 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
+export interface CdpOptions {
+  sendDebuggerCommandFn: SendDebuggerCommand
+  onFn: OnFn
+  automation: Automation
+  experimentalMultiDomain: boolean
+}
+
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
-    onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
-    onFn('Network.responseReceived', this.onResponseReceived)
+  sendDebuggerCommandFn: SendDebuggerCommand
+  automation: Automation
+  experimentalMultiDomain: boolean
+
+  constructor (options: CdpOptions) {
+    this.sendDebuggerCommandFn = options.sendDebuggerCommandFn
+    this.automation = options.automation
+    this.experimentalMultiDomain = options.experimentalMultiDomain
+
+    options.onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
+    options.onFn('Network.responseReceived', this.onResponseReceived)
   }
 
   async enable () {
@@ -238,8 +255,23 @@ export class CdpAutomation {
       urls: [url],
     })
     .then((result: Protocol.Network.GetCookiesResponse) => {
+      const isLocalhost = uri.isLocalhost(new URL(url))
+
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {
+        // Chrome returns all cookies for a URL, even if they wouldn't normally
+        // be sent with a request. This standardizes it by filtering out ones
+        // that are secure but not on a secure context
+
+        if (this.experimentalMultiDomain) {
+          // localhost is considered a secure context (even when http:)
+          // and it's required for multi-domain when visiting a secondary
+          // domain so that all its cookies are sent. This may be a
+          // breaking change, so put it behind the flag for now. Need to
+          // investigate further when we remove the experimental flag.
+          return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
+        }
+
         return !(url.startsWith('http:') && cookie.secure)
       })
     })
