@@ -2991,6 +2991,7 @@ declare namespace Cypress {
 
   type DevServerObject = {
     framework: 'react-scripts'
+    bundler: 'webpack'
     options?: {
       /**
        * @default false

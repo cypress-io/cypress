@@ -16,6 +16,7 @@ export default makeConfig({
       'vue-router',
       '@urql/devtools',
       '@urql/exchange-graphcache',
+      '@headlessui/vue',
     ],
   },
 }, {

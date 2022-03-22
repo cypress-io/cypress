@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
 import type * as vite from 'vite'
+import viteConfig from './vite.config'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -33,11 +34,10 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
       viteConfig: {
+        ...viteConfig,
         optimizeDeps: {
           include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'p-defer',
+            ...viteConfig.optimizeDeps.include,
             'just-my-luck',
             'combine-properties',
             'faker',

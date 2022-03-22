@@ -4,6 +4,7 @@ const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
+const getValidDevServer = require('./getValidDevServer')
 
 let tsRegistered = false
 
@@ -62,28 +63,6 @@ function run (ipc, file, projectRoot) {
     }
 
     return true
-  }
-
-  /**
-   * @param {Cypress.ComponentConfigOptions}
-   */
-  const getValidDevServer = (config) => {
-    const { devServer } = config
-
-    if (devServer && typeof devServer === 'function') {
-      return devServer
-    }
-
-    // devServer: { bundler, framework }
-    if (typeof devServer === 'object' && devServer) {
-      //
-    }
-
-    ipc.send('setupTestingType:error', util.serializeError(
-      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', file, config),
-    ))
-
-    return false
   }
 
   // Config file loading of modules is tested within
@@ -160,7 +139,9 @@ function run (ipc, file, projectRoot) {
         }
 
         if (testingType === 'component') {
-          if (!isValidDevServer((result.component || {}))) {
+          const devServer = getValidDevServer((result.component || {}))
+
+          if (!devServer) {
             return
           }
 

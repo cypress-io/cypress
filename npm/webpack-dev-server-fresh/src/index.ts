@@ -23,7 +23,7 @@ export interface StartFreshDevServerArgs {
   options: Cypress.DevServerConfig
 }
 
-export function runtimeWebpackDevServer (startDevServerArgs: StartFreshDevServerArgs) {
+export function devServer (startDevServerArgs: StartFreshDevServerArgs) {
   const { options: { config: { devServer } } } = startDevServerArgs
 
   if (typeof devServer === 'function' || typeof devServer !== 'object' || devServer.bundler !== 'webpack') {
