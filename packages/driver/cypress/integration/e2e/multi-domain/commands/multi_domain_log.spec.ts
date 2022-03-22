@@ -3,6 +3,7 @@ import { assertLogLength } from '../../../../support/utils'
 // @ts-ignore / session support is needed for visiting about:blank between tests
 context('log', { experimentalSessionSupport: true }, () => {
   let logs: any = []
+  let lastTestLogId = ''
 
   beforeEach(() => {
     logs = []
@@ -21,9 +22,8 @@ context('log', { experimentalSessionSupport: true }, () => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in multi-domain') {
             expect(attrs.message).to.eq('test log in multi-domain')
-            expect(attrs.id).to.equal('log-http://foobar.com:3500-7')
             cy.removeListener('log:added', listener)
-            resolve()
+            resolve(attrs.id)
           }
         }
 
@@ -32,12 +32,13 @@ context('log', { experimentalSessionSupport: true }, () => {
 
       cy.log('test log in multi-domain')
       cy.wrap(afterLogAdded)
-    }).then(() => {
+    }).then((id) => {
+      lastTestLogId = id
       // Verify the log is also fired in the primary domain.
       expect(logs[6].get('message')).to.eq('test log in multi-domain')
       // Verify the log has the same ID as was generated in the cross-origin
-      expect(logs[6].get('id')).to.equal('log-http://foobar.com:3500-7')
-      assertLogLength(logs, 12)
+      expect(logs[6].get('id')).to.equal(id)
+      assertLogLength(logs, 11)
     })
   })
 
@@ -47,9 +48,8 @@ context('log', { experimentalSessionSupport: true }, () => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in multi-domain') {
             expect(attrs.message).to.eq('test log in multi-domain')
-            expect(attrs.id).to.equal('log-http://foobar.com:3500-21')
             cy.removeListener('log:added', listener)
-            resolve()
+            resolve(attrs.id)
           }
         }
 
@@ -58,11 +58,12 @@ context('log', { experimentalSessionSupport: true }, () => {
 
       cy.log('test log in multi-domain')
       cy.wrap(afterLogAdded)
-    }).then(() => {
+    }).then((id) => {
       // Verify the log is also fired in the primary domain.
       expect(logs[6].get('message')).to.eq('test log in multi-domain')
       // Verify the log has the same ID as was generated in the cross-origin
-      expect(logs[6].get('id')).to.equal('log-http://foobar.com:3500-21')
+      expect(logs[6].get('id')).to.equal(id)
+      expect(logs[6].get('id')).to.not.equal(lastTestLogId)
       assertLogLength(logs, 12)
     })
   })
