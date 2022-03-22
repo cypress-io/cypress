@@ -42,7 +42,6 @@ See [the readme in the src/public/shiki/themes directory](./src/public/shiki/the
 These apply to this package, `app`, and `launchpad`, as well as any future work in this Vue-Tailwind-GQL stack. The goal is for this to provide useful context for new developers adding features to the codebase, or making changes to existing features. There are pros and cons to all of these decisions, but rather than get into those in detail, this is just a document of what practices we are following.
 
 ### Development Workflow
-
 We recommend component-based test driven development. More details in the [Testing Practices](../../guides/testing-strategy-and-styleguide.md) guide. To make changes to an existing component:
 
 1. Open Cypress and got to the spec that covers the component (often it's 1:1 but sometimes components are tested via their parents)
@@ -56,7 +55,6 @@ To create a new component:
 1. In the spec file, import and mount the component. If the component depends on a GQL fragment, use `mountFragment` to mount the component so it can receive test data through the `gql` prop. 
 
 ### Vue 3
-
 If you are new to Vue 3, there are some new features we are using in this codebase that you should become familiar with.
 
 But first, if you are coming from React to Vue 3, here's a small potential gotcha to note as you read and write Vue code: the idea of a `ref` in Vue is similar to a `ref` in React but with a major difference. In React, a when a ref's value changes, it doesn't trigger an update, or get "noticed" at all, by default. In Vue, a ref is part of the reactivity system and when the value updates, the component knows this and the updated value is reflected wherever the value is referenced. This can mean DOM updates, watchers firing, etc.
@@ -126,7 +124,6 @@ To use an icon in tests, or to refer to it in the `<script>` block of a componen
 `import MyIcon from '~icons/cy/path-to-icon_x16'`
 
 #### Styling Icons
-
 This example renders a book icon from `./src/assets/book_x16.svg` and makes it pink for the 'light' color and purple for the 'dark' color. It uses the `hover:` pseudoclass to invert the light/dark colors on hover. A class string formatted like this:
 
 `icon-light` + `-any-color-100`
