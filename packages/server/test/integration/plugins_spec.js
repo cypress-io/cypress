@@ -2,13 +2,14 @@ require('../spec_helper')
 
 const plugins = require('../../lib/plugins')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
 const pluginsFile = Fixtures.projectPath('plugin-before-browser-launch-deprecation/cypress/plugins/index.js')
 
 describe('lib/plugins', () => {
   beforeEach(async () => {
     Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
-    await Fixtures.scaffoldCommonNodeModules()
+    await scaffoldCommonNodeModules()
   })
 
   afterEach(() => {
