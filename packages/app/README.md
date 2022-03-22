@@ -30,7 +30,7 @@ Route configuration that might typically appear in `router.ts` can be set in a `
 ```ts
 <route>
   {
-    name: 'SpecsRunner',
+    name: 'SpecRunner',
     meta: {
       header: false,
       navBarExpandedAllowed: false
