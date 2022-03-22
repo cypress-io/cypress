@@ -497,7 +497,7 @@ export const AllCypressErrors = {
         https://on.cypress.io/dashboard`
   },
   // TODO: make this relative path, not absolute
-  NO_PROJECT_ID: (configFilePath: string | false) => {
+  NO_PROJECT_ID: (configFilePath: string) => {
     return errTemplate`Can't find ${fmt.highlight(`projectId`)} in the config file: ${fmt.path(configFilePath || '')}`
   },
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
@@ -1362,7 +1362,7 @@ export const AllCypressErrors = {
     `
   },
 
-  TEST_FILES_DEPRECATION: (errShape: BreakingErrResult) => {
+  TEST_FILES_RENAMED: (errShape: BreakingErrResult) => {
     const code = errPartial`
     {
       e2e: {
@@ -1377,7 +1377,23 @@ export const AllCypressErrors = {
      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
       It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a testing type property: ${fmt.highlightSecondary('e2e.specPattern')} and ${fmt.highlightSecondary('component.specPattern')}
+      ${fmt.code(code)}
 
+      https://on.cypress.io/migration-guide`
+  },
+
+  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      component: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
       ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide`

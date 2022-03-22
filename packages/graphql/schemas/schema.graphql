@@ -493,6 +493,7 @@ enum ErrorTypeEnum {
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
+  COMPONENT_FOLDER_REMOVED
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION
   CONFIG_FILE_INVALID_DEV_START_EVENT
@@ -586,7 +587,7 @@ enum ErrorTypeEnum {
   SUPPORT_FILE_NOT_FOUND
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
-  TEST_FILES_DEPRECATION
+  TEST_FILES_RENAMED
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
@@ -1254,6 +1255,9 @@ type Subscription {
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""

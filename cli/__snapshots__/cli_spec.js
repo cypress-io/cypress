@@ -26,8 +26,7 @@ exports['shows help for open --foo 1'] = `
                                      cypress.config.{ts|js}.
     -C, --config-file <config-file>  path to script file where configuration
                                      values are set. defaults to
-                                     "cypress.config.{ts|js}". pass "false" to
-                                     disable.
+                                     "cypress.config.{ts|js}".
     -d, --detached [bool]            runs Cypress application in detached mode
     --e2e                            runs end to end tests
     -e, --env <env>                  sets environment variables. separate
@@ -72,7 +71,7 @@ exports['shows help for run --foo 1'] = `
     --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
     --component                                runs component tests
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.config.{ts|js}.
-    -C, --config-file <config-file>            path to script file where configuration values are set. defaults to "cypress.config.{ts|js}". pass "false" to disable.
+    -C, --config-file <config-file>            path to script file where configuration values are set. defaults to "cypress.config.{ts|js}".
     --e2e                                      runs end to end tests
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{ts|js} or cypress.env.json
     --group <name>                             a named group for recorded runs in the Cypress Dashboard

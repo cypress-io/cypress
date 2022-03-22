@@ -2834,11 +2834,6 @@ declare namespace Cypress {
      */
     blockHosts: null | string | string[]
     /**
-     * Path to folder containing component test files.
-     * @deprecated
-     */
-    componentFolder: false | string
-    /**
      * A unique ID for the project used for recording
      */
     projectId: null | string
@@ -2887,9 +2882,9 @@ declare namespace Cypress {
    */
   interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
-     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js})
      */
-    configFile: string | false
+    configFile: string
     /**
      * CPU architecture, from Node `os.arch()`
      *
