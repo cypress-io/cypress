@@ -40,6 +40,7 @@ describe('Web Sockets', () => {
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(async () => {
         const automationStub = {

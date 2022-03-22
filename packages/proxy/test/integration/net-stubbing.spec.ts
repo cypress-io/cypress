@@ -38,6 +38,7 @@ context('network stubbing', () => {
       netStubbingState,
       config,
       middleware: defaultMiddleware,
+      getCurrentBrowser: () => ({ family: 'chromium' }),
       getRemoteState: () => remoteState,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
