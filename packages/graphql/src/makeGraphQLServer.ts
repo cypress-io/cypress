@@ -187,10 +187,12 @@ export const graphqlWS = (httpServer: Server, targetRoute: string) => {
     }
   })
 
-  return useServer({
+  useServer({
     schema: graphqlSchema,
     context: () => getCtx(),
   }, graphqlWs)
+
+  return graphqlWs
 }
 
 export const graphQLHTTP = graphqlHTTP((req, res, params) => {
