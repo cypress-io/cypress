@@ -13,18 +13,4 @@ context.skip('multi-domain network requests', { experimentalSessionSupport: true
       })
     })
   })
-
-  it('.intercept()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
-      cy.intercept('POST', '/post-only', {
-        statusCode: 201,
-        body: 'Added',
-      }).as('mockRequest')
-
-      cy.get('#request').click()
-
-      cy.wait('@mockRequest')
-      cy.get('#result').should('contain', 'Added')
-    })
-  })
 })
