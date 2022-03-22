@@ -397,11 +397,7 @@ class $Cypress {
           return
         }
 
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'start', args[0])
-        }
-
-        break
+        return this.emit('mocha', 'start', args[0])
 
       case 'runner:end':
         // mocha runner has finished running the tests
@@ -423,95 +419,54 @@ class $Cypress {
 
       case 'runner:suite:start':
         // mocha runner started processing a suite
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'suite', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'suite', ...args)
 
       case 'runner:suite:end':
         // mocha runner finished processing a suite
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'suite end', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'suite end', ...args)
 
       case 'runner:hook:start':
         // mocha runner started processing a hook
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'hook', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'hook', ...args)
 
       case 'runner:hook:end':
         // mocha runner finished processing a hook
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'hook end', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'hook end', ...args)
 
       case 'runner:test:start':
         // mocha runner started processing a hook
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'test', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'test', ...args)
 
       case 'runner:test:end':
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'test end', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'test end', ...args)
 
       case 'runner:pass':
         // mocha runner calculated a pass
         // this is delayed from when mocha would normally fire it
         // since we fire it after all afterEach hooks have ran
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'pass', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'pass', ...args)
 
       case 'runner:pending':
         // mocha runner calculated a pending test
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'pending', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'pending', ...args)
 
       case 'runner:fail': {
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'fail', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'fail', ...args)
       }
+
       // retry event only fired in mocha version 6+
       // https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
       case 'runner:retry': {
         // mocha runner calculated a pass
-        if (this.config('isTextTerminal')) {
-          this.emit('mocha', 'retry', ...args)
-        }
-
-        break
+        return this.emit('mocha', 'retry', ...args)
       }
 
       case 'mocha:runnable:run':
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
-        if (this.config('isTextTerminal')) {
-          // needed for handling test retries
-          this.emit('mocha', 'test:before:run', args[0])
-        }
+        // needed for handling test retries
+        this.emit('mocha', 'test:before:run', args[0])
 
         this.emit('test:before:run', ...args)
         break
@@ -530,13 +485,10 @@ class $Cypress {
         // stats and runnable properties such as errors
         this.emit('test:after:run', ...args)
 
-        if (this.config('isTextTerminal')) {
-          // needed for calculating wallClockDuration
-          // and the timings of after + afterEach hooks
-          return this.emit('mocha', 'test:after:run', args[0])
-        }
+        // needed for calculating wallClockDuration
+        // and the timings of after + afterEach hooks
+        return this.emit('mocha', 'test:after:run', args[0])
 
-        break
       case 'cy:before:all:screenshots':
         return this.emit('before:all:screenshots', ...args)
 
