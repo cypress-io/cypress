@@ -115,7 +115,13 @@ class ElementOverrideManager {
       removedNodes,
     }) => {
       if (type === 'attributes' && attributeName) {
-        (target as HTMLElement).setAttribute(attributeName, oldValue || '')
+        let targetElement = target as HTMLElement
+
+        if (!oldValue) {
+          targetElement.removeAttribute(attributeName)
+        } else {
+          targetElement.setAttribute(attributeName, oldValue)
+        }
 
         return
       }
