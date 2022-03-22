@@ -135,5 +135,15 @@ describe('shortcuts', function () {
       cy.get('button.stop').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Stop Running S')
     })
+
+    it('does not run shortcut if modifier keys are pressed', () => {
+      ['{ctrl+f}', '{alt+f}', '{shift+f}', '{meta+f}'].forEach((text) => {
+        cy.get('body').type(text)
+      })
+
+      cy.then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('focus:tests')
+      })
+    })
   })
 })
