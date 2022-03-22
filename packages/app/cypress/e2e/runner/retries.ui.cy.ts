@@ -20,7 +20,7 @@ describe('runner/cypress retries.ui.spec', {
 
   it('collapses tests that retry and pass', () => {
     loadSpec({
-      fileName: 'collapse-after-pass.retries.cy.js',
+      filePath: 'retries/collapse-after-pass.retries.cy.js',
       passCount: 2,
       failCount: 0,
     })
@@ -30,7 +30,7 @@ describe('runner/cypress retries.ui.spec', {
 
   it('collapses prev attempts and keeps final one open on failure', () => {
     loadSpec({
-      fileName: 'collapse-prev-attempts.retries.cy.js',
+      filePath: 'retries/collapse-prev-attempts.retries.cy.js',
       passCount: 1,
       failCount: 1,
     })
@@ -40,7 +40,7 @@ describe('runner/cypress retries.ui.spec', {
 
   it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
     loadSpec({
-      fileName: 'all-retry-one-failure.retries.cy.js',
+      filePath: 'retries/all-retry-one-failure.retries.cy.js',
       passCount: 2,
       failCount: 1,
     })
@@ -74,7 +74,7 @@ describe('runner/cypress retries.ui.spec', {
     }
 
     loadSpec({
-      fileName: 'opens-attempt-for-screenshot.retries.cy.js',
+      filePath: 'retries/opens-attempt-for-screenshot.retries.cy.js',
       passCount: 3,
       failCount: 0,
       setup: () => {
@@ -102,7 +102,7 @@ describe('runner/cypress retries.ui.spec', {
     const attemptTag = (sel) => `.attempt-tag:contains(Attempt ${sel})`
 
     loadSpec({
-      fileName: 'includes-all-in-attempt.retries.cy.js',
+      filePath: 'retries/includes-all-in-attempt.retries.cy.js',
       passCount: 1,
       failCount: 0,
     })
@@ -129,7 +129,7 @@ describe('runner/cypress retries.ui.spec', {
   describe('only', () => {
     it('test retry with [only]', () => {
       loadSpec({
-        fileName: 'only.retries.cy.js',
+        filePath: 'retries/only.retries.cy.js',
         passCount: 1,
         failCount: 0,
       })
@@ -143,7 +143,7 @@ describe('runner/cypress retries.ui.spec', {
   describe('beforeAll', () => {
     it('tests do not retry when beforeAll fails', () => {
       loadSpec({
-        fileName: 'before-all-failure.retries.cy.js',
+        filePath: 'retries/before-all-failure.retries.cy.js',
         passCount: 0,
         failCount: 1,
       })
@@ -153,7 +153,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('before all hooks are not run on the second attempt when fails outside of beforeAll', () => {
       loadSpec({
-        fileName: 'before-all-called-once.retries.cy.js',
+        filePath: 'retries/before-all-called-once.retries.cy.js',
         passCount: 1,
         failCount: 0,
       })
@@ -167,7 +167,7 @@ describe('runner/cypress retries.ui.spec', {
   describe('beforeEach', () => {
     it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', { viewportHeight: 1550 }, () => {
       loadSpec({
-        fileName: 'before-each-failure.retries.cy.js',
+        filePath: 'retries/before-each-failure.retries.cy.js',
         passCount: 1,
         failCount: 0,
       })
@@ -198,7 +198,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('beforeEach retried tests skip remaining tests in suite', () => {
       loadSpec({
-        fileName: 'before-each-skip.retries.cy.js',
+        filePath: 'retries/before-each-skip.retries.cy.js',
         passCount: 0,
         failCount: 1,
         pendingCount: 0,
@@ -214,7 +214,7 @@ describe('runner/cypress retries.ui.spec', {
       const shouldBeOpen = ($el) => cy.wrap($el).parentsUntil('.collapsible').last().parent().should('have.class', 'is-open')
 
       loadSpec({
-        fileName: 'after-each-failure.retries.cy.js',
+        filePath: 'retries/after-each-failure.retries.cy.js',
         passCount: 1,
         failCount: 0,
       })
@@ -245,7 +245,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('afterEach retried tests skip remaining tests in suite', () => {
       loadSpec({
-        fileName: 'after-each-skip.retries.cy.js',
+        filePath: 'retries/after-each-skip.retries.cy.js',
         passCount: 0,
         failCount: 1,
         pendingCount: 0,
@@ -256,7 +256,7 @@ describe('runner/cypress retries.ui.spec', {
   describe('afterAll', () => {
     it('only run afterAll hook on last attempt', () => {
       loadSpec({
-        fileName: 'after-all-once.retries.cy.js',
+        filePath: 'retries/after-all-once.retries.cy.js',
         passCount: 3,
         failCount: 0,
       })
@@ -269,7 +269,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('tests do not retry when afterAll fails', () => {
       loadSpec({
-        fileName: 'after-all-failure.retries.cy.js',
+        filePath: 'retries/after-all-failure.retries.cy.js',
         passCount: 0,
         failCount: 1,
       })
@@ -308,7 +308,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('via config value', () => {
       loadSpec({
-        fileName: 'configure-retries.retries.cy.js',
+        filePath: 'retries/configure-retries.retries.cy.js',
         passCount: 0,
         failCount: 7,
       })
@@ -324,7 +324,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('throws when set via this.retries in test', () => {
       loadSpec({
-        fileName: 'configure-in-test.retries.cy.js',
+        filePath: 'retries/configure-in-test.retries.cy.js',
         passCount: 0,
         failCount: 1,
       })
@@ -335,7 +335,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('throws when set via this.retries in hook', () => {
       loadSpec({
-        fileName: 'configure-in-hook.retries.cy.js',
+        filePath: 'retries/configure-in-hook.retries.cy.js',
         passCount: 0,
         failCount: 1,
       })
@@ -346,7 +346,7 @@ describe('runner/cypress retries.ui.spec', {
 
     it('throws when set via this.retries in suite', () => {
       loadSpec({
-        fileName: 'configure-in-suite.retries.cy.js',
+        filePath: 'retries/configure-in-suite.retries.cy.js',
         passCount: 0,
         failCount: 1,
       })

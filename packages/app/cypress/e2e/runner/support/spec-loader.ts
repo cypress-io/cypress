@@ -1,3 +1,5 @@
+import { getRunnerHref } from '../../support/get-runner-href'
+
 export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) => {
   passCount = passCount || '--'
   failCount = failCount || '--'
@@ -13,7 +15,7 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) =>
 }
 
 export type LoadSpecOptions = {
-  fileName: string
+  filePath: string
   setup?: () => void
   passCount?: number | string
   failCount?: number | string
@@ -23,7 +25,7 @@ export type LoadSpecOptions = {
 
 export function loadSpec (options: LoadSpecOptions): void {
   const {
-    fileName,
+    filePath,
     setup,
     passCount = '--',
     failCount = '--',
@@ -55,25 +57,14 @@ export function loadSpec (options: LoadSpecOptions): void {
     })
   }, { hasPreferredIde })
 
-  // TODO: investigate why directly visiting the spec will sometimes hang
-  // https://cypress-io.atlassian.net/browse/UNIFY-1154
-  // cy.__incorrectlyVisitAppWithIntercept(`specs/runner?file=cypress/e2e/errors/${fileName}`)
+  // Need to normalize the spec path for windows usage
+  cy.visitApp(getRunnerHref(`cypress/e2e/${filePath}`))
 
-  cy.__incorrectlyVisitAppWithIntercept()
+  // cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
 
   if (setup) {
     setup()
   }
-
-  cy.findByLabelText('Search Specs').type(fileName)
-  // wait for virtualized spec list to update, there is a chance
-  // of disconnection otherwise
-  cy.wait(500)
-  cy.contains('[data-cy=spec-item]', fileName).click()
-
-  cy.location().should((location) => {
-    expect(location.hash).to.contain(fileName)
-  })
 
   // Wait for specs to complete
   shouldHaveTestResults({ passCount, failCount, pendingCount })
