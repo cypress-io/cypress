@@ -240,7 +240,6 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   if (this.config.experimentalMultiDomain && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
-    // if we failed to create the spec bridge, just end this response
     this.serverBus.once('ready:for:domain:failed', () => {
       this.next()
     })

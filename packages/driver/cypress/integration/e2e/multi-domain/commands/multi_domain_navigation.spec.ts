@@ -249,7 +249,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
     })
 
     // TODO: test currently fails when redirecting
-    it.skip('supports server redirects', () => {
+    it.skip('supports visit redirects', () => {
       cy.visit('/fixtures/multi-domain.html')
       cy.get('a[data-cy="dom-link"]').click()
 
@@ -262,7 +262,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
     it('supports auth options and adding auth to subsequent requests', () => {
       cy.switchToDomain('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/basic_auth?request=1', {
+        cy.visit('http://www.foobar.com:3500/basic_auth', {
           auth: {
             username: 'cypress',
             password: 'password123',
@@ -271,24 +271,11 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
         cy.get('body').should('have.text', 'basic auth worked')
 
-        cy.window().then({ timeout: 60000 }, (win) => {
-          return new Cypress.Promise(((resolve, reject) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/basic_auth?request=2')
-            xhr.onload = function () {
-              try {
-                expect(this.responseText).to.include('basic auth worked')
-
-                return resolve(win)
-              } catch (err) {
-                return reject(err)
-              }
-            }
-
-            return xhr.send()
-          }))
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/basic_auth'
         })
+
+        cy.get('body').should('have.text', 'basic auth worked')
       })
 
       // attaches the auth options for the foobar domain even from another switchToDomain
@@ -296,7 +283,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
         cy.visit('/fixtures/multi-domain.html')
 
         cy.window().then((win) => {
-          win.location.href = 'http://www.foobar.com:3500/basic_auth?request=3'
+          win.location.href = 'http://www.foobar.com:3500/basic_auth'
         })
       })
 
@@ -308,7 +295,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
       // attaches the auth options for the foobar domain from the top-level
       cy.window().then((win) => {
-        win.location.href = 'http://www.foobar.com:3500/basic_auth?request=4'
+        win.location.href = 'http://www.foobar.com:3500/basic_auth'
       })
 
       cy.switchToDomain('http://foobar.com:3500', () => {
@@ -316,11 +303,13 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    it('does not propagate the auth options across tests', () => {
+    it('does not propagate the auth options across tests', (done) => {
       cy.intercept('/basic_auth', (req) => {
         req.on('response', (res) => {
           // clear the www-authenticate header so the browser doesn't prompt for username/password
           res.headers['www-authenticate'] = ''
+          expect(res.statusCode).to.equal(401)
+          done()
         })
       })
 
@@ -328,24 +317,9 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
         win.location.href = 'http://www.foobar.com:3500/fixtures/multi-domain.html'
       })
 
-      cy.switchToDomain('http://www.foobar.com:3500', () => {
-        cy.window().then({ timeout: 60000 }, (win) => {
-          return new Cypress.Promise(((resolve, reject) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/basic_auth')
-            xhr.onload = function () {
-              try {
-                expect(this.status).to.eq(401)
-
-                return resolve(win)
-              } catch (err) {
-                return reject(err)
-              }
-            }
-
-            return xhr.send()
-          }))
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/basic_auth'
         })
       })
     })

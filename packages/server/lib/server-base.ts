@@ -238,8 +238,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       clientCertificates.loadClientCertificateConfig(config)
 
-      const getRemoteState = (forUrl) => {
-        return this._getRemoteState(forUrl)
+      const getRemoteState = () => {
+        return this._getRemoteState()
       }
 
       const getRemoteStateFor = (url) => {
@@ -478,7 +478,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._remoteStates.get(originPolicy)
   }
 
-  _getRemoteState (forUrl?: string): Cypress.RemoteState {
+  _getRemoteState (): Cypress.RemoteState {
     // {
     //   origin: "http://localhost:2020"
     //   fileServer:
