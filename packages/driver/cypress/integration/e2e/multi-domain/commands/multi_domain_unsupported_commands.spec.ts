@@ -20,6 +20,7 @@ context('multi-domain unsupported commands', { experimentalSessionSupport: true 
   it('cy.server() method is deprecated', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.equal('`cy.server()` has been deprecated and use is not supported in the `cy.switchToDomain()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
+      expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
       done()
     })
 

@@ -219,6 +219,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
     it('throws an error when a user attempts to configure Cypress.Server.defaults() inside of multi-domain', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and use is not supported in `cy.switchToDomain()`. Consider using `cy.intercept()` instead.')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
         done()
       })
 
@@ -230,6 +231,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
     it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of multi-domain', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is not supported in `cy.switchToDomain()`. Consider using `cy.session()` instead.')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/session')
         done()
       })
 
