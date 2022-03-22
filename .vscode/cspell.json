@@ -25,7 +25,8 @@
         "urql",
         "vite",
         "vitejs",
-        "vueuse"
+        "vueuse",
+        "Windi"
     ],
     "ignoreWords": [],
     "import": []

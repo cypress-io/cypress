@@ -1,6 +1,6 @@
 # Frontend Shared
 
-This package contains components and other code (such as Windi CSS config) that is is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher level components that exist in both apps, like the header.
+This package contains components and other code (such as WindiCSS config) that is is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher level components that exist in both apps, like the header.
 
 Conceivably, other packages may be created that also import from this shared component package.
 
@@ -28,7 +28,7 @@ yarn workspace @packages/frontend-shared cypress:run:ct
 
 ## Utility class usage
 
-Windi CSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
+WindiCSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
 
 ```bash
 ## from this directory
@@ -67,10 +67,7 @@ To create a new component:
 1. Add a component spec file and the component file itself as siblings in the desired location
 1. In the spec file, import and mount the component. If the component depends on a GQL fragment, use `mountFragment` to mount the component. If the component depends on a GQL query, create a wrapper that executes the query and passes the result into the child component via the `gql` prop, using a fragment to access the data in the child.
 
-TODO: in light of gql subscriptions, this might already be out of date, revisit.
-TODO 2: write generators that spin up well-formed components that do and do not depend on GQL
-
-### Welcome to Vue 3!
+### Vue 3
 
 If you are new to Vue 3, there are some new features we are using in this codebase that you should become familiar with.
 
@@ -79,7 +76,7 @@ But first, if you are coming from React to Vue 3, here's a small potential gotch
 ### Vue ideas and packages we are using
 
 #### Composition API and `<script setup>`
-We are using the [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) and specifically the [`<script setup>`](https://vuejs.org/api/sfc-script-setup.html#script-setup) syntax in our Vue Single File Components. This removes a lot of boilerplate, and because of that it's not always obvious reading the code which Vue features are being leveraged, compared to Vue 2.
+We are using the [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) and specifically the [`<script setup>`](https://vuejs.org/api/sfc-script-setup.html#script-setup) syntax in our [Vue Single File Components (SFCs)](https://vuejs.org/guide/scaling-up/sfc.html). This removes a lot of boilerplate, and because of that it's not always obvious reading the code which Vue features are being leveraged, compared to Vue 2.
 
 If you are familiar with the Options API, which was the main way to write component script sections in Vue 2, the separation of variables and functions into named parts of the Options object like `computed` and `data` provided a familiar, but unwieldy, structure in each component. The Composition API lets us use those features anywhere we like, without dividing things into a predefined structure. `<script setup>` is a way to write Composition API code with less boilerplate and some other advantages described in the docs.
 #### [Pinia](https://pinia.vuejs.org/)
@@ -90,10 +87,14 @@ Broad collection of composable utilities that provides reactive values for vario
 
 #### [Headless UI](https://headlessui.dev/)
 We are using some components from Headless UI as the basis for UI patterns like modals, custom dropdowns, and expanding panels. We use Headless UI because it is well documented and the accessibility features are properly thought out. These advantages outweigh the occasional workarounds we have to use in order to get sophisticated behavior working that Headless UI does not support.
+
+### Router
+
+Only `@packages/app` has a router, so details are described in its [README](../app/README.md).
 ### Styles
 
 #### Tailwind and Windi
-We use [Tailwind](https://tailwindcss.com/) through [Windi CSS](https://windicss.org/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
+We use [Tailwind](https://tailwindcss.com/) through [WindiCSS](https://windicss.org/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
 
 #### Explicit Pixel Values
 WindiCSS can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
@@ -101,15 +102,63 @@ WindiCSS can create CSS classes as build time based on what class names we use i
 `<p class="p-20px">`
 
 This allows us to specify explicit pixel values for measurements. We follow this pattern throughout the Cypress App codebase.
+
+### Icons
+
+The icons will temporarily live in this package and will soon be moved to `packages/frontend-shared`.
+
+## Custom Icon Library
+Cy has a very custom icon library, to meet the following needs:
+
+* Most of our icons are duo-tone
+* They must be styled in both dark and light contexts (e.g. on a dark menu bar vs on a light background).
+* Since they're duotone, you want to target the specific strokes and fills of the SVGs to color them.
+* All of the niceties of our utility classes should work (e.g. `group-hover` or `group-focus`).
+
+### Usage
+#### Importing Icons
+1. `import MyIcon from '~icons/cy/path-to-icon_x16'`
+2. Automatic template discovery
+```jsx
+/* This just works. No imports necessary */
+<i-cy-path-to-icon_x16 />
+```
+
+#### Styling Icons
+```jsx
+/* This renders a book icon from `./src/assets/book_x16.svg`
+ * and makes it pink and purple
+ */
+
+<i-cy-book_x16 class="
+  icon-dark-pink-300
+  icon-dark-purple-50
+  hover:icon-dark-pink-500
+  hover:icon-light-purple-300
+" />
+```
+
+### Implementation: Custom classes w/ a WindiCSS plugin
+To support selecting specific paths while keeping Tailwind's incredibly helpful interaction helpers (e.g. `group-hover` or `group-focus`), we use a WindiCSS plugin. Windi configuration lives in the [windi.config.ts](windi.config.ts) file in this package.
+#### Adding new icons
+
+To add an new icon: 
+
+1. Export the icon from Figma (all icons should come from the design system in Figma) as an SVG. 
+1. Add the SVG to the [icons folder](./src/assets/icons). 
+1. Name the file following the existing convention in there: `icon-name_x[size in pixels]`, e.g. `arrow-down_x16.svg`.
+1. Manually edit the SVG file to add classes `icon-dark` and `icon-light` to the dark and light internal elements, and save the file. If an icon path doesn't define a class, nothing bad will happen, it just won't get targeted by any styling.
+1. Finally, you don't need to expose anything. `./src/assets/icons` is automatically watched and loaded 😮
+
+Now the icon is ready to be used in Vue SFC templates  
 ### Accessibility
 
-We consider accessibility a core part of frontend code quality. When possible, interactions should be built out using standard semantic HTML elements. If there are no plain HTML solutions, we can reach for a library like HeadlessUI above that implements known patterns in an accessible way. In rare cases we will augment our HTML with ARIA roles. Tests should use the accessible name or label for interactive elements as described in the [testing guide](../../guides/testing-strategy-and-styleguide.md).
-#### Accessibility Tree
+We consider accessibility a core part of front-end code quality. When possible, components should be built out using standard semantic HTML elements. If there are no plain HTML solutions for a particular interaction, we can reach for a library (like HeadlessUI above) that implements known patterns in an accessible way. In rare cases we will augment our HTML with ARIA roles. Tests should use the accessible name or label for interactive elements as described in the [testing guide](../../guides/testing-strategy-and-styleguide.md).
+#### The Accessibility Tree
 
-The Accessibility Tree available in your browser's dev tools will show how the nature, structure, and labelling of the elements in the DOM is presented to assistive technology. We can use this to explore the accessibility of our components, especially when creating or reviewing more complex UI interactions.
+The [Accessibility Tree](https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree) available in your browser's dev tools will show how the nature, structure, and labelling of the elements in the DOM is presented to assistive technology. We can use this to explore the accessibility of our components, especially when creating or reviewing more complex UI interactions, to make sure the content that appears there makes sense.
 ### GraphQL in Vue Components
-[GraphQL](https://graphql.org/) is the main source of data and state from the server in the app and launchpad. Vue components describe the data they will use in Queries or Fragments, as well as the Mutations they will use, which can set data on the server or trigger side effects like launching a project and opening the the user's browser.
+[GraphQL](https://graphql.org/) is the main source of data and state from the server in the app and launchpad. In their `<script>` block, Vue components describe the data they will receive in Queries or Fragments, as well as the Mutations they will trigger, which can set data on the server or trigger side effects like launching a project and opening the the user's browser.
 
-Our GraphQL frontend client is [urql](https://formidable.com/open-source/urql/) using the [urql-vue](https://formidable.com/open-source/urql/docs/basics/vue/) package.
+Our GraphQL frontend client is [urql](https://formidable.com/open-source/urql/) using the [urql-vue](https://formidable.com/open-source/urql/docs/basics/vue/) package. This provides composables like `useQuery` and `useMutation` to simplify interacting with GraphQL.
 
-TODO: follow up with examples for using and testing gql

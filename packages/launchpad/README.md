@@ -19,6 +19,8 @@ It is using the following technologies:
 - TypeScript
 - [Urql](https://formidable.com/open-source/urql/) for the GraphQL client
 
+More details on the front-end setup are found in the `@packages/frontend-shared` [package README](../frontend-shared/README.md).
+
 Cypress' entire back-end is powered by the `@packages/server` package. Launchpad interfaces with it via a GraphQL layer, found in `@packages/graphql`.
 
 [Here is a short tutorial](https://github.com/lmiller1990/vue-3-urql-example) building a simple app using the same technologies we are using for launchpad. There are a lot of moving pieces; understanding how everything works will help you contribute to Launchpad.
@@ -66,13 +68,4 @@ E2E tests:
 ```bash
 ## from repo root
 yarn workspace @packages/launchpad cypress:open
-```
-
-## Utility class usage
-
-Windi CSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
-
-```bash
-## from launchpad directory
-yarn windi
 ```
