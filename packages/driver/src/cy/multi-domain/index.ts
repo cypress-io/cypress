@@ -174,7 +174,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             // user-specified callback to run in that domain
             try {
               communicator.toSpecBridge(domain, 'run:domain:fn', {
-                args: data?.args || undefined,
+                data: data?.args || undefined,
                 fn: callbackFn.toString(),
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
                 // this should only be used for internal testing. Cast to boolean to guarantee serialization

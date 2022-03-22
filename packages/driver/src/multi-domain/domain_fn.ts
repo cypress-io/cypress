@@ -6,7 +6,7 @@ import type { Runnable, Test } from 'mocha'
 
 interface RunDomainFnOptions {
   config: Cypress.Config
-  args: any
+  data: any
   env: Cypress.ObjectLike
   fn: string
   skipConfigValidation: boolean
@@ -82,7 +82,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
-    const { config, args, env, fn, state, skipConfigValidation } = options
+    const { config, data: args, env, fn, state, skipConfigValidation } = options
 
     let queueFinished = false
 
