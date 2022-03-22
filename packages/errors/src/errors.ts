@@ -1362,6 +1362,43 @@ export const AllCypressErrors = {
     `
   },
 
+  TEST_FILES_RENAMED: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        specPattern: '...',
+      },
+      component: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a testing type property: ${fmt.highlightSecondary('e2e.specPattern')} and ${fmt.highlightSecondary('component.specPattern')}
+      ${fmt.code(code)}
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      component: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
+      ${fmt.code(code)}
+
+      https://on.cypress.io/migration-guide`
+  },
+
   RENAMED_TO_SPEC_PATTERN: ({ name, setupNodeEvents = false }: {name: string, setupNodeEvents?: boolean}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 

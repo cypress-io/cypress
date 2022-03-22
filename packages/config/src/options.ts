@@ -20,6 +20,7 @@ export type BreakingOptionErrorKey =
   | 'PLUGINS_FILE_CONFIG_OPTION_REMOVED'
   | 'RENAMED_CONFIG_OPTION'
   | 'TEST_FILES_RENAMED'
+  | 'RENAMED_TO_SPEC_PATTERN'
 
 type TestingType = 'e2e' | 'component'
 
@@ -513,21 +514,6 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
  */
 export const breakingOptions: Array<BreakingOption> = [
   {
-    name: 'integrationFolder',
-    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
-    isWarning: false,
-  },
-  {
-    name: 'componentFolder',
-    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
-    isWarning: false,
-  },
-  {
-    name: 'testFiles',
-    errorKey: 'MIGRATED_CONFIG_OPTIONS_SPEC_PATTERN',
-    isWarning: false,
-  },
-  {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
@@ -580,6 +566,21 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'testFiles',
     errorKey: 'TEST_FILES_RENAMED',
+    isWarning: false,
+  },
+  {
+    name: 'ignoreTestFiles',
+    errorKey: 'IGNORE_TEST_FILES_RENAMED',
+    isWarning: false,
+  },
+  {
+    name: 'integrationFolder',
+    errorKey: 'RENAMED_TO_SPEC_PATTERN',
+    isWarning: false,
+  },
+  {
+    name: 'componentFolder',
+    errorKey: 'RENAMED_TO_SPEC_PATTERN',
     isWarning: false,
   },
 ]
