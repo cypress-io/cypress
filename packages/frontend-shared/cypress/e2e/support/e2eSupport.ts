@@ -525,6 +525,12 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    '.runnable-header .duration': ($el) => {
+      $el.text('XX:XX')
+    },
+  },
+})
 
 addNetworkCommands()
