@@ -1,17 +1,10 @@
 import dedent from 'dedent'
 
-export interface FilePartNoHighlight {
+export type FilePart = {
   text: string
-  highlight: false
+  group?: 'folder' | 'preExtension' | 'supportFileName' | 'fileName'
+  highlight: boolean
 }
-
-export interface FilePartHighlight {
-  text: string
-  group: 'folder' | 'preExtension' | 'supportFileName'
-  highlight: true
-}
-
-export type FilePart = FilePartNoHighlight | FilePartHighlight
 
 export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const match = regexp.exec(file)
@@ -55,6 +48,7 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   {
     text: (folder ? '/' : '') + fileName, // user/cypress/integration/file.spec.tsx -> /file
     highlight: false,
+    group: 'fileName',
   },
   {
     text: preExtension || '', // user/cypress/integration/file.spec.tsx -> .spec.
