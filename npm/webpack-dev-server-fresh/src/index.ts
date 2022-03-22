@@ -1,6 +1,5 @@
 /// <reference types="cypress" />
 
-import { customWebpackDevServer } from './customWebpackDevServer'
 import { nextjsDevServer } from './nextjsDevServer'
 import { nuxtjsDevServer } from './nuxtjsDevServer'
 import { reactScriptsDevServer } from './reactScriptsDevServer'
@@ -49,10 +48,6 @@ export function runtimeWebpackDevServer (startDevServerArgs: StartFreshDevServer
 
   if (devServer.framework === 'react') {
     return reactWebpackDevServer(startDevServerArgs)
-  }
-
-  if (devServer.framework === 'custom') {
-    return customWebpackDevServer(startDevServerArgs)
   }
 
   throw new Error(`Unexpected devServer.framework ${devServer.framework}`)

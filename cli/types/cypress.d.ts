@@ -2984,12 +2984,29 @@ declare namespace Cypress {
    //     }
    //   }
    // }
+   [key: string]: any
   }
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
   type DevServerObject = {
-    framework: 'react-scripts' | 'react' | 'nuxtjs' | 'nextjs' | 'vue' | 'custom'
+    framework: 'react-scripts'
+    options?: {
+      /**
+       * @default false
+       */
+      eslintPlugin?: boolean
+      /**
+       * @default true
+       */
+      tscCompileOnError?: boolean
+      /**
+       * @default development
+       */
+      webpackEnv?: 'development'
+    }
+  } | {
+    framework: 'react' | 'nuxtjs' | 'nextjs' | 'vue'
     bundler: 'webpack'
     webpackConfig?: string | PickConfigOpt<'webpackConfig'>
     viteConfig?: never
