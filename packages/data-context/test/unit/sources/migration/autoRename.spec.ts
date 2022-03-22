@@ -167,6 +167,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': '/button',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -194,6 +195,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': '/button',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -230,6 +232,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': 'custom-folder/button',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -248,6 +251,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': 'custom-folder/button',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -293,6 +297,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': '/foo.bar',
+              'group': 'fileName',
             },
           ],
         },
@@ -311,6 +316,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': '/foo.bar',
+              'group': 'fileName',
             },
           ],
         },
@@ -347,6 +353,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': '/spec',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -374,6 +381,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': '/spec',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -412,6 +420,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': 'cypress/tests/api-bankaccounts',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -430,6 +439,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': 'cypress/tests/api-bankaccounts',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -466,6 +476,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': 'cypress/component/button',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -484,6 +495,7 @@ describe('applyMigrationTransform', () => {
             {
               'highlight': false,
               'text': 'cypress/component/button',
+              'group': 'fileName',
             },
             {
               'highlight': true,
@@ -522,6 +534,7 @@ describe('applyMigrationTransform', () => {
             {
               'text': 'cypress/custom-component/button',
               'highlight': false,
+              'group': 'fileName',
             },
             {
               'text': '.spec.',
@@ -540,6 +553,7 @@ describe('applyMigrationTransform', () => {
             {
               'text': 'cypress/custom-component/button',
               'highlight': false,
+              'group': 'fileName',
             },
             {
               'text': '.cy.',
