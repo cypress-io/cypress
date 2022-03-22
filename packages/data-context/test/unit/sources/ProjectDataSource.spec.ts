@@ -277,4 +277,64 @@ describe('getDefaultSpecFileName', () => {
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
   })
+
+  context('extra cases', () => {
+    it('creates specName for tests/*.js', () => {
+      const defaultFileName = getDefaultSpecFileName('tests/*.js')
+
+      expect(defaultFileName).to.eq('tests/filename.js')
+    })
+
+    it('creates specName for src/*-test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*-test.js')
+
+      expect(defaultFileName).to.eq('src/filename-test.js')
+    })
+
+    it('creates specName for src/*.foo.bar.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*.foo.bar.js')
+
+      expect(defaultFileName).to.eq('src/filename.foo.bar.js')
+    })
+
+    it('creates specName for src/prefix.*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/prefix.*.test.js')
+
+      expect(defaultFileName).to.eq('src/prefix.cy.test.js')
+    })
+
+    it('creates specName for src/*/*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*/*.test.js')
+
+      expect(defaultFileName).to.eq('src/e2e/filename.test.js')
+    })
+
+    it('creates specName for src-*/**/*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src-*/**/*.test.js')
+
+      expect(defaultFileName).to.eq('src-e2e/filename.test.js')
+    })
+
+    it('creates specName for src/*.test.(js|jsx)', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*.test.(js|jsx)')
+
+      const possiblesFileNames = ['src/filename.test.jsx', 'src/filename.test.js']
+
+      expect(possiblesFileNames.includes(defaultFileName)).to.eq(true)
+    })
+
+    it('creates specName for (src|components)/**/*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('(src|components)/**/*.test.js')
+
+      const possiblesFileNames = ['src/filename.test.js', 'components/filename.test.js']
+
+      expect(possiblesFileNames.includes(defaultFileName)).to.eq(true)
+    })
+
+    it('creates specName for e2e/**/*.cy.{js,jsx,ts,tsx}', () => {
+      const defaultFileName = getDefaultSpecFileName('e2e/**/*.cy.{js,jsx,ts,tsx}')
+
+      expect(defaultFileName).to.eq('e2e/filename.cy.js')
+    })
+  })
 })
