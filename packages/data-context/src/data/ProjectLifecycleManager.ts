@@ -281,7 +281,7 @@ export class ProjectLifecycleManager {
   async reloadConfig () {
     assert(this._configManager)
 
-    return this._configManager.reloadConfig
+    return this._configManager.reloadConfig()
   }
 
   async initializeConfig () {
@@ -701,8 +701,6 @@ export class ProjectLifecycleManager {
   private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
 
   async initializeRunMode () {
-    this._pendingInitialize = pDefer()
-
     if (!this._currentTestingType) {
       // e2e is assumed to be the default testing type if
       // none is passed in run mode
@@ -713,9 +711,9 @@ export class ProjectLifecycleManager {
       return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
     }
 
-    return this._pendingInitialize.promise.finally(() => {
-      this._pendingInitialize = undefined
-    })
+    assert(this._configManager)
+
+    return this._configManager.initializeRunMode()
   }
 
   private configFileWarningCheck () {

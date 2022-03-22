@@ -475,6 +475,14 @@ export class ProjectConfigManager {
     this._registeredEvents[event] = callback
   }
 
+  async initializeRunMode () {
+    this._pendingInitialize = pDefer()
+
+    return this._pendingInitialize.promise.finally(() => {
+      this._pendingInitialize = undefined
+    })
+  }
+
   private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply) {
     this._registeredEvents = {}
     this.watchRequires('setupNodeEvents', result.requires)
