@@ -89,6 +89,7 @@ describe('Server', () => {
               createRoutes,
               specsStore: new SpecsStore({}, 'e2e'),
               testingType: 'e2e',
+              getCurrentBrowser: () => null,
             })
             .spread(async (port) => {
               const automationStub = {

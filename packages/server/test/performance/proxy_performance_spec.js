@@ -358,6 +358,7 @@ describe('Proxy Performance', function () {
             createRoutes,
             specsStore: new SpecsStore({}, 'e2e'),
             testingType: 'e2e',
+            getCurrentBrowser: () => null,
           })
         }),
       )

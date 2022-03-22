@@ -84,6 +84,15 @@ export function urlMatchesOriginPolicyProps (urlStr, props) {
   return _.isEqual(parsedUrl, props)
 }
 
+export function urlOriginsMatch (url1, url2) {
+  if (!url1 || !url2) return false
+
+  const parsedUrl1 = parseUrlIntoDomainTldPort(url1)
+  const parsedUrl2 = parseUrlIntoDomainTldPort(url2)
+
+  return _.isEqual(parsedUrl1, parsedUrl2)
+}
+
 export function urlMatchesOriginProtectionSpace (urlStr, origin) {
   const normalizedUrl = uri.addDefaultPort(urlStr).format()
   const normalizedOrigin = uri.addDefaultPort(origin).format()

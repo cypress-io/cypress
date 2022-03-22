@@ -51,7 +51,12 @@ const _getAutomation = async function (win, options, parent) {
     })
   }
 
-  const automation = new CdpAutomation(sendCommand, on, parent)
+  const automation = new CdpAutomation({
+    sendDebuggerCommandFn: sendCommand,
+    onFn: on,
+    automation: parent,
+    experimentalMultiDomain: options.experimentalMultiDomain,
+  })
 
   await automation.enable()
 
