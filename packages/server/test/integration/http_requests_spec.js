@@ -449,7 +449,7 @@ describe('Routes', () => {
       let i = 0
 
       const interval = setInterval(() => {
-        if (ctx.lifecycleManager.eventsIpcResult.state === 'loaded') {
+        if (ctx.lifecycleManager.isLoadedNodeEvents) {
           clearInterval(interval)
           resolve()
         }

@@ -120,6 +120,8 @@ export class ProjectDataSource {
   }
 
   async getConfig () {
+    assert(this.ctx.coreData.currentTestingType)
+
     return await this.ctx.lifecycleManager.getFullInitialConfig()
   }
 

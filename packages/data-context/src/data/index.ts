@@ -3,5 +3,6 @@
 
 export * from './LegacyPluginsIpc'
 export * from './ProjectConfigIpc'
+export * from './ProjectConfigManager'
 export * from './ProjectLifecycleManager'
 export * from './coreDataShape'
