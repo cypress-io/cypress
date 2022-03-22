@@ -1258,6 +1258,9 @@ type Subscription {
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""
