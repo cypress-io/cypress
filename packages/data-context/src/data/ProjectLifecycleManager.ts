@@ -139,12 +139,10 @@ export class ProjectLifecycleManager {
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? path.basename(this.configFilePath) ?? 'cypress.config.js'
+    return this.ctx.modeOptions.configFile ?? (this.configFilePath && path.basename(this.configFilePath)) ?? 'cypress.config.js'
   }
 
   get configFilePath () {
-    assert(this._configFilePath, 'Expected configFilePath to be found')
-
     return this._configFilePath
   }
 
