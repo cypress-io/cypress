@@ -145,7 +145,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: defaultSpecPattern.component,
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -160,14 +162,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'specPattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.component : defaultSpecPattern.e2e,
-    validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: defaultSpecPattern.e2e,
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
