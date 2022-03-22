@@ -5464,15 +5464,12 @@ declare namespace Cypress {
     language: string
     line: number
     column: number
-    absoluteFile:string
+    absoluteFile: string
     originalFile: string
     relativeFile: string
   }
 
-  interface CypressError {
-    name: string
-    message: string
-    stack: string
+  interface CypressError extends Error {
     docsUrl?: string
     codeFrame?: CodeFrame
   }
