@@ -1,8 +1,61 @@
-require('@percy/cypress')
-const _ = require('lodash')
+/// <reference types="cypress" />
+
+import '@percy/cypress'
+import type { SnapshotOptions } from '@percy/core'
+
+export interface CustomSnapshotOptions extends SnapshotOptions{
+  /**
+   * width of the snapshot taken from the left edge of the viewport
+   * @default - The test's viewportWidth
+   */
+  width?: number
+  /**
+   * height of the snapshot taken from the top edge of the viewport
+   * @default - The test's viewportHeight
+   */
+  height?: number
+  /**
+   * The desired snapshot overrides. These will be merged with and take
+   * precedence over the global override defined when the command was installed.
+   * @example
+   * ```ts
+   * {
+   *  '.element-to-hide': true,
+   *  '#element-to-replace-content': ($el) => { $el.text('new content') },
+   * }
+   * ```
+   */
+  elementOverrides?: Record<string, ((el$: JQuery) => void) | true>
+}
+
+interface SnapshotMutationOptions{
+  log?: string
+  defaultWidth: number
+  defaultHeight: number
+  snapshotWidth: number
+  snapshotHeight: number
+  snapshotElementOverrides: NonNullable<CustomSnapshotOptions['elementOverrides']>
+}
+
+declare global {
+  namespace Cypress {
+    interface Chainable{
+      /**
+       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+       * reset after snapshot generation so that the AUT is not polluted after the command executes.
+       */
+      percySnapshot(options?: CustomSnapshotOptions): Chainable<() => void>
+      /**
+       * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+       * reset after snapshot generation so that the AUT is not polluted after the command executes.
+       */
+      percySnapshot(name?: string, options?: CustomSnapshotOptions): Chainable<() => void>
+    }
+  }
+}
 
 class ElementOverrideManager {
-  mutationStack = undefined
+  private mutationStack: Array<MutationRecord> | undefined = undefined
 
   /**
    * overrides are defined in selector/override pairs.
@@ -17,19 +70,24 @@ class ElementOverrideManager {
    *   }
    * }
    */
-  performOverrides (cy, overrides) {
+  performOverrides (cy: Cypress.cy, overrides: NonNullable<CustomSnapshotOptions['elementOverrides']>) {
     const observer = new MutationObserver((mutations) => {
       this.mutationStack ??= []
       this.mutationStack.push(...mutations)
     })
 
-    observer.observe(cy.$$('html')[0], { childList: true, subtree: true, attributes: true, attributeOldValue: true })
+    observer.observe(cy.$$('html')[0], {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+    })
 
-    _.each(overrides, (v, k) => {
+    Object.entries(overrides).forEach(([k, v]) => {
       // eslint-disable-next-line cypress/no-assigning-return-values
       const $el = cy.$$(k)
 
-      if (_.isFunction(v)) {
+      if (typeof v === 'function') {
         v($el)
 
         return
@@ -46,7 +104,9 @@ class ElementOverrideManager {
   }
 
   resetOverrides () {
-    _.forEachRight(this.mutationStack, ({
+    if (!this.mutationStack) return
+
+    [...this.mutationStack].reverse().forEach(({
       type,
       target,
       attributeName,
@@ -54,8 +114,14 @@ class ElementOverrideManager {
       addedNodes,
       removedNodes,
     }) => {
-      if (type === 'attributes') {
-        target.setAttribute(attributeName, oldValue)
+      if (type === 'attributes' && attributeName) {
+        let targetElement = target as HTMLElement
+
+        if (!oldValue) {
+          targetElement.removeAttribute(attributeName)
+        } else {
+          targetElement.setAttribute(attributeName, oldValue)
+        }
 
         return
       }
@@ -94,22 +160,21 @@ const applySnapshotMutations = ({
   snapshotElementOverrides,
   defaultWidth,
   defaultHeight,
-}) => {
-  let elementOverrideManager
-
-  if (Object.keys(snapshotElementOverrides).length) {
-    elementOverrideManager = new ElementOverrideManager()
+}: SnapshotMutationOptions): Cypress.Chainable<() => void> => {
+  if (!Object.keys(snapshotElementOverrides).length) {
+    return cy.then(() => () => {})
   }
+
+  const elementOverrideManager = new ElementOverrideManager()
 
   return cy.viewport(snapshotWidth, snapshotHeight, { log: false })
   .then(() => {
-    if (elementOverrideManager) {
-      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
-    }
+    elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
 
     if (log) {
       Cypress.log({
         message: log,
+        // @ts-ignore
         snapshot: true,
         end: true,
       })
@@ -118,15 +183,13 @@ const applySnapshotMutations = ({
     return () => {
       cy.viewport(defaultWidth, defaultHeight, { log: false })
       .then(() => {
-        if (elementOverrideManager) {
-          elementOverrideManager.resetOverrides()
-        }
+        elementOverrideManager.resetOverrides()
       })
     }
   })
 }
 
-export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
+export const installCustomPercyCommand = ({ before, elementOverrides }: {before?: () => void, elementOverrides?: CustomSnapshotOptions['elementOverrides'] } = {}) => {
   /**
    * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
    * reset after snapshot generation so that the AUT is not polluted after the command executes.
@@ -138,28 +201,27 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
    * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
    *   precedence over the global override defined when the command was installed.
    */
-  const customPercySnapshot = (origFn, name, options = {}) => {
-    if (_.isObject(name)) {
+  const customPercySnapshot = (percySnapshot: (name?: string, options?: SnapshotOptions) => Cypress.Chainable<any>, name?: string, options: CustomSnapshotOptions = {}) => {
+    if (name && typeof name === 'object') {
       options = name
-      name = null
+      name = undefined
     }
 
-    /**
-     * @type {Mocha.Test}
-     */
-    const test = cy.state('test')
+    // @ts-ignore
+    const test: Mocha.Test = cy.state('test')
 
     const titlePath = test.titlePath()
 
-    const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
+    const screenshotName = name ? titlePath.concat(name).filter(Boolean).join(' > ') : ''
 
     // viewport data is read from test state rather than config to ensure that
     // the snapshot is presented at the test's expected size.
-    const { viewportWidth, viewportHeight } = cy.state()
-    const snapshotWidth = !_.isNil(options.width) ? options.width : viewportWidth
-    const snapshotHeight = !_.isNil(options.height) ? options.height : viewportHeight
+    // @ts-ignore
+    const { viewportWidth, viewportHeight } = cy.state() as Cypress.Config
+    const snapshotWidth = options.width ? options.width : viewportWidth
+    const snapshotHeight = options.height ? options.height : viewportHeight
 
-    const snapshotMutationOptions = {
+    const snapshotMutationOptions: SnapshotMutationOptions = {
       defaultWidth: viewportWidth,
       defaultHeight: viewportHeight,
       snapshotWidth,
@@ -181,7 +243,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
       }).then((reset) => reset())
     }
 
-    if (_.isFunction(before)) {
+    if (before && typeof before === 'function') {
       before()
     }
 
@@ -198,11 +260,14 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     .then((reset) => {
       // Wrap in cy.then here to ensure that the original command is
       // enqueued appropriately.
-      cy.then(() => {
-        return origFn(screenshotName, {
+      cy
+      .then(() => {
+        return percySnapshot(screenshotName, {
+          ...options,
           widths: [snapshotWidth],
         })
-      }).then(() => {
+      })
+      .then(() => {
         return reset()
       })
       .then(() => {
