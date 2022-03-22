@@ -566,11 +566,13 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'testFiles',
     errorKey: 'TEST_FILES_RENAMED',
+    newName: 'specPattern',
     isWarning: false,
   },
   {
     name: 'ignoreTestFiles',
-    errorKey: 'IGNORE_TEST_FILES_RENAMED',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'excludeSpecPattern',
     isWarning: false,
   },
   {

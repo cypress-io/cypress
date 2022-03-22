@@ -1376,7 +1376,7 @@ export const AllCypressErrors = {
     return errTemplate`\
      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
-      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a testing type property: ${fmt.highlightSecondary('e2e.specPattern')} and ${fmt.highlightSecondary('component.specPattern')}
+      It is now renamed to ${fmt.highlight(errShape.newName || '<unknown>')} and configured separately as a testing type property: ${fmt.highlightSecondary('e2e.specPattern')} and ${fmt.highlightSecondary('component.specPattern')}
       ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide`
