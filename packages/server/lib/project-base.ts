@@ -233,9 +233,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await this.saveState(stateToSave)
 
-    await Promise.all([
-      checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
-    ])
+    await checkSupportFile(cfg.supportFile)
 
     if (cfg.isTextTerminal) {
       return

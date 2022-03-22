@@ -61,11 +61,6 @@
     "field": "clientCertificates"
   },
   {
-    "value": "src",
-    "from": "config",
-    "field": "componentFolder"
-  },
-  {
     "value": 4000,
     "from": "default",
     "field": "defaultCommandTimeout"

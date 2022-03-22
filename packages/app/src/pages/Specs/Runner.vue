@@ -3,7 +3,7 @@
     <!--
       Run Mode is a more minimal UI.
       It does not render things like the SpecList,
-      Side and Top Nav, etc.
+      Side Nav, etc.
       It also has no GraphQL dependency.
     -->
     <SpecRunnerContainerRunMode
@@ -14,7 +14,7 @@
     <!--
       Open Mode is the full Cypress runner UI -
       including things like the SpecList,
-      Side and Top Nav, Selector Playground etc.
+      Side Nav, Selector Playground etc.
       It is driven by GraphQL and urql.
     -->
     <SpecRunnerContainerOpenMode
@@ -25,18 +25,30 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { SpecPageContainerDocument } from '../../generated/graphql'
-import { getAutIframeModel } from '../../runner'
+import { gql, useQuery, useSubscription } from '@urql/vue'
+import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument } from '../../generated/graphql'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
-import { togglePlayground } from '../../runner/utils'
 
 gql`
 query SpecPageContainer {
   ...SpecRunner
 }
 `
+
+gql`
+subscription SpecPageContainer_specsChange {
+  specsChange {
+    id
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
+  }
+}
+`
+
+useSubscription({ query: SpecPageContainer_SpecsChangeDocument })
 
 const isRunMode = window.__CYPRESS_MODE__ === 'run'
 
@@ -57,18 +69,11 @@ const query = useQuery({
 // be added or removed.
 const specs = window.__RUN_MODE_SPECS__
 
-// @ts-ignore - this is used for exposing the selector playground in e2e tests
-// TODO: migrate this to true e2e test w/o the hack using Cypress-in-Cypress when
-// that is supported.
-window.__showSelectorPlaygroundForTestingPurposes = () => {
-  togglePlayground(getAutIframeModel())
-}
-
 </script>
 
 <route>
   {
-    name: 'SpecsRunner',
+    name: 'SpecRunner',
     meta: {
       header: false,
       navBarExpandedAllowed: false

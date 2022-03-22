@@ -21,7 +21,7 @@ export class ServerCt extends ServerBase<SocketCt> {
       this.server.on('connect', this.onConnect.bind(this))
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
-      graphqlWS(this.server, `${socketIoRoute}-graphql`)
+      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
 
       return this._listen(port, (err) => {
         if (err.code === 'EADDRINUSE') {

@@ -1,10 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-
-function getPathForPlatform (posixPath: string) {
-  if (Cypress.platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
+import { getPathForPlatform } from '../../src/paths'
 
 function getRunnerHref (specPath: string) {
   specPath = getPathForPlatform(specPath)
@@ -129,12 +124,10 @@ describe('App: Index', () => {
           cy.get('@CloseDialogButton').click()
           cy.findByRole('dialog').should('not.exist')
 
-          // TODO Asserts are flakey around the spec page update after scaffolding,
-          // re-evaluate when https://github.com/cypress-io/cypress/pull/19619 is merged
-          // expectedScaffoldPaths.forEach((spec) => {
-          //   // Validate that links for each generated spec are rendered
-          //   cy.get(`a[href="#/specs/runner?file=${spec}"`).should('exist')
-          // })
+          expectedScaffoldPaths.forEach((spec) => {
+            // Validate that links for each generated spec are rendered
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
+          })
         })
 
         it('dismisses scaffold dialog with action button press', () => {
@@ -207,10 +200,9 @@ describe('App: Index', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
-          cy.percySnapshot('Generator success')
+          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
 
-          // TODO: code rendering is flaky in CI
-          // cy.get('code').should('contain', 'describe(\'MyTest.cy.js\'')
+          cy.percySnapshot('Generator success')
 
           cy.get('[aria-label="Close"]').click()
 
@@ -407,12 +399,13 @@ describe('App: Index', () => {
 
           cy.get('[data-cy="create-spec-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/writing-and-organizing-tests')
 
-          // TODO: Check that the popup stays open
           cy.withCtx(async (ctx, o) => {
             const stats = await ctx.actions.file.checkIfFileExists(o.path)
 
             expect(stats?.isFile()).to.be.true
           }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).should('be.visible')
         })
       })
     })
@@ -707,15 +700,15 @@ describe('App: Index', () => {
 
         it('shows success modal when spec is created from component', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.findAllByTestId('file-list-row').contains('App.jsx').as('NewSpecFile')
+            cy.findByLabelText('file-name-input').focus().type('App.jsx')
 
             // TODO: assert visibility of secondary text on hover/focus when
             // item is made keyboard accessible
             // https://cypress-io.atlassian.net/browse/UNIFY-864
-            // cy.get('@NewSpecFile).focus()
-            // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
+            // cy.contains('file-list-row', 'App.jsx').focus()
+            // cy.findByText('src/stories/App.jsx').should('be.visible')
 
-            cy.get('@NewSpecFile').click()
+            cy.findAllByTestId('file-list-row').contains('App.jsx').click()
           })
 
           cy.findByRole('dialog', {
@@ -741,32 +734,33 @@ describe('App: Index', () => {
           })
         })
 
-        // TODO: Generated spec is no longer found by runner, need to determine why
-        it.skip('navigates to spec runner when selected', () => {
+        it('navigates to spec runner when selected', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
-            cy.get('@NewSpecFile').click()
+            cy.findByLabelText('file-name-input').focus().type('App.jsx')
+            cy.findAllByTestId('file-list-row').contains('App.jsx').click()
           })
 
-          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('cypress.config.cy.js')).click()
+            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
           })
 
-          cy.findByTestId('spec-gen-component-app', { timeout: 5000 }).should('be.visible')
+          cy.get('#main-pane').should('be.visible')
+
+          cy.location().its('href').should('contain', getRunnerHref('src/App.cy.jsx'))
         })
 
         it('displays alert with docs link on new spec', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
-            cy.get('@NewSpecFile').click()
+            cy.findByLabelText('file-name-input').focus().type('App.jsx')
+            cy.findAllByTestId('file-list-row').contains('App.jsx').click()
           })
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('cypress.config.cy.js')).click()
+            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
           })
 
           cy.contains('Review the docs')
