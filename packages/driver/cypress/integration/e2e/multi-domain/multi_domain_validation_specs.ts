@@ -179,7 +179,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
     it('errors passing non-array to callback function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to be an object. You passed: `foo`')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'options\' argument to be an object. You passed: `foo`')
 
         done()
       })
@@ -190,7 +190,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
     it('errors passing in empty object to callback function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to contain an \'args\' key. You passed: `{}`')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'options\' argument to contain an \'args\' key. You passed: `{}`')
 
         done()
       })
@@ -199,9 +199,9 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('foobar.com', {}, () => {})
     })
 
-    it('errors if passed a non-serializable data value', (done) => {
+    it('errors if passed a non-serializable args value', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('data argument specified is not serializable')
+        expect(err.message).to.include('arguments specified are not serializable')
 
         if (Cypress.browser.family === 'chromium') {
           expect(err.message).to.include('HTMLDivElement object could not be cloned')

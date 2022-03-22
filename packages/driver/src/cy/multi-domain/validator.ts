@@ -11,7 +11,7 @@ export class Validator {
     this.onFailure = onFailure
   }
 
-  validate ({ callbackFn, data, originOrDomain }) {
+  validate ({ callbackFn, options, originOrDomain }) {
     if (!isString(originOrDomain)) {
       this.onFailure()
 
@@ -21,19 +21,19 @@ export class Validator {
       })
     }
 
-    if (data && (!isObject(data) || Array.isArray(data))) {
+    if (options && (!isObject(options) || Array.isArray(options))) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.invalid_data_argument', {
+      $errUtils.throwErrByPath('switchToDomain.invalid_options_argument', {
         onFail: this.log,
-        args: { arg: $utils.stringify(data) },
+        args: { arg: $utils.stringify(options) },
       })
-    } else if (data && !Object.getOwnPropertyDescriptor(data, 'args')) {
+    } else if (options && !Object.getOwnPropertyDescriptor(options, 'args')) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.incomplete_data_argument', {
+      $errUtils.throwErrByPath('switchToDomain.incomplete_options_argument', {
         onFail: this.log,
-        args: { arg: $utils.stringify(data) },
+        args: { arg: $utils.stringify(options) },
       })
     }
 

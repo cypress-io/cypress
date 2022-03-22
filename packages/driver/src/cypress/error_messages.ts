@@ -1718,11 +1718,11 @@ export default {
     invalid_origin_argument: {
       message: `${cmd('switchToDomain')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
     },
-    invalid_data_argument: {
-      message: `${cmd('switchToDomain')} requires the 'data' argument to be an object. You passed: \`{{arg}}\``,
+    invalid_options_argument: {
+      message: `${cmd('switchToDomain')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
     },
-    incomplete_data_argument: {
-      message: `${cmd('switchToDomain')} requires the 'data' argument to contain an 'args' key. You passed: \`{{arg}}\``,
+    incomplete_options_argument: {
+      message: `${cmd('switchToDomain')} requires the 'options' argument to contain an 'args' key. You passed: \`{{arg}}\``,
     },
     invalid_fn_argument: {
       message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
@@ -1733,7 +1733,7 @@ export default {
 
         > {{error}}
 
-      This is likely because the data argument specified is not serializable. Note that functions and DOM objects cannot be serialized.`,
+      This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\

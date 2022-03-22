@@ -1925,9 +1925,9 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    switchToDomain<T>(originOrDomain: string, data: {
+    switchToDomain<T>(originOrDomain: string, options: {
       args: T
-    }, fn: (data: T) => void): Chainable
+    }, fn: (args: T) => void): Chainable
 
     /**
      * Run a task in Node via the plugins file.
