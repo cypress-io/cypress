@@ -144,14 +144,12 @@ export class ProjectConfigManager {
         this._eventProcess = child
         this._eventsIpc = ipc
 
-        if (!this._testingType || this._eventsIpcResult.state === 'loading') {
-          return
-        }
+        if (this._testingType && this._eventsIpcResult.state !== 'loading') {
+          this.options.onConfigLoaded()
 
-        this.options.onConfigLoaded()
-
-        if (this.isTestingTypeConfigured(this._testingType) || this.options.isRunMode) {
-          this.setupNodeEvents().catch(this.onLoadError)
+          if (this.isTestingTypeConfigured(this._testingType) || this.options.isRunMode) {
+            this.setupNodeEvents().catch(this.onLoadError)
+          }
         }
       }
 
