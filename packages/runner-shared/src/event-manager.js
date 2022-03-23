@@ -582,12 +582,21 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
 
+    const crossOriginLogs = {}
+
     Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
-      reporterBus.emit('reporter:log:add', attrs)
+      // Create a new local log representation of the cross origin log.
+      // It will be attached to the current command.
+      // We also keep a reference to it to update it in the future.
+      crossOriginLogs[attrs.id] = Cypress.log(attrs)
     })
 
     Cypress.multiDomainCommunicator.on('log:changed', (attrs) => {
-      reporterBus.emit('reporter:log:state:changed', attrs)
+      // Retrieve the referenced log and update it.
+      const log = crossOriginLogs[attrs.id]
+
+      // this will trigger a log changed event for the log itself.
+      log?.set(attrs)
     })
   },
 

@@ -5,6 +5,7 @@ import { createUnserializableSubjectProxy } from './unserializable_subject_proxy
 import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
 import { $Location } from '../../cypress/location'
+import { LogUtils } from '../../cypress/log'
 
 const reHttp = /^https?:\/\//
 
@@ -192,6 +193,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
+                logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
               const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
