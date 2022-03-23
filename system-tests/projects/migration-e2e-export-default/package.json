@@ -2,5 +2,5 @@
   "dependencies": {
     "typescript": "^4.0.0"
   },
-  "_cySkipYarnInstall": true
+  "_cySkipDepInstall": true
 }
