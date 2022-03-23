@@ -1,12 +1,12 @@
 declare global {
   namespace Cypress {
     interface Chainable {
-      attachFileWithPath: (path: string) => Chainable<HTMLInputElement>
+      attachFileWithPath: (path: string) => Chainable<JQuery<HTMLInputElement>>
     }
   }
 }
 
-export function attachedFileWithPath (subject: HTMLInputElement, path: string) {
+export function attachFileWithPath (subject, path: string) {
   const attachedFile = new File([new Blob()], 'cypress.config.ts')
 
   Object.defineProperty(attachedFile, 'path', { value: path })
@@ -22,6 +22,5 @@ export function attachedFileWithPath (subject: HTMLInputElement, path: string) {
 Cypress.Commands.add(
   'attachFileWithPath',
   { prevSubject: true },
-  // TODO: Figure out why https://github.com/cypress-io/cypress/pull/19003 isn't fixing this?
-  attachedFileWithPath as any,
+  attachFileWithPath,
 )

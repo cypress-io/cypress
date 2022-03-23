@@ -24,6 +24,7 @@ export const remoteSchemaWrapped = wrapSchema({
         info,
         operationName: getOperationName(info),
         transformedSchema,
+        rootValue: _parent,
       })
     }
   },
