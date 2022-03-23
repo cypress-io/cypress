@@ -3022,7 +3022,7 @@ describe('Routes', () => {
         })
 
         this.server._eventBus.on('cross:domain:delaying:html', () => {
-          this.server._eventBus.emit('ready:for:domain', { shouldInject: true })
+          this.server._eventBus.emit('ready:for:domain', { originPolicy: 'http://foobar.com' })
         })
 
         return this.rp({

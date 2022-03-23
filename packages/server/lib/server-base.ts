@@ -169,12 +169,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   setupMultiDomain () {
     this._eventBus.on('cross:domain:delaying:html', (request) => {
-      this.socket.localBus.once('ready:for:domain', () => {
-        this._eventBus.emit('ready:for:domain')
-      })
-
-      this.socket.localBus.once('ready:for:domain:failed', () => {
-        this._eventBus.emit('ready:for:domain:failed')
+      this.socket.localBus.once('ready:for:domain', (args) => {
+        this._eventBus.emit('ready:for:domain', args)
       })
 
       this.socket.toDriver('cross:domain:delaying:html', request)
@@ -183,13 +179,15 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // This is handled separately from above since we may not need to delay the html
     // when we are in the scenario where the user creates the switchToDomain first
     // and then visits or navigates within the secondary domain
-    this.socket.localBus.on('ready:for:domain', (originPolicy) => {
+    this.socket.localBus.on('ready:for:domain', ({ originPolicy, failed }) => {
+      if (failed) return
+
       const existingOrigin = this._remoteStates.get(originPolicy)
 
       // since this is just the switchToDomain starting, we don't want to override
       // the existing origin if it already exists
       if (!existingOrigin) {
-        this._addRemoteState(originPolicy)
+        this._setRemoteStateFor(originPolicy)
       }
 
       this._originStack.push(originPolicy)
@@ -521,7 +519,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }) as Cypress.RemoteState
   }
 
-  _addRemoteState (url: string, options: { auth?: {}} = {}) {
+  _setRemoteStateFor (url: string, options: { auth?: {}} = {}) {
     const remoteOrigin = origin(url)
     const remoteProps = cors.parseUrlIntoDomainTldPort(remoteOrigin)
     const remoteOriginPolicy = cors.getOriginPolicy(url)

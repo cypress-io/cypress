@@ -36,7 +36,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // response. This typically happens during a redirect where the user does
     // not have a switchToDomain for the intermediary domain.
     timeoutId = setTimeout(() => {
-      Cypress.backend('ready:for:domain:failed')
+      Cypress.backend('ready:for:domain', { failed: true })
     }, 300)
   })
 
@@ -75,7 +75,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const validator = new Validator({
         log,
         onFailure: () => {
-          Cypress.backend('ready:for:domain:failed')
+          Cypress.backend('ready:for:domain', { failed: true })
         },
       })
 
@@ -130,7 +130,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           // lets the proxy know to allow the response for the secondary
           // domain html through, so the page will finish loading
-          Cypress.backend('ready:for:domain', location.originPolicy)
+          Cypress.backend('ready:for:domain', { originPolicy: location.originPolicy })
 
           if (err) {
             return _reject(err)

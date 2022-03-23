@@ -923,7 +923,7 @@ describe('Server', () => {
             fileServer: this.fileServer,
           })
 
-          this.server.socket.localBus.emit('ready:for:domain', 'http://cypress.io')
+          this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
 
           expect(this.server._getRemoteState()).to.deep.eq({
             auth: undefined,
@@ -997,7 +997,7 @@ describe('Server', () => {
             'Content-Type': 'text/html',
           })
 
-          this.server.socket.localBus.emit('ready:for:domain', 'http://cypress.io')
+          this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
 
           return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isMultiDomain: true })
           .then(() => {
@@ -1015,7 +1015,7 @@ describe('Server', () => {
               fileServer: null,
             })
 
-            this.server.socket.localBus.emit('ready:for:domain', 'http://cypress.io')
+            this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
 
             // Verify the existing secondary remote state is not overridden
             expect(this.server._getRemoteState()).to.deep.eq({
@@ -1035,13 +1035,13 @@ describe('Server', () => {
 
         context('#_getRemoteStateFor()', () => {
           it('returns undefined for not found remote state', function () {
-            this.server._addRemoteState('http://www.cypress.io/')
+            this.server._setRemoteStateFor('http://www.cypress.io/')
 
             expect(this.server._getRemoteStateFor('http://notfound.com/')).to.be.undefined
           })
 
           it('returns primary remote state', function () {
-            this.server._addRemoteState('http://www.cypress.io/')
+            this.server._setRemoteStateFor('http://www.cypress.io/')
 
             expect(this.server._getRemoteStateFor('http://localhost:2000')).to.deep.eq({
               auth: undefined,
@@ -1054,7 +1054,7 @@ describe('Server', () => {
           })
 
           it('returns secondary remote state', function () {
-            this.server._addRemoteState('http://www.cypress.io/')
+            this.server._setRemoteStateFor('http://www.cypress.io/')
 
             expect(this.server._getRemoteStateFor('http://cypress.io')).to.deep.eq({
               auth: undefined,
@@ -1073,8 +1073,8 @@ describe('Server', () => {
 
         context('#_resetRemoteState()', () => {
           it('returns undefined for not found remote state', function () {
-            this.server.socket.localBus.emit('ready:for:domain', 'http://cypress.io')
-            this.server.socket.localBus.emit('ready:for:domain', 'http://example.com')
+            this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+            this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://example.com' })
 
             expect(this.server._originStack).to.deep.equal(['http://localhost:2000', 'http://cypress.io', 'http://example.com'])
             expect(this.server._remoteStates.size).to.equal(2)

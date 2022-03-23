@@ -298,7 +298,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 if (isOk && details.isHtml) {
                   // if we are in multi-domain, add it to the remote states
                   if (options.isMultiDomain) {
-                    this._addRemoteState(newUrl as string, options)
+                    this._setRemoteStateFor(newUrl as string, options)
                   // if we're not handling a local file set the domain to the new url
                   } else if (!handlingLocalFile) {
                     this._onDomainSet(newUrl, options)

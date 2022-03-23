@@ -281,7 +281,7 @@ describe('http/response-middleware', function () {
       return promise
     })
 
-    it('waits for server signal, letting it continue after receiving ready:for:domain:failed', function () {
+    it('waits for server signal, letting it continue after receiving ready:for:domain failed', function () {
       prepareContext({
         req: {
           isAUTFrame: true,
@@ -304,7 +304,7 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain:failed').args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain', { failed: true }).args[0][1]()
 
       expect(ctx.res.wantsInjection).to.be.undefined
 
