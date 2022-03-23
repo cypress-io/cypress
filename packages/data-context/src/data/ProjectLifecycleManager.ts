@@ -88,7 +88,6 @@ export class ProjectLifecycleManager {
   private _currentTestingType: TestingType | null = null
   private _runModeExitEarly: ((error: Error) => void) | undefined
   private _projectRoot: string | undefined
-  private _configFilePath: string | undefined
   private _configManager: ProjectConfigManager | undefined
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
   _pendingMigrationInitialize?: pDefer.DeferredPromise<void>
@@ -566,6 +565,7 @@ export class ProjectLifecycleManager {
    * onboarding screens, suggestions in the onboarding wizard, etc.
    */
   refreshMetaState (): ProjectMetaState {
+    let configFilePathSet = false
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
@@ -634,17 +634,19 @@ export class ProjectLifecycleManager {
 
         // We've found our first config file! We'll continue looping to make sure there's
         // only one. Looping over all config files is done so we can provide rich errors and warnings.
-        if (!this._configFilePath) {
+        if (!configFilePathSet) {
           metaState.hasValidConfigFile = true
           this.setConfigFilePath(fileName)
+          configFilePathSet = true
         }
       }
     }
 
     // We finished looping through all of the possible config files
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
-    if (!this._configFilePath) {
+    if (!this._configManager?.configFilePath) {
       this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+      configFilePathSet = true
     }
 
     if (metaState.hasLegacyCypressJson && !metaState.hasValidConfigFile) {
