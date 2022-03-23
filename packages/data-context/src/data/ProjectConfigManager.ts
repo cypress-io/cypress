@@ -52,6 +52,7 @@ type ProjectConfigManagerOptions = {
   initializeActiveProject: (options?: OpenProjectLaunchOptions) => Promise<unknown>
   setupFullConfigWithDefaults: (config: SetupFullConfigOptions) => Promise<FullConfig>
   machineBrowsers: () => FoundBrowser[] | Promise<FoundBrowser[]>
+  setSpecsFoundForConfig: (config: FullConfig) => Promise<void>
 }
 
 export class ProjectConfigManager {
@@ -557,6 +558,10 @@ export class ProjectConfigManager {
     await this.options.setActiveBrowser()
 
     this._pendingInitialize?.resolve(finalConfig)
+
+    if (this._testingType && finalConfig[this._testingType]?.specPattern) {
+      await this.options.setSpecsFoundForConfig(fullConfig)
+    }
 
     return result
   }

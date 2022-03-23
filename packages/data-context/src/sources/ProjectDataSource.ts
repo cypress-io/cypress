@@ -198,13 +198,7 @@ export class ProjectDataSource {
     const onSpecsChanged = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
-      this.setSpecs(specs)
-
-      if (testingType === 'component') {
-        this.api.getDevServer().updateSpecs(specs)
-      }
-
-      this.ctx.emitter.toApp()
+      this.ctx.actions.project.setSpecs(specs)
     })
 
     this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)

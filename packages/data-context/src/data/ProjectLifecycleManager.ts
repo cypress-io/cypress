@@ -278,6 +278,17 @@ export class ProjectLifecycleManager {
       setupFullConfigWithDefaults: async (config) => {
         return this.ctx._apis.configApi.setupFullConfigWithDefaults(config)
       },
+      setSpecsFoundForConfig: async (config) => {
+        assert(this._currentTestingType)
+
+        await this.ctx.actions.project.setSpecsFoundBySpecPattern({
+          path: this.projectRoot,
+          testingType: this._currentTestingType,
+          specPattern: this.ctx.modeOptions.spec || config[this._currentTestingType]?.specPattern,
+          excludeSpecPattern: config[this._currentTestingType]?.excludeSpecPattern,
+          additionalIgnorePattern: this._currentTestingType === 'component' ? config.e2e?.specPattern : undefined,
+        })
+      },
     })
   }
 
@@ -572,10 +583,6 @@ export class ProjectLifecycleManager {
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 
-    if (configFile === false) {
-      return metaState
-    }
-
     try {
       // Find the suggested framework, starting with meta-frameworks first
       const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
@@ -594,7 +601,7 @@ export class ProjectLifecycleManager {
       // No need to handle
     }
 
-    if (typeof configFile === 'string') {
+    if (configFile) {
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
