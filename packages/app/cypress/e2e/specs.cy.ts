@@ -126,7 +126,7 @@ describe('App: Index', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
+            cy.get(`a[href="${getRunnerHref(spec)}"`).scrollIntoView().should('exist')
           })
         })
 
@@ -320,7 +320,7 @@ describe('App: Index', () => {
 
         cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
-        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{spec,cy}.{js,jsx}')
+        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
@@ -362,27 +362,73 @@ describe('App: Index', () => {
         })
       })
 
-      it('shows preferred pattern warning', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
-        cy.get('[data-cy="create-spec-modal"]').within(() => {
-          cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
+      context('scaffold empty spec', () => {
+        it('should generate empty spec', () => {
+          cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+            cy.findAllByTestId('card').eq(0)
+            .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+
+            cy.findAllByTestId('card').eq(1)
+            .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
+          })
+
+          cy.contains('Create new empty spec').click()
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/filename.cy.js'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+          cy.get('@enterSpecInput').clear()
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+
+          // Shows entered file does not match spec pattern
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+          cy.percySnapshot('Invalid spec error')
+
+          // Create spec
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/MyTest.cy.js'))
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/MyTest.cy.js')).click()
+
+          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
+
+          cy.percySnapshot('Generator success')
+
+          cy.get('[aria-label="Close"]').click()
+
+          cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')
         })
+      })
+
+      it('shows extension warning', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(0)
+          .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+
+          cy.findAllByTestId('card').eq(1)
+          .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
+        })
+
+        cy.contains('Create new empty spec').click()
 
         cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
         .as('enterSpecInput')
 
-        // Shows entered file does not match spec pattern
-        cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
-        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
-
-        cy.percySnapshot('Invalid spec error')
-
-        //Shows extension warning
-        cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/test/MyTest.spec.js'))
+        cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/MyTest.spec.jsx'))
 
         cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
         cy.percySnapshot('Non-recommended spec pattern warning')
+        cy.contains('span', '{filename}.cy.jsx')
       })
     })
 

@@ -11,6 +11,6 @@ module.exports = {
   },
   e2e: {
     supportFile: false,
-    specPattern: 'src/**/*.{spec,cy}.{js,jsx}',
+    specPattern: 'src/**/*.{cy,spec}.{js,jsx}',
   },
 }

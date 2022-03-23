@@ -45,6 +45,7 @@ export interface RemoteGraphQLInterceptPayload {
   variables: Record<string, any>
   document: DocumentNode
   result: ExecutionResult
+  callCount: number
 }
 
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult>
