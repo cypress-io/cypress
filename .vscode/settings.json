@@ -36,6 +36,9 @@
   "i18n-ally.keystyle": "nested",
 
   // Volar is the main extension that powers Vue's language features.
+  // These are commented out because they slow down node development
   // "volar.autoCompleteRefs": false,
   "volar.takeOverMode.enabled": true,
+
+  "editor.tabSize": 2,
 }
