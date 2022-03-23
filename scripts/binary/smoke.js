@@ -162,7 +162,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
 
 const test = async function (buildAppExecutable) {
   await scaffoldCommonNodeModules()
-  Fixtures.scaffoldProject('e2e')
+  await Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
   await runSmokeTest(buildAppExecutable)
