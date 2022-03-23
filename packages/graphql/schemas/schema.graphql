@@ -388,6 +388,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """Default spec file name for spec creation"""
+  defaultSpecFileName: String
+
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
@@ -1001,7 +1004,7 @@ type Mutation {
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
-  openExternal(url: String!): Boolean
+  openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
 
   """Open a file on specified line and column in preferred IDE"""
   openFileInIDE(input: FileDetailsInput!): Boolean
@@ -1253,8 +1256,14 @@ type Subscription {
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
+  """"""
+  cloudViewerChange: Query
+
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""

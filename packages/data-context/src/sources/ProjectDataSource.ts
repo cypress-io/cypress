@@ -8,6 +8,9 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
+import parseGlob from 'parse-glob'
+import mm from 'micromatch'
+import RandExp from 'randexp'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
@@ -99,6 +102,62 @@ export function transformSpec ({
     relative,
     absolute,
   }
+}
+
+export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?: 'js' | 'ts') {
+  function replaceWildCard (s: string, fallback: string) {
+    return s.replace(/\*/g, fallback)
+  }
+
+  const parsedGlob = parseGlob(specPattern)
+
+  if (!parsedGlob.is.glob) {
+    return specPattern
+  }
+
+  let dirname = parsedGlob.path.dirname
+
+  if (dirname.startsWith('**')) {
+    dirname = dirname.replace('**', 'cypress')
+  }
+
+  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, 'e2e')).join('/')
+  const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
+
+  const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+  let extname = replaceWildCard(extnameWithoutExt, 'cy')
+
+  if (extname.startsWith('.')) {
+    extname = extname.substr(1)
+  }
+
+  if (extname.endsWith('.')) {
+    extname = extname.slice(0, -1)
+  }
+
+  const basename = [fileName, extname, parsedGlob.path.ext].filter(Boolean).join('.')
+
+  const glob = splittedDirname + basename
+
+  const globWithoutBraces = mm.braces(glob, { expand: true })
+
+  let finalGlob = globWithoutBraces[0]
+
+  if (fileExtensionToUse) {
+    const filteredGlob = mm(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
+
+    if (filteredGlob?.length) {
+      finalGlob = filteredGlob[0]
+    }
+  }
+
+  if (!finalGlob) {
+    return
+  }
+
+  const randExp = new RandExp(finalGlob.replace(/\./g, '\\.'))
+
+  return randExp.gen()
 }
 
 export class ProjectDataSource {
@@ -196,18 +255,43 @@ export class ProjectDataSource {
     const onSpecsChanged = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
-      this.setSpecs(specs)
-
-      if (testingType === 'component') {
-        this.api.getDevServer().updateSpecs(specs)
-      }
-
-      this.ctx.emitter.toApp()
+      this.ctx.actions.project.setSpecs(specs)
     })
 
     this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
     this._specWatcher.on('add', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
+  }
+
+  async defaultSpecFileName () {
+    const defaultFileName = 'cypress/e2e/filename.cy.js'
+
+    try {
+      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+        return null
+      }
+
+      let specPatternSet: string | undefined
+      const { specPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+
+      if (Array.isArray(specPattern)) {
+        specPatternSet = specPattern[0]
+      }
+
+      if (!specPatternSet) {
+        return defaultFileName
+      }
+
+      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.lifecycleManager.fileExtensionToUse)
+
+      if (!specFileName) {
+        return defaultFileName
+      }
+
+      return specFileName
+    } catch {
+      return defaultFileName
+    }
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {
