@@ -52,15 +52,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.electron, 'openExternal')
-      })
-
       cy.get('[href="#/runs"]').click()
       cy.contains('a', 'OVERLIMIT').click()
 
       cy.withCtx((ctx) => {
-        expect(ctx.actions.electron.openExternal).to.have.been.calledWith('http://dummy.cypress.io/runs/4')
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/4')
       })
     })
   })
@@ -396,15 +392,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.electron, 'openExternal')
-      })
-
       cy.get('[href="#/runs"]').click()
       cy.get('[data-cy^="runCard-"]').first().click()
 
       cy.withCtx((ctx) => {
-        expect(ctx.actions.electron.openExternal).to.have.been.calledWith('http://dummy.cypress.io/runs/0')
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/0')
       })
     })
   })
