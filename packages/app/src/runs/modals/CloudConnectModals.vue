@@ -27,8 +27,9 @@ import { ref } from 'vue'
 import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
 import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
 import NeedManualUpdateModal from './NeedManualUpdateModal.vue'
-import { gql } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import type { CloudConnectModalsFragment } from '../../generated/graphql'
+import { CheckCloudOrganizationsDocument } from '../../generated/graphql'
 
 gql`
 fragment CloudConnectModals on Query {
@@ -43,6 +44,16 @@ fragment CloudConnectModals on Query {
   }
 }
 `
+
+gql`
+subscription CheckCloudOrganizations {
+  cloudViewerChange {
+    ...CloudConnectModals
+  }
+}
+`
+
+useSubscription({ query: CheckCloudOrganizationsDocument })
 
 const emit = defineEmits<{
   (event: 'success'): void
