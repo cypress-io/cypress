@@ -35,7 +35,6 @@ interface RequireWatchers {
 }
 
 type ProjectConfigManagerOptions = {
-  configFilePath: string
   configFile: string | false
   projectRoot: string
   nodePath: string | null | undefined
@@ -56,6 +55,7 @@ type ProjectConfigManagerOptions = {
 }
 
 export class ProjectConfigManager {
+  private _configFilePath: string | undefined
   private _envFileResult: EnvFileResultState = { state: 'pending' }
   private _configResult: ConfigResultState = { state: 'pending' }
   private _cachedFullConfig: FullConfig | undefined
@@ -104,6 +104,16 @@ export class ProjectConfigManager {
     return this._configResult.state === 'loaded'
   }
 
+  get configFilePath () {
+    assert(this._configFilePath)
+
+    return this._configFilePath
+  }
+
+  set configFilePath (configFilePath) {
+    this._configFilePath = configFilePath
+  }
+
   setTestingType (testingType: TestingType) {
     this._testingType = testingType
   }
@@ -130,9 +140,9 @@ export class ProjectConfigManager {
 
     promise.then((result) => {
       if (this._configResult.value === promise) {
-        debug(`config is loaded for file`, this.options.configFilePath, this._testingType)
+        debug(`config is loaded for file`, this.configFilePath, this._testingType)
         this._configResult = { state: 'loaded', value: result }
-        this.validateConfigFile(this.options.configFilePath, result.initialConfig)
+        this.validateConfigFile(this.configFilePath, result.initialConfig)
 
         this.watchRequires('config', result.requires)
 
@@ -205,11 +215,12 @@ export class ProjectConfigManager {
   }
 
   private forkConfigProcess () {
-    const configProcessArgs = ['--projectRoot', this.options.projectRoot, '--file', this.options.configFilePath]
+    assert(this.configFilePath)
+    const configProcessArgs = ['--projectRoot', this.options.projectRoot, '--file', this.configFilePath]
 
     const childOptions: ForkOptions = {
       stdio: 'pipe',
-      cwd: path.dirname(this.options.configFilePath),
+      cwd: path.dirname(this.configFilePath),
       env: {
         ...process.env,
         NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
@@ -660,7 +671,7 @@ export class ProjectConfigManager {
     ipc.send('setupTestingType', this._testingType, {
       ...orderedConfig,
       projectRoot: this.options.projectRoot,
-      configFile: this.options.configFilePath,
+      configFile: this.configFilePath,
       version: this.options.cypressVersion,
       testingType: this._testingType,
     })

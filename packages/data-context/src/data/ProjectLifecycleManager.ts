@@ -139,11 +139,18 @@ export class ProjectLifecycleManager {
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? (this.configFilePath && path.basename(this.configFilePath)) ?? 'cypress.config.js'
+    return this.ctx.modeOptions.configFile ?? (this._configManager?.configFilePath && path.basename(this._configManager.configFilePath)) ?? 'cypress.config.js'
   }
 
   get configFilePath () {
-    return this._configFilePath
+    assert(this._configManager)
+
+    return this._configManager.configFilePath
+  }
+
+  setConfigFilePath (fileName: string) {
+    assert(this._configManager)
+    this._configManager.configFilePath = this._pathToFile(fileName)
   }
 
   get envFilePath () {
@@ -221,7 +228,6 @@ export class ProjectLifecycleManager {
 
   #createConfigManager () {
     return new ProjectConfigManager({
-      configFilePath: this.configFilePath,
       configFile: this.configFile,
       projectRoot: this.projectRoot,
       nodePath: this.ctx.nodePath,
@@ -323,6 +329,9 @@ export class ProjectLifecycleManager {
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
     this.resetInternalState()
+
+    this._configManager = this.#createConfigManager()
+
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.packageManager = packageManagerUsed
@@ -347,7 +356,6 @@ export class ProjectLifecycleManager {
     }
 
     this.configFileWarningCheck()
-    this._configManager = this.#createConfigManager()
 
     if (this.metaState.hasValidConfigFile) {
       // at this point, there is not a cypress configuration file to initialize
@@ -602,8 +610,8 @@ export class ProjectLifecycleManager {
           }
         }
       } else {
-        this._configFilePath = this._pathToFile(configFile)
-        if (fs.existsSync(this._configFilePath)) {
+        this.setConfigFilePath(configFile)
+        if (fs.existsSync(this.configFilePath)) {
           metaState.hasValidConfigFile = true
         }
       }
@@ -646,10 +654,6 @@ export class ProjectLifecycleManager {
     this._projectMetaState = metaState
 
     return metaState
-  }
-
-  setConfigFilePath (fileName: string) {
-    this._configFilePath = this._pathToFile(fileName)
   }
 
   private _pathToFile (file: string) {
