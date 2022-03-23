@@ -585,10 +585,8 @@ describe('Routes', () => {
         return this.setup({
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
-            e2e: {
-              specPattern: 'my-tests/**/*',
-              supportFile: 'helpers/includes.js',
-            },
+            specPattern: 'my-tests/**/*',
+            supportFile: 'helpers/includes.js',
           },
         })
       })
@@ -793,10 +791,8 @@ describe('Routes', () => {
           return this.setup({
             projectRoot: Fixtures.projectPath('todos'),
             config: {
-              e2e: {
-                specPattern: 'tests/**/*',
-                supportFile: false,
-              },
+              specPattern: 'tests/**/*',
+              supportFile: false,
               fixturesFolder: 'tests/_fixtures',
             },
           })
@@ -3104,10 +3100,8 @@ describe('Routes', () => {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             fileServerFolder: 'dev',
-            e2e: {
-              specPattern: 'my-tests/**/*',
-              supportFile: false,
-            },
+            specPattern: 'my-tests/**/*',
+            supportFile: false,
           },
         })
         .then(() => {
