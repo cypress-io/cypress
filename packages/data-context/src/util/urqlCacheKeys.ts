@@ -37,5 +37,6 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     CloudProjectUnauthorized: (data) => data.__typename,
     GeneratedSpecError: () => null,
     GenerateSpecResponse: (data) => data.__typename,
+    LastBrowser: () => null,
   },
 }
