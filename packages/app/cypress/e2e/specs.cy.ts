@@ -320,7 +320,7 @@ describe('App: Index', () => {
 
         cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
-        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
+        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
