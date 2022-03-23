@@ -313,6 +313,7 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
             - ~/.yarn
+            - ~/.cy-npm-cache
 
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
