@@ -173,6 +173,61 @@ describe('http/response-middleware', function () {
       })
     })
 
+    it('doesn\'t do anything when request is for a previous origin in the stack', function () {
+      prepareContext({
+        req: {
+          isAUTFrame: true,
+          proxiedUrl: 'http://www.foobar.com/test',
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        getOriginStack () {
+          return ['http://127.0.0.1:3501', 'http://foobar.com', 'http://example.com']
+        },
+        config: {
+          experimentalMultiDomain: true,
+        },
+      })
+
+      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      .then(() => {
+        expect(ctx.serverBus.emit).not.to.be.called
+      })
+    })
+
+    it('waits for server signal if req is not of a previous origin, letting it continue after receiving ready:for:domain', function () {
+      prepareContext({
+        req: {
+          isAUTFrame: true,
+          proxiedUrl: 'http://www.idp.com/test',
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        getOriginStack () {
+          return ['http://127.0.0.1:3501', 'http://foobar.com', 'http://example.com']
+        },
+        config: {
+          experimentalMultiDomain: true,
+        },
+      })
+
+      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
+
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+
+      expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+
+      return promise
+    })
+
     it('waits for server signal if res is html, letting it continue after receiving ready:for:domain', function () {
       prepareContext({
         incomingRes: {
@@ -222,6 +277,36 @@ describe('http/response-middleware', function () {
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
       expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+
+      return promise
+    })
+
+    it('waits for server signal, letting it continue after receiving ready:for:domain:failed', function () {
+      prepareContext({
+        req: {
+          isAUTFrame: true,
+          proxiedUrl: 'http://www.idp.com/test',
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        getOriginStack () {
+          return ['http://127.0.0.1:3501', 'http://foobar.com', 'http://example.com']
+        },
+        config: {
+          experimentalMultiDomain: true,
+        },
+      })
+
+      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
+
+      ctx.serverBus.once.withArgs('ready:for:domain:failed').args[0][1]()
+
+      expect(ctx.res.wantsInjection).to.be.undefined
 
       return promise
     })
@@ -368,6 +453,31 @@ describe('http/response-middleware', function () {
       })
     })
 
+    it('injects "fullMultiDomain" when request is in origin stack for cross-domain html"', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://example.com',
+          isAUTFrame: true,
+          cookies: {},
+          headers: {},
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        originStack: ['http://127.0.0.1:3501', 'http://example.com', 'http://foobar.com'],
+        config: {
+          experimentalMultiDomain: true,
+        },
+      })
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+      })
+    })
+
     it('performs full injection on initial AUT html origin', function () {
       prepareContext({
         req: {
@@ -411,6 +521,41 @@ describe('http/response-middleware', function () {
           headers: {
             'content-type': 'text/html',
           },
+        },
+        originStack: ['http://127.0.0.1:3501'],
+      })
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.wantsInjection).to.equal('partial')
+      })
+    })
+
+    it('injects partial when request is for top-level origin', function () {
+      prepareContext({
+        renderedHTMLOrigins: {},
+        getRenderedHTMLOrigins () {
+          return this.renderedHTMLOrigins
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/',
+          isAUTFrame: true,
+          cookies: {},
+          headers: {
+            'accept': [
+              'text/html',
+              'application/xhtml+xml',
+            ],
+          },
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        originStack: ['http://127.0.0.1:3501', 'http://foobar.com'],
+        config: {
+          experimentalMultiDomain: true,
         },
       })
 
