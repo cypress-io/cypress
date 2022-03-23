@@ -158,12 +158,16 @@ async function makeE2ETasks () {
       sinon.stub(ctx.actions.electron, 'openExternal')
       sinon.stub(ctx.actions.electron, 'showItemInFolder')
 
+      const operationCount: Record<string, number> = {}
+
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
           if (String(url).endsWith('/test-runner-graphql')) {
             const { query, variables } = JSON.parse(String(init?.body))
             const document = parse(query)
             const operationName = getOperationName(document)
+
+            operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
 
             let result = await execute({
               operationName,
@@ -176,6 +180,8 @@ async function makeE2ETasks () {
               },
             })
 
+            operationCount[operationName ?? 'unknown']++
+
             if (remoteGraphQLIntercept) {
               try {
                 result = await remoteGraphQLIntercept({
@@ -184,6 +190,7 @@ async function makeE2ETasks () {
                   document,
                   query,
                   result,
+                  callCount: operationCount[operationName ?? 'unknown'],
                 })
               } catch (e) {
                 const err = e as Error
