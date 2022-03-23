@@ -16,19 +16,23 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('aut-url').should('be.visible')
     cy.findByTestId('playground-activator').should('not.exist')
 
+    cy.findByLabelText('Stats').within(() => {
+      cy.get('.passed .num', { timeout: 10000 }).should('have.text', '1')
+    })
+
     // confirm expected content is rendered
     cy.contains('1000x660').should('be.visible')
     cy.contains('71%').should('be.visible')
     cy.contains('Chrome 1').should('be.visible')
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
 
-    cy.percySnapshot()
-
     // confirm no interactions are implemented
     cy.findByTestId('viewport').click()
     cy.contains('The viewport determines').should('not.exist')
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
+
+    cy.percySnapshot()
   })
 
   it('component testing run mode spec runner header is correct', () => {
@@ -46,17 +50,21 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('aut-url').should('not.exist')
     cy.findByTestId('playground-activator').should('not.exist')
 
+    cy.findByLabelText('Stats').within(() => {
+      cy.get('.passed .num', { timeout: 10000 }).should('have.text', '1')
+    })
+
     // confirm expected content is rendered
     cy.contains('500x500').should('be.visible')
     cy.contains('Chrome 1').should('be.visible')
-
-    cy.percySnapshot()
 
     // confirm no interactions are implemented
     cy.findByTestId('viewport').click()
     cy.contains('The viewport determines').should('not.exist')
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
+
+    cy.percySnapshot()
   })
 })
 

@@ -29,12 +29,13 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
+import { gql, useQuery, useSubscription } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
-import { SpecsPageContainerDocument } from '../../generated/graphql'
+import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } from '../../generated/graphql'
+
 const { t } = useI18n()
 
 gql`
@@ -48,6 +49,20 @@ query SpecsPageContainer {
   }
 }
 `
+
+gql`
+subscription SpecsPageContainer_specsChange {
+  specsChange {
+    id
+    specs {
+      id
+      ...SpecsList
+    }
+  }
+}
+`
+
+useSubscription({ query: SpecsPageContainer_SpecsChangeDocument })
 
 const query = useQuery({ query: SpecsPageContainerDocument })
 
