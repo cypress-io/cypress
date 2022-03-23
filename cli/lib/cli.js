@@ -271,7 +271,7 @@ const addCypressOpenCommand = (program) => {
   .command('open')
   .usage('[options]')
   .description('Opens Cypress in the interactive GUI.')
-  .option('-b, --browser <browser-path>', text('browserOpenMode'))
+  .option('-b, --browser <browser-path>', text('browser'))
   .option('--component', text('component'))
   .option('-c, --config <config>', text('config'))
   .option('-C, --config-file <config-file>', text('configFile'))

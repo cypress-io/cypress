@@ -37,7 +37,7 @@ declare namespace CypressCommandLine {
   interface CypressRunOptions extends CypressCommonOptions {
     /**
      * Specify browser to run tests in, either by name or by filesystem path
-    */
+     */
     browser: string
     /**
      * Specify a unique identifier for a run to enable grouping or parallelization

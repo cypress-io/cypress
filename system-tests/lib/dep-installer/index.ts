@@ -271,7 +271,13 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
  */
 export async function scaffoldCommonNodeModules () {
   await Promise.all([
+    '@babel/preset-env',
+    '@babel/preset-react',
+    'babel-loader',
+    // Used for import { defineConfig } from 'cypress'
+    'cypress',
     '@cypress/code-coverage',
+    '@cypress/react',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',

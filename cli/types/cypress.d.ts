@@ -3406,7 +3406,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.arguments'): Chainable<Subject>
     /**
-     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('be.approximately', 5, 0.5)
      * @alias closeTo
@@ -3415,7 +3415,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.approximately', value: number, delta: number): Chainable<Subject>
     /**
-     * Asserts that the target is a number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('be.closeTo', 5, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
@@ -3590,7 +3590,7 @@ declare namespace Cypress {
     (chainer: 'contain', value: any): Chainable<Subject>
     /**
      * When one argument is provided, `.decrease` asserts that the given function `subject` returns a lesser number when it's invoked after invoking the target function compared to when it's invoked beforehand.
-     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. it's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
      *    let val = 1
      *    function subtractTwo() { val -= 2 }
@@ -3842,7 +3842,7 @@ declare namespace Cypress {
      * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it's
      * invoked after invoking the target function compared to when it's invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
-     * it's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * It's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      *
      * When two arguments are provided, `.increase` asserts that the value of the given object `subject`'s `prop` property is greater after
      * invoking the target function compared to beforehand.
@@ -4015,7 +4015,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.arguments'): Chainable<Subject>
     /**
-     * Asserts that the target is a not number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
+     * Asserts that the target is a not number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('not.be.approximately', 6, 0.5)
      * @alias closeTo
@@ -4024,7 +4024,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.approximately', value: number, delta: number): Chainable<Subject>
     /**
-     * Asserts that the target is not a number that’s within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
+     * Asserts that the target is not a number that's within a given +/- `delta` range of the given number `expected`. However, it's often best to assert that the target is equal to its expected value.
      * @example
      *    cy.wrap(5.1).should('not.be.closeTo', 6, 0.5)
      * @see http://chaijs.com/api/bdd/#method_closeto
@@ -4199,7 +4199,7 @@ declare namespace Cypress {
     (chainer: 'not.contain', value: any): Chainable<Subject>
     /**
      * When one argument is provided, `.decrease` asserts that the given function `subject` does not returns a lesser number when it's invoked after invoking the target function compared to when it's invoked beforehand.
-     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. it's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
+     * `.decrease` also causes all `.by` assertions that follow in the chain to assert how much lesser of a number is returned. It's often best to assert that the return value decreased by the expected amount, rather than asserting it decreased by any amount.
      * @example
      *    let val = 1
      *    function subtractTwo() { val -= 2 }
@@ -4426,7 +4426,7 @@ declare namespace Cypress {
      * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it's
      * invoked after invoking the target function compared to when it's invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
-     * it's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     * It's often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
      *
      * When two arguments are provided, `.increase` asserts that the value of the given object `subject`'s `prop` property is greater after
      * invoking the target function compared to beforehand.

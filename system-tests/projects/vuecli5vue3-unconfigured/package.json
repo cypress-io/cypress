@@ -18,5 +18,5 @@
     "not dead",
     "not ie 11"
   ],
-  "_cySkipYarnInstall": true
+  "_cySkipDepInstall": true
 }
