@@ -49,7 +49,7 @@ export class GitDataSource {
     try {
       return (await this.#git.getConfig('user.name')).value
     } catch (e) {
-      debug(`Failed to get current git user`, e.message)
+      debug(`Failed to get current git user`, (e as Error).message)
 
       return ''
     }
