@@ -129,6 +129,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.string('defaultSpecFileName', {
+      description: 'Default spec file name for spec creation',
+      resolve: (source, args, ctx) => {
+        return ctx.project.defaultSpecFileName()
+      },
+    })
+
     t.nonNull.list.nonNull.field('specs', {
       description: 'A list of specs for the currently open testing type of a project',
       type: Spec,
