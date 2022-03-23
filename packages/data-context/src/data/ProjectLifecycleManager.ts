@@ -349,7 +349,7 @@ export class ProjectLifecycleManager {
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.#legacyMigration(legacyConfigPath)
+      this.#legacyMigration(legacyConfigPath).catch(this.onLoadError)
 
       return
     }
@@ -483,23 +483,8 @@ export class ProjectLifecycleManager {
 
     legacyFileWatcher.on('all', (event, file) => {
       debug('WATCHER: config file event', event, file)
-      let shouldReloadConfig = this.configFile === file
-
-      if (!shouldReloadConfig) {
-        const metaState = this._projectMetaState
-        const nextMetaState = this.refreshMetaState()
-
-        shouldReloadConfig = !_.isEqual(metaState, nextMetaState)
-      }
-
-      if (shouldReloadConfig) {
-        this.ctx.update((coreData) => {
-          coreData.baseError = null
-        })
-
-        assert(this._configManager)
-        this._configManager.reloadConfig().catch(this.onLoadError)
-      }
+      assert(this._configManager)
+      this._configManager.reloadConfig().catch(this.onLoadError)
     })
 
     legacyFileWatcher.on('error', (err) => {
@@ -510,12 +495,8 @@ export class ProjectLifecycleManager {
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
-      this.ctx.update((coreData) => {
-        coreData.baseError = null
-      })
-
       assert(this._configManager)
-      this._configManager.reloadCypressEnvFile().catch(this.onLoadError)
+      this._configManager.reloadConfig().catch(this.onLoadError)
     })
   }
 
@@ -756,7 +737,9 @@ export class ProjectLifecycleManager {
    * for run mode
    */
   private onLoadError = (err: any) => {
-    if (!this.ctx.isRunMode) {
+    if (this.ctx.isRunMode && this._configManager) {
+      this._configManager.onLoadError(err)
+    } else {
       this.ctx.onError(err, 'Error Loading Config')
     }
   }

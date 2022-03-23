@@ -375,7 +375,7 @@ export class ProjectConfigManager {
     )
   }
 
-  private onLoadError = (err: any) => {
+  onLoadError = (err: any) => {
     if (this.options.isRunMode && this._pendingInitialize) {
       this._pendingInitialize.reject(err)
     } else {
