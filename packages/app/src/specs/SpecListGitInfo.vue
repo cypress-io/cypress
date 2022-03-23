@@ -62,7 +62,7 @@ const classes = computed(() => {
       indicator: 'border-transparent bg-transparent',
       gitText: 'text-gray-600 group-hocus:text-indigo-500',
     },
-  }[props.gql.statusType]
+  }[props.gql.statusType || 'modified']
 })
 
 const gitInfoText = computed(() => {
