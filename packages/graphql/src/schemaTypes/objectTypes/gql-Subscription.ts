@@ -17,6 +17,17 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ctx.coreData.dev,
     })
 
+    t.field('cloudViewerChange', {
+      type: Query,
+      description: '',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
+      resolve: (source, args, ctx) => {
+        return {
+          requestPolicy: 'network-only',
+        }
+      },
+    })
+
     t.field('browserStatusChange', {
       type: CurrentProject,
       description: 'Status of the currently opened browser',
