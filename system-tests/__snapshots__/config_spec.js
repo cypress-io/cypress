@@ -303,6 +303,9 @@ The testFiles configuration option is now invalid when set on the config object 
 
  https://on.cypress.io/migration-guide
 
+
+
+
 `
 
 exports['e2e config throws an error if componentFolder is set on the config file 1'] = `
@@ -319,4 +322,7 @@ The componentFolder configuration option is now invalid when set on the config o
 
  https://on.cypress.io/migration-guide
 
+
+
+ 
 `
