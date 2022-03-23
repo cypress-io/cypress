@@ -259,9 +259,7 @@ export function updateWithPluginValues (cfg, overrides) {
   debug('validate that there is no breaking config options added by setupNodeEvents')
 
   configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
-    throw errors.get(err, {
-      ...options,
-    })
+    throw errors.get(err, options)
   })
 
   const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
