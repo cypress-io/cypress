@@ -6,7 +6,7 @@
     :next-fn="confirmInstalled"
     class="max-w-640px relative"
     :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
-    :skip-fn="canNavigateForward ? null : confirmInstalled"
+    :skip-fn="canNavigateForward ? undefined : confirmInstalled"
   >
     <ManualInstall
       :gql="props.gql"
