@@ -59,7 +59,7 @@ export function loadSpec (options: LoadSpecOptions): void {
   // https://cypress-io.atlassian.net/browse/UNIFY-1154
   // cy.__incorrectlyVisitAppWithIntercept(`specs/runner?file=cypress/e2e/errors/${fileName}`)
 
-  cy.__incorrectlyVisitAppWithIntercept()
+  cy.visitApp()
 
   if (setup) {
     setup()

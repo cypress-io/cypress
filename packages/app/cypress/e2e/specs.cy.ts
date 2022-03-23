@@ -16,7 +16,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
         cy.startAppServer('e2e')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -178,21 +178,6 @@ describe('App: Index', () => {
 
           cy.percySnapshot('Invalid spec error')
 
-          //Shows extension warning
-          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.spec.j'))
-          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
-            if (req.body.variables.specFile === getPathForPlatform('cypress/e2e/MyTest.spec.jx')) {
-              req.on('before:response', (res) => {
-                res.body.data.matchesSpecPattern = true
-              })
-            }
-          })
-
-          cy.get('@enterSpecInput').type('x')
-          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-          cy.percySnapshot('Non-recommended spec pattern warning')
-          cy.contains('span', '{filename}.cy.jx')
-
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
@@ -223,7 +208,7 @@ describe('App: Index', () => {
         cy.openProject('no-specs-no-storybook')
 
         cy.startAppServer('e2e')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -282,21 +267,6 @@ describe('App: Index', () => {
 
           cy.percySnapshot('Invalid spec error')
 
-          //Shows extension warning
-          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.spec.t'))
-          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
-            if (req.body.variables.specFile === getPathForPlatform('cypress/e2e/MyTest.spec.tx')) {
-              req.on('before:response', (res) => {
-                res.body.data.matchesSpecPattern = true
-              })
-            }
-          })
-
-          cy.get('@enterSpecInput').type('x')
-          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-          cy.percySnapshot('Non-recommended spec pattern warning')
-          cy.contains('span', '{filename}.cy.tx')
-
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
@@ -335,7 +305,7 @@ describe('App: Index', () => {
         })
 
         cy.startAppServer('e2e')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -350,26 +320,34 @@ describe('App: Index', () => {
 
         cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
-        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
+        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{spec,cy}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
       })
 
       it('opens config file in ide from SpecPattern', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('shows new spec button to start creation workflow', () => {
@@ -382,6 +360,29 @@ describe('App: Index', () => {
           cy.findAllByTestId('card').eq(1)
           .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
         })
+      })
+
+      it('shows preferred pattern warning', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+        cy.get('[data-cy="create-spec-modal"]').within(() => {
+          cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
+        })
+
+        cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+        .as('enterSpecInput')
+
+        // Shows entered file does not match spec pattern
+        cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
+        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
+        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+        cy.percySnapshot('Invalid spec error')
+
+        //Shows extension warning
+        cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/test/MyTest.spec.js'))
+
+        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
+        cy.percySnapshot('Non-recommended spec pattern warning')
       })
     })
 
@@ -810,7 +811,7 @@ describe('App: Index', () => {
         })
 
         cy.startAppServer('component')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -832,19 +833,27 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from SpecPattern', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('shows new spec button to start creation workflow', () => {
@@ -943,7 +952,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('react-code-gen')
         cy.openProject('react-code-gen')
         cy.startAppServer('component')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       const checkCodeGenCandidates = (specs: string[]) => {
@@ -965,10 +974,8 @@ describe('App: Index', () => {
         cy.percySnapshot('Component Generator')
         checkCodeGenCandidates(['cypress.config.js', 'App.cy.jsx', 'App.jsx', 'index.jsx', 'support.js', 'Button.jsx', 'Button.stories.jsx'])
 
-        cy.intercept('query-ComponentGeneratorStepOne').as('code-gen-candidates')
         cy.findByTestId('file-match-button').click()
         cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput).clear().type('App.*')
-        cy.wait('@code-gen-candidates')
 
         checkCodeGenCandidates(['App.css', 'App.cy.jsx', 'App.jsx'])
 

@@ -8,7 +8,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
 
       cy.contains('fixture.js').click()
 
@@ -26,7 +26,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
     })
 
     it('expands the left nav bar by default', () => {
@@ -144,7 +144,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('[data-cy="sidebar-header"]').within(() => {
@@ -173,21 +173,19 @@ describe('Sidebar Navigation', () => {
         cy.contains('Running')
       })
 
-      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
-      cy.withCtx((ctx) => {
-        ctx.actions.project.reconfigureProject = sinon.stub()
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
       })
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
-        expect(interception.request.body.variables.testingType).eq('component')
-      })
-
       cy.withCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.actions.project.setCurrentTestingType).to.have.been.calledWith('component')
+        expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
 
       cy.get('[aria-label="Close"]').click()
@@ -298,7 +296,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing')
       cy.startAppServer('component')
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.findByRole('dialog', {
@@ -318,17 +316,19 @@ describe('Sidebar Navigation', () => {
         name: 'Choose a testing type',
       }).should('be.visible')
 
-      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
-      cy.withCtx((ctx) => {
-        ctx.actions.project.reconfigureProject = sinon.stub()
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
       })
 
       cy.get('[data-cy-testingtype="e2e"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
-        expect(interception.request.body.variables.testingType).eq('e2e')
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.actions.project.setCurrentTestingType).to.have.been.calledWith('e2e')
+        expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
     })
 

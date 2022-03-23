@@ -218,7 +218,7 @@ async function makeE2ETasks () {
     },
 
     __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
+      remoteGraphQLIntercept = new Function('console', 'testState', 'obj', `return (${fn})(obj, testState)`).bind(null, console, testState) as RemoteGraphQLInterceptor
 
       return null
     },

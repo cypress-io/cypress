@@ -43,7 +43,7 @@ describe('App: Settings', () => {
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
       })
 
       cy.startAppServer('e2e')
@@ -254,7 +254,7 @@ describe('App: Settings', () => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
       })
 
-      cy.__incorrectlyVisitAppWithIntercept('settings')
+      cy.visitApp('settings')
       cy.contains('Device Settings').click()
     })
 

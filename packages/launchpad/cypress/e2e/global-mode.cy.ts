@@ -42,7 +42,7 @@ describe('Launchpad: Global Mode', () => {
       cy.scaffoldProject('todos')
       .then((projectPath) => {
         cy.withCtx(async (ctx, o) => {
-          ctx.actions.electron.showOpenDialog = o.sinon.stub().resolves(o.projectPath)
+          o.sinon.stub(ctx.actions.electron, 'showOpenDialog').resolves(o.projectPath)
         }, { projectPath })
       })
 

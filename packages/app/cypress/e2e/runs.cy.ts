@@ -1,4 +1,3 @@
-import type { Interception } from '@packages/net-stubbing/lib/external-types'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
@@ -51,14 +50,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('if logged in and connected', { viewportWidth: 1200 }, () => {
       cy.loginUser()
-      cy.__incorrectlyVisitAppWithIntercept()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+      cy.visitApp()
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.electron, 'openExternal')
+      })
 
       cy.get('[href="#/runs"]').click()
       cy.contains('a', 'OVERLIMIT').click()
-      cy.wait('@OpenExternal')
-      .its('request.body.variables.url')
-      .should('equal', 'http://dummy.cypress.io/runs/4')
+
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.electron.openExternal).to.have.been.calledWith('http://dummy.cypress.io/runs/4')
+      })
     })
   })
 
@@ -179,9 +182,38 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.loginUser()
+    })
+
+    it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
-        // Currently, all remote requests go through here, we want to use this to modify the
-        // remote request before it's used and avoid touching the login query
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectUnauthorized'
+            proj.message = 'Cloud Project Unauthorized'
+            proj.hasRequestedAccess = false
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp('/runs')
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
+    })
+
+    it('clicking on the call to action should call the mutation', () => {
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
+          obj.result.data!.cloudProjectRequestAccess = {
+            __typename: 'CloudProject',
+            message: 'Cloud Project',
+            hasRequestedAccess: true,
+          }
+
+          testState.cloudProjectRequestAccessWasCalled = true
+
+          return obj.result
+        }
 
         if (obj.result.data?.cloudProjectsBySlugs) {
           for (const proj of obj.result.data.cloudProjectsBySlugs) {
@@ -193,19 +225,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
-    })
 
-    it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.visitApp('/runs')
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
-    })
 
-    it('clicking on the call to action should call the mutation', () => {
-      cy.__incorrectlyVisitAppWithIntercept('/runs')
-      cy.intercept('mutation-RunsErrorRenderer_RequestAccess').as('RequestAccess')
       cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
-      cy.wait('@RequestAccess').then((interception: Interception) => {
-        expect(interception.request.url).to.include('graphql/mutation-RunsErrorRenderer_RequestAccess')
+
+      cy.withCtx((ctx, o) => {
+        expect(o.testState.cloudProjectRequestAccessWasCalled).to.eql(true)
       })
     })
   })
@@ -296,7 +322,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays a copy button', () => {
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
-        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
       })
 
       cy.loginUser()
@@ -368,12 +394,17 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens the run page if a run is clicked', () => {
       cy.loginUser()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.electron, 'openExternal')
+      })
+
       cy.get('[href="#/runs"]').click()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
       cy.get('[data-cy^="runCard-"]').first().click()
-      cy.wait('@OpenExternal').then((interception: Interception) => {
-        expect(interception.request.url).to.include('graphql/mutation-ExternalLink_OpenExternal')
+
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.electron.openExternal).to.have.been.calledWith('http://dummy.cypress.io/runs/0')
       })
     })
   })

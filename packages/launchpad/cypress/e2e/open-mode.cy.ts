@@ -113,7 +113,7 @@ describe('Launchpad: Open Mode', () => {
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.actions.electron.showItemInFolder = o.sinon.stub()
+        o.sinon.stub(ctx.actions.electron, 'showItemInFolder')
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
 

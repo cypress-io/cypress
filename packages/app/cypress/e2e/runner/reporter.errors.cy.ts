@@ -37,18 +37,24 @@ describe('errors ui', {
       column: 25,
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
+      ideLine: 3,
+      ideColumn: 25,
     })
 
     verify('with assert()', {
       column: '(5|12)', // (chrome|firefox)
       message: `should be true`,
       verifyOpenInIde: true,
+      ideLine: 7,
+      ideColumn: 5,
     })
 
     verify('with assert.<foo>()', {
       column: 12,
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
+      ideLine: 11,
+      ideColumn: 12,
     })
   })
 
