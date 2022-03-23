@@ -89,7 +89,11 @@ class Reporter extends Component<SingleReporterProps> {
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: BaseReporterProps) {
-    this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec?.relative ?? null)
+    if (!this.props.runnerStore.spec) {
+      throw Error(`Expected runnerStore.spec and runnerStore.specRunId not to be null.`)
+    }
+
+    this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec.relative)
     if (
       this.props.resetStatsOnSpecChange &&
       this.props.runnerStore.specRunId !== newProps.runnerStore.specRunId
@@ -102,6 +106,10 @@ class Reporter extends Component<SingleReporterProps> {
 
   componentDidMount () {
     const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen, runnerStore } = this.props
+
+    if (!runnerStore.spec) {
+      throw Error(`Expected runnerStore.spec and runnerStore.specRunId not to be null.`)
+    }
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)
@@ -122,7 +130,7 @@ class Reporter extends Component<SingleReporterProps> {
 
     shortcuts.start()
     EQ.init()
-    this.props.runnablesStore.setRunningSpec(runnerStore.spec?.relative ?? null)
+    this.props.runnablesStore.setRunningSpec(runnerStore.spec.relative)
   }
 
   componentWillUnmount () {
