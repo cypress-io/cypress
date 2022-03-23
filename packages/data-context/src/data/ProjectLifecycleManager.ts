@@ -565,7 +565,6 @@ export class ProjectLifecycleManager {
    * onboarding screens, suggestions in the onboarding wizard, etc.
    */
   refreshMetaState (): ProjectMetaState {
-    let configFilePathSet = false
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
@@ -621,6 +620,8 @@ export class ProjectLifecycleManager {
       return metaState
     }
 
+    let configFilePathSet = false
+
     metaState.allFoundConfigFiles = []
 
     for (const fileName of potentialConfigFiles) {
@@ -644,7 +645,7 @@ export class ProjectLifecycleManager {
 
     // We finished looping through all of the possible config files
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
-    if (!this._configManager?.configFilePath) {
+    if (!configFilePathSet) {
       this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
       configFilePathSet = true
     }
