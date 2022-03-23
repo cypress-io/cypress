@@ -468,14 +468,20 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _getRemoteStateFor (url: string): Cypress.RemoteState | undefined {
-    const defaultOriginPolicy = cors.getOriginPolicy(this._remoteOrigin)
-    const originPolicy = cors.getOriginPolicy(url)
-
-    if (defaultOriginPolicy === originPolicy) {
+    if (cors.urlOriginsMatch(this._remoteOrigin, url)) {
       return this._getDefaultRemoteState()
     }
 
-    return this._remoteStates.get(originPolicy)
+    return this._remoteStates.get(cors.getOriginPolicy(url))
+  }
+
+  _getCurrentSecondaryOrigin (): Cypress.RemoteState | undefined {
+    // greater than 1 to indicate we have a secondary origin
+    if (this._originStack.length > 1) {
+      return this._remoteStates.get(this._originStack[this._originStack.length - 1]) as Cypress.RemoteState
+    }
+
+    return undefined
   }
 
   _getRemoteState (): Cypress.RemoteState {
@@ -497,15 +503,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     //     domain: "google"
     //   }
     // }
-
-    let props
-
-    // greater than 1 to indicate we have a secondary origin
-    if (this._originStack.length > 1) {
-      props = this._remoteStates.get(this._originStack[this._originStack.length - 1]) as Cypress.RemoteState
-    } else {
-      props = this._getDefaultRemoteState()
-    }
+    const props = this._getCurrentSecondaryOrigin() || this._getDefaultRemoteState()
 
     debug('Getting remote state: %o', props)
 

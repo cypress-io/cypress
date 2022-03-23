@@ -574,6 +574,28 @@ describe('lib/socket', () => {
         this.client.emit('backend:request', 'ready:for:domain', 'http://foobar.com', () => {})
       })
     })
+
+    context('on(ready:for:domain:failed)', () => {
+      it('emits ready:for:domain:failed on local bus', function (done) {
+        this.server.socket.localBus.once('ready:for:domain:failed', () => {
+          done()
+        })
+
+        this.client.emit('backend:request', 'ready:for:domain:failed', () => {})
+      })
+    })
+
+    context('on(cross:origin:finished)', () => {
+      it('emits cross:origin:finished on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:finished', (originPolicy) => {
+          expect(originPolicy).to.equal('http://foobar.com')
+
+          done()
+        })
+
+        this.client.emit('backend:request', 'cross:origin:finished', 'http://foobar.com', () => {})
+      })
+    })
   })
 
   context('unit', () => {
