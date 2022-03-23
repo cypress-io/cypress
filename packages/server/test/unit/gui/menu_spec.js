@@ -286,6 +286,7 @@ describe('gui/menu', function () {
           'Reload',
           'Toggle Developer Tools',
           'View App Data',
+          'GraphQL requests over Fetch (off)',
           'GraphiQL',
         ])
       })
