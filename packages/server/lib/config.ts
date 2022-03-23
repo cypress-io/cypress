@@ -262,6 +262,14 @@ export function updateWithPluginValues (cfg, overrides) {
     throw errors.get(err, options)
   })
 
+  configUtils.validateNoBreakingConfig(overrides.e2e, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `e2e.${options.name}` })
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.component, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `component.${options.name}` })
+  })
+
   const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
     value: cfg.browsers,
     from: 'default',
