@@ -119,4 +119,127 @@ describe('http/request-middleware', () => {
       })
     })
   })
+
+  describe('MaybeSetBasicAuthHeaders', () => {
+    const { MaybeSetBasicAuthHeaders } = RequestMiddleware
+
+    it('adds auth header from remote state', async () => {
+      const headers = {}
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          headers,
+        },
+        res: {} as Partial<CypressOutgoingResponse>,
+        getRemoteStateFor () {
+          return {
+            auth: {
+              username: 'u',
+              password: 'p',
+            },
+            origin: 'https://www.cypress.io',
+          }
+        },
+      }
+
+      await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
+      .then(() => {
+        const expectedAuthHeader = `Basic ${Buffer.from('u:p').toString('base64')}`
+
+        expect(ctx.req.headers['authorization']).to.equal(expectedAuthHeader)
+      })
+    })
+
+    it('does not add auth header if origins do not match', async () => {
+      const headers = {}
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          headers,
+        },
+        res: {} as Partial<CypressOutgoingResponse>,
+        getRemoteStateFor () {
+          return {
+            auth: {
+              username: 'u',
+              password: 'p',
+            },
+            origin: 'https://cypress.io', // does not match due to subdomain
+          }
+        },
+      }
+
+      await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['authorization']).to.be.undefined
+      })
+    })
+
+    it('does not add auth header if remote does not have auth', async () => {
+      const headers = {}
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          headers,
+        },
+        res: {} as Partial<CypressOutgoingResponse>,
+        getRemoteStateFor () {
+          return {
+            origin: 'https://www.cypress.io',
+          }
+        },
+      }
+
+      await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['authorization']).to.be.undefined
+      })
+    })
+
+    it('does not add auth header if remote not found', async () => {
+      const headers = {}
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          headers,
+        },
+        res: {} as Partial<CypressOutgoingResponse>,
+        getRemoteStateFor () {
+          return undefined
+        },
+      }
+
+      await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['authorization']).to.be.undefined
+      })
+    })
+
+    it('does not update auth header from remote if request already has auth', async () => {
+      const headers = {
+        authorization: 'token',
+      }
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          headers,
+        },
+        res: {} as Partial<CypressOutgoingResponse>,
+        getRemoteStateFor () {
+          return {
+            auth: {
+              username: 'u',
+              password: 'p',
+            },
+            origin: 'https://www.cypress.io',
+          }
+        },
+      }
+
+      await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['authorization']).to.equal('token')
+      })
+    })
+  })
 })
