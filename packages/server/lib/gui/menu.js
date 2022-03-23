@@ -203,18 +203,6 @@ module.exports = {
     if (options.withInternalDevTools) {
       devToolsSubmenu = devToolsSubmenu.concat([
         {
-          label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
-          click: (item, focusedWindow) => {
-            if (process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET) {
-              delete process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
-            } else {
-              process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET = '1'
-            }
-
-            this.set(opts)
-          },
-        },
-        {
           label: 'GraphiQL',
           click () {
             return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)

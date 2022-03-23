@@ -275,11 +275,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   })
 }
 
-interface VisitAppConfig {
-  withIntercept?: boolean
-}
-
-function visitApp (href?: string, config?: VisitAppConfig) {
+function visitApp (href?: string) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -296,13 +292,7 @@ function visitApp (href?: string, config?: VisitAppConfig) {
 
       return config.clientRoute
     }).then((clientRoute) => {
-      const visitConfig: Partial<Cypress.VisitOptions> = config?.withIntercept ? {
-        onBeforeLoad (win) {
-          win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
-        },
-      } : {}
-
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, visitConfig)
+      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
     })
   })
 }
