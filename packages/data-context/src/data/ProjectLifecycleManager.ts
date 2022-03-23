@@ -330,29 +330,31 @@ export class ProjectLifecycleManager {
     }
 
     this._projectRoot = projectRoot
-    this.legacyPluginGuard()
-    Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
-    this.verifyProjectRoot(projectRoot)
-    const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
     this.resetInternalState()
 
     this._configManager = this.#createConfigManager()
 
+    const { needsCypressJsonMigration } = this.refreshMetaState()
+    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
+
+    if (needsCypressJsonMigration) {
+      if (!this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
+        this.#legacyMigration(legacyConfigPath).catch(this.onLoadError)
+      }
+
+      return
+    }
+
+    this.legacyPluginGuard()
+    Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
+    this.verifyProjectRoot(projectRoot)
+    const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
+
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.packageManager = packageManagerUsed
     })
-
-    const { needsCypressJsonMigration } = this.refreshMetaState()
-
-    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
-
-    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.#legacyMigration(legacyConfigPath).catch(this.onLoadError)
-
-      return
-    }
 
     this.configFileWarningCheck()
 
@@ -483,11 +485,19 @@ export class ProjectLifecycleManager {
 
     legacyFileWatcher.on('all', (event, file) => {
       debug('WATCHER: config file event', event, file)
+      this.ctx.update((coreData) => {
+        coreData.baseError = null
+      })
+
       assert(this._configManager)
       this._configManager.reloadConfig().catch(this.onLoadError)
     })
 
     legacyFileWatcher.on('error', (err) => {
+      this.ctx.update((coreData) => {
+        coreData.baseError = null
+      })
+
       debug('error watching config files %O', err)
       this.ctx.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
