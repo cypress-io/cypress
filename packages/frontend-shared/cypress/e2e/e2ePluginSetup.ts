@@ -184,7 +184,7 @@ async function makeE2ETasks () {
                   document,
                   query,
                   result,
-                })
+                }, testState)
               } catch (e) {
                 const err = e as Error
 
@@ -218,7 +218,7 @@ async function makeE2ETasks () {
     },
 
     __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'testState', 'obj', `return (${fn})(obj, testState)`).bind(null, console, testState) as RemoteGraphQLInterceptor
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },

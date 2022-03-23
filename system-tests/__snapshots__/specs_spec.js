@@ -12,7 +12,7 @@ Can't run because no spec files were found.
 
 We searched for specs matching this glob pattern:
 
-  > /foo/bar/.projects/no-specs-custom-pattern/src/**/*.cy.{js,jsx}
+  > /foo/bar/.projects/no-specs-custom-pattern/src/**/*.{spec,cy}.{js,jsx}
 
 `
 
