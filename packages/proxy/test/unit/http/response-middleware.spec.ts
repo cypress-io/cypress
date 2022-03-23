@@ -356,7 +356,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        originStack: ['http://foobar.com'],
+        originStack: ['http://127.0.0.1:3501', 'http://foobar.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -473,7 +473,7 @@ describe('http/response-middleware', function () {
           }
         },
         getOriginStack () {
-          return ['http://127.0.0.1:3501'].concat(props.originStack)
+          return props.originStack || ['http://127.0.0.1:3501']
         },
         debug: (formatter, ...args) => {
           debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
@@ -633,13 +633,7 @@ describe('http/response-middleware', function () {
           res: {
             append: appendStub,
           },
-          getRemoteState () {
-            // nonsense, but it's the simplest way to match origin policy
-            return {
-              strategy: 'file',
-              origin: 'http',
-            }
-          },
+          originStack: ['http://127.0.0.1:3501'],
         })
 
         await testMiddleware([CopyCookiesFromIncomingRes], ctx)
@@ -662,13 +656,7 @@ describe('http/response-middleware', function () {
           res: {
             append: appendStub,
           },
-          getRemoteState () {
-            // nonsense, but it's the simplest way to match origin policy
-            return {
-              strategy: 'file',
-              origin: 'http',
-            }
-          },
+          originStack: ['http://127.0.0.1:3501'],
         })
 
         ctx.getPreviousAUTRequestUrl = () => ctx.req.proxiedUrl
@@ -796,7 +784,7 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http:127.0.0.1:3501/multi-domain.html',
+          proxiedUrl: 'http://127.0.0.1:3501/multi-domain.html',
           headers: {},
           ...props.req,
         },
@@ -816,6 +804,9 @@ describe('http/response-middleware', function () {
           return {
             strategy: 'foo',
           }
+        },
+        getOriginStack () {
+          return props.originStack || []
         },
         debug () {},
         onError (error) {
