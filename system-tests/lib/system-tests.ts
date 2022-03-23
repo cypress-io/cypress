@@ -940,7 +940,7 @@ const systemTests = {
     if (!options.skipScaffold) {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
-      Fixtures.scaffoldProject(options.project)
+      await Fixtures.scaffoldProject(options.project)
       await DepInstaller.scaffoldProjectNodeModules(options.project)
     }
 
