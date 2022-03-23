@@ -5,7 +5,7 @@ import debugLib from 'debug'
 import type { DataContext } from '..'
 import pDefer from 'p-defer'
 import getenv from 'getenv'
-import { pipe, subscribe, toPromise } from 'wonka'
+import { pipe, subscribe, toPromise, take } from 'wonka'
 import type { DocumentNode, OperationTypeNode } from 'graphql'
 import {
   createClient,
@@ -129,7 +129,10 @@ export class CloudDataSource {
       return dfd.promise
     }
 
-    return pipe(executingQuery, toPromise).then((data) => {
+    // take(1) completes the stream immediately after the first value was emitted
+    // avoiding it to hang forever on query operations
+    // https://github.com/FormidableLabs/urql/issues/298
+    return pipe(executingQuery, take(1), toPromise).then((data) => {
       debug('executeRemoteGraphQL toPromise res %o', data)
 
       if (data.error) {
