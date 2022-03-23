@@ -13,6 +13,19 @@ const debug = Debug('data-context:sources:GitDataSource')
 
 dayjs.extend(relativeTime)
 
+// We get the last modified time for each spec
+// using a shell command. The reason is
+// none of the Node.js git wrappers support
+// bulk fetching the last modified date and user.
+// Doing them one by one in a Node.js for loop is way too slow.
+// The fastest way to do it is using a shell command,
+// looping over each spec and processing the result of `git log`
+// The command is slightly different between macOS/Linux and Windows.
+// macOS/Linux: getInfoPosix
+// Windows: getInfoWindows
+// Where possible, we use SimpleGit to get other git info, like
+// the status of untracked files and the current git username.
+
 // matches <timestamp> <when> <author>
 // $ git log -1 --pretty=format:%ci %ar %an <file>
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
@@ -27,26 +40,20 @@ export interface GitInfo {
   statusType: typeof gitStatusType[number]
 }
 
-async function getCurrentGitUser () {
-  try {
-    const result = await execaPosix('git config --get user.name')
-
-    return result.stdout.trim()
-  } catch (e) {
-    debug(`Failed to get current git user`, e.message)
-
-    return ''
-  }
-}
-
-function execaPosix (cmd: string) {
-  return execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
-}
-
 export class GitDataSource {
   #git = simpleGit()
 
   constructor (private ctx: DataContext) {}
+
+  async getCurrentGitUser () {
+    try {
+      return (await this.#git.getConfig('user.name')).value
+    } catch (e) {
+      debug(`Failed to get current git user`, e.message)
+
+      return ''
+    }
+  }
 
   gitInfo (path: string): Promise<GitInfo | null> {
     return this.gitInfoLoader.load(path)
@@ -96,7 +103,7 @@ export class GitDataSource {
           output.push({
             lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
             lastModifiedHumanReadable: ctime.fromNow(),
-            author: await getCurrentGitUser(),
+            author: await this.getCurrentGitUser(),
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
           })
         } else {
@@ -142,7 +149,7 @@ export class GitDataSource {
 
     debug('executing command `%s`:', cmd)
 
-    const result = await execaPosix(cmd)
+    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
     const stdout = result.stdout.split('\n')
 
     if (stdout.length !== absolutePaths.length) {
