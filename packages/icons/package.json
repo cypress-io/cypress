@@ -11,7 +11,7 @@
     "test": "yarn test-unit"
   },
   "devDependencies": {
-    "@types/mocha": "^8.0.3",
+    "@types/mocha": "8.0.3",
     "@types/to-ico": "^1.1.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",

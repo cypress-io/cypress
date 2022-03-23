@@ -28,7 +28,7 @@
     "@types/chalk": "^2.2.0",
     "@types/common-tags": "^1.8.0",
     "@types/jquery.scrollto": "1.4.29",
-    "@types/mocha": "^8.0.3",
+    "@types/mocha": "8.0.3",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/underscore.string": "0.0.38",
     "angular": "1.8.0",
