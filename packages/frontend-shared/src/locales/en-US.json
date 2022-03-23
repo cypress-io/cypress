@@ -258,7 +258,8 @@
     "step": {
       "continue": "Continue",
       "next": "Next Step",
-      "back": "Back"
+      "back": "Back",
+      "skip": "Skip"
     },
     "configFile": {
       "createManually": "Create file manually",
