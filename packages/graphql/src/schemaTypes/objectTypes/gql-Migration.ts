@@ -20,15 +20,15 @@ export const MigrationStep = objectType({
     t.nonNull.boolean('isCurrentStep', {
       description: 'This is the current step',
       resolve: (source, args, ctx) => {
-        return ctx.migration.step === source.name
+        return ctx.coreData.migration.step === source.name
       },
     })
 
     t.nonNull.boolean('isCompleted', {
       description: 'Has the current step been completed',
       resolve: (source, args, ctx) => {
-        const indexOfObservedStep = ctx.migration.filteredSteps.indexOf(source.name)
-        const indexOfCurrentStep = ctx.migration.filteredSteps.indexOf(ctx.migration.step)
+        const indexOfObservedStep = ctx.coreData.migration.filteredSteps.indexOf(source.name)
+        const indexOfCurrentStep = ctx.coreData.migration.filteredSteps.indexOf(ctx.coreData.migration.step)
 
         return indexOfObservedStep < indexOfCurrentStep
       },
@@ -37,7 +37,7 @@ export const MigrationStep = objectType({
     t.nonNull.int('index', {
       description: 'Index of the step in the list',
       resolve: (source, args, ctx) => {
-        return ctx.migration.filteredSteps.indexOf(source.name) + 1
+        return ctx.coreData.migration.filteredSteps.indexOf(source.name) + 1
       },
     })
   },
@@ -148,7 +148,7 @@ export const Migration = objectType({
       type: MigrationStep,
       description: 'Steps filtered with the current context',
       resolve: (source, args, ctx) => {
-        return ctx.migration.filteredSteps.map((name) => {
+        return ctx.coreData.migration.filteredSteps.map((name) => {
           return {
             name,
           }
@@ -171,7 +171,7 @@ export const Migration = objectType({
       type: ManualMigration,
       resolve: async (source, args, ctx) => {
         // avoid starting the watcher when not on this step
-        if (ctx.migration.step !== 'renameManual') {
+        if (ctx.coreData.migration.step !== 'renameManual') {
           return null
         }
 
@@ -199,10 +199,24 @@ export const Migration = objectType({
       },
     })
 
+    t.nonNull.string('configFileNameBefore', {
+      description: 'the name of the config file to be migrated',
+      resolve: (source, args, ctx) => {
+        return ctx.lifecycleManager.legacyConfigFile
+      },
+    })
+
+    t.nonNull.string('configFileNameAfter', {
+      description: 'the name of the config file after the migration',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.configFileNameAfterMigration
+      },
+    })
+
     t.nonNull.string('configBeforeCode', {
       description: 'contents of the cypress.json file before conversion',
       resolve: (source, args, ctx) => {
-        return ctx.migration.getConfig()
+        return JSON.stringify(ctx.coreData.migration.legacyConfigForMigration, null, 2)
       },
     })
 
@@ -226,7 +240,7 @@ export const Migration = objectType({
     t.nonNull.boolean('hasCustomIntegrationFolder', {
       description: 'whether the integration folder is custom or not',
       resolve: (source, args, ctx) => {
-        return ctx.migration.hasCustomIntegrationFolder
+        return ctx.coreData.migration.flags.hasCustomIntegrationFolder
       }
       ,
     })
@@ -234,28 +248,28 @@ export const Migration = objectType({
     t.nonNull.boolean('hasCustomIntegrationTestFiles', {
       description: 'whether the testFiles member is custom or not in integration',
       resolve: (source, args, ctx) => {
-        return ctx.migration.hasCustomIntegrationTestFiles
+        return ctx.coreData.migration.flags.hasCustomIntegrationTestFiles
       },
     })
 
     t.nonNull.boolean('hasCustomComponentFolder', {
       description: 'whether the component folder is custom or not',
       resolve: (source, args, ctx) => {
-        return ctx.migration.hasCustomComponentFolder
+        return ctx.coreData.migration.flags.hasCustomComponentFolder
       },
     })
 
     t.nonNull.boolean('hasCustomComponentTestFiles', {
       description: 'whether the testFiles member is custom or not in component testing',
       resolve: (source, args, ctx) => {
-        return ctx.migration.hasCustomComponentTestFiles
+        return ctx.coreData.migration.flags.hasCustomComponentTestFiles
       },
     })
 
     t.nonNull.boolean('hasComponentTesting', {
       description: 'whether component testing is set up in the migrated config or not',
       resolve: (source, args, ctx) => {
-        return ctx.migration.hasComponentTesting
+        return ctx.coreData.migration.flags.hasComponentTesting
       },
     })
 

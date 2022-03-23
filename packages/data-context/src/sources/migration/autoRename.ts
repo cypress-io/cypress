@@ -8,10 +8,10 @@ import {
   getIntegrationFolder,
   getIntegrationTestFilesGlobs,
   isDefaultTestFiles,
-  OldCypressConfig,
   regexps,
 } from '.'
 import type { MigrationFile } from '../MigrationDataSource'
+import type { LegacyCypressConfigJson } from '..'
 
 export interface MigrationSpec {
   relative: string
@@ -102,7 +102,7 @@ export function applyMigrationTransform (
   }
 }
 
-export async function getSpecs (projectRoot: string, config: OldCypressConfig): Promise<GetSpecs> {
+export async function getSpecs (projectRoot: string, config: LegacyCypressConfigJson): Promise<GetSpecs> {
   const integrationFolder = getIntegrationFolder(config)
   const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
@@ -112,21 +112,21 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
   let integrationSpecs: MigrationSpec[] = []
   let componentSpecs: MigrationSpec[] = []
 
-  const globs = integrationFolder === false
-    ? []
-    : integrationFolder === 'cypress/integration'
-      ? ['**/*'].map((glob) => `${integrationFolder}/${glob}`)
+  const globs = integrationFolder
+    ? integrationFolder === 'cypress/integration'
+      ? ['**/*.{js,ts,jsx,tsx,coffee}'].map((glob) => `${integrationFolder}/${glob}`)
       : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
+    : []
 
-  let specs = integrationFolder === false
-    ? []
-    : (await globby(globs, { onlyFiles: true, cwd: projectRoot }))
+  let specs = integrationFolder
+    ? (await globby(globs, { onlyFiles: true, cwd: projectRoot }))
+    : []
 
   const fullyCustom = integrationFolder !== 'cypress/integration' && !isDefaultTestFiles(config, 'integration')
 
   // we cannot do a migration if either integrationFolder is false,
   // or if both the integrationFolder and testFiles are custom.
-  if (integrationFolder === false || fullyCustom) {
+  if (fullyCustom) {
     integrationSpecs = []
   } else {
     integrationSpecs = specs.map((relative) => {

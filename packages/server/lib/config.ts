@@ -4,7 +4,7 @@ import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
@@ -128,7 +128,7 @@ export function mergeDefaults (
   .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
-  .each((val, key) => {
+  .each((val: any, key) => {
     // If users pass in testing-type specific keys (eg, specPattern),
     // we want to merge this with what we've read from the config file,
     // rather than override it entirely.
@@ -246,10 +246,6 @@ export function updateWithPluginValues (cfg, overrides) {
   // passes our validation functions
   configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
     let configFile = getCtx().lifecycleManager.configFile
-
-    if (configFile === false) {
-      configFile = '--config file set to "false" via CLI--'
-    }
 
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
@@ -511,9 +507,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   envCLI = envCLI != null ? envCLI : {}
 
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgKey: string
-
-    cfgKey = configUtils.matchesConfigKey(key)
+    const cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
       // only change the value if it hasn't been

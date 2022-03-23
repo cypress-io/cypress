@@ -16,10 +16,10 @@
           src="../assets/logos/cypress-dark.png"
         >
         <a
-          class="font-medium mr-2px hocus-link-default"
-          :class="props.gql?.currentProject ? 'text-indigo-500' :
+          class="font-medium mr-2px"
+          :class="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'text-indigo-500 hocus-link-default' :
             'text-gray-700'"
-          :href="props.gql?.currentProject ? 'global-mode' : undefined"
+          :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
           @click.prevent="clearCurrentProject"
         >
           {{ t('topNav.global.projects') }}
@@ -105,10 +105,13 @@
 </template>
 
 <script setup lang="ts">
-import { gql, useMutation } from '@urql/vue'
+import { gql, useMutation, useSubscription } from '@urql/vue'
 import { ref, computed } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
-import { GlobalPageHeader_ClearCurrentProjectDocument } from '../generated/graphql'
+import {
+  GlobalPageHeader_ClearCurrentProjectDocument,
+  HeaderBarContent_AuthChangeDocument,
+} from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
@@ -117,6 +120,16 @@ import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
+
+gql`
+subscription HeaderBarContent_authChange {
+  authChange {
+    ...Auth
+  }
+}
+`
+
+useSubscription({ query: HeaderBarContent_AuthChangeDocument })
 
 gql`
 mutation GlobalPageHeader_clearCurrentProject {
@@ -136,6 +149,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     config
     savedState
   }
+  projectRootFromCI
   ...TopNav
   ...Auth
 }
@@ -157,7 +171,7 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  if (props.gql.currentProject) {
+  if (props.gql.currentProject && !props.gql.projectRootFromCI) {
     clearCurrentProjectMutation.executeMutation({})
   }
 }

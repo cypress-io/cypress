@@ -21,6 +21,7 @@
         "TIMEDOUT",
         "unconfigured",
         "unplugin",
+        "unrunnable",
         "urql",
         "vite",
         "vitejs",

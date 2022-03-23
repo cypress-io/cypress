@@ -11,10 +11,10 @@ const throwKnownError = function (message, props = {}) {
 }
 
 module.exports = {
-  run (pluginsFilePath, options) {
+  run (configFilePath, options) {
     debug('run task', options.task, 'with arg', options.arg)
 
-    const fileText = pluginsFilePath ? `\n\nFix this in your setupNodeEvents method here:\n${pluginsFilePath}` : ''
+    const fileText = configFilePath ? `\n\nFix this in your setupNodeEvents method here:\n${configFilePath}` : ''
 
     return Promise
     .try(() => {

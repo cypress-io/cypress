@@ -66,6 +66,7 @@ interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
   scaffoldCommonNodeModules(): Promise<void>
+  scaffoldProjectNodeModules(project: string): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -117,6 +118,8 @@ async function makeE2ETasks () {
 
     await Fixtures.scaffoldCommonNodeModules()
 
+    await Fixtures.scaffoldProjectNodeModules(projectName)
+
     scaffoldedProjects.add(projectName)
 
     return Fixtures.projectPath(projectName)
@@ -155,12 +158,16 @@ async function makeE2ETasks () {
       sinon.stub(ctx.actions.electron, 'openExternal')
       sinon.stub(ctx.actions.electron, 'showItemInFolder')
 
+      const operationCount: Record<string, number> = {}
+
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
           if (String(url).endsWith('/test-runner-graphql')) {
             const { query, variables } = JSON.parse(String(init?.body))
             const document = parse(query)
             const operationName = getOperationName(document)
+
+            operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
 
             let result = await execute({
               operationName,
@@ -173,6 +180,8 @@ async function makeE2ETasks () {
               },
             })
 
+            operationCount[operationName ?? 'unknown']++
+
             if (remoteGraphQLIntercept) {
               try {
                 result = await remoteGraphQLIntercept({
@@ -181,6 +190,7 @@ async function makeE2ETasks () {
                   document,
                   query,
                   result,
+                  callCount: operationCount[operationName ?? 'unknown'],
                 })
               } catch (e) {
                 const err = e as Error

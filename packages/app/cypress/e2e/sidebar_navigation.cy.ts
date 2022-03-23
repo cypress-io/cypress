@@ -1,4 +1,25 @@
 describe('Sidebar Navigation', () => {
+  context('as e2e testing type with localSettings', () => {
+    it('use saved state for nav size', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
+      })
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.startAppServer()
+      cy.__incorrectlyVisitAppWithIntercept()
+
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        expect($initialWidth).eq(100)
+      })
+    })
+  })
+
   context('as e2e testing type', () => {
     beforeEach(() => {
       cy.scaffoldProject('todos')
@@ -14,15 +35,16 @@ describe('Sidebar Navigation', () => {
     })
 
     it('highlights indicator on hover showing you can click to expand', () => {
-      cy.findByLabelText('toggle navigation', {
-        selector: 'button',
-      }).should('not.have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
+      const navIndicatorSelector = '[data-testid=sidebar-nav-indicator]'
+      const navExpansionToggleSelector = '[aria-label="toggle navigation"]'
 
-      cy.findByLabelText('toggle navigation', {
-        selector: 'button',
-      }).realHover().should('have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
-
-      cy.percySnapshot()
+      cy.get(navIndicatorSelector)
+      .should('not.be.visible')
+      .get(navExpansionToggleSelector)
+      .realHover()
+      .get(navIndicatorSelector)
+      .should('be.visible')
+      .percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
@@ -224,6 +246,50 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Settings').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
+    })
+
+    it('resize nav sends the correct value on the mutation', () => {
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { clientX: 400 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+        cy.wait('@setPreferences').its('request.body.variables.value').should('include', '{"reporterWidth":')
+      })
+    })
+
+    // TODO: Remove skip when we fix cy.reload() in Cypress in Cypress - UNIFY-1346
+    it.skip('resize nav and persist the state after refresh', () => {
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { clientX: 400 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+        cy.wait('@setPreferences')
+
+        cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($updatedWidth) => {
+          expect($updatedWidth).not.to.eq($initialWidth)
+
+          cy.reload()
+          cy.contains('fixture.js').click()
+
+          cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should(($refreshedWidth) => {
+            expect($refreshedWidth).eq($updatedWidth)
+          })
+        })
+      })
     })
   })
 

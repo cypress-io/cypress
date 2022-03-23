@@ -22,17 +22,15 @@ cypress.run().then(results => {
 cypress.open() // $ExpectType Promise<void>
 cypress.run() // $ExpectType Promise<CypressRunResult | CypressFailedRunResult>
 
-cypress.open({
-  configFile: false
-})
-
 cypress.run({
   configFile: "abc123"
 })
 
 // provide only some config options
 const runConfig: Cypress.ConfigOptions = {
-  baseUrl: 'http://localhost:8080',
+  e2e: {
+    baseUrl: 'http://localhost:8080',
+  },
   env: {
     login: false
   },

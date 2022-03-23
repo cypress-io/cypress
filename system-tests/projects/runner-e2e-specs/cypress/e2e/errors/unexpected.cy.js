@@ -13,7 +13,7 @@ describe('unexpected errors', { defaultCommandTimeout: 0 }, () => {
   })
 
   it('Cypress method error', () => {
-    window.eval('Cypress.LocalStorage._isSpecialKeyword = () => { throw new Error("thrown in Cypress-LocalStorage-_isSpecialKeyword") }')
+    window.eval('Cypress.LocalStorage.clear = () => { throw new Error("thrown in Cypress-LocalStorage-clear") }')
 
     Cypress.LocalStorage.clear()
   })

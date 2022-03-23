@@ -388,6 +388,12 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """Default spec file name for spec creation"""
+  defaultSpecFileName: String
+
+  """File extension to use based on if the project has typescript or not"""
+  fileExtensionToUse: FileExtensionEnum
+
   """Whether the project has Typescript"""
   hasTypescript: Boolean
 
@@ -490,6 +496,7 @@ enum ErrorTypeEnum {
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
+  COMPONENT_FOLDER_REMOVED
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION
   CONFIG_FILE_INVALID_DEV_START_EVENT
@@ -532,6 +539,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
+  EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
   FIREFOX_GC_INTERVAL_REMOVED
@@ -550,7 +558,9 @@ enum ErrorTypeEnum {
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
   INVOKED_BINARY_OUTSIDE_NPM_MODULE
+  LEGACY_CONFIG_ERROR_DURING_MIGRATION
   LEGACY_CONFIG_FILE
+  MIGRATION_ALREADY_OCURRED
   MULTIPLE_SUPPORT_FILES_FOUND
   NODE_VERSION_DEPRECATION_BUNDLED
   NODE_VERSION_DEPRECATION_SYSTEM
@@ -563,7 +573,7 @@ enum ErrorTypeEnum {
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN
   PLAN_EXCEEDS_MONTHLY_TESTS
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED
-  PLUGINS_INVALID_EVENT_NAME_ERROR
+  PLUGINS_FILE_CONFIG_OPTION_REMOVED
   PLUGINS_RUN_EVENT_ERROR
   PORT_IN_USE_LONG
   PORT_IN_USE_SHORT
@@ -575,10 +585,12 @@ enum ErrorTypeEnum {
   RENDERER_CRASHED
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
   SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER
+  SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION
   SUPPORT_FILE_NOT_FOUND
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
+  TEST_FILES_RENAMED
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
@@ -623,6 +635,11 @@ input FileDetailsInput {
   """
   filePath: String!
   line: Int
+}
+
+enum FileExtensionEnum {
+  js
+  ts
 }
 
 """Represents a file on the file system"""
@@ -781,6 +798,12 @@ type Migration {
   """contents of the cypress.json file before conversion"""
   configBeforeCode: String!
 
+  """the name of the config file after the migration"""
+  configFileNameAfter: String!
+
+  """the name of the config file to be migrated"""
+  configFileNameBefore: String!
+
   """Steps filtered with the current context"""
   filteredSteps: [MigrationStep!]!
 
@@ -904,6 +927,9 @@ type Mutation {
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
   completeSetup: Query
 
+  """add the passed text to the local clipboard"""
+  copyTextToClipboard(text: String!): Boolean
+
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
@@ -978,13 +1004,16 @@ type Mutation {
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
-  openExternal(url: String!): Boolean
+  openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
 
   """Open a file on specified line and column in preferred IDE"""
   openFileInIDE(input: FileDetailsInput!): Boolean
 
   """Open a path in the local file explorer"""
   openInFinder(path: String!): Boolean
+
+  """Ping configured Base URL"""
+  pingBaseUrl: Query
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
@@ -1126,9 +1155,6 @@ type Query {
   """The currently opened project"""
   currentProject: CurrentProject
 
-  """The mode the interactive runner was launched in"""
-  currentTestingType: TestingTypeEnum
-
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
@@ -1140,6 +1166,9 @@ type Query {
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
+
+  """Whether the project was specified from the --project flag"""
+  projectRootFromCI: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!
@@ -1218,6 +1247,23 @@ type Storybook implements Node {
 
   """Folder containing storybook configuration files"""
   storybookRoot: String!
+}
+
+type Subscription {
+  """Triggered when the auth state changes"""
+  authChange: Query
+
+  """Status of the currently opened browser"""
+  browserStatusChange: CurrentProject
+
+  """"""
+  cloudViewerChange: Query
+
+  """Issued for internal development changes"""
+  devChange: DevState
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""

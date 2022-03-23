@@ -9,7 +9,6 @@ import {
   supportFilesForMigration,
   reduceConfig,
   renameSupportFilePath,
-  OldCypressConfig,
 } from '../../../../src/sources/migration'
 import { expect } from 'chai'
 import { MigrationFile } from '../../../../src/sources'
@@ -19,13 +18,13 @@ const projectRoot = getSystemTestProject('migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
-    const config: OldCypressConfig = {
+    const config: Partial<Cypress.Config> = {
       viewportWidth: 300,
     }
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
-      hasComponentTesting: false,
+      hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
@@ -35,7 +34,7 @@ describe('cypress.config.js generation', () => {
   })
 
   it('should create a string when passed only a e2e options', async () => {
-    const config: OldCypressConfig = {
+    const config: Partial<Cypress.Config> = {
       e2e: {
         baseUrl: 'localhost:3000',
       },
@@ -43,7 +42,7 @@ describe('cypress.config.js generation', () => {
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
-      hasComponentTesting: false,
+      hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
@@ -53,11 +52,39 @@ describe('cypress.config.js generation', () => {
   })
 
   it('should create a string when passed only a component options', async () => {
-    const config: OldCypressConfig = {
+    const config: Partial<Cypress.Config> = {
       component: {
         retries: 2,
       },
     }
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should create only a component entry when no e2e specs are detected', async () => {
+    const config: OldCypressConfig = {}
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: false,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should create only an e2e entry when no component specs are detected', async () => {
+    const config: OldCypressConfig = {}
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
@@ -74,6 +101,7 @@ describe('cypress.config.js generation', () => {
     const config = {
       viewportWidth: 300,
       baseUrl: 'localhost:300',
+      slowTestThreshold: 500,
       e2e: {
         retries: 2,
       },
@@ -84,7 +112,7 @@ describe('cypress.config.js generation', () => {
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
-      hasComponentTesting: false,
+      hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
@@ -98,7 +126,7 @@ describe('cypress.config.js generation', () => {
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
-      hasComponentTesting: false,
+      hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
@@ -116,7 +144,7 @@ describe('cypress.config.js generation', () => {
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
-      hasComponentTesting: false,
+      hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
@@ -131,7 +159,22 @@ describe('cypress.config.js generation', () => {
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,
-      hasComponentTesting: false,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should maintain both root level and nested non-breaking options during migration', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-component-default-everything')
+    const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,

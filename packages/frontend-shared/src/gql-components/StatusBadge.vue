@@ -76,7 +76,6 @@ const emit = defineEmits<{
 gql`
 mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!, $isApp: Boolean!) {
   setTestingTypeAndReconfigureProject(testingType: $testingType, isApp: $isApp) {
-    currentTestingType
     currentProject {
       id
       currentTestingType
