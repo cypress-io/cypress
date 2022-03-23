@@ -16,7 +16,7 @@ context('log', { experimentalSessionSupport: true }, () => {
     cy.get('a[data-cy="dom-link"]').click()
   })
 
-  it('it logs in primary and secondary domains', () => {
+  it('logs in primary and secondary domains', () => {
     cy.switchToDomain('http://foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
