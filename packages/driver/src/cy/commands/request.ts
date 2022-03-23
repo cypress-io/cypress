@@ -144,7 +144,11 @@ export default (Commands, Cypress, cy, state, config) => {
       // origin may return an empty string if we haven't visited anything yet
       options.url = $Location.normalize(options.url)
 
-      const originOrBase = config('baseUrl') || cy.getRemoteLocation('origin')
+      let originOrBase = config('baseUrl') || cy.getRemoteLocation('origin')
+
+      if (Cypress.isMultiDomain) {
+        originOrBase = Cypress.state('multiDomainBaseUrl')
+      }
 
       if (originOrBase) {
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
