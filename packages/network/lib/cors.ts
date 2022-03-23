@@ -100,9 +100,8 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
   return _.startsWith(normalizedUrl, normalizedOrigin)
 }
 
-// TODO: support ipv6 addresses
 export function getOriginPolicy (url: string) {
-  const { port, protocol } = uri.parse(url)
+  const { port, protocol } = new URL(url)
 
   // origin policy is comprised of:
   // protocol + superdomain + port (subdomain is not factored in)
