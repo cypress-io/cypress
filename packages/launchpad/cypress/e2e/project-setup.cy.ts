@@ -122,11 +122,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('@aboutTestingTypes').should('not.exist')
     })
 
-    // Cypress enter key down isn't trigger close callback. Working correctly when manually tested
-    // or when using the cypress-real-evens plugin.
-    // Could be related to this bug? https://github.com/cypress-io/cypress/issues/14864
-    // FIXME: https://github.com/cypress-io/cypress/pull/19726
-    it.skip('closes modal by pressing enter key when close button is focused', () => {
+    it('closes modal by pressing enter key when close button is focused', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
@@ -136,10 +132,8 @@ describe('Launchpad: Setup Project', () => {
       .within(() => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
-        cy.tabUntil((el) => el.text().includes('Close'))
-
         cy.findByRole('button', { name: 'Close' })
-        .should('have.focus')
+        .focus()
         .type('{enter}')
       })
 

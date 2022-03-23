@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
 import type { GlobalPageFragment } from '../generated/graphql-test'
-import { GlobalPageFragmentDoc } from '../generated/graphql-test'
+import { GlobalPageFragmentDoc, GlobalPage_AddProjectDocument } from '../generated/graphql-test'
 
 const searchLabel = defaultMessages.globalPage.searchPlaceholder
 const emptyMessages = defaultMessages.globalPage.empty
@@ -19,8 +19,42 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
       cy.findByText(emptyMessages.title).should('be.visible')
       cy.findByText(emptyMessages.helper).should('be.visible')
 
-      // TODO: This should open a native file picker
+      const addProjectStub = cy.stub()
+
+      cy.stubMutationResolver(GlobalPage_AddProjectDocument, (defineResult) => {
+        addProjectStub()
+
+        return defineResult({
+          addProject: {
+            'projects': [
+              {
+                'id': '1',
+                'title': 'some-test-title',
+                'projectRoot': '/usr/local/dev/projects/some-test-title',
+                '__typename': 'GlobalProject',
+              },
+              {
+                'id': 'R2xvYmFsUHJvamVjdDoyOmFub3RoZXItdGVzdC1wcm9qZWN0',
+                'title': 'another-test-project',
+                'projectRoot': '/usr/local/dev/projects/another-test-project',
+                '__typename': 'GlobalProject',
+              },
+            ],
+            'localSettings': {
+              'availableEditors': [],
+              'preferences': {
+                'preferredEditorBinary': null,
+                '__typename': 'LocalSettingsPreferences',
+              },
+              '__typename': 'LocalSettings',
+            },
+            '__typename': 'Query',
+          } })
+      })
+
       cy.findByText(emptyMessages.browseManually).click()
+
+      cy.wrap(addProjectStub).should('have.been.called')
     })
   })
 
@@ -47,11 +81,14 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
     })
 
     it('can add a project when clicking the button', () => {
+      cy.findByText('cypress-config-ts').should('not.exist')
+
       cy.contains('button', defaultMessages.globalPage.addProjectButton).click()
       cy.get('input[type=file]')
       .attachFileWithPath('absolute/path/to/yet-another-test-project/cypress.config.ts')
       .trigger('change', { force: true })
-      // .findByText('yet-another-test-project').should('be.visible')
+
+      cy.findByText('cypress-config-ts').should('be.visible')
     })
   })
 })

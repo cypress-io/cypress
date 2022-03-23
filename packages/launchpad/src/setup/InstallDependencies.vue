@@ -83,7 +83,7 @@ const toInstall = computed(() => {
   return props.gql.wizard.packagesToInstall?.map((p) => p.package)
 })
 
-// TODO: convert this to a subscription
+// TODO: UNIFY-1350 convert this to a subscription
 const intervalQueryTrigger = useIntervalFn(async () => {
   const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
 
