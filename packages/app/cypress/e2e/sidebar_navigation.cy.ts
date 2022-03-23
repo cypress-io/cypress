@@ -1,3 +1,5 @@
+import type { SinonStub } from 'sinon'
+
 describe('Sidebar Navigation', () => {
   context('as e2e testing type with localSettings', () => {
     it('use saved state for nav size', () => {
@@ -251,14 +253,18 @@ describe('Sidebar Navigation', () => {
 
       cy.get('.toggle-specs-text').click()
 
-      cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
+      })
 
       cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
         cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
         .trigger('mousemove', { clientX: 400 })
         .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+      })
 
-        cy.wait('@setPreferences').its('request.body.variables.value').should('include', '{"reporterWidth":')
+      cy.withCtx((ctx, o) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
       })
     })
 
@@ -268,14 +274,18 @@ describe('Sidebar Navigation', () => {
 
       cy.get('.toggle-specs-text').click()
 
-      cy.intercept('mutation-Preferences_SetPreferences').as('setPreferences')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
+      })
 
       cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
         cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
         .trigger('mousemove', { clientX: 400 })
         .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 
-        cy.wait('@setPreferences')
+        cy.withCtx((ctx, o) => {
+          expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
+        })
 
         cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($updatedWidth) => {
           expect($updatedWidth).not.to.eq($initialWidth)
