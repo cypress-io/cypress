@@ -48,6 +48,7 @@ export const e2eProjectDirs = [
   'migration-custom-config-file-respect-pathname',
   'migration-custom-config-file-root-level',
   'migration-custom-config-file-with-existing-v10-config-file',
+  'migration-e2e-cjsx',
   'migration-e2e-coffeescript',
   'migration-e2e-component-default-everything',
   'migration-e2e-component-default-test-files',
