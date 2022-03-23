@@ -35,19 +35,6 @@ context('multi-domain misc', { experimentalSessionSupport: true }, () => {
     })
   })
 
-  it('.log()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
-      const afterLogAdded = new Promise<void>((resolve) => {
-        cy.once('log:added', () => {
-          resolve()
-        })
-      })
-
-      cy.log('test log in multi-domain')
-      cy.wrap(afterLogAdded)
-    })
-  })
-
   it('.pause()', () => {
     cy.switchToDomain('http://foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
