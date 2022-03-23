@@ -1,4 +1,5 @@
 import CopyButton from './CopyButton.vue'
+import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
 
 describe('<CopyButton />', { viewportHeight: 80, viewportWidth: 120 }, () => {
   it('copies text to clipboard', () => {
@@ -7,13 +8,23 @@ describe('<CopyButton />', { viewportHeight: 80, viewportWidth: 120 }, () => {
     </>))
     .get('button')
     .should('contain.text', 'Copy')
-
     .get('svg')
     .should('exist')
 
-    // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
-    // cy.findByRole('button', { name: 'Copy' }).realClick()
-    // cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+    const copyStub = cy.stub()
+
+    cy.stubMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
+      copyStub(text)
+
+      return defineResult({
+        copyTextToClipboard: true,
+      })
+    })
+
+    cy.findByRole('button', { name: 'Copy' }).click()
+    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+
+    cy.wrap(copyStub).should('have.been.calledWith', 'Foobar')
   })
 
   it('noIcon hides the icon', () => {
