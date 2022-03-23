@@ -1,6 +1,9 @@
 import execa from 'execa'
 import path from 'path'
 import os from 'os'
+import Debug from 'debug'
+
+const debug = Debug('data-context:sources:GitDataSource')
 
 import type { DataContext } from '..'
 
@@ -42,7 +45,7 @@ export class GitDataSource {
 
       const output: Array<GitInfo | null> = []
 
-      this.ctx.debug('stdout %s', stdout)
+      debug('stdout %s', stdout)
 
       for (let i = 0; i < absolutePaths.length; i++) {
         const file = absolutePaths[i]
@@ -56,14 +59,14 @@ export class GitDataSource {
             author: info[3],
           })
         } else {
-          this.ctx.debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
+          debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
           output.push(null)
         }
       }
 
       return output
     } catch (e) {
-      this.ctx.debug('Error getting git info: %s', (e as Error).message)
+      debug('Error getting git info: %s', (e as Error).message)
 
       // does not have git installed,
       // file is not under source control
@@ -74,7 +77,7 @@ export class GitDataSource {
   }
 
   private async getInfoPosix (absolutePaths: readonly string[]) {
-    this.ctx.debug('getting git info for %o:', absolutePaths)
+    debug('getting git info for %o:', absolutePaths)
     const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
 
     // for file in {one,two} is valid in bash, but for file {one} is not
@@ -84,17 +87,17 @@ export class GitDataSource {
       ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
       : `IFS=$'\n'; for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
-    this.ctx.debug('executing command `%s`:', cmd)
+    debug('executing command `%s`:', cmd)
 
-    const result = await execa(cmd, { shell: true })
+    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
     const stdout = result.stdout.split('\n')
 
     if (stdout.length !== absolutePaths.length) {
-      this.ctx.debug('error... stdout:', stdout)
+      debug('error... stdout:', stdout)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
 
-    this.ctx.debug('stdout for git info', stdout)
+    debug('stdout for git info', stdout)
 
     return stdout
   }
@@ -112,7 +115,7 @@ export class GitDataSource {
     const [, ...stdout] = split
 
     if (stdout.length !== absolutePaths.length) {
-      this.ctx.debug('stdout', stdout)
+      debug('stdout', stdout)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
 
@@ -123,13 +126,13 @@ export class GitDataSource {
     try {
       const { stdout, exitCode = 0 } = await execa(GIT_BRANCH_COMMAND, { shell: true, cwd: absolutePath })
 
-      this.ctx.debug('executing command `%s`:', GIT_BRANCH_COMMAND)
-      this.ctx.debug('stdout for git branch', stdout)
-      this.ctx.debug('exitCode for git branch', exitCode)
+      debug('executing command `%s`:', GIT_BRANCH_COMMAND)
+      debug('stdout for git branch', stdout)
+      debug('exitCode for git branch', exitCode)
 
       return exitCode === 0 ? stdout.trim() : null
     } catch (e) {
-      this.ctx.debug('Error getting git branch: %s', (e as Error).message)
+      debug('Error getting git branch: %s', (e as Error).message)
 
       return null
     }
