@@ -261,7 +261,6 @@ export function updateWithPluginValues (cfg, overrides) {
   configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
     throw errors.get(err, {
       ...options,
-      setupNodeEvents: true,
     })
   })
 
