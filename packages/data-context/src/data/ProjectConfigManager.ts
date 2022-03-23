@@ -8,10 +8,10 @@ import { ChildProcess, ForkOptions, fork } from 'child_process'
 import path from 'path'
 import _ from 'lodash'
 import inspector from 'inspector'
-import fs from 'fs-extra'
 import chokidar from 'chokidar'
 import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
 import type { SetupFullConfigOptions } from './ProjectLifecycleManager'
+import { CypressEnv } from './CypressEnv'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -24,8 +24,6 @@ type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {s
 type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', CypressError>
 
 type ConfigResultState = LoadingStateFor<LoadConfigReply>
-
-type EnvFileResultState = LoadingStateFor<Cypress.ConfigOptions>
 
 type SetupNodeEventsResultState = LoadingStateFor<SetupNodeEventsReply>
 
@@ -57,7 +55,6 @@ type ProjectConfigManagerOptions = {
 
 export class ProjectConfigManager {
   private _configFilePath: string | undefined
-  private _envFileResult: EnvFileResultState = { state: 'pending' }
   private _configResult: ConfigResultState = { state: 'pending' }
   private _cachedFullConfig: FullConfig | undefined
   private _childProcesses = new Set<ChildProcess>()
@@ -75,7 +72,19 @@ export class ProjectConfigManager {
   private _initializedProject: unknown | undefined
   private _testingType: TestingType | undefined
 
-  constructor (private options: ProjectConfigManagerOptions) {}
+  #cypressEnv: CypressEnv
+
+  constructor (private options: ProjectConfigManagerOptions) {
+    this.#cypressEnv = new CypressEnv({
+      envFilePath: this.envFilePath,
+      validateConfigFile: (filePath, config) => {
+        this.validateConfigFile(filePath, config)
+      },
+      toLaunchpad: (...args) => {
+        this.options.toLaunchpad(...args)
+      },
+    })
+  }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
     return this._configResult.state === 'loaded' ? this._configResult.value.initialConfig : null
@@ -538,10 +547,10 @@ export class ProjectConfigManager {
       })
     }
 
-    assert(this._envFileResult.state === 'loaded')
     assert(this._configResult.state === 'loaded')
 
-    const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.options.modeOptions)
+    const cypressEnv = await this.loadCypressEnvFile()
+    const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, cypressEnv, this.options.modeOptions)
 
     const finalConfig = this._cachedFullConfig = this.options.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
@@ -713,7 +722,7 @@ export class ProjectConfigManager {
 
     const [configFileContents, envFile] = await Promise.all([
       this.getConfigFileContents(),
-      this.loadCypressEnvFile(),
+      this.reloadCypressEnvFile(),
     ])
 
     this._cachedFullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
@@ -729,68 +738,22 @@ export class ProjectConfigManager {
     return this.initializeConfig()
   }
 
-  loadCypressEnvFile () {
-    if (!this.options.hasCypressEnvFile) {
-      this._envFileResult = { state: 'loaded', value: {} }
-    }
-
-    if (this._envFileResult.state === 'loading') {
-      return this._envFileResult.value
-    }
-
-    if (this._envFileResult.state === 'errored') {
-      return Promise.reject(this._envFileResult.value)
-    }
-
-    if (this._envFileResult.state === 'loaded') {
-      return Promise.resolve(this._envFileResult.value)
-    }
-
-    assert.strictEqual(this._envFileResult.state, 'pending')
-
-    const promise = this.readCypressEnvFile().then((value) => {
-      this.validateConfigFile(this.envFilePath, value)
-      this._envFileResult = { state: 'loaded', value }
-
-      return value
-    })
-    .catch((e) => {
-      this._envFileResult = { state: 'errored', value: e }
-      throw e
-    })
-    .finally(() => {
-      this.options.toLaunchpad()
-    })
-
-    this._envFileResult = { state: 'loading', value: promise }
-
-    return promise
-  }
-
-  private async readCypressEnvFile (): Promise<Cypress.ConfigOptions> {
-    try {
-      return await fs.readJSON(this.envFilePath)
-    } catch (err: any) {
-      if (err.code === 'ENOENT') {
-        return {}
-      }
-
-      if (err.isCypressErr) {
-        throw err
-      }
-
-      throw getError('ERROR_READING_FILE', this.envFilePath, err)
-    }
+  async loadCypressEnvFile () {
+    return this.#cypressEnv.loadCypressEnvFile()
   }
 
   async reloadCypressEnvFile () {
-    if (this._envFileResult.state === 'loading') {
-      return this._envFileResult.value
-    }
+    this.#cypressEnv = new CypressEnv({
+      envFilePath: this.envFilePath,
+      validateConfigFile: (filePath, config) => {
+        this.validateConfigFile(filePath, config)
+      },
+      toLaunchpad: (...args) => {
+        this.options.toLaunchpad(...args)
+      },
+    })
 
-    this._envFileResult = { state: 'pending' }
-
-    return this.loadCypressEnvFile()
+    return this.#cypressEnv.loadCypressEnvFile()
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
@@ -829,7 +792,6 @@ export class ProjectConfigManager {
     this.closeWatchers()
     this._configResult = { state: 'pending' }
     this._eventsIpcResult = { state: 'pending' }
-    this._envFileResult = { state: 'pending' }
     this._requireWatchers = { config: {}, setupNodeEvents: {} }
     this._eventProcess = undefined
     this._registeredEventsTarget = undefined

@@ -996,9 +996,6 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
-  """Initialize the migration wizard to the first step"""
-  migrateStart: Query
-
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean

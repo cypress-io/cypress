@@ -11,7 +11,6 @@ import path from 'path'
 import _ from 'lodash'
 import resolve from 'resolve'
 import debugLib from 'debug'
-import pDefer from 'p-defer'
 import fs from 'fs'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
@@ -90,7 +89,6 @@ export class ProjectLifecycleManager {
   private _projectRoot: string | undefined
   private _configManager: ProjectConfigManager | undefined
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
-  _pendingMigrationInitialize?: pDefer.DeferredPromise<void>
 
   constructor (private ctx: DataContext) {
     this.watchers = new Set()
@@ -332,7 +330,6 @@ export class ProjectLifecycleManager {
     }
 
     this._projectRoot = projectRoot
-    this._pendingMigrationInitialize = pDefer()
     this.legacyPluginGuard()
     Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
@@ -349,20 +346,12 @@ export class ProjectLifecycleManager {
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
-    const legacyConfigPatah = path.join(projectRoot, this.legacyConfigFile)
+    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
 
-    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPatah)) {
-      // we run the legacy plugins/index.js in a child process
-      // and mutate the config based on the return value for migration
-      // only used in open mode (cannot migrate via terminal)
-      const legacyConfig = this.ctx.fs.readJsonSync(legacyConfigPatah) as LegacyCypressConfigJson
+    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
+      this.#legacyMigration(legacyConfigPath)
 
-      // should never throw, unless there existing pluginsFile errors out,
-      // in which case they are attempting to migrate an already broken project.
-      this.ctx.actions.migration.initialize(legacyConfig)
-      .then(this._pendingMigrationInitialize?.resolve)
-      .finally(() => this._pendingMigrationInitialize = undefined)
-      .catch(this.onLoadError)
+      return
     }
 
     this.configFileWarningCheck()
@@ -388,6 +377,21 @@ export class ProjectLifecycleManager {
     // The migration screen will disappear see `Main.vue` & `MigrationAction.ts`
     if (!needsCypressJsonMigration) {
       this.initializeConfigWatchers()
+    }
+  }
+
+  async #legacyMigration (legacyConfigPath: string) {
+    try {
+      // we run the legacy plugins/index.js in a child process
+      // and mutate the config based on the return value for migration
+      // only used in open mode (cannot migrate via terminal)
+      const legacyConfig = this.ctx.fs.readJsonSync(legacyConfigPath) as LegacyCypressConfigJson
+
+      // should never throw, unless there existing pluginsFile errors out,
+      // in which case they are attempting to migrate an already broken project.
+      await this.ctx.actions.migration.initialize(legacyConfig)
+    } catch (error) {
+      this.onLoadError(error)
     }
   }
 
@@ -515,7 +519,7 @@ export class ProjectLifecycleManager {
     })
   }
 
-  loadCypressEnvFile () {
+  async loadCypressEnvFile () {
     assert(this._configManager)
 
     return this._configManager.loadCypressEnvFile()
@@ -710,8 +714,6 @@ export class ProjectLifecycleManager {
     return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
-  private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
-
   async initializeRunMode () {
     if (!this._currentTestingType) {
       // e2e is assumed to be the default testing type if
@@ -754,9 +756,7 @@ export class ProjectLifecycleManager {
    * for run mode
    */
   private onLoadError = (err: any) => {
-    if (this.ctx.isRunMode && this._pendingInitialize) {
-      this._pendingInitialize.reject(err)
-    } else {
+    if (!this.ctx.isRunMode) {
       this.ctx.onError(err, 'Error Loading Config')
     }
   }

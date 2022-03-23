@@ -465,16 +465,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('migrateStart', {
-      description: 'Initialize the migration wizard to the first step',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
-
-        return {}
-      },
-    })
-
     t.field('migrateRenameSpecs', {
       description: 'While migrating to 10+ renames files to match the new .cy pattern',
       type: Query,
