@@ -12,6 +12,7 @@
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit:update-snapshots": "SNAPSHOT_UPDATE=1 mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register test/unit/**/*.spec.ts --exit",
     "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register test/unit/**/*.spec.ts --exit"
   },
   "dependencies": {

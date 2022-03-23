@@ -8,8 +8,6 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "experimentalShadowDomSupport",
   "experimentalStudio",
   "firefoxGcInterval",
-  "ignoreTestFiles",
-  "integrationFolder",
   "nodeVersion",
   "nodeVersion",
   "pluginsFile",
@@ -28,6 +26,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
       "**/__snapshots__/*",
       "**/__image_snapshots__/*"
     ],
+    "slowTestThreshold": 250,
     "specPattern": "**/*.cy.{js,jsx,ts,tsx}",
     "supportFile": "cypress/support/component.{js,jsx,ts,tsx}",
     "viewportHeight": 500,
@@ -38,6 +37,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "e2e": {
     "baseUrl": null,
     "excludeSpecPattern": "*.hot-update.js",
+    "slowTestThreshold": 10000,
     "specPattern": "cypress/e2e/**/*.{js,jsx,ts,tsx}",
     "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
     "viewportHeight": 660,

@@ -108,12 +108,12 @@ const testingTypeConfigOptions: Array<ResolvedConfigOption> = [
     validation: () => true,
     canUpdateDuringTestTime: false,
   },
-  // {
-  //   name: 'slowTestThreshold',
-  //   defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
-  //   validation: validate.isNumber,
-  //   canUpdateDuringTestTime: true,
-  // },
+  {
+    name: 'slowTestThreshold',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
+    validation: validate.isNumber,
+    canUpdateDuringTestTime: true,
+  },
   {
     name: 'specPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? '**/*.cy.{js,jsx,ts,tsx}' : 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
@@ -359,11 +359,6 @@ const projectConfigOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
-  }, {
-    name: 'slowTestThreshold',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
-    validation: validate.isNumber,
-    canUpdateDuringTestTime: true,
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
