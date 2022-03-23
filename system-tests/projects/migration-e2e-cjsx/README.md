@@ -28,7 +28,7 @@ The project has a default support file, `cypress/support/index.js`. We can renam
 
 | Before | After|
 |---|---|
-| `cypress/support/index.coffee` | `cypress/support/e2e.coffee` |
+| `cypress/support/index.js` | `cypress/support/e2e.js` |
 
 ## Update Config
 
