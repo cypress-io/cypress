@@ -100,6 +100,8 @@ const props = defineProps<{
 }>()
 
 const language = computed(() => {
+  // The fileExtension from FileParts is prepended with a period;
+  // we must strip the period to validate against our supported languages.
   let extension = props.fileExtension.replace(/^\./, '')
 
   if (extension && (langsSupported as readonly string[]).includes(extension)) {
