@@ -3,6 +3,7 @@ import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
 import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
 import type { Runnable, Test } from 'mocha'
+import { LogUtils } from '../cypress/log'
 
 interface RunDomainFnOptions {
   config: Cypress.Config
@@ -11,7 +12,7 @@ interface RunDomainFnOptions {
   fn: string
   skipConfigValidation: boolean
   state: {}
-  isStable: boolean
+  logCounter: number
 }
 
 interface serializedRunnable {
@@ -82,11 +83,14 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
-    const { config, args, env, fn, state, skipConfigValidation } = options
+    const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
 
     reset(state)
+
+    // Set the counter for log ids
+    LogUtils.setCounter(logCounter)
 
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false

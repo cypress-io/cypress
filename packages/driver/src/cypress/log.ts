@@ -106,6 +106,10 @@ export const LogUtils = {
   setCounter: (num) => {
     return counter = num
   },
+
+  getCounter: () => {
+    return counter
+  },
 }
 
 const defaults = function (state, config, obj) {
