@@ -39908,11 +39908,6 @@ speed-measure-webpack-plugin@1.4.2:
   dependencies:
     chalk "^4.1.0"
 
-spin.js@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/spin.js/-/spin.js-4.1.1.tgz#567464a08620541e523da856cb5f67af2d0f48ad"
-  integrity sha512-3cjbjZBw8TmZmvzcmlXqArUpefJ1vGgQZ+dh1CdyDyxZZNxNmw+2Dq5jyoP/OCqQP+z78rWgSJX9m3uMuGaxxw==
-
 split-ca@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/split-ca/-/split-ca-1.0.1.tgz#6c83aff3692fa61256e0cd197e05e9de157691a6"
