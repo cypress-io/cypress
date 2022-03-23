@@ -157,6 +157,8 @@ describe('Launchpad: Error System Tests', () => {
     cy.findByText('E2E Testing').click()
     cy.get('h1').should('contain', 'Error Loading Config')
     cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:5:32')
   })
 
   it('throws an error when in setupNodeEvents updating a config value on a clone of config that was removed in 10.X', () => {
@@ -177,5 +179,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.findByText('E2E Testing').click()
     cy.get('h1').should('contain', 'Error Loading Config')
     cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:5:36')
   })
 })
