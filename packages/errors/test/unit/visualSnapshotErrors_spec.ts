@@ -1122,12 +1122,9 @@ describe('visual error templates', () => {
         default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
-    RENAMED_TO_SPEC_PATTERN: () => {
+    INTEGRATION_FOLDER_REMOVED: () => {
       return {
-        default: [{ name: 'integrationFolder' }, makeErr()],
-        testFiles: [{ name: 'testFiles' }, makeErr()],
-        componentFolder: [{ name: 'componentFolder' }, makeErr()],
-        testFilesInSetup: [{ name: 'testFiles', setupNodeEvents: true }, makeErr()],
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
   })

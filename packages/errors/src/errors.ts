@@ -1362,7 +1362,9 @@ export const AllCypressErrors = {
     `
   },
 
-  TEST_FILES_RENAMED: (errShape: BreakingErrResult) => {
+  TEST_FILES_RENAMED: (errShape: BreakingErrResult, err?: Error) => {
+    const stackTrace = err ? fmt.stackTrace(err) : null
+
     const newName = errShape.newName || '<unknown>'
     const code = errPartial`
     {
@@ -1380,10 +1382,15 @@ export const AllCypressErrors = {
       It is now renamed to ${fmt.highlight(newName)} and configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${newName}`)} and ${fmt.highlightSecondary(`component.${newName}`)}
       ${fmt.code(code)}
 
-      https://on.cypress.io/migration-guide`
+      https://on.cypress.io/migration-guide
+      
+      ${stackTrace}
+      `
   },
 
-  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult) => {
+  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult, err?: Error) => {
+    const stackTrace = err ? fmt.stackTrace(err) : null
+
     const code = errPartial`
     {
       component: {
@@ -1397,49 +1404,32 @@ export const AllCypressErrors = {
       It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
       ${fmt.code(code)}
 
-      https://on.cypress.io/migration-guide`
+      https://on.cypress.io/migration-guide
+
+      ${stackTrace}
+      `
   },
 
-  RENAMED_TO_SPEC_PATTERN: ({ name, setupNodeEvents = false }: {name: string, setupNodeEvents?: boolean}, err?: Error) => {
+  INTEGRATION_FOLDER_REMOVED: (errShape: BreakingErrResult, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
-
-    // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
-    // in the errors maps with this prefix. strip it out.
-    const rootKey = name.replace(/^(component|e2e)\./, '')
-
-    const testingTypePrefix = name.includes('component.') ? 'component.' : name.includes('e2e.') ? 'e2e.' : ''
-
-    const mergedOptionKey = 'testFiles' === rootKey
-      ? errPartial`${fmt.highlight('integrationFolder')} or ${fmt.highlight('componentFolder')}`
-      : errPartial`${fmt.highlight('testFiles')}`
-
-    const message = setupNodeEvents ? errPartial`
-    In ${fmt.highlight('setupNodeEvents()')}, you are attempting to update a the ${fmt.highlight(name)} configuration option. 
-    Its now invalid on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-    ` : errPartial`
-    The ${fmt.highlight(name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-    `
 
     const code = errPartial`
     {
       e2e: {
         specPattern: '...',
       },
-      component: {
-        specPattern: '...',
-      },
     }`
 
-    return errTemplate`
-    ${message}
-    It is now merged with ${mergedOptionKey} into ${fmt.highlight(`${testingTypePrefix}specPattern`)} option and configured separately as a testing type property
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
-    ${fmt.code(code)}
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
+      ${fmt.code(code)}
 
-    https://on.cypress.io/migration-guide
-
-    ${stackTrace}
-    `
+      https://on.cypress.io/migration-guide
+      
+      ${stackTrace}
+      `
   },
 
 } as const
