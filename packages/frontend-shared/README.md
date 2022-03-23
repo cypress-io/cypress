@@ -1,6 +1,6 @@
 # Frontend Shared
 
-This package contains components and other code (such as WindiCSS config) that is is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher level components that exist in both apps, like the header.
+This package contains components and other code (such as WindiCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher level components that exist in both apps, like the header.
 
 Conceivably, other packages may be created that also import from this shared component package.
 
@@ -44,9 +44,9 @@ These apply to this package, `app`, and `launchpad`, as well as any future work 
 ### Development Workflow
 We recommend component-based test driven development. More details in the [Testing Practices](../../guides/testing-strategy-and-styleguide.md) guide. To make changes to an existing component:
 
-1. Open Cypress and got to the spec that covers the component (often it's 1:1 but sometimes components are tested via their parents)
+1. Open Cypress and go to the spec that covers the component (often it's 1:1 but sometimes components are tested via their parents)
 1. Update the test to reflect the desired change (or part of it)
-1. Implement the Change in the component
+1. Implement the change in the component
 1. Add Percy snapshot for any new unique states covered by the change
 
 To create a new component:
@@ -57,7 +57,7 @@ To create a new component:
 ### Vue 3
 If you are new to Vue 3, there are some new features we are using in this codebase that you should become familiar with.
 
-But first, if you are coming from React to Vue 3, here's a small potential gotcha to note as you read and write Vue code: the idea of a `ref` in Vue is similar to a `ref` in React but with a major difference. In React, a when a ref's value changes, it doesn't trigger an update, or get "noticed" at all, by default. In Vue, a ref is part of the reactivity system and when the value updates, the component knows this and the updated value is reflected wherever the value is referenced. This can mean DOM updates, watchers firing, etc.
+But first, if you are coming from React to Vue 3, here's a small potential gotcha to note as you read and write Vue code: the idea of a `ref` in Vue is similar to a `ref` in React but with a major difference. In React, when a ref's value changes, it doesn't trigger an update, or get "noticed" at all, by default. In Vue, a ref is part of the reactivity system and when the value updates, the component knows this and the updated value is reflected wherever the value is referenced. This can mean DOM updates, watchers firing, etc.
 
 Here are some features of Vue 3, and packages in the ecosystem, that are worth knowing about as we work in the codebase.
 
