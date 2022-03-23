@@ -43,6 +43,7 @@
     "prettier": "2.5.1",
     "randomstring": "1.1.5",
     "resolve-from": "^5.0.0",
+    "simple-git": "3.4.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.5",
     "wonka": "^4.0.15"

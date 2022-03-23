@@ -1,11 +1,17 @@
 import execa from 'execa'
+import simpleGit from 'simple-git'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
+import fs from 'fs-extra'
 import os from 'os'
 import Debug from 'debug'
+import type { DataContext } from '..'
+import type { gitStatusType } from '@packages/types'
 
 const debug = Debug('data-context:sources:GitDataSource')
 
-import type { DataContext } from '..'
+dayjs.extend(relativeTime)
 
 // matches <timestamp> <when> <author>
 // $ git log -1 --pretty=format:%ci %ar %an <file>
@@ -18,9 +24,28 @@ export interface GitInfo {
   author: string | null
   lastModifiedTimestamp: string | null
   lastModifiedHumanReadable: string | null
+  statusType: typeof gitStatusType[number]
+}
+
+async function getCurrentGitUser () {
+  try {
+    const result = await execaPosix('git config --get user.name')
+
+    return result.stdout.trim()
+  } catch (e) {
+    debug(`Failed to get current git user`, e.message)
+
+    return ''
+  }
+}
+
+function execaPosix (cmd: string) {
+  return execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
 }
 
 export class GitDataSource {
+  #git = simpleGit()
+
   constructor (private ctx: DataContext) {}
 
   gitInfo (path: string): Promise<GitInfo | null> {
@@ -43,24 +68,52 @@ export class GitDataSource {
           : this.getInfoPosix(absolutePaths)
       )
 
+      const unstaged = await this.#git.status()
+
       const output: Array<GitInfo | null> = []
 
       debug('stdout %s', stdout)
 
       for (let i = 0; i < absolutePaths.length; i++) {
         const file = absolutePaths[i]
-        const data = stdout[i]
-        const info = data?.match(GIT_LOG_REGEXP)
 
-        if (file && info && info[1] && info[2] && info[3]) {
+        if (!file) {
+          continue
+        }
+
+        // first check unstaged/untracked files
+        const isUnstaged = unstaged.files.find((x) => file.endsWith(x.path))
+
+        // These are the status codes used by SimpleGit.
+        // M -> modified
+        // ? -> unstaged
+        // A or ' ' -> staged, but not yet committed
+        // D -> deleted, but we do not show deleted files in the UI, so it's not used.
+        if (isUnstaged && ['M', 'A', ' ', '?'].includes(isUnstaged?.working_dir)) {
+          const stat = fs.statSync(file)
+          const ctime = dayjs(stat.ctime)
+
           output.push({
-            lastModifiedTimestamp: info[1],
-            lastModifiedHumanReadable: info[2],
-            author: info[3],
+            lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
+            lastModifiedHumanReadable: ctime.fromNow(),
+            author: await getCurrentGitUser(),
+            statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
           })
         } else {
-          debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
-          output.push(null)
+          const data = stdout[i]
+          const info = data?.match(GIT_LOG_REGEXP)
+
+          if (file && info && info[1] && info[2] && info[3]) {
+            output.push({
+              lastModifiedTimestamp: info[1],
+              lastModifiedHumanReadable: info[2],
+              author: info[3],
+              statusType: 'unmodified',
+            })
+          } else {
+            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
+            output.push(null)
+          }
         }
       }
 
@@ -89,7 +142,7 @@ export class GitDataSource {
 
     debug('executing command `%s`:', cmd)
 
-    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
+    const result = await execaPosix(cmd)
     const stdout = result.stdout.split('\n')
 
     if (stdout.length !== absolutePaths.length) {

@@ -99,7 +99,7 @@
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data.data?.gitInfo"
+              v-if="row.data.isLeaf && row.data.data?.gitInfo"
               :gql="row.data.data.gitInfo"
             />
           </template>
