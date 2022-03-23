@@ -388,6 +388,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """Default spec file name for spec creation"""
+  defaultSpecFileName: String
+
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
