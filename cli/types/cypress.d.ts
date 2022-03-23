@@ -5465,6 +5465,21 @@ declare namespace Cypress {
     (action: 'task', tasks: Tasks): void
   }
 
+  interface CodeFrame {
+    frame: string
+    language: string
+    line: number
+    column: number
+    absoluteFile: string
+    originalFile: string
+    relativeFile: string
+  }
+
+  interface CypressError extends Error {
+    docsUrl?: string
+    codeFrame?: CodeFrame
+  }
+
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -5570,7 +5585,7 @@ declare namespace Cypress {
      *  This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'fail', fn: (error: Error, mocha: Mocha.Runnable) => void): Cypress
+    (action: 'fail', fn: (error: CypressError, mocha: Mocha.Runnable) => void): Cypress
     /**
      * Fires whenever the viewport changes via a `cy.viewport()` or naturally when
      * Cypress resets the viewport to the default between tests. Useful for debugging purposes.

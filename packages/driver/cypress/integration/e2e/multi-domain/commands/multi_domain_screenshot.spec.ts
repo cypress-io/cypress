@@ -256,7 +256,6 @@ context('multi-domain screenshot', { experimentalSessionSupport: true }, () => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error during screenshot')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
-        // @ts-ignore
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
       })
 

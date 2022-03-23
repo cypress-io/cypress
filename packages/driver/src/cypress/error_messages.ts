@@ -1775,31 +1775,34 @@ export default {
       message: stripIndent`\
       ${cmd('switchToDomain')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
-    // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
-    route: {
-      unsupported: {
-        message: `${cmd('route')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+    unsupported: {
+      route: {
+        message: `${cmd('route')} has been deprecated and use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
-    },
-    server: {
-      unsupported: {
-        message: `${cmd('server')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+      server: {
+        message: `${cmd('server')} has been deprecated and use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
-    },
-    Server: {
-      unsupported: {
-        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+      Server: {
+        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
-    },
-    Cookies: {
-      preserveOnce: {
-        unsupported: {
-          message: `\`Cypress.Cookies.preserveOnce\` use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
-          docsUrl: 'https://on.cypress.io/session',
-        },
+      Cookies_preserveOnce: {
+        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      switchToDomain: {
+        message: `${cmd('switchToDomain')} use is not currently supported in the ${cmd('switchToDomain')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
+        docsUrl: 'https://on.cypress.io/github-issue/20718',
+      },
+      intercept: {
+        message: `${cmd('intercept')} use is not supported in the ${cmd('switchToDomain')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
+        docsUrl: 'https://on.cypress.io/github-issue/20720',
+      },
+      session: {
+        message: `${cmd('session')} use is not supported in the ${cmd('switchToDomain')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
+        docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
     },
   },
