@@ -5,7 +5,6 @@
 const debugLib = require('debug')
 const Promise = require('bluebird')
 const _ = require('lodash')
-const { wrapInvalidPluginOptions } = require('@packages/config')
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
@@ -115,10 +114,6 @@ class RunPlugins {
     Promise
     .try(() => {
       debug('Calling setupNodeEvents')
-      // setup all setters for 10.X+ non-supported config options
-      // so that where setters are called they error. This will
-      // help users find the issue and fix it.
-      wrapInvalidPluginOptions(initialConfig)
 
       return setupNodeEvents(registerChildEvent, initialConfig)
     })
@@ -138,14 +133,12 @@ class RunPlugins {
     })
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
-      const processedError = err.isCypressErr ? err : require('@packages/errors').getError(
+      this.ipc.send('setupTestingType:error', util.serializeError(require('@packages/errors').getError(
         'CONFIG_FILE_SETUP_NODE_EVENTS_ERROR',
         this.requiredFile,
         initialConfig.testingType,
         err,
-      )
-
-      this.ipc.send('setupTestingType:error', util.serializeError(processedError))
+      )))
     })
   }
 

@@ -5,7 +5,6 @@ import type { BreakingOption, BreakingOptionErrorKey } from './options'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
-import { wrapInvalidPluginOptions } from './wrap-invalid-plugin-options'
 
 export {
   validation,
@@ -13,7 +12,6 @@ export {
   breakingOptions,
   BreakingOption,
   BreakingOptionErrorKey,
-  wrapInvalidPluginOptions,
 }
 
 const debug = Debug('cypress:config:validator')
