@@ -149,7 +149,9 @@ describe('Launchpad: Error System Tests', () => {
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
   })
+})
 
+describe('setupNodeEvents', () => {
   it('throws an error when in setupNodeEvents updating a config value that was removed in 10.X', () => {
     cy.scaffoldProject('config-update-non-migrated-value')
     cy.openProject('config-update-non-migrated-value')
