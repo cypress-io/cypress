@@ -1721,8 +1721,18 @@ export default {
     invalid_options_argument: {
       message: `${cmd('switchToDomain')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
     },
-    incomplete_options_argument: {
-      message: `${cmd('switchToDomain')} requires the 'options' argument to contain an 'args' key. You passed: \`{{arg}}\``,
+    extraneous_options_argument ({ extraneousKeys, validOptionKeys }) {
+      return stripIndent`\
+        ${cmd('switchToDomain')} detected extraneous keys in your options configuration.
+
+        The extraneous keys detected were:
+
+          > \`${extraneousKeys}\`
+
+        Valid keys include the following:
+
+          > \`${validOptionKeys}\`
+      `
     },
     invalid_fn_argument: {
       message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,

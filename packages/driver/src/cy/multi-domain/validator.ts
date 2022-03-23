@@ -1,6 +1,8 @@
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { isPlainObject, isString } from 'lodash'
+import { difference, isPlainObject, isString } from 'lodash'
+
+const validOptionKeys = Object.freeze(['args'])
 
 export class Validator {
   log: Cypress.Log
@@ -21,20 +23,29 @@ export class Validator {
       })
     }
 
-    if (options && !isPlainObject(options)) {
-      this.onFailure()
+    if (options) {
+      if (!isPlainObject(options)) {
+        this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.invalid_options_argument', {
-        onFail: this.log,
-        args: { arg: $utils.stringify(options) },
-      })
-    } else if (options && !Object.getOwnPropertyDescriptor(options, 'args')) {
-      this.onFailure()
+        $errUtils.throwErrByPath('switchToDomain.invalid_options_argument', {
+          onFail: this.log,
+          args: { arg: $utils.stringify(options) },
+        })
+      }
 
-      $errUtils.throwErrByPath('switchToDomain.incomplete_options_argument', {
-        onFail: this.log,
-        args: { arg: $utils.stringify(options) },
-      })
+      const extraneousKeys = difference(Object.keys(options), validOptionKeys)
+
+      if (extraneousKeys.length) {
+        this.onFailure()
+
+        $errUtils.throwErrByPath('switchToDomain.extraneous_options_argument', {
+          onFail: this.log,
+          args: {
+            extraneousKeys: extraneousKeys.join(', '),
+            validOptionKeys: validOptionKeys.join(', '),
+          },
+        })
+      }
     }
 
     if (typeof callbackFn !== 'function') {

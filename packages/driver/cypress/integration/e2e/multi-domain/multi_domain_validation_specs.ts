@@ -188,15 +188,22 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('foobar.com', 'foo', () => {})
     })
 
-    it('errors passing in empty object to callback function', (done) => {
+    it('errors passing in invalid config object to callback function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'options\' argument to contain an \'args\' key. You passed: `{}`')
+        expect(err.message).to.include('`cy.switchToDomain()` detected extraneous keys in your options configuration.')
+        expect(err.message).to.include('The extraneous keys detected were:')
+        expect(err.message).to.include('> `foo, bar`')
+        expect(err.message).to.include('Valid keys include the following:')
+        expect(err.message).to.include('> `args`')
 
         done()
       })
 
-      // @ts-ignore
-      cy.switchToDomain('foobar.com', {}, () => {})
+      cy.switchToDomain('foobar.com', {
+        // @ts-ignore
+        foo: 'foo',
+        bar: 'bar',
+      }, () => {})
     })
 
     it('errors if passed a non-serializable args value', (done) => {
