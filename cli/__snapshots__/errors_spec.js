@@ -83,6 +83,7 @@ exports['errors individual has the following errors 1'] = [
   "incompatibleTestTypeFlags",
   "incompatibleTestingTypeAndFlag",
   "invalidCacheDirectory",
+  "invalidConfigFile",
   "invalidCypressEnv",
   "invalidOS",
   "invalidRunProjectPath",

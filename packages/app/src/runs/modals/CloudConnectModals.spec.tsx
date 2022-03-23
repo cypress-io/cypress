@@ -30,14 +30,6 @@ describe('<CloudConnectModals />', () => {
     })
   }
 
-  it('show the create org modal when no org is there', () => {
-    mountDialog(true)
-    cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
-    cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
-
-    cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
-  })
-
   it('shows the select org modal when orgs are added', () => {
     mountDialog()
     cy.contains(defaultMessages.runs.connect.modal.selectProject.connectProject).should('be.visible')

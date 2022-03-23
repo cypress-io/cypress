@@ -1,7 +1,7 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BrowserStatusEnum } from '..'
+import { BrowserStatusEnum, FileExtensionEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
@@ -103,7 +103,7 @@ export const CurrentProject = objectType({
     t.boolean('needsLegacyConfigMigration', {
       description: 'Whether the project needs to be migrated before proceeding',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.metaState.needsCypressJsonMigration
+        return ctx.lifecycleManager.needsCypressJsonMigration()
       },
     })
 
@@ -118,6 +118,21 @@ export const CurrentProject = objectType({
       description: 'Whether the project has Typescript',
       resolve (source, args, ctx) {
         return ctx.lifecycleManager.metaState.hasTypescript
+      },
+    })
+
+    t.field('fileExtensionToUse', {
+      type: FileExtensionEnum,
+      description: 'File extension to use based on if the project has typescript or not',
+      resolve: (source, args, ctx) => {
+        return ctx.lifecycleManager.fileExtensionToUse
+      },
+    })
+
+    t.string('defaultSpecFileName', {
+      description: 'Default spec file name for spec creation',
+      resolve: (source, args, ctx) => {
+        return ctx.project.defaultSpecFileName()
       },
     })
 

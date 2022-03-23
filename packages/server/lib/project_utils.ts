@@ -44,7 +44,7 @@ export const checkSupportFile = async ({
   projectRoot?: string
 }) => {
   if (!supportFile) {
-    return
+    return false
   }
 
   // @ts-ignore

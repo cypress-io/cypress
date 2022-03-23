@@ -1,6 +1,5 @@
 <template>
-  <!-- TODO: spread on props.gql is needed due to bug in mountFragment. Fix -->
-  <SpecPatterns :gql="{...props.gql}" />
+  <SpecPatterns :gql="props.gql" />
 
   <div class="flex mt-32px gap-16px justify-center">
     <OpenConfigFileInIDE

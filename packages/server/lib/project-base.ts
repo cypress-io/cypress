@@ -101,7 +101,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       report: false,
       onFocusTests () {},
       onError () {},
-      onWarning () {},
+      onWarning: this.ctx.onWarning,
       ...options,
     }
 
@@ -233,9 +233,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await this.saveState(stateToSave)
 
-    await Promise.all([
-      checkSupportFile({ projectRoot: this.projectRoot, supportFile: cfg.supportFile }),
-    ])
+    await checkSupportFile({ projectRoot: this.projectRoot, supportFile: cfg.supportFile })
 
     if (cfg.isTextTerminal) {
       return

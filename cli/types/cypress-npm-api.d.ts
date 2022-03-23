@@ -92,10 +92,6 @@ declare namespace CypressCommandLine {
      */
     reporterOptions: any
     /**
-     * Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold.
-     */
-    slowTestThreshold: number
-    /**
      * Specify the specs to run
      */
     spec: string
@@ -146,11 +142,9 @@ declare namespace CypressCommandLine {
     /**
      * Path to the config file to be used.
      *
-     * If `false` is passed, no config file will be used.
-     *
      * @default "cypress.config.{ts|js}"
      */
-    configFile: string | false
+    configFile: string
     /**
      * Specify environment variables.
      * TODO: isn't this duplicate of config.env?!
