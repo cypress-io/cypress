@@ -1,3 +1,4 @@
+import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
@@ -113,7 +114,6 @@ describe('Launchpad: Open Mode', () => {
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.actions.electron, 'showItemInFolder')
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
 
@@ -128,7 +128,7 @@ describe('Launchpad: Open Mode', () => {
       cy.wait('@OpenInFinder')
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.electron.showItemInFolder).to.have.been.calledOnceWith('/some/project')
+        expect((ctx.actions.electron.showItemInFolder as SinonStub).lastCall.lastArg).to.eql('/some/project')
       })
     })
   })
