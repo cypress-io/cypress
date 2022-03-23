@@ -60,8 +60,6 @@ export function loadSpec (options: LoadSpecOptions): void {
   // Need to normalize the spec path for windows usage
   cy.visitApp(getRunnerHref(`cypress/e2e/${filePath}`))
 
-  // cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
-
   if (setup) {
     setup()
   }
