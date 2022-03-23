@@ -17,19 +17,28 @@ export interface ApplicationDataApiShape {
 export class AppActions {
   constructor (private ctx: DataContext) {}
 
-  setActiveBrowser (browser: FoundBrowser) {
+  async setActiveBrowser (browser: FoundBrowser) {
     this.ctx.coreData.chosenBrowser = browser
+
+    await this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {
+      lastBrowser: {
+        name: browser.name,
+        channel: browser.channel,
+      },
+    })
   }
 
-  setActiveBrowserById (id: string) {
+  async setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
 
     // Ensure that this is a valid ID to set
     const browser = this.ctx.lifecycleManager.browsers?.find((b) => this.idForBrowser(b as FoundBrowser) === browserId)
 
     if (browser) {
-      this.setActiveBrowser(browser)
+      return await this.setActiveBrowser(browser)
     }
+
+    throw new Error('no browser in setActiveBrowserById')
   }
 
   async removeAppDataDir () {

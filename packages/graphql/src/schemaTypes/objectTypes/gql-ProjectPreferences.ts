@@ -1,4 +1,5 @@
 import { objectType } from 'nexus'
+import { LastBrowser } from './gql-LastBrowser'
 
 export const ProjectPreferences = objectType({
   name: 'ProjectPreferences',
@@ -8,7 +9,8 @@ export const ProjectPreferences = objectType({
       description: 'The preferred testing type to start in',
     })
 
-    t.string('browserPath', {
+    t.field('lastBrowser', {
+      type: LastBrowser,
       description: 'The preferred browser to launch',
     })
   },

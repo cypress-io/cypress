@@ -34,13 +34,9 @@ export class BrowserDataSource {
 
       this.ctx.coreData.machineBrowsers = p
       p.then((browsers) => {
-        if (this.ctx.coreData.machineBrowsers === p) {
-          if (browsers[0]) {
-            this.ctx.coreData.chosenBrowser = browsers[0]
-          }
+        if (!browsers.length) throw new Error('no browsers found in machineBrowsers')
 
-          this.ctx.coreData.machineBrowsers = browsers
-        }
+        this.ctx.coreData.machineBrowsers = browsers
       }).catch((e) => {
         this.ctx.update((coreData) => {
           coreData.machineBrowsers = null

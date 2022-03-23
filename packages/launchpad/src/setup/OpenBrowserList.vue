@@ -200,6 +200,12 @@ fragment OpenBrowserList on CurrentProject {
     warning
     majorVersion
   }
+  preferences {
+    lastBrowser {
+      name
+      channel
+    }
+  }
   currentTestingType
   browserStatus
 }
@@ -229,7 +235,14 @@ const browsers = computed(() => {
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
-  get: () => props.gql.currentBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id,
+  get () {
+    const { browsers, currentBrowser } = props.gql
+    const lastBrowser = props.gql.preferences?.lastBrowser
+
+    return currentBrowser?.id
+      || (lastBrowser && browsers?.find(({ name, channel }) => name === lastBrowser.name && channel === lastBrowser.channel)?.id)
+      || browsers?.find((browser) => browser.name === 'electron')?.id
+  },
   set (browserId) {
     if (browserId) {
       setBrowser.executeMutation({ id: browserId })

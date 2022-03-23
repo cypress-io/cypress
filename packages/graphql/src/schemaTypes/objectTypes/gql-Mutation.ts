@@ -200,8 +200,8 @@ export const mutation = mutationType({
           description: 'ID of the browser that we want to set',
         })),
       },
-      resolve (_, args, ctx) {
-        ctx.actions.app.setActiveBrowserById(args.id)
+      async resolve (_, args, ctx) {
+        await ctx.actions.app.setActiveBrowserById(args.id)
 
         return ctx.lifecycleManager
       },
