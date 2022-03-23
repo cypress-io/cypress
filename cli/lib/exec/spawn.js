@@ -232,7 +232,6 @@ module.exports = {
         process.stdin.on('error', (err) => {
           if (['EPIPE', 'ENOTCONN'].includes(err.code)) {
             return
-            // return err
           }
 
           throw err
@@ -240,7 +239,6 @@ module.exports = {
 
         if (stdioOptions.detached) {
           child.unref()
-          throw new Error('here!!!')
         }
       })
     }
@@ -283,12 +281,9 @@ module.exports = {
       .then((code) => {
         if (code !== 0 && brokenGtkDisplay) {
           util.logBrokenGtkDisplayWarning()
-          console.log('HERE - spawnInXvfb')
 
           return spawnInXvfb()
         }
-
-        console.log('HERE2 - code')
 
         return code
       })
