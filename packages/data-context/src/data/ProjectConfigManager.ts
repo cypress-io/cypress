@@ -145,7 +145,6 @@ export class ProjectConfigManager {
       }
 
       this._state = 'errored'
-      this.onLoadError(error)
 
       throw error
     } finally {
