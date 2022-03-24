@@ -30,17 +30,11 @@ export class AppActions {
 
   async setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
-
-    // Ensure that this is a valid ID to set
     const browser = this.ctx.lifecycleManager.browsers?.find((b) => this.idForBrowser(b as FoundBrowser) === browserId)
 
-    if (browser) {
-      await this.setActiveBrowser(browser)
+    if (!browser) throw new Error('no browser in setActiveBrowserById')
 
-      return
-    }
-
-    throw new Error('no browser in setActiveBrowserById')
+    await this.setActiveBrowser(browser)
   }
 
   async removeAppDataDir () {

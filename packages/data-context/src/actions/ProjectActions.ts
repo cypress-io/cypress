@@ -209,9 +209,7 @@ export class ProjectActions {
 
     testingType = testingType || this.ctx.coreData.currentTestingType
 
-    if (!testingType) {
-      throw new Error('Missing testingType in launchProject')
-    }
+    if (!testingType) throw new Error('Missing testingType in launchProject')
 
     let activeSpec: FoundSpec | undefined
 
