@@ -30,6 +30,8 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - 10.0-release
         - fix-beta-build-caching
+        - feature-multidomain
+
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -39,6 +41,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,6 +51,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
     - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -1633,7 +1637,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-beta-build-caching" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-beta-build-caching" && "$CIRCLE_BRANCH" != "feature-multidomain" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
