@@ -30,6 +30,8 @@ import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
 
+  legacyConfig.env = legacyConfig.env ?? {}
+
   return new Promise((resolve, reject) => {
     // couldn't find a pluginsFile
     // just bail with initial config
