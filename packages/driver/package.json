@@ -7,7 +7,7 @@
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "patch-package",
-    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in the pluginsFile.\n\tChanges to the server will be watched and reloaded automatically.`))'"
+    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'"
   },
   "dependencies": {},
   "devDependencies": {
@@ -64,7 +64,7 @@
     "methods": "1.1.2",
     "mime-types": "2.1.27",
     "minimatch": "3.0.4",
-    "minimist": "1.2.5",
+    "minimist": "1.2.6",
     "mocha": "7.0.1",
     "morgan": "1.9.1",
     "multer": "1.4.2",
@@ -81,9 +81,9 @@
     "text-mask-addons": "3.8.0",
     "underscore.string": "3.3.5",
     "unfetch": "4.1.0",
-    "url-parse": "1.5.8",
+    "url-parse": "1.5.9",
     "vanilla-text-mask": "5.1.1",
-    "vite": "2.5.0",
+    "vite": "2.9.0-beta.3",
     "webpack": "^4.44.2",
     "zone.js": "0.9.0"
   },

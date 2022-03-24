@@ -63,6 +63,7 @@ fragment Wizard_InstalledPackages_Data on Query {
   wizard {
     installedPackages
   }
+  ...InstallDependencies
 }
 `
 
@@ -73,7 +74,6 @@ query Wizard_InstalledPackages{
 
 const queryInstalled = useQuery({
   query: Wizard_InstalledPackagesDocument,
-  requestPolicy: 'network-only',
 })
 
 const packagesInstalled = ref<string[]>([])
@@ -82,8 +82,9 @@ const toInstall = computed(() => {
   return props.gql.wizard.packagesToInstall?.map((p) => p.package)
 })
 
+// TODO: UNIFY-1350 convert this to a subscription
 const intervalQueryTrigger = useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({})
+  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
 
   packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
     (pkg) => pkg,

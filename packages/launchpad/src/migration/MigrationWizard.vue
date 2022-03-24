@@ -197,7 +197,9 @@ query MigrationWizardQuery {
 }
 `
 
-const query = useQuery({ query: MigrationWizardQueryDocument })
+// The requestPolicy needs to be cache-and-network because otherwise
+// if a user visits 2 projects with migration data - is gonna show only the first data
+const query = useQuery({ query: MigrationWizardQueryDocument, requestPolicy: 'cache-and-network', pause: true })
 
 const migration = computed(() => query.data.value?.migration)
 const steps = computed(() => migration.value?.filteredSteps || [])
@@ -388,7 +390,6 @@ function convertConfig () {
 gql`
 mutation MigrationWizard_ReconfigureComponentTesting {
   migrateComponentTesting {
-    currentTestingType
     currentProject {
       id
       currentTestingType

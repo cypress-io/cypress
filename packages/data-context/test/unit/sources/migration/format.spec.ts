@@ -14,7 +14,7 @@ describe('formatMigrationFile', () => {
       expect(actual).to.eql([
         { text: 'cypress/', highlight: false },
         { text: 'integration', highlight: true, group: 'folder' },
-        { text: '/app', highlight: false },
+        { text: '/app', highlight: false, group: 'fileName' },
         { text: '.spec.', highlight: true, group: 'preExtension' },
         { text: 'js', highlight: false },
       ])

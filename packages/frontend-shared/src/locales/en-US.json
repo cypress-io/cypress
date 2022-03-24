@@ -133,7 +133,10 @@
       "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
       "gitInfo": "{fileState} {timeAgo}"
     },
-    "noResultsMessage": "No specs matched your search:"
+    "noResultsMessage": "No specs matched your search:",
+    "noSpecErrorTitle": "Spec not found",
+    "noSpecErrorIntro": "There is no spec matching the following location:",
+    "noSpecErrorExplainer": "It is possible that the file has been moved or deleted. Please choose from the list of specs below."
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -616,6 +619,10 @@
       "description": "Choose your preferred browser for {testingType} testing."
     }
   },
+  "e2eProjectSetup": {
+    "title": "Project Setup",
+    "description": "Confirm your project's preferred language."
+  },
   "openBrowser": {
     "startComponent": "Start Component Testing in {browser}",
     "startE2E": "Start E2E Testing in {browser}",
@@ -627,6 +634,10 @@
     "switchTestingType": "Switch testing type"
   },
   "runner": {
+    "header": {
+      "reviewDocs": "Review the docs",
+      "troubleRendering": "if you're having trouble rendering your components properly."
+    },
     "snapshot": {
       "toggleHighlights": "Toggle highlights",
       "highlightsLabel": "Highlights",
@@ -643,5 +654,8 @@
       "invalidSelector": "Invalid",
       "selectorMethodsLabel": "Selector Methods"
     }
+  },
+  "warnings": {
+    "retry": "Try again"
   }
 }

@@ -93,10 +93,7 @@ const normalizeBackslashes = (options) => {
     if (typeof options[property] === 'string') {
       options[property] = normalizeBackslash(options[property])
     } else {
-      // configFile is a special case that can be set to false
-      if (property !== 'configFile') {
-        delete options[property]
-      }
+      delete options[property]
     }
   })
 
@@ -207,7 +204,7 @@ const sanitizeAndConvertNestedArgs = (str, argName) => {
 /**
  * Parses the '--spec' cli parameter to return an array of valid patterns.
  *
- * @param {Strng} pattern pattern to parse
+ * @param {String} pattern pattern to parse
  * @returns Array of patterns
  */
 const parseSpecArgv = (pattern) => {

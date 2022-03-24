@@ -1,16 +1,17 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { getPathForPlatform } from '../../src/paths'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
-describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
+describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.__incorrectlyVisitAppWithIntercept()
   })
 
   it('test component', () => {
+    cy.__incorrectlyVisitAppWithIntercept()
     cy.contains('TestComponent.spec').click()
     cy.location().should((location) => {
       expect(location.hash).to.contain('TestComponent.spec')
@@ -56,6 +57,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
   })
 
   it('navigation between specs and other parts of the app works', () => {
+    cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
@@ -74,7 +76,49 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
   })
 
+  it('redirects to the specs list with error if a spec is not found', () => {
+    cy.visitApp()
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+    const badFilePath = 'src/DoesNotExist.spec.js'
+
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
+    cy.contains(noSpecErrorTitle).should('be.visible')
+    cy.contains(noSpecErrorIntro).should('be.visible')
+    cy.contains(noSpecErrorExplainer).should('be.visible')
+    cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
+    cy.location()
+    .its('href')
+    .should('eq', 'http://localhost:4455/__/#/specs')
+
+    // should clear after reload
+    cy.reload()
+    cy.contains(noSpecErrorTitle).should('not.exist')
+  })
+
+  it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
+    const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
+
+    const goodFilePath = 'src/TestComponent.spec.jsx'
+
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
+
+    cy.contains('renders the test component').should('be.visible')
+
+    cy.withCtx((ctx, o) => {
+      ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
+    }, { path: goodFilePath }).then(() => {
+      cy.contains(noSpecErrorTitle).should('be.visible')
+      cy.contains(noSpecErrorIntro).should('be.visible')
+      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
+      cy.location()
+      .its('href')
+      .should('eq', 'http://localhost:4455/__/#/specs')
+    })
+  })
+
   it('browser picker in runner calls mutation with current spec path', () => {
+    cy.__incorrectlyVisitAppWithIntercept()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 

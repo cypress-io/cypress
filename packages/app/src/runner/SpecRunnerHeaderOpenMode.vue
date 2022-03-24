@@ -5,18 +5,6 @@
     :style="{ width: `${props.width}px` }"
   >
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
-      <!--
-        TODO: Studio. Out of scope for GA.
-      <Button
-        data-cy="header-studio"
-        :disabled="isDisabled"
-        class="m-16px mr-12px"
-        variant="outline"
-        @click="togglePlayground"
-      >
-        <i-cy-action-record_x16 class="h-32px w-32px" />
-      </Button>
-      -->
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
@@ -89,7 +77,7 @@
         </template>
         <template #default>
           <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
-            <!-- TODO: This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
+            <!-- TODO: UNIFY-1316 - This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
             <p class="mb-16px">
               The
               <strong>viewport</strong> determines the width and height of your application.
@@ -122,11 +110,26 @@
       :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
+
+    <Alert
+      v-model="showAlert"
+      status="success"
+      dismissible
+    >
+      <template #title>
+        <ExternalLink href="https://on.cypress.io/mount">
+          <i-cy-book_x16 class="inline-block icon-dark-indigo-500 icon-light-indigo-200" />
+          {{ t('runner.header.reviewDocs') }}
+        </ExternalLink>
+        {{ t('runner.header.troubleRendering') }}
+      </template>
+    </Alert>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAutStore, useSpecStore } from '../store'
 import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
@@ -135,7 +138,9 @@ import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
+import { useI18n } from 'vue-i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
@@ -158,12 +163,26 @@ fragment SpecRunnerHeader on CurrentProject {
 }
 `
 
+const { t } = useI18n()
+
+const autStore = useAutStore()
+
+const specStore = useSpecStore()
+
+const route = useRoute()
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
   width: number
 }>()
+
+const showAlert = ref(false)
+
+watchEffect(() => {
+  showAlert.value = route.params.shouldShowTroubleRenderingAlert === 'true'
+})
 
 const autIframe = props.getAutIframe()
 
@@ -177,10 +196,6 @@ const togglePlayground = () => _togglePlayground(autIframe)
 
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql.currentBrowser })
-
-const autStore = useAutStore()
-
-const specStore = useSpecStore()
 
 const activeSpecPath = specStore.activeSpec?.absolute
 

@@ -297,6 +297,13 @@ describe('visual error templates', () => {
 
   // testVisualErrors('CANNOT_RECORD_NO_PROJECT_ID', {
   testVisualErrors(errorType, {
+    LEGACY_CONFIG_ERROR_DURING_MIGRATION: () => {
+      const err = makeErr()
+
+      return {
+        default: ['cypress/plugins/index.js', err],
+      }
+    },
     CANNOT_TRASH_ASSETS: () => {
       const err = makeErr()
 
@@ -676,7 +683,7 @@ describe('visual error templates', () => {
         default: ['/path/to/cypress.config.js', err],
       }
     },
-    PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
+    SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
       return {
@@ -722,11 +729,6 @@ describe('visual error templates', () => {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: [1, 2, 3],
-        }],
-        pluginsFile: ['pluginsFile', 'cypress/plugins/index.js', {
-          key: 'defaultCommandTimeout',
-          type: 'a number',
-          value: false,
         }],
         noFileType: [null, null, {
           key: 'defaultCommandTimeout',
@@ -790,8 +792,7 @@ describe('visual error templates', () => {
       return {
         default: [
           '/path/to/project/root',
-          'cypress.config.js',
-          'cypress.config.ts',
+          ['cypress.config.js', 'cypress.config.ts', 'cypress.config.mjs'],
         ],
       }
     },
@@ -1000,6 +1001,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_STUDIO_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     FIREFOX_GC_INTERVAL_REMOVED: () => {
       return {
         default: [],
@@ -1061,6 +1067,11 @@ describe('visual error templates', () => {
         default: ['spec.{ts,js}', ['support.ts', 'support.js']],
       }
     },
+    PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
+      return {
+        default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
     CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
       return {
         default: [{ name: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
@@ -1094,6 +1105,26 @@ describe('visual error templates', () => {
     DASHBOARD_GRAPHQL_ERROR: () => {
       return {
         default: [makeErr()],
+      }
+    },
+    MIGRATION_ALREADY_OCURRED: () => {
+      return {
+        default: ['custom.config.js', 'custom.json'],
+      }
+    },
+    TEST_FILES_RENAMED: () => {
+      return {
+        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    COMPONENT_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    INTEGRATION_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
   })

@@ -2,12 +2,10 @@ import { BUNDLERS, FRONTEND_FRAMEWORKS, AllPackagePackages } from '@packages/sca
 import { CODE_LANGUAGES } from '@packages/types/src'
 
 function fakeInstalledDeps () {
-  cy.withCtx(async (ctx) => {
+  cy.withCtx(async (ctx, o) => {
     const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
 
-    ctx.update((coreData) => {
-      coreData.wizard.__fakeInstalledPackagesForTesting = deps
-    })
+    o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
   })
 }
 
@@ -124,11 +122,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('@aboutTestingTypes').should('not.exist')
     })
 
-    // Cypress enter key down isn't trigger close callback. Working correctly when manually tested
-    // or when using the cypress-real-evens plugin.
-    // Could be related to this bug? https://github.com/cypress-io/cypress/issues/14864
-    // FIXME: https://github.com/cypress-io/cypress/pull/19726
-    it.skip('closes modal by pressing enter key when close button is focused', () => {
+    it('closes modal by pressing enter key when close button is focused', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
@@ -138,10 +132,8 @@ describe('Launchpad: Setup Project', () => {
       .within(() => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
-        cy.tabUntil((el) => el.text().includes('Close'))
-
         cy.findByRole('button', { name: 'Close' })
-        .should('have.focus')
+        .focus()
         .type('{enter}')
       })
 
@@ -304,6 +296,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'JavaScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -344,6 +337,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -613,10 +607,6 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('h1').should('contain', 'Choose a Browser')
       })
-    })
-
-    beforeEach(() => {
-      fakeInstalledDeps()
     })
 
     const hasStorybookPermutations = [false, true]

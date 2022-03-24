@@ -195,6 +195,7 @@ export class DataContext {
     return new EnvDataSource(this)
   }
 
+  @cached
   get emitter () {
     return new DataEmitterActions(this)
   }

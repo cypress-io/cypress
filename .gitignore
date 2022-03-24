@@ -9,6 +9,9 @@ _test-output
 cypress.zip
 .babel-cache
 
+# from config, compiled .js files
+packages/config/src/*.js
+
 # from extension
 Cached Theme.pak
 Cached Theme Material Design.pak
@@ -95,7 +98,6 @@ system-tests/fixtures/large-img
 
 # Building app binary
 scripts/support
-package-lock.json
 binary-url.json
 
 # Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts

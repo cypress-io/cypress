@@ -45,6 +45,7 @@ export interface RemoteGraphQLInterceptPayload {
   variables: Record<string, any>
   document: DocumentNode
   result: ExecutionResult
+  callCount: number
 }
 
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
@@ -323,7 +324,7 @@ function __incorrectlyVisitAppWithIntercept (href?: string) {
 
 function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
-    return cy.visit(`http://localhost:${Cypress.env('e2e_launchpadPort')}/__launchpad/index.html`, { log: false }).then((val) => {
+    return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
       return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
         return val
       })
@@ -524,6 +525,12 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    '.runnable-header .duration': ($el) => {
+      $el.text('XX:XX')
+    },
+  },
+})
 
 addNetworkCommands()

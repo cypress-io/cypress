@@ -23,7 +23,7 @@ function getTranspileFolders (config) {
   }
 
   // attempt to add directories based on spec pattern
-  let componentDirs = config.component.specPattern || ''
+  let componentDirs = config.specPattern || ''
 
   // can be string or array
   if (typeof componentDirs === 'string') {

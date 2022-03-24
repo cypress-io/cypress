@@ -47,7 +47,19 @@ const processTestingType = (options) => {
   return []
 }
 
+/**
+ * Throws an error if configFile is string 'false' or boolean false
+ * @param {*} options
+ */
+const checkConfigFile = (options) => {
+  // CLI will parse as string, module API can pass in boolean
+  if (options.configFile === 'false' || options.configFile === false) {
+    throwInvalidOptionError(errors.invalidConfigFile)
+  }
+}
+
 module.exports = {
   throwInvalidOptionError,
   processTestingType,
+  checkConfigFile,
 }

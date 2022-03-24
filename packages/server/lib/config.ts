@@ -4,7 +4,7 @@ import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
@@ -128,7 +128,7 @@ export function mergeDefaults (
   .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
-  .each((val, key) => {
+  .each((val: any, key) => {
     // If users pass in testing-type specific keys (eg, specPattern),
     // we want to merge this with what we've read from the config file,
     // rather than override it entirely.
@@ -155,6 +155,14 @@ export function mergeDefaults (
   const defaultsForRuntime = configUtils.getDefaultValues(options)
 
   _.defaultsDeep(config, defaultsForRuntime)
+
+  let additionalIgnorePattern = config.additionalIgnorePattern
+
+  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+    additionalIgnorePattern = config.e2e.specPattern
+  }
+
+  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
 
   // split out our own app wide env from user env variables
   // and delete envFile
@@ -199,9 +207,20 @@ export function mergeDefaults (
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
+  debug('validate that there is no breaking config options before setupNodeEvents')
+
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw errors.get(err, ...args)
   })
+
+  // We need to remove the nested propertied by testing type because it has been
+  // flattened/compacted based on the current testing type that is selected
+  // making the config only available with the properties that are valid,
+  // also, having the correct values that can be used in the setupNodeEvents
+  delete config['e2e']
+  delete config['component']
+  delete config['resolved']['e2e']
+  delete config['resolved']['component']
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
 }
@@ -247,27 +266,31 @@ export function updateWithPluginValues (cfg, overrides) {
   configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
     let configFile = getCtx().lifecycleManager.configFile
 
-    if (configFile === false) {
-      configFile = '--config file set to "false" via CLI--'
-    }
-
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
-    // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
-  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
+  debug('validate that there is no breaking config options added by setupNodeEvents')
 
-  if (!originalResolvedBrowsers) {
-    // have something to resolve with if plugins return nothing
-    originalResolvedBrowsers = {
-      value: cfg.browsers,
-      from: 'default',
-    } as ResolvedFromConfig
-  }
+  configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
+    throw errors.get(err, options)
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.e2e, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `e2e.${options.name}` })
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.component, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `component.${options.name}` })
+  })
+
+  const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
+    value: cfg.browsers,
+    from: 'default',
+  } as ResolvedFromConfig
 
   const diffs = deepDiff(cfg, overrides, true)
 
@@ -511,9 +534,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   envCLI = envCLI != null ? envCLI : {}
 
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgKey: string
-
-    cfgKey = configUtils.matchesConfigKey(key)
+    const cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
       // only change the value if it hasn't been

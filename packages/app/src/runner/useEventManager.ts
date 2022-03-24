@@ -12,7 +12,7 @@ export function useEventManager () {
 
   function runSpec () {
     if (!specStore.activeSpec) {
-      throw Error(`Cannot run spec when specStore.active spec is null!`)
+      throw Error(`Cannot run spec when specStore.active spec is null or undefined!`)
     }
 
     autStore.setScriptError(null)
@@ -54,7 +54,7 @@ export function useEventManager () {
   }
 
   const startSpecWatcher = () => {
-    return watch(() => specStore.activeSpec, (spec) => {
+    return watch(() => specStore.activeSpec, () => {
       runSpec()
     }, { immediate: true, flush: 'post' })
   }
@@ -63,7 +63,7 @@ export function useEventManager () {
     // Clean up the AUT and Reporter every time we leave the route.
     empty(getRunnerElement())
 
-    // TODO: this should be handled by whoever starts it, reporter?
+    // TODO: UNIFY-1318 - this should be handled by whoever starts it, reporter?
     window.UnifiedRunner.shortcuts.stop()
 
     empty(getReporterElement())

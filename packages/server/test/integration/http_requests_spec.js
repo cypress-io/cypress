@@ -26,6 +26,7 @@ const resolve = require(`../../lib/util/resolve`)
 const { fs } = require(`../../lib/util/fs`)
 const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 /**
  * @type {import('@packages/resolve-dist')}
  */
@@ -80,7 +81,7 @@ describe('Routes', () => {
   require('mocha-banner').register()
 
   beforeEach(async function () {
-    await Fixtures.scaffoldCommonNodeModules()
+    await scaffoldCommonNodeModules()
     ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -585,7 +586,7 @@ describe('Routes', () => {
         return this.setup({
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
-            integrationFolder: 'my-tests',
+            specPattern: 'my-tests/**/*',
             supportFile: 'helpers/includes.js',
           },
         })
@@ -791,9 +792,9 @@ describe('Routes', () => {
           return this.setup({
             projectRoot: Fixtures.projectPath('todos'),
             config: {
-              integrationFolder: 'tests',
-              fixturesFolder: 'tests/_fixtures',
+              specPattern: 'tests/**/*',
               supportFile: false,
+              fixturesFolder: 'tests/_fixtures',
             },
           })
         })
@@ -3100,7 +3101,7 @@ describe('Routes', () => {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             fileServerFolder: 'dev',
-            integrationFolder: 'my-tests',
+            specPattern: 'my-tests/**/*',
             supportFile: false,
           },
         })

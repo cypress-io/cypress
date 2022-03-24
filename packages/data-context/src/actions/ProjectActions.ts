@@ -10,6 +10,7 @@ import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
+import { getError } from '@packages/errors'
 
 export interface ProjectApiShape {
   /**
@@ -34,6 +35,7 @@ export interface ProjectApiShape {
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
+  isListening: (url: string) => Promise<void>
 }
 
 type SetSpecsFoundBySpecPattern = {
@@ -64,6 +66,7 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
+      d.app.browserStatus = 'closed'
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
@@ -179,7 +182,7 @@ export class ProjectActions {
     }
 
     if (args.open) {
-      await this.setCurrentProject(projectRoot)
+      this.setCurrentProject(projectRoot).catch(this.ctx.onError)
     }
   }
 
@@ -300,6 +303,12 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
+
+    if (this.ctx.coreData.currentTestingType === 'component') {
+      this.api.getDevServer().updateSpecs(specs)
+    }
+
+    this.ctx.emitter.specsChange()
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -400,24 +409,18 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    const cfg = this.ctx.project.getConfig()
+    const cfg = await this.ctx.project.getConfig()
 
     if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
-      const { specs } = await this.setSpecsFoundBySpecPattern({
+      await this.setSpecsFoundBySpecPattern({
         path: this.ctx.currentProject,
         testingType,
-        specPattern: cfg[testingType]?.specPattern,
-        excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
-        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+        specPattern: cfg.specPattern,
+        excludeSpecPattern: cfg.excludeSpecPattern,
+        additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
-
-      if (specs) {
-        if (testingType === 'component') {
-          this.api.getDevServer().updateSpecs(specs)
-        }
-      }
     }
 
     return {
@@ -451,7 +454,7 @@ export class ProjectActions {
 
     this.ctx.actions.project.setSpecs(specs)
 
-    return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
+    this.ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
@@ -506,5 +509,21 @@ export class ProjectActions {
         description: 'Generated spec',
       }
     })
+  }
+
+  async pingBaseUrl () {
+    const baseUrl = (await this.ctx.project.getConfig())?.baseUrl
+
+    // Should never happen
+    if (!baseUrl) {
+      return
+    }
+
+    this.ctx.update((d) => {
+      d.warnings = d.warnings.filter((w) => w.cypressError.type !== 'CANNOT_CONNECT_BASE_URL_WARNING')
+    })
+
+    return this.api.isListening(baseUrl)
+    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
   }
 }

@@ -80,7 +80,10 @@ export class BrowserDataSource {
   }
 
   setBrowserStatus (browserStatus: BrowserStatus) {
-    this.ctx.coreData.app.browserStatus = browserStatus
-    this.ctx.emitter.toLaunchpad()
+    this.ctx.update((d) => {
+      d.app.browserStatus = browserStatus
+    })
+
+    this.ctx.emitter.browserStatusChange()
   }
 }

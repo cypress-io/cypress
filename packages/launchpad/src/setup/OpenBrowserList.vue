@@ -153,7 +153,7 @@
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
-import { useMutation, gql } from '@urql/vue'
+import { useMutation, gql, useSubscription } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
 import TestingTypeE2EIcon from '~icons/cy/testing-type-e2e_x16'
@@ -166,7 +166,7 @@ import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-compone
 import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
-import { OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
+import { OpenBrowserList_SetBrowserDocument, OpenBrowserList_BrowserStatusChangeDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
@@ -209,7 +209,16 @@ fragment OpenBrowserList on CurrentProject {
   currentTestingType
   browserStatus
 }
+
+subscription OpenBrowserList_browserStatusChange {
+  browserStatusChange {
+    id
+    browserStatus
+  }
+}
 `
+
+useSubscription({ query: OpenBrowserList_BrowserStatusChangeDocument })
 
 const props = defineProps<{
   gql: OpenBrowserListFragment

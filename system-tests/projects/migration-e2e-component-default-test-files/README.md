@@ -25,7 +25,7 @@ No manual migration, since the user has a non default componentFolder.
 
 ## Rename supportFile
 
-The project has a default support file, `cypress/support/index.js`. We can rename it for them to `cypress/support/e2e.js`. There is no such `cypress/support/component.js` created here - that's going to part of the componen ttesting reconfiguration workflow.
+The project has a default support file, `cypress/support/index.js`. We can rename it for them to `cypress/support/e2e.js`. There is no such `cypress/support/component.js` created here - that's going to part of the component testing reconfiguration workflow.
 
 | Before | After|
 |---|---|

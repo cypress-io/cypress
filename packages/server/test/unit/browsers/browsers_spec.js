@@ -10,6 +10,9 @@ const { EventEmitter } = require('events')
 const { sinon } = require('../../spec_helper')
 const { exec } = require('child_process')
 const util = require('util')
+const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
+const electron = require('../../../lib/browsers/electron')
+const Promise = require('bluebird')
 
 const normalizeSnapshot = (str) => {
   return snapshot(stripAnsi(str))
@@ -24,6 +27,12 @@ const originalElectronVersion = process.versions.electron
 
 before(() => {
   process.versions.electron = true
+})
+
+let ctx
+
+beforeEach(() => {
+  ctx = createTestDataContext()
 })
 
 after(() => {
@@ -135,7 +144,7 @@ describe('lib/browsers/index', () => {
         family: 'foo-bad',
       }, {
         browsers: [],
-      })
+      }, null, ctx)
       .then((e) => {
         throw new Error('should\'ve failed')
       })
@@ -224,6 +233,60 @@ describe('lib/browsers/index', () => {
 
       expect(util.promisify).to.be.calledWith(exec)
       expect(mockExec).to.be.calledWith(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '3333'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+    })
+  })
+
+  context('kill', () => {
+    it('allows registered emitter events to fire before kill', () => {
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const removeAllListenersSpy = sinon.spy(ee, 'removeAllListeners')
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      const exitSpy = sinon.spy()
+
+      ee.once('exit', () => {
+        exitSpy()
+      })
+
+      return browsers.close().then(() => {
+        expect(exitSpy.calledBefore(removeAllListenersSpy)).to.be.true
+        expect(browsers.getBrowserInstance()).to.eq(null)
+      })
+    })
+  })
+
+  context('browserStatus', () => {
+    it('calls setBrowserStatus with correct lifecycle state', () => {
+      const url = 'http://localhost:3000'
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.browser, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+        ['opening', 'open', 'closed'].forEach((status, i) => {
+          expect(ctx.browser.setBrowserStatus.getCall(i).args[0]).eq(status)
+        })
+      })
     })
   })
 })
