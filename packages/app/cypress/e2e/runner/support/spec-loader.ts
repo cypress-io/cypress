@@ -21,7 +21,7 @@ export type LoadSpecOptions = {
   hasPreferredIde?: boolean
 }
 
-export function loadSpec (options: LoadSpecOptions): void {
+export function loadSpec (options: LoadSpecOptions) {
   const {
     fileName,
     setup,
@@ -77,4 +77,24 @@ export function loadSpec (options: LoadSpecOptions): void {
 
   // Wait for specs to complete
   shouldHaveTestResults({ passCount, failCount, pendingCount })
+}
+
+export function runSpec ({ fileName }: { fileName: string }) {
+  cy.scaffoldProject('runner-e2e-specs')
+  cy.openProject('runner-e2e-specs')
+  cy.startAppServer()
+
+  cy.__incorrectlyVisitAppWithIntercept()
+
+  cy.findByLabelText('Search Specs').type(fileName)
+  // wait for virtualized spec list to update, there is a chance
+  // of disconnection otherwise
+  cy.wait(500)
+  cy.contains('[data-cy=spec-item]', fileName).click()
+
+  cy.location().should((location) => {
+    expect(location.hash).to.contain(fileName)
+  })
+
+  return cy.window()
 }
