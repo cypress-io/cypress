@@ -16,7 +16,7 @@ const platform = os.platform()
 
 export interface BrowserApiShape {
   close(): Promise<any>
-  ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser | undefined>
+  ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser>
   getBrowsers(): Promise<FoundBrowser[]>
   focusActiveBrowserWindow(): Promise<any>
 }
@@ -36,12 +36,7 @@ export class BrowserDataSource {
       p.then(async (browsers) => {
         if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
 
-        const { lastBrowser } = await this.ctx._apis.localSettingsApi.getPreferences()
-
-        this.ctx.coreData.chosenBrowser = (lastBrowser && browsers.find((b) => b.name === lastBrowser.name && b.channel === lastBrowser.channel))
-          || browsers[0]
-
-        this.ctx.coreData.machineBrowsers = browsers
+        return browsers
       }).catch((e) => {
         this.ctx.update((coreData) => {
           coreData.machineBrowsers = null
