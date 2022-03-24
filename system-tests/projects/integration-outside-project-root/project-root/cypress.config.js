@@ -1,6 +1,6 @@
 module.exports = {
-  'integrationFolder': '../integration',
   'e2e': {
+    'specPattern': '../integration/**/*',
     'supportFile': false,
   },
 }

@@ -302,6 +302,9 @@ The testFiles configuration option is now invalid when set on the config object 
 }
 
  https://on.cypress.io/migration-guide
+ 
+ 
+ 
 
 `
 
@@ -379,5 +382,8 @@ The componentFolder configuration option is now invalid when set on the config o
 }
 
  https://on.cypress.io/migration-guide
+
+ 
+ 
 
 `
