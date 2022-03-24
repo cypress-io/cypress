@@ -56,7 +56,7 @@ exports['@packages/data-context initializeData initializes 1'] = {
       "history": [
         "welcome"
       ],
-      "chosenBrowser": {
+      "activeBrowser": {
         "path": "/dev/chrome"
       }
     },

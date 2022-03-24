@@ -15,7 +15,7 @@ describe('<OpenBrowserList />', () => {
   it('renders a long list of found browsers correctly', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (result) => {
-        result.currentBrowser = null
+        result.activeBrowser = null
       },
       render: (gqlVal) =>
         (<div class="border-current border-1 resize overflow-auto">
@@ -47,7 +47,7 @@ describe('<OpenBrowserList />', () => {
   it('displays a tooltip for an unsupported browser', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (result) => {
-        result.currentBrowser = null
+        result.activeBrowser = null
       },
       render: (gqlVal) =>
         (<div class="border-current border-1 resize overflow-auto">
@@ -122,7 +122,7 @@ describe('<OpenBrowserList />', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.browserStatus = 'open'
-        res.currentBrowser = longBrowsersList.find((browser) => !browser.isFocusSupported) || null
+        res.activeBrowser = longBrowsersList.find((browser) => !browser.isFocusSupported) || null
       },
       render: (gqlVal) => (
         <div class="border-current border-1 resize overflow-auto">

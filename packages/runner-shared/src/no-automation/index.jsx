@@ -28,9 +28,9 @@ const browser = (browser) => (
 )
 
 const browserPicker = (browsers, onLaunchBrowser) => {
-  const chosenBrowser = _.find(browsers, { default: true }) || browsers[0]
+  const activeBrowser = _.find(browsers, { default: true }) || browsers[0]
   const otherBrowsers = _(browsers)
-  .without(chosenBrowser)
+  .without(activeBrowser)
   .map((browser) => _.extend({}, browser, { key: browser.name + browser.version }))
   .value()
 
@@ -38,7 +38,7 @@ const browserPicker = (browsers, onLaunchBrowser) => {
     <div>
       <p className='muted'>This browser was not launched through Cypress. Tests cannot run.</p>
       <Dropdown
-        chosen={chosenBrowser}
+        chosen={activeBrowser}
         others={otherBrowsers}
         renderItem={browser}
         keyProperty='key'

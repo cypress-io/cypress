@@ -1289,7 +1289,7 @@ export class ProjectLifecycleManager {
       // lastBrowser is cached per-project.
       const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
 
-      this.ctx.coreData.chosenBrowser = (prefs?.lastBrowser && browsers!.find((b) => b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel))
+      this.ctx.coreData.activeBrowser = (prefs?.lastBrowser && browsers!.find((b) => b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel))
         || browsers![0] as FoundBrowser
     }
 
@@ -1315,7 +1315,7 @@ export class ProjectLifecycleManager {
     try {
       const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(cliBrowser)
 
-      this.ctx.coreData.chosenBrowser = browser
+      this.ctx.coreData.activeBrowser = browser
     } catch (e) {
       const error = e as CypressError
 

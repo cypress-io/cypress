@@ -219,7 +219,7 @@ export class ProjectActions {
       activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
-    const browser = this.ctx.coreData.chosenBrowser
+    const browser = this.ctx.coreData.activeBrowser
 
     if (!browser) throw new Error('Missing browser in launchProject')
 

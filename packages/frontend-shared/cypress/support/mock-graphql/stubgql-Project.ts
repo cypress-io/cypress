@@ -48,7 +48,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
       component: '**/*.vue',
       story: '**/*.stories.*',
     },
-    currentBrowser: stubBrowsers[0],
+    activeBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
     browserStatus: 'closed',

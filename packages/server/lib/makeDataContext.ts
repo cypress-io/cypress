@@ -80,7 +80,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         const windows = require('./gui/windows')
         const originalIsMainWindowFocused = windows.isMainWindowFocused()
         const onLoginFlowComplete = async () => {
-          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.chosenBrowser)) {
+          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.activeBrowser)) {
             windows.focusMainWindow()
           } else {
             await ctx.actions.browser.focusActiveBrowserWindow()

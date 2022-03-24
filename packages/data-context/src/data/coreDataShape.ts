@@ -110,7 +110,7 @@ export interface ForceReconfigureProjectDataShape {
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
-  chosenBrowser: FoundBrowser | null
+  activeBrowser: FoundBrowser | null
   machineBrowsers: Promise<FoundBrowser[]> | FoundBrowser[] | null
   servers: {
     appServer?: Maybe<Server>
@@ -199,7 +199,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       },
     },
     warnings: [],
-    chosenBrowser: null,
+    activeBrowser: null,
     user: null,
     electron: {
       app: null,

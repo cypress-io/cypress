@@ -102,19 +102,19 @@
   </ExternalLink>
 
   <TopNavList
-    v-if="props.gql?.currentProject?.currentBrowser && showBrowsers"
+    v-if="props.gql?.currentProject?.activeBrowser && showBrowsers"
   >
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName] || allBrowsersIcons.generic"
+        :src="allBrowsersIcons[props.gql?.currentProject?.activeBrowser?.displayName] || allBrowsersIcons.generic"
       >
       <span
         data-cy="top-nav-active-browser"
         class="font-medium whitespace-nowrap"
-      >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentProject?.activeBrowser?.displayName }} {{ props.gql.currentProject?.activeBrowser?.majorVersion }}</span>
     </template>
     <VerticalBrowserListItems
       :gql="props.gql.currentProject"
@@ -232,7 +232,7 @@ fragment TopNav on Query {
     id
     title
     packageManager
-    currentBrowser {
+    activeBrowser {
       id
       displayName
       majorVersion

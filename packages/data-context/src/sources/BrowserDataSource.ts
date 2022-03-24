@@ -55,11 +55,11 @@ export class BrowserDataSource {
   }
 
   isSelected (obj: FoundBrowser) {
-    if (!this.ctx.coreData.chosenBrowser) {
+    if (!this.ctx.coreData.activeBrowser) {
       return false
     }
 
-    return this.idForBrowser(this.ctx.coreData.chosenBrowser) === this.idForBrowser(obj)
+    return this.idForBrowser(this.ctx.coreData.activeBrowser) === this.idForBrowser(obj)
   }
 
   isFocusSupported (obj: FoundBrowser) {

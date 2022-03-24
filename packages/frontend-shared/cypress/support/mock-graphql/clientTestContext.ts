@@ -18,7 +18,7 @@ export interface ClientTestContext {
   currentProject: CurrentProject | null
   projects: GlobalProject[]
   app: {
-    currentBrowser: Browser | null
+    activeBrowser: Browser | null
     browsers: Browser[] | null
   }
   versions: VersionData
@@ -29,7 +29,6 @@ export interface ClientTestContext {
     chosenFramework: WizardFrontendFramework | null
     chosenManualInstall: boolean
     allBundlers: WizardBundler[]
-    chosenBrowser: null
     warnings: []
   }
   migration: {}
@@ -52,7 +51,7 @@ export function makeClientTestContext (): ClientTestContext {
     projects: [stubGlobalProject, createTestGlobalProject('another-test-project')],
     app: {
       browsers: stubBrowsers,
-      currentBrowser: stubBrowsers[0],
+      activeBrowser: stubBrowsers[0],
     },
     versions: {
       __typename: 'VersionData',
@@ -77,7 +76,7 @@ export function makeClientTestContext (): ClientTestContext {
       chosenFramework: null,
       chosenManualInstall: false,
       allBundlers,
-      chosenBrowser: null,
+      activeBrowser: null,
       warnings: [],
     },
     user: null,

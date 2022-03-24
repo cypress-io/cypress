@@ -110,7 +110,7 @@
             {{ browserText.running }}
           </Button>
           <Button
-            v-if="props.gql.currentBrowser?.isFocusSupported"
+            v-if="props.gql.activeBrowser?.isFocusSupported"
             size="lg"
             type="button"
             variant="outline"
@@ -180,7 +180,7 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 gql`
 fragment OpenBrowserList on CurrentProject {
   id
-  currentBrowser {
+  activeBrowser {
     id
     displayName
     path
@@ -239,9 +239,9 @@ const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
   get () {
-    const { browsers, currentBrowser } = props.gql
+    const { browsers, activeBrowser } = props.gql
 
-    return currentBrowser?.id
+    return activeBrowser?.id
       || browsers?.find((browser) => browser.name === 'electron')?.id
   },
   set (browserId) {
