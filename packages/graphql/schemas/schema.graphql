@@ -748,14 +748,6 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
-"""
-An object that uniquely identifies the last chosen browser in interactive mode.
-"""
-type LastBrowser {
-  channel: String!
-  name: String!
-}
-
 """local settings on a device-by-device basis"""
 type LocalSettings {
   availableEditors: [Editor!]!
@@ -1130,9 +1122,6 @@ interface ProjectLike {
 
 """Preferences specific to a project"""
 type ProjectPreferences {
-  """The preferred browser to launch"""
-  lastBrowser: LastBrowser
-
   """The preferred testing type to start in"""
   testingType: String
 }
