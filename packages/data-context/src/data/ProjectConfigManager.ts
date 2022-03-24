@@ -153,6 +153,10 @@ export class ProjectConfigManager {
   }
 
   reloadConfig () {
+    if (['errored', 'ready', 'loadedConfig'].includes(this._state)) {
+      this._loadConfigPromise = undefined
+    }
+
     return this.initializeConfig()
   }
 
@@ -168,16 +172,18 @@ export class ProjectConfigManager {
   }
 
   private loadConfig () {
-    // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
-    if (this._eventsIpc) {
-      this._cleanupIpc(this._eventsIpc)
+    if (!this._loadConfigPromise) {
+      // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
+      if (this._eventsIpc) {
+        this._cleanupIpc(this._eventsIpc)
+      }
+
+      const dfd = pDeferFulfilled<LoadConfigReply>()
+
+      this._eventProcess = this.forkConfigProcess()
+      this._eventsIpc = this.wrapConfigProcess(this._eventProcess, dfd)
+      this._loadConfigPromise = dfd.promise
     }
-
-    const dfd = pDeferFulfilled<LoadConfigReply>()
-
-    this._eventProcess = this.forkConfigProcess()
-    this._eventsIpc = this.wrapConfigProcess(this._eventProcess, dfd)
-    this._loadConfigPromise = dfd.promise
 
     return this._loadConfigPromise
   }
