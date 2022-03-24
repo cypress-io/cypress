@@ -52,7 +52,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
   "includeShadowDom": false,
-  "keystrokeDelay": 10,
+  "keystrokeDelay": 0,
   "modifyObstructiveCode": true,
   "numTestsKeptInMemory": 50,
   "pageLoadTimeout": 60000,

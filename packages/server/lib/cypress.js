@@ -28,6 +28,7 @@ const exit = (code = 0) => {
   return process.exit(code)
 }
 
+// CHECK CONFIG OPT #2
 const showWarningForInvalidConfig = (options) => {
   const publicConfigKeys = getPublicConfigKeys()
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {

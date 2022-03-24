@@ -41,6 +41,9 @@ interface RuntimeConfigOption {
   defaultValue: any
   validation: Function
   isInternal?: boolean
+  /**
+   * Can be mutated with Cypress.config() or test-specific configuration overrides
+   */
   canUpdateDuringTestTime?: boolean
 }
 
@@ -197,6 +200,7 @@ const projectConfigOptions: Array<ResolvedConfigOption> = [
       ComponentTestingConfigOptions.map((opt: ResolvedConfigOption) => {
         const defaultValue = typeof opt.defaultValue === 'function' ? opt.defaultValue({ testingType: 'component' }) : opt.defaultValue
 
+        // @ts-ignore
         defaults[`${opt.name}`] = defaultValue
       })
 
@@ -223,6 +227,7 @@ const projectConfigOptions: Array<ResolvedConfigOption> = [
       E2ETestingConfigOptions.map((opt: ResolvedConfigOption) => {
         const defaultValue = typeof opt.defaultValue === 'function' ? opt.defaultValue({ testingType: 'e2e' }) : opt.defaultValue
 
+        // @ts-ignore
         defaults[`${opt.name}`] = defaultValue
       })
 
@@ -283,8 +288,8 @@ const projectConfigOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'keystrokeDelay',
-    defaultValue: 10,
-    validation: validate.isNumber,
+    defaultValue: 0,
+    validation: validate.isNumberOrFalse,
     canUpdateDuringTestTime: true,
   }, {
     name: 'modifyObstructiveCode',
