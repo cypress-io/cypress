@@ -28,9 +28,7 @@ describe('lib/open_project', () => {
     sinon.stub(browsers, 'open')
     sinon.stub(browsers, 'connectToNewSpec')
     sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
-      e2e: {
-        specPattern: 'cypress/integration/**/*',
-      },
+      specPattern: 'cypress/integration/**/*',
     })
 
     sinon.stub(ProjectBase.prototype, 'open').resolves()

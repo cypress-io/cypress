@@ -494,6 +494,7 @@ module.exports = {
 
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 

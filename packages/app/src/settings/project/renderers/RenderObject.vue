@@ -14,7 +14,7 @@
       <span
         :class="props.colorClasses"
         :style="`margin-left:${(props.depth + 1) * 24}px`"
-      >'{{ k }}': </span><RenderObject
+      >{{ k }}: </span><RenderObject
         v-if="typeof val === 'object'"
         :record-key="k"
         :value="val"

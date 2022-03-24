@@ -20,7 +20,7 @@
     "debug": "^4.3.2",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "minimist": "1.2.5"
+    "minimist": "1.2.6"
   },
   "devDependencies": {
     "electron": "15.3.4",

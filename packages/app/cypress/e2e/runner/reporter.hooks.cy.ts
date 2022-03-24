@@ -7,7 +7,7 @@ describe('hooks', {
 }, () => {
   it('displays commands under correct hook', () => {
     loadSpec({
-      fileName: 'basic.cy.js',
+      filePath: 'hooks/basic.cy.js',
       passCount: 2,
     })
 
@@ -40,7 +40,7 @@ describe('hooks', {
 
   it('creates open in IDE button', () => {
     loadSpec({
-      fileName: 'basic.cy.js',
+      filePath: 'hooks/basic.cy.js',
       passCount: 2,
       hasPreferredIde: true,
     })
@@ -49,20 +49,20 @@ describe('hooks', {
 
     cy.get('.hook-open-in-ide').should('have.length', 4)
 
-    cy.intercept('mutation-SpecRunnerOpenMode_OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+    cy.withCtx((ctx, o) => {
+      ctx.actions.file.openFile = o.sinon.stub()
+    })
 
     cy.contains('Open in IDE').invoke('show').click({ force: true })
 
-    cy.wait('@OpenIDE').then(({ request }) => {
-      expect(request.body.variables.input.filePath).to.include('hooks/basic.cy.js')
-      expect(request.body.variables.input.column).to.eq(Cypress.browser.family === 'firefox' ? 6 : 3)
-      expect(request.body.variables.input.line).to.eq(2)
-    })
+    cy.withCtx((ctx, o) => {
+      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), o.ideLine, o.ideColumn)
+    }, { ideLine: 2, ideColumn: Cypress.browser.family === 'firefox' ? 6 : 3 })
   })
 
   it('does not display commands from skipped tests', () => {
     loadSpec({
-      fileName: 'skip.cy.js',
+      filePath: 'hooks/skip.cy.js',
       passCount: 1,
     })
 
@@ -80,7 +80,7 @@ describe('hooks', {
 
   it('only displays tests with .only', () => {
     loadSpec({
-      fileName: 'only.cy.js',
+      filePath: 'hooks/only.cy.js',
       passCount: 1,
     })
 
@@ -105,7 +105,7 @@ describe('hooks', {
   // https://github.com/cypress-io/cypress/issues/8189
   it('can rerun without timeout error leaking into next run (due to run restart)', () => {
     loadSpec({
-      fileName: 'rerun.cy.js',
+      filePath: 'hooks/rerun.cy.js',
       passCount: 1,
     })
 

@@ -25,10 +25,12 @@ import { useExternalLink } from '../gql-components/useExternalLink'
 const props = withDefaults(defineProps<{
   href?: string
   useDefaultHocus?: boolean
+  includeGraphqlPort?: boolean
 }>(), {
   useDefaultHocus: true,
   href: '',
+  includeGraphqlPort: false,
 })
 
-const open = useExternalLink(props.href)
+const open = useExternalLink(props.href, props.includeGraphqlPort)
 </script>
