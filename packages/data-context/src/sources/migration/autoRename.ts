@@ -1,6 +1,7 @@
 import globby from 'globby'
 import type { TestingType } from '@packages/types'
 import {
+  defaultTestFilesGlob,
   FilePart,
   formatMigrationFile,
   getComponentFolder,
@@ -114,7 +115,7 @@ export async function getSpecs (projectRoot: string, config: LegacyCypressConfig
 
   const globs = integrationFolder
     ? integrationFolder === 'cypress/integration'
-      ? ['**/*.{js,ts,jsx,tsx,coffee,cjsx}'].map((glob) => `${integrationFolder}/${glob}`)
+      ? [defaultTestFilesGlob].map((glob) => `${integrationFolder}/${glob}`)
       : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
     : []
 
