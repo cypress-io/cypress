@@ -24,7 +24,7 @@ class ErrorCodeFrame extends Component<Props> {
 
     return (
       <div className='test-err-code-frame'>
-        <FileNameOpener className="runnable-err-file-path" fileDetails={{ ...this.props.codeFrame, ...{ displayFile: this.props.codeFrame.relativeFile } }} hasIcon />
+        <FileNameOpener className="runnable-err-file-path" fileDetails={{ ...this.props.codeFrame, displayFile: this.props.codeFrame.relativeFile }} hasIcon />
         <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language || 'text'}`}>{frame}</code>
         </pre>
