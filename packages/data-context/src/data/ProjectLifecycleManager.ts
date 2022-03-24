@@ -8,6 +8,7 @@
  */
 import { ChildProcess, ForkOptions, fork } from 'child_process'
 import chokidar, { FSWatcher } from 'chokidar'
+import assert from 'assert'
 import path from 'path'
 import inspector from 'inspector'
 import _ from 'lodash'
@@ -16,13 +17,13 @@ import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
 
-import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
-import type { DataContext } from '..'
+import * as configUtils from '@packages/config'
+import { getError, CypressError } from '@packages/errors'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
-import assert from 'assert'
-import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BreakingErrResult, BreakingOptionErrorKey } from '@packages/config'
 import { autoBindDebug } from '../util/autoBindDebug'
+
+import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { DataContext } from '..'
 import type { LegacyCypressConfigJson } from '../sources'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -47,8 +48,6 @@ export interface SetupFullConfigOptions {
   options: Partial<AllModeOptions>
 }
 
-type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrResult) => T
-
 /**
  * All of the APIs injected from @packages/server & @packages/config
  * since these are not strictly typed
@@ -56,13 +55,8 @@ type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrRe
 export interface InjectedConfigApi {
   cypressVersion: string
   getServerPluginHandlers: () => IpcHandler[]
-  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
-  allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
-  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
-  validateLaunchpadConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
-  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
@@ -177,11 +171,12 @@ export class ProjectLifecycleManager {
       return this.ctx.modeOptions.configFile
     }
 
-    return 'cypress.json'
+    return configUtils.legacyConfigFile
+    // return 'cypress.json'11
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? path.basename(this.configFilePath) ?? 'cypress.config.js'
+    return this.ctx.modeOptions.configFile ?? path.basename(this.configFilePath) ?? configUtils.supportedConfigFiles[0]
   }
 
   get configFilePath () {
@@ -191,7 +186,7 @@ export class ProjectLifecycleManager {
   }
 
   get envFilePath () {
-    return path.join(this.projectRoot, 'cypress.env.json')
+    return path.join(this.projectRoot, configUtils.envFile)
   }
 
   get browsers () {
@@ -464,14 +459,22 @@ export class ProjectLifecycleManager {
   }
 
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
-    this.validateConfigRoot(configFileContents)
+    const handleConfigWarning = (type, ...args) => {
+      return getError(type, ...args)
+    }
+
+    const handleConfigError = (type, ...args) => {
+      throw getError(type, ...args)
+    }
+
+    configUtils.validateNoBreakingConfigRoot(configFileContents, handleConfigWarning, handleConfigError)
 
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
       const optionsOverrides = options.config?.[this._currentTestingType] ?? {}
 
-      this.validateTestingTypeConfig(testingTypeOverrides)
-      this.validateTestingTypeConfig(optionsOverrides)
+      configUtils.validateNoBreakingTestingTypeConfig(testingTypeOverrides, this._currentTestingType, handleConfigWarning, handleConfigError)
+      configUtils.validateNoBreakingTestingTypeConfig(optionsOverrides, this._currentTestingType, handleConfigWarning, handleConfigError)
 
       // TODO: pass in options.config overrides separately, so they are reflected in the UI
       configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
@@ -589,35 +592,8 @@ export class ProjectLifecycleManager {
     return promise.then((v) => v.initialConfig)
   }
 
-  private validateTestingTypeConfig (config: Cypress.ConfigOptions) {
-    assert(this._currentTestingType)
-
-    return this.ctx._apis.configApi.validateTestingTypeConfigBreakingChanges(
-      config,
-      this._currentTestingType,
-      (type, ...args) => {
-        return getError(type, ...args)
-      },
-      (type, ...args) => {
-        throw getError(type, ...args)
-      },
-    )
-  }
-
-  private validateConfigRoot (config: Cypress.ConfigOptions) {
-    return this.ctx._apis.configApi.validateRootConfigBreakingChanges(
-      config,
-      (type, obj) => {
-        return getError(type, obj)
-      },
-      (type, obj) => {
-        throw getError(type, obj)
-      },
-    )
-  }
-
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
-    this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
+    configUtils.validate(config, (errMsg) => {
       if (_.isString(errMsg)) {
         throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
       }
@@ -625,19 +601,23 @@ export class ProjectLifecycleManager {
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     })
 
-    return this.ctx._apis.configApi.validateLaunchpadConfigBreakingChanges(
+    return configUtils.validateNoBreakingConfig(
       config,
       (type, obj) => {
         const error = getError(type, obj)
 
-        this.ctx.onWarning(error)
+        if (obj.showInLaunchpad) {
+          this.ctx.onWarning(error)
+        }
 
         return error
       },
       (type, obj) => {
         const error = getError(type, obj)
 
-        this.ctx.onError(error)
+        if (obj.showInLaunchpad) {
+          this.ctx.onError(error)
+        }
 
         throw error
       },

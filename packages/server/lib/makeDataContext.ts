@@ -1,7 +1,6 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
-import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
 
 import type {
@@ -57,14 +56,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     configApi: {
       getServerPluginHandlers: plugins.getServerPluginHandlers,
-      allowedConfig: configUtils.allowed,
       cypressVersion: pkg.version,
-      validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
-      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
-      validateLaunchpadConfigBreakingChanges: configUtils.validateNoBreakingConfigLaunchpad,
-      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,
