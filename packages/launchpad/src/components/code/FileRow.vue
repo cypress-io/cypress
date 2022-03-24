@@ -96,12 +96,13 @@ const props = defineProps<{
   filePath: string
   content: string
   description?: string
+  fileExtension: string
 }>()
 
-// TODO: Remove this. Use FileParts when available
 const language = computed(() => {
-  // get the extension of the current file path
-  const extension = /\.(\w+)$/.exec(props.filePath)?.[1]
+  // The fileExtension from FileParts is prepended with a period;
+  // we must strip the period to validate against our supported languages.
+  let extension = props.fileExtension.replace(/^\./, '')
 
   if (extension && (langsSupported as readonly string[]).includes(extension)) {
     return extension as CyLangType
