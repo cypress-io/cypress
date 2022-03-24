@@ -113,10 +113,12 @@ describe('Spec List - Git Status', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     .then((projectPath) => {
-      cy.task('initGitRepoForTestProject', projectPath)
-      cy.openProject('cypress-in-cypress')
-      cy.startAppServer('e2e')
-      cy.visitApp()
+      cy.task('initGitRepoForTestProject', projectPath).then(() => {
+        cy.wait(100)
+        cy.openProject('cypress-in-cypress')
+        cy.startAppServer('e2e')
+        cy.visitApp()
+      })
     })
   })
 
