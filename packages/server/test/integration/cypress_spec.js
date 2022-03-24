@@ -1673,10 +1673,15 @@ describe('lib/cypress', () => {
       }).then(() => {
         const projectOptions = openProject.getProject().options
 
-        expect(projectOptions.port).to.eq(2121)
-        expect(projectOptions.pageLoadTimeout).to.eq(1000)
-        expect(projectOptions.report).to.eq(false)
-        expect(projectOptions.env).to.eql({ baz: 'baz' })
+        expect(projectOptions).to.include({
+          port: 2121,
+          pageLoadTimeout: 1000,
+          report: false,
+        })
+
+        expect(projectOptions.env).to.eql({
+          baz: 'baz',
+        })
 
         expect(open).to.be.called
 
