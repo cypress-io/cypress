@@ -477,7 +477,7 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
     cy.withRetryableCtx(async (ctx, o) => {
       // The actual openExternal call may include the GQL port, so we only assert that it starts with the requested href
       // rather than equalling it exactly.
-      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.match(new RegExp(`^${o.href}`))
+      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg.startsWith(o.href)).to.be.true
     }, { href, log: false })
 
     return cy.get('@Link')
