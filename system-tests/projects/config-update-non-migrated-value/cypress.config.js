@@ -3,6 +3,8 @@ module.exports = {
     supportFile: false,
     setupNodeEvents (on, config) {
       config.integrationFolder = 'path/to/integration/folder'
+
+      return config
     },
   },
 }

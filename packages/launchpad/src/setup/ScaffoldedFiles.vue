@@ -10,6 +10,7 @@
       :content="file.file.contents"
       :status="file.status"
       :file-path="file.file.relative"
+      :file-extension="file.file.fileExtension"
       :description="file.description || undefined"
     />
     <hr class="my-4">
@@ -64,6 +65,7 @@ fragment ScaffoldedFiles on Query {
       absolute
       relative
       contents
+      fileExtension
     }
   }
 }

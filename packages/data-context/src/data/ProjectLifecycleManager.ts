@@ -1288,13 +1288,13 @@ export class ProjectLifecycleManager {
 
     this._pendingInitialize?.resolve(finalConfig)
 
-    if (this._currentTestingType && finalConfig[this._currentTestingType]?.specPattern) {
+    if (this._currentTestingType && finalConfig.specPattern) {
       return this.ctx.actions.project.setSpecsFoundBySpecPattern({
         path: this.projectRoot,
         testingType: this._currentTestingType,
-        specPattern: this.ctx.modeOptions.spec || finalConfig[this._currentTestingType]?.specPattern,
-        excludeSpecPattern: finalConfig[this._currentTestingType]?.excludeSpecPattern,
-        additionalIgnorePattern: this._currentTestingType === 'component' ? finalConfig.e2e?.specPattern : undefined,
+        specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
+        excludeSpecPattern: finalConfig.excludeSpecPattern,
+        additionalIgnorePattern: finalConfig.additionalIgnorePattern,
       })
     }
 
