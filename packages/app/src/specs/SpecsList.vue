@@ -66,6 +66,7 @@
           v-for="row in list"
           :id="getIdIfDirectory(row)"
           :key="row.index"
+          :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
         >
           <template #file>
             <RouterLink
@@ -99,7 +100,7 @@
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data.isLeaf && row.data.data?.gitInfo"
+              v-if="row.data.data?.gitInfo"
               :gql="row.data.data.gitInfo"
             />
           </template>
