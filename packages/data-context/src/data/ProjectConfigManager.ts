@@ -117,11 +117,6 @@ export class ProjectConfigManager {
       this._state = 'loadingConfig'
       this._cachedInitialConfig = undefined
 
-      // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
-      if (this._eventsIpc) {
-        this._cleanupIpc(this._eventsIpc)
-      }
-
       const result = await this.loadConfig()
 
       if (this._state === 'loadingConfig') {
@@ -174,13 +169,16 @@ export class ProjectConfigManager {
   }
 
   private loadConfig () {
-    if (!this._loadConfigPromise) {
-      const dfd = pDeferFulfilled<LoadConfigReply>()
-
-      this._eventProcess = this.forkConfigProcess()
-      this._eventsIpc = this.wrapConfigProcess(this._eventProcess, dfd)
-      this._loadConfigPromise = dfd.promise
+    // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
+    if (this._eventsIpc) {
+      this._cleanupIpc(this._eventsIpc)
     }
+
+    const dfd = pDeferFulfilled<LoadConfigReply>()
+
+    this._eventProcess = this.forkConfigProcess()
+    this._eventsIpc = this.wrapConfigProcess(this._eventProcess, dfd)
+    this._loadConfigPromise = dfd.promise
 
     return this._loadConfigPromise
   }
@@ -597,47 +595,41 @@ export class ProjectConfigManager {
   }
 
   private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
-    if (!this._setupNodeEventsPromise) {
-      this._setupNodeEventsPromise = (async () => {
-        assert(this._testingType)
-        const config = await this.getFullInitialConfig()
+    assert(this._testingType)
+    const config = await this.getFullInitialConfig()
 
-        assert(config)
+    assert(config)
 
-        this._registeredEventsTarget = this._testingType
+    this._registeredEventsTarget = this._testingType
 
-        for (const handler of this.options.handlers) {
-          handler(ipc)
-        }
-
-        const { promise } = this.registerSetupIpcHandlers(ipc)
-
-        const overrides = config[this._testingType] ?? {}
-        const mergedConfig = { ...config, ...overrides }
-
-        // alphabetize config by keys
-        let orderedConfig = {} as Cypress.PluginConfigOptions
-
-        Object.keys(mergedConfig).sort().forEach((key) => {
-          const k = key as keyof typeof mergedConfig
-
-          // @ts-ignore
-          orderedConfig[k] = mergedConfig[k]
-        })
-
-        ipc.send('setupTestingType', this._testingType, {
-          ...orderedConfig,
-          projectRoot: this.options.projectRoot,
-          configFile: this.configFilePath,
-          version: this.options.cypressVersion,
-          testingType: this._testingType,
-        })
-
-        return promise
-      })()
+    for (const handler of this.options.handlers) {
+      handler(ipc)
     }
 
-    return this._setupNodeEventsPromise
+    const { promise } = this.registerSetupIpcHandlers(ipc)
+
+    const overrides = config[this._testingType] ?? {}
+    const mergedConfig = { ...config, ...overrides }
+
+    // alphabetize config by keys
+    let orderedConfig = {} as Cypress.PluginConfigOptions
+
+    Object.keys(mergedConfig).sort().forEach((key) => {
+      const k = key as keyof typeof mergedConfig
+
+      // @ts-ignore
+      orderedConfig[k] = mergedConfig[k]
+    })
+
+    ipc.send('setupTestingType', this._testingType, {
+      ...orderedConfig,
+      projectRoot: this.options.projectRoot,
+      configFile: this.configFilePath,
+      version: this.options.cypressVersion,
+      testingType: this._testingType,
+    })
+
+    return promise
   }
 
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
