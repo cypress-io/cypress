@@ -90,7 +90,10 @@ describe('Opening unmigrated project', () => {
   })
 })
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
+describe('Full migration flow for each project', {
+  retries: { openMode: 2, runMode: 2 },
+  defaultCommandTimeout: 10000,
+}, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
