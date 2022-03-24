@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import execa from 'execa'
 import simpleGit from 'simple-git'
 import dayjs from 'dayjs'
@@ -5,11 +6,11 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
 import fs from 'fs-extra'
 import os from 'os'
-import Debug from 'debug'
+// import Debug from 'debug'
 import type { DataContext } from '..'
 import type { gitStatusType } from '@packages/types'
 
-const debug = Debug('data-context:sources:GitDataSource')
+// const debug = Debug('data-context:sources:GitDataSource')
 
 dayjs.extend(relativeTime)
 
@@ -49,7 +50,7 @@ export class GitDataSource {
     try {
       return (await this.#git.getConfig('user.name')).value
     } catch (e) {
-      debug(`Failed to get current git user`, (e as Error).message)
+      console.log(`Failed to get current git user`, (e as Error).message)
 
       return ''
     }
@@ -79,7 +80,7 @@ export class GitDataSource {
 
       const output: Array<GitInfo | null> = []
 
-      debug('stdout %s', stdout)
+      console.log('stdout %s', stdout)
 
       for (let i = 0; i < absolutePaths.length; i++) {
         const file = absolutePaths[i]
@@ -118,7 +119,7 @@ export class GitDataSource {
               statusType: 'unmodified',
             })
           } else {
-            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
+            console.log(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
             output.push(null)
           }
         }
@@ -126,7 +127,7 @@ export class GitDataSource {
 
       return output
     } catch (e) {
-      debug('Error getting git info: %s', (e as Error).message)
+      console.log('Error getting git info: %s', e)
 
       // does not have git installed,
       // file is not under source control
@@ -137,7 +138,7 @@ export class GitDataSource {
   }
 
   private async getInfoPosix (absolutePaths: readonly string[]) {
-    debug('getting git info for %o:', absolutePaths)
+    console.log('getting git info for %o:', absolutePaths)
     const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
 
     // for file in {one,two} is valid in bash, but for file {one} is not
@@ -147,17 +148,17 @@ export class GitDataSource {
       ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
       : `IFS=$'\n'; for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
-    debug('executing command `%s`:', cmd)
+    console.log('executing command `%s`:', cmd)
 
     const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
     const stdout = result.stdout.split('\n')
 
     if (stdout.length !== absolutePaths.length) {
-      debug('error... stdout:', stdout)
+      console.log('error... stdout:', stdout)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
 
-    debug('stdout for git info', stdout)
+    console.log('stdout for git info', stdout)
 
     return stdout
   }
@@ -175,7 +176,7 @@ export class GitDataSource {
     const [, ...stdout] = split
 
     if (stdout.length !== absolutePaths.length) {
-      debug('stdout', stdout)
+      console.log('stdout', stdout)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
 
@@ -186,13 +187,13 @@ export class GitDataSource {
     try {
       const { stdout, exitCode = 0 } = await execa(GIT_BRANCH_COMMAND, { shell: true, cwd: absolutePath })
 
-      debug('executing command `%s`:', GIT_BRANCH_COMMAND)
-      debug('stdout for git branch', stdout)
-      debug('exitCode for git branch', exitCode)
+      console.log('executing command `%s`:', GIT_BRANCH_COMMAND)
+      console.log('stdout for git branch', stdout)
+      console.log('exitCode for git branch', exitCode)
 
       return exitCode === 0 ? stdout.trim() : null
     } catch (e) {
-      debug('Error getting git branch: %s', (e as Error).message)
+      console.log('Error getting git branch: %s', (e as Error).message)
 
       return null
     }
