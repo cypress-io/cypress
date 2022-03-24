@@ -170,8 +170,8 @@ export class ProjectLifecycleManager {
     return this._configManager?.isLoadingNodeEvents
   }
 
-  get isLoadedNodeEvents () {
-    return this._configManager?.isLoadedNodeEvents
+  get isReady () {
+    return this._configManager?.isReady
   }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
@@ -359,9 +359,6 @@ export class ProjectLifecycleManager {
     this.configFileWarningCheck()
 
     if (this.metaState.hasValidConfigFile) {
-      // at this point, there is not a cypress configuration file to initialize
-      // the project will be scaffolded and when the user selects the testing type
-      // the would like to setup
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
 
