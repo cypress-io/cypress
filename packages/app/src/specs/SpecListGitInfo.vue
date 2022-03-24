@@ -1,6 +1,9 @@
 <template>
   <div class="h-full grid gap-9px grid-cols-[16px,auto] git-info-row items-center">
-    <span class="flex w-16px items-center justify-center">
+    <span
+      class="flex w-16px items-center justify-center"
+      :data-cy="`git-status-${props.gql.statusType}`"
+    >
       <span
         v-if="props.gql.statusType !== 'unmodified'"
         class="rounded-full border-1 min-w-6px min-h-6px max-w-6px max-h-6px"
