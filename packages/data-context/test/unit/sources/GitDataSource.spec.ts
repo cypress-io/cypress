@@ -17,6 +17,11 @@ describe('GitDataSource', () => {
 
     const git = simpleGit({ baseDir: projectPath })
 
+    if (process.env.CI) {
+      // need to set a user on CI
+      git.addConfig('user.name', 'Test User', true, 'global')
+    }
+
     await git.init()
     await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
     await git.commit('add all specs')

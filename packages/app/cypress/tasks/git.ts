@@ -3,10 +3,15 @@ import path from 'path'
 import fs from 'fs-extra'
 
 export async function initGitRepoForTestProject (projectPath: string) {
+  const git = simpleGit({ baseDir: projectPath })
+
+  if (process.env.CI) {
+    // need to set a user on CI
+    git.addConfig('user.name', 'Test User', true, 'global')
+  }
+
   const e2eFolder = path.join(projectPath, 'cypress', 'e2e')
   const allSpecs = fs.readdirSync(e2eFolder)
-
-  const git = simpleGit({ baseDir: projectPath })
 
   await git.init()
   await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
