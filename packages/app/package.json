@@ -53,7 +53,6 @@
     "lodash": "4.17.21",
     "pinia": "2.0.0-rc.14",
     "rimraf": "3.0.2",
-    "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.15.2",
