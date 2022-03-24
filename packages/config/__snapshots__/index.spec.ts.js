@@ -148,5 +148,6 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "browsers",
   "hosts",
   "isInteractive",
-  "modifyObstructiveCode"
+  "modifyObstructiveCode",
+  "specPattern"
 ]

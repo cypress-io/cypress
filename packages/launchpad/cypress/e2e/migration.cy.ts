@@ -944,7 +944,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
   })
 })
 
-// TODO: toLaunchpad emitter not working in Cypress in Cypress.
+// TODO: UNIFY-1350 toLaunchpad emitter not working in Cypress in Cypress,
+// re-evaluate after conversion to subscriptions
 describe.skip('component testing migration - defaults', () => {
   it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
