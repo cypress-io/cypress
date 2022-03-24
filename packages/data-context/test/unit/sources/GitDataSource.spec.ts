@@ -29,6 +29,7 @@ describe('GitDataSource', () => {
 
     fs.createFileSync(fooSpec)
     fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
+
     process.chdir(projectPath)
 
     const [created, unmodified, modified] = await Promise.all([
@@ -39,18 +40,20 @@ describe('GitDataSource', () => {
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
     expect(created.statusType).to.eql('created')
-    // do not want to set this in the test, since it can mess up your local git instance
+    // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(created.author).not.to.be.undefined
     expect(created.lastModifiedTimestamp).not.to.be.undefined
 
-    expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(unmodified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
     expect(unmodified.statusType).to.eql('unmodified')
-    expect(created.author).not.to.be.undefined
+    // do not want to set this explicitly in the test, since it can mess up your local git instance
+    expect(unmodified.author).not.to.be.undefined
     expect(unmodified.lastModifiedTimestamp).not.to.be.undefined
 
     expect(modified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
     expect(modified.statusType).to.eql('modified')
-    expect(created.author).not.to.be.undefined
+    // do not want to set this explicitly in the test, since it can mess up your local git instance
+    expect(modified.author).not.to.be.undefined
     expect(modified.lastModifiedTimestamp).not.to.be.undefined
   })
 })
