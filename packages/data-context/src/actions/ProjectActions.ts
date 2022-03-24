@@ -421,9 +421,9 @@ export class ProjectActions {
       await this.setSpecsFoundBySpecPattern({
         path: this.ctx.currentProject,
         testingType,
-        specPattern: cfg[testingType]?.specPattern,
-        excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
-        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+        specPattern: cfg.specPattern,
+        excludeSpecPattern: cfg.excludeSpecPattern,
+        additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
     }
 

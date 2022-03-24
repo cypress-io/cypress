@@ -181,6 +181,16 @@ describe('e2e config', () => {
     })
   })
 
+  it('setupNodeEvents modify specPattern for current testing type', async function () {
+    await Fixtures.scaffoldProject('e2e')
+
+    return systemTests.exec(this, {
+      project: 'e2e',
+      configFile: 'cypress-setupNodeEvents-modify-config.config.js',
+      snapshot: true,
+    })
+  })
+
   it('throws an error if componentFolder is set on the config file', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
 

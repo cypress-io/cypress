@@ -64,9 +64,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 
 interface FixturesShape {
   scaffold (): void
-  scaffoldProject (project: string): void
-  scaffoldCommonNodeModules(): Promise<void>
-  scaffoldProjectNodeModules(project: string): Promise<void>
+  scaffoldProject (project: string): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -81,6 +79,7 @@ async function makeE2ETasks () {
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
   const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
+  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')
@@ -116,9 +115,9 @@ async function makeE2ETasks () {
 
     await Fixtures.scaffoldProject(projectName)
 
-    await Fixtures.scaffoldCommonNodeModules()
+    await scaffoldCommonNodeModules()
 
-    await Fixtures.scaffoldProjectNodeModules(projectName)
+    await scaffoldProjectNodeModules(projectName)
 
     scaffoldedProjects.add(projectName)
 
