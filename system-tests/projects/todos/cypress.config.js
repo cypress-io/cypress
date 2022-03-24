@@ -3,7 +3,7 @@ module.exports = {
   'port': 8888,
   'projectId': 'abc123',
   'component': {
-    'specFilePattern': 'src/**/*.spec.cy.js',
+    'specPattern': 'src/**/*.spec.cy.js',
     'supportFile': 'tests/_support/spec_helper.js',
   },
   'e2e': {

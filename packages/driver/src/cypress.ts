@@ -72,6 +72,9 @@ interface AutomationError extends Error {
   automation: boolean
 }
 
+// Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
+const isCypressInCypress = document.defaultView !== top
+
 class $Cypress {
   cy: any
   chai: any
@@ -372,6 +375,17 @@ class $Cypress {
     })
   }
 
+  maybeEmitCypressInCypress (...args: unknown[]) {
+    // emit an event if we are running a Cypress in Cypress E2E Test.
+    // used to assert the runner (mocha) is emitting the expected
+    // events/payload.
+    if (!isCypressInCypress) {
+      return
+    }
+
+    this.emit('cypress:in:cypress:runner:event', ...args)
+  }
+
   action (eventName, ...args) {
     // normalizes all the various ways
     // other objects communicate intent
@@ -397,6 +411,8 @@ class $Cypress {
           return
         }
 
+        this.maybeEmitCypressInCypress('mocha', 'start', args[0])
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'start', args[0])
         }
@@ -415,6 +431,8 @@ class $Cypress {
         // test:after:run events ourselves
         this.emit('run:end')
 
+        this.maybeEmitCypressInCypress('mocha', 'end', args[0])
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'end', args[0])
         }
@@ -423,6 +441,8 @@ class $Cypress {
 
       case 'runner:suite:start':
         // mocha runner started processing a suite
+        this.maybeEmitCypressInCypress('mocha', 'suite', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite', ...args)
         }
@@ -431,6 +451,8 @@ class $Cypress {
 
       case 'runner:suite:end':
         // mocha runner finished processing a suite
+        this.maybeEmitCypressInCypress('mocha', 'suite end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite end', ...args)
         }
@@ -439,6 +461,9 @@ class $Cypress {
 
       case 'runner:hook:start':
         // mocha runner started processing a hook
+
+        this.maybeEmitCypressInCypress('mocha', 'hook', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'hook', ...args)
         }
@@ -447,6 +472,8 @@ class $Cypress {
 
       case 'runner:hook:end':
         // mocha runner finished processing a hook
+        this.maybeEmitCypressInCypress('mocha', 'hook end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'hook end', ...args)
         }
@@ -455,6 +482,8 @@ class $Cypress {
 
       case 'runner:test:start':
         // mocha runner started processing a hook
+        this.maybeEmitCypressInCypress('mocha', 'test', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'test', ...args)
         }
@@ -462,6 +491,8 @@ class $Cypress {
         break
 
       case 'runner:test:end':
+        this.maybeEmitCypressInCypress('mocha', 'test end', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'test end', ...args)
         }
@@ -472,6 +503,8 @@ class $Cypress {
         // mocha runner calculated a pass
         // this is delayed from when mocha would normally fire it
         // since we fire it after all afterEach hooks have ran
+        this.maybeEmitCypressInCypress('mocha', 'pass', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pass', ...args)
         }
@@ -480,6 +513,8 @@ class $Cypress {
 
       case 'runner:pending':
         // mocha runner calculated a pending test
+        this.maybeEmitCypressInCypress('mocha', 'pending', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pending', ...args)
         }
@@ -487,6 +522,8 @@ class $Cypress {
         break
 
       case 'runner:fail': {
+        this.maybeEmitCypressInCypress('mocha', 'fail', ...args)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'fail', ...args)
         }
@@ -497,6 +534,8 @@ class $Cypress {
       // https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
       case 'runner:retry': {
         // mocha runner calculated a pass
+        this.maybeEmitCypressInCypress('mocha', 'retry', ...args)
+
         if (this.config('isTextTerminal')) {
           this.emit('mocha', 'retry', ...args)
         }
@@ -508,6 +547,8 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
+        this.maybeEmitCypressInCypress('mocha', 'test:before:run', args[0])
+
         if (this.config('isTextTerminal')) {
           // needed for handling test retries
           this.emit('mocha', 'test:before:run', args[0])
@@ -529,6 +570,7 @@ class $Cypress {
         // this event is how the reporter knows how to display
         // stats and runnable properties such as errors
         this.emit('test:after:run', ...args)
+        this.maybeEmitCypressInCypress('mocha', 'test:after:run', args[0])
 
         if (this.config('isTextTerminal')) {
           // needed for calculating wallClockDuration

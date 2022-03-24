@@ -1554,7 +1554,7 @@ module.exports = {
         // but be defensive about it
         const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
 
-        let specPattern = specPatternFromCli || config[options.testingType].specPattern
+        let specPattern = specPatternFromCli || config.specPattern
 
         specPattern = relativeSpecPattern(projectRoot, specPattern)
 

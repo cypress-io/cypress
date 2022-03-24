@@ -649,12 +649,6 @@ describe.skip('lib/modes/run', () => {
         proxyUrl: 'http://localhost:12345',
         video: true,
         videosFolder: 'videos',
-        integrationFolder: '/path/to/integrationFolder',
-        resolved: {
-          integrationFolder: {
-            integrationFolder: { value: '/path/to/integrationFolder', from: 'config' },
-          },
-        },
       }
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()

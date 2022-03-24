@@ -45,7 +45,7 @@ describe('<ConfigCode />', () => {
         }} />
       </div>))
 
-      const expectedText = `{${Object.entries(objectTest).map(([key, value]) => `'${key}': '${value}'`).join(',')},}`
+      const expectedText = `{${Object.entries(objectTest).map(([key, value]) => `${key}: '${value}'`).join(',')},}`
 
       cy.contains(`objectTest:`).should('contain.text', expectedText)
     })
