@@ -19,6 +19,13 @@ const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/ch
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
+const POTENTIAL_CONFIG_FILES = [
+  'cypress.config.ts',
+  'cypress.config.mjs',
+  'cypress.config.cjs',
+  'cypress.config.js',
+]
+
 type ProjectConfigManagerOptions = {
   configFile: string | false
   projectRoot: string
@@ -57,8 +64,7 @@ export class ProjectConfigManager {
   private _testingType: TestingType | undefined
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
-  private _setupNodeEventsPromise: Promise<SetupNodeEventsReply> | undefined
-  private _cachedInitialConfig: Cypress.ConfigOptions | undefined
+  private _cachedLoadConfig: LoadConfigReply | undefined
 
   #cypressEnv: CypressEnv
 
@@ -75,7 +81,7 @@ export class ProjectConfigManager {
   }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
-    return this._cachedInitialConfig ?? null
+    return this._cachedLoadConfig?.initialConfig ?? null
   }
 
   get envFilePath () {
@@ -115,24 +121,24 @@ export class ProjectConfigManager {
   async initializeConfig (): Promise<LoadConfigReply['initialConfig']> {
     try {
       this._state = 'loadingConfig'
-      this._cachedInitialConfig = undefined
+      this._cachedLoadConfig = undefined
 
       const result = await this.loadConfig()
 
+      // This is necessary as there is a weird timing issue where an error occurs and the config results get loaded
+      // TODO: see if this can be !== 'errored'
       if (this._state === 'loadingConfig') {
         debug(`config is loaded for file`, this.configFilePath, this._testingType)
         this.validateConfigFile(this.configFilePath, result.initialConfig)
 
-        this.watchRequires(result.requires)
-
         this._state = 'loadedConfig'
-        this._cachedInitialConfig = result.initialConfig
+        this._cachedLoadConfig = result
 
         if (this._testingType) {
           this.options.onConfigLoaded()
 
           if (this.isTestingTypeConfigured(this._testingType) || this.options.isRunMode) {
-            this.setupNodeEvents(result.initialConfig).catch(this.onLoadError)
+            this.setupNodeEvents(result).catch(this.onLoadError)
           }
         }
       }
@@ -145,11 +151,147 @@ export class ProjectConfigManager {
       }
 
       this._state = 'errored'
+      this.closeWatchers()
 
       throw error
     } finally {
       this.options.toLaunchpad()
     }
+  }
+
+  private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {
+    assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
+    this._state = 'loadingNodeEvents'
+
+    try {
+      const val = await this.callSetupNodeEventsWithConfig(this._eventsIpc)
+
+      await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, val)
+      this._state = 'ready'
+    } catch (error) {
+      debug(`catch setupNodeEvents %o`, error)
+      this._state = 'errored'
+      if (this._eventsIpc) {
+        this._cleanupIpc(this._eventsIpc)
+      }
+
+      this.closeWatchers()
+
+      throw error
+    } finally {
+      this.options.toLaunchpad()
+    }
+  }
+
+  private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
+    assert(this._testingType)
+    const config = await this.getFullInitialConfig()
+
+    this._registeredEventsTarget = this._testingType
+
+    for (const handler of this.options.handlers) {
+      handler(ipc)
+    }
+
+    const { promise } = this.registerSetupIpcHandlers(ipc)
+
+    const overrides = config[this._testingType] ?? {}
+    const mergedConfig = { ...config, ...overrides }
+
+    // alphabetize config by keys
+    let orderedConfig = {} as Cypress.PluginConfigOptions
+
+    Object.keys(mergedConfig).sort().forEach((key) => {
+      const k = key as keyof typeof mergedConfig
+
+      // @ts-ignore
+      orderedConfig[k] = mergedConfig[k]
+    })
+
+    ipc.send('setupTestingType', this._testingType, {
+      ...orderedConfig,
+      projectRoot: this.options.projectRoot,
+      configFile: this.configFilePath,
+      version: this.options.cypressVersion,
+      testingType: this._testingType,
+    })
+
+    return promise
+  }
+
+  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, loadConfigReply: LoadConfigReply, result: SetupNodeEventsReply) {
+    this._registeredEvents = {}
+
+    for (const { event, eventId } of result.registrations) {
+      debug('register plugins process event', event, 'with id', eventId)
+
+      this.registerEvent(event, function (...args: any[]) {
+        return new Promise((resolve, reject) => {
+          const invocationId = _.uniqueId('inv')
+
+          debug('call event', event, 'for invocation id', invocationId)
+
+          ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
+            if (err) {
+              debug('promise rejected for id %s %o', invocationId, ':', err.stack)
+              reject(_.extend(new Error(err.message), err))
+
+              return
+            }
+
+            if (value === UNDEFINED_SERIALIZED) {
+              value = undefined
+            }
+
+            debug(`promise resolved for id '${invocationId}' with value`, value)
+
+            return resolve(value)
+          })
+
+          const ids = { invocationId, eventId }
+
+          // no argument is passed for cy.task()
+          // This is necessary because undefined becomes null when it is sent through ipc.
+          if (event === 'task' && args[1] === undefined) {
+            args[1] = {
+              __cypress_task_no_argument__: true,
+            }
+          }
+
+          ipc.send('execute:plugins', event, ids, args)
+        })
+      })
+    }
+
+    const cypressEnv = await this.loadCypressEnvFile()
+    const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.modeOptions)
+
+    const finalConfig = this._cachedFullConfig = this.options.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
+
+    // This happens automatically with openProjectCreate in run mode
+    if (!this.options.isRunMode) {
+      if (!this._initializedProject) {
+        this._initializedProject = await this.options.initializeActiveProject({})
+      } else {
+        // TODO: modify the _initializedProject
+      }
+    }
+
+    // TODO: not sure about where this fits into the refactor
+    await this.options.setActiveBrowser()
+
+    this._pendingInitialize?.resolve(finalConfig)
+
+    if (this._testingType && finalConfig[this._testingType]?.specPattern) {
+      await this.options.setSpecsFoundForConfig(fullConfig)
+    }
+
+    // TODO: clean up these watchers on error
+    this.watchRequires(loadConfigReply.requires)
+    this.watchRequires(result.requires)
+    this.initializeConfigWatchers()
+
+    return result
   }
 
   reloadConfig () {
@@ -166,8 +308,8 @@ export class ProjectConfigManager {
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
       this.reloadConfig().catch(this.onLoadError)
-    } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedInitialConfig) {
-      this.setupNodeEvents(this._cachedInitialConfig).catch(this.onLoadError)
+    } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
+      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
     }
   }
 
@@ -341,6 +483,7 @@ export class ProjectConfigManager {
   }
 
   onLoadError = (err: any) => {
+    // this.closeWatchers()
     if (this.options.isRunMode && this._pendingInitialize) {
       this._pendingInitialize.reject(err)
     } else {
@@ -404,28 +547,6 @@ export class ProjectConfigManager {
     return evtFn(...args)
   }
 
-  private async setupNodeEvents (initialConfig: Cypress.ConfigOptions): Promise<void> {
-    assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
-    this._state = 'loadingNodeEvents'
-
-    try {
-      const val = await this.callSetupNodeEventsWithConfig(this._eventsIpc)
-
-      await this.handleSetupTestingTypeReply(this._eventsIpc, initialConfig, val)
-      this._state = 'ready'
-    } catch (error) {
-      debug(`catch setupNodeEvents %o`, error)
-      this._state = 'errored'
-      if (this._eventsIpc) {
-        this._cleanupIpc(this._eventsIpc)
-      }
-
-      throw error
-    } finally {
-      this.options.toLaunchpad()
-    }
-  }
-
   registerEvent (event: string, callback: Function) {
     debug(`register event '${event}'`)
 
@@ -446,77 +567,6 @@ export class ProjectConfigManager {
     return this._pendingInitialize.promise.finally(() => {
       this._pendingInitialize = undefined
     })
-  }
-
-  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, initialConfig: Cypress.ConfigOptions, result: SetupNodeEventsReply) {
-    this._registeredEvents = {}
-    this.watchRequires(result.requires)
-
-    for (const { event, eventId } of result.registrations) {
-      debug('register plugins process event', event, 'with id', eventId)
-
-      this.registerEvent(event, function (...args: any[]) {
-        return new Promise((resolve, reject) => {
-          const invocationId = _.uniqueId('inv')
-
-          debug('call event', event, 'for invocation id', invocationId)
-
-          ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
-            if (err) {
-              debug('promise rejected for id %s %o', invocationId, ':', err.stack)
-              reject(_.extend(new Error(err.message), err))
-
-              return
-            }
-
-            if (value === UNDEFINED_SERIALIZED) {
-              value = undefined
-            }
-
-            debug(`promise resolved for id '${invocationId}' with value`, value)
-
-            return resolve(value)
-          })
-
-          const ids = { invocationId, eventId }
-
-          // no argument is passed for cy.task()
-          // This is necessary because undefined becomes null when it is sent through ipc.
-          if (event === 'task' && args[1] === undefined) {
-            args[1] = {
-              __cypress_task_no_argument__: true,
-            }
-          }
-
-          ipc.send('execute:plugins', event, ids, args)
-        })
-      })
-    }
-
-    const cypressEnv = await this.loadCypressEnvFile()
-    const fullConfig = await this.buildBaseFullConfig(initialConfig, cypressEnv, this.options.modeOptions)
-
-    const finalConfig = this._cachedFullConfig = this.options.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
-
-    // This happens automatically with openProjectCreate in run mode
-    if (!this.options.isRunMode) {
-      if (!this._initializedProject) {
-        this._initializedProject = await this.options.initializeActiveProject({})
-      } else {
-        // TODO: modify the _initializedProject
-      }
-    }
-
-    // TODO: not sure about where this fits into the refactor
-    await this.options.setActiveBrowser()
-
-    this._pendingInitialize?.resolve(finalConfig)
-
-    if (this._testingType && finalConfig[this._testingType]?.specPattern) {
-      await this.options.setSpecsFoundForConfig(fullConfig)
-    }
-
-    return result
   }
 
   private validateConfigRoot (config: Cypress.ConfigOptions) {
@@ -599,44 +649,6 @@ export class ProjectConfigManager {
     return _.cloneDeep(fullConfig)
   }
 
-  private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
-    assert(this._testingType)
-    const config = await this.getFullInitialConfig()
-
-    assert(config)
-
-    this._registeredEventsTarget = this._testingType
-
-    for (const handler of this.options.handlers) {
-      handler(ipc)
-    }
-
-    const { promise } = this.registerSetupIpcHandlers(ipc)
-
-    const overrides = config[this._testingType] ?? {}
-    const mergedConfig = { ...config, ...overrides }
-
-    // alphabetize config by keys
-    let orderedConfig = {} as Cypress.PluginConfigOptions
-
-    Object.keys(mergedConfig).sort().forEach((key) => {
-      const k = key as keyof typeof mergedConfig
-
-      // @ts-ignore
-      orderedConfig[k] = mergedConfig[k]
-    })
-
-    ipc.send('setupTestingType', this._testingType, {
-      ...orderedConfig,
-      projectRoot: this.options.projectRoot,
-      configFile: this.configFilePath,
-      version: this.options.cypressVersion,
-      testingType: this._testingType,
-    })
-
-    return promise
-  }
-
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
     const dfd = pDefer<SetupNodeEventsReply>()
 
@@ -676,8 +688,8 @@ export class ProjectConfigManager {
   }
 
   async getConfigFileContents () {
-    if (this._cachedInitialConfig) {
-      return this._cachedInitialConfig
+    if (this._cachedLoadConfig?.initialConfig) {
+      return this._cachedLoadConfig?.initialConfig
     }
 
     return this.initializeConfig()
@@ -719,13 +731,45 @@ export class ProjectConfigManager {
     return true
   }
 
+  private _pathToFile (file: string) {
+    return path.isAbsolute(file) ? file : path.join(this.options.projectRoot, file)
+  }
+
+  private initializeConfigWatchers () {
+    if (this.options.isRunMode) {
+      return
+    }
+
+    const configWatchers = this.addWatcher([
+      ...POTENTIAL_CONFIG_FILES.map((f) => this._pathToFile(f)),
+    ])
+
+    configWatchers.on('all', (event, file) => {
+      debug('WATCHER: config file event', event, file)
+
+      this.reloadConfig().catch(this.onLoadError)
+    })
+
+    configWatchers.on('error', (err) => {
+      debug('error watching config files %O', err)
+      this.options.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
+    })
+
+    const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
+
+    cypressEnvFileWatcher.on('all', () => {
+      this.reloadConfig().catch(this.onLoadError)
+    })
+  }
+
   private closeWatchers () {
-    for (const watcher of this._watchers.values()) {
+    for (const watcher of [...this._watchers.values(), ...Object.values(this._requireWatchers)]) {
       // We don't care if there's an error while closing the watcher,
       // the watch listener on our end is already removed synchronously by chokidar
       watcher.close().catch((e) => {})
     }
     this._watchers = new Set()
+    this._requireWatchers = {}
   }
 
   destroy () {
@@ -735,16 +779,11 @@ export class ProjectConfigManager {
 
     this.killChildProcesses()
     this._state = 'pending'
-    this._cachedInitialConfig = undefined
+    this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined
     this._eventProcess = undefined
     this._registeredEventsTarget = undefined
     this.closeWatchers()
-    for (const watcher of Object.values(this._requireWatchers)) {
-      // Don't worry about any errors closing the watcher, not important to catch
-      watcher.close().catch()
-    }
-    this._requireWatchers = {}
   }
 }
 

@@ -28,8 +28,13 @@ export const mutation = mutationType({
       type: Query,
       description: 'Re-initializes Cypress from the initial CLI options',
       resolve: async (_, args, ctx) => {
-        await ctx.reinitializeCypress(ctx.modeOptions)
-        await ctx.initializeMode()
+        ctx.update((d) => {
+          d.baseError = null
+          d.warnings = []
+        })
+
+        // Wait for the project config to be reloaded
+        await ctx.lifecycleManager.reloadConfig()
 
         return {}
       },

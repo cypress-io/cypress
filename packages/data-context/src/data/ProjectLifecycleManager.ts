@@ -6,11 +6,9 @@
  * See `guides/app-lifecycle.md` for documentation on the project & possible
  * states that exist, and how they are managed.
  */
-import chokidar, { FSWatcher } from 'chokidar'
 import path from 'path'
 import _ from 'lodash'
 import resolve from 'resolve'
-import debugLib from 'debug'
 import fs from 'fs'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
@@ -23,15 +21,6 @@ import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import type { IpcHandler } from './ProjectConfigIpc'
 
-const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
-
-const potentialConfigFiles = [
-  'cypress.config.ts',
-  'cypress.config.mjs',
-  'cypress.config.cjs',
-  'cypress.config.js',
-]
-
 export interface SetupFullConfigOptions {
   projectName: string
   projectRoot: string
@@ -42,6 +31,13 @@ export interface SetupFullConfigOptions {
 }
 
 type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrResult) => T
+
+const POTENTIAL_CONFIG_FILES = [
+  'cypress.config.ts',
+  'cypress.config.mjs',
+  'cypress.config.cjs',
+  'cypress.config.js',
+]
 
 /**
  * All of the APIs injected from @packages/server & @packages/config
@@ -82,8 +78,6 @@ const PROJECT_META_STATE: ProjectMetaState = {
 }
 
 export class ProjectLifecycleManager {
-  // Config, from the cypress.config.{js|ts}
-  private watchers = new Set<chokidar.FSWatcher>()
   private _currentTestingType: TestingType | null = null
   private _runModeExitEarly: ((error: Error) => void) | undefined
   private _projectRoot: string | undefined
@@ -91,11 +85,10 @@ export class ProjectLifecycleManager {
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
 
   constructor (private ctx: DataContext) {
-    this.watchers = new Set()
-
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
+      // TODO: figure out what exactly causes this scenario
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
 
@@ -336,6 +329,7 @@ export class ProjectLifecycleManager {
     this._configManager = this.#createConfigManager()
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
+
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
 
     if (needsCypressJsonMigration) {
@@ -366,16 +360,6 @@ export class ProjectLifecycleManager {
 
     if (this.ctx.coreData.currentTestingType) {
       this.setCurrentTestingType(this.ctx.coreData.currentTestingType)
-    }
-
-    // If migration is needed only initialize the watchers
-    // when the migration is done.
-    //
-    // NOTE: If we watch the files while initializing,
-    // the config will be loaded before the migration is complete.
-    // The migration screen will disappear see `Main.vue` & `MigrationAction.ts`
-    if (!needsCypressJsonMigration) {
-      this.initializeConfigWatchers()
     }
   }
 
@@ -431,22 +415,12 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private closeWatchers () {
-    for (const watcher of this.watchers.values()) {
-      // We don't care if there's an error while closing the watcher,
-      // the watch listener on our end is already removed synchronously by chokidar
-      watcher.close().catch((e) => {})
-    }
-    this.watchers = new Set()
-  }
-
   private resetInternalState () {
     if (this._configManager) {
       this._configManager.destroy()
       this._configManager = undefined
     }
 
-    this.closeWatchers()
     this._currentTestingType = null
   }
 
@@ -466,73 +440,10 @@ export class ProjectLifecycleManager {
     return this._configManager.getConfigFileContents()
   }
 
-  /**
-   * Initializes the "watchers" for the current
-   * config for "open" mode.
-   */
-  initializeConfigWatchers () {
-    if (this.ctx.isRunMode) {
-      return
-    }
-
-    const legacyFileWatcher = this.addWatcher([
-      this._pathToFile(this.legacyConfigFile),
-      ...potentialConfigFiles.map((f) => this._pathToFile(f)),
-    ])
-
-    legacyFileWatcher.on('all', (event, file) => {
-      debug('WATCHER: config file event', event, file)
-      this.ctx.update((coreData) => {
-        coreData.baseError = null
-      })
-
-      assert(this._configManager)
-      this._configManager.reloadConfig().catch(this.onLoadError)
-    })
-
-    legacyFileWatcher.on('error', (err) => {
-      this.ctx.update((coreData) => {
-        coreData.baseError = null
-      })
-
-      debug('error watching config files %O', err)
-      this.ctx.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
-    })
-
-    const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
-
-    cypressEnvFileWatcher.on('all', () => {
-      assert(this._configManager)
-      this._configManager.reloadConfig().catch(this.onLoadError)
-    })
-  }
-
   async loadCypressEnvFile () {
     assert(this._configManager)
 
     return this._configManager.loadCypressEnvFile()
-  }
-
-  addWatcher (file: string | string[]) {
-    const w = chokidar.watch(file, {
-      ignoreInitial: true,
-      cwd: this.projectRoot,
-    })
-
-    this.watchers.add(w)
-
-    return w
-  }
-
-  closeWatcher (watcherToClose: FSWatcher) {
-    for (const watcher of this.watchers.values()) {
-      if (watcher === watcherToClose) {
-        watcher.close().catch(() => {})
-        this.watchers.delete(watcher)
-
-        return
-      }
-    }
   }
 
   reinitializeCypress () {
@@ -623,7 +534,7 @@ export class ProjectLifecycleManager {
 
     metaState.allFoundConfigFiles = []
 
-    for (const fileName of potentialConfigFiles) {
+    for (const fileName of POTENTIAL_CONFIG_FILES) {
       const filePath = this._pathToFile(fileName)
       const fileExists = fs.existsSync(filePath)
 
