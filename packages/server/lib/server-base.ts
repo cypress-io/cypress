@@ -49,7 +49,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
     `/${namespace}/runner/favicon.ico`,
 
-    // the reason this is not namespace is because we don't launch the vite
+    // the reason this is not namespaced is because we don't launch the vite
     // dev server from inside of the cypress code - it's statically generating the
     // assets in dev, which is launched as a separate process outside of the server
     // code. ideally we could use the config.namespace (__cypress-app) to configure
