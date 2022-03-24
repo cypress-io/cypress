@@ -33,8 +33,13 @@ export class BrowserDataSource {
       const p = this.ctx._apis.browserApi.getBrowsers()
 
       this.ctx.coreData.machineBrowsers = p
-      p.then((browsers) => {
-        if (!browsers.length) throw new Error('no browsers found in machineBrowsers')
+      p.then(async (browsers) => {
+        if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
+
+        const { lastBrowser } = await this.ctx._apis.localSettingsApi.getPreferences()
+
+        this.ctx.coreData.chosenBrowser = (lastBrowser && browsers.find((b) => b.name === lastBrowser.name && b.channel === lastBrowser.channel))
+          || browsers[0]
 
         this.ctx.coreData.machineBrowsers = browsers
       }).catch((e) => {

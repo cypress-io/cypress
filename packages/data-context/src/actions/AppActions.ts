@@ -35,7 +35,9 @@ export class AppActions {
     const browser = this.ctx.lifecycleManager.browsers?.find((b) => this.idForBrowser(b as FoundBrowser) === browserId)
 
     if (browser) {
-      return await this.setActiveBrowser(browser)
+      await this.setActiveBrowser(browser)
+
+      return
     }
 
     throw new Error('no browser in setActiveBrowserById')

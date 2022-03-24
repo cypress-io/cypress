@@ -219,16 +219,9 @@ export class ProjectActions {
       activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
-    // Ensure that we have loaded browsers to choose from
-    if (this.ctx.appData.refreshingBrowsers) {
-      await this.ctx.appData.refreshingBrowsers
-    }
+    const browser = this.ctx.coreData.chosenBrowser
 
-    const browser = this.ctx.coreData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
-
-    if (!browser) {
-      throw new Error('Missing browser in launchProject')
-    }
+    if (!browser) throw new Error('Missing browser in launchProject')
 
     // launchProject expects a spec when opening browser for url navigation.
     // We give it an empty spec if none is passed so as to land on home page
