@@ -242,7 +242,7 @@ const organizations = computed(() => {
       ...org,
       projects: {
         ...org.projects,
-        nodes: sortBy(org.projects.nodes, 'name'),
+        nodes: sortBy(org.projects?.nodes, 'name'),
       },
       icon: FolderIcon,
     }
