@@ -7,7 +7,7 @@ describe('hooks', {
 }, () => {
   it('displays commands under correct hook', () => {
     loadSpec({
-      fileName: 'basic.cy.js',
+      filePath: 'hooks/basic.cy.js',
       passCount: 2,
     })
 
@@ -40,7 +40,7 @@ describe('hooks', {
 
   it('creates open in IDE button', () => {
     loadSpec({
-      fileName: 'basic.cy.js',
+      filePath: 'hooks/basic.cy.js',
       passCount: 2,
       hasPreferredIde: true,
     })
@@ -62,7 +62,7 @@ describe('hooks', {
 
   it('does not display commands from skipped tests', () => {
     loadSpec({
-      fileName: 'skip.cy.js',
+      filePath: 'hooks/skip.cy.js',
       passCount: 1,
     })
 
@@ -80,7 +80,7 @@ describe('hooks', {
 
   it('only displays tests with .only', () => {
     loadSpec({
-      fileName: 'only.cy.js',
+      filePath: 'hooks/only.cy.js',
       passCount: 1,
     })
 
@@ -105,7 +105,7 @@ describe('hooks', {
   // https://github.com/cypress-io/cypress/issues/8189
   it('can rerun without timeout error leaking into next run (due to run restart)', () => {
     loadSpec({
-      fileName: 'rerun.cy.js',
+      filePath: 'hooks/rerun.cy.js',
       passCount: 1,
     })
 

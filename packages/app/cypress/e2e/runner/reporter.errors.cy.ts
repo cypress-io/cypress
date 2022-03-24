@@ -9,14 +9,14 @@ type VerifyFunc = (specTitle: string, verifyOptions: any) => void
  */
 function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
   const {
-    fileName,
+    filePath,
     hasPreferredIde = false,
   } = options
 
   specLoader.loadSpec(options)
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ fileName, hasPreferredIde })
+  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde })
 }
 
 describe('errors ui', {
@@ -28,7 +28,7 @@ describe('errors ui', {
 }, () => {
   it('assertion failures', () => {
     const verify = loadErrorSpec({
-      fileName: 'assertions.cy.js',
+      filePath: 'errors/assertions.cy.js',
       hasPreferredIde: true,
       failCount: 3,
     })
@@ -60,7 +60,7 @@ describe('errors ui', {
 
   it('assertion failures - no preferred IDE', () => {
     const verify = loadErrorSpec({
-      fileName: 'assertions.cy.js',
+      filePath: 'errors/assertions.cy.js',
       failCount: 3,
     })
 
@@ -74,7 +74,7 @@ describe('errors ui', {
 
   it('exception failures', () => {
     const verify = loadErrorSpec({
-      fileName: 'exceptions.cy.js',
+      filePath: 'errors/exceptions.cy.js',
       failCount: 2,
     })
 
@@ -92,7 +92,7 @@ describe('errors ui', {
 
   it('hooks', { viewportHeight: 900 }, () => {
     const verify = loadErrorSpec({
-      fileName: 'hooks.cy.js',
+      filePath: 'errors/hooks.cy.js',
       failCount: 1,
     })
 
@@ -108,7 +108,7 @@ describe('errors ui', {
 
   it('commands', () => {
     const verify = loadErrorSpec({
-      fileName: 'commands.cy.js',
+      filePath: 'errors/commands.cy.js',
       failCount: 2,
     })
 
@@ -125,7 +125,7 @@ describe('errors ui', {
 
   it('cy.then', () => {
     const verify = loadErrorSpec({
-      fileName: 'then.cy.js',
+      filePath: 'errors/then.cy.js',
       failCount: 3,
     })
 
@@ -147,7 +147,7 @@ describe('errors ui', {
 
   it('cy.should', () => {
     const verify = loadErrorSpec({
-      fileName: 'should.cy.js',
+      filePath: 'errors/should.cy.js',
       failCount: 8,
     })
 
@@ -197,7 +197,7 @@ describe('errors ui', {
 
   it('cy.each', () => {
     const verify = loadErrorSpec({
-      fileName: 'each.cy.js',
+      filePath: 'errors/each.cy.js',
       failCount: 3,
     })
 
@@ -219,7 +219,7 @@ describe('errors ui', {
 
   it('cy.spread', () => {
     const verify = loadErrorSpec({
-      fileName: 'spread.cy.js',
+      filePath: 'errors/spread.cy.js',
       failCount: 3,
     })
 
@@ -241,7 +241,7 @@ describe('errors ui', {
 
   it('cy.within', () => {
     const verify = loadErrorSpec({
-      fileName: 'within.cy.js',
+      filePath: 'errors/within.cy.js',
       failCount: 3,
     })
 
@@ -263,7 +263,7 @@ describe('errors ui', {
 
   it('cy.wrap', () => {
     const verify = loadErrorSpec({
-      fileName: 'wrap.cy.js',
+      filePath: 'errors/wrap.cy.js',
       failCount: 3,
     })
 
@@ -285,7 +285,7 @@ describe('errors ui', {
 
   it('cy.visit', () => {
     const verify = loadErrorSpec({
-      fileName: 'visit.cy.js',
+      filePath: 'errors/visit.cy.js',
       failCount: 3,
     })
 
@@ -316,7 +316,7 @@ describe('errors ui', {
 
   it('cy.intercept', () => {
     const verify = loadErrorSpec({
-      fileName: 'intercept.cy.ts',
+      filePath: 'errors/intercept.cy.ts',
       failCount: 3,
     })
 
@@ -359,7 +359,7 @@ describe('errors ui', {
 
   it('cy.route', () => {
     const verify = loadErrorSpec({
-      fileName: 'route.cy.js',
+      filePath: 'errors/route.cy.js',
       failCount: 9,
     })
 
@@ -417,7 +417,7 @@ describe('errors ui', {
 
   it('cy.server', () => {
     const verify = loadErrorSpec({
-      fileName: 'server.cy.js',
+      filePath: 'errors/server.cy.js',
       failCount: 6,
     })
 
@@ -460,7 +460,7 @@ describe('errors ui', {
 
   it('cy.readFile', () => {
     const verify = loadErrorSpec({
-      fileName: 'readfile.cy.js',
+      filePath: 'errors/readfile.cy.js',
       failCount: 1,
     })
 
@@ -472,7 +472,7 @@ describe('errors ui', {
 
   it('validation errors', () => {
     const verify = loadErrorSpec({
-      fileName: 'validation.cy.js',
+      filePath: 'errors/validation.cy.js',
       failCount: 3,
     })
 
@@ -496,7 +496,7 @@ describe('errors ui', {
 
   it('event handlers', () => {
     const verify = loadErrorSpec({
-      fileName: 'events.cy.js',
+      filePath: 'errors/events.cy.js',
       failCount: 4,
     })
 
@@ -523,7 +523,7 @@ describe('errors ui', {
 
   it('uncaught errors', () => {
     const verify = loadErrorSpec({
-      fileName: 'uncaught.cy.js',
+      filePath: 'errors/uncaught.cy.js',
       failCount: 11,
     })
 
@@ -672,7 +672,7 @@ describe('errors ui', {
 
   it('uncaught errors: outside test', () => {
     const verify = loadErrorSpec({
-      fileName: 'uncaught_outside_test.cy.js',
+      filePath: 'errors/uncaught_outside_test.cy.js',
       failCount: 1,
     })
 
@@ -693,7 +693,7 @@ describe('errors ui', {
 
   it('uncaught errors: outside test only suite', () => {
     const verify = loadErrorSpec({
-      fileName: 'uncaught_outside_test_only_suite.cy.js',
+      filePath: 'errors/uncaught_outside_test_only_suite.cy.js',
       failCount: 1,
     })
 
@@ -710,7 +710,7 @@ describe('errors ui', {
 
   it('custom commands', () => {
     const verify = loadErrorSpec({
-      fileName: 'custom_commands.cy.js',
+      filePath: 'errors/custom_commands.cy.js',
       failCount: 3,
     })
 
@@ -735,7 +735,7 @@ describe('errors ui', {
 
   it('typescript', () => {
     const verify = loadErrorSpec({
-      fileName: 'typescript.cy.ts',
+      filePath: 'errors/typescript.cy.ts',
       failCount: 3,
     })
 
@@ -774,7 +774,7 @@ describe('errors ui', {
       const docsUrl = 'https://on.cypress.io/viewport'
 
       const verify = loadErrorSpec({
-        fileName: 'docs_url.cy.js',
+        filePath: 'errors/docs_url.cy.js',
         failCount: 2,
       })
 
@@ -811,7 +811,7 @@ describe('errors ui', {
   // methods to make them throw an error
   it('unexpected errors', () => {
     const verify = loadErrorSpec({
-      fileName: 'unexpected.cy.js',
+      filePath: 'errors/unexpected.cy.js',
       failCount: 2,
     })
 
