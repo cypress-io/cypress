@@ -5,6 +5,7 @@ import pkg from '@packages/root'
 
 export type BreakingOptionErrorKey =
   | 'COMPONENT_FOLDER_REMOVED'
+  | 'INTEGRATION_FOLDER_REMOVED'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
@@ -545,6 +546,20 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'COMPONENT_FOLDER_REMOVED',
     isWarning: false,
   }, {
+    name: 'integrationFolder',
+    errorKey: 'INTEGRATION_FOLDER_REMOVED',
+    isWarning: false,
+  }, {
+    name: 'testFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'specPattern',
+    isWarning: false,
+  }, {
+    name: 'ignoreTestFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'excludeSpecPattern',
+    isWarning: false,
+  }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
     isWarning: false,
@@ -586,10 +601,6 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'pluginsFile',
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
-  }, {
-    name: 'testFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    isWarning: false,
   },
 ]
 

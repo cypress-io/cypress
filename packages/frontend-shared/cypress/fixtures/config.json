@@ -129,11 +129,6 @@
     "field": "includeShadowDom"
   },
   {
-    "value": "cypress/e2e/integration",
-    "from": "config",
-    "field": "integrationFolder"
-  },
-  {
     "value": true,
     "from": "default",
     "field": "modifyObstructiveCode"

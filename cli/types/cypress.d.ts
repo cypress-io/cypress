@@ -2698,12 +2698,6 @@ declare namespace Cypress {
      */
     fixturesFolder: string | false
     /**
-     * Path to folder containing integration test files
-     * @default "cypress/integration"
-     * @deprecated
-     */
-    integrationFolder: string
-    /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
      */
