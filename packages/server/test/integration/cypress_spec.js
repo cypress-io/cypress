@@ -1673,7 +1673,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         const projectOptions = openProject.getProject().options
 
-        expect(projectOptions).to.include({
+        expect(projectOptions, `Object that did not match ${JSON.stringify(projectOptions, null, 2)}`).to.include({
           port: 2121,
           pageLoadTimeout: 1000,
           report: false,
