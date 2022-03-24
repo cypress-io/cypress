@@ -136,7 +136,6 @@ export async function startCypressWatch () {
   fs.ensureDirSync(path.dirname(DevActions.CY_STATE_PATH))
 
   function signalRestart () {
-    console.log('signalRestart')
     if (!child) {
       startCypressWithListeners()
     } else {
