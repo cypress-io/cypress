@@ -11,11 +11,11 @@
       </p>
       <div @click="startWaitingOrgToBeCreated()">
         <ExternalLink
-          class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
+          class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
           :href="createOrgUrl"
           :include-graphql-port="true"
         >
-          <i-cy-office-building_x16 class="inline-block icon-dark-gray-500" />
+          <i-cy-office-building_x16 class="inline-block icon-dark-white" />
           {{ t('runs.connect.modal.createOrg.button') }}
         </ExternalLink>
       </div>
