@@ -38,6 +38,7 @@ export interface Cfg extends ReceivedCypressOptions {
   }
   e2e: Partial<Cfg>
   component: Partial<Cfg>
+  additionalIgnorePattern?: string
 }
 
 const localCwd = process.cwd()
