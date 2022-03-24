@@ -45,6 +45,7 @@ export interface RemoteGraphQLInterceptPayload {
   variables: Record<string, any>
   document: DocumentNode
   result: ExecutionResult
+  callCount: number
 }
 
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
@@ -524,6 +525,12 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    '.runnable-header .duration': ($el) => {
+      $el.text('XX:XX')
+    },
+  },
+})
 
 addNetworkCommands()

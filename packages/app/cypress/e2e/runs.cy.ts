@@ -91,6 +91,34 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('button').get('[aria-label="Close"').click()
       cy.get('[aria-modal="true"]').should('not.exist')
     })
+
+    it('opens create Org modal after clicking Connect Project button and refetch data from the cloud', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer') && obj.callCount < 2) {
+          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+            obj.result.data.cloudViewer.organizations.nodes = []
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.refreshButton).click()
+
+      cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+    })
   })
 
   context('Runs - Connect Project', () => {

@@ -394,12 +394,12 @@ describe('reduceConfig', () => {
     expect(newConfig.global.integrationFolder).to.not.exist
   })
 
-  it('should rename ignoreTestFiles to specExcludePattern', () => {
+  it('should rename ignoreTestFiles to excludeSpecPattern', () => {
     const config = { ignoreTestFiles: 'path/to/**/*.js' }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.e2e.specExcludePattern).to.eq(config.ignoreTestFiles)
-    expect(newConfig.component.specExcludePattern).to.eq(config.ignoreTestFiles)
+    expect(newConfig.e2e.excludeSpecPattern).to.eq(config.ignoreTestFiles)
+    expect(newConfig.component.excludeSpecPattern).to.eq(config.ignoreTestFiles)
   })
 
   it('should nest supportFile under component and e2e', () => {

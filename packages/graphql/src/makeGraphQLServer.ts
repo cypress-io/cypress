@@ -50,6 +50,29 @@ export async function makeGraphQLServer () {
 
   app.use('/__cypress/launchpad/graphql/:operationName?', graphQLHTTP)
 
+  app.get('/cloud-notification', (req, res) => {
+    const ctx = getCtx()
+
+    const operationName = req.query.operationName
+
+    if (!operationName || Array.isArray(operationName)) {
+      res.sendStatus(200)
+
+      return
+    }
+
+    switch (operationName) {
+      case 'orgCreated':
+        ctx.emitter.cloudViewerChange()
+        break
+
+      default:
+        break
+    }
+
+    res.sendStatus(200)
+  })
+
   function makeProxy (): express.Handler {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
       const viteProxy = httpProxy.createProxyServer({
@@ -166,10 +189,12 @@ export const graphqlWS = (httpServer: Server, targetRoute: string) => {
     }
   })
 
-  return useServer({
+  useServer({
     schema: graphqlSchema,
     context: () => getCtx(),
   }, graphqlWs)
+
+  return graphqlWs
 }
 
 export const graphQLHTTP = graphqlHTTP((req, res, params) => {
