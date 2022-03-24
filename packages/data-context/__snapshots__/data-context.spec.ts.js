@@ -26,7 +26,6 @@ exports['@packages/data-context initializeData initializes 1'] = {
     },
     "app": {
       "currentTestingType": null,
-      "refreshingBrowsers": {},
       "browsers": [
         {
           "path": "/dev/chrome"

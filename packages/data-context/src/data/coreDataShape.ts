@@ -56,7 +56,6 @@ export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
   browserStatus: BrowserStatus
@@ -158,7 +157,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      refreshingBrowsers: null,
       browsers: null,
       projects: [],
       refreshingNodePath: null,
