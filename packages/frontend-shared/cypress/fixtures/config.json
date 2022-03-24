@@ -274,12 +274,9 @@
     "field": "watchForFileChanges"
   },
   {
-    "value": {
-      "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
-      "supportFile": "cypress/e2e/support/e2eSupport.ts"
-    },
+    "field": "specPattern",
     "from": "config",
-    "field": "e2e"
+    "value": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
   },
   {
     "value": {

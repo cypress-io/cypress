@@ -7,7 +7,7 @@ import type { DataContext } from '@packages/data-context'
  * @returns
  */
 export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
-  const { document: _document, operationType, variables, context: _context } = obj
+  const { document: _document, operationType, variables, context: _context, rootValue } = obj
 
   const document: DocumentNode = _document
   const context: DataContext = _context
@@ -21,6 +21,7 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
     document,
     variables,
     query: print(document),
+    requestPolicy: rootValue?.requestPolicy,
   })
 
   context.debug('executorResult %o', executorResult)
