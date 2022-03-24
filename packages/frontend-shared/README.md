@@ -1,6 +1,6 @@
 # Frontend Shared
 
-This package contains components and other code (such as WindiCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher level components that exist in both apps, like the header.
+This package contains components and other code (such as WindiCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to be the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher-level components that exist in both apps, like the header.
 
 Conceivably, other packages may be created that also import from this shared component package.
 
