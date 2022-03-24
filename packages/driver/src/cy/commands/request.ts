@@ -144,7 +144,12 @@ export default (Commands, Cypress, cy, state, config) => {
       // origin may return an empty string if we haven't visited anything yet
       options.url = $Location.normalize(options.url)
 
-      const originOrBase = config('baseUrl') || cy.getRemoteLocation('origin')
+      // If passed a relative url, determine the fully qualified URL to use.
+      // In the multi-domain version of the driver, we use multiDomainBaseUrl,
+      // which is set to the origin that is associated with it.
+      // In the primary driver (where multiDomainBaseUrl is undefined), we
+      // use the baseUrl or remote origin.
+      const originOrBase = Cypress.state('multiDomainBaseUrl') || config('baseUrl') || cy.getRemoteLocation('origin')
 
       if (originOrBase) {
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
