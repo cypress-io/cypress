@@ -90,7 +90,7 @@ class Reporter extends Component<SingleReporterProps> {
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: BaseReporterProps) {
     if (!this.props.runnerStore.spec) {
-      throw Error(`Expected runnerStore.spec and runnerStore.specRunId not to be null.`)
+      throw Error(`Expected runnerStore.spec not to be null.`)
     }
 
     this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec.relative)
@@ -108,7 +108,7 @@ class Reporter extends Component<SingleReporterProps> {
     const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen, runnerStore } = this.props
 
     if (!runnerStore.spec) {
-      throw Error(`Expected runnerStore.spec and runnerStore.specRunId not to be null.`)
+      throw Error(`Expected runnerStore.spec not to be null.`)
     }
 
     action('set:scrolling', () => {
