@@ -160,6 +160,7 @@ import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import { sortBy } from 'lodash'
 
 const { t } = useI18n()
 
@@ -236,18 +237,22 @@ const emit = defineEmits<{
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
-  return props.gql.cloudViewer?.organizations?.nodes.map((org) => {
+  return sortBy(props.gql.cloudViewer?.organizations?.nodes.map((org) => {
     return {
       ...org,
+      projects: {
+        ...org.projects,
+        nodes: sortBy(org.projects.nodes, 'name'),
+      },
       icon: FolderIcon,
     }
-  }) || []
+  }) || [], 'name')
 })
 const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
 const newProject = ref(projects.value.length === 0)
-const pickedProject = ref()
+const pickedProject = ref(pickedOrganization.value?.projects ? pickedOrganization.value.projects.nodes.find((p) => p.name === projectName.value) : undefined)
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
 const projectPlaceholder = computed(() => {
