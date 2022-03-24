@@ -19,7 +19,10 @@ describe('GitDataSource', () => {
 
     if (process.env.CI) {
       // need to set a user on CI
-      git.addConfig('user.name', 'Test User', true, 'global')
+      await Promise.all([
+        git.addConfig('user.name', 'Test User', true, 'global'),
+        git.addConfig('user.email', 'test-user@example.com', true, 'global'),
+      ])
     }
 
     await git.init()
