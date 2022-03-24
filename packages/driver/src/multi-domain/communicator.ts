@@ -63,9 +63,9 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 
     const preprocessedData = preprocessForSerialization<any>(data)
 
-    // if user defined data is passed in, do NOT sanitize it.
-    if (data?.data) {
-      preprocessedData.data = data.data
+    // if user defined arguments are passed in, do NOT sanitize it.
+    if (data?.args) {
+      preprocessedData.args = data.args
     }
 
     // If there is no crossDomainDriverWindow, there is no need to send the message.
@@ -82,9 +82,9 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 
     const preprocessedData = preprocessForSerialization<any>(data)
 
-    // if user defined data is passed in, do NOT sanitize it.
-    if (data?.data) {
-      preprocessedData.data = data.data
+    // if user defined arguments are passed in, do NOT sanitize it.
+    if (data?.args) {
+      preprocessedData.args = data.args
     }
 
     // If there is no crossDomainDriverWindow, there is no need to send the message.

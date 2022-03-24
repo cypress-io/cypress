@@ -830,17 +830,18 @@ namespace CypressKeyboardTests {
 
 namespace CypressMultiDomainTests {
   cy.switchToDomain('example.com', () => {})
-  cy.switchToDomain('example.com', [{}], (value: object[]) => {})
-  cy.switchToDomain('example.com', [], (value: any[]) => {})
-  cy.switchToDomain('example.com', [1, 'value', {}, true], (value: Array<string | number | boolean | {}>) => {})
-  cy.switchToDomain('example.com', ['value'], (value: string[]) => {})
-  cy.switchToDomain('example.com', [1], (value: number[]) => {})
-  cy.switchToDomain('example.com', [true], (value: boolean[]) => {})
+  cy.switchToDomain('example.com', { args: {}}, (value: object) => {})
+  cy.switchToDomain('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
+  cy.switchToDomain('example.com', { args: [1, 'value', true ] }, (value: Array<(number | string | boolean)>) => {})
+  cy.switchToDomain('example.com', { args : 'value'}, (value: string) => {})
+  cy.switchToDomain('example.com', { args: 1 }, (value: number) => {})
+  cy.switchToDomain('example.com', { args: true }, (value: boolean) => {})
 
   cy.switchToDomain() // $ExpectError
   cy.switchToDomain('example.com') // $ExpectError
   cy.switchToDomain(true) // $ExpectError
   cy.switchToDomain('example.com', {}) // $ExpectError
   cy.switchToDomain('example.com', {}, {}) // $ExpectError
-  cy.switchToDomain('example.com', ['value'], (value: boolean[]) => {}) // $ExpectError
+  cy.switchToDomain('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
+  cy.switchToDomain('example.com', {}, (value: undefined) => {}) // $ExpectError
 }

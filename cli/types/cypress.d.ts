@@ -1912,16 +1912,22 @@ declare namespace Cypress {
      *    })
      */
     switchToDomain(originOrDomain: string, fn: () => void): Chainable
+
+    // TODO: when we find other options to put into the 'data' argument of switchToDomain, we may want to overload this type with
+    // a 'data' paramater that contains all data options, including args, and one that contains all data options, excluding args.
+    // This will provide better typings support for whatever args is set to as opposed to an optional undefined
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/switchToDomain
      * @example
-     *    cy.switchToDomain('example.com', [{ key: 'value' }, 'foo'], ([{ key }, foo]) => {
+     *    cy.switchToDomain('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
      *      expect(key).to.equal('value')
      *      expect(foo).to.equal('foo')
      *    })
      */
-    switchToDomain<T>(originOrDomain: string, data: T[], fn: (data: T[]) => void): Chainable
+    switchToDomain<T>(originOrDomain: string, options: {
+      args: T
+    }, fn: (args: T) => void): Chainable
 
     /**
      * Run a task in Node via the plugins file.
