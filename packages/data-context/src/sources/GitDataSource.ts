@@ -41,9 +41,11 @@ export interface GitInfo {
 }
 
 export class GitDataSource {
-  #git = simpleGit()
-
   constructor (private ctx: DataContext) {}
+
+  get #git () {
+    return simpleGit()
+  }
 
   async getCurrentGitUser () {
     try {
