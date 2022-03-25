@@ -1,4 +1,4 @@
-require('@packages/ts/registerFunction')(path.resolve(__dirname, '..', 'lib'))
+require('@packages/ts/register')
 const path = require('path')
 const { promisify } = require('util')
 const glob = promisify(require('glob'))
