@@ -1,4 +1,4 @@
-require('@packages/ts/register')
+require('@packages/ts/registerPackages')
 
 module.exports = require('./lib/proxy')
 

@@ -25,7 +25,7 @@ module.exports = function (scopeDir) {
         project,
         transpileOnly: true,
         preferTsExts: true, // Helps when the files are compiled locally, resolves the TS file
-        scope: true,
+        scope: Boolean(scopeDir),
         scopeDir,
       })
     } else {
