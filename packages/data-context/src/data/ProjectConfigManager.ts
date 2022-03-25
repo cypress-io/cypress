@@ -172,6 +172,7 @@ export class ProjectConfigManager {
   }
 
   private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
+    debug('callSetupNodeEvents', this._testingType)
     assert(this._testingType)
     const config = await this.getFullInitialConfig()
 

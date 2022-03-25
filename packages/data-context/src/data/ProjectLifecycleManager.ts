@@ -626,12 +626,12 @@ export class ProjectLifecycleManager {
     return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
-  async initializeRunMode () {
+  async initializeRunMode (testingType?: TestingType) {
     this._pendingInitialize = pDefer()
 
     if (await this.waitForInitializeSuccess()) {
-      if (this._currentTestingType) {
-        this.setCurrentTestingType(this._currentTestingType)
+      if (testingType) {
+        this.setCurrentTestingType(testingType)
       } else {
         this.setCurrentTestingType('e2e')
       }
