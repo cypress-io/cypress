@@ -275,13 +275,15 @@ export class ProjectConfigManager {
     return result
   }
 
-  reloadConfig () {
+  async reloadConfig () {
     // TODO: not loadingConfig
     if (['errored', 'ready', 'loadedConfig'].includes(this._state)) {
       this._loadConfigPromise = undefined
+      this._registeredEventsTarget = undefined
     }
 
-    return this.initializeConfig()
+    await this.initializeConfig()
+    this.loadTestingType()
   }
 
   loadTestingType () {
