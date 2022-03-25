@@ -1,45 +1,6 @@
 # Runner CT
 
-The runner-ct is where the code for the component testing's runner lives and has the following responsibilities:
+This is an old package, deprecated in favor of `@packages/app`. It has two remaining responsibilities before it can be entirely removed:
 
-- Displaying the component specs list and all states around that in the runner
-
-## Developing
-
-### Watching
-
-This watches and compiles all changes as you make them.
-
-```bash
-yarn workspace @packages/runner-ct watch
-```
-
-## Building
-
-### For development
-
-```bash
-yarn workspace @packages/runner-ct build
-```
-
-### For production
-
-```bash
-yarn workspace @packages/runner-ct build-prod
-```
-
-## Testing
-
-### Cypress Tests
-
-You can run Cypress tests found in [`cypress/component`](./cypress/component):
-
-```bash
-yarn workspace @packages/runner-ct cypress:open
-```
-
-To watch and reload changes to the runner while testing you'll want to run:
-
-```bash
-yarn workspace @packages/runner-ct watch
-```
+1. Bundles `@packages/reporter` and `@packages/driver` via webpack. Once those can be directly imported to `@packages/app`, we can remove this.
+2. Bundles styles for `@packages/reporter`, loaded in `main.scss`. Ideally, reporter should import its own styles.
