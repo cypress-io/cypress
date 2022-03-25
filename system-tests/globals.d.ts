@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import { expect as _expect } from 'chai'
 import _sinon from 'sinon'
 
