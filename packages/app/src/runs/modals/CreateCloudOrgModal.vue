@@ -11,12 +11,11 @@
       </p>
       <div @click="startWaitingOrgToBeCreated()">
         <ExternalLink
-          class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
+          class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
           :href="createOrgUrl"
-          :prefix-icon="OrganizationIcon"
           :include-graphql-port="true"
-          prefix-icon-class="icon-light-transparent icon-dark-white"
         >
+          <i-cy-office-building_x16 class="inline-block icon-dark-white" />
           {{ t('runs.connect.modal.createOrg.button') }}
         </ExternalLink>
       </div>
@@ -60,7 +59,6 @@ import { gql, useQuery } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
 import { CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
