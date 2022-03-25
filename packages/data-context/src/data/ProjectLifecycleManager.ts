@@ -15,7 +15,6 @@ import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/e
 import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BreakingErrResult, BreakingOptionErrorKey } from '@packages/config'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
@@ -30,8 +29,6 @@ export interface SetupFullConfigOptions {
   envFile: Partial<Cypress.ConfigOptions>
   options: Partial<AllModeOptions>
 }
-
-type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrResult) => T
 
 const POTENTIAL_CONFIG_FILES = [
   'cypress.config.ts',
@@ -51,9 +48,6 @@ export interface InjectedConfigApi {
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
-  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
-  validateLaunchpadConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
-  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): void
 }
 
 export interface ProjectMetaState {
@@ -345,10 +339,8 @@ export class ProjectLifecycleManager {
 
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
 
-    if (needsCypressJsonMigration) {
-      if (!this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-        this.#legacyMigration(legacyConfigPath).catch(this.onLoadError)
-      }
+    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
+      this.#legacyMigration(legacyConfigPath).catch(this.onLoadError)
 
       return
     }

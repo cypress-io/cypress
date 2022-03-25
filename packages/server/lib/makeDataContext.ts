@@ -62,9 +62,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
-      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
-      validateLaunchpadConfigBreakingChanges: configUtils.validateNoBreakingConfigLaunchpad,
-      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,
