@@ -253,6 +253,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use((req, res, next) => {
       setProxiedUrl(req)
 
+      res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+      res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
       // useful for tests
       if (this._middleware) {
         this._middleware(req, res)
