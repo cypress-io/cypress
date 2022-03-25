@@ -14,7 +14,7 @@ describe('App: Spec List (E2E)', () => {
           author: 'Test Author',
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
-          statusType: 'modified',
+          statusType: 'unmodified',
         })
       })
     })
