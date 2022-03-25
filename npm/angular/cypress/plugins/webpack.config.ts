@@ -1,7 +1,7 @@
-import * as webpack from 'webpack'
+import * as Webpack from 'webpack'
 import * as path from 'path'
 
-module.exports = {
+const config: Webpack.Configuration = {
   mode: 'development',
   devtool: 'inline-source-map',
   resolve: {
@@ -93,10 +93,10 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.DefinePlugin({
+    new Webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'test'),
     }),
-    new webpack.ContextReplacementPlugin(
+    new Webpack.ContextReplacementPlugin(
       /\@angular(\\|\/)core(\\|\/)f?esm5/,
       path.join(__dirname, './src'),
     ),
@@ -114,3 +114,5 @@ module.exports = {
     fs: 'empty',
   },
 }
+
+export default config

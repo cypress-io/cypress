@@ -20,6 +20,7 @@
     "typescript-cached-transpile": "^0.0.6"
   },
   "files": [
-    "register.js"
+    "register.js",
+    "registerFunction.js"
   ]
 }

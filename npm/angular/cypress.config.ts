@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
 import { devServer } from '@cypress/webpack-dev-server'
-import * as webpackConfig from './cypress/plugins/webpack.config'
+import webpackConfig from './cypress/plugins/webpack.config'
 
 export default defineConfig({
   'experimentalFetchPolyfill': true,
