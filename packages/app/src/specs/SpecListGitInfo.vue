@@ -69,10 +69,17 @@ const classes = computed(() => {
 })
 
 const gitInfoText = computed(() => {
-  return t('specPage.rows.gitInfoWithAuthor', {
+  if (props.gql.statusType === 'unmodified') {
+    return t('specPage.rows.gitInfoWithAuthor', {
+      fileState: t(`file.git.${props.gql.statusType}`),
+      timeAgo: props.gql.lastModifiedHumanReadable,
+      author: props.gql.author,
+    })
+  }
+
+  return t('specPage.rows.gitInfo', {
     fileState: t(`file.git.${props.gql.statusType}`),
     timeAgo: props.gql.lastModifiedHumanReadable,
-    author: props.gql.author,
   })
 })
 </script>
