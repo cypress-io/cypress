@@ -1,6 +1,6 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
-import { ref, watch } from 'vue'
+import { Ref, ref, watch } from 'vue'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
 const PATH_SEP = /[\/\\]/
@@ -118,15 +118,24 @@ export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
   }
 }
 
-export function useCachedSpecs (specs) {
-  const cachedSpecs = ref<FoundSpec[]>([])
+export type SpecsComparator<T extends FileLike> = (specs: T[], oldSpecs: T[]) => boolean
 
-  watch(specs, (currentSpecs: FoundSpec[], prevSpecs: FoundSpec[] = []) => {
+interface FileLike {
+  absolute: string
+}
+
+function defaultCompareFn (specs: Array<FileLike>, oldSpecs: Array<FileLike>) {
+  return specs.some((spec, idx) => spec.absolute !== oldSpecs[idx]?.absolute)
+}
+
+export function useCachedSpecs<S extends { absolute: string }> (specs: Ref<S[]>, compareFn?: SpecsComparator<S>): Ref<S[]> {
+  const cachedSpecs: typeof specs = ref([])
+
+  watch(specs, (currentSpecs, prevSpecs = []) => {
+    const comparer = compareFn?.(currentSpecs, prevSpecs) || defaultCompareFn(currentSpecs, prevSpecs)
+
     const specsAreDifferent =
-        currentSpecs.length !== prevSpecs.length ||
-        currentSpecs.some(
-          (spec, idx) => spec.absolute !== prevSpecs[idx]?.absolute,
-        )
+        currentSpecs.length !== prevSpecs?.length || comparer
 
     if (specsAreDifferent) {
       cachedSpecs.value = currentSpecs

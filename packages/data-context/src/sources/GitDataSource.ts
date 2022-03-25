@@ -9,7 +9,7 @@ import Debug from 'debug'
 import type { DataContext } from '..'
 import type { gitStatusType } from '@packages/types'
 
-const debug = Debug('data-context:sources:GitDataSource')
+const debug = Debug('cypress:data-context:GitDataSource')
 
 dayjs.extend(relativeTime)
 
