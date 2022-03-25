@@ -94,10 +94,10 @@ describe.skip('lib/project-base', () => {
 
   context('#saveState', function () {
     beforeEach(function () {
-      const integrationFolder = 'the/save/state/test'
+      const supportFile = 'the/save/state/test'
 
-      sinon.stub(config, 'get').withArgs(this.todosPath).resolves({ integrationFolder })
-      this.project.cfg = { integrationFolder }
+      sinon.stub(config, 'get').withArgs(this.todosPath).resolves({ supportFile })
+      this.project.cfg = { supportFile }
 
       return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
@@ -135,11 +135,11 @@ describe.skip('lib/project-base', () => {
   })
 
   context('#initializeConfig', () => {
-    const integrationFolder = 'foo/bar/baz'
+    const supportFile = 'foo/bar/baz'
 
     beforeEach(function () {
       sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar', configFile: 'cypress.config.js' })
-      .resolves({ baz: 'quux', integrationFolder, browsers: [] })
+      .resolves({ baz: 'quux', supportFile, browsers: [] })
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
@@ -151,7 +151,7 @@ describe.skip('lib/project-base', () => {
 
         await this.project.initializeConfig()
         expect(this.project.getConfig()).to.deep.eq({
-          integrationFolder,
+          supportFile,
           browsers: [],
           baz: 'quux',
           state: {
@@ -163,12 +163,12 @@ describe.skip('lib/project-base', () => {
 
     it('resolves if cfg is already set', async function () {
       this.project._cfg = {
-        integrationFolder,
+        supportFile,
         foo: 'bar',
       }
 
       expect(this.project.getConfig()).to.deep.eq({
-        integrationFolder,
+        supportFile,
         foo: 'bar',
       })
     })
@@ -188,7 +188,7 @@ describe.skip('lib/project-base', () => {
 
     it('attaches warning to non-chrome browsers when chromeWebSecurity:false', async function () {
       const cfg = Object.assign({}, {
-        integrationFolder,
+        supportFile,
         browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
         chromeWebSecurity: false,
       })
@@ -225,7 +225,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
       ctx.lifecycleManager.restore?.()
       sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').returns({
-        integrationFolder,
+        supportFile,
         browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
         chromeWebSecurity: true,
       })
