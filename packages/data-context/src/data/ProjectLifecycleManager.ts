@@ -626,7 +626,7 @@ export class ProjectLifecycleManager {
     return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
-  async initializeRunMode (testingType?: TestingType) {
+  async initializeRunMode (testingType: TestingType | null) {
     this._pendingInitialize = pDefer()
 
     if (await this.waitForInitializeSuccess()) {
