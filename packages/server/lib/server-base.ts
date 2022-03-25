@@ -384,7 +384,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return svr
   }
 
-  _port () {
+  _port = () => {
     return (this.server.address() as AddressInfo).port
   }
 

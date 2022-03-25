@@ -47,6 +47,15 @@ declare namespace Cypress {
     password: string
   }
 
+  interface RemoteState {
+    auth?: Auth
+    domainName: string
+    strategy: 'file' | 'http'
+    origin: string
+    fileServer: string | null
+    props: Record<string, any>
+  }
+
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -55,8 +64,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
-    (task: 'ready:for:domain', args: { originPolicy?: string , failed?: boolean}): boolean
-    (task: 'cross:origin:finished', originPolicy: string): boolean
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 

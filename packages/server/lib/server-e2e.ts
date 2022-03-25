@@ -16,7 +16,6 @@ import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
 import type { Cfg } from './project-base'
-import type { RemoteState } from './remote_states'
 
 type WarningErr = Record<string, any>
 
@@ -331,7 +330,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         })
       }
 
-      const restorePreviousRemoteState = (previousRemoteState: RemoteState, previousRemoteStateIsPrimary: boolean) => {
+      const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
         this.remoteStates.set(previousRemoteState, { isMultiDomain: !previousRemoteStateIsPrimary })
       }
 

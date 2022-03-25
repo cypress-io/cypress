@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
-import type { RemoteState } from '@packages/server/lib/remote_states'
 import debugModule from 'debug'
 import type { HttpMiddleware } from './'
 
@@ -136,7 +135,7 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   this.next()
 }
 
-function reqNeedsBasicAuthHeaders (req, { auth, origin }: RemoteState) {
+function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
   //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }

@@ -21,17 +21,6 @@ import _ from 'lodash'
 //     domain: "google"
 //   }
 // }
-export interface RemoteState {
-  auth?: {
-    username: string
-    password: string
-  }
-  domainName: string
-  strategy: 'file' | 'http'
-  origin: string
-  fileServer: string | null
-  props: Record<string, any>
-}
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -39,7 +28,7 @@ const fullyQualifiedRe = /^https?:\/\//
 const debug = Debug('cypress:server:remote-states')
 
 export class RemoteStates {
-  private remoteStates: Map<string, RemoteState> = new Map()
+  private remoteStates: Map<string, Cypress.RemoteState> = new Map()
   private originStack: string[] = []
   private configure: () => { serverPort: string, fileServerPort: string }
   private config: { serverPort: string, fileServerPort: string } | undefined
@@ -89,15 +78,15 @@ export class RemoteStates {
     this.originStack = [stateArray[0][0]]
   }
 
-  current (): RemoteState {
-    const state = this.remoteStates.get(this.originStack[this.originStack.length - 1]) as RemoteState
+  current (): Cypress.RemoteState {
+    const state = this.remoteStates.get(this.originStack[this.originStack.length - 1]) as Cypress.RemoteState
 
     debug('Getting current remote state: %o', state)
 
     return _.cloneDeep(state)
   }
 
-  set (urlOrState: string | RemoteState, options: { auth?: {}, isMultiDomain?: boolean } = {}): RemoteState {
+  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {}, isMultiDomain?: boolean } = {}): Cypress.RemoteState {
     let state
 
     if (_.isString(urlOrState)) {
@@ -125,7 +114,7 @@ export class RemoteStates {
           fileServer: null,
           domainName: cors.getDomainNameFromParsedHost(remoteProps),
           props: remoteProps,
-        } as RemoteState
+        }
       }
     } else {
       state = urlOrState
