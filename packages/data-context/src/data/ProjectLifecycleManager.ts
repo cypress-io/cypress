@@ -421,7 +421,7 @@ export class ProjectLifecycleManager {
 
     assert(this._configManager)
     this._configManager.setTestingType(testingType)
-    if (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType])) {
+    if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
       this._configManager.loadTestingType()
     }
   }
