@@ -182,6 +182,6 @@ describe('setupNodeEvents', () => {
     cy.get('h1').should('contain', 'Error Loading Config')
     cy.percySnapshot()
 
-    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:5:36')
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:5:35')
   })
 })
