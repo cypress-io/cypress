@@ -1,11 +1,9 @@
-import webpack, { Compiler } from 'webpack'
+import webpack, { Compiler, compilation, version } from 'webpack'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 import semver from 'semver'
 import fs, { PathLike } from 'fs'
 import path from 'path'
-// eslint-disable-next-line no-duplicate-imports
-import type { Compilation } from 'webpack'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
@@ -24,7 +22,7 @@ export interface CypressCTWebpackContext {
   _cypress: CypressCTOptionsPluginOptions
 }
 
-export type Webpack45Compilation = Compilation & {
+export type Webpack45Compilation = compilation.Compilation & {
   // TODO: Drop these additional Webpack 4 types
   inputFileSystem: {
     fileSystem: {
@@ -106,7 +104,7 @@ export default class CypressCTOptionsPlugin {
 
       this.files = specs
       const inputFileSystem = compilation.inputFileSystem
-      const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
+      const utimesSync: UtimesSync = semver.gt('4.0.0', version ?? '0.0.0') ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
 
       utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
     })
@@ -114,9 +112,9 @@ export default class CypressCTOptionsPlugin {
     // Webpack 5
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {
-      webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
+      (webpack as any).NormalModule.getCompilationHooks(compilation).loader.tap(
         'CypressCTOptionsPlugin',
-        (context) => this.pluginFunc(context as CypressCTWebpackContext),
+        (context: CypressCTWebpackContext) => this.pluginFunc(context),
       )
 
       return

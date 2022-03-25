@@ -33,7 +33,7 @@
     "gulp-clean": "0.4.0",
     "gulp-gh-pages": "0.6.0-6",
     "gulp-rev-all": "2.0.2",
-    "mocha": "2.5.3",
+    "mocha": "8.0.1",
     "resolve-pkg": "2.0.0",
     "shelljs": "0.8.5"
   }

@@ -29,7 +29,7 @@
     "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
-    "mocha": "3.5.3",
+    "mocha": "8.0.1",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.3",
     "sinon-chai": "3.3.0",

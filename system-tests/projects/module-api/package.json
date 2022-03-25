@@ -13,7 +13,7 @@
     "check-more-types": "2.24.0",
     "debug": "4.3.3",
     "lazy-ass": "1.6.0",
-    "mocha": "9.2.0",
+    "mocha": "8.0.1",
     "mocha-banner": "1.1.2",
     "ramda": "0.28.0",
     "snap-shot-it": "5.0.1",

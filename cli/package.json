@@ -84,7 +84,7 @@
     "dtslint": "4.0.7",
     "execa-wrap": "1.4.0",
     "hasha": "5.2.2",
-    "mocha": "6.2.2",
+    "mocha": "8.0.1",
     "mock-fs": "5.1.1",
     "mocked-env": "1.3.2",
     "nock": "13.0.7",

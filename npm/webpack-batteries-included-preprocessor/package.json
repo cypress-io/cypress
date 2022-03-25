@@ -27,8 +27,8 @@
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@types/mocha": "^8.0.2",
-    "@types/webpack": "^4.41.21",
+    "@types/mocha": "8.0.3",
+    "@types/webpack": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-eslint": "^10.1.0",
@@ -39,7 +39,7 @@
     "eslint-plugin-react": "^7.22.0",
     "fs-extra": "^9.1.0",
     "graphql": "14.0.0",
-    "mocha": "^8.1.1",
+    "mocha": "8.0.1",
     "react": "^16.13.1",
     "typescript": "^4.2.3"
   },

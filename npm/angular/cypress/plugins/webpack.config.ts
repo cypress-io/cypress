@@ -1,7 +1,7 @@
 import * as webpack from 'webpack'
 import * as path from 'path'
 
-module.exports = {
+const config: webpack.Configuration = {
   mode: 'development',
   devtool: 'inline-source-map',
   resolve: {
@@ -114,3 +114,5 @@ module.exports = {
     fs: 'empty',
   },
 }
+
+export default config

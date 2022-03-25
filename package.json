@@ -157,7 +157,7 @@
     "listr2": "3.8.3",
     "lodash": "^4.17.21",
     "minimist": "1.2.6",
-    "mocha": "3.5.3",
+    "mocha": "8.0.1",
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "2.0.0",
     "mocha-multi-reporters": "1.1.7",

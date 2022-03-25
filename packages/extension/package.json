@@ -30,7 +30,7 @@
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-rename": "1.4.0",
-    "mocha": "3.5.3",
+    "mocha": "8.0.1",
     "mock-require": "3.0.3",
     "rimraf": "3.0.2",
     "sinon": "7.3.2",

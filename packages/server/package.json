@@ -165,7 +165,7 @@
     "express-useragent": "1.0.15",
     "https-proxy-agent": "3.0.1",
     "istanbul": "0.4.5",
-    "mocha": "7.1.0",
+    "mocha": "8.0.1",
     "mocha-banner": "1.1.2",
     "mochawesome-1.5.2": "npm:mochawesome@1.5.2",
     "mochawesome-2.3.1": "npm:mochawesome@2.3.1",

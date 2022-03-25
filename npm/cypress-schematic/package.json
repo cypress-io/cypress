@@ -33,7 +33,7 @@
     "@types/node": "^12.11.1",
     "chai": "4.2.0",
     "cypress": "0.0.0-development",
-    "mocha": "3.5.3",
+    "mocha": "8.0.1",
     "typescript": "~4.2.4"
   },
   "license": "MIT",

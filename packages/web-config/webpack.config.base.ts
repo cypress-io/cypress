@@ -113,7 +113,7 @@ export const getCommonConfig = () => {
       net: 'empty',
       tls: 'empty',
       module: 'empty',
-    },
+    } as Configuration['node'],
     resolve: {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
     },

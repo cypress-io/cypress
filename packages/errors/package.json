@@ -23,7 +23,7 @@
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
     "@types/chai": "4.2.15",
-    "@types/mocha": "8.2.2",
+    "@types/mocha": "8.0.3",
     "@types/node": "14.14.31",
     "@types/pixelmatch": "^5.2.4",
     "@types/pngjs": "^6.0.1",
@@ -32,7 +32,7 @@
     "chai": "4.2.0",
     "globby": "^11.1.0",
     "is-ci": "^3.0.1",
-    "mocha": "7.0.1",
+    "mocha": "8.0.1",
     "pngjs": "^6.0.0",
     "sinon": "7.5.0",
     "terminal-banner": "^1.1.0",

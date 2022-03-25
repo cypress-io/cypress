@@ -35,7 +35,7 @@
     "@types/node": "14.14.31",
     "@types/ora": "^3.2.0",
     "copy": "0.3.2",
-    "mocha": "7.1.1",
+    "mocha": "8.0.1",
     "mock-fs": "5.1.1",
     "shx": "0.3.3",
     "snap-shot-it": "7.9.3",

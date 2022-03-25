@@ -23,25 +23,31 @@ babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   css: false,
 }])
 
-const { pngRule, nonPngRules } = commonConfig!.module!.rules!.reduce<{
+interface PngRuleObject {
   nonPngRules: webpack.RuleSetRule[]
-  pngRule: webpack.RuleSetRule | undefined
-}>((acc, rule) => {
-  if (rule?.test?.toString().includes('png')) {
+  pngRule?: webpack.RuleSetRule
+}
+
+const { pngRule, nonPngRules } = commonConfig?.module?.rules?.reduce((acc, rule) => {
+  if (typeof rule !== 'object') {
+    return acc
+  }
+
+  if (rule.test?.toString().includes('png')) {
     return {
       ...acc,
       pngRule: rule,
-    }
+    } as PngRuleObject
   }
 
   return {
     ...acc,
     nonPngRules: [...acc.nonPngRules, rule],
-  }
+  } as PngRuleObject
 }, {
   nonPngRules: [],
   pngRule: undefined,
-})
+} as PngRuleObject) ?? { nonPngRules: [] } as PngRuleObject
 
 if (!pngRule || !pngRule.use) {
   throw Error('Could not find png loader')

@@ -1,11 +1,12 @@
 import { addMatchImageSnapshotPlugin } from 'cypress-image-snapshot/plugin'
-import * as webpackConfig from './webpack.config'
+import webpackConfig from './webpack.config'
 
 module.exports = (on, config) => {
   addMatchImageSnapshotPlugin(on, config)
-  const { startDevServer } = require('@cypress/webpack-dev-server')
 
   on('dev-server:start', (options) => {
+    const { startDevServer } = require('@cypress/webpack-dev-server')
+
     return startDevServer({
       options,
       webpackConfig,

@@ -25,7 +25,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "cross-env": "6.0.3",
-    "mocha": "3.5.3",
+    "mocha": "8.0.1",
     "shelljs": "0.8.5",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",

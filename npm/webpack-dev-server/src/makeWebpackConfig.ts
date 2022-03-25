@@ -78,10 +78,12 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     })
   }
 
-  if (typeof userWebpackConfig?.module?.unsafeCache === 'function') {
-    const originalCachePredicate = userWebpackConfig.module.unsafeCache
+  const wp5config = userWebpackConfig as any
 
-    userWebpackConfig.module.unsafeCache = (module: any) => {
+  if (typeof wp5config?.module?.unsafeCache === 'function') {
+    const originalCachePredicate = wp5config.module.unsafeCache
+
+    wp5config.module.unsafeCache = (module: any) => {
       return originalCachePredicate(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
     }
   }
