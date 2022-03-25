@@ -351,19 +351,21 @@ export class ProjectLifecycleManager {
     })
 
     if (this._currentTestingType === testingType) {
-      return
+      return Promise.resolve()
     }
 
     this._initializedProject = undefined
     this._currentTestingType = testingType
 
     if (!testingType) {
-      return
+      return Promise.resolve()
     }
 
     if (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType])) {
-      this.loadTestingType()
+      return this.loadTestingType()
     }
+
+    return Promise.resolve()
   }
 
   /**
@@ -379,10 +381,14 @@ export class ProjectLifecycleManager {
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
-      this.reloadConfig().catch(this.onLoadError)
-    } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
-      this.setupNodeEvents().catch(this.onLoadError)
+      return this.reloadConfig().catch(this.onLoadError)
     }
+
+    if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
+      return this.setupNodeEvents().catch(this.onLoadError)
+    }
+
+    return Promise.resolve()
   }
 
   private killChildProcesses () {
