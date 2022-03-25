@@ -34,16 +34,7 @@ describe('<InstallDependencies />', () => {
     cy.contains('button', defaultMessages.clipboard.copy).should('be.visible')
     cy.contains('button', defaultMessages.setupPage.step.back).should('be.visible')
 
-    cy.contains('button', defaultMessages.setupPage.install.checkForUpdates).should('not.exist')
     cy.contains('button', defaultMessages.setupPage.step.skip).should('be.visible')
-  })
-
-  it('shows expected actions after 180000ms', () => {
-    cy.contains('button', defaultMessages.clipboard.copy).should('be.visible')
-    cy.contains('button', defaultMessages.setupPage.step.back).should('be.visible')
-    cy.tick(180000)
-    cy.contains('button', defaultMessages.setupPage.install.checkForUpdates).should('be.visible')
-    cy.contains('button', defaultMessages.setupPage.step.skip).should('not.exist')
   })
 
   it('triggers back button callback', function () {

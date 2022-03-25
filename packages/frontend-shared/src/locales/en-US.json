@@ -251,7 +251,6 @@
     "install": {
       "startButton": "Install",
       "waitForInstall": "Waiting for you to install the dependencies...",
-      "checkForUpdates": "Refresh",
       "installed": "installed",
       "pendingInstall": "pending installation"
     },
