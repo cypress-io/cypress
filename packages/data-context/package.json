@@ -27,7 +27,6 @@
     "dataloader": "^2.0.0",
     "dedent": "^0.7.0",
     "ejs": "^3.1.6",
-    "electron": "14.1.0",
     "endent": "2.0.1",
     "execa": "1.0.0",
     "front-matter": "^4.0.2",
