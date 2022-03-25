@@ -188,10 +188,7 @@ const showSpecPatternModal = ref(false)
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 
-const compareGitInfo: SpecsComparator = (
-  curr: typeof props.gql.currentProject.specs,
-  prev: typeof props.gql.currentProject.specs,
-) => {
+const compareGitInfo: SpecsComparator<{ absolute: string, gitInfo: any }> = (curr, prev) => {
   for (let i = 0; i < curr.length; i++) {
     if (!prev[i]) {
       return true
@@ -206,7 +203,7 @@ const compareGitInfo: SpecsComparator = (
 }
 
 const cachedSpecs = useCachedSpecs(
-  computed(() => props.gql.currentProject?.specs || []),
+  computed(() => props.gql.currentProject?.specs ?? []),
   compareGitInfo,
 )
 
