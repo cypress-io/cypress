@@ -98,7 +98,7 @@ describe('Server', () => {
 
               await this.server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
-                this.server._onDomainSet(initialUrl)
+                this.server.remoteStates.set(initialUrl)
               }
 
               this.srv = this.server.getHttpServer()

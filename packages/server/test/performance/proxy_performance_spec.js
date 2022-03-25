@@ -220,9 +220,9 @@ const runBrowserTest = (urlUnderTest, testCase) => {
   }
 
   if (testCase.cyIntercept) {
-    cyServer._onDomainSet(urlUnderTest)
+    cyServer.remoteStates.set(urlUnderTest)
   } else {
-    cyServer._onDomainSet('<root>')
+    cyServer.remoteStates.set('<root>')
   }
 
   let cmd = CHROME_PATH

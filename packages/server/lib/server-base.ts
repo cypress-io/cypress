@@ -133,7 +133,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.remoteStates = new RemoteStates(() => {
       return {
         serverPort: this._port(),
-        fileServerPort: this._fileServer.port(),
+        fileServerPort: this._fileServer?.port(),
       }
     })
   }

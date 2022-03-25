@@ -31,7 +31,7 @@ export class RemoteStates {
   private remoteStates: Map<string, Cypress.RemoteState> = new Map()
   private originStack: string[] = []
   private configure: () => { serverPort: string, fileServerPort: string }
-  private config: { serverPort: string, fileServerPort: string } | undefined
+  private _config: { serverPort: string, fileServerPort: string } | undefined
 
   constructor (configure) {
     this.configure = configure
@@ -94,10 +94,6 @@ export class RemoteStates {
       const remoteProps = cors.parseUrlIntoDomainTldPort(remoteOrigin)
 
       if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {
-        if (!this.config) {
-          this.config = this.configure()
-        }
-
         state = {
           auth: options.auth,
           origin: `http://${DEFAULT_DOMAIN_NAME}:${this.config.serverPort}`,
@@ -139,5 +135,13 @@ export class RemoteStates {
     debug('Setting remote state %o for %s', state, remoteOriginPolicy)
 
     return _.cloneDeep(state)
+  }
+
+  private get config () {
+    if (!this._config) {
+      this._config = this.configure()
+    }
+
+    return this._config
   }
 }

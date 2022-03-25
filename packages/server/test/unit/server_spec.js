@@ -374,7 +374,7 @@ xdescribe('lib/server', () => {
     })
 
     it('calls proxy.ws with hostname + port', function () {
-      this.server._onDomainSet('https://www.google.com')
+      this.server.remoteStates.set('https://www.google.com')
 
       const req = {
         connection: {
