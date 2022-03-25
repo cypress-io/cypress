@@ -1,5 +1,5 @@
 // @ts-check
-const log = require('debug')('cypress:ts')
+const debug = require('debug')('cypress:ts')
 const path = require('path')
 
 // in development we should have TypeScript hook installed
@@ -25,10 +25,14 @@ try {
       transpileOnly: true,
       preferTsExts: true, // Helps when the files are compiled locally, resolves the TS file
     })
+
+    process.env.CYPRESS_TS_NODE_REGISTERED = 'true'
+  } else {
+    debug('skipping ts-node registration while testing the app')
   }
 
   // do we need to prevent any other TypeScript hooks?
 } catch (e) {
   // continue running without TypeScript require hook
-  log('Running without ts-node hook in environment "%s"', process.env.CYPRESS_INTERNAL_ENV)
+  debug('Running without ts-node hook in environment "%s"', process.env.CYPRESS_INTERNAL_ENV)
 }

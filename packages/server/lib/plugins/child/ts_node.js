@@ -25,6 +25,11 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
 }
 
 const register = (projectRoot, registeredFile) => {
+  // in test mode we already register ts-node for the config object
+  // we don't want to re-register it.
+  // This should be false in production
+  if (process.env.CYPRESS_TS_NODE_REGISTERED) return
+
   try {
     debug('projectRoot path: %s', projectRoot)
     debug('registeredFile: %s', registeredFile)
