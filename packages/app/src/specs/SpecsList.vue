@@ -193,8 +193,8 @@ const compareGitInfo: SpecsComparator = (
   prev: typeof props.gql.currentProject.specs,
 ) => {
   for (let i = 0; i < curr.length; i++) {
-    if (!curr[i]?.gitInfo || !prev[i]?.gitInfo) {
-      return false
+    if (!prev[i]) {
+      return true
     }
 
     if (JSON.stringify(curr[i].gitInfo) !== JSON.stringify(prev[i].gitInfo)) {
