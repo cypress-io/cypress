@@ -24,6 +24,7 @@ export class CypressEnv {
     const cypressEnv = await this.#readCypressEnvFile()
 
     this.options.validateConfigFile(this.options.envFilePath, cypressEnv)
+    // TODO: Figure out if this is necessary
     this.options.toLaunchpad()
 
     return cypressEnv

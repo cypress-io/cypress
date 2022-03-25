@@ -176,7 +176,7 @@ export class ProjectLifecycleManager {
   }
 
   get loadedFullConfig (): FullConfig | null {
-    return this._configManager ? this._configManager.loadedFullConfig : null
+    return this.#cachedFullConfig ?? null
   }
 
   get projectRoot () {

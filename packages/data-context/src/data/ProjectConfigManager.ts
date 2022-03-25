@@ -68,7 +68,7 @@ export class ProjectConfigManager {
 
   constructor (private options: ProjectConfigManagerOptions) {
     this.#cypressEnv = new CypressEnv({
-      envFilePath: this.envFilePath,
+      envFilePath: this.#envFilePath,
       validateConfigFile: (filePath, config) => {
         this.validateConfigFile(filePath, config)
       },
@@ -76,18 +76,6 @@ export class ProjectConfigManager {
         this.options.toLaunchpad(...args)
       },
     })
-  }
-
-  get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
-    return this._cachedLoadConfig?.initialConfig ?? null
-  }
-
-  get envFilePath () {
-    return path.join(this.options.projectRoot, 'cypress.env.json')
-  }
-
-  get loadedFullConfig (): FullConfig | null {
-    return this._cachedFullConfig ?? null
   }
 
   get isLoadingNodeEvents () {
@@ -114,6 +102,14 @@ export class ProjectConfigManager {
 
   setTestingType (testingType: TestingType) {
     this._testingType = testingType
+  }
+
+  get #envFilePath () {
+    return path.join(this.options.projectRoot, 'cypress.env.json')
+  }
+
+  get #loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
+    return this._cachedLoadConfig?.initialConfig ?? null
   }
 
   async initializeConfig (): Promise<LoadConfigReply['initialConfig']> {
@@ -273,7 +269,7 @@ export class ProjectConfigManager {
       }
     }
 
-    this.options.onFinalConfigLoaded(finalConfig)
+    await this.options.onFinalConfigLoaded(finalConfig)
 
     this.watchRequires(loadConfigReply.requires)
     this.watchRequires(result.requires)
@@ -320,7 +316,6 @@ export class ProjectConfigManager {
   }
 
   private forkConfigProcess () {
-    assert(this.configFilePath)
     const configProcessArgs = ['--projectRoot', this.options.projectRoot, '--file', this.configFilePath]
     // allow the use of ts-node in subprocesses tests by removing the env constant from it
     // without this line, packages/ts/register.js never registers the ts-node module for config and
@@ -681,7 +676,7 @@ export class ProjectConfigManager {
 
   async reloadCypressEnvFile () {
     this.#cypressEnv = new CypressEnv({
-      envFilePath: this.envFilePath,
+      envFilePath: this.#envFilePath,
       validateConfigFile: (filePath, config) => {
         this.validateConfigFile(filePath, config)
       },
@@ -694,7 +689,7 @@ export class ProjectConfigManager {
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
-    const config = this.loadedConfigFile
+    const config = this.#loadedConfigFile
 
     if (!config) {
       return false
@@ -735,7 +730,7 @@ export class ProjectConfigManager {
       this.options.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
 
-    const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
+    const cypressEnvFileWatcher = this.addWatcher(this.#envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
       this.reloadConfig().catch(this.onLoadError)
