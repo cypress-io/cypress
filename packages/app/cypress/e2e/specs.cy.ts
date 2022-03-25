@@ -389,7 +389,7 @@ describe('App: Index', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')
+          cy.visitApp().get('[data-cy-row]').contains('MyTest.cy.js')
         })
       })
 
