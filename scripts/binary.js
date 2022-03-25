@@ -1,5 +1,7 @@
+const path = require('path')
+
 /* eslint-disable no-console */
-require('@packages/ts/register')
+require('@packages/ts/registerFunction')(path.resolve(__dirname, 'binary'))
 
 const command = process.argv[2]
 

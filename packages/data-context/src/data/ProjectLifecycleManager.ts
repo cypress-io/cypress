@@ -1004,7 +1004,7 @@ export class ProjectLifecycleManager {
     // allow the use of ts-node in subprocesses tests by removing the env constant from it
     // without this line, packages/ts/register.js never registers the ts-node module for config and
     // run_plugins can't use the config module.
-    const { CYPRESS_TS_NODE_REGISTERED, CYPRESS_INTERNAL_E2E_TESTING_SELF, ...env } = process.env
+    const { CYPRESS_INTERNAL_E2E_TESTING_SELF, ...env } = process.env
 
     env.NODE_OPTIONS = process.env.ORIGINAL_NODE_OPTIONS || ''
 
