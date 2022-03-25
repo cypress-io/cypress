@@ -1,3 +1,4 @@
+import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
@@ -11,7 +12,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
   })
 
   it('test component', () => {
-    cy.__incorrectlyVisitAppWithIntercept()
+    cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.location().should((location) => {
       expect(location.hash).to.contain('TestComponent.spec')
@@ -118,11 +119,14 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
   })
 
   it('browser picker in runner calls mutation with current spec path', () => {
-    cy.__incorrectlyVisitAppWithIntercept()
+    cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
-    cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.actions.app, 'setActiveBrowserById')
+      o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
+    })
 
     cy.get('[data-cy="select-browser"]')
     .click()
@@ -130,8 +134,15 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     cy.contains('Firefox')
     .click()
 
-    cy.wait('@setBrowser').then(({ request }) => {
-      expect(request.body.variables.specPath).to.contain('/cypress-in-cypress/src/TestComponent.spec.jsx')
+    cy.withCtx((ctx, o) => {
+      const browserId = (ctx.actions.app.setActiveBrowserById as SinonStub).args[0][0]
+      const genId = ctx.fromId(browserId, 'Browser')
+
+      expect(ctx.actions.app.setActiveBrowserById).to.have.been.calledWith(browserId)
+      expect(genId).to.eql('firefox-firefox-stable')
+      expect(ctx.actions.project.launchProject).to.have.been.calledWith(
+        ctx.coreData.currentTestingType, {}, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),
+      )
     })
   })
 })

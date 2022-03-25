@@ -1,4 +1,4 @@
-/* global Cypress, JSX */
+/* global JSX */
 import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
@@ -18,7 +18,7 @@ import shortcuts from './lib/shortcuts'
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
-import { BaseStore } from '@packages/runner-shared/src/store'
+import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
 interface BaseReporterProps {
   appState: AppState
@@ -34,7 +34,7 @@ interface BaseReporterProps {
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   experimentalStudioEnabled: boolean
-  runnerStore: BaseStore & {spec: Cypress.Spec, specRunId: string}
+  runnerStore: MobxRunnerStore
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
@@ -73,7 +73,7 @@ class Reporter extends Component<SingleReporterProps> {
         {appState?.isPreferencesMenuOpen ? (
           <TestingPreferences appState={appState} />
         ) : (
-          <Runnables
+          this.props.runnerStore.spec && <Runnables
             appState={appState}
             error={error}
             runnablesStore={runnablesStore}
@@ -89,6 +89,10 @@ class Reporter extends Component<SingleReporterProps> {
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: BaseReporterProps) {
+    if (!this.props.runnerStore.spec) {
+      throw Error(`Expected runnerStore.spec not to be null.`)
+    }
+
     this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec.relative)
     if (
       this.props.resetStatsOnSpecChange &&
@@ -102,6 +106,10 @@ class Reporter extends Component<SingleReporterProps> {
 
   componentDidMount () {
     const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen, runnerStore } = this.props
+
+    if (!runnerStore.spec) {
+      throw Error(`Expected runnerStore.spec not to be null.`)
+    }
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)

@@ -73,7 +73,7 @@ export function runSpec ({ fileName }: { fileName: string }) {
   cy.openProject('runner-e2e-specs')
   cy.startAppServer()
 
-  cy.__incorrectlyVisitAppWithIntercept()
+  cy.visitApp()
 
   cy.findByLabelText('Search Specs').type(fileName)
   // wait for virtualized spec list to update, there is a chance
