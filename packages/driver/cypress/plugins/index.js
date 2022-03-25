@@ -1,5 +1,5 @@
 // only required to read in webpack config, since it is .ts
-require('@packages/ts/registerPackages')
+require('@packages/ts/register')
 require('./server')
 const _ = require('lodash')
 const path = require('path')
