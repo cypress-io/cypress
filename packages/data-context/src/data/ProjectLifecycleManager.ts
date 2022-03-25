@@ -296,6 +296,16 @@ export class ProjectLifecycleManager {
     return this._configManager.reloadConfig()
   }
 
+  async waitForInitializeSuccess (): Promise<boolean> {
+    try {
+      await this.initializeConfig()
+
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
   async initializeConfig () {
     assert(this._configManager)
 
@@ -362,10 +372,6 @@ export class ProjectLifecycleManager {
     }
 
     this.loadCypressEnvFile().catch(this.onLoadError)
-
-    if (this.ctx.coreData.currentTestingType) {
-      this.setCurrentTestingType(this.ctx.coreData.currentTestingType)
-    }
   }
 
   async #legacyMigration (legacyConfigPath: string) {
@@ -623,14 +629,16 @@ export class ProjectLifecycleManager {
   async initializeRunMode () {
     this._pendingInitialize = pDefer()
 
-    if (!this._currentTestingType) {
-      // e2e is assumed to be the default testing type if
-      // none is passed in run mode
-      this.setCurrentTestingType('e2e')
-    }
+    if (await this.waitForInitializeSuccess()) {
+      if (this._currentTestingType) {
+        this.setCurrentTestingType(this._currentTestingType)
+      } else {
+        this.setCurrentTestingType('e2e')
+      }
 
-    if (!this.metaState.hasValidConfigFile) {
-      return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
+      if (!this.metaState.hasValidConfigFile) {
+        return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
+      }
     }
 
     return this._pendingInitialize.promise.finally(() => {

@@ -129,10 +129,6 @@ export class ProjectConfigManager {
         this._cachedLoadConfig = result
 
         this.options.onInitialConfigLoaded(result.initialConfig)
-
-        if (this._testingType && this.isTestingTypeConfigured(this._testingType) || this.options.isRunMode) {
-          this.setupNodeEvents(result).catch(this.onLoadError)
-        }
       }
 
       return result.initialConfig

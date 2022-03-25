@@ -433,6 +433,9 @@ export class DataContext {
       await this.lifecycleManager.initializeRunMode()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
+      if (this.coreData.currentTestingType && await this.lifecycleManager.waitForInitializeSuccess()) {
+        this.lifecycleManager.setCurrentTestingType(this.coreData.currentTestingType)
+      }
     } else {
       throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
