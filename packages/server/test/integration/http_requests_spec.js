@@ -409,7 +409,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/spec-iframe/)
+        expect(res.body).to.match(/\.reporter/)
       })
     })
   })

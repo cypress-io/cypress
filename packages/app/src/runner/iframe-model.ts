@@ -80,7 +80,6 @@ export class IframeModel {
     autStore.setIsRunning(true)
     autStore.resetUrl()
 
-    this.studio.selectorPlaygroundModel.setEnabled(false)
     this._reset()
   }
 
