@@ -2,6 +2,8 @@ import { cors } from '@packages/network'
 import origin from './util/origin'
 import Debug from 'debug'
 import _ from 'lodash'
+import type { SocketE2E } from './socket-e2e'
+import type { SocketCt } from './socket-ct'
 
 // {
 //   origin: "http://localhost:2020"
@@ -135,6 +137,26 @@ export class RemoteStates {
     debug('Setting remote state %o for %s', state, remoteOriginPolicy)
 
     return _.cloneDeep(state)
+  }
+
+  addSocketListeners (socket: SocketE2E | SocketCt) {
+    socket.localBus.on('ready:for:domain', ({ originPolicy, failed }) => {
+      if (failed) return
+
+      const existingOrigin = this.remoteStates.get(originPolicy)
+
+      // since this is just the switchToDomain starting, we don't want to override
+      // the existing origin if it already exists
+      if (!existingOrigin) {
+        this.set(originPolicy, { isMultiDomain: true })
+      }
+
+      this.addOrigin(originPolicy)
+    })
+
+    socket.localBus.on('cross:origin:finished', () => {
+      this.removeCurrentOrigin()
+    })
   }
 
   private get config () {

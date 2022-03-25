@@ -172,27 +172,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.socket.toDriver('cross:domain:delaying:html', request)
     })
-
-    // This is handled separately from above since we may not need to delay the html
-    // when we are in the scenario where the user creates the switchToDomain first
-    // and then visits or navigates within the secondary domain
-    this.socket.localBus.on('ready:for:domain', ({ originPolicy, failed }) => {
-      if (failed) return
-
-      const existingOrigin = this.remoteStates.get(originPolicy)
-
-      // since this is just the switchToDomain starting, we don't want to override
-      // the existing origin if it already exists
-      if (!existingOrigin) {
-        this.remoteStates.set(originPolicy, { isMultiDomain: true })
-      }
-
-      this.remoteStates.addOrigin(originPolicy)
-    })
-
-    this.socket.localBus.on('cross:origin:finished', () => {
-      this.remoteStates.removeCurrentOrigin()
-    })
   }
 
   abstract createServer (
@@ -255,6 +234,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
 
       this.setupMultiDomain()
+      this.remoteStates.addSocketListeners(this.socket)
 
       const runnerSpecificRouter = testingType === 'e2e'
         ? createRoutesE2E(routeOptions)

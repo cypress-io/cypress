@@ -18,7 +18,7 @@ const getFixture = async () => {}
 
 context('network stubbing', () => {
   let config
-  let remoteStates
+  let remoteStates: RemoteStates
   let netStubbingState: NetStubbingState
   let app
   let destinationApp
@@ -28,7 +28,7 @@ context('network stubbing', () => {
 
   beforeEach((done) => {
     config = {}
-    remoteStates = new RemoteStates()
+    remoteStates = new RemoteStates(() => {})
     socket = new EventEmitter()
     socket.toDriver = sinon.stub()
     app = express()
@@ -63,6 +63,7 @@ context('network stubbing', () => {
 
     server = allowDestroy(destinationApp.listen(() => {
       destinationPort = server.address().port
+      remoteStates.set(`http://localhost:${destinationPort}`)
       done()
     }))
   })
@@ -72,26 +73,12 @@ context('network stubbing', () => {
   })
 
   it('can make a vanilla request', (done) => {
-    remoteState.strategy = 'http'
-    remoteState.props = {
-      port: `${destinationPort}`,
-      tld: 'localhost',
-      domain: '',
-    }
-
     supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .expect('it worked', done)
   })
 
   it('does not add CORS headers to all responses', () => {
-    remoteState.strategy = 'http'
-    remoteState.props = {
-      port: `${destinationPort}`,
-      tld: 'localhost',
-      domain: '',
-    }
-
     return supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .then((res) => {
@@ -241,13 +228,6 @@ context('network stubbing', () => {
         res.send('ok')
       })
     })
-
-    remoteState.strategy = 'http'
-    remoteState.props = {
-      port: `${destinationPort}`,
-      tld: 'localhost',
-      domain: '',
-    }
 
     // capture unintercepted content-length
     await supertest(app)
