@@ -24,9 +24,9 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('reinitializeCypress', {
+    t.field('resetErrorsAndLoadConfig', {
       type: Query,
-      description: 'Re-initializes Cypress from the initial CLI options',
+      description: 'Resets errors and attempts to reload the config',
       resolve: async (_, args, ctx) => {
         ctx.update((d) => {
           d.baseError = null

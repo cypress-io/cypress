@@ -1012,14 +1012,14 @@ type Mutation {
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
-  """Re-initializes Cypress from the initial CLI options"""
-  reinitializeCypress: Query
-
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
   """Reset the Auth State"""
   resetAuthState: Query!
+
+  """Resets errors and attempts to reload the config"""
+  resetErrorsAndLoadConfig: Query
 
   """
   Resets the latest version call to capture additional telemetry for the current user

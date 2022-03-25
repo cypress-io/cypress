@@ -38,13 +38,12 @@ type ProjectConfigManagerOptions = {
   onError: (cypressError: CypressError, title?: string | undefined) => void
   onWarning: (err: CypressError) => void
   toLaunchpad: (...args: any[]) => void
-  onConfigLoaded: () => void
-  setActiveBrowser: () => Promise<void>
+  onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
+  onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
   updateWithPluginValues: (config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>) => FullConfig
   initializeActiveProject: (options?: OpenProjectLaunchOptions) => Promise<unknown>
   setupFullConfigWithDefaults: (config: SetupFullConfigOptions) => Promise<FullConfig>
   machineBrowsers: () => FoundBrowser[] | Promise<FoundBrowser[]>
-  setSpecsFoundForConfig: (config: FullConfig) => Promise<void>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'destroyed' | 'errored'
@@ -56,7 +55,6 @@ export class ProjectConfigManager {
   private _eventsIpc?: ProjectConfigIpc
   private _eventProcess: ChildProcess | undefined
   private _requireWatchers: Record<string, chokidar.FSWatcher> = {}
-  private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEvents: Record<string, Function> = {}
   private _registeredEventsTarget: TestingType | undefined
@@ -134,12 +132,10 @@ export class ProjectConfigManager {
         this._state = 'loadedConfig'
         this._cachedLoadConfig = result
 
-        if (this._testingType) {
-          this.options.onConfigLoaded()
+        this.options.onInitialConfigLoaded(result.initialConfig)
 
-          if (this.isTestingTypeConfigured(this._testingType) || this.options.isRunMode) {
-            this.setupNodeEvents(result).catch(this.onLoadError)
-          }
+        if (this._testingType && this.isTestingTypeConfigured(this._testingType) || this.options.isRunMode) {
+          this.setupNodeEvents(result).catch(this.onLoadError)
         }
       }
 
@@ -164,9 +160,9 @@ export class ProjectConfigManager {
     this._state = 'loadingNodeEvents'
 
     try {
-      const val = await this.callSetupNodeEventsWithConfig(this._eventsIpc)
+      const setupNodeEventsReply = await this.callSetupNodeEventsWithConfig(this._eventsIpc)
 
-      await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, val)
+      await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
       this._state = 'ready'
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)
@@ -277,16 +273,8 @@ export class ProjectConfigManager {
       }
     }
 
-    // TODO: not sure about where this fits into the refactor
-    await this.options.setActiveBrowser()
+    this.options.onFinalConfigLoaded(finalConfig)
 
-    this._pendingInitialize?.resolve(finalConfig)
-
-    if (this._testingType && finalConfig[this._testingType]?.specPattern) {
-      await this.options.setSpecsFoundForConfig(fullConfig)
-    }
-
-    // TODO: clean up these watchers on error
     this.watchRequires(loadConfigReply.requires)
     this.watchRequires(result.requires)
     this.initializeConfigWatchers()
@@ -295,6 +283,7 @@ export class ProjectConfigManager {
   }
 
   reloadConfig () {
+    // TODO: not loadingConfig
     if (['errored', 'ready', 'loadedConfig'].includes(this._state)) {
       this._loadConfigPromise = undefined
     }
@@ -482,13 +471,10 @@ export class ProjectConfigManager {
     )
   }
 
-  onLoadError = (err: any) => {
-    // this.closeWatchers()
-    if (this.options.isRunMode && this._pendingInitialize) {
-      this._pendingInitialize.reject(err)
-    } else {
-      this.options.onError(err, 'Error Loading Config')
-    }
+  onLoadError = (error: any) => {
+    this.closeWatchers()
+    // TODO: this isn't i18n'd
+    this.options.onError(error, 'Error Loading Config')
   }
 
   private watchRequires (paths: string[]) {
@@ -559,14 +545,6 @@ export class ProjectConfigManager {
     }
 
     this._registeredEvents[event] = callback
-  }
-
-  async initializeRunMode () {
-    this._pendingInitialize = pDefer()
-
-    return this._pendingInitialize.promise.finally(() => {
-      this._pendingInitialize = undefined
-    })
   }
 
   private validateConfigRoot (config: Cypress.ConfigOptions) {

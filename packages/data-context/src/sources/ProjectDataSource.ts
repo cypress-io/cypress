@@ -235,6 +235,10 @@ export class ProjectDataSource {
     return false
   }
 
+  destroy () {
+    this.stopSpecWatcher()
+  }
+
   stopSpecWatcher () {
     if (!this._specWatcher) {
       return

@@ -20,6 +20,7 @@ import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import type { IpcHandler } from './ProjectConfigIpc'
+import pDefer from 'p-defer'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -83,6 +84,10 @@ export class ProjectLifecycleManager {
   private _projectRoot: string | undefined
   private _configManager: ProjectConfigManager | undefined
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
+  private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
+
+  #cachedInitialConfig: Cypress.ConfigOptions | undefined
+  #cachedFullConfig: FullConfig | undefined
 
   constructor (private ctx: DataContext) {
     if (ctx.coreData.currentProject) {
@@ -92,7 +97,6 @@ export class ProjectLifecycleManager {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
 
-    // see timers/parent.js line #93 for why this is necessary
     process.on('exit', this.onProcessExit)
 
     return autoBindDebug(this)
@@ -168,7 +172,7 @@ export class ProjectLifecycleManager {
   }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
-    return this._configManager ? this._configManager.loadedConfigFile : null
+    return this.#cachedInitialConfig ?? null
   }
 
   get loadedFullConfig (): FullConfig | null {
@@ -227,7 +231,11 @@ export class ProjectLifecycleManager {
       cypressVersion: this.ctx._apis.configApi.cypressVersion,
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       onError: (cypressError, title) => {
-        this.ctx.onError(cypressError, title)
+        if (this.ctx.isRunMode && this._pendingInitialize) {
+          this._pendingInitialize.reject(cypressError)
+        } else {
+          this.ctx.onError(cypressError, title)
+        }
       },
       onWarning: (error) => {
         this.ctx.onWarning(error)
@@ -235,27 +243,43 @@ export class ProjectLifecycleManager {
       toLaunchpad: (...args) => {
         this.ctx.emitter.toLaunchpad(...args)
       },
-      onConfigLoaded: () => {
-        assert(this._currentTestingType)
-        if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-          this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
+        this.#cachedInitialConfig = initialConfig
+        if (this._currentTestingType) {
+          if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
+            this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
-          return
-        }
+            return
+          }
 
-        if (this.ctx.coreData.scaffoldedFiles) {
-          this.ctx.coreData.scaffoldedFiles.filter((f) => {
-            if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
-              f.status = 'valid'
-              this.ctx.emitter.toLaunchpad()
-            }
-          })
+          if (this.ctx.coreData.scaffoldedFiles) {
+            this.ctx.coreData.scaffoldedFiles.filter((f) => {
+              if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
+                f.status = 'valid'
+                this.ctx.emitter.toLaunchpad()
+              }
+            })
+          }
         }
       },
-      setActiveBrowser: async () => {
+      onFinalConfigLoaded: async (finalConfig: FullConfig) => {
+        this.#cachedFullConfig = finalConfig
+
         if (this.ctx.coreData.cliBrowser) {
           await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
         }
+
+        if (this._currentTestingType && finalConfig[this._currentTestingType]?.specPattern) {
+          await this.ctx.actions.project.setSpecsFoundBySpecPattern({
+            path: this.projectRoot,
+            testingType: this._currentTestingType,
+            specPattern: this.ctx.modeOptions.spec || finalConfig[this._currentTestingType]?.specPattern,
+            excludeSpecPattern: finalConfig[this._currentTestingType]?.excludeSpecPattern,
+            additionalIgnorePattern: this._currentTestingType === 'component' ? finalConfig.e2e?.specPattern : undefined,
+          })
+        }
+
+        this._pendingInitialize?.resolve(finalConfig)
       },
       updateWithPluginValues: (config, modifiedConfig) => {
         return this.ctx._apis.configApi.updateWithPluginValues(config, modifiedConfig)
@@ -268,17 +292,6 @@ export class ProjectLifecycleManager {
       },
       setupFullConfigWithDefaults: async (config) => {
         return this.ctx._apis.configApi.setupFullConfigWithDefaults(config)
-      },
-      setSpecsFoundForConfig: async (config) => {
-        assert(this._currentTestingType)
-
-        await this.ctx.actions.project.setSpecsFoundBySpecPattern({
-          path: this.projectRoot,
-          testingType: this._currentTestingType,
-          specPattern: this.ctx.modeOptions.spec || config[this._currentTestingType]?.specPattern,
-          excludeSpecPattern: config[this._currentTestingType]?.excludeSpecPattern,
-          additionalIgnorePattern: this._currentTestingType === 'component' ? config.e2e?.specPattern : undefined,
-        })
       },
     })
   }
@@ -421,7 +434,9 @@ export class ProjectLifecycleManager {
       this._configManager = undefined
     }
 
+    this.ctx.project.destroy()
     this._currentTestingType = null
+    this.#cachedInitialConfig = undefined
   }
 
   /**
@@ -614,6 +629,8 @@ export class ProjectLifecycleManager {
   }
 
   async initializeRunMode () {
+    this._pendingInitialize = pDefer()
+
     if (!this._currentTestingType) {
       // e2e is assumed to be the default testing type if
       // none is passed in run mode
@@ -624,9 +641,9 @@ export class ProjectLifecycleManager {
       return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
     }
 
-    assert(this._configManager)
-
-    return this._configManager.initializeRunMode()
+    return this._pendingInitialize.promise.finally(() => {
+      this._pendingInitialize = undefined
+    })
   }
 
   private configFileWarningCheck () {
