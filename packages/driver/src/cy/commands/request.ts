@@ -103,6 +103,15 @@ export default (Commands, Cypress, cy, state, config) => {
         o.body = args[2]
       }
 
+      if (o.body !== undefined && o.body !== null) {
+        let fixtureName = o.body
+
+        if (o.body.startsWith('fx:')) {
+          fixtureName = fixtureName.replace('fx:', '')
+          o.body = cy.fixture(fixtureName)
+        }
+      }
+
       let options = _.defaults({}, userOptions, REQUEST_DEFAULTS, {
         log: true,
       })
