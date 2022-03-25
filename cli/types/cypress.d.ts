@@ -47,18 +47,6 @@ declare namespace Cypress {
     password: string
   }
 
-  interface RemoteState {
-    auth?: {
-      username: string
-      password: string
-    }
-    domainName: string
-    strategy: 'file' | 'http'
-    origin: string
-    fileServer: string | null
-    props: Record<string, any>
-  }
-
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.

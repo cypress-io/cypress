@@ -39,7 +39,7 @@ export class ServerCt extends ServerBase<SocketCt> {
           // to root by default
           // which prevents a situation where navigating
           // to http sites redirects to /__/ cypress
-          this._onDomainSet(baseUrl)
+          this.remoteStates.set(baseUrl)
 
           return resolve([port])
         })

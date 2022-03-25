@@ -323,6 +323,31 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
         })
       })
     })
+
+    it('succeeds when visiting local file server first', { baseUrl: undefined }, () => {
+      cy.visit('cypress/fixtures/multi-domain.html')
+
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
+        cy.visit('/fixtures/multi-domain-secondary.html')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+      })
+    })
+
+    it('handles visit failures', { baseUrl: undefined }, (done) => {
+      cy.on('fail', (e) => {
+        expect(e.message).to.include('failed trying to load:\n\nhttp://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(e.message).to.include('500: Internal Server Error')
+
+        done()
+      })
+
+      cy.intercept('*/multi-domain-secondary.html', { statusCode: 500 })
+
+      cy.visit('cypress/fixtures/multi-domain.html')
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
+        cy.visit('fixtures/multi-domain-secondary.html')
+      })
+    })
   })
 
   it('supports navigating through changing the window.location.href', () => {

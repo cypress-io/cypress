@@ -259,7 +259,7 @@ describe('Server', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://localhost:2000',
               strategy: 'file',
@@ -583,7 +583,7 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</head>content</html>')
 
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://espn.go.com',
               strategy: 'http',
@@ -891,7 +891,7 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth,
             origin: 'http://google.com',
             strategy: 'http',
@@ -914,7 +914,7 @@ describe('Server', () => {
             'Content-Type': 'text/html',
           })
 
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             props: null,
             origin: 'http://localhost:2000',
@@ -925,7 +925,7 @@ describe('Server', () => {
 
           this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
 
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             props: {
               domain: 'cypress',
@@ -938,7 +938,7 @@ describe('Server', () => {
             fileServer: null,
           })
 
-          expect(this.server._originStack).to.deep.equal(['http://localhost:2000', 'http://cypress.io'])
+          expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.true
 
           return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isMultiDomain: true })
           .then((obj = {}) => {
@@ -961,7 +961,7 @@ describe('Server', () => {
             expect(buffer.isMultiDomain).to.be.true
 
             // Verify the secondary remote state is returned
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
                 domain: 'cypress',
@@ -976,10 +976,10 @@ describe('Server', () => {
 
             this.server.socket.localBus.emit('cross:origin:finished', 'http://cypress.io')
 
-            expect(this.server._originStack).to.deep.equal(['http://localhost:2000'])
+            expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.false
 
             // Verify the primary remote state is now returned
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: null,
               origin: 'http://localhost:2000',
@@ -1002,7 +1002,7 @@ describe('Server', () => {
           return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isMultiDomain: true })
           .then(() => {
             // Verify the secondary remote state is returned
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
                 domain: 'cypress',
@@ -1018,7 +1018,7 @@ describe('Server', () => {
             this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
 
             // Verify the existing secondary remote state is not overridden
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
                 domain: 'cypress',
@@ -1033,17 +1033,17 @@ describe('Server', () => {
           })
         })
 
-        context('#_getRemoteStateFor()', () => {
+        context('#get()', () => {
           it('returns undefined for not found remote state', function () {
-            this.server._setRemoteStateFor('http://www.cypress.io/')
+            this.server.remoteStates.set('http://www.cypress.io/')
 
-            expect(this.server._getRemoteStateFor('http://notfound.com/')).to.be.undefined
+            expect(this.server.remoteStates.get('http://notfound.com/')).to.be.undefined
           })
 
           it('returns primary remote state', function () {
-            this.server._setRemoteStateFor('http://www.cypress.io/')
+            this.server.remoteStates.set('http://www.cypress.io/', { isMultiDomain: true })
 
-            expect(this.server._getRemoteStateFor('http://localhost:2000')).to.deep.eq({
+            expect(this.server.remoteStates.get('http://localhost:2000')).to.deep.eq({
               auth: undefined,
               props: null,
               origin: 'http://localhost:2000',
@@ -1054,9 +1054,9 @@ describe('Server', () => {
           })
 
           it('returns secondary remote state', function () {
-            this.server._setRemoteStateFor('http://www.cypress.io/')
+            this.server.remoteStates.set('http://www.cypress.io/', { isMultiDomain: true })
 
-            expect(this.server._getRemoteStateFor('http://cypress.io')).to.deep.eq({
+            expect(this.server.remoteStates.get('http://cypress.io')).to.deep.eq({
               auth: undefined,
               props: {
                 domain: 'cypress',
@@ -1071,18 +1071,19 @@ describe('Server', () => {
           })
         })
 
-        context('#_resetRemoteState()', () => {
+        context('#reset()', () => {
           it('returns undefined for not found remote state', function () {
             this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
-            this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://example.com' })
 
-            expect(this.server._originStack).to.deep.equal(['http://localhost:2000', 'http://cypress.io', 'http://example.com'])
-            expect(this.server._remoteStates.size).to.equal(2)
+            expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.true
+            expect(this.server.remoteStates.get('http://cypress.io')).to.not.be.undefined
 
-            this.server._resetRemoteState()
+            this.server.remoteStates.reset()
 
-            expect(this.server._originStack).to.deep.equal(['http://localhost:2000'])
-            expect(this.server._remoteStates.size).to.equal(0)
+            expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.false
+            expect(this.server.remoteStates.get('http://cypress.io')).to.be.undefined
+            expect(this.server.remoteStates.isPrimaryOrigin('http://localhost:2000')).to.be.true
+            expect(this.server.remoteStates.get('http://localhost:2000')).to.not.be.undefined
           })
         })
       })
@@ -1147,7 +1148,7 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://www.google.com',
             strategy: 'http',
@@ -1181,7 +1182,7 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
@@ -1227,7 +1228,7 @@ describe('Server', () => {
             expect(res.body).to.include('</script></head><body>google</body></html>')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://www.google.com',
             strategy: 'http',
@@ -1265,7 +1266,7 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
@@ -1298,7 +1299,7 @@ describe('Server', () => {
               expect(res.body).to.include('</script></head><body>google</body></html>')
             })
           }).then(() => {
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://www.google.com',
               strategy: 'http',
@@ -1341,7 +1342,7 @@ describe('Server', () => {
             expect(res.body).to.include('</script></head><body>https server</body></html>')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'https://www.foobar.com:8443',
             strategy: 'http',
@@ -1379,7 +1380,7 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
@@ -1412,7 +1413,7 @@ describe('Server', () => {
               expect(res.body).to.include('</script></head><body>https server</body></html>')
             })
           }).then(() => {
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'https://www.foobar.com:8443',
               strategy: 'http',
@@ -1463,7 +1464,7 @@ describe('Server', () => {
             expect(res.body).to.include('Cypress')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'https://s3.amazonaws.com',
             strategy: 'http',
@@ -1501,7 +1502,7 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
@@ -1540,7 +1541,7 @@ describe('Server', () => {
               expect(res.body).to.include('Cypress')
             })
           }).then(() => {
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'https://s3.amazonaws.com',
               strategy: 'http',

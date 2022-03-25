@@ -11,13 +11,14 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { EventEmitter } from 'events'
+import { RemoteStates } from '@packages/server/lib/remote_states'
 
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
 
 context('network stubbing', () => {
   let config
-  let remoteState
+  let remoteStates
   let netStubbingState: NetStubbingState
   let app
   let destinationApp
@@ -27,7 +28,7 @@ context('network stubbing', () => {
 
   beforeEach((done) => {
     config = {}
-    remoteState = {}
+    remoteStates = new RemoteStates()
     socket = new EventEmitter()
     socket.toDriver = sinon.stub()
     app = express()
@@ -39,9 +40,7 @@ context('network stubbing', () => {
       config,
       middleware: defaultMiddleware,
       getCurrentBrowser: () => ({ family: 'chromium' }),
-      getRemoteState: () => remoteState,
-      getRemoteStateFor: (url: string) => remoteState,
-      getOriginStack: () => [],
+      remoteStates,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),

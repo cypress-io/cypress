@@ -99,7 +99,7 @@ describe('http', function () {
       const resAdded = {}
       const errorAdded = {}
 
-      let expectedKeys = ['req', 'res', 'config', 'getRemoteState', 'middleware']
+      let expectedKeys = ['req', 'res', 'config', 'middleware']
 
       incomingRequest.callsFake(function () {
         expect(this).to.include.keys(expectedKeys)

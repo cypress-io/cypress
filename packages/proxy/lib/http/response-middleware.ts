@@ -230,8 +230,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
-  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
-  const isPreviousOrigin = this.getOriginStack().includes(cors.getOriginPolicy(this.req.proxiedUrl))
+  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+  const isPreviousOrigin = this.remoteStates.isInOriginStack(this.req.proxiedUrl)
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
   const isAUTFrame = this.req.isAUTFrame
@@ -273,7 +273,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
+  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.remoteStates.current())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -281,9 +281,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
-    const remoteOriginStack = this.getOriginStack()
-    const isSecondaryOrigin = remoteOriginStack.indexOf(cors.getOriginPolicy(this.req.proxiedUrl), 1) !== -1
-
+    const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin(this.req.proxiedUrl)
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
@@ -406,7 +404,7 @@ const determineIfNeedsMultiDomainHandling = (ctx: HttpMiddlewareThis<ResponseMid
     !!ctx.req.isAUTFrame &&
     (
       (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
-      || !cors.urlOriginsMatch(ctx.getOriginStack()[0], ctx.req.proxiedUrl)
+      || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
     )
   )
 }
@@ -499,7 +497,7 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
-  setInitialCookie(this.res, this.getRemoteState(), true)
+  setInitialCookie(this.res, this.remoteStates.current(), true)
 
   debug('redirecting to new url %o', { statusCode, newUrl })
   this.res.redirect(Number(statusCode), newUrl)
@@ -513,7 +511,7 @@ const CopyResponseStatusCode: ResponseMiddleware = function () {
 }
 
 const ClearCyInitialCookie: ResponseMiddleware = function () {
-  setInitialCookie(this.res, this.getRemoteState(), false)
+  setInitialCookie(this.res, this.remoteStates.current(), false)
   this.next()
 }
 

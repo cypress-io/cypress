@@ -3,9 +3,8 @@ import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import { expect } from 'chai'
 import sinon from 'sinon'
-import {
-  testMiddleware,
-} from './helpers'
+import { testMiddleware } from './helpers'
+import { RemoteStates } from '@packages/server/lib/remote_states'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -184,9 +183,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        getOriginStack () {
-          return ['http://127.0.0.1:3501', 'http://foobar.com', 'http://example.com']
-        },
+        secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -209,9 +206,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        getOriginStack () {
-          return ['http://127.0.0.1:3501', 'http://foobar.com', 'http://example.com']
-        },
+        secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -221,7 +216,7 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://idp.com' })
 
       expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
 
@@ -237,7 +232,7 @@ describe('http/response-middleware', function () {
         },
         req: {
           isAUTFrame: true,
-          proxiedUrl: 'protocol://host/originalUrl',
+          proxiedUrl: 'http://www.foobar.com/test',
         },
         config: {
           experimentalMultiDomain: true,
@@ -246,9 +241,9 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'protocol://host/originalUrl' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.foobar.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
 
       return promise
     })
@@ -263,7 +258,7 @@ describe('http/response-middleware', function () {
             ],
           },
           isAUTFrame: true,
-          proxiedUrl: 'protocol://host/originalUrl',
+          proxiedUrl: 'http://www.foobar.com/test',
         },
         config: {
           experimentalMultiDomain: true,
@@ -272,9 +267,9 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'protocol://host/originalUrl' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.foobar.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
 
       expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
 
@@ -292,9 +287,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        getOriginStack () {
-          return ['http://127.0.0.1:3501', 'http://foobar.com', 'http://example.com']
-        },
+        secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -304,7 +297,7 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain', { failed: true }).args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ failed: true })
 
       expect(ctx.res.wantsInjection).to.be.undefined
 
@@ -312,6 +305,15 @@ describe('http/response-middleware', function () {
     })
 
     function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+
+      remoteStates.set('http://127.0.0.1:3501')
+
+      props.secondaryOrigins?.forEach((origin) => {
+        remoteStates.set(origin, { isMultiDomain: true })
+        remoteStates.addOrigin(origin)
+      })
+
       ctx = {
         incomingRes: {
           headers: {},
@@ -330,14 +332,7 @@ describe('http/response-middleware', function () {
           emit: sinon.stub(),
           once: sinon.stub(),
         },
-        getRemoteState () {
-          return {
-            strategy: 'foo',
-          }
-        },
-        getOriginStack () {
-          return ['http://127.0.0.1:3501']
-        },
+        remoteStates,
         debug () {},
         onError (error) {
           throw error
@@ -441,7 +436,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        originStack: ['http://127.0.0.1:3501', 'http://foobar.com'],
+        secondaryOrigins: ['http://foobar.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -466,7 +461,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        originStack: ['http://127.0.0.1:3501', 'http://example.com', 'http://foobar.com'],
+        secondaryOrigins: ['http://example.com', 'http://foobar.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -522,7 +517,6 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        originStack: ['http://127.0.0.1:3501'],
       })
 
       return testMiddleware([SetInjectionLevel], ctx)
@@ -553,7 +547,7 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        originStack: ['http://127.0.0.1:3501', 'http://foobar.com'],
+        secondaryOrigins: ['http://foobar.com'],
         config: {
           experimentalMultiDomain: true,
         },
@@ -591,6 +585,15 @@ describe('http/response-middleware', function () {
     })
 
     function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+
+      remoteStates.set('http://127.0.0.1:3501')
+
+      props.secondaryOrigins?.forEach((origin) => {
+        remoteStates.set(origin, { isMultiDomain: true })
+        remoteStates.addOrigin(origin)
+      })
+
       ctx = {
         incomingRes: {
           headers: {},
@@ -609,17 +612,7 @@ describe('http/response-middleware', function () {
           },
           ...props.req,
         },
-        getRemoteState () {
-          return {
-            strategy: 'http',
-            props: {
-              port: '3501', tld: '127.0.0.1', domain: '',
-            },
-          }
-        },
-        getOriginStack () {
-          return props.originStack || ['http://127.0.0.1:3501']
-        },
+        remoteStates,
         debug: (formatter, ...args) => {
           debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
         },
@@ -774,11 +767,11 @@ describe('http/response-middleware', function () {
           },
           req: {
             isAUTFrame: true,
+            proxiedUrl: 'http://www.foobar.com/multi-domain.html',
           },
           res: {
             append: appendStub,
           },
-          originStack: ['http://127.0.0.1:3501'],
         })
 
         await testMiddleware([CopyCookiesFromIncomingRes], ctx)
@@ -797,11 +790,11 @@ describe('http/response-middleware', function () {
           },
           req: {
             isAUTFrame: true,
+            proxiedUrl: 'http://www.foobar.com/multi-domain.html',
           },
           res: {
             append: appendStub,
           },
-          originStack: ['http://127.0.0.1:3501'],
         })
 
         ctx.getPreviousAUTRequestUrl = () => ctx.req.proxiedUrl
@@ -918,6 +911,15 @@ describe('http/response-middleware', function () {
     })
 
     function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+
+      remoteStates.set('http://foobar.com')
+
+      props.secondaryOrigins?.forEach((origin) => {
+        remoteStates.set(origin, { isMultiDomain: true })
+        remoteStates.addOrigin(origin)
+      })
+
       return {
         incomingRes: {
           headers: {},
@@ -945,14 +947,7 @@ describe('http/response-middleware', function () {
           return { family: 'chromium' }
         },
         getPreviousAUTRequestUrl () {},
-        getRemoteState () {
-          return {
-            strategy: 'foo',
-          }
-        },
-        getOriginStack () {
-          return props.originStack || []
-        },
+        remoteStates,
         debug () {},
         onError (error) {
           throw error
