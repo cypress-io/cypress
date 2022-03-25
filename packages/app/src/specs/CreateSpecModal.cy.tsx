@@ -37,6 +37,7 @@ describe('<CreateSpecModal />', () => {
             },
             specs: [],
             fileExtensionToUse: 'js',
+            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
           },
         }}
         show={show.value}
@@ -106,6 +107,7 @@ describe('playground', () => {
             },
             specs: [],
             fileExtensionToUse: 'js',
+            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
           },
         }}
         show={show.value}

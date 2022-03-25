@@ -21,6 +21,13 @@ abstract class DataEmitterEvents {
     this._emit('devChange')
   }
 
+  /**
+   * Emitted when we have a notification from the cloud to refresh the data
+   */
+  cloudViewerChange () {
+    this._emit('cloudViewerChange')
+  }
+
   browserStatusChange () {
     this._emit('browserStatusChange')
   }

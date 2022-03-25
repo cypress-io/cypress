@@ -64,9 +64,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 
 interface FixturesShape {
   scaffold (): void
-  scaffoldProject (project: string): void
-  scaffoldCommonNodeModules(): Promise<void>
-  scaffoldProjectNodeModules(project: string): Promise<void>
+  scaffoldProject (project: string): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -81,6 +79,7 @@ async function makeE2ETasks () {
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
   const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
+  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')
@@ -116,9 +115,9 @@ async function makeE2ETasks () {
 
     await Fixtures.scaffoldProject(projectName)
 
-    await Fixtures.scaffoldCommonNodeModules()
+    await scaffoldCommonNodeModules()
 
-    await Fixtures.scaffoldProjectNodeModules(projectName)
+    await scaffoldProjectNodeModules(projectName)
 
     scaffoldedProjects.add(projectName)
 
@@ -158,12 +157,16 @@ async function makeE2ETasks () {
       sinon.stub(ctx.actions.electron, 'openExternal')
       sinon.stub(ctx.actions.electron, 'showItemInFolder')
 
+      const operationCount: Record<string, number> = {}
+
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
           if (String(url).endsWith('/test-runner-graphql')) {
             const { query, variables } = JSON.parse(String(init?.body))
             const document = parse(query)
             const operationName = getOperationName(document)
+
+            operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
 
             let result = await execute({
               operationName,
@@ -176,6 +179,8 @@ async function makeE2ETasks () {
               },
             })
 
+            operationCount[operationName ?? 'unknown']++
+
             if (remoteGraphQLIntercept) {
               try {
                 result = await remoteGraphQLIntercept({
@@ -184,7 +189,8 @@ async function makeE2ETasks () {
                   document,
                   query,
                   result,
-                })
+                  callCount: operationCount[operationName ?? 'unknown'],
+                }, testState)
               } catch (e) {
                 const err = e as Error
 
@@ -218,7 +224,7 @@ async function makeE2ETasks () {
     },
 
     __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },

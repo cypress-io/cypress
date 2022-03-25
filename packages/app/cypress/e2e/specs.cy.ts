@@ -1,13 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
-
-function getRunnerHref (specPath: string) {
-  specPath = getPathForPlatform(specPath)
-
-  if (Cypress.platform === 'win32') specPath = specPath.replaceAll('\\', '%5C')
-
-  return `#/specs/runner?file=${specPath}`
-}
+import { getRunnerHref } from './support/get-runner-href'
 
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
@@ -16,7 +9,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
         cy.startAppServer('e2e')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -126,7 +119,7 @@ describe('App: Index', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
+            cy.get(`a[href="#/${getRunnerHref(spec)}"`).scrollIntoView().should('exist')
           })
         })
 
@@ -178,21 +171,6 @@ describe('App: Index', () => {
 
           cy.percySnapshot('Invalid spec error')
 
-          //Shows extension warning
-          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.spec.j'))
-          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
-            if (req.body.variables.specFile === getPathForPlatform('cypress/e2e/MyTest.spec.jx')) {
-              req.on('before:response', (res) => {
-                res.body.data.matchesSpecPattern = true
-              })
-            }
-          })
-
-          cy.get('@enterSpecInput').type('x')
-          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-          cy.percySnapshot('Non-recommended spec pattern warning')
-          cy.contains('span', '{filename}.cy.jx')
-
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
@@ -223,7 +201,7 @@ describe('App: Index', () => {
         cy.openProject('no-specs-no-storybook')
 
         cy.startAppServer('e2e')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -282,21 +260,6 @@ describe('App: Index', () => {
 
           cy.percySnapshot('Invalid spec error')
 
-          //Shows extension warning
-          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.spec.t'))
-          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
-            if (req.body.variables.specFile === getPathForPlatform('cypress/e2e/MyTest.spec.tx')) {
-              req.on('before:response', (res) => {
-                res.body.data.matchesSpecPattern = true
-              })
-            }
-          })
-
-          cy.get('@enterSpecInput').type('x')
-          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-          cy.percySnapshot('Non-recommended spec pattern warning')
-          cy.contains('span', '{filename}.cy.tx')
-
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
@@ -335,7 +298,7 @@ describe('App: Index', () => {
         })
 
         cy.startAppServer('e2e')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -350,26 +313,34 @@ describe('App: Index', () => {
 
         cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
-        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
+        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
       })
 
       it('opens config file in ide from SpecPattern', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('shows new spec button to start creation workflow', () => {
@@ -382,6 +353,75 @@ describe('App: Index', () => {
           cy.findAllByTestId('card').eq(1)
           .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
         })
+      })
+
+      context('scaffold empty spec', () => {
+        it('should generate empty spec', () => {
+          cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+            cy.findAllByTestId('card').eq(0)
+            .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+
+            cy.findAllByTestId('card').eq(1)
+            .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
+          })
+
+          cy.contains('Create new empty spec').click()
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/filename.cy.js'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+          cy.get('@enterSpecInput').clear()
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+
+          // Shows entered file does not match spec pattern
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+          cy.percySnapshot('Invalid spec error')
+
+          // Create spec
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/MyTest.cy.js'))
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/MyTest.cy.js')).click()
+
+          cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
+
+          cy.percySnapshot('Generator success')
+
+          cy.get('[aria-label="Close"]').click()
+
+          cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')
+        })
+      })
+
+      it('shows extension warning', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(0)
+          .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+
+          cy.findAllByTestId('card').eq(1)
+          .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
+        })
+
+        cy.contains('Create new empty spec').click()
+
+        cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+        .as('enterSpecInput')
+
+        cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/MyTest.spec.jsx'))
+
+        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
+        cy.percySnapshot('Non-recommended spec pattern warning')
+        cy.contains('span', '{filename}.cy.jsx')
       })
     })
 
@@ -566,7 +606,7 @@ describe('App: Index', () => {
             cy.contains(getPathForPlatform('src/stories/Button.stories.cy.jsx')).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', getRunnerHref('src/stories/Button.stories.cy.jsx'))
+            .should('have.attr', 'href', `#/${getRunnerHref('src/stories/Button.stories.cy.jsx')}`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -718,7 +758,7 @@ describe('App: Index', () => {
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', getRunnerHref('src/App.cy.jsx'))
+            .should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -743,12 +783,12 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
+            }).should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`).click()
           })
 
           cy.get('#main-pane').should('be.visible')
 
-          cy.location().its('href').should('contain', getRunnerHref('src/App.cy.jsx'))
+          cy.location().its('href').should('contain', `#/${getRunnerHref('src/App.cy.jsx')}`)
         })
 
         it('displays alert with docs link on new spec', () => {
@@ -760,7 +800,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
+            }).should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`).click()
           })
 
           cy.contains('Review the docs')
@@ -810,7 +850,7 @@ describe('App: Index', () => {
         })
 
         cy.startAppServer('component')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -832,19 +872,27 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from SpecPattern', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
-        cy.wait('@OpenIDE')
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
       })
 
       it('shows new spec button to start creation workflow', () => {
@@ -903,7 +951,7 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', getRunnerHref('src/specs-folder/MyTest.cy.jsx'))
+          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/MyTest.cy.jsx')}`)
         })
       })
 
@@ -933,7 +981,7 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', getRunnerHref('src/specs-folder/Button.stories.cy.jsx'))
+          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/Button.stories.cy.jsx')}`)
         })
       })
     })
@@ -943,7 +991,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('react-code-gen')
         cy.openProject('react-code-gen')
         cy.startAppServer('component')
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       const checkCodeGenCandidates = (specs: string[]) => {
@@ -965,10 +1013,8 @@ describe('App: Index', () => {
         cy.percySnapshot('Component Generator')
         checkCodeGenCandidates(['cypress.config.js', 'App.cy.jsx', 'App.jsx', 'index.jsx', 'support.js', 'Button.jsx', 'Button.stories.jsx'])
 
-        cy.intercept('query-ComponentGeneratorStepOne').as('code-gen-candidates')
         cy.findByTestId('file-match-button').click()
         cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput).clear().type('App.*')
-        cy.wait('@code-gen-candidates')
 
         checkCodeGenCandidates(['App.css', 'App.cy.jsx', 'App.jsx'])
 

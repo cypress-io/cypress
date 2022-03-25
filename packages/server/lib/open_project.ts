@@ -271,9 +271,9 @@ export class OpenProject {
       await this._ctx.actions.project.setSpecsFoundBySpecPattern({
         path,
         testingType,
-        specPattern: options.spec || cfg[testingType].specPattern,
-        excludeSpecPattern: cfg[testingType].excludeSpecPattern,
-        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+        specPattern: options.spec || cfg.specPattern,
+        excludeSpecPattern: cfg.excludeSpecPattern,
+        additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
 
       await this.projectBase.open()
