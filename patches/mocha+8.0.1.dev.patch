@@ -1,10 +1,10 @@
 diff --git a/node_modules/mocha/lib/mocha.js b/node_modules/mocha/lib/mocha.js
-index 0b43004..588e195 100644
+index 8aabcb8..4e5da25 100644
 --- a/node_modules/mocha/lib/mocha.js
 +++ b/node_modules/mocha/lib/mocha.js
-@@ -965,7 +965,7 @@ Mocha.prototype.run = function(fn) {
-   options.files = this.files;
-   var runner = new exports.Runner(suite, options.delay);
+@@ -962,7 +962,7 @@ Mocha.prototype.run = function(fn) {
+     cleanReferencesAfterRun: this._cleanReferencesAfterRun
+   });
    createStatsCollector(runner);
 -  var reporter = new this._reporter(runner, options);
 +  var reporter = this._reporter(runner, options);
