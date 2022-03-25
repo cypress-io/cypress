@@ -49,7 +49,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       it('shows the current browser in the top nav browser list button', () => {
@@ -93,12 +93,22 @@ describe('App Top Nav Workflows', () => {
       it('performs mutations to update and relaunch browser', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
-        cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.app, 'setActiveBrowserById')
+          o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
+        })
 
-        cy.findAllByTestId('top-nav-browser-list-item').eq(1).click().then(($element) => {
-          cy.wait('@setBrowser').then(({ request }) => {
-            expect(request.body.variables.id).to.eq($element.attr('data-browser-id'))
-          })
+        cy.findAllByTestId('top-nav-browser-list-item').eq(1).click()
+
+        cy.withCtx((ctx, o) => {
+          const browserId = (ctx.actions.app.setActiveBrowserById as SinonStub).args[0][0]
+          const genId = ctx.fromId(browserId, 'Browser')
+
+          expect(ctx.actions.app.setActiveBrowserById).to.have.been.calledWith(browserId)
+          expect(genId).to.eql('edge-chromium-stable')
+          expect(ctx.actions.project.launchProject).to.have.been.calledWith(
+            ctx.coreData.currentTestingType, {}, undefined,
+          )
         })
       })
     })
@@ -240,7 +250,7 @@ describe('App Top Nav Workflows', () => {
       cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
 
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
@@ -286,23 +296,25 @@ describe('App Top Nav Workflows', () => {
     it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
       cy.get('@docsButton').click()
 
-      cy.intercept('mutation-TopNav_SetPromptShown').as('SetPromptShown')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setPromptShown')
+      })
 
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.wait('@SetPromptShown')
-      .its('request.body.variables.slug')
-      .should('equal', 'ci1')
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
+      })
 
       cy.findByRole('button', { name: 'Run tests faster' }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.wait('@SetPromptShown')
-      .its('request.body.variables.slug')
-      .should('equal', 'orchestration1')
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
+      })
     })
   })
 
@@ -313,7 +325,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.loginUser()
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })
@@ -341,11 +353,7 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
-        cy.intercept('mutation-Auth_Logout').as('logout')
-
         cy.findByRole('button', { name: 'Log Out' }).click()
-
-        cy.wait('@logout')
 
         cy.findByTestId('app-header-bar').findByText('Log In').should('be.visible')
       })

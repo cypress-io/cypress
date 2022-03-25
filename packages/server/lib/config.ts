@@ -156,6 +156,14 @@ export function mergeDefaults (
 
   _.defaultsDeep(config, defaultsForRuntime)
 
+  let additionalIgnorePattern = config.additionalIgnorePattern
+
+  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+    additionalIgnorePattern = config.e2e.specPattern
+  }
+
+  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
@@ -199,9 +207,20 @@ export function mergeDefaults (
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
+  debug('validate that there is no breaking config options before setupNodeEvents')
+
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw errors.get(err, ...args)
   })
+
+  // We need to remove the nested propertied by testing type because it has been
+  // flattened/compacted based on the current testing type that is selected
+  // making the config only available with the properties that are valid,
+  // also, having the correct values that can be used in the setupNodeEvents
+  delete config['e2e']
+  delete config['component']
+  delete config['resolved']['e2e']
+  delete config['resolved']['component']
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
 }
@@ -252,18 +271,26 @@ export function updateWithPluginValues (cfg, overrides) {
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
-    // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
-  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
+  debug('validate that there is no breaking config options added by setupNodeEvents')
 
-  if (!originalResolvedBrowsers) {
-    // have something to resolve with if plugins return nothing
-    originalResolvedBrowsers = {
-      value: cfg.browsers,
-      from: 'default',
-    } as ResolvedFromConfig
-  }
+  configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
+    throw errors.get(err, options)
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.e2e, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `e2e.${options.name}` })
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.component, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `component.${options.name}` })
+  })
+
+  const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
+    value: cfg.browsers,
+    from: 'default',
+  } as ResolvedFromConfig
 
   const diffs = deepDiff(cfg, overrides, true)
 

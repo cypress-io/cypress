@@ -1,60 +1,7 @@
 # Runner
 
-![Runner](https://cloud.githubusercontent.com/assets/1157043/17947042/e9352ae2-6a18-11e6-85af-3670c7cfba03.png)
+This is an old package, deprecated in favor of `@packages/app`. It has two remaining responsibilities before it can be entirely removed:
 
-The runner is the minimal "chrome" around the user's app for end-to-end testing and has the following responsibilities:
-
-- Managing communication between the driver, the reporter, the extension, and the server
-- Managing the viewport size and scale
-- Showing the currently active URL
-
-This package also includes the majority of the code that gets injected into the App Under Test (AUT) by `packages/proxy`. That bundle's entry point is `injection/index.js`.
-
-## Developing
-
-### Watching
-
-This watches and compiles all changes as you make them.
-
-- Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/cypress_runner.js`
-- Runs associated unit test of file saved and outputs to terminal
-- Compiles `*.scss` files to single `dist/cypress_runner.css`
-- Additionally it compiles both the [`reporter`](../reporter) and [`driver`](../driver)
-
-```bash
-yarn workspace @packages/runner watch
-```
-
-## Building
-
-### For development
-
-```bash
-yarn workspace @packages/runner build
-```
-
-### For production
-
-```bash
-yarn workspace @packages/runner build-prod
-```
-
-## Testing
-
-### Node Unit Tests
-
-```bash
-yarn workspace @packages/runner test
-```
-
-### Cypress Tests
-
-You can run Cypress tests found in [`cypress/integration`](./cypress/integration):
-```bash
-yarn workspace @packages/runner cypress:open
-```
-
-To watch and reload changes to the runner while testing you'll want to run:
-```bash
-yarn workspace @packages/runner watch
-```
+1. Bundles `@packages/reporter` and `@packages/driver` via webpack. Once those can be directly imported to `@packages/app`, we can remove this.
+2. Bundles styles for `@packages/reporter`, loaded in `main.scss`. Ideally, reporter should import its own styles.
+3. Some existing tests in `cypress/e2e` should be migrated to `@packages/app/cypress/e2e/runner`.

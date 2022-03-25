@@ -1114,12 +1114,17 @@ describe('visual error templates', () => {
     },
     TEST_FILES_RENAMED: () => {
       return {
-        default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
+        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     COMPONENT_FOLDER_REMOVED: () => {
       return {
         default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    INTEGRATION_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
   })

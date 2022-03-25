@@ -96,8 +96,8 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
         onResult: (res) => {
           if (res.currentProject?.config) {
             res.currentProject.config = res.currentProject.config.map((x) => {
-              if (x.field === 'e2e') {
-                return { ...x, value: { ...x.value, specPattern: customSpecPattern } }
+              if (x.field === 'specPattern') {
+                return { ...x, value: customSpecPattern }
               }
 
               return x

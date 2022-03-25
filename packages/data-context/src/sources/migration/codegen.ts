@@ -398,8 +398,8 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
       case 'ignoreTestFiles':
         return {
           ...acc,
-          e2e: { ...acc.e2e, specExcludePattern: val },
-          component: { ...acc.component, specExcludePattern: val },
+          e2e: { ...acc.e2e, excludeSpecPattern: val },
+          component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
         return {
