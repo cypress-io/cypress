@@ -64,7 +64,7 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
   }
 }
 
-function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
+function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   function getStatus (): string | undefined {
     const { stubbed, reqModified, resModified } = req.flags
 

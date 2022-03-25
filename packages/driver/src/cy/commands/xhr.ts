@@ -197,11 +197,11 @@ const startXhrServer = (cy, state, config) => {
             wentToOrigin: !isStubbed,
           }
         },
-      })
+      } as Cypress.CommandLogConfig)
 
       Cypress.ProxyLogging.addXhrLog({ xhr, route, log, stack })
 
-      return log.snapshot('request')
+      return log && log.snapshot('request')
     },
 
     onLoad: (xhr) => {

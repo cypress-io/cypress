@@ -18,27 +18,6 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
 
-export interface LogConfig {
-  // defaults to command
-  instrument?: 'agent' | 'command' | 'route'
-  // name of the log
-  name?: string
-  // additional information to include in the log if not overridden
-  // the render props message
-  // defaults to command arguments for command instrument
-  message?: string
-  // the JQuery element for the command. This will highlight the command
-  // in the main window when debugging
-  $el?: JQuery
-  // whether or not to show the log in the Reporter UI or only
-  // store the log details on the command and log manager
-  emitOnly?: boolean
-  // whether or not to start a new log group
-  groupStart?: boolean
-  // timeout of the group command - defaults to defaultCommandTimeout
-  timeout?: number
-}
-
 export const LogUtils = {
   // mutate attrs by nulling out
   // object properties
@@ -131,7 +110,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state, config, obj: Cypress.InternalLogConfig): Cypress.LogAttributes {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -148,7 +127,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -199,7 +178,7 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
-  _.defaults(obj, {
+  const logProperties: Cypress.LogProperties = _.defaults(obj, {
     id: (counter += 1),
     state: 'pending',
     instrument: 'command',
@@ -226,19 +205,19 @@ const defaults = function (state, config, obj) {
   const logGroups = state('logGroup') || []
 
   if (logGroups.length) {
-    obj.group = _.last(logGroups)
-    obj.groupLevel = logGroups.length
+    logProperties.group = _.last(logGroups)
+    logProperties.groupLevel = logGroups.length
   }
 
-  if (obj.groupEnd) {
+  if (logProperties.groupEnd) {
     state('logGroup', _.slice(state('logGroup'), 0, -1))
   }
 
-  if (obj.groupStart) {
-    state('logGroup', (logGroups).concat(obj.id))
+  if (logProperties.groupStart) {
+    state('logGroup', (logGroups).concat(logProperties.id))
   }
 
-  return obj
+  return logProperties
 }
 
 class Log {
@@ -246,16 +225,16 @@ class Log {
   state: any
   config: any
   fireChangeEvent: ((log) => (void | undefined))
-  obj: any
+  obj: Record<string, any> = {}
 
-  private attributes: Record<string, any> = {}
+  private attributes: Cypress.LogAttributes
 
   constructor (cy, state, config, fireChangeEvent, obj) {
     this.cy = cy
     this.state = state
     this.config = config
     this.fireChangeEvent = fireChangeEvent
-    this.obj = defaults(state, config, obj)
+    this.attributes = defaults(state, config, obj)
 
     extendEvents(this)
   }
@@ -320,9 +299,9 @@ class Log {
       this.obj.consoleProps = this.obj.onConsole
     }
 
-    // if we have an alias automatically
+    // if we have an alias without an aliasType, automatically
     // figure out what type of alias it is
-    if (this.obj.alias) {
+    if (this.obj.alias && !this.obj.aliasType) {
       _.defaults(this.obj, { aliasType: this.obj.$el ? 'dom' : 'primitive' })
     }
 
@@ -421,7 +400,7 @@ class Log {
   }
 
   endGroup () {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    this.state('logGroup', _.slice(this.state('logGroup'), 0, -1))
   }
 
   getError (err) {
@@ -448,14 +427,14 @@ class Log {
       return this.unset('$el')
     }
 
-    // make sure all $el elements are visible!
-    this.obj = {
+    const elAttributes = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
       visible: $el.length === $el.filter(':visible').length,
     }
 
-    return this.set(this.obj, { silent: true })
+    // make sure all $el elements are visible!
+    return this.set(elAttributes, { silent: true })
   }
 
   merge (log) {
