@@ -11,6 +11,7 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
+import { debug } from 'console'
 
 export interface ProjectApiShape {
   /**
@@ -127,6 +128,7 @@ export class ProjectActions {
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
     assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
     assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
+    debug('initializing active project')
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,

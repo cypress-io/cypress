@@ -344,6 +344,7 @@ export class ProjectLifecycleManager {
    * with the chosen testing type.
    */
   setCurrentTestingType (testingType: TestingType | null) {
+    debug('setCurrentTestingType', testingType)
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -376,6 +377,8 @@ export class ProjectLifecycleManager {
     const testingType = this._currentTestingType
 
     assert(testingType, 'loadTestingType requires a testingType')
+
+    debug('loadTestingType', testingType)
 
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
@@ -573,7 +576,7 @@ export class ProjectLifecycleManager {
     this._cachedFullConfig = undefined
     this._configResult = { state: 'loading', value: promise }
 
-    promise.then((result) => {
+    return promise.then((result) => {
       if (this._configResult.value === promise) {
         debug(`config is loaded for file`, this.configFilePath)
         this._configResult = { state: 'loaded', value: result }
@@ -582,6 +585,8 @@ export class ProjectLifecycleManager {
       }
 
       this.ctx.emitter.toLaunchpad()
+
+      return result.initialConfig
     })
     .catch((err) => {
       debug(`catch %o`, err)
@@ -590,9 +595,9 @@ export class ProjectLifecycleManager {
 
       this.onLoadError(err)
       this.ctx.emitter.toLaunchpad()
-    })
 
-    return promise.then((v) => v.initialConfig)
+      return {}
+    })
   }
 
   private validateTestingTypeConfig (config: Cypress.ConfigOptions) {
@@ -706,6 +711,7 @@ export class ProjectLifecycleManager {
    * to the config or the list of imported files, we will re-execute the setupNodeEvents
    */
   reloadConfig () {
+    debug('reloadConfig')
     if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
       this._configResult = { state: 'pending' }
       debug('reloadConfig refresh')
@@ -860,6 +866,7 @@ export class ProjectLifecycleManager {
 
   private setupNodeEvents (): Promise<SetupNodeEventsReply> {
     assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
+    debug('setupNodeEvents')
     const ipc = this._eventsIpc
     const promise = this.callSetupNodeEventsWithConfig(ipc)
 
@@ -1230,6 +1237,7 @@ export class ProjectLifecycleManager {
   private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply) {
     this._registeredEvents = {}
     this.watchRequires('setupNodeEvents', result.requires)
+    debug('handleSetupTestingTypeReply')
 
     for (const { event, eventId } of result.registrations) {
       debug('register plugins process event', event, 'with id', eventId)
@@ -1272,8 +1280,8 @@ export class ProjectLifecycleManager {
       })
     }
 
-    assert(this._envFileResult.state === 'loaded')
-    assert(this._configResult.state === 'loaded')
+    assert(this._envFileResult.state === 'loaded', 'env file should be loaded')
+    assert(this._configResult.state === 'loaded', 'config should be loaded')
 
     const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.ctx.modeOptions)
 
