@@ -37,6 +37,7 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
 
     cy.findByText('component.specPattern').should('be.visible')
     cy.findByText('testFiles').should('be.visible')
+    cy.findByText('e2e.specPattern').should('not.exist')
   })
 
   it('renders the lines for e2e folder', () => {
@@ -73,6 +74,7 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
 
     cy.findByText('e2e.specPattern').should('be.visible')
     cy.findByText('testFiles').should('be.visible')
+    cy.findByText('componentFolder').should('not.exist')
   })
 
   it('renders all lines if both are custom', () => {

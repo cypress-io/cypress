@@ -429,30 +429,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    // NOTE: We no longer do this in the new flow
-    it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
-      .then((cfg) => {
-        return fs.statAsync(cfg.integrationFolder)
-        .then(() => {
-          throw new Error('integrationFolder should not exist!')
-        }).catch(() => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(cfg.integrationFolder)
-        }).then(() => {
-          return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
-          )
-        })
-      })
-    })
-
     it('does not scaffold when headless and exits with error when no existing project', function () {
       const ensureDoesNotExist = function (inspection, index) {
         if (!inspection.isRejected()) {
@@ -1170,27 +1146,6 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      // NOTE: --config-file=false is not supported
-      it.skip('false does not require cypress.config.js to run', function () {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
-        .then(() => {
-          throw new Error('cypress.config.js should not exist')
-        }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([
-            `--run-project=${this.pristinePath}`,
-            '--no-run-mode',
-            '--config-file',
-            'false',
-          ]).then(() => {
-            // uses default specPattern which is cypress/integration/**/*
-            // exits with 1 since there are not specs for this pristine project.
-            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
-            this.expectExitWithErr('NO_SPECS_FOUND', 'Can\'t run because no spec files were found')
-            this.expectExitWith(1)
-          })
-        })
-      })
-
       // TODO: fix
       it.skip(`with a custom config file fails when it doesn't exist`, function () {
         this.filename = 'abcdefgh.test.js'

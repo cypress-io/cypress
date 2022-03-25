@@ -4,12 +4,12 @@ import type { MaybeRef } from '@vueuse/core'
 import { unref } from 'vue'
 
 gql`
-mutation ExternalLink_OpenExternal ($url: String!) {
-  openExternal(url: $url)
+mutation ExternalLink_OpenExternal ($url: String!, $includeGraphqlPort: Boolean) {
+  openExternal(url: $url, includeGraphqlPort: $includeGraphqlPort)
 }
 `
 
-export const useExternalLink = ($href?: MaybeRef<string>) => {
+export const useExternalLink = ($href?: MaybeRef<string>, includeGraphqlPort: boolean = false) => {
   const openExternalMutation = useMutation(ExternalLink_OpenExternalDocument)
 
   return (href?: string) => {
@@ -19,6 +19,6 @@ export const useExternalLink = ($href?: MaybeRef<string>) => {
       return new Error(`Cannot open external link. Possible urls passed in were ${{ localHref: href, initialHref: unref($href) }}`)
     }
 
-    return openExternalMutation.executeMutation({ url: resolvedHref })
+    return openExternalMutation.executeMutation({ url: resolvedHref, includeGraphqlPort })
   }
 }

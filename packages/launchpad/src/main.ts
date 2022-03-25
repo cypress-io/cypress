@@ -22,15 +22,6 @@ app.use(createI18n())
 
 let launchpadClient: Client
 
-// TODO: (tim) remove this when we refactor to remove the retry plugin logic
-export function getLaunchpadClient () {
-  if (!launchpadClient) {
-    throw new Error(`Cannot access launchpadClient before app has been init`)
-  }
-
-  return launchpadClient
-}
-
 // Make sure highlighter is initialized before
 // we show any code to avoid jank at rendering
 Promise.all([
