@@ -1712,17 +1712,27 @@ export default {
 
   switchToDomain: {
     docsUrl: 'https://on.cypress.io/switchToDomain',
-    done_reference_mismatch: {
-      message: `${cmd('switchToDomain')} must have done as its second argument when three or more arguments are used.`,
-    },
     experiment_not_enabled: {
       message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
     },
     invalid_origin_argument: {
       message: `${cmd('switchToDomain')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
     },
-    invalid_data_argument: {
-      message: `${cmd('switchToDomain')} requires the 'data' argument to be an array. You passed: \`{{arg}}\``,
+    invalid_options_argument: {
+      message: `${cmd('switchToDomain')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
+    },
+    extraneous_options_argument ({ extraneousKeys, validOptionKeys }) {
+      return stripIndent`\
+        ${cmd('switchToDomain')} detected extraneous keys in your options configuration.
+
+        The extraneous keys detected were:
+
+          > \`${extraneousKeys}\`
+
+        Valid keys include the following:
+
+          > \`${validOptionKeys}\`
+      `
     },
     invalid_fn_argument: {
       message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
@@ -1733,7 +1743,7 @@ export default {
 
         > {{error}}
 
-      This is likely because the data argument specified is not serializable. Note that functions and DOM objects cannot be serialized.`,
+      This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\

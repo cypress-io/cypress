@@ -7,7 +7,7 @@ import { LogUtils } from '../cypress/log'
 
 interface RunDomainFnOptions {
   config: Cypress.Config
-  data: any[]
+  args: any
   env: Cypress.ObjectLike
   fn: string
   skipConfigValidation: boolean
@@ -83,7 +83,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
-    const { config, data, env, fn, state, skipConfigValidation, logCounter } = options
+    const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
 
@@ -114,7 +114,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     })
 
     try {
-      const value = window.eval(`(${fn})`)(data)
+      const value = window.eval(`(${fn})`)(args)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {

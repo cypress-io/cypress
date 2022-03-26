@@ -282,6 +282,42 @@ describe('src/cy/commands/files', () => {
         cy.readFile('foo.json')
       })
 
+      // https://github.com/cypress-io/cypress/issues/20683
+      it('has implicit existence assertion, retries and throws a specific error when file does not exist for null encoding', function (done) {
+        const err = new Error('ENOENT: no such file or directory, open \'foo.json\'')
+
+        err.name = 'ENOENT'
+        err.code = 'ENOENT'
+        err.filePath = '/path/to/foo.json'
+
+        Cypress.backend.rejects(err)
+        let retries = 0
+
+        cy.on('command:retry', () => {
+          retries += 1
+        })
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+
+          expect(err.message).to.eq(stripIndent`
+            Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file does not exist at the following path:
+
+            \`/path/to/foo.json\``)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+          expect(retries).to.eq(2)
+
+          done()
+        })
+
+        cy.readFile('foo.json', null)
+      })
+
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
         Cypress.backend.resolves(okResponse)
 

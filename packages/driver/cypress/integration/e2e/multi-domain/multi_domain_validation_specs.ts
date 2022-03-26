@@ -179,7 +179,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
     it('errors passing non-array to callback function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to be an array. You passed: `foo`')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'options\' argument to be an object. You passed: `foo`')
 
         done()
       })
@@ -188,9 +188,27 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('foobar.com', 'foo', () => {})
     })
 
-    it('errors if passed a non-serializable data value', (done) => {
+    it('errors passing in invalid config object to callback function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('data argument specified is not serializable')
+        expect(err.message).to.include('`cy.switchToDomain()` detected extraneous keys in your options configuration.')
+        expect(err.message).to.include('The extraneous keys detected were:')
+        expect(err.message).to.include('> `foo, bar`')
+        expect(err.message).to.include('Valid keys include the following:')
+        expect(err.message).to.include('> `args`')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', {
+        // @ts-ignore
+        foo: 'foo',
+        bar: 'bar',
+      }, () => {})
+    })
+
+    it('errors if passed a non-serializable args value', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('arguments specified are not serializable')
 
         if (Cypress.browser.family === 'chromium') {
           expect(err.message).to.include('HTMLDivElement object could not be cloned')
@@ -203,7 +221,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
       const el = document.createElement('div')
 
-      cy.switchToDomain('foobar.com', ['foo', '1', el], () => {})
+      cy.switchToDomain('foobar.com', { args: ['foo', '1', el] }, () => {})
     })
 
     it('errors if last argument is absent', (done) => {
