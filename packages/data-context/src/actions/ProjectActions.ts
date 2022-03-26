@@ -11,7 +11,9 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
-import { debug } from 'console'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:project_actions')
 
 export interface ProjectApiShape {
   /**

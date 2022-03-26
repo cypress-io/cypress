@@ -137,7 +137,7 @@ export class ProjectLifecycleManager {
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
-      this.setCurrentTestingType(ctx.coreData.currentTestingType)
+      this.setCurrentTestingTypeSync(ctx.coreData.currentTestingType)
     }
 
     // see timers/parent.js line #93 for why this is necessary
@@ -338,13 +338,8 @@ export class ProjectLifecycleManager {
     return this._runModeExitEarly
   }
 
-  /**
-   * Setting the testing type should automatically handle cleanup of existing
-   * processes and load the config / initialize the plugin process associated
-   * with the chosen testing type.
-   */
-  setCurrentTestingType (testingType: TestingType | null) {
-    debug('setCurrentTestingType', testingType)
+  private setCurrentTestingTypeSync (testingType: TestingType | null) {
+    debug('setCurrentTestingTypeSync', testingType)
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -352,12 +347,21 @@ export class ProjectLifecycleManager {
     })
 
     if (this._currentTestingType === testingType) {
-      return Promise.resolve()
+      return
     }
 
     this._initializedProject = undefined
     this._currentTestingType = testingType
+  }
 
+  /**
+   * Setting the testing type should automatically handle cleanup of existing
+   * processes and load the config / initialize the plugin process associated
+   * with the chosen testing type.
+   */
+  setCurrentTestingType (testingType: TestingType | null) {
+    debug('setCurrentTestingType', testingType)
+    this.setCurrentTestingTypeSync(testingType)
     if (!testingType) {
       return Promise.resolve()
     }
@@ -831,7 +835,7 @@ export class ProjectLifecycleManager {
   /**
    * Called on the completion of the
    */
-  private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
+  private async onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
 
     // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
@@ -861,7 +865,7 @@ export class ProjectLifecycleManager {
       })
     }
 
-    this.setupNodeEvents().catch(this.onLoadError)
+    await this.setupNodeEvents().catch(this.onLoadError)
   }
 
   private setupNodeEvents (): Promise<SetupNodeEventsReply> {
@@ -874,6 +878,7 @@ export class ProjectLifecycleManager {
 
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
+        debug('setupNodeEvents success')
         // If we're handling the events, we don't want any notifications
         // to send to the client until the `.finally` of this block.
         // TODO: Remove when GraphQL Subscriptions lands
