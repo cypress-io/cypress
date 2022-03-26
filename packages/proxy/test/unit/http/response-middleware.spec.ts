@@ -722,13 +722,6 @@ describe('http/response-middleware', function () {
           getPreviousAUTRequestUrl () {
             return 'https://different.site'
           },
-          getRemoteState () {
-            // nonsense, but it's the simplest way to match origin policy
-            return {
-              strategy: 'file',
-              origin: 'http',
-            }
-          },
         })
 
         await testMiddleware([CopyCookiesFromIncomingRes], ctx)

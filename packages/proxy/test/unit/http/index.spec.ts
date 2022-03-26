@@ -5,7 +5,6 @@ import sinon from 'sinon'
 describe('http', function () {
   context('Http.handle', function () {
     let config
-    let getRemoteState
     let middleware
     let incomingRequest
     let incomingResponse
@@ -14,8 +13,6 @@ describe('http', function () {
 
     beforeEach(function () {
       config = {}
-      getRemoteState = sinon.stub().returns({})
-
       incomingRequest = sinon.stub()
       incomingResponse = sinon.stub()
       error = sinon.stub()
@@ -26,7 +23,7 @@ describe('http', function () {
         [HttpStages.Error]: [error],
       }
 
-      httpOpts = { config, getRemoteState, middleware }
+      httpOpts = { config, middleware }
     })
 
     it('calls IncomingRequest stack, then IncomingResponse stack', function () {
