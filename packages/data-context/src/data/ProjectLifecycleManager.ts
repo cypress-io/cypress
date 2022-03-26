@@ -835,7 +835,7 @@ export class ProjectLifecycleManager {
   /**
    * Called on the completion of the
    */
-  private async onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
+  private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
 
     // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
@@ -847,13 +847,13 @@ export class ProjectLifecycleManager {
     this._eventsIpc = ipc
 
     if (!this._currentTestingType || this._eventsIpcResult.state === 'loading') {
-      return
+      return Promise.resolve()
     }
 
     if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
       this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
-      return
+      return Promise.resolve()
     }
 
     if (this.ctx.coreData.scaffoldedFiles) {
@@ -865,7 +865,7 @@ export class ProjectLifecycleManager {
       })
     }
 
-    await this.setupNodeEvents().catch(this.onLoadError)
+    return this.setupNodeEvents().catch(this.onLoadError)
   }
 
   private setupNodeEvents (): Promise<SetupNodeEventsReply> {
