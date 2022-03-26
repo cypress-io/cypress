@@ -44,7 +44,7 @@ export interface RemoteGraphQLInterceptPayload {
   query: string
   variables: Record<string, any>
   document: DocumentNode
-  result: ExecutionResult
+  result: ExecutionResult<any, any>
   callCount: number
 }
 

@@ -181,8 +181,8 @@ fragment SelectCloudProjectModal on Query {
         }
       }
     }
-    ...CreateCloudOrgModal
   }
+  ...CreateCloudOrgModal
   currentProject{
     id
     title

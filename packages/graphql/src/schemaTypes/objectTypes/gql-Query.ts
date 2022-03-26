@@ -8,11 +8,17 @@ import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
+import { CachedViewer } from './gql-CachedViewer'
 
 export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
+    t.field('cachedViewer', {
+      type: CachedViewer,
+      resolve: (root, args, ctx) => ctx.user,
+    })
+
     t.field('baseError', {
       type: ErrorWrapper,
       resolve: (root, args, ctx) => ctx.baseError,

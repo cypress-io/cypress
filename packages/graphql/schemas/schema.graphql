@@ -2,6 +2,31 @@
 ### Do not make changes to this file directly
 
 
+"""
+Directs the executor to defer this fragment when the `if` argument is true or undefined.
+"""
+directive @defer(
+  """Deferred when true or undefined."""
+  if: Boolean
+
+  """Unique name"""
+  label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"""
+Directs the executor to stream plural fields when the `if` argument is true or undefined.
+"""
+directive @stream(
+  """Stream when true or undefined."""
+  if: Boolean
+
+  """Number of items to return immediately"""
+  initialCount: Int = 0
+
+  """Unique name"""
+  label: String
+) on FIELD
+
 """Represents state of auth based on most recent message from login flow"""
 type AuthState {
   """Whether the browser was successfully opened for login"""
@@ -48,6 +73,20 @@ enum BrowserStatus {
   closed
   open
   opening
+}
+
+"""
+When a user does not have internet connection, we still have their "cached" identifier.
+"""
+type CachedViewer implements Node {
+  """Email address of the cached user"""
+  email: String
+
+  """Relay style Node ID field for the CachedViewer field"""
+  id: ID!
+
+  """Name of the cached user"""
+  name: String
 }
 
 """
@@ -1133,6 +1172,7 @@ type Query {
   """The latest state of the auth process"""
   authState: AuthState!
   baseError: ErrorWrapper
+  cachedViewer: CachedViewer
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(

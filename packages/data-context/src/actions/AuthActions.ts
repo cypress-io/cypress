@@ -1,3 +1,4 @@
+import { OperationTypeNode } from 'graphql'
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
@@ -31,7 +32,7 @@ export class AuthActions {
 
   async checkAuth () {
     const result = await this.ctx.cloud.executeRemoteGraphQL({
-      operationType: 'query',
+      operationType: OperationTypeNode.QUERY,
       query: `query Cypress_CheckAuth { cloudViewer { id } }`,
       variables: {},
       requestPolicy: 'network-only',

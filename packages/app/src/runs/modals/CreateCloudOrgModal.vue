@@ -73,13 +73,15 @@ const emit = defineEmits<{
 }>()
 
 gql`
-fragment CreateCloudOrgModal on CloudUser {
-  id
-  createCloudOrganizationUrl
-  organizationControl: organizations (first: 1) {
-    nodes {
-      id
-    }
+fragment CreateCloudOrgModal on Query {
+  cachedViewer {
+    id
+    name
+    email 
+  }
+  cloudViewer {
+    id
+    createCloudOrganizationUrl
   }
 }
 `
@@ -118,5 +120,5 @@ onBeforeUnmount(() => {
   window.clearTimeout(timer)
 })
 
-const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
+const createOrgUrl = computed(() => props.gql.cloudViewer?.createCloudOrganizationUrl || '#')
 </script>

@@ -16,8 +16,8 @@
     @cancel="emit('cancel')"
   />
   <CreateCloudOrgModal
-    v-else-if="props.gql.cloudViewer"
-    :gql="props.gql.cloudViewer"
+    v-else
+    :gql="props.gql"
     @cancel="emit('cancel')"
   />
 </template>
@@ -34,13 +34,14 @@ import { CheckCloudOrganizationsDocument } from '../../generated/graphql'
 gql`
 fragment CloudConnectModals on Query {
   ...SelectCloudProjectModal
-  cloudViewer {
-    id
-    ...CreateCloudOrgModal
-  }
-  currentProject{
+  ...CreateCloudOrgModal
+  currentProject {
     id
     ...NeedManualUpdateModal
+  }
+  cloudViewer {
+    id
+    # hasOrganizations
   }
 }
 `

@@ -5,6 +5,7 @@ import * as schemaTypes from './schemaTypes/'
 import { nodePlugin } from './plugins/nexusNodePlugin'
 import { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'
 import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin } from './plugins'
+import { GraphQLDeferDirective, GraphQLStreamDirective, specifiedDirectives } from 'graphql'
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
@@ -51,4 +52,10 @@ export const graphqlSchema = makeSchema({
   features: {
     abstractTypeRuntimeChecks: false,
   },
+  enableDeferStream: true,
+  directives: [
+    ...specifiedDirectives,
+    GraphQLDeferDirective,
+    GraphQLStreamDirective,
+  ],
 })

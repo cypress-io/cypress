@@ -1,5 +1,5 @@
 import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
-import type { GraphQLResolveInfo } from 'graphql'
+import { GraphQLResolveInfo, OperationTypeNode } from 'graphql'
 import { remoteSchemaWrapped } from './remoteSchemaWrapped'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
 import type { DataContext } from '@packages/data-context'
@@ -45,7 +45,7 @@ export async function delegateToRemoteQueryBatched<T extends KnownBatchFields> (
       info: config.info,
       context: config.context,
       rootValue: config.rootValue ?? {},
-      operation: 'query',
+      operation: OperationTypeNode.QUERY,
       operationName: `${config.info.operation.name?.value ?? 'Unnamed'}_${pathToArray(config.info.path).join('_')}_batched`,
       fieldName: config.fieldName,
       key: config.key,

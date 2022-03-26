@@ -179,6 +179,10 @@ async function makeE2ETasks () {
               },
             })
 
+            if ('next' in result) {
+              throw new Error('Cannot use @defer with remote request')
+            }
+
             operationCount[operationName ?? 'unknown']++
 
             if (remoteGraphQLIntercept) {
@@ -194,7 +198,7 @@ async function makeE2ETasks () {
               } catch (e) {
                 const err = e as Error
 
-                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+                result = { data: null, extensions: {}, errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
               }
             }
 

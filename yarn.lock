@@ -3477,9 +3477,9 @@
   integrity sha512-HyYEUDeIj5rRQU2Hk5HTB2uHsbRQpF70nvMhVzi+VJR0X+xNEhjPui4/kBf3VeH/wqD28PT4sVOm8qqLjBrSZg==
 
 "@electron/get@^1.0.1", "@electron/get@^1.13.0", "@electron/get@^1.6.0":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.13.1.tgz#42a0aa62fd1189638bd966e23effaebb16108368"
-  integrity sha512-U5vkXDZ9DwXtkPqlB45tfYnnYBN8PePp1z/XDCupnSpdrxT8/ThCv9WCwPLf9oqiSGZTkH6dx2jDUPuoXpjkcA==
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
+  integrity sha512-BrZYyL/6m0ZXz/lDxy/nlVhQz+WF+iPS6qXolEU8atw7h6v1aYkjwJZ63m+bJMBTxDE66X+r2tPS4a/8C82sZw==
   dependencies:
     debug "^4.1.1"
     env-paths "^2.2.0"
@@ -4481,10 +4481,10 @@
     tslib "~2.2.0"
     value-or-promise "1.0.6"
 
-"@graphql-typed-document-node/core@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.0.tgz#0eee6373e11418bfe0b5638f654df7a4ca6a3950"
-  integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
+"@graphql-typed-document-node/core@^3.1.0", "@graphql-typed-document-node/core@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.1.tgz#076d78ce99822258cf813ecc1e7fa460fa74d052"
+  integrity sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg==
 
 "@hapi/accept@5.0.1":
   version "5.0.1"
@@ -10725,12 +10725,12 @@
   resolved "https://registry.yarnpkg.com/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz#aa58042711d6e3275dd37dc597e5d31e8c290a44"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
-"@urql/core@2.3.1", "@urql/core@>=2.3.0", "@urql/core@>=2.3.1", "@urql/core@^2.1.5":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.3.1.tgz#1aa558b5aa6eca785062a3a768e6fec708aab6d2"
-  integrity sha512-M9gGz02+TH7buqkelVg+m0eTkLCKly9ZjuTp6NHMP7hXD/zpImPu/m3YluA+D4HbFqw3kofBtLCuVk67X9dxRw==
+"@urql/core@2.4.3", "@urql/core@>=2.3.6", "@urql/core@^2.3.6":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.4.3.tgz#af35355cd2e3eeef4657f91616098e7cba8154dc"
+  integrity sha512-FpapxUKF0nLdzRLoB1QsudDjeLXJhBwzkzl8bSOJ6Cnj7LRRKJ+dYdqHfqGykswB/ILrkZks2Isp4a4BhqyUow==
   dependencies:
-    "@graphql-typed-document-node/core" "^3.1.0"
+    "@graphql-typed-document-node/core" "^3.1.1"
     wonka "^4.0.14"
 
 "@urql/devtools@2.0.3":
@@ -10740,20 +10740,20 @@
   dependencies:
     wonka ">= 4.0.9"
 
-"@urql/exchange-execute@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@urql/exchange-execute/-/exchange-execute-1.1.0.tgz#253ee9cdd3f9b16019cb1e6aa48ee4af11a1a0c2"
-  integrity sha512-TYnlZnia824fzXVMIdcg4BDBi4sR7PhsbrZqv+Dp4pvw9qYs5gSkEGnhSIHAto/LSWg4GISXajxgwSp3yIBZdg==
+"@urql/exchange-execute@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-execute/-/exchange-execute-1.2.2.tgz#41a68500c44d12c4c1e6a80dfc77cefccde15687"
+  integrity sha512-KebdnKWMKI1NkRtIxp8YIouynOaFnhcdaMNCcJEtp+kmY4vGZUgdxT/SIzTPXXYJvk5G2aiQ/JMr97I+wM/EHA==
   dependencies:
-    "@urql/core" ">=2.3.0"
+    "@urql/core" ">=2.3.6"
     wonka "^4.0.14"
 
-"@urql/exchange-graphcache@4.3.3":
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.3.tgz#5a4fee253458fd2faeb70a2bb1474d4f775f7846"
-  integrity sha512-30xFeagf1pJj+ilQeujY0J/qczFW6kQHMbK+WzLBjuomVkn/+D2ZCylMplaUMZ2gYKZ6hHIpkG4MWX1KUnmqhQ==
+"@urql/exchange-graphcache@4.3.6":
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.6.tgz#fea25b8877a704a9d65bdd29578fa6e9fd31bfa5"
+  integrity sha512-RDEi1954lcnwBK2dwQGaxOInuebZrRliz2v7aAuQasj49N9bWYrlSkBfELG14EzOL7NI23IUaeLeaDN7MouDJg==
   dependencies:
-    "@urql/core" ">=2.3.1"
+    "@urql/core" ">=2.3.6"
     wonka "^4.0.14"
 
 "@urql/introspection@^0.3.0":
@@ -10761,12 +10761,12 @@
   resolved "https://registry.yarnpkg.com/@urql/introspection/-/introspection-0.3.0.tgz#545f2425b68d95892afa5961433a19aab1867268"
   integrity sha512-dw87YiSmCgEUFnWj7fYu+wnrFcSEhYyQ8DykTvL1UzCKPm9uLDeey1z0yiSxZeX2qP9oD+TSGIq+61AZHhQO0w==
 
-"@urql/vue@0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.4.3.tgz#3f97c3a45fef2033d6965c4dde81c00ac75749fd"
-  integrity sha512-r5KPa6kQG2BAWkfXoahUnz3I9F3ShuEyIVCZ3nEjTWn1BsgnYObLOzcGYWgKfzHRVF4XW7KGaBkGnAt9ls8yXg==
+"@urql/vue@0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.6.1.tgz#bb315650c5158f862b4065a127690805c7191b79"
+  integrity sha512-sQMWiPMDGpCP+ybF4eMWyR4JXK6U2Fn9KsmdXnP8wRJiUdON+RVIkr44aulcF4yjdCRl0PeQjZAG+0h6HmYdag==
   dependencies:
-    "@urql/core" "^2.1.5"
+    "@urql/core" "^2.3.6"
     wonka "^4.0.14"
 
 "@vitejs/plugin-vue-jsx@1.3.8":
@@ -21482,10 +21482,10 @@ expect@^24.9.0:
     jest-message-util "^24.9.0"
     jest-regex-util "^24.9.0"
 
-express-graphql@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/express-graphql/-/express-graphql-0.12.0.tgz#58deabc309909ca2c9fe2f83f5fbe94429aa23df"
-  integrity sha512-DwYaJQy0amdy3pgNtiTDuGGM2BLdj+YO2SgbKoLliCfuHv3VVTt7vNG/ZqK2hRYjtYHE2t2KB705EU94mE64zg==
+express-graphql@0.12.0-experimental-stream-defer.1:
+  version "0.12.0-experimental-stream-defer.1"
+  resolved "https://registry.yarnpkg.com/express-graphql/-/express-graphql-0.12.0-experimental-stream-defer.1.tgz#1723f400cd94065e9a584ad4677a0d2ce4a7e7d1"
+  integrity sha512-VqSOUgN00Sbs+OO7sYWvZVtGwkLbWK6D71N07Q8iuM9NcJOSQH/g0UvODd1eXLq/nEOQTWLyd7W1s9n1UWxZsA==
   dependencies:
     accepts "^1.3.7"
     content-type "^1.0.4"
@@ -23980,17 +23980,10 @@ graphql-ws@^5.4.1, graphql-ws@^5.5.5:
   resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.5.5.tgz#f375486d3f196e2a2527b503644693ae3a8670a9"
   integrity sha512-hvyIS71vs4Tu/yUYHPvGXsTgo0t3arU820+lT5VjZS2go0ewp2LqyCgxEN56CzOG7Iys52eRhHBiD1gGRdiQtw==
 
-graphql@14.0.0:
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.0.0.tgz#4ee771c5266d08cb75df2d3ac41e8dd51ce3d599"
-  integrity sha512-HGVcnO6B25YZcSt6ZsH6/N+XkYuPA7yMqJmlJ4JWxWlS4Tr8SHI56R1Ocs8Eor7V7joEZPRXPDH8RRdll1w44Q==
-  dependencies:
-    iterall "^1.2.2"
-
-graphql@^15.5.1:
-  version "15.5.1"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.5.1.tgz#f2f84415d8985e7b84731e7f3536f8bb9d383aad"
-  integrity sha512-FeTRX67T3LoE3LWAxxOlW2K3Bz+rMYAC18rRguK4wgXaTZMiJwSUwDmPFo3UadAKbzirKIg5Qy+sNJXbpPRnQw==
+graphql@14.0.0, graphql@16.1.0-experimental-stream-defer.6:
+  version "16.1.0-experimental-stream-defer.6"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.1.0-experimental-stream-defer.6.tgz#8f00e27b11cf2c71ddec0350c663270cd3230659"
+  integrity sha512-qNedUtVDai94Ptxz7IXHoQR/GU27cuC/SfAU2CogIEfOflr7tW52GTnAF9SDa2i8gneowK0Ye5vyeQUJpGRvAQ==
 
 gravatar@1.8.0:
   version "1.8.0"
@@ -26793,7 +26786,7 @@ isurl@^1.0.0-alpha5:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
 
-iterall@^1.2.1, iterall@^1.2.2, iterall@^1.3.0:
+iterall@^1.2.1, iterall@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.3.0.tgz#afcb08492e2915cbd8a0884eb93a8c94d0d72fea"
   integrity sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==
@@ -31378,10 +31371,10 @@ next@^10.1.2:
     vm-browserify "1.1.2"
     watchpack "2.1.1"
 
-nexus@^1.2.0-next.15:
-  version "1.2.0-next.15"
-  resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.2.0-next.15.tgz#db1e6d76321d348cd6075ad605c4edb526eb154c"
-  integrity sha512-T5ArbIMsJpo6PkuVtaDr3JVVmIN2fE/pQImDPbMj2Mu+HPfGr0r4x8kceFAdqCEthnuuMrxEdxQCeyarv4nlmA==
+nexus@1.4.0-next.5:
+  version "1.4.0-next.5"
+  resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.4.0-next.5.tgz#225cbfde0484c307e46fa4b46b6226fc412ee7b9"
+  integrity sha512-WmPEvToW0FDvfp3jliAz5V2k8n2/dliIAw3K2PX9m9s/qhaY5sv7w6dOWnJ5rdvk+RPe6h3okwVHDpKD5FX09A==
   dependencies:
     iterall "^1.3.0"
     tslib "^2.0.3"

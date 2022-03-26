@@ -3,7 +3,7 @@ import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub } from '@packages/data-context'
 import pDefer from 'p-defer'
 import cors from 'cors'
-import { SocketIOServer } from '@packages/socket'
+import { SocketIOServer, Socket as SocketIOSocket } from '@packages/socket'
 import type { Server } from 'http'
 import { graphqlHTTP, GraphQLParams } from 'express-graphql'
 import serverDestroy from 'server-destroy'
@@ -127,7 +127,7 @@ export async function makeGraphQLServer () {
   graphqlWS(srv, '/__launchpad/graphql-ws')
 
   gqlSocketServer.on('connection', (socket) => {
-    socket.on('graphql:request', handleGraphQLSocketRequest)
+    socket.on('graphql:request', handleGraphQLSocketRequest.bind(socket))
   })
 
   getCtx().setGqlSocketServer(gqlSocketServer)
@@ -141,28 +141,57 @@ interface GraphQLSocketPayload {
   operationName?: string
 }
 
-// TODO: replace this w/ persisted queries
 /**
  * Handles the GraphQL operation run over WebSockets,
  * rather than HTTP to clear up the console from extra chatter
  * that doesn't originate from the users' web app.
+ *
+ * Handles @fetch/@defer as defined in https://github.com/graphql/graphql-wg/blob/main/rfcs/DeferStream.md
+ * so the client can emulate a streaming response.
+ *
  * @param uid
  * @param data
  * @param callback
  */
-export async function handleGraphQLSocketRequest (uid: string, payload: string, callback: Function) {
+export async function handleGraphQLSocketRequest (this: SocketIOSocket, uid: string, payload: string, callback: Function) {
   try {
+    // TODO: replace this w/ persisted queries
     const operation = JSON.parse(payload) as GraphQLSocketPayload
+    const { operationName, variables } = operation
 
     const result = await execute({
-      operationName: operation.operationName,
-      variableValues: operation.variables,
+      operationName,
+      variableValues: variables,
       document: parse(operation.query),
       schema: graphqlSchema,
       contextValue: getCtx(),
     })
 
-    callback(result)
+    if ('next' in result) {
+      let done = false
+      let hasSentInitial = false
+
+      let i = 0
+
+      while (!done) {
+        i++
+        const toPush = await result.next()
+
+        if (!hasSentInitial) {
+          hasSentInitial = true
+          callback(toPush.value)
+        } else {
+          debugOperation(`%s emitting to %s(%d): %o`, operationName, uid, i, toPush.value)
+          this.emit(`graphql:request:${uid}`, toPush.value)
+        }
+
+        if (toPush.done || !toPush.value.hasNext) {
+          done = true
+        }
+      }
+    } else {
+      callback(result)
+    }
   } catch (e) {
     callback({ data: null, errors: [e] })
   }
@@ -208,6 +237,11 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
       const prefix = `${args.operationName ?? '(anonymous)'}`
 
       return Promise.resolve(execute(args)).then((val) => {
+        // Response is an async iterator
+        if ('next' in val) {
+          return val
+        }
+
         debugOperation(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
 
         return val

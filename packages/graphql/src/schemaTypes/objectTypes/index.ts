@@ -3,6 +3,7 @@
 
 export * from './gql-AuthState'
 export * from './gql-Browser'
+export * from './gql-CachedViewer'
 export * from './gql-CodeFrame'
 export * from './gql-CodeGenGlobs'
 export * from './gql-CurrentProject'

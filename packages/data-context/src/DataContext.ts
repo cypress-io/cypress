@@ -268,9 +268,9 @@ export class DataContext {
   initialPush = (socket: Socket) => {
     // TODO: This is a hack that will go away when we refine the whole socket communication
     // layer w/ GraphQL subscriptions, we shouldn't be pushing so much
-    setTimeout(() => {
-      socket.emit('data-context-push')
-    }, 100)
+    // setTimeout(() => {
+    //   socket.emit('data-context-push')
+    // }, 100)
   }
 
   /**
