@@ -40,9 +40,11 @@ export class RemoteStates {
   }
 
   get (url: string) {
-    debug('Getting remote state for: ', url)
+    const state = this.remoteStates.get(cors.getOriginPolicy(url))
 
-    return this.remoteStates.get(cors.getOriginPolicy(url))
+    debug('Getting remote state: %o for: %s', state, url)
+
+    return _.cloneDeep(state)
   }
 
   isInOriginStack (url: string): boolean {
@@ -56,18 +58,6 @@ export class RemoteStates {
 
   isPrimaryOrigin (url: string): boolean {
     return this.originStack[0] === cors.getOriginPolicy(url)
-  }
-
-  addOrigin (originPolicy) {
-    this.originStack.push(originPolicy)
-
-    debug('Added origin: ', originPolicy)
-  }
-
-  removeCurrentOrigin () {
-    const originPolicy = this.originStack.pop()
-
-    debug('Removed current origin: ', originPolicy)
   }
 
   reset () {
@@ -165,5 +155,17 @@ export class RemoteStates {
     }
 
     return this._config
+  }
+
+  private addOrigin (originPolicy) {
+    this.originStack.push(originPolicy)
+
+    debug('Added origin: ', originPolicy)
+  }
+
+  private removeCurrentOrigin () {
+    const originPolicy = this.originStack.pop()
+
+    debug('Removed current origin: ', originPolicy)
   }
 }
