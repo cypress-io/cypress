@@ -8,10 +8,10 @@ const log = require('debug')('cypress:electron')
 const fs = require('fs-extra')
 const crypto = require('crypto')
 
-let electronVersion
+let electronVersion = pkg.electronVersion || pkg.devDependencies.electron
 
 // ensure we have an electronVersion set in package.json
-if (!(electronVersion = pkg.devDependencies.electron)) {
+if (!electronVersion) {
   throw new Error('Missing \'electron\' devDependency in root package.json')
 }
 
