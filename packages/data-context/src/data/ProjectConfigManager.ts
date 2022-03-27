@@ -12,6 +12,7 @@ import chokidar from 'chokidar'
 import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
 import type { SetupFullConfigOptions } from './ProjectLifecycleManager'
 import { CypressEnv } from './CypressEnv'
+import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -63,12 +64,11 @@ export class ProjectConfigManager {
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
   private _cachedLoadConfig: LoadConfigReply | undefined
-
-  #cypressEnv: CypressEnv
+  private _cypressEnv: CypressEnv
 
   constructor (private options: ProjectConfigManagerOptions) {
-    this.#cypressEnv = new CypressEnv({
-      envFilePath: this.#envFilePath,
+    this._cypressEnv = new CypressEnv({
+      envFilePath: this.envFilePath,
       validateConfigFile: (filePath, config) => {
         this.validateConfigFile(filePath, config)
       },
@@ -76,6 +76,8 @@ export class ProjectConfigManager {
         this.options.toLaunchpad(...args)
       },
     })
+
+    return autoBindDebug(this)
   }
 
   get isLoadingNodeEvents () {
@@ -104,11 +106,11 @@ export class ProjectConfigManager {
     this._testingType = testingType
   }
 
-  get #envFilePath () {
+  private get envFilePath () {
     return path.join(this.options.projectRoot, 'cypress.env.json')
   }
 
-  get #loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
+  private get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
     return this._cachedLoadConfig?.initialConfig ?? null
   }
 
@@ -670,12 +672,12 @@ export class ProjectConfigManager {
   }
 
   async loadCypressEnvFile () {
-    return this.#cypressEnv.loadCypressEnvFile()
+    return this._cypressEnv.loadCypressEnvFile()
   }
 
   async reloadCypressEnvFile () {
-    this.#cypressEnv = new CypressEnv({
-      envFilePath: this.#envFilePath,
+    this._cypressEnv = new CypressEnv({
+      envFilePath: this.envFilePath,
       validateConfigFile: (filePath, config) => {
         this.validateConfigFile(filePath, config)
       },
@@ -684,11 +686,11 @@ export class ProjectConfigManager {
       },
     })
 
-    return this.#cypressEnv.loadCypressEnvFile()
+    return this._cypressEnv.loadCypressEnvFile()
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
-    const config = this.#loadedConfigFile
+    const config = this.loadedConfigFile
 
     if (!config) {
       return false
@@ -729,7 +731,7 @@ export class ProjectConfigManager {
       this.options.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
 
-    const cypressEnvFileWatcher = this.addWatcher(this.#envFilePath)
+    const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
       this.reloadConfig().catch(this.onLoadError)

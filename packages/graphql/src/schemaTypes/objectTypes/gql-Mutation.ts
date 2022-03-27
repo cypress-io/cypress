@@ -173,6 +173,10 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType
           && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           await ctx.actions.wizard.initialize()
+
+          if (ctx.wizardData.chosenLanguage === 'ts') {
+            ctx.lifecycleManager.scaffoldFilesIfNecessary()
+          }
         }
 
         return {}
@@ -615,6 +619,8 @@ export const mutation = mutationType({
         ctx.actions.project.setCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
+        // TODO: do i need to scaffold here too?
+
         return true
       },
     })
@@ -633,6 +639,8 @@ export const mutation = mutationType({
         if (args.isApp) {
           await ctx.actions.project.reconfigureProject()
         }
+
+        // TODO: do i need to scaffold here too?
 
         return true
       },

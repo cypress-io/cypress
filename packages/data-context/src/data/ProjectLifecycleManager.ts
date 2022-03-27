@@ -79,9 +79,8 @@ export class ProjectLifecycleManager {
   private _configManager: ProjectConfigManager | undefined
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
   private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
-
-  #cachedInitialConfig: Cypress.ConfigOptions | undefined
-  #cachedFullConfig: FullConfig | undefined
+  private _cachedInitialConfig: Cypress.ConfigOptions | undefined
+  private _cachedFullConfig: FullConfig | undefined
 
   constructor (private ctx: DataContext) {
     if (ctx.coreData.currentProject) {
@@ -166,11 +165,11 @@ export class ProjectLifecycleManager {
   }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
-    return this.#cachedInitialConfig ?? null
+    return this._cachedInitialConfig ?? null
   }
 
   get loadedFullConfig (): FullConfig | null {
-    return this.#cachedFullConfig ?? null
+    return this._cachedFullConfig ?? null
   }
 
   get projectRoot () {
@@ -214,7 +213,7 @@ export class ProjectLifecycleManager {
     return 'npm'
   }
 
-  #createConfigManager () {
+  private createConfigManager () {
     return new ProjectConfigManager({
       configFile: this.configFile,
       projectRoot: this.projectRoot,
@@ -238,26 +237,19 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toLaunchpad(...args)
       },
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
-        this.#cachedInitialConfig = initialConfig
-        if (this._currentTestingType) {
-          if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-            this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+        this._cachedInitialConfig = initialConfig
 
-            return
-          }
-
-          if (this.ctx.coreData.scaffoldedFiles) {
-            this.ctx.coreData.scaffoldedFiles.filter((f) => {
-              if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
-                f.status = 'valid'
-                this.ctx.emitter.toLaunchpad()
-              }
-            })
-          }
+        if (this.ctx.coreData.scaffoldedFiles) {
+          this.ctx.coreData.scaffoldedFiles.filter((f) => {
+            if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
+              f.status = 'valid'
+              this.ctx.emitter.toLaunchpad()
+            }
+          })
         }
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
-        this.#cachedFullConfig = finalConfig
+        this._cachedFullConfig = finalConfig
 
         if (this.ctx.coreData.cliBrowser) {
           await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
@@ -343,14 +335,14 @@ export class ProjectLifecycleManager {
 
     this.resetInternalState()
 
-    this._configManager = this.#createConfigManager()
+    this._configManager = this.createConfigManager()
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.#legacyMigration(legacyConfigPath).catch(this.onLoadError)
+      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
 
       return
     }
@@ -374,7 +366,7 @@ export class ProjectLifecycleManager {
     this.loadCypressEnvFile().catch(this.onLoadError)
   }
 
-  async #legacyMigration (legacyConfigPath: string) {
+  async legacyMigration (legacyConfigPath: string) {
     try {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
@@ -426,6 +418,12 @@ export class ProjectLifecycleManager {
     }
   }
 
+  scaffoldFilesIfNecessary () {
+    if (this._currentTestingType && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
+      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+    }
+  }
+
   private resetInternalState () {
     if (this._configManager) {
       this._configManager.destroy()
@@ -434,7 +432,8 @@ export class ProjectLifecycleManager {
 
     this.ctx.project.destroy()
     this._currentTestingType = null
-    this.#cachedInitialConfig = undefined
+    this._cachedInitialConfig = undefined
+    this._cachedFullConfig = undefined
   }
 
   /**
