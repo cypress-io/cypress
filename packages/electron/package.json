@@ -23,14 +23,12 @@
     "minimist": "1.2.6"
   },
   "devDependencies": {
-    "electron": "15.3.4",
     "electron-packager": "15.4.0",
     "execa": "4.1.0",
     "mocha": "3.5.3",
     "rimraf": "3.0.2"
   },
   "files": [
-    "electron.js",
     "dist",
     "lib"
   ],

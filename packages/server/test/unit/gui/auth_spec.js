@@ -4,7 +4,7 @@ const auth = require(`../../../lib/gui/auth`)
 const windows = require(`../../../lib/gui/windows`)
 const user = require(`../../../lib/user`)
 
-const electron = require('@packages/electron/electron')
+const electron = require('electron')
 const machineId = require(`../../../lib/util/machine_id`)
 const os = require('os')
 const pkg = require('@packages/root')

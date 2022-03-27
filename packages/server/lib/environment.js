@@ -41,7 +41,7 @@ try {
   // these command line switches immediately
   const {
     app,
-  } = require('@packages/electron/electron')
+  } = require('electron')
 
   app.commandLine.appendSwitch('disable-renderer-backgrounding', true)
   app.commandLine.appendSwitch('ignore-certificate-errors', true)

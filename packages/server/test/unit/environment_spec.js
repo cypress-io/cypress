@@ -4,7 +4,7 @@ const Promise = require('bluebird')
 const pkg = require('@packages/root')
 const { fs } = require(`../../lib/util/fs`)
 const mockedEnv = require('mocked-env')
-const { app } = require('@packages/electron/electron')
+const { app } = require('electron')
 
 const setEnv = (env) => {
   process.env['CYPRESS_INTERNAL_ENV'] = env

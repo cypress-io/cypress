@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const Promise = require('bluebird')
-const electron = require('@packages/electron/electron')
+const electron = require('electron')
 const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const pkg = require('@packages/root')

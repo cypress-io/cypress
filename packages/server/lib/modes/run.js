@@ -1647,7 +1647,7 @@ module.exports = {
 
   async run (options, loading = Promise.resolve()) {
     if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
-      const app = require('@packages/electron/electron').app
+      const app = require('electron').app
 
       // electron >= 5.0.0 will exit the app if all browserwindows are closed,
       // this is obviously undesirable in run mode

@@ -1,6 +1,6 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
-const ipc = require('@packages/electron/electron').ipcMain
+const ipc = require('electron').ipcMain
 const debug = require('debug')('cypress:server:events')
 
 import type { LaunchArgs } from '@packages/types'

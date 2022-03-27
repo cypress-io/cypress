@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { shell } from '@packages/electron/electron'
+import { shell } from 'electron'
 import { URL, URLSearchParams } from 'url'
 
 // NOTE: in order for query params to be passed through on links

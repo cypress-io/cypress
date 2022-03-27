@@ -4,7 +4,7 @@ const express = require('express')
 const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
-const { shell } = require('@packages/electron/electron')
+const { shell } = require('electron')
 const url = require('url')
 
 const machineId = require('../util/machine_id')

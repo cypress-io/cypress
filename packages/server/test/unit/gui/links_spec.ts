@@ -3,7 +3,7 @@ import '../../spec_helper'
 import { expect } from 'chai'
 import 'sinon-chai'
 
-import { shell } from '@packages/electron/electron'
+import { shell } from 'electron'
 
 import { openExternal } from '../../../lib/gui/links'
 

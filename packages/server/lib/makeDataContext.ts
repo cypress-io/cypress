@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from '@packages/electron/electron'
+import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'

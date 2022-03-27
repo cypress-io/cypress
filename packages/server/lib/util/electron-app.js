@@ -1,6 +1,6 @@
 const scale = () => {
   try {
-    const { app } = require('@packages/electron/electron')
+    const { app } = require('electron')
 
     return app.commandLine.appendSwitch('force-device-scale-factor', '1')
   } catch (err) {

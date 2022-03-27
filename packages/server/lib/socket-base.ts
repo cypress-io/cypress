@@ -494,7 +494,7 @@ export class SocketBase {
 
       socket.on('external:open', (url: string) => {
         debug('received external:open %o', { url })
-        // using this instead of require('@packages/electron/electron').shell.openExternal
+        // using this instead of require('electron').shell.openExternal
         // because CT runner does not spawn an electron shell
         // if we eventually decide to exclusively launch CT from
         // the desktop-gui electron shell, we should update this to use
