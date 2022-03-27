@@ -619,8 +619,6 @@ export const mutation = mutationType({
         ctx.actions.project.setCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
-        // TODO: do i need to scaffold here too?
-
         return true
       },
     })

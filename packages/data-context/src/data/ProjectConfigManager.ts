@@ -2,7 +2,7 @@ import { CypressError, getError } from '@packages/errors'
 import { IpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
 import pDefer from 'p-defer'
-import type { AllModeOptions, FoundBrowser, FullConfig, OpenProjectLaunchOptions, TestingType } from '@packages/types'
+import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import debugLib from 'debug'
 import { ChildProcess, ForkOptions, fork } from 'child_process'
 import path from 'path'
@@ -20,13 +20,6 @@ const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/ch
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
-const POTENTIAL_CONFIG_FILES = [
-  'cypress.config.ts',
-  'cypress.config.mjs',
-  'cypress.config.cjs',
-  'cypress.config.js',
-]
-
 type ProjectConfigManagerOptions = {
   configFile: string | false
   projectRoot: string
@@ -42,7 +35,6 @@ type ProjectConfigManagerOptions = {
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
   updateWithPluginValues: (config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>) => FullConfig
-  initializeActiveProject: (options?: OpenProjectLaunchOptions) => Promise<unknown>
   setupFullConfigWithDefaults: (config: SetupFullConfigOptions) => Promise<FullConfig>
   machineBrowsers: () => FoundBrowser[] | Promise<FoundBrowser[]>
 }
@@ -55,11 +47,10 @@ export class ProjectConfigManager {
   private _childProcesses = new Set<ChildProcess>()
   private _eventsIpc?: ProjectConfigIpc
   private _eventProcess: ChildProcess | undefined
-  private _requireWatchers: Record<string, chokidar.FSWatcher> = {}
+  private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEvents: Record<string, Function> = {}
   private _registeredEventsTarget: TestingType | undefined
-  private _initializedProject: unknown | undefined
   private _testingType: TestingType | undefined
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
@@ -146,6 +137,17 @@ export class ProjectConfigManager {
       throw error
     } finally {
       this.options.toLaunchpad()
+    }
+  }
+
+  loadTestingType () {
+    // If we have set a testingType, and it's not the "target" of the
+    // registeredEvents (switching testing mode), we need to get a fresh
+    // config IPC & re-execute the setupTestingType
+    if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
+      this.reloadConfig().catch(this.onLoadError)
+    } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
+      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
     }
   }
 
@@ -259,20 +261,14 @@ export class ProjectConfigManager {
 
     const finalConfig = this._cachedFullConfig = this.options.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
-    // This happens automatically with openProjectCreate in run mode
-    if (!this.options.isRunMode) {
-      if (!this._initializedProject) {
-        this._initializedProject = await this.options.initializeActiveProject({})
-      } else {
-        // TODO: modify the _initializedProject
-      }
-    }
-
     await this.options.onFinalConfigLoaded(finalConfig)
 
-    this.watchRequires(loadConfigReply.requires)
-    this.watchRequires(result.requires)
-    this.initializeConfigWatchers()
+    this.watchFiles([
+      ...loadConfigReply.requires,
+      ...result.requires,
+      this.configFilePath,
+      this.envFilePath,
+    ])
 
     return result
   }
@@ -288,17 +284,6 @@ export class ProjectConfigManager {
     this.loadTestingType()
   }
 
-  loadTestingType () {
-    // If we have set a testingType, and it's not the "target" of the
-    // registeredEvents (switching testing mode), we need to get a fresh
-    // config IPC & re-execute the setupTestingType
-    if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.reloadConfig().catch(this.onLoadError)
-    } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
-    }
-  }
-
   private loadConfig () {
     if (!this._loadConfigPromise) {
       // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
@@ -306,11 +291,8 @@ export class ProjectConfigManager {
         this._cleanupIpc(this._eventsIpc)
       }
 
-      const dfd = pDeferFulfilled<LoadConfigReply>()
-
       this._eventProcess = this.forkConfigProcess()
-      this._eventsIpc = this.wrapConfigProcess(this._eventProcess, dfd)
-      this._loadConfigPromise = dfd.promise
+      this._loadConfigPromise = this.wrapConfigProcess(this._eventProcess)
     }
 
     return this._loadConfigPromise
@@ -348,51 +330,58 @@ export class ProjectConfigManager {
     return proc
   }
 
-  private wrapConfigProcess (child: ChildProcess, dfd: pDefer.DeferredPromise<LoadConfigReply> & { settled: boolean }) {
-    // The "IPC" is an EventEmitter wrapping the child process, adding a "send"
-    // method, and re-emitting any "message" that comes through the channel through the EventEmitter
-    const ipc = new ProjectConfigIpc(child)
+  private wrapConfigProcess (child: ChildProcess): Promise<LoadConfigReply> {
+    return new Promise((resolve, reject) => {
+      // The "IPC" is an EventEmitter wrapping the child process, adding a "send"
+      // method, and re-emitting any "message" that comes through the channel through the EventEmitter
+      const ipc = new ProjectConfigIpc(child)
 
-    if (child.stdout && child.stderr) {
-      // manually pipe plugin stdout and stderr for dashboard capture
-      // @see https://github.com/cypress-io/cypress/issues/7434
-      child.stdout.on('data', (data) => process.stdout.write(data))
-      child.stderr.on('data', (data) => process.stderr.write(data))
-    }
+      if (child.stdout && child.stderr) {
+        // manually pipe plugin stdout and stderr for dashboard capture
+        // @see https://github.com/cypress-io/cypress/issues/7434
+        child.stdout.on('data', (data) => process.stdout.write(data))
+        child.stderr.on('data', (data) => process.stderr.write(data))
+      }
 
-    child.on('error', (err) => {
-      this.handleChildProcessError(err, ipc, dfd)
+      let resolved = false
+
+      child.on('error', (err) => {
+        this.handleChildProcessError(err, ipc, resolved, reject)
+        reject(err)
+      })
+
+      /**
+       * This reject cannot be caught anywhere??
+       *
+       * It's supposed to be caught on lib/modes/run.js:1689,
+       * but it's not.
+       */
+      ipc.on('childProcess:unhandledError', (err) => {
+        this.handleChildProcessError(err, ipc, resolved, reject)
+        reject(err)
+      })
+
+      ipc.once('loadConfig:reply', (val) => {
+        debug('loadConfig:reply')
+        resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
+        resolved = true
+      })
+
+      ipc.once('loadConfig:error', (err) => {
+        this.killChildProcess(child)
+        reject(err)
+      })
+
+      debug('trigger the load of the file')
+      ipc.once('ready', () => {
+        ipc.send('loadConfig')
+      })
+
+      this._eventsIpc = ipc
     })
-
-    /**
-     * This reject cannot be caught anywhere??
-     *
-     * It's supposed to be caught on lib/modes/run.js:1689,
-     * but it's not.
-     */
-    ipc.on('childProcess:unhandledError', (err) => {
-      return this.handleChildProcessError(err, ipc, dfd)
-    })
-
-    ipc.once('loadConfig:reply', (val) => {
-      debug('loadConfig:reply')
-      dfd.resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
-    })
-
-    ipc.once('loadConfig:error', (err) => {
-      this.killChildProcess(child)
-      dfd.reject(err)
-    })
-
-    debug('trigger the load of the file')
-    ipc.once('ready', () => {
-      ipc.send('loadConfig')
-    })
-
-    return ipc
   }
 
-  private handleChildProcessError (err: any, ipc: ProjectConfigIpc, dfd: pDefer.DeferredPromise<any> & {settled: boolean}) {
+  private handleChildProcessError (err: any, ipc: ProjectConfigIpc, resolved: boolean, reject: (reason?: any) => void) {
     debug('plugins process error:', err.stack)
 
     this._state = 'errored'
@@ -403,10 +392,10 @@ export class ProjectConfigManager {
 
     // this can sometimes trigger before the promise is fulfilled and
     // sometimes after, so we need to handle each case differently
-    if (dfd.settled) {
+    if (resolved) {
       this.options.onError(err)
     } else {
-      dfd.reject(err)
+      reject(err)
     }
   }
 
@@ -475,7 +464,7 @@ export class ProjectConfigManager {
     this.options.onError(error, 'Error Loading Config')
   }
 
-  private watchRequires (paths: string[]) {
+  private watchFiles (paths: string[]) {
     if (this.options.isRunMode) {
       return
     }
@@ -483,13 +472,13 @@ export class ProjectConfigManager {
     const filtered = paths.filter((p) => !p.includes('/node_modules/'))
 
     for (const path of filtered) {
-      if (!this._requireWatchers[path]) {
-        this._requireWatchers[path] = this.addWatcherFor(path)
+      if (!this._pathToWatcherRecord[path]) {
+        this._pathToWatcherRecord[path] = this.addWatcherFor(path)
       }
     }
   }
 
-  addWatcherFor (file: string) {
+  private addWatcherFor (file: string) {
     const w = this.addWatcher(file)
 
     w.on('all', (evt) => {
@@ -497,10 +486,15 @@ export class ProjectConfigManager {
       this.reloadConfig().catch(this.onLoadError)
     })
 
+    w.on('error', (err) => {
+      debug('error watching config files %O', err)
+      this.options.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
+    })
+
     return w
   }
 
-  addWatcher (file: string | string[]) {
+  private addWatcher (file: string | string[]) {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
       cwd: this.options.projectRoot,
@@ -707,45 +701,14 @@ export class ProjectConfigManager {
     return true
   }
 
-  private _pathToFile (file: string) {
-    return path.isAbsolute(file) ? file : path.join(this.options.projectRoot, file)
-  }
-
-  private initializeConfigWatchers () {
-    if (this.options.isRunMode) {
-      return
-    }
-
-    const configWatchers = this.addWatcher([
-      ...POTENTIAL_CONFIG_FILES.map((f) => this._pathToFile(f)),
-    ])
-
-    configWatchers.on('all', (event, file) => {
-      debug('WATCHER: config file event', event, file)
-
-      this.reloadConfig().catch(this.onLoadError)
-    })
-
-    configWatchers.on('error', (err) => {
-      debug('error watching config files %O', err)
-      this.options.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
-    })
-
-    const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
-
-    cypressEnvFileWatcher.on('all', () => {
-      this.reloadConfig().catch(this.onLoadError)
-    })
-  }
-
   private closeWatchers () {
-    for (const watcher of [...this._watchers.values(), ...Object.values(this._requireWatchers)]) {
+    for (const watcher of this._watchers.values()) {
       // We don't care if there's an error while closing the watcher,
       // the watch listener on our end is already removed synchronously by chokidar
       watcher.close().catch((e) => {})
     }
     this._watchers = new Set()
-    this._requireWatchers = {}
+    this._pathToWatcherRecord = {}
   }
 
   destroy () {
@@ -760,32 +723,5 @@ export class ProjectConfigManager {
     this._eventProcess = undefined
     this._registeredEventsTarget = undefined
     this.closeWatchers()
-  }
-}
-
-function pDeferFulfilled<T> (): pDefer.DeferredPromise<T> & {settled: boolean} {
-  const dfd = pDefer<T>()
-  let settled = false
-  const { promise, resolve, reject } = dfd
-
-  const resolveFn = function (val: T) {
-    settled = true
-
-    return resolve(val)
-  }
-
-  const rejectFn = function (val: any) {
-    settled = true
-
-    return reject(val)
-  }
-
-  return {
-    promise,
-    resolve: resolveFn,
-    reject: rejectFn,
-    get settled () {
-      return settled
-    },
   }
 }

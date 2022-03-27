@@ -81,6 +81,7 @@ export class ProjectLifecycleManager {
   private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
   private _cachedInitialConfig: Cypress.ConfigOptions | undefined
   private _cachedFullConfig: FullConfig | undefined
+  private _initializedProject: unknown | undefined
 
   constructor (private ctx: DataContext) {
     if (ctx.coreData.currentProject) {
@@ -194,10 +195,11 @@ export class ProjectLifecycleManager {
 
   clearCurrentProject () {
     this.resetInternalState()
+    this._initializedProject = undefined
     this._projectRoot = undefined
   }
 
-  getPackageManagerUsed (projectRoot: string) {
+  private getPackageManagerUsed (projectRoot: string) {
     if (fs.existsSync(path.join(projectRoot, 'package-lock.json'))) {
       return 'npm'
     }
@@ -251,6 +253,15 @@ export class ProjectLifecycleManager {
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
         this._cachedFullConfig = finalConfig
 
+        // This happens automatically with openProjectCreate in run mode
+        if (!this.ctx.isRunMode) {
+          if (!this._initializedProject) {
+            this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else {
+            // TODO: modify the _initializedProject
+          }
+        }
+
         if (this.ctx.coreData.cliBrowser) {
           await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
         }
@@ -269,9 +280,6 @@ export class ProjectLifecycleManager {
       },
       updateWithPluginValues: (config, modifiedConfig) => {
         return this.ctx._apis.configApi.updateWithPluginValues(config, modifiedConfig)
-      },
-      initializeActiveProject: async (options) => {
-        return this.ctx.actions.project.initializeActiveProject(options)
       },
       machineBrowsers: async () => {
         return this.ctx.browser.machineBrowsers()
@@ -332,6 +340,7 @@ export class ProjectLifecycleManager {
     }
 
     this._projectRoot = projectRoot
+    this._initializedProject = undefined
 
     this.resetInternalState()
 
@@ -405,6 +414,7 @@ export class ProjectLifecycleManager {
       return
     }
 
+    this._initializedProject = undefined
     this._currentTestingType = testingType
 
     if (!testingType) {
