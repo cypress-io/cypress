@@ -39,7 +39,7 @@ type ProjectConfigManagerOptions = {
   machineBrowsers: () => FoundBrowser[] | Promise<FoundBrowser[]>
 }
 
-type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'destroyed' | 'errored'
+type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
 
 export class ProjectConfigManager {
   private _configFilePath: string | undefined
@@ -274,11 +274,8 @@ export class ProjectConfigManager {
   }
 
   async reloadConfig () {
-    // TODO: not loadingConfig
-    if (['errored', 'ready', 'loadedConfig'].includes(this._state)) {
-      this._loadConfigPromise = undefined
-      this._registeredEventsTarget = undefined
-    }
+    this._loadConfigPromise = undefined
+    this._registeredEventsTarget = undefined
 
     await this.initializeConfig()
     this.loadTestingType()
