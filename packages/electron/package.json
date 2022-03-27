@@ -30,6 +30,7 @@
     "rimraf": "3.0.2"
   },
   "files": [
+    "electron.js",
     "dist",
     "lib"
   ],
