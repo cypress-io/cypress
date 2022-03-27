@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
-import { BrowserWindow } from 'electron'
+import { BrowserWindow } from '@packages/electron/electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'

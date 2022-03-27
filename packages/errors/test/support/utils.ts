@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow } from '@packages/electron/electron'
 import fse from 'fs-extra'
 import path from 'path'
 import { PNG } from 'pngjs'

@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import os from 'os'
-import { app, nativeImage as image } from 'electron'
+import { app, nativeImage as image } from '@packages/electron/electron'
 // eslint-disable-next-line no-duplicate-imports
-import type { WebContents } from 'electron'
+import type { WebContents } from '@packages/electron/electron'
 import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
 import menu from '../gui/menu'

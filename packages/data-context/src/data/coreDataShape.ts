@@ -1,7 +1,7 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
 import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import type { App, BrowserWindow } from 'electron'
+import type { App, BrowserWindow } from '@packages/electron/electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'

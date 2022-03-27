@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const EE = require('events')
 const extension = require('@packages/extension')
-const electron = require('electron')
+const electron = require('@packages/electron/electron')
 const Promise = require('bluebird')
 const chromePolicyCheck = require(`../../../lib/util/chrome_policy_check`)
 const ProjectBase = require(`../../../lib/project-base`).ProjectBase

@@ -19,7 +19,7 @@ export const openFile = (fileDetails: OpenFileDetails) => {
 
   if (binary === 'computer') {
     try {
-      require('electron').shell.showItemInFolder(fileDetails.file)
+      require('@packages/electron/electron').shell.showItemInFolder(fileDetails.file)
     } catch (err: any) {
       debug('error opening file: %s', err.stack)
     }

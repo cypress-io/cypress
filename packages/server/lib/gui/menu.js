@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const os = require('os')
-const { Menu } = require('electron')
-const { shell } = require('electron')
+const { Menu } = require('@packages/electron/electron')
+const { shell } = require('@packages/electron/electron')
 
 const appData = require('../util/app_data')
 const open = require('../util/open')

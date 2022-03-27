@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const electron = require('electron')
+const electron = require('@packages/electron/electron')
 const appData = require(`../../../lib/util/app_data`)
 const open = require(`../../../lib/util/open`)
 const menu = require(`../../../lib/gui/menu`)

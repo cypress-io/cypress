@@ -1,4 +1,4 @@
-import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue } from 'electron'
+import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue } from '@packages/electron/electron'
 import os from 'os'
 import type { DataContext } from '..'
 import _ from 'lodash'
