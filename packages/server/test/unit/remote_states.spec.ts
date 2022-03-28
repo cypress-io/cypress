@@ -98,9 +98,17 @@ describe('remote states', () => {
       this.remoteStates.addOrigin('https://google.com')
       expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.true
 
-      this.remoteStates.removeCurrentOrigin('http://google.com')
+      this.remoteStates.removeCurrentOrigin('https://google.com')
 
       expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.false
+    })
+
+    it('throws an error when trying to remove the incorrect origin', function () {
+      this.remoteStates.addOrigin('https://google.com')
+      expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.true
+
+      expect(() => this.remoteStates.removeCurrentOrigin('http://notfound.com'))
+      .to.throw(Error, 'Tried to remove origin http://notfound.com but https://google.com was found. This should never happen and likely is a bug. Please open an issue.')
     })
   })
 

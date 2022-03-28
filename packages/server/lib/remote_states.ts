@@ -5,30 +5,44 @@ import _ from 'lodash'
 import type { SocketE2E } from './socket-e2e'
 import type { SocketCt } from './socket-ct'
 
-// {
-//   origin: "http://localhost:2020"
-//   fileServer:
-//   strategy: "file"
-//   domainName: "localhost"
-//   props: null
-// }
-
-// {
-//   origin: "https://foo.google.com"
-//   strategy: "http"
-//   domainName: "google.com"
-//   props: {
-//     port: 443
-//     tld: "com"
-//     domain: "google"
-//   }
-// }
-
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 
 const debug = Debug('cypress:server:remote-states')
 
+/**
+ * Class to maintain and manage the remote states of the server.
+ *
+ * Example file remote state:
+ * {
+ *   auth: {
+ *     username: 'name'
+ *     password: 'pass'
+ *   }
+ *   origin: "http://localhost:2020"
+ *   fileServer: "http://localhost:2021"
+ *   strategy: "file"
+ *   domainName: "localhost"
+ *   props: null
+ * }
+ *
+ * Example http remote state:
+ * {
+ *   auth: {
+ *     username: 'name'
+ *     password: 'pass'
+ *   }
+ *   origin: "https://foo.google.com"
+ *   fileServer: null
+ *   strategy: "http"
+ *   domainName: "google.com"
+ *   props: {
+ *     port: 443
+ *     tld: "com"
+ *     domain: "google"
+ *   }
+ * }
+ */
 export class RemoteStates {
   private remoteStates: Map<string, Cypress.RemoteState> = new Map()
   private originStack: string[] = []
@@ -144,8 +158,8 @@ export class RemoteStates {
       this.addOrigin(originPolicy)
     })
 
-    socket.localBus.on('cross:origin:finished', () => {
-      this.removeCurrentOrigin()
+    socket.localBus.on('cross:origin:finished', (originPolicy) => {
+      this.removeCurrentOrigin(originPolicy)
     })
   }
 
@@ -163,8 +177,14 @@ export class RemoteStates {
     debug('Added origin: ', originPolicy)
   }
 
-  private removeCurrentOrigin () {
-    const originPolicy = this.originStack.pop()
+  private removeCurrentOrigin (originPolicy) {
+    const currentOriginPolicy = this.originStack[this.originStack.length - 1]
+
+    if (originPolicy !== currentOriginPolicy) {
+      throw new Error(`Tried to remove origin ${originPolicy} but ${currentOriginPolicy} was found. This should never happen and likely is a bug. Please open an issue.`)
+    }
+
+    this.originStack.pop()
 
     debug('Removed current origin: ', originPolicy)
   }
