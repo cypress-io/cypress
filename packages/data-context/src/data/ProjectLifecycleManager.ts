@@ -432,7 +432,7 @@ export class ProjectLifecycleManager {
   }
 
   scaffoldFilesIfNecessary () {
-    if (this._currentTestingType && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
+    if (this._currentTestingType && !this._projectMetaState.needsCypressJsonMigration && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
       this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
     }
   }
