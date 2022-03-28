@@ -2,9 +2,13 @@ import { createClient, Client, dedupExchange, ssrExchange } from '@urql/core'
 import { cacheExchange } from '@urql/exchange-graphcache'
 import { executeExchange } from '@urql/exchange-execute'
 import { GraphQLSchema, introspectionFromSchema } from 'graphql'
+import debugLib from 'debug'
+
 import type { DataContext } from '../DataContext'
 import type * as allOperations from '../gen/all-operations.gen'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
+
+const debug = debugLib('cypress:data-context:GraphQLDataSource')
 
 // Filter out non-Query shapes
 type AllQueries<T> = {
@@ -38,7 +42,11 @@ export class GraphQLDataSource {
       throw new Error(`Trying to execute unknown operation ${document}, needs to be one of: [${Object.keys(allQueries).join(', ')}]`)
     }
 
-    return this._urqlClient.query(allQueries[document], variables).toPromise()
+    const queryResult = this._urqlClient.query(allQueries[document], variables).toPromise()
+
+    debug('Issuing %s, with __key %i', document, allQueries[document].__key)
+
+    return queryResult
   }
 
   getSSRData () {

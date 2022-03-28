@@ -5,7 +5,7 @@ describe('maxExecution: launchpad', () => {
   })
 
   it('loads through to the browser screen when the network is slow', () => {
-    cy.setFetchDelay(3000)
+    cy.setFetchDelay(10000)
     cy.loginUser()
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')

@@ -38,7 +38,7 @@ const props = defineProps<{
   filePath: string
 }>()
 
-const query = useQuery({ query: OpenFileInIdeDocument, requestPolicy: 'network-only' })
+const query = useQuery({ query: OpenFileInIdeDocument, requestPolicy: 'cache-and-network' })
 
 const OpenFileInIDE = useMutation(OpenFileInIde_MutationDocument)
 

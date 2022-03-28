@@ -60,7 +60,10 @@ generates:
           noExport: true
       - 'typescript-operations':
           noExport: true
-      - 'typed-document-node'
+      - 'typed-document-node':
+          # Intentionally specified under typed-document-node rather than top level config,
+          # becuase we don't want it flattening the types for the operations
+          flattenGeneratedTypes: true      
 
   ###
   # Generates types for us to infer the correct "source types" when we mock out on the frontend

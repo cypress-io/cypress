@@ -121,7 +121,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
+    cy.visitApp(`/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
 
     cy.contains('Dom Content').should('be.visible')
 
