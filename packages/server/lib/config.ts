@@ -222,7 +222,7 @@ export function mergeDefaults (
   delete config['resolved']['e2e']
   delete config['resolved']['component']
 
-  return setSupportFileAndFolder(config, defaultsForRuntime)
+  return setSupportFileAndFolder(config)
 }
 
 export function setResolvedConfigValues (config, defaults, resolved) {
