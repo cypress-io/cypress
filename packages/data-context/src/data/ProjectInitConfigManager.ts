@@ -186,8 +186,8 @@ export class ProjectInitialConfigManager {
       this.cleanupIpc(this.ipc)
     }
 
-    // this.killChildProcesses()
-    // this._process = undefined
-    // this._projectInitialConfigPromise = undefined
+    this.killChildProcesses()
+    this._process = undefined
+    this._projectInitialConfigPromise = undefined
   }
 }
