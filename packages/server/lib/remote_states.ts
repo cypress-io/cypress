@@ -136,7 +136,7 @@ export class RemoteStates {
 
     debug('Setting remote state %o for %s', state, remoteOriginPolicy)
 
-    return _.cloneDeep(state)
+    return this.get(remoteOriginPolicy) as Cypress.RemoteState
   }
 
   addSocketListeners (socket: SocketE2E | SocketCt) {
