@@ -403,7 +403,7 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
 }
 
 // async function
-export async function setSupportFileAndFolder (obj, defaults) {
+export async function setSupportFileAndFolder (obj) {
   if (!obj.supportFile) {
     return Bluebird.resolve(obj)
   }
