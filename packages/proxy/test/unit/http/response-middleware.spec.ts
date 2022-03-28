@@ -272,8 +272,6 @@ describe('http/response-middleware', function () {
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
 
-      expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
-
       return promise
     })
 
@@ -299,8 +297,6 @@ describe('http/response-middleware', function () {
       expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ failed: true })
-
-      expect(ctx.res.wantsInjection).to.be.undefined
 
       return promise
     })

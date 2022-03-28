@@ -29,13 +29,6 @@ const findCypress = () => {
 
 const Cypress = findCypress()
 
-// TODO: If the spec bridge is not found we should throw some kind of error to main cypress, this should account for redirects so maybe wait a bit before throwing?
-// This may not be needed if we defer to the first command
-if (!Cypress) {
-  throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
-Cypress in the spec bridge window but it is missing.')
-}
-
 // the timers are wrapped in the injection code similar to the primary domain
 const timers = createTimers()
 
