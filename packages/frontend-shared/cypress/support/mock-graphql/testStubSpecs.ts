@@ -154,8 +154,10 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
       __typename: baseTypename,
       gitInfo: {
         __typename: 'GitInfo' as const,
+        statusType: 'modified',
         id: faker.datatype.uuid(),
         author: faker.internet.userName(),
+        lastModifiedHumanReadable: `1 minute ago`,
         lastModifiedTimestamp: new Date(faker.random.arrayElement([
           faker.date.recent(8),
           faker.date.past(1),

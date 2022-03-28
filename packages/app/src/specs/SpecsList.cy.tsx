@@ -60,6 +60,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       .should('not.exist')
 
       cy.contains(`${defaultMessages.specPage.noResultsMessage} garbage 🗑`)
+      .should('be.visible')
 
       cy.percySnapshot('no results')
 
