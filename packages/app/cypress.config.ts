@@ -44,6 +44,9 @@ export default defineConfig({
         throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. Close Cypress and run tests using the `yarn cypress:*` commands from the `packages/app` directory')
       }
 
+      // Cy-in-cy currently only works in Chrome
+      config.browsers = config.browsers.filter((b) => b.name.includes('chrom'))
+
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'

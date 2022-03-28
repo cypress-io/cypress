@@ -12,7 +12,7 @@ describe('maxExecution: App', () => {
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.git, 'gitInfo').get(() => {
           return async (): Promise<GitInfo> => {
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 2000))
 
             return {
               author: 'Test User',
@@ -24,6 +24,8 @@ describe('maxExecution: App', () => {
       })
 
       cy.visitApp()
+      cy.contains('fixture.js', { timeout: 100 }).closest('[data-cy="specs-list-row"]').should('not.contain', 'Modified just now')
+      cy.contains('fixture.js').closest('[data-cy="specs-list-row"]').should('contain', 'Modified just now')
     })
   })
 })
