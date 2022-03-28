@@ -294,13 +294,17 @@ export class ProjectLifecycleManager {
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
-    try {
-      await this.initializeConfig()
+    if (this._configManager?.isLoadingConfigFile) {
+      try {
+        await this.initializeConfig()
 
-      return true
-    } catch (error) {
-      return false
+        return true
+      } catch (error) {
+        return false
+      }
     }
+
+    return !this._configManager?.isInError
   }
 
   async initializeConfig () {
@@ -354,7 +358,11 @@ export class ProjectLifecycleManager {
     }
 
     this.legacyPluginGuard()
-    Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
+
+    // Preemptively load these so that they are available when we need them later
+    this.ctx.browser.machineBrowsers().catch(this.onLoadError)
+    this.loadCypressEnvFile().catch(this.onLoadError)
+
     this.verifyProjectRoot(projectRoot)
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
@@ -368,8 +376,6 @@ export class ProjectLifecycleManager {
     if (this.metaState.hasValidConfigFile) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
-
-    this.loadCypressEnvFile().catch(this.onLoadError)
   }
 
   async legacyMigration (legacyConfigPath: string) {

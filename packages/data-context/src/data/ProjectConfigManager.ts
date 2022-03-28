@@ -83,6 +83,10 @@ export class ProjectConfigManager {
     return this._state === 'loadingConfig'
   }
 
+  get isInError () {
+    return this._state === 'errored'
+  }
+
   get configFilePath () {
     assert(this._configFilePath)
 
