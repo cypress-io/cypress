@@ -138,7 +138,7 @@ describe('Launchpad: Open Mode', () => {
     cy.openProject('no-support-file', ['--e2e'])
     cy.visitLaunchpad()
     cy.contains('Error Loading Config')
-    cy.contains('Your project does not contain a supportFile. By default, we look for files matching cypress/support/e2e.{js,jsx,ts,tsx}.')
+    cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })
 })
