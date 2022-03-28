@@ -593,7 +593,7 @@ export const AllCypressErrors = {
   },
   DEFAULT_SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
     return errTemplate`\
-        Your project does not contain a ${fmt.highlight(`supportFile`)}. By default, we look for files matching ${fmt.path(supportFilePath)}.
+        Your project does not contain a default ${fmt.highlight(`supportFile`)}. We expect a file matching ${fmt.path(supportFilePath)} to exist.
 
         If a support file is not necessary for your project, set ${fmt.highlight(`supportFile`)} to ${fmt.highlightSecondary(`false`)}.
 
