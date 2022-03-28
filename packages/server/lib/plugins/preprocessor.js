@@ -71,7 +71,6 @@ const API = {
 
       const baseFilePath = filePath
       .replace(config.projectRoot, '')
-      .replace(config.integrationFolder, '')
 
       fileObject = (fileObjects[filePath] = _.extend(new EE(), {
         filePath,

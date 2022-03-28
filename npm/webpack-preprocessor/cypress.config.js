@@ -1,5 +1,4 @@
 module.exports = {
-  'integrationFolder': 'cypress/tests',
   'e2e': {
     setupNodeEvents (on, config) {
       const webpackPreprocessor = require('./index')

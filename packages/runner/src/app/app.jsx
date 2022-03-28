@@ -317,7 +317,6 @@ App.propTypes = {
       ]),
       version: PropTypes.string.isRequired,
     })).isRequired,
-    integrationFolder: PropTypes.string.isRequired,
     numTestsKeptInMemory: PropTypes.number.isRequired,
     projectName: PropTypes.string.isRequired,
     viewportHeight: PropTypes.number.isRequired,
