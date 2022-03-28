@@ -5,7 +5,7 @@ describe('maxExecution: launchpad', () => {
   })
 
   it('loads through to the browser screen when the network is slow', () => {
-    cy.setFetchDelay(10000)
+    cy.setRemoteFetchDelay(60000)
     cy.loginUser()
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
@@ -14,10 +14,11 @@ describe('maxExecution: launchpad', () => {
   })
 
   it('shows the versions after they resolve', () => {
-    cy.setFetchDelay(3000)
+    cy.setRemoteFetchDelay(60000)
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('E2E Testing')
+    cy.clearRemoteFetchDelay()
     // This will show up after it resolves
     cy.get('[data-cy=top-nav-cypress-version-current-link]')
   })

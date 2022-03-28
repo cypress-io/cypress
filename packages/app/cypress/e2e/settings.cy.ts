@@ -330,6 +330,7 @@ describe('App: Settings without cloud', () => {
     cy.visitApp()
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
+    cy.findBrowsers()
 
     cy.get('[data-cy=config-code]').within(() => {
       const { browsers } = Cypress.config()

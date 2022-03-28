@@ -1,6 +1,8 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
+import { ref, watch } from 'vue'
+import _ from 'lodash'
 
 const PATH_SEP = /[\/\\]/
 
@@ -115,4 +117,22 @@ export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
     fileIndexes: [],
     dirIndexes: [],
   }
+}
+
+export function useCachedSpecs (specs) {
+  const cachedSpecs = ref<FoundSpec[]>([])
+
+  watch(specs, (currentSpecs: FoundSpec[], prevSpecs: FoundSpec[] = []) => {
+    const specsAreDifferent =
+        currentSpecs.length !== prevSpecs.length ||
+        currentSpecs.some(
+          (spec, idx) => !_.isEqual(spec, prevSpecs[idx]),
+        )
+
+    if (specsAreDifferent) {
+      cachedSpecs.value = currentSpecs
+    }
+  }, { immediate: true })
+
+  return cachedSpecs
 }

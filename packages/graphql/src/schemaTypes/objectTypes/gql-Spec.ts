@@ -43,7 +43,7 @@ export const Spec = objectType({
     t.field('gitInfo', {
       type: GitInfo,
       maxExecution: {
-        duration: 2000,
+        duration: 1500,
         triggerOnResult: 'specsChange',
       },
       description: 'Git information about the spec file',

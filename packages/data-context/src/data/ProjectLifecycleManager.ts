@@ -152,7 +152,7 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
-      const contents = await this.getFullInitialConfig()
+      const contents = await this.getConfigFileContents()
 
       return contents.projectId ?? null
     } catch {
@@ -835,8 +835,6 @@ export class ProjectLifecycleManager {
     }
 
     if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-
       return
     }
 

@@ -19,7 +19,7 @@ export const maxExecutionDirective = new GraphQLDirective({
 const CLOUD_EXECUTION: Record<string, Record<string, MaxExecutionConfig>> = {
   Query: {
     cloudViewer: {
-      duration: 1000,
+      duration: 500,
       triggerOnResult: 'cloudViewerChange',
     },
   },

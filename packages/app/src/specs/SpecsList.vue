@@ -124,7 +124,7 @@ import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
@@ -193,8 +193,10 @@ function handleClear () {
   search.value = ''
 }
 
+const cachedSpecs = useCachedSpecs(() => (props.gql.currentProject?.specs || []))
+
 const specs = computed(() => {
-  const specs = (props.gql.currentProject?.specs || []).map((x) => makeFuzzyFoundSpec(x))
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
   if (!debouncedSearchString.value) {
     return specs

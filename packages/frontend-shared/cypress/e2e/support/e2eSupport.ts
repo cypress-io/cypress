@@ -129,7 +129,11 @@ declare global {
       /**
        * Sets the delay for all remote fetches
        */
-      setFetchDelay: typeof setFetchDelay
+      setRemoteFetchDelay: typeof setRemoteFetchDelay
+      /**
+       * Clears the delay for all remote fetches
+       */
+      clearRemoteFetchDelay: typeof clearRemoteFetchDelay
       /**
        * Gives the ability to intercept the remote GraphQL request & respond accordingly
        */
@@ -411,9 +415,15 @@ function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
   })
 }
 
-function setFetchDelay (ms: number) {
-  return logInternal(`setFetchDelay ${ms}`, () => {
-    return taskInternal('__internal_setFetchDelay', ms)
+function setRemoteFetchDelay (ms: number) {
+  return logInternal(`setRemoteFetchDelay ${ms}`, () => {
+    return taskInternal('__internal_setRemoteFetchDelay', ms)
+  })
+}
+
+function clearRemoteFetchDelay () {
+  return logInternal(`clearRemoteFetchDelay`, () => {
+    return taskInternal('__internal_clearRemoteFetchDelay', undefined)
   })
 }
 
@@ -508,7 +518,8 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('withRetryableCtx', withRetryableCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
-Cypress.Commands.add('setFetchDelay', setFetchDelay)
+Cypress.Commands.add('setRemoteFetchDelay', setRemoteFetchDelay)
+Cypress.Commands.add('clearRemoteFetchDelay', clearRemoteFetchDelay)
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)

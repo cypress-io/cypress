@@ -239,7 +239,7 @@ describe('Launchpad: Setup Project', () => {
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
         scaffoldAndOpenProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
-
+        cy.findByRole('button', { name: 'Next Step' }).click()
         cy.contains('h1', 'Configuration Files')
         cy.contains('We added the following files to your project.')
 
@@ -754,7 +754,6 @@ describe('Launchpad: Setup Project', () => {
     it('opens to the "choose framework" page when opened via cli with --component flag', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing', ['--component'])
       cy.visitLaunchpad()
-
       cy.get('h1').should('contain', 'Project Setup')
       cy.contains('Confirm the front-end framework and bundler used in your project.')
     })
