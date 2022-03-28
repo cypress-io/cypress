@@ -116,7 +116,7 @@ describe('VersionsDataSource', () => {
 
       versionsDataSource.resetLatestVersionTelemetry()
 
-      const latestVersion = await privateVersionsDataSource._latestVersion
+      const latestVersion = await ctx.coreData.versionData.latestVersion
 
       expect(latestVersion).to.eql('16.0.0')
     })
@@ -144,7 +144,7 @@ describe('VersionsDataSource', () => {
 
       const versionInfo = await versionsDataSource.versionData()
 
-      expect(versionInfo.current).to.eql(versionInfo.latest)
+      expect(versionInfo.current.version).to.eql(currentCypressVersion)
     })
   })
 })

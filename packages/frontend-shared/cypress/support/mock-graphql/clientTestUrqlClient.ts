@@ -47,6 +47,10 @@ export function testUrqlClient (context: ClientTestContext,
                 },
               }).end()
 
+              if (result.operation.kind === 'subscription') {
+                return result
+              }
+
               if (mutationResolvers && result.operation.kind === 'mutation') {
                 const firstMutation = result.operation.query.definitions[0]
 

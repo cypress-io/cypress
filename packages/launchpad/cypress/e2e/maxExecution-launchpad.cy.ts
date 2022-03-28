@@ -14,7 +14,7 @@ describe('maxExecution: launchpad', () => {
   })
 
   it('shows the versions after they resolve', () => {
-    cy.setFetchDelay(2000)
+    cy.setFetchDelay(3000)
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('E2E Testing')
