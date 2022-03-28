@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { ProjectLike, ScaffoldedFile } from '..'
+import { CachedViewer, ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'
@@ -13,6 +13,11 @@ export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
+    t.field('cachedViewer', {
+      type: CachedViewer,
+      resolve: (root, args, ctx) => ctx.user,
+    })
+
     t.field('baseError', {
       type: ErrorWrapper,
       resolve: (root, args, ctx) => ctx.baseError,

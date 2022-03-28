@@ -127,6 +127,10 @@ declare global {
        */
       // logoutUser: typeof logoutUser
       /**
+       * Sets the delay for all remote fetches
+       */
+      setFetchDelay: typeof setFetchDelay
+      /**
        * Gives the ability to intercept the remote GraphQL request & respond accordingly
        */
       remoteGraphQLIntercept: typeof remoteGraphQLIntercept
@@ -301,7 +305,7 @@ function visitApp (href?: string) {
 function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
     return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
-      return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
+      return cy.get('[data-e2e]', { timeout: 2000, log: false }).then(() => {
         return val
       })
     })
@@ -407,6 +411,12 @@ function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
   })
 }
 
+function setFetchDelay (ms: number) {
+  return logInternal(`setFetchDelay ${ms}`, () => {
+    return taskInternal('__internal_setFetchDelay', ms)
+  })
+}
+
 type Resolved<V> = V extends Promise<infer U> ? U : V
 
 /**
@@ -498,6 +508,7 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('withRetryableCtx', withRetryableCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
+Cypress.Commands.add('setFetchDelay', setFetchDelay)
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)

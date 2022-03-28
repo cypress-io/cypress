@@ -20,7 +20,7 @@
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
-      :spec-count="cachedSpecs.length"
+      :spec-count="props.gql.currentProject?.specs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
       @show-spec-pattern-modal="showSpecPatternModal = true"
     />
@@ -124,7 +124,7 @@ import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
@@ -152,7 +152,7 @@ fragment SpecsList on Spec {
   specFileExtension
   fileExtension
   relative
-  gitInfo {
+  gitInfo @maxExecution(duration: 1000, triggerOnResult: specsChange) {
     ...SpecListRow
   }
 }
@@ -174,6 +174,18 @@ fragment Specs_SpecsList on Query {
 }
 `
 
+gql`
+subscription SpecsList_Specs {
+  specsChange {
+    id
+    specs {
+      id
+      ...SpecsList
+    }
+  }
+}
+`
+
 const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
@@ -186,8 +198,6 @@ const showSpecPatternModal = ref(false)
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
-
 const search = ref('')
 const debouncedSearchString = useDebounce(search, 200)
 
@@ -196,7 +206,7 @@ function handleClear () {
 }
 
 const specs = computed(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
+  const specs = (props.gql.currentProject?.specs || []).map((x) => makeFuzzyFoundSpec(x))
 
   if (!debouncedSearchString.value) {
     return specs

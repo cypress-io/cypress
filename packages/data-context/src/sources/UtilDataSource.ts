@@ -62,7 +62,7 @@ export class UtilDataSource {
     return crypto.createHash('sha1').update(value).digest('hex')
   }
 
-  get fetch () {
-    return proxiedFetch
+  fetch (input: RequestInfo, init?: RequestInit) {
+    return proxiedFetch(input, init)
   }
 }

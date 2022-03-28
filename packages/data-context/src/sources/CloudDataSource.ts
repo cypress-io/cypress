@@ -52,7 +52,10 @@ export class CloudDataSource {
         cacheExchange,
         fetchExchange,
       ],
-      fetch: this.ctx.util.fetch,
+      // Set this way so we can intercept the fetch on the context for testing
+      fetch: (...args) => {
+        return this.ctx.util.fetch(...args)
+      },
     })
   }
 
@@ -116,8 +119,8 @@ export class CloudDataSource {
 
             // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
             // since we know we're up-to-date
-            this.ctx.deref.emitter.toApp()
-            this.ctx.deref.emitter.toLaunchpad()
+            this.ctx.emitter.toApp()
+            this.ctx.emitter.toLaunchpad()
           }
 
           if (!res.stale) {

@@ -8,7 +8,7 @@ import { urqlCacheKeys } from '../util/urqlCacheKeys'
 
 // Filter out non-Query shapes
 type AllQueries<T> = {
-  [K in keyof T]: T[K] extends { __resultType?: infer U }
+  [K in keyof T]: T[K] extends { __apiType?: (...args: any[]) => infer U }
     ? U extends { __typename?: 'Query' }
       ? K
       : never

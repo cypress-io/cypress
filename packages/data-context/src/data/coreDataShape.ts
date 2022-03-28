@@ -139,6 +139,10 @@ export interface CoreDataShape {
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
   cancelActiveLogin: (() => void) | null
+  versionData: {
+    latestVersion?: Promise<string | undefined>
+    npmMetadata?: Promise<Record<string, string> | undefined>
+  }
 }
 
 /**
@@ -211,5 +215,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     cancelActiveLogin: null,
+    versionData: {},
   }
 }

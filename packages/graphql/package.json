@@ -26,7 +26,7 @@
     "graphql": "^15.5.1",
     "graphql-scalars": "^1.10.0",
     "graphql-ws": "^5.5.5",
-    "nexus": "^1.2.0-next.15",
+    "nexus": "1.4.0-next.5",
     "server-destroy": "^1.0.1",
     "ws": "^8.5.0"
   },

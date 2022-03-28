@@ -28,7 +28,7 @@ import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import { fuzzySortSpecs, makeFuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useDebounce } from '@vueuse/core'
 
@@ -69,10 +69,9 @@ const showModal = ref(false)
 
 const search = ref('')
 const debouncedSearchString = useDebounce(search, 200)
-const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
+  const specs = (props.gql.currentProject?.specs ?? []).map((x) => makeFuzzyFoundSpec(x))
 
   if (!debouncedSearchString.value) return specs
 

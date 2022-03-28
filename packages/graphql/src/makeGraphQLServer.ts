@@ -241,7 +241,7 @@ function proxyContext (ctx: DataContext, operationName: string) {
         return Reflect.get(ctx, 'deref', ctx)
       }
 
-      if (p === 'actions' || p === 'emitter') {
+      if (p === 'actions') {
         throw new Error(
           `Cannot access ctx.${p} within a query, only within mutations / outside of a GraphQL request\n` +
           `Seen in operation: ${operationName}`,

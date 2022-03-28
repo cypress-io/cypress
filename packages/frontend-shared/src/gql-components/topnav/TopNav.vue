@@ -214,8 +214,8 @@ const { t } = useI18n()
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
-fragment TopNav on Query {
-  versions {
+fragment TopNav_Versions on Query {
+  versions @maxExecution(duration: 500, triggerOnResult: versionsResolved) {
     current {
       id
       version
@@ -227,6 +227,12 @@ fragment TopNav on Query {
       released
     }
   }
+}
+`
+
+gql`
+fragment TopNav on Query {
+  ...TopNav_Versions
 
   currentProject {
     id

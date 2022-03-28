@@ -27,7 +27,7 @@ describe('VersionsDataSource', () => {
 
     beforeEach(() => {
       nmiStub = sinon.stub(nmi, 'machineId')
-      sinon.stub(ctx.util, 'fetch').get(() => fetchStub)
+      sinon.stub(ctx.util, 'fetch').callsFake(fetchStub)
       sinon.stub(os, 'platform').returns('darwin')
       sinon.stub(os, 'arch').returns('x64')
       sinon.useFakeTimers({ now: mockNow })

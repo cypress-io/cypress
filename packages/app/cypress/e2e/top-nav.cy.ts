@@ -221,14 +221,12 @@ describe('App Top Nav Workflows', () => {
         cy.withCtx((ctx, o) => {
           const oldFetch = ctx.util.fetch
 
-          o.sinon.stub(ctx.util, 'fetch').get(() => {
-            return async (url: RequestInfo, init?: RequestInit) => {
-              if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
-                throw new Error(String(url))
-              }
-
-              return oldFetch(url, init)
+          o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo, init?: RequestInit) => {
+            if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+              throw new Error(String(url))
             }
+
+            return oldFetch(url, init)
           })
         })
 

@@ -101,6 +101,7 @@ async function makeE2ETasks () {
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
+  let fetchDelay: number | undefined
   let scaffoldedProjects = new Set<string>()
 
   clearCtx()
@@ -149,6 +150,7 @@ async function makeE2ETasks () {
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
+      fetchDelay = undefined
 
       const fetchApi = ctx.util.fetch
 
@@ -159,70 +161,77 @@ async function makeE2ETasks () {
 
       const operationCount: Record<string, number> = {}
 
-      sinon.stub(ctx.util, 'fetch').get(() => {
-        return async (url: RequestInfo, init?: RequestInit) => {
-          if (String(url).endsWith('/test-runner-graphql')) {
-            const { query, variables } = JSON.parse(String(init?.body))
-            const document = parse(query)
-            const operationName = getOperationName(document)
-
-            operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
-
-            let result = await execute({
-              operationName,
-              document,
-              variableValues: variables,
-              schema: cloudSchema,
-              rootValue: CloudRunQuery,
-              contextValue: {
-                __server__: ctx,
-              },
-            })
-
-            operationCount[operationName ?? 'unknown']++
-
-            if (remoteGraphQLIntercept) {
-              try {
-                result = await remoteGraphQLIntercept({
-                  operationName,
-                  variables,
-                  document,
-                  query,
-                  result,
-                  callCount: operationCount[operationName ?? 'unknown'],
-                }, testState)
-              } catch (e) {
-                const err = e as Error
-
-                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
-              }
-            }
-
-            return new Response(JSON.stringify(result), { status: 200 })
-          }
-
-          if (String(url) === 'https://download.cypress.io/desktop.json') {
-            return new Response(JSON.stringify({
-              name: 'Cypress',
-              version: pkg.version,
-            }), { status: 200 })
-          }
-
-          if (String(url) === 'https://registry.npmjs.org/cypress') {
-            return new Response(JSON.stringify({
-              'time': {
-                [pkg.version]: '2022-02-10T01:07:37.369Z',
-              },
-            }), { status: 200 })
-          }
-
-          return fetchApi(url, init)
+      sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo, init?: RequestInit) => {
+        if (typeof fetchDelay === 'number') {
+          await new Promise((resolve) => setTimeout(resolve, fetchDelay))
         }
+
+        if (String(url).endsWith('/test-runner-graphql')) {
+          const { query, variables } = JSON.parse(String(init?.body))
+          const document = parse(query)
+          const operationName = getOperationName(document)
+
+          operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
+
+          let result = await execute({
+            operationName,
+            document,
+            variableValues: variables,
+            schema: cloudSchema,
+            rootValue: CloudRunQuery,
+            contextValue: {
+              __server__: ctx,
+            },
+          })
+
+          operationCount[operationName ?? 'unknown']++
+
+          if (remoteGraphQLIntercept) {
+            try {
+              result = await remoteGraphQLIntercept({
+                operationName,
+                variables,
+                document,
+                query,
+                result,
+                callCount: operationCount[operationName ?? 'unknown'],
+              }, testState)
+            } catch (e) {
+              const err = e as Error
+
+              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+            }
+          }
+
+          return new Response(JSON.stringify(result), { status: 200 })
+        }
+
+        if (String(url) === 'https://download.cypress.io/desktop.json') {
+          return new Response(JSON.stringify({
+            name: 'Cypress',
+            version: pkg.version,
+          }), { status: 200 })
+        }
+
+        if (String(url) === 'https://registry.npmjs.org/cypress') {
+          return new Response(JSON.stringify({
+            'time': {
+              [pkg.version]: '2022-02-10T01:07:37.369Z',
+            },
+          }), { status: 200 })
+        }
+
+        return fetchApi(url, init)
       })
 
       return null
     },
 
+    __internal_setFetchDelay (ms: number) {
+      fetchDelay = ms
+
+      return null
+    },
     __internal_remoteGraphQLIntercept (fn: string) {
       remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
 

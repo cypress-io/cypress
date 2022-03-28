@@ -104,7 +104,7 @@ const navigation = [
 ]
 
 gql`
-fragment SidebarNavigation on Query {
+fragment SidebarNavigation_Settings on Query {
   localSettings {
     preferences {
       isSideNavigationOpen
@@ -120,18 +120,18 @@ fragment SidebarNavigation on Query {
 gql`
 mutation SideBarNavigation_SetPreferences ($value: String!) {
   setPreferences (value: $value) {
-    ...SidebarNavigation
+    ...SidebarNavigation_Settings
   }
 }`
 
 gql`
 query SideBarNavigation {
   ...SidebarNavigationHeader
-  ...SidebarNavigation
+  ...SidebarNavigation_Settings
 }
 `
 
-const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
+const query = useQuery({ query: SideBarNavigationDocument })
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
 

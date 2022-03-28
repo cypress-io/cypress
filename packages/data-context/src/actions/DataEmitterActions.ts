@@ -41,6 +41,13 @@ abstract class DataEmitterEvents {
     this._emit('specsChange')
   }
 
+  /**
+   * Emitted when the versions data is resolved from the remote request
+   */
+  versionsResolved () {
+    this._emit('versionsResolved')
+  }
+
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
     this.pub.emit(evt, ...args)
   }
@@ -90,7 +97,7 @@ export class DataEmitterActions extends DataEmitterEvents {
       if (dfd) {
         dfd.resolve({ done: false, value })
         dfd = undefined
-      } else {
+      } else if (!done) {
         pending.push({ done: false, value })
       }
     }

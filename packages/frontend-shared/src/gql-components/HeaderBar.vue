@@ -11,13 +11,29 @@
 </template>
 
 <script setup lang="ts">
-import { gql, useQuery } from '@urql/vue'
+import { gql, useQuery, useSubscription } from '@urql/vue'
 import HeaderBarContent from './HeaderBarContent.vue'
-import { HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
+import { HeaderBar_HeaderBarQueryDocument, HeaderBar_CloudViewerResolvedDocument, HeaderBar_VersionsResolvedDocument } from '../generated/graphql'
 
 gql`
 query HeaderBar_HeaderBarQuery {
   ...HeaderBar_HeaderBarContent
+}
+`
+
+gql`
+subscription HeaderBar_cloudViewerResolved {
+  cloudViewerChange {
+    ...Auth
+  }
+}
+`
+
+gql`
+subscription HeaderBar_versionsResolved {
+  versionsResolved {
+    ...TopNav_Versions
+  }
 }
 `
 
@@ -33,5 +49,8 @@ const props = withDefaults(
 )
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
+
+useSubscription({ query: HeaderBar_CloudViewerResolvedDocument })
+useSubscription({ query: HeaderBar_VersionsResolvedDocument })
 
 </script>
