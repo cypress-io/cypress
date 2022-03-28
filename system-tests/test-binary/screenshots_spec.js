@@ -62,7 +62,7 @@ describe('e2e screenshots', () => {
   // the test title as the file name
   systemTests.it('passes', {
     withBinary: true,
-    dockerImage: 'cypress/base:16',
+    dockerImage: 'cypress/base:16.5.0',
     spec: 'screenshots_spec.js',
     expectedExitCode: 5,
     snapshot: true,

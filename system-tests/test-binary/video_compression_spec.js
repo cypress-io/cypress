@@ -39,7 +39,7 @@ describe('e2e video compression', () => {
   ].forEach((headed) => {
     systemTests.it(`passes (head${headed ? 'ed' : 'less'})`, {
       withBinary: true,
-      dockerImage: 'cypress/base:16',
+      dockerImage: 'cypress/base:16.5.0',
       // videos are corrupted in firefox due to known issues
       browser: '!firefox',
       spec: 'video_compression_spec.js',
