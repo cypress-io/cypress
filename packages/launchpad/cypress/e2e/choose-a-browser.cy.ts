@@ -1,3 +1,5 @@
+import type { FoundBrowser } from '@packages/types/src'
+
 describe('Choose a Browser Page', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
@@ -250,6 +252,34 @@ describe('Choose a Browser Page', () => {
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
+    })
+
+    it('subscribes to changes to browserStatus/currentBrowser through the browserStatusUpdated subscription', () => {
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
+
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible').click()
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('open')
+      })
+
+      cy.contains('button', 'Running Chrome')
+
+      // Updating active browser in conjunction with the browser status to ensure that changes to
+      // both are reflected in the UI.
+      cy.withCtx((ctx) => {
+        ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers!.find((browser) => browser.name === 'firefox') as FoundBrowser)
+        ctx.browser.setBrowserStatus('closed')
+      })
+
+      cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
+      cy.findByRole('radio', { name: 'Firefox v5', checked: true }).should('be.visible')
     })
   })
 

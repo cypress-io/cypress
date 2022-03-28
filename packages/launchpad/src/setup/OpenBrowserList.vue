@@ -236,7 +236,11 @@ const browsers = computed(() => {
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
-  get: () => props.gql.currentBrowser?.id,
+  get: () => {
+    // NOTE: The currentBrowser is set to the first detected browser
+    // found during project initialization. It should always be defined.
+    return props.gql.currentBrowser?.id
+  },
   set (browserId) {
     if (browserId) {
       setBrowser.executeMutation({ id: browserId })
