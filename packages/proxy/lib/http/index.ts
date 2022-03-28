@@ -19,6 +19,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { Browser } from '@packages/server/lib/browsers/types'
+import type { RemoteStates } from '@packages/server/lib/remote_states'
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
@@ -61,7 +62,7 @@ export type ServerCtx = Readonly<{
   shouldCorrelatePreRequests?: () => boolean
   getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
-  getRemoteState: CyServer.getRemoteState
+  remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -74,7 +75,6 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
-  'getRemoteState',
   'netStubbingState',
   'next',
   'end',
@@ -201,7 +201,7 @@ export class Http {
   deferredSourceMapCache: DeferredSourceMapCache
   getCurrentBrowser: () => Browser | Partial<Browser> & Pick<Browser, 'family'> | null
   getFileServerToken: () => string
-  getRemoteState: () => any
+  remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()
@@ -219,7 +219,7 @@ export class Http {
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getCurrentBrowser = opts.getCurrentBrowser
     this.getFileServerToken = opts.getFileServerToken
-    this.getRemoteState = opts.getRemoteState
+    this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.socket = opts.socket
@@ -240,7 +240,7 @@ export class Http {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       getCurrentBrowser: this.getCurrentBrowser,
       getFileServerToken: this.getFileServerToken,
-      getRemoteState: this.getRemoteState,
+      remoteStates: this.remoteStates,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,

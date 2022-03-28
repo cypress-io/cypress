@@ -21,14 +21,7 @@ const normalizeDomain = (domain) => {
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
 
-  // @ts-ignore
   const communicator = Cypress.multiDomainCommunicator
-
-  const sendReadyForDomain = () => {
-    // lets the proxy know to allow the response for the secondary
-    // domain html through, so the page will finish loading
-    Cypress.backend('ready:for:domain')
-  }
 
   communicator.on('delaying:html', (request) => {
     // when a secondary domain is detected by the proxy, it holds it up
@@ -38,10 +31,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // @ts-ignore
     cy.isAnticipatingMultiDomainFor(request.href)
 
-    // cy.isAnticipatingMultiDomainFor(href) will free the queue to move forward.
-    // if the next command isn't switchToDomain, this timeout will hit and
-    // the test will fail with a cross-origin error
-    timeoutId = setTimeout(sendReadyForDomain, 2000)
+    // If we haven't seen a switchToDomain and cleared the timeout within 300ms,
+    // go ahead and inform the server 'ready:for:domain' failed and to release the
+    // response. This typically happens during a redirect where the user does
+    // not have a switchToDomain for the intermediary domain.
+    timeoutId = setTimeout(() => {
+      Cypress.backend('ready:for:domain', { failed: true })
+    }, 300)
   })
 
   Commands.addAll({
@@ -80,7 +76,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       const validator = new Validator({
         log,
-        onFailure: sendReadyForDomain,
+        onFailure: () => {
+          Cypress.backend('ready:for:domain', { failed: true })
+        },
       })
 
       validator.validate({
@@ -101,6 +99,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = () => {
+          Cypress.backend('cross:origin:finished', location.originPolicy)
           communicator.off('queue:finished', onQueueFinished)
         }
 
@@ -135,7 +134,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         communicator.once('ran:domain:fn', (details) => {
           const { subject, unserializableSubjectType, err, finished } = details
 
-          sendReadyForDomain()
+          // lets the proxy know to allow the response for the secondary
+          // domain html through, so the page will finish loading
+          Cypress.backend('ready:for:domain', { originPolicy: location.originPolicy })
 
           if (err) {
             return _reject(err)

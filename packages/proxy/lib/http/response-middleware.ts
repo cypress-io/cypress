@@ -230,16 +230,22 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
-  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
+  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+  const isPreviousOrigin = this.remoteStates.isInOriginStack(this.req.proxiedUrl)
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
   const isAUTFrame = this.req.isAUTFrame
 
-  if (this.config.experimentalMultiDomain && isCrossDomain && isAUTFrame && (isHTML || isRenderedHTML)) {
-    this.debug('is cross-domain, delay until domain:ready event')
+  // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
+  if (this.config.experimentalMultiDomain && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    this.debug('is cross-domain, delay until ready:for:domain event')
 
-    this.serverBus.once('ready:for:domain', () => {
-      this.debug('ready for domain, let it go')
+    this.serverBus.once('ready:for:domain', ({ failed }) => {
+      this.debug(`ready for domain${failed ? ' failed' : ''}, let it go`)
+
+      if (!failed) {
+        this.res.wantsInjection = 'fullMultiDomain'
+      }
 
       this.next()
     })
@@ -267,7 +273,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
+  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.remoteStates.current())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -275,10 +281,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
+    const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin(this.req.proxiedUrl)
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalMultiDomain && !isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalMultiDomain && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- multi-domain injection')
 
       return 'fullMultiDomain'
@@ -397,7 +404,7 @@ const determineIfNeedsMultiDomainHandling = (ctx: HttpMiddlewareThis<ResponseMid
     !!ctx.req.isAUTFrame &&
     (
       (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, ctx.req.proxiedUrl))
-      || !reqMatchesOriginPolicy(ctx.req, ctx.getRemoteState())
+      || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
     )
   )
 }
@@ -490,7 +497,7 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
-  setInitialCookie(this.res, this.getRemoteState(), true)
+  setInitialCookie(this.res, this.remoteStates.current(), true)
 
   debug('redirecting to new url %o', { statusCode, newUrl })
   this.res.redirect(Number(statusCode), newUrl)
@@ -504,7 +511,7 @@ const CopyResponseStatusCode: ResponseMiddleware = function () {
 }
 
 const ClearCyInitialCookie: ResponseMiddleware = function () {
-  setInitialCookie(this.res, this.getRemoteState(), false)
+  setInitialCookie(this.res, this.remoteStates.current(), false)
   this.next()
 }
 

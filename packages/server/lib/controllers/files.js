@@ -22,7 +22,7 @@ module.exports = {
     })
   },
 
-  handleIframe (req, res, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, config, remoteStates, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
@@ -39,7 +39,7 @@ module.exports = {
 
         const iframeOptions = {
           title: this.getTitle(test),
-          domain: getRemoteState().domainName,
+          domain: remoteStates.current().domainName,
           scripts: JSON.stringify(allFilesToSend),
         }
 

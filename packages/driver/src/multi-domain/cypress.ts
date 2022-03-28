@@ -81,8 +81,6 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleUnsupportedAPIs(Cypress, cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
-
-  return cy
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces

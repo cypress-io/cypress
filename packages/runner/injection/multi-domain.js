@@ -33,7 +33,7 @@ const Cypress = findCypress()
 // This may not be needed if we defer to the first command
 if (!Cypress) {
   throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
-    Cypress in the spec bridge window but it is missing.')
+Cypress in the spec bridge window but it is missing.')
 }
 
 // the timers are wrapped in the injection code similar to the primary domain

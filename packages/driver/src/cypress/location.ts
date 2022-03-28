@@ -89,13 +89,7 @@ export class $Location {
   }
 
   getOriginPolicy () {
-    // origin policy is comprised of
-    // protocol + superdomain
-    // and subdomain is not factored in
-    return _.compact([
-      `${this.getProtocol()}//${this.getSuperDomain()}`,
-      this.getPort(),
-    ]).join(':')
+    return cors.getOriginPolicy(this.remote.href)
   }
 
   getSuperDomain () {

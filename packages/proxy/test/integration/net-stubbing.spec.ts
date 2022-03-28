@@ -11,13 +11,14 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { EventEmitter } from 'events'
+import { RemoteStates } from '@packages/server/lib/remote_states'
 
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
 
 context('network stubbing', () => {
   let config
-  let remoteState
+  let remoteStates: RemoteStates
   let netStubbingState: NetStubbingState
   let app
   let destinationApp
@@ -27,7 +28,7 @@ context('network stubbing', () => {
 
   beforeEach((done) => {
     config = {}
-    remoteState = {}
+    remoteStates = new RemoteStates(() => {})
     socket = new EventEmitter()
     socket.toDriver = sinon.stub()
     app = express()
@@ -39,7 +40,7 @@ context('network stubbing', () => {
       config,
       middleware: defaultMiddleware,
       getCurrentBrowser: () => ({ family: 'chromium' }),
-      getRemoteState: () => remoteState,
+      remoteStates,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
@@ -62,6 +63,7 @@ context('network stubbing', () => {
 
     server = allowDestroy(destinationApp.listen(() => {
       destinationPort = server.address().port
+      remoteStates.set(`http://localhost:${destinationPort}`)
       done()
     }))
   })
@@ -71,26 +73,12 @@ context('network stubbing', () => {
   })
 
   it('can make a vanilla request', (done) => {
-    remoteState.strategy = 'http'
-    remoteState.props = {
-      port: `${destinationPort}`,
-      tld: 'localhost',
-      domain: '',
-    }
-
     supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .expect('it worked', done)
   })
 
   it('does not add CORS headers to all responses', () => {
-    remoteState.strategy = 'http'
-    remoteState.props = {
-      port: `${destinationPort}`,
-      tld: 'localhost',
-      domain: '',
-    }
-
     return supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .then((res) => {
@@ -240,13 +228,6 @@ context('network stubbing', () => {
         res.send('ok')
       })
     })
-
-    remoteState.strategy = 'http'
-    remoteState.props = {
-      port: `${destinationPort}`,
-      tld: 'localhost',
-      domain: '',
-    }
 
     // capture unintercepted content-length
     await supertest(app)
