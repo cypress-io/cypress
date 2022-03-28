@@ -653,6 +653,20 @@
       "printTooltip": "Printed to console",
       "invalidSelector": "Invalid",
       "selectorMethodsLabel": "Selector Methods"
+    },
+    "automation": {
+      "disconnected": {
+        "title": "The Cypress extension has disconnected.",
+        "description": "Cypress cannot run tests without this extension.",
+        "reload": "Reload the browser"
+      },
+      "missing": {
+        "title": "The Cypress extension is missing.",
+        "description": "Cypress cannot run tests without this extension. Please choose another browser."
+      },
+      "shared": {
+        "link": "Read more about browser management"
+      }
     }
   },
   "warnings": {
