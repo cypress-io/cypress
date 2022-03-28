@@ -580,12 +580,12 @@ export class ProjectLifecycleManager {
     this._cachedFullConfig = undefined
     this._configResult = { state: 'loading', value: promise }
 
-    return promise.then((result) => {
+    return promise.then(async (result) => {
       if (this._configResult.value === promise) {
         debug(`config is loaded for file`, this.configFilePath)
         this._configResult = { state: 'loaded', value: result }
         this.validateConfigFile(this.configFilePath, result.initialConfig)
-        this.onConfigLoaded(child, ipc, result)
+        await this.onConfigLoaded(child, ipc, result)
       }
 
       this.ctx.emitter.toLaunchpad()
