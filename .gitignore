@@ -49,6 +49,9 @@ packages/proxy/lib/**/*.js
 # npm packages
 npm/**/cypress/screenshots
 
+# from app
+packages/app/cypress/videos
+
 # from example
 packages/example/app
 packages/example/build
@@ -92,8 +95,9 @@ system-tests/fixtures/large-img
 /packages/errors/__snapshot-html-local__
 
 # graphql, auto-generated
-/packages/launchpad/src/generated
 /packages/app/src/generated
+/packages/launchpad/src/generated
+/packages/frontend-shared/src/generated
 
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template

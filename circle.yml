@@ -2084,19 +2084,15 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - system-tests-chrome:
-        context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
     - system-tests-electron:
-        context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
     - system-tests-firefox:
-        context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
     - system-tests-non-root:
-        context: test-runner:performance-tracking
         executor: non-root-docker-user
         requires:
           - system-tests-node-modules-install
@@ -2294,6 +2290,7 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - binary-system-tests:
+        context: test-runner:performance-tracking
         requires:
           - create-build-artifacts
           - system-tests-node-modules-install
