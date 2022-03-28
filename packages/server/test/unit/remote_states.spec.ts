@@ -38,6 +38,40 @@ describe('remote states', () => {
 
       expect(state).to.be.undefined
     })
+
+    it('changing returned state does not mutate remote state', function () {
+      const originalState = this.remoteStates.get('http://localhost:3500/foobar')
+
+      expect(originalState).to.deep.equal({
+        auth: undefined,
+        origin: 'http://localhost:3500',
+        strategy: 'http',
+        domainName: 'localhost',
+        fileServer: null,
+        props: {
+          port: '3500',
+          domain: '',
+          tld: 'localhost',
+        },
+      })
+
+      originalState.auth = { username: 'u', password: 'p' }
+
+      const currentState = this.remoteStates.get('http://localhost:3500/foobar')
+
+      expect(currentState).to.deep.equal({
+        auth: undefined,
+        origin: 'http://localhost:3500',
+        strategy: 'http',
+        domainName: 'localhost',
+        fileServer: null,
+        props: {
+          port: '3500',
+          domain: '',
+          tld: 'localhost',
+        },
+      })
+    })
   })
 
   context('#isInOriginStack', () => {

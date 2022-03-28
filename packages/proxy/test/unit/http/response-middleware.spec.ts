@@ -300,6 +300,7 @@ describe('http/response-middleware', function () {
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ failed: true })
 
       expect(ctx.res.wantsInjection).to.be.undefined
+      expect(ctx.remoteStates.current().origin).to.equal('http://example.com')
 
       return promise
     })

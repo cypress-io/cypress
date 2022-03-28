@@ -85,11 +85,7 @@ export class RemoteStates {
   }
 
   current (): Cypress.RemoteState {
-    const state = this.remoteStates.get(this.originStack[this.originStack.length - 1]) as Cypress.RemoteState
-
-    debug('Getting current remote state: %o', state)
-
-    return _.cloneDeep(state)
+    return this.get(this.originStack[this.originStack.length - 1]) as Cypress.RemoteState
   }
 
   set (urlOrState: string | Cypress.RemoteState, options: { auth?: {}, isMultiDomain?: boolean } = {}): Cypress.RemoteState {
