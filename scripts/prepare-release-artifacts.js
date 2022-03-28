@@ -15,7 +15,7 @@ if (!/^\d+\.\d+\.\d+$/.test(args.version)) {
 const log = (...args) => console.log('🏗', ...args)
 
 const exec = args['dry-run'] ?
-  (...args) => log('Dry run, not executing:', ...args)
+  (...args) => log('Dry run, not executing:', args[0])
   : (...args) => execSync(...args)
 
 log('Running `move-binaries`...')
