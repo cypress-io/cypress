@@ -154,7 +154,7 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
       __typename: baseTypename,
       gitInfo: {
         __typename: 'GitInfo' as const,
-        statusType: 'modified',
+        statusType: 'modified' as const,
         id: faker.datatype.uuid(),
         author: faker.internet.userName(),
         lastModifiedHumanReadable: `1 minute ago`,
