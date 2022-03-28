@@ -19,6 +19,7 @@ export const maxExecutionDirective = new GraphQLDirective({
         name: 'TriggerOnResultOptions',
         values: {
           cloudViewerChange: {},
+          cloudProjectChange: {},
           versionsResolved: {},
           specsChange: {},
         },

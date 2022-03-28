@@ -49,5 +49,12 @@ export const Subscription = subscriptionType({
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('versionsResolved'),
       resolve: (source: NexusGenFieldTypes['Query']) => source,
     })
+
+    t.field('cloudProjectChange', {
+      description: 'When the cloud project associated with the current project has changed',
+      type: CurrentProject,
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudProjectChange'),
+      resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
   },
 })

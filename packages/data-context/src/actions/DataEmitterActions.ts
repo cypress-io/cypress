@@ -32,6 +32,10 @@ abstract class DataEmitterEvents {
     this._emit('browserStatusChange')
   }
 
+  cloudProjectChange () {
+    this._emit('cloudProjectChange')
+  }
+
   /**
    * Emitted when the specs for the current project have changed. This can
    * be due to files being added or removed or due to a change in

@@ -20,21 +20,28 @@ import ProjectId from './ProjectId.vue'
 import type { CloudSettingsFragment } from '../../generated/graphql'
 
 gql`
+fragment CloudSettings_CloudProject on CurrentProject {
+  id
+  cloudProject @maxExecution(duration: 1000, triggerOnResult: cloudProjectChange) {
+    __typename
+    ... on CloudProject {
+      id
+      cloudProjectSettingsUrl
+      recordKeys {
+        id
+        ...RecordKey
+      }
+    }
+  }
+}
+`
+
+gql`
 fragment CloudSettings on Query {
   ...ProjectId
   currentProject {
     id
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        cloudProjectSettingsUrl
-        recordKeys {
-          id
-          ...RecordKey
-        }
-      }
-    }
+    ...CloudSettings_CloudProject
   }
 }
 `

@@ -1283,6 +1283,9 @@ type Subscription {
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
+  """When the cloud project associated with the current project has changed"""
+  cloudProjectChange: CurrentProject
+
   """
   Triggered when there is a change to the info associated with the cloud project (org added, project added)
   """
@@ -1328,6 +1331,7 @@ type TestingTypeInfo implements Node {
 }
 
 enum TriggerOnResultOptions {
+  cloudProjectChange
   cloudViewerChange
   specsChange
   versionsResolved
