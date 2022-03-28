@@ -97,11 +97,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       cy.state('latestActiveDomain', domain)
 
-      return new Bluebird((resolve, reject) => {
+      return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = () => {
           Cypress.backend('cross:origin:finished', location.originPolicy)
           communicator.off('queue:finished', onQueueFinished)
         }
+
+        onCancel && onCancel(() => {
+          cleanup()
+        })
 
         const _resolve = ({ subject, unserializableSubjectType }) => {
           cleanup()
@@ -202,7 +206,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 error: err.message,
               })
 
-              reject(wrappedErr)
+              _reject(wrappedErr)
             }
           }
         })
