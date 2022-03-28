@@ -50,7 +50,6 @@ export class ProjectConfigManager {
   private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEvents: Record<string, Function> = {}
-  private _registeredEventsTarget: TestingType | undefined
   private _testingType: TestingType | undefined
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
@@ -141,12 +140,7 @@ export class ProjectConfigManager {
   }
 
   loadTestingType () {
-    // If we have set a testingType, and it's not the "target" of the
-    // registeredEvents (switching testing mode), we need to get a fresh
-    // config IPC & re-execute the setupTestingType
-    if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.reloadConfig().catch(this.onLoadError)
-    } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
+    if (this._eventsIpc && this._cachedLoadConfig) {
       this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
     }
   }
@@ -179,8 +173,6 @@ export class ProjectConfigManager {
     debug('callSetupNodeEvents', this._testingType)
     assert(this._testingType)
     const config = await this.getFullInitialConfig()
-
-    this._registeredEventsTarget = this._testingType
 
     for (const handler of this.options.handlers) {
       handler(ipc)
@@ -275,7 +267,6 @@ export class ProjectConfigManager {
 
   async reloadConfig () {
     this._loadConfigPromise = undefined
-    this._registeredEventsTarget = undefined
 
     await this.initializeConfig()
     this.loadTestingType()
@@ -718,7 +709,6 @@ export class ProjectConfigManager {
     this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined
     this._eventProcess = undefined
-    this._registeredEventsTarget = undefined
     this.closeWatchers()
   }
 }
