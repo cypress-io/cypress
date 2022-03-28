@@ -174,18 +174,6 @@ fragment Specs_SpecsList on Query {
 }
 `
 
-gql`
-subscription SpecsList_Specs {
-  specsChange {
-    id
-    specs {
-      id
-      ...SpecsList
-    }
-  }
-}
-`
-
 const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
