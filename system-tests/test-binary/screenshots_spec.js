@@ -61,6 +61,7 @@ describe('e2e screenshots', () => {
   // and are also generated automatically on failure with
   // the test title as the file name
   systemTests.it('passes', {
+    withBinary: true,
     spec: 'screenshots_spec.js',
     expectedExitCode: 5,
     snapshot: true,
