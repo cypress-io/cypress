@@ -5,6 +5,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { testMiddleware } from './helpers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
+import EventEmitter from 'events'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -300,19 +301,21 @@ describe('http/response-middleware', function () {
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ failed: true })
 
       expect(ctx.res.wantsInjection).to.be.undefined
-      expect(ctx.remoteStates.current().origin).to.equal('http://example.com')
 
       return promise
     })
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
+      const eventEmitter = new EventEmitter({})
 
+      // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
 
-      props.secondaryOrigins?.forEach((origin) => {
-        remoteStates.set(origin, { isMultiDomain: true })
-        remoteStates.addOrigin(origin)
+      // set the secondary remote states
+      remoteStates.addEventListeners(eventEmitter)
+      props.secondaryOrigins?.forEach((originPolicy) => {
+        eventEmitter.emit('ready:for:domain', { originPolicy })
       })
 
       ctx = {
@@ -587,12 +590,15 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
+      const eventEmitter = new EventEmitter({})
 
+      // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
 
-      props.secondaryOrigins?.forEach((origin) => {
-        remoteStates.set(origin, { isMultiDomain: true })
-        remoteStates.addOrigin(origin)
+      // set the secondary remote states
+      remoteStates.addEventListeners(eventEmitter)
+      props.secondaryOrigins?.forEach((originPolicy) => {
+        eventEmitter.emit('ready:for:domain', { originPolicy })
       })
 
       ctx = {
@@ -906,12 +912,15 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
+      const eventEmitter = new EventEmitter({})
 
+      // set the primary remote state
       remoteStates.set('http://foobar.com')
 
-      props.secondaryOrigins?.forEach((origin) => {
-        remoteStates.set(origin, { isMultiDomain: true })
-        remoteStates.addOrigin(origin)
+      // set the secondary remote states
+      remoteStates.addEventListeners(eventEmitter)
+      props.secondaryOrigins?.forEach((originPolicy) => {
+        eventEmitter.emit('ready:for:domain', { originPolicy })
       })
 
       return {

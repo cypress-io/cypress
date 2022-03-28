@@ -2,8 +2,7 @@ import { cors } from '@packages/network'
 import origin from './util/origin'
 import Debug from 'debug'
 import _ from 'lodash'
-import type { SocketE2E } from './socket-e2e'
-import type { SocketCt } from './socket-ct'
+import type EventEmitter from 'events'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -139,8 +138,8 @@ export class RemoteStates {
     return this.get(remoteOriginPolicy) as Cypress.RemoteState
   }
 
-  addSocketListeners (socket: SocketE2E | SocketCt) {
-    socket.localBus.on('ready:for:domain', ({ originPolicy, failed }) => {
+  addEventListeners (eventEmitter: EventEmitter) {
+    eventEmitter.on('ready:for:domain', ({ originPolicy, failed }) => {
       if (failed) return
 
       const existingOrigin = this.remoteStates.get(originPolicy)
@@ -154,7 +153,7 @@ export class RemoteStates {
       this.addOrigin(originPolicy)
     })
 
-    socket.localBus.on('cross:origin:finished', (originPolicy) => {
+    eventEmitter.on('cross:origin:finished', (originPolicy) => {
       this.removeCurrentOrigin(originPolicy)
     })
   }
