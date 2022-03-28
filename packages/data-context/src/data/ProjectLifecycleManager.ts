@@ -226,6 +226,11 @@ export class ProjectLifecycleManager {
       cypressVersion: this.ctx._apis.configApi.cypressVersion,
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       onError: (cypressError, title) => {
+        if (this._configManager) {
+          // Reset here but keep the manager around for its state
+          this._configManager.destroy()
+        }
+
         if (this.ctx.isRunMode && this._pendingInitialize) {
           this._pendingInitialize.reject(cypressError)
         } else {
@@ -357,7 +362,6 @@ export class ProjectLifecycleManager {
     }
 
     this.legacyPluginGuard()
-    Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
@@ -372,6 +376,7 @@ export class ProjectLifecycleManager {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
 
+    this.ctx.browser.machineBrowsers().catch(this.onLoadError)
     this.loadCypressEnvFile().catch(this.onLoadError)
   }
 
@@ -424,7 +429,7 @@ export class ProjectLifecycleManager {
     assert(this._configManager)
     this._configManager.setTestingType(testingType)
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
-      this._configManager.loadTestingType()
+      this._configManager.loadTestingType(testingType)
     }
   }
 
