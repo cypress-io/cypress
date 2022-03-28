@@ -86,9 +86,6 @@ export class ProjectLifecycleManager {
   constructor (private ctx: DataContext) {
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
-    } else if (ctx.coreData.currentTestingType && this._projectRoot) {
-      // TODO: figure out what exactly causes this scenario
-      this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
 
     process.on('exit', this.onProcessExit)
