@@ -584,6 +584,9 @@ describe('lib/socket', () => {
           done()
         })
 
+        // add the origin before calling cross:origin:finished (otherwise we'll fail trying to remove the origin)
+        this.client.emit('backend:request', 'ready:for:domain', { originPolicy: 'http://foobar.com' }, () => {})
+
         this.client.emit('backend:request', 'cross:origin:finished', 'http://foobar.com', () => {})
       })
     })
