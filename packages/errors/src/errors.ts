@@ -1399,6 +1399,23 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
+  INTEGRATION_FOLDER_REMOVED: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as an e2e testing property: ${fmt.highlightSecondary('e2e.specPattern')}
+      ${fmt.code(code)}
+
+      https://on.cypress.io/migration-guide`
+  },
+
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

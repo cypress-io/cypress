@@ -15,6 +15,7 @@ export type BreakingOptionErrorKey =
   | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
   | 'EXPERIMENTAL_STUDIO_REMOVED'
   | 'FIREFOX_GC_INTERVAL_REMOVED'
+  | 'INTEGRATION_FOLDER_REMOVED'
   | 'NODE_VERSION_DEPRECATION_SYSTEM'
   | 'NODE_VERSION_DEPRECATION_BUNDLED'
   | 'PLUGINS_FILE_CONFIG_OPTION_REMOVED'
@@ -549,6 +550,10 @@ export const breakingOptions: Array<BreakingOption> = [
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
+  }, {
+    name: 'integrationFolder',
+    errorKey: 'INTEGRATION_FOLDER_REMOVED',
+    isWarning: false,
   }, {
     name: 'nodeVersion',
     value: 'system',

@@ -1122,5 +1122,10 @@ describe('visual error templates', () => {
         default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    INTEGRATION_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
   })
 })
