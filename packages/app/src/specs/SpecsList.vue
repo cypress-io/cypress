@@ -152,7 +152,7 @@ fragment SpecsList on Spec {
   specFileExtension
   fileExtension
   relative
-  gitInfo @maxExecution(duration: 1000, triggerOnResult: specsChange) {
+  gitInfo {
     ...SpecListRow
   }
 }

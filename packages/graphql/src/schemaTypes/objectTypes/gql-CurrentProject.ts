@@ -57,6 +57,10 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
+      maxExecution: {
+        duration: 1000,
+        triggerOnResult: 'cloudProjectChange',
+      },
       description: 'The remote associated project from Cypress Dashboard',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
@@ -203,6 +207,9 @@ export const CurrentProject = objectType({
 
     t.string('branch', {
       description: 'The current branch of the project',
+      maxExecution: {
+        duration: 2000,
+      },
       resolve: async (source, args, ctx) => {
         const branchName = await ctx.git.getBranch(source.projectRoot)
 

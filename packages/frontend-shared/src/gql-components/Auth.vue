@@ -90,7 +90,7 @@ const props = defineProps<{
 
 gql`
 fragment Auth on Query {
-  cloudViewer @maxExecution(duration: 500, triggerOnResult: cloudViewerChange) {
+  cloudViewer {
     id
     email
     fullName

@@ -2,16 +2,8 @@
 ### Do not make changes to this file directly
 
 
-"""
-Add a max-execution time for field, and an optional event to trigger when the field does resolve
-"""
-directive @maxExecution(
-  """
-  Amount of time (in ms) we should wait before returning null for this field
-  """
-  duration: Int!
-  triggerOnResult: TriggerOnResultOptions
-) on FIELD
+"""Skips any maxExecution guard defined internally on the field"""
+directive @skipMaxExecutionGuard on QUERY
 
 """Represents state of auth based on most recent message from login flow"""
 type AuthState {
@@ -1328,13 +1320,6 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
-}
-
-enum TriggerOnResultOptions {
-  cloudProjectChange
-  cloudViewerChange
-  specsChange
-  versionsResolved
 }
 
 """Version of Cypress and release date"""

@@ -61,7 +61,7 @@ fragment SidebarNavigationHeader on Query {
     id
     currentTestingType
     title
-    branch @maxExecution(duration: 1000)
+    branch
   }
 }
 `

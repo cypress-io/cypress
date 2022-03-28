@@ -1,64 +1,54 @@
 import type { DataContext } from '@packages/data-context'
-import { DirectiveLocation, GraphQLDirective, GraphQLEnumType, GraphQLInt, GraphQLNonNull } from 'graphql'
+import { DirectiveLocation, GraphQLDirective } from 'graphql'
 import { plugin } from 'nexus'
-import assert from 'assert'
-import type { TriggerOnResultOptions } from '../gen/nxs.gen'
+import type { NexusGenFieldTypes } from '../gen/nxs.gen'
+
+interface MaxExecutionConfig {
+  duration: number
+  triggerOnResult?: keyof NexusGenFieldTypes['Subscription']
+}
 
 export const maxExecutionDirective = new GraphQLDirective({
-  name: 'maxExecution',
-  description: 'Add a max-execution time for field, and an optional event to trigger when the field does resolve',
-  locations: [DirectiveLocation.FIELD],
+  name: 'skipMaxExecutionGuard',
+  description: 'Skips any maxExecution guard defined internally on the field',
+  locations: [DirectiveLocation.QUERY],
   isRepeatable: false,
-  args: {
-    duration: {
-      type: new GraphQLNonNull(GraphQLInt),
-      description: 'Amount of time (in ms) we should wait before returning null for this field',
-    },
-    triggerOnResult: {
-      type: new GraphQLEnumType({
-        name: 'TriggerOnResultOptions',
-        values: {
-          cloudViewerChange: {},
-          cloudProjectChange: {},
-          versionsResolved: {},
-          specsChange: {},
-        },
-      }),
+})
+
+// Added here because the field is defined automatically by the merged schema
+const CLOUD_EXECUTION: Record<string, Record<string, MaxExecutionConfig>> = {
+  Query: {
+    cloudViewer: {
+      duration: 1000,
+      triggerOnResult: 'cloudViewerChange',
     },
   },
-})
+}
 
 export const nexusMaxExecutionPlugin = plugin({
   name: 'maxExecutionPlugin',
   description: 'If a maxExecution directive is provided, adds a configured Promise.race to the resolution of the field',
+  fieldDefTypes: `maxExecution?: { duration: number, triggerOnResult?: keyof NexusGenFieldTypes['Subscription'] }`,
   onCreateFieldResolver (field) {
+    const maxExecutionConfig = (field.fieldConfig.extensions?.nexus?.config?.maxExecution || CLOUD_EXECUTION[field.parentTypeConfig.name]?.[field.fieldConfig.name]) as MaxExecutionConfig | undefined
+
+    if (!maxExecutionConfig) {
+      return
+    }
+
     return async (source, args, ctx: DataContext, info, next) => {
-      if (info.operation.operation !== 'query') {
+      if (info.operation.operation !== 'query' || info.operation.directives?.some((d) => d.name.value === 'skipMaxExecutionGuard')) {
         return next(source, args, ctx, info)
       }
 
-      const node = info.fieldNodes.map((n) => n.directives?.find((d) => d.name.value === 'maxExecution')).filter((f) => f)
-
-      // Immediately resolve if we don't have an explicit guard for the field execution
-      if (!node?.length) {
-        return next(source, args, ctx, info)
-      }
-
-      const [maxExecutionDirective] = node
-
-      const durationArg = maxExecutionDirective?.arguments?.find((a) => a.name.value === 'duration')
-      const triggerArg = maxExecutionDirective?.arguments?.find((a) => a.name.value === 'triggerOnResult')
-
-      assert(durationArg?.value.kind === 'IntValue')
-      const raceMs = Number(durationArg.value.value)
-      const triggerOnResult = triggerArg?.value.kind === 'EnumValue' ? (triggerArg.value.value as TriggerOnResultOptions) : null
+      const { duration, triggerOnResult } = maxExecutionConfig
 
       let timeoutHit = false
       const RACE_RESULT = {} as const
 
       const result = await Promise.race([
         // If this wins, we resolve with null, and trigger the appropriate client subscription
-        new Promise((resolve) => setTimeout(() => resolve(RACE_RESULT), raceMs)),
+        new Promise((resolve) => setTimeout(() => resolve(RACE_RESULT), duration)),
         // If this wins, we resolve immediately with the result,
         // otherwise we trigger the "triggerOnResult" with the payload
         Promise.resolve(next(source, args, ctx, info)).then((result) => {

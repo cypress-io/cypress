@@ -22,7 +22,7 @@ import type { CloudSettingsFragment } from '../../generated/graphql'
 gql`
 fragment CloudSettings_CloudProject on CurrentProject {
   id
-  cloudProject @maxExecution(duration: 1000, triggerOnResult: cloudProjectChange) {
+  cloudProject {
     __typename
     ... on CloudProject {
       id

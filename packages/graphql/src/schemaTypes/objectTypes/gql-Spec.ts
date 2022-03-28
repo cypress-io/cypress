@@ -42,6 +42,10 @@ export const Spec = objectType({
 
     t.field('gitInfo', {
       type: GitInfo,
+      maxExecution: {
+        duration: 2000,
+        triggerOnResult: 'specsChange',
+      },
       description: 'Git information about the spec file',
       resolve: async (source, args, ctx) => {
         return ctx.git.gitInfo(source.absolute)

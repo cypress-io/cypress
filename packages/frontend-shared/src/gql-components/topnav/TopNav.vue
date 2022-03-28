@@ -215,7 +215,7 @@ const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
 fragment TopNav_Versions on Query {
-  versions @maxExecution(duration: 500, triggerOnResult: versionsResolved) {
+  versions {
     current {
       id
       version
