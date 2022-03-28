@@ -391,6 +391,17 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
   return obj
 }
 
+export function relativeToProjectRoot (projectRoot: string, file: string) {
+  if (!file.startsWith(projectRoot)) {
+    return file
+  }
+
+  // captures leading slash(es), both forward slash and back slash
+  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
+
+  return file.replace(projectRoot, '').replace(leadingSlashRe, '')
+}
+
 // async function
 export async function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
@@ -408,7 +419,11 @@ export async function setSupportFileAndFolder (obj, defaults) {
   }
 
   if (supportFilesByGlob.length === 0) {
-    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
+    if (obj.resolved.supportFile.from === 'default') {
+      return errors.throwErr('DEFAULT_SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
+    }
+
+    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
   }
 
   // TODO move this logic to find support file into util/path_helpers
@@ -441,7 +456,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throwErr('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
+        errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -455,7 +470,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     })
     .then((result) => {
       if (result === null) {
-        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })
