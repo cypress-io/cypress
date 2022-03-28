@@ -102,7 +102,7 @@ export default (Commands, Cypress, cy, state, config) => {
         o.url = args[1]
         o.body = args[2]
       }
-
+      //Handling fixture name passed as parameter
       if (o.body !== undefined && o.body !== null) {
         let fixtureName = new String(o.body)
 
