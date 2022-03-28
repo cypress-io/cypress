@@ -307,7 +307,7 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter({})
+      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
@@ -590,7 +590,7 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter({})
+      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
@@ -912,7 +912,7 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter({})
+      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://foobar.com')

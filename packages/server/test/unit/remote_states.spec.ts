@@ -15,7 +15,7 @@ describe('remote states', () => {
     // set the initial state
     this.remoteStates.set('http://localhost:3500')
 
-    this.eventEmitter = new EventEmitter({})
+    this.eventEmitter = new EventEmitter()
     this.remoteStates.addEventListeners(this.eventEmitter)
   })
 

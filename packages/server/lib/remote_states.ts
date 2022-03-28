@@ -45,8 +45,8 @@ const debug = Debug('cypress:server:remote-states')
 export class RemoteStates {
   private remoteStates: Map<string, Cypress.RemoteState> = new Map()
   private originStack: string[] = []
-  private configure: () => { serverPort: string, fileServerPort: string }
-  private _config: { serverPort: string, fileServerPort: string } | undefined
+  private configure: () => { serverPort: number, fileServerPort: number }
+  private _config: { serverPort: number, fileServerPort: number } | undefined
 
   constructor (configure) {
     this.configure = configure
