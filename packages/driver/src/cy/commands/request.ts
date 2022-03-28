@@ -104,11 +104,11 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       if (o.body !== undefined && o.body !== null) {
-        let fixtureName = o.body
+        let fixtureName = new String(o.body)
 
-        if (o.body.startsWith('fx:')) {
+        if (fixtureName.startsWith('fx:')) {
           fixtureName = fixtureName.replace('fx:', '')
-          o.body = cy.fixture(fixtureName)
+          cy.fixture(fixtureName).then((fixtureData) => o.body = fixtureData)
         }
       }
 
