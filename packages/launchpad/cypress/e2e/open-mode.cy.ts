@@ -28,8 +28,8 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes to component test onboarding when launched with --component and not configured', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--component'])
+    cy.scaffoldProject('pristine')
+    cy.openProject('pristine', ['--component'])
     cy.visitLaunchpad()
     // Component testing is not configured for the todo project
     cy.get('h1').should('contain', 'Project Setup')
