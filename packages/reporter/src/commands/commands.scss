@@ -425,21 +425,12 @@
     overflow-wrap: anywhere;
   }
 
-  .cmd-children {
+  .command-children {
     &:hover {
       .command-group,
       .command-group-block {
         border-left: 1px dotted $gray-400;
       }
-
-      .command-group-attr,
-      .command-group-block {
-        border-left: 1px dotted $red-400;
-      }
-    }
-    &:hover .command.command-wrapper.command-group, 
-    &:hover .command.command-wrapper.command-group.command-wrapper-text.command-group-block {
-      border-left: 1px dotted $gray-400;
     }
   }
 
