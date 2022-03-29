@@ -111,14 +111,11 @@ const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log,
       differences: differences.join(', '),
       previousUrl: previousUrlVisited,
       attemptedUrl: remote.origin,
+      isMultiDomain,
     },
   }
 
-  if (isMultiDomain) {
-    $errUtils.throwErrByPath('switchToDomain.cannot_visit_different_origin', errOpts)
-  } else {
-    $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
-  }
+  $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
 }
 
 const specifyFileByRelativePath = (url, log) => {

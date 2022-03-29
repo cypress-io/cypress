@@ -1805,25 +1805,6 @@ export default {
         docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
     },
-    cannot_visit_different_origin: {
-      message: stripIndent`\
-        ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
-
-        The new URL is considered a different origin because the following parts of the URL are different:
-
-          > {{differences}}
-
-        You may only ${cmd('visit')} same-origin URLs within ${cmd('switchToDomain')}.
-
-        The previous URL you visited was:
-
-          > '{{previousUrl}}'
-
-        You're attempting to visit this URL:
-
-          > '{{attemptedUrl}}'`,
-      docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
-    },
   },
 
   task: {
@@ -2090,26 +2071,28 @@ export default {
         \`url\` from the \`url\` parameter: {{url}}`,
       docsUrl: 'https://on.cypress.io/visit',
     },
-    cannot_visit_different_origin: {
-      message: stripIndent`\
-        ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
+    cannot_visit_different_origin (args) {
+      return {
+        message: stripIndent`\
+          ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-        The new URL is considered a different origin because the following parts of the URL are different:
+          The new URL is considered a different origin because the following parts of the URL are different:
 
-          > {{differences}}
+            > {{differences}}
 
-        You may only ${cmd('visit')} same-origin URLs within a single test.
+          You may only ${cmd('visit')} same-origin URLs within ${args.isMultiDomain ? cmd('switchToDomain') : 'a single test'}.
 
-        The previous URL you visited was:
+          The previous URL you visited was:
 
-          > '{{previousUrl}}'
+            > '{{previousUrl}}'
 
-        You're attempting to visit this URL:
+          You're attempting to visit this URL:
 
-          > '{{attemptedUrl}}'
+            > '{{attemptedUrl}}'
 
-        You may need to restructure some of your test code to avoid this problem.`,
-      docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
+          You may need to restructure some of your test code to avoid this problem.`,
+        docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
+      }
     },
     loading_network_failed: stripIndent`\
       ${cmd('visit')} failed trying to load:
