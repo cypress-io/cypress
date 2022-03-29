@@ -305,30 +305,30 @@ class Command extends Component<Props> {
                   <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
                   : <Message model={model} />
                 }
-                <span className='command-controls'>
-                  {model.isInvisible && (
-                    <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-                      <span>
-                        <HiddenIcon className='command-invisible' />
+              </span>
+              <span className='command-controls'>
+                {model.isInvisible && (
+                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+                    <span>
+                      <HiddenIcon className='command-invisible' />
+                    </span>
+                  </Tooltip>
+                )}
+                {displayNumOfElements && (
+                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                    <span className={cs('num-elements', 'command-num-elements')}>{model.numElements}</span>
+                  </Tooltip>
+                )}
+                <span className='alias-container'>
+                  <Interceptions model={model} />
+                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                  {displayNumOfChildren && (
+                    <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
+                      <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
+                        {model.numChildren}
                       </span>
                     </Tooltip>
                   )}
-                  {displayNumOfElements && (
-                    <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                      <span className={cs('num-elements', 'command-num-elements')}>{model.numElements}</span>
-                    </Tooltip>
-                  )}
-                  <span className='alias-container'>
-                    <Interceptions model={model} />
-                    <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                    {displayNumOfChildren && (
-                      <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
-                        <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
-                          {model.numChildren}
-                        </span>
-                      </Tooltip>
-                    )}
-                  </span>
                 </span>
               </span>
               <Progress model={model} />

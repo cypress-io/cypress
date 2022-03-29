@@ -185,8 +185,8 @@
   }
 
   .command-info {
-    display: flex;
-    flex-wrap: wrap;
+    // display: flex;
+    // flex-wrap: wrap;
     padding-top: 2px;
     padding-bottom: 2px;
     margin-left: 0;
@@ -195,8 +195,10 @@
 
     .command-aliases,
     .command-message {
-      display: flex;
-      flex-grow: 2;
+      // display: inline;
+      overflow: hidden;
+      // display: flex;
+      // flex-grow: 2;
 
       .fa-circle {
         padding: 4px;
@@ -223,8 +225,8 @@
   }
 
   .command-message-text {
-    display: block;
-    flex-grow: 2;
+    // display: block;
+    // flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -424,9 +426,11 @@
   .command-message-text {
     font-size: 12px;
     white-space: initial;
-    word-wrap: break-word;
-    line-height: 1.5;
-    display: -webkit-box;
+    word-wrap: inherit;
+    line-break: anywhere;
+    width: 100%;
+    // line-height: 1.5;
+    // display: -webkit-box;
     -webkit-line-clamp: 50;
     -webkit-box-orient: vertical;
   }
@@ -440,6 +444,7 @@
   }
 
   .command-controls {
+    display: flex;
     padding-right: 2px;
 
     svg {
