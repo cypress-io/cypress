@@ -111,13 +111,7 @@ describe('<OpenBrowserList />', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.browserStatus = 'open'
-
-        // The id of '14' maps to the "Fake Browser" stubbed by our mock-graphql schema
-        res.currentBrowser = {
-          id: '14',
-          isFocusSupported: false,
-          __typename: 'Browser',
-        }
+        res.currentBrowser!.isFocusSupported = false
       },
       render: (gqlVal) => {
         return (
@@ -129,13 +123,13 @@ describe('<OpenBrowserList />', () => {
       },
     })
 
-    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Fake Browser')).should('be.disabled')
+    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
     cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
 
     cy.percySnapshot()
   })
 
-  it('hides open button when currentBrowser is null', () => {
+  it('hides action buttons when currentBrowser is null', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.currentBrowser = null

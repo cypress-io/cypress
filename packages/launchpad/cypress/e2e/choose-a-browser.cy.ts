@@ -176,8 +176,8 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.withCtx((ctx) => {
-        ctx.actions.project.launchProject = sinon.spy()
+      cy.withCtx((ctx, o) => {
+        ctx.actions.project.launchProject = o.sinon.spy()
       })
 
       cy.intercept('mutation-OpenBrowser_LaunchProject', cy.stub().as('launchProject'))
@@ -219,8 +219,8 @@ describe('Choose a Browser Page', () => {
 
       cy.intercept('mutation-OpenBrowser_FocusActiveBrowserWindow').as('focusBrowser')
 
-      cy.withCtx((ctx) => {
-        sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
       })
 
       cy.get('@focusButton').click()
@@ -240,9 +240,9 @@ describe('Choose a Browser Page', () => {
       })
 
       cy.openProject('launchpad', ['--e2e'])
-      cy.withCtx((ctx) => {
+      cy.withCtx((ctx, o) => {
         ctx.project.setRelaunchBrowser(true)
-        ctx.actions.project.launchProject = sinon.stub()
+        ctx.actions.project.launchProject = o.sinon.stub()
       })
 
       cy.visitLaunchpad()
