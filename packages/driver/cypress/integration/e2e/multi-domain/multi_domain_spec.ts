@@ -275,4 +275,20 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
     .invoke('text')
     .should('equal', 'Welcome TJohnson')
   })
+
+  it('creates a spec bridge for https://example.com', () => {
+    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.switchToDomain('example.com', () => {
+      cy.visit('https://example.com')
+      cy.get('h1').invoke('text').should('equal', 'Example Domain')
+    })
+  })
+
+  it('creates a spec bridge for http://example.com', () => {
+    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.switchToDomain('http://example.com', () => {
+      cy.visit('http://example.com')
+      cy.get('h1').invoke('text').should('equal', 'Example Domain')
+    })
+  })
 })
