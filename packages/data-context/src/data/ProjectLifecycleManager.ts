@@ -835,7 +835,7 @@ export class ProjectLifecycleManager {
     }
 
     if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      // this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
       return
     }
