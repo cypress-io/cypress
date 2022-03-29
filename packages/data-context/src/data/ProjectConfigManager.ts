@@ -1,13 +1,10 @@
 import { CypressError, getError } from '@packages/errors'
 import { IpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
-import pDefer from 'p-defer'
 import type { AllModeOptions, FullConfig, TestingType } from '@packages/types'
 import debugLib from 'debug'
-import { ChildProcess, ForkOptions, fork } from 'child_process'
 import path from 'path'
 import _ from 'lodash'
-import inspector from 'inspector'
 import chokidar from 'chokidar'
 import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
 import { CypressEnv } from './CypressEnv'
@@ -17,8 +14,6 @@ import type { DataContext } from '../DataContext'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
-
-const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -40,7 +35,6 @@ export class ProjectConfigManager {
   private _configFilePath: string | undefined
   private _cachedFullConfig: FullConfig | undefined
   private _eventsIpc?: ProjectConfigIpc
-  private _eventProcess: ChildProcess | undefined
   private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEventsTarget: TestingType | undefined
@@ -126,7 +120,7 @@ export class ProjectConfigManager {
     } catch (error) {
       debug(`catch %o`, error)
       if (this._eventsIpc) {
-        this._cleanupIpc(this._eventsIpc)
+        this._eventsIpc.cleanupIpc()
       }
 
       this._state = 'errored'
@@ -162,7 +156,7 @@ export class ProjectConfigManager {
       debug(`catch setupNodeEvents %o`, error)
       this._state = 'errored'
       if (this._eventsIpc) {
-        this._cleanupIpc(this._eventsIpc)
+        this._eventsIpc.cleanupIpc()
       }
 
       this.closeWatchers()
@@ -184,7 +178,8 @@ export class ProjectConfigManager {
       handler(ipc)
     }
 
-    const { promise } = this.registerSetupIpcHandlers(ipc)
+    assert(this._eventsIpc)
+    const promise = this._eventsIpc.registerSetupIpcHandlers()
 
     const overrides = config[this._testingType] ?? {}
     const mergedConfig = { ...config, ...overrides }
@@ -283,132 +278,18 @@ export class ProjectConfigManager {
     if (!this._loadConfigPromise) {
       // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
       if (this._eventsIpc) {
-        this._cleanupIpc(this._eventsIpc)
+        this._eventsIpc.cleanupIpc()
       }
 
-      this._eventProcess = this.forkConfigProcess()
-      this._loadConfigPromise = this.wrapConfigProcess(this._eventProcess)
+      this._eventsIpc = new ProjectConfigIpc(this.options.ctx.nodePath, this.options.projectRoot, this.configFilePath, this.options.configFile, (cypressError: CypressError, title?: string | undefined) => {
+        this._state = 'errored'
+        this.options.ctx.onError(cypressError, title)
+      }, this.options.ctx.onWarning)
+
+      this._loadConfigPromise = this._eventsIpc.loadConfig()
     }
 
     return this._loadConfigPromise
-  }
-
-  private forkConfigProcess () {
-    const configProcessArgs = ['--projectRoot', this.options.projectRoot, '--file', this.configFilePath]
-    // allow the use of ts-node in subprocesses tests by removing the env constant from it
-    // without this line, packages/ts/register.js never registers the ts-node module for config and
-    // run_plugins can't use the config module.
-    const { CYPRESS_INTERNAL_E2E_TESTING_SELF, ...env } = process.env
-
-    env.NODE_OPTIONS = process.env.ORIGINAL_NODE_OPTIONS || ''
-
-    const childOptions: ForkOptions = {
-      stdio: 'pipe',
-      cwd: path.dirname(this.configFilePath),
-      env,
-      execPath: this.options.ctx.nodePath ?? undefined,
-    }
-
-    if (inspector.url()) {
-      childOptions.execArgv = _.chain(process.execArgv.slice(0))
-      .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + 1}`)
-      .value()
-    }
-
-    debug('fork child process', CHILD_PROCESS_FILE_PATH, configProcessArgs, _.omit(childOptions, 'env'))
-
-    const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
-
-    return proc
-  }
-
-  private wrapConfigProcess (child: ChildProcess): Promise<LoadConfigReply> {
-    return new Promise((resolve, reject) => {
-      // The "IPC" is an EventEmitter wrapping the child process, adding a "send"
-      // method, and re-emitting any "message" that comes through the channel through the EventEmitter
-      const ipc = new ProjectConfigIpc(child)
-
-      if (child.stdout && child.stderr) {
-        // manually pipe plugin stdout and stderr for dashboard capture
-        // @see https://github.com/cypress-io/cypress/issues/7434
-        child.stdout.on('data', (data) => process.stdout.write(data))
-        child.stderr.on('data', (data) => process.stderr.write(data))
-      }
-
-      let resolved = false
-
-      child.on('error', (err) => {
-        this.handleChildProcessError(err, ipc, resolved, reject)
-        reject(err)
-      })
-
-      /**
-       * This reject cannot be caught anywhere??
-       *
-       * It's supposed to be caught on lib/modes/run.js:1689,
-       * but it's not.
-       */
-      ipc.on('childProcess:unhandledError', (err) => {
-        this.handleChildProcessError(err, ipc, resolved, reject)
-        reject(err)
-      })
-
-      ipc.once('loadConfig:reply', (val) => {
-        debug('loadConfig:reply')
-        resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
-        resolved = true
-      })
-
-      ipc.once('loadConfig:error', (err) => {
-        this.killChildProcess(child)
-        reject(err)
-      })
-
-      debug('trigger the load of the file')
-      ipc.once('ready', () => {
-        ipc.send('loadConfig')
-      })
-
-      this._eventsIpc = ipc
-    })
-  }
-
-  private handleChildProcessError (err: any, ipc: ProjectConfigIpc, resolved: boolean, reject: (reason?: any) => void) {
-    debug('plugins process error:', err.stack)
-
-    this._state = 'errored'
-    this._cleanupIpc(ipc)
-
-    err = getError('CONFIG_FILE_UNEXPECTED_ERROR', this.options.configFile || '(unknown config file)', err)
-    err.title = 'Config process error'
-
-    // this can sometimes trigger before the promise is fulfilled and
-    // sometimes after, so we need to handle each case differently
-    if (resolved) {
-      this.options.onError(err)
-    } else {
-      reject(err)
-    }
-  }
-
-  private _cleanupIpc (ipc: ProjectConfigIpc) {
-    this.killChildProcess(ipc.childProcess)
-    ipc.removeAllListeners()
-    if (this._eventsIpc === ipc) {
-      this._eventsIpc = undefined
-    }
-
-    if (this._eventProcess === ipc.childProcess) {
-      this._eventProcess = undefined
-    }
-  }
-
-  private killChildProcess (child: ChildProcess) {
-    child.kill()
-    child.stdout?.removeAllListeners()
-    child.stderr?.removeAllListeners()
-    child.removeAllListeners()
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
@@ -566,29 +447,6 @@ export class ProjectConfigManager {
     return _.cloneDeep(fullConfig)
   }
 
-  private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
-    const dfd = pDefer<SetupNodeEventsReply>()
-
-    ipc.childProcess.on('error', dfd.reject)
-
-    // For every registration event, we want to turn into an RPC with the child process
-    ipc.once('setupTestingType:reply', dfd.resolve)
-
-    ipc.once('setupTestingType:error', (err) => {
-      dfd.reject(err)
-    })
-
-    const handleWarning = (warningErr: CypressError) => {
-      debug('plugins process warning:', warningErr.stack)
-
-      return this.options.ctx.onWarning(warningErr)
-    }
-
-    ipc.on('warning', handleWarning)
-
-    return dfd
-  }
-
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
     if (this._cachedFullConfig) {
       return this._cachedFullConfig
@@ -657,13 +515,12 @@ export class ProjectConfigManager {
 
   destroy () {
     if (this._eventsIpc) {
-      this._cleanupIpc(this._eventsIpc)
+      this._eventsIpc.cleanupIpc()
     }
 
     this._state = 'pending'
     this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined
-    this._eventProcess = undefined
     this._registeredEventsTarget = undefined
     this.closeWatchers()
   }
