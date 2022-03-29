@@ -1,14 +1,23 @@
 exports['e2e screenshots / passes'] = `
+⚠ Warning: It looks like you're passing CYPRESS_INTERNAL_ENV=test
+
+The environment variable "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
+
+Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.
+⚠ Warning: Binary version 9.5.3 does not match the expected package version 0.0.0-development
+
+  These versions may not work properly together.
 
 ====================================================================================================
 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshots_spec.js)                                                      │
-  │ Searched:   cypress/integration/screenshots_spec.js                                            │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   vX (/foo/bar/node)                                                             │
+  │ Specs:          1 found (screenshots_spec.js)                                                  │
+  │ Searched:       cypress/integration/screenshots_spec.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

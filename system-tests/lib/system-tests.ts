@@ -1,6 +1,7 @@
 const snapshot = require('snap-shot-it')
 
 import type { SpawnOptions } from 'child_process'
+import os from 'os'
 import stream from 'stream'
 import { expect } from './spec_helper'
 import { dockerSpawner } from './docker'
@@ -268,10 +269,6 @@ export type SpawnerResult = {
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
-  if (options.withBinary) {
-    throw new Error('withBinary is not supported without the use of dockerImage')
-  }
-
   return cp.spawn(cmd, args, {
     env,
     ...options.spawnOpts,
@@ -793,19 +790,26 @@ const systemTests = {
   },
 
   args (options: ExecOptions) {
+    console.log(options)
     debug('converting options to args %o', { options })
 
     const projectPath = Fixtures.projectPath(options.project)
-    const args = options.withBinary ? [
-      `run`,
-      `--project=${projectPath}`,
-    ] : [
-      require.resolve('@packages/server'),
-      // hides a user warning to go through NPM module
-      `--cwd=${serverPath}`,
-      `--run-project=${projectPath}`,
-      `--testingType=${options.testingType || 'e2e'}`,
-    ]
+
+    const args = []
+
+    if (options.withBinary && options.dockerImage) {
+      args.push(`run`, `--project=${projectPath}`)
+    } else if (options.withBinary) {
+      args.push('../cli/bin/cypress', `run`, `--project=${projectPath}`)
+    } else {
+      args.push(
+        require.resolve('@packages/server'),
+        // hides a user warning to go through NPM module
+        `--cwd=${serverPath}`,
+        `--run-project=${projectPath}`,
+        `--testingType=${options.testingType || 'e2e'}`,
+      )
+    }
 
     if (options.testingType === 'component') {
       args.push('--component-testing')
@@ -820,8 +824,8 @@ const systemTests = {
       args.push(`--port=${options.port}`)
     }
 
-    if (!_.isUndefined(options.headed)) {
-      args.push('--headed', String(options.headed))
+    if (options.headed) {
+      args.push('--headed')
     }
 
     if (options.record) {
@@ -1018,7 +1022,7 @@ const systemTests = {
 
     debug('spawning Cypress %o', { args })
 
-    const cmd = options.command || (options.withBinary ? 'cypress' : 'node')
+    const cmd = options.command || ((options.withBinary && options.dockerImage) ? 'cypress' : 'node')
 
     const env = _.chain(process.env)
     .omit('CYPRESS_DEBUG')
@@ -1045,6 +1049,8 @@ const systemTests = {
 
       // disable frame skipping to make quick Chromium tests have matching snapshots/working video
       CYPRESS_EVERY_NTH_FRAME: 1,
+
+      ...(options.withBinary && !options.dockerImage ? { CYPRESS_RUN_BINARY: `../build/build/${os.platform()}-unpacked/Cypress` } : {}),
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
