@@ -55,7 +55,7 @@
           </div>
           <div
             class="font-medium pt-2 text-indigo-600 text-18px leading-28px"
-            :class="{ 'text-jade-600': browser.id === selectedBrowserId, 'text-gray-500': browser.disabled || !browser.isVersionSupported }"
+            :class="{ 'text-jade-600': checked, 'text-gray-500': browser.disabled || !browser.isVersionSupported }"
           >
             {{ browser.displayName }}
           </div>
