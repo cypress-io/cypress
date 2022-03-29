@@ -540,7 +540,7 @@ commands:
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -DW ~/cypress/cypress.tgz
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz
       - run:
           name: Run system tests
           command: |
