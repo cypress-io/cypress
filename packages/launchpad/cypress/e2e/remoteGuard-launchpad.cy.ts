@@ -3,7 +3,6 @@ import type Sinon from '@packages/../cli/types/sinon'
 describe('remoteGuard: launchpad', () => {
   beforeEach(() => {
     cy.scaffoldProject('todos')
-    cy.openProject('todos')
     cy.withCtx((ctx, o) => {
       const currentStubbbedFetch = ctx.util.fetch;
 
@@ -21,6 +20,8 @@ describe('remoteGuard: launchpad', () => {
         return result
       })
     })
+
+    cy.openProject('todos')
   })
 
   afterEach(() => {

@@ -298,10 +298,10 @@ function visitApp (href?: string) {
   })
 }
 
-function visitLaunchpad () {
+function visitLaunchpad (config?: {timeout?: number}) {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
     return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
-      return cy.get('[data-e2e]', { timeout: 2000, log: false }).then(() => {
+      return cy.get('[data-e2e]', { timeout: config?.timeout ?? 10000, log: false }).then(() => {
         return val
       })
     })

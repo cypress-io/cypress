@@ -144,8 +144,8 @@ export class WizardActions {
   async scaffoldTestingType () {
     const { currentTestingType, wizard: { chosenLanguage } } = this.ctx.coreData
 
-    assert(currentTestingType)
-    assert(chosenLanguage)
+    assert(currentTestingType, 'Must have a currentTestingType to scaffold testing type')
+    assert(chosenLanguage, 'Must have a chosen language to scaffoldTestingType')
 
     switch (currentTestingType) {
       case 'e2e': {
@@ -182,7 +182,9 @@ export class WizardActions {
     debug('scaffoldComponent')
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
-    assert(chosenFramework && chosenLanguage && chosenBundler)
+    assert(chosenLanguage, 'Must have a chosen language to scaffold component')
+    assert(chosenFramework, 'Must ahve a chosen framework to scaffold component')
+    assert(chosenBundler, 'Must have a chosen bundler to scaffold component')
 
     return await Promise.all([
       this.scaffoldConfig('component'),
