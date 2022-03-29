@@ -39,7 +39,6 @@ type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadin
 export class ProjectConfigManager {
   private _configFilePath: string | undefined
   private _cachedFullConfig: FullConfig | undefined
-  private _childProcesses = new Set<ChildProcess>()
   private _eventsIpc?: ProjectConfigIpc
   private _eventProcess: ChildProcess | undefined
   private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
@@ -313,15 +312,13 @@ export class ProjectConfigManager {
     if (inspector.url()) {
       childOptions.execArgv = _.chain(process.execArgv.slice(0))
       .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + this._childProcesses.size + 1}`)
+      .push(`--inspect=${process.debugPort + 1}`)
       .value()
     }
 
     debug('fork child process', CHILD_PROCESS_FILE_PATH, configProcessArgs, _.omit(childOptions, 'env'))
 
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
-
-    this._childProcesses.add(proc)
 
     return proc
   }
@@ -396,7 +393,7 @@ export class ProjectConfigManager {
   }
 
   private _cleanupIpc (ipc: ProjectConfigIpc) {
-    this._cleanupProcess(ipc.childProcess)
+    this.killChildProcess(ipc.childProcess)
     ipc.removeAllListeners()
     if (this._eventsIpc === ipc) {
       this._eventsIpc = undefined
@@ -407,23 +404,11 @@ export class ProjectConfigManager {
     }
   }
 
-  private _cleanupProcess (proc: ChildProcess) {
-    proc.kill()
-    this._childProcesses.delete(proc)
-  }
-
   private killChildProcess (child: ChildProcess) {
     child.kill()
     child.stdout?.removeAllListeners()
     child.stderr?.removeAllListeners()
     child.removeAllListeners()
-  }
-
-  private killChildProcesses () {
-    for (const proc of this._childProcesses) {
-      this._cleanupProcess(proc)
-    }
-    this._childProcesses = new Set()
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
@@ -675,7 +660,6 @@ export class ProjectConfigManager {
       this._cleanupIpc(this._eventsIpc)
     }
 
-    this.killChildProcesses()
     this._state = 'pending'
     this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined
