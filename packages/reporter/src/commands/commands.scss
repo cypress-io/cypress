@@ -58,6 +58,7 @@
     color: $gray-500;
     display: flex;
     min-height: 20px;
+    padding-top: 1px;
     padding-right: 2px;
 
     &:hover {
@@ -418,7 +419,6 @@
 
   .command-pin-target {
     width: 100%;
-    padding-top: 1px;
   }
 
   .command-message-text {
