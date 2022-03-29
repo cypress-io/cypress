@@ -73,6 +73,18 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
       }).message
 
       const retryErrProps = modifyErrMsg(error, prependMsg, (msg1, msg2) => {
+        const autOrigin = Cypress.state('autOrigin')
+        const commandOrigin = window.location.origin
+
+        if (commandOrigin !== autOrigin) {
+          const appendMsg = errByPath('miscellaneous.cross_origin_command', {
+            commandOrigin,
+            autOrigin,
+          }).message
+
+          return `${msg2}${msg1}\n\n${appendMsg}`
+        }
+
         return `${msg2}${msg1}`
       })
 

@@ -97,6 +97,8 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
   const onWindowLoadPrimary = ({ url }) => {
     cy.isStable(true, 'primary onload')
+
+    cy.state('autOrigin', cors.getOriginPolicy(url))
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
   }
 
@@ -128,7 +130,11 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow)
 
-      Cypress.specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
+      const remoteLocation = cy.getRemoteLocation()
+
+      cy.state('autOrigin', remoteLocation.originPolicy)
+
+      Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
 
       // If load happened in this spec bridge stop listening.

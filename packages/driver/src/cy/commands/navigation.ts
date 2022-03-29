@@ -58,7 +58,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     cy.isAnticipatingMultiDomainFor(undefined)
 
     // By default origins is just this location.
-    let origins = [location.origin]
+    let origins = [cy.getRemoteLocation('originPolicy')]
 
     const currentCommand = cy.queue.state('current')
 
@@ -74,7 +74,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
       args: {
         configFile: Cypress.config('configFile'),
         ms,
-        crossOriginUrl: new URL(anticipatedCrossOriginHref),
+        crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
         origins,
       },
       onFail: log,
