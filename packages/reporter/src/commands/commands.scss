@@ -421,13 +421,33 @@
 
   .command-pin-target {
     width: 100%;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .cmd-children {
+    &:hover {
+      .command-group,
+      .command-group-block {
+        border-left: 1px dotted $gray-400;
+      }
+
+      .command-group-attr,
+      .command-group-block {
+        border-left: 1px dotted $red-400;
+      }
+    }
+    &:hover .command.command-wrapper.command-group, 
+    &:hover .command.command-wrapper.command-group.command-wrapper-text.command-group-block {
+      border-left: 1px dotted $gray-400;
+    }
   }
 
   .command-message-text {
     font-size: 12px;
     white-space: initial;
     word-wrap: inherit;
-    line-break: anywhere;
+    // line-break: anywhere;
     width: 100%;
     // line-height: 1.5;
     // display: -webkit-box;

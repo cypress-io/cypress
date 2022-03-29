@@ -248,12 +248,14 @@ class Command extends Component<Props> {
 
     let groupPlaceholder: Array<JSX.Element> = []
 
+    const cmdGroupClass = `command-group-id-${model.group}`
+
     if (model.groupLevel !== undefined) {
       // cap the group nesting to 6 levels keep the log text legible
       const level = model.groupLevel < 6 ? model.groupLevel : 5
 
       for (let i = 1; i < level; i++) {
-        groupPlaceholder.push(<span key={`${this.props.groupId}-${level}`} className='command-group-block' />)
+        groupPlaceholder.push(<span key={`${this.props.groupId}-${level}`} className={`command-group-id-${model.group} command-group-block`} />)
       }
     }
 
@@ -287,7 +289,7 @@ class Command extends Component<Props> {
             message='Printed output to your console'
             onClick={this._toggleColumnPin}
             shouldShowMessage={this._shouldShowClickMessage}
-            wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
+            wrapperClassName={cs('command-pin-target', cmdGroupClass, { 'command-group': !!this.props.groupId })}
           >
             <div
               className='command-wrapper-text'
@@ -344,7 +346,7 @@ class Command extends Component<Props> {
     const { appState, events, model, runnablesStore } = this.props
 
     return (
-      <ul>
+      <ul className='cmd-children'>
         {_.map(model.children, (child) => (
           <Command
             key={child.id}
