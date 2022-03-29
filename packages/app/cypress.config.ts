@@ -45,7 +45,7 @@ export default defineConfig({
       }
 
       // Cy-in-cy currently only works in Chrome
-      config.browsers = config.browsers.filter((b) => b.name.includes('chrom'))
+      config.browsers = config.browsers.filter((b) => b.family === 'chromium' && b.name !== 'electron')
 
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
