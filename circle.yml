@@ -29,7 +29,6 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - marktnoonan/backmerge-develop-3-8-22
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -39,7 +38,6 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ marktnoonan/backmerge-develop-3-8-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -49,7 +47,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ marktnoonan/backmerge-develop-3-8-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -316,6 +313,7 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
             - ~/.yarn
+            - ~/.cy-npm-cache
 
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
@@ -1689,7 +1687,6 @@ jobs:
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
-          pull_request_id: 524
       - install-required-node
       - run:
           name: Remove cypress.json
@@ -2005,7 +2002,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
-          pull_request_id: 524
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2013,7 +2009,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
-          pull_request_id: 524
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
@@ -2021,7 +2016,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
-          pull_request_id: 524
 
   test-binary-against-todomvc-firefox:
     <<: *defaults

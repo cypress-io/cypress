@@ -81,6 +81,7 @@ const warnings = computed(() => {
 const dismiss = (key) => {
   // TODO, call a mutation here so that the server persists the result of the mutation.
   // However, we still intend to keep the "warnings" dismissal so that the client updates immediately before the server responds.
+  // UNIFY-1368
   dismissed.value[key] = true
 }
 

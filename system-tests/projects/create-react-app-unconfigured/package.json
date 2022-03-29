@@ -29,5 +29,5 @@
       "last 1 safari version"
     ]
   },
-  "_cySkipYarnInstall": true
+  "_cySkipDepInstall": true
 }

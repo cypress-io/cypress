@@ -18,5 +18,5 @@
     "last 2 versions",
     "not dead"
   ],
-  "_cySkipYarnInstall": true
+  "_cySkipDepInstall": true
 }

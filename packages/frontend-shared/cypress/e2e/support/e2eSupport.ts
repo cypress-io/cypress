@@ -45,9 +45,10 @@ export interface RemoteGraphQLInterceptPayload {
   variables: Record<string, any>
   document: DocumentNode
   result: ExecutionResult
+  callCount: number
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult>
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -137,14 +138,6 @@ declare global {
        * Visits the Cypress app, for Cypress-in-Cypress testing
        */
       visitApp(href?: string): Chainable<AUTWindow>
-      /**
-       * Visits the Cypress app, but runs GraphQL requests over HTTP
-       * so we can cy.intercept. This is so we don't need to refactor all of
-       * the current tests to use GraphQL over the socket connection, but we
-       * should ideally make the tests transport agnostic. If we need to assert
-       * on things, we can do it with sinon spying on things in withCtx
-       */
-      __incorrectlyVisitAppWithIntercept(href?: string): Chainable<AUTWindow>
       /**
        * Visits the Cypress launchpad
        */
@@ -283,11 +276,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   })
 }
 
-interface VisitAppConfig {
-  withIntercept?: boolean
-}
-
-function visitApp (href?: string, config?: VisitAppConfig) {
+function visitApp (href?: string) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -298,27 +287,15 @@ function visitApp (href?: string, config?: VisitAppConfig) {
     `)
   }
 
-  const title = config?.withIntercept ? '__incorrectlyVisitAppWithIntercept' : 'visitApp'
-
-  return logInternal(title, () => {
+  return logInternal('visitApp', () => {
     return cy.withCtx(async (ctx) => {
       const config = await ctx.lifecycleManager.getFullInitialConfig()
 
       return config.clientRoute
     }).then((clientRoute) => {
-      const visitConfig: Partial<Cypress.VisitOptions> = config?.withIntercept ? {
-        onBeforeLoad (win) {
-          win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
-        },
-      } : {}
-
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, visitConfig)
+      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
     })
   })
-}
-
-function __incorrectlyVisitAppWithIntercept (href?: string) {
-  return visitApp(href, { withIntercept: true })
 }
 
 function visitLaunchpad () {
@@ -474,7 +451,9 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
     .click()
 
     cy.withRetryableCtx(async (ctx, o) => {
-      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq(o.href)
+      // The actual openExternal call may include the GQL port, so we only assert that it starts with the requested href
+      // rather than equalling it exactly.
+      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg.startsWith(o.href)).to.be.true
     }, { href, log: false })
 
     return cy.get('@Link')
@@ -512,7 +491,6 @@ Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
-Cypress.Commands.add('__incorrectlyVisitAppWithIntercept', __incorrectlyVisitAppWithIntercept)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('startAppServer', startAppServer)
@@ -524,6 +502,12 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    '.runnable-header .duration': ($el) => {
+      $el.text('XX:XX')
+    },
+  },
+})
 
 addNetworkCommands()

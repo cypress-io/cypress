@@ -2876,9 +2876,9 @@ declare namespace Cypress {
    */
   interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
-     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js})
      */
-    configFile: string | false
+    configFile: string
     /**
      * CPU architecture, from Node `os.arch()`
      *

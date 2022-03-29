@@ -35,7 +35,6 @@
     </ButtonInternals>
   </button>
 
-  <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
   <component
     :is="linkVersion"
     v-else
@@ -147,6 +146,8 @@ const linkVersion = computed(() => {
 })
 
 const linkProps = computed(() => {
+  // context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html
+
   if (props.disabled) {
     return {
       role: 'link',

@@ -656,6 +656,11 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
+    DEFAULT_SUPPORT_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/supportFile/**/*.{js,jsx,ts,tsx}'],
+      }
+    },
     CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
@@ -1114,7 +1119,7 @@ describe('visual error templates', () => {
     },
     TEST_FILES_RENAMED: () => {
       return {
-        default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
+        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     COMPONENT_FOLDER_REMOVED: () => {

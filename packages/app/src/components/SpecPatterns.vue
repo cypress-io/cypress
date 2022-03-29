@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full border-gray-100 rounded border-1px">
-    <div class="flex items-center justify-between p-16px">
+  <div class="rounded border-gray-100 border-1px w-full">
+    <div class="flex p-16px items-center justify-between">
       <FileMatchIndicator>
         <i18n-t
           scope="global"
@@ -14,7 +14,7 @@
         :gql="props.gql"
       >
         <button
-          class="flex items-center text-indigo-500 outline-transparent gap-8px group"
+          class="flex outline-transparent text-indigo-500 gap-8px items-center group"
           @click="onClick"
         >
           <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
@@ -27,7 +27,7 @@
       <code
         v-for="pattern in specPatterns"
         :key="pattern"
-        class="flex block text-gray-600 py-8px text-size-14px leading-24px"
+        class="flex py-8px text-gray-600 text-size-14px leading-24px block"
         data-cy="spec-pattern"
       >
         {{ pattern }}
@@ -61,7 +61,7 @@ const props = defineProps<{
 }>()
 
 const specPatterns = computed<string[]>(() => {
-  let patterns = props.gql.config.find((x) => x.field === props.gql.currentTestingType)?.value?.specPattern
+  const patterns = props.gql.config.find((x) => x.field === 'specPattern')?.value
 
   if (!patterns) {
     return []

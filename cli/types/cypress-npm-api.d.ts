@@ -37,7 +37,7 @@ declare namespace CypressCommandLine {
   interface CypressRunOptions extends CypressCommonOptions {
     /**
      * Specify browser to run tests in, either by name or by filesystem path
-    */
+     */
     browser: string
     /**
      * Specify a unique identifier for a run to enable grouping or parallelization
@@ -114,7 +114,7 @@ declare namespace CypressCommandLine {
    */
   interface CypressOpenOptions extends CypressCommonOptions {
     /**
-    * Specify browser to run tests in, either by name or by filesystem path
+     * Specify browser to run tests in, either by name or by filesystem path
      */
     browser: string
     /**
@@ -142,11 +142,9 @@ declare namespace CypressCommandLine {
     /**
      * Path to the config file to be used.
      *
-     * If `false` is passed, no config file will be used.
-     *
      * @default "cypress.config.{ts|js}"
      */
-    configFile: string | false
+    configFile: string
     /**
      * Specify environment variables.
      * TODO: isn't this duplicate of config.env?!

@@ -388,6 +388,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """Default spec file name for spec creation"""
+  defaultSpecFileName: String
+
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
@@ -527,6 +530,7 @@ enum ErrorTypeEnum {
   DASHBOARD_STALE_RUN
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
   DASHBOARD_UNKNOWN_INVALID_REQUEST
+  DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
   DUPLICATE_TASK_KEY
   ERROR_READING_FILE
@@ -725,6 +729,15 @@ type GitInfo {
 
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
+
+  """status type - created or modified"""
+  statusType: GitInfoStatusType
+}
+
+enum GitInfoStatusType {
+  created
+  modified
+  unmodified
 }
 
 """A project which exists on the filesystem but has not been opened"""
@@ -1002,7 +1015,7 @@ type Mutation {
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
-  openExternal(url: String!): Boolean
+  openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
 
   """Open a file on specified line and column in preferred IDE"""
   openFileInIDE(input: FileDetailsInput!): Boolean
@@ -1254,8 +1267,14 @@ type Subscription {
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
+  """"""
+  cloudViewerChange: Query
+
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""

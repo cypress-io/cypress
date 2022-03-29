@@ -44,21 +44,6 @@ const stripIndent = (strings: any, ...args: any) => {
 }
 
 describe('lib/util/config-file-updater', () => {
-  context('with configFile: false', () => {
-    beforeEach(function () {
-      this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
-    })
-
-    it('.insertValuesInConfigFile does not create a file', function () {
-      return insertValuesInConfigFile(this.projectRoot, {})
-      .then(() => {
-        throw Error('file shuold not have been created here')
-      }).catch((err) => {
-        expect(err.code).to.equal('ENOENT')
-      })
-    })
-  })
-
   context('with js files', () => {
     describe('#insertValueInJSString', () => {
       describe('es6 vs es5', () => {
@@ -287,12 +272,12 @@ describe('lib/util/config-file-updater', () => {
           }
         `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specPattern: 'src/**/*.spec.cy.js' } })
 
           const expectedOutput = stripIndent`\
               module.exports = {
                 component: {
-                  specFilePattern: "src/**/*.spec.cy.js",
+                  specPattern: "src/**/*.spec.cy.js",
                 },
                 foo: 42
               }
@@ -311,12 +296,12 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specPattern: 'src/**/*.spec.cy.js' } })
 
           const expectedOutput = stripIndent`\
             module.exports = {
               component: {
-                specFilePattern: "src/**/*.spec.cy.js",
+                specPattern: "src/**/*.spec.cy.js",
                 viewportWidth: 800
               },
               foo: 42
@@ -331,18 +316,18 @@ describe('lib/util/config-file-updater', () => {
             module.exports = {
               foo: 42,
               component: {
-                specFilePattern: 'components/**/*.spec.cy.js',
+                specPattern: 'components/**/*.spec.cy.js',
                 foo: 82
               }
             }`
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specPattern: 'src/**/*.spec.cy.js' } })
 
           const expectedOutput = stripIndent`\
           module.exports = {
             foo: 42,
             component: {
-              specFilePattern: "src/**/*.spec.cy.js",
+              specPattern: "src/**/*.spec.cy.js",
               foo: 82
             }
           }`
