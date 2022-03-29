@@ -30,6 +30,14 @@ describe('e2e typescript in spec and support file', function () {
     })
   })
 
+  it('project wtih custom supportFile passes', function () {
+    return systemTests.exec(this, {
+      project: 'ts-proj-custom-names',
+      snapshot: true,
+      expectedExitCode: 0,
+    })
+  })
+
   // this covers spec/support files as well as the plugins file
   // @see https://github.com/cypress-io/cypress/issues/7006
   // @see https://github.com/cypress-io/cypress/issues/8555

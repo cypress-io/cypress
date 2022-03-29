@@ -656,6 +656,11 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
+    DEFAULT_SUPPORT_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/supportFile/**/*.{js,jsx,ts,tsx}'],
+      }
+    },
     CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
