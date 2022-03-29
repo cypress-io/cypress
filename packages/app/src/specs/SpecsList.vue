@@ -66,6 +66,8 @@
           v-for="row in list"
           :id="getIdIfDirectory(row)"
           :key="row.index"
+          :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
+          :data-cy-row="row.data.data?.relative"
         >
           <template #file>
             <RouterLink
@@ -99,7 +101,7 @@
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data.data?.gitInfo"
+              v-if="row.data.isLeaf && row.data.data?.gitInfo"
               :gql="row.data.data.gitInfo"
             />
           </template>
@@ -205,7 +207,11 @@ const specs = computed(() => {
   return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
-const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))
+const collapsible = computed(() => {
+  return useCollapsibleTree(
+    buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true },
+  )
+})
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })

@@ -43,6 +43,7 @@
     "combine-properties": "0.1.0",
     "cross-env": "6.0.3",
     "cypress-real-events": "1.6.0",
+    "dayjs": "^1.9.3",
     "fake-uuid": "^1.0.0",
     "faker": "5.5.3",
     "fuzzysort": "^1.1.4",

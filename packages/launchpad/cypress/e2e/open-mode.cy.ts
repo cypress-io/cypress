@@ -132,4 +132,13 @@ describe('Launchpad: Open Mode', () => {
       })
     })
   })
+
+  it('opens an e2e project without a supportFile', () => {
+    cy.scaffoldProject('no-support-file')
+    cy.openProject('no-support-file', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.contains('Error Loading Config')
+    cy.contains('Your project does not contain a default supportFile.')
+    cy.contains('If a support file is not necessary for your project, set supportFile to false.')
+  })
 })

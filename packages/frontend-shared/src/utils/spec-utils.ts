@@ -1,6 +1,7 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
+import type { ComputedRef, Ref } from 'vue'
 import { ref, watch } from 'vue'
 import _ from 'lodash'
 
@@ -119,15 +120,22 @@ export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
   }
 }
 
-export function useCachedSpecs (specs) {
-  const cachedSpecs = ref<FoundSpec[]>([])
+export type SpecsComparator<T extends Readonly<FileLike>> = (
+  specs: Readonly<T[]>,
+  oldSpecs: Readonly<T[]>
+) => boolean
 
-  watch(specs, (currentSpecs: FoundSpec[], prevSpecs: FoundSpec[] = []) => {
-    const specsAreDifferent =
-        currentSpecs.length !== prevSpecs.length ||
-        currentSpecs.some(
-          (spec, idx) => !_.isEqual(spec, prevSpecs[idx]),
-        )
+type FileLike = {
+  absolute: string
+}
+
+export function useCachedSpecs<S extends { absolute: string }> (
+  specs: ComputedRef<Readonly<S[]>>,
+): Ref<Readonly<S[]>> {
+  const cachedSpecs: Ref<Readonly<S[]>> = ref([])
+
+  watch(specs, (currentSpecs, prevSpecs = []) => {
+    const specsAreDifferent = !_.isEqual(currentSpecs, prevSpecs)
 
     if (specsAreDifferent) {
       cachedSpecs.value = currentSpecs

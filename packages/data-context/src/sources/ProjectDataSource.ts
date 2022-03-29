@@ -260,6 +260,7 @@ export class ProjectDataSource {
 
     this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
     this._specWatcher.on('add', onSpecsChanged)
+    this._specWatcher.on('change', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
   }
 

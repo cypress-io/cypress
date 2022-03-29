@@ -547,6 +547,7 @@ enum ErrorTypeEnum {
   DASHBOARD_STALE_RUN
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
   DASHBOARD_UNKNOWN_INVALID_REQUEST
+  DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
   DUPLICATE_TASK_KEY
   ERROR_READING_FILE
@@ -745,6 +746,15 @@ type GitInfo {
 
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
+
+  """status type - created or modified"""
+  statusType: GitInfoStatusType
+}
+
+enum GitInfoStatusType {
+  created
+  modified
+  unmodified
 }
 
 """A project which exists on the filesystem but has not been opened"""
