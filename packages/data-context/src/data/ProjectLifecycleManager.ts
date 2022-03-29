@@ -474,6 +474,10 @@ export class ProjectLifecycleManager {
     this.resetInternalState()
   }
 
+  registerEvent (event: string, callback: Function) {
+    return this._configManager?.registerEvent(event, callback)
+  }
+
   hasNodeEvent (eventName: string) {
     return this._configManager?.hasNodeEvent(eventName)
   }
