@@ -325,12 +325,12 @@ describe('App: Settings without cloud', () => {
   it('have returned browsers', () => {
     cy.scaffoldProject('simple-ct')
     cy.openProject('simple-ct')
+    cy.findBrowsers()
     cy.startAppServer('component')
 
     cy.visitApp()
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
-    cy.findBrowsers()
 
     cy.get('[data-cy=config-code]').within(() => {
       const { browsers } = Cypress.config()

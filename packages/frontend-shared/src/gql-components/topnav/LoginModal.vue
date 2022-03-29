@@ -119,6 +119,11 @@ const props = defineProps<{
 gql`
 fragment LoginModal on Query {
   ...Auth
+  cloudViewer {
+    id
+    fullName
+    email
+  }
 }
 `
 

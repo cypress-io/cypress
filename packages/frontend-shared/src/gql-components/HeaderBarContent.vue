@@ -84,7 +84,7 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!props.gql?.cloudViewer">
+        <div v-if="!userData">
           <button
             class="flex text-gray-600 group items-center focus:outline-transparent"
             @click="openLogin"
