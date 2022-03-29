@@ -74,7 +74,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
       args: {
         configFile: Cypress.config('configFile'),
         ms,
-        crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
+        crossOriginUrl: new URL(anticipatedCrossOriginHref),
         origins,
       },
       onFail: log,
