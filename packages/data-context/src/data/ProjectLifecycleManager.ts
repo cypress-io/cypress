@@ -18,9 +18,9 @@ import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@pac
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
-import type { IpcHandler } from './ProjectConfigIpc'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
+import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -44,7 +44,6 @@ const POTENTIAL_CONFIG_FILES = [
  */
 export interface InjectedConfigApi {
   cypressVersion: string
-  getServerPluginHandlers: () => IpcHandler[]
   validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
@@ -217,13 +216,10 @@ export class ProjectLifecycleManager {
 
   private createConfigManager () {
     return new ProjectConfigManager({
+      ctx: this.ctx,
       configFile: this.configFile,
       projectRoot: this.projectRoot,
-      nodePath: this.ctx.nodePath,
-      modeOptions: this.ctx.modeOptions,
-      isRunMode: this.ctx.isRunMode,
-      handlers: this.ctx._apis.configApi.getServerPluginHandlers(),
-      cypressVersion: this.ctx._apis.configApi.cypressVersion,
+      handlers: getServerPluginHandlers(),
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       eventRegistrar: this._eventRegistrar,
       onError: (cypressError, title) => {
@@ -232,12 +228,6 @@ export class ProjectLifecycleManager {
         } else {
           this.ctx.onError(cypressError, title)
         }
-      },
-      onWarning: (error) => {
-        this.ctx.onWarning(error)
-      },
-      toLaunchpad: (...args) => {
-        this.ctx.emitter.toLaunchpad(...args)
       },
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
@@ -258,8 +248,6 @@ export class ProjectLifecycleManager {
         if (!this.ctx.isRunMode) {
           if (!this._initializedProject) {
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
-          } else {
-            // TODO: modify the _initializedProject
           }
         }
 
@@ -278,15 +266,6 @@ export class ProjectLifecycleManager {
         }
 
         this._pendingInitialize?.resolve(finalConfig)
-      },
-      updateWithPluginValues: (config, modifiedConfig) => {
-        return this.ctx._apis.configApi.updateWithPluginValues(config, modifiedConfig)
-      },
-      machineBrowsers: async () => {
-        return this.ctx.browser.machineBrowsers()
-      },
-      setupFullConfigWithDefaults: async (config) => {
-        return this.ctx._apis.configApi.setupFullConfigWithDefaults(config)
       },
     })
   }
@@ -475,6 +454,7 @@ export class ProjectLifecycleManager {
   }
 
   reinitializeCypress () {
+    resetPluginHandlers()
     this.resetInternalState()
   }
 

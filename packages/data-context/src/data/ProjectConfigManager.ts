@@ -2,7 +2,7 @@ import { CypressError, getError } from '@packages/errors'
 import { IpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
 import pDefer from 'p-defer'
-import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { AllModeOptions, FullConfig, TestingType } from '@packages/types'
 import debugLib from 'debug'
 import { ChildProcess, ForkOptions, fork } from 'child_process'
 import path from 'path'
@@ -10,11 +10,12 @@ import _ from 'lodash'
 import inspector from 'inspector'
 import chokidar from 'chokidar'
 import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
-import type { SetupFullConfigOptions } from './ProjectLifecycleManager'
 import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
+import type { DataContext } from '../DataContext'
 
+const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
@@ -22,23 +23,15 @@ const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/ch
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
 type ProjectConfigManagerOptions = {
+  ctx: DataContext
   configFile: string | false
   projectRoot: string
-  nodePath: string | null | undefined
-  modeOptions: Partial<AllModeOptions>
-  isRunMode: boolean
   handlers: IpcHandler[]
   hasCypressEnvFile: boolean
-  cypressVersion: string
   eventRegistrar: EventRegistrar
   onError: (cypressError: CypressError, title?: string | undefined) => void
-  onWarning: (err: CypressError) => void
-  toLaunchpad: (...args: any[]) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
-  updateWithPluginValues: (config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>) => FullConfig
-  setupFullConfigWithDefaults: (config: SetupFullConfigOptions) => Promise<FullConfig>
-  machineBrowsers: () => FoundBrowser[] | Promise<FoundBrowser[]>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
@@ -110,7 +103,11 @@ export class ProjectConfigManager {
   async initializeConfig (): Promise<LoadConfigReply['initialConfig']> {
     try {
       this._state = 'loadingConfig'
+
+      // Clean things up for a new load
+      this.closeWatchers()
       this._cachedLoadConfig = undefined
+      this._cachedFullConfig = undefined
 
       const result = await this.loadConfig()
 
@@ -138,7 +135,7 @@ export class ProjectConfigManager {
 
       throw error
     } finally {
-      this.options.toLaunchpad()
+      this.options.ctx.emitter.toLaunchpad()
     }
   }
 
@@ -173,7 +170,7 @@ export class ProjectConfigManager {
 
       throw error
     } finally {
-      this.options.toLaunchpad()
+      this.options.ctx.emitter.toLaunchpad()
     }
   }
 
@@ -207,7 +204,7 @@ export class ProjectConfigManager {
       ...orderedConfig,
       projectRoot: this.options.projectRoot,
       configFile: this.configFilePath,
-      version: this.options.cypressVersion,
+      version: pkg.version,
       testingType: this._testingType,
     })
 
@@ -259,9 +256,9 @@ export class ProjectConfigManager {
     }
 
     const cypressEnv = await this.loadCypressEnvFile()
-    const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.modeOptions)
+    const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.ctx.modeOptions)
 
-    const finalConfig = this._cachedFullConfig = this.options.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
+    const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
     await this.options.onFinalConfigLoaded(finalConfig)
 
@@ -310,7 +307,7 @@ export class ProjectConfigManager {
       stdio: 'pipe',
       cwd: path.dirname(this.configFilePath),
       env,
-      execPath: this.options.nodePath ?? undefined,
+      execPath: this.options.ctx.nodePath ?? undefined,
     }
 
     if (inspector.url()) {
@@ -443,7 +440,7 @@ export class ProjectConfigManager {
       (type, obj) => {
         const error = getError(type, obj)
 
-        this.options.onWarning(error)
+        this.options.ctx.onWarning(error)
 
         return error
       },
@@ -464,7 +461,7 @@ export class ProjectConfigManager {
   }
 
   private watchFiles (paths: string[]) {
-    if (this.options.isRunMode) {
+    if (this.options.ctx.isRunMode) {
       return
     }
 
@@ -487,7 +484,7 @@ export class ProjectConfigManager {
 
     w.on('error', (err) => {
       debug('error watching config files %O', err)
-      this.options.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
+      this.options.ctx.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
 
     return w
@@ -543,7 +540,7 @@ export class ProjectConfigManager {
     configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
 
     // TODO: Convert this to be synchronous, it's just FS checks
-    let fullConfig = await this.options.setupFullConfigWithDefaults({
+    let fullConfig = await this.options.ctx._apis.configApi.setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
@@ -556,7 +553,7 @@ export class ProjectConfigManager {
     })
 
     if (withBrowsers) {
-      const browsers = await this.options.machineBrowsers()
+      const browsers = await this.options.ctx.browser.machineBrowsers()
 
       if (!fullConfig.browsers || fullConfig.browsers.length === 0) {
         // @ts-ignore - we don't know if the browser is headed or headless at this point.
@@ -599,7 +596,7 @@ export class ProjectConfigManager {
     const handleWarning = (warningErr: CypressError) => {
       debug('plugins process warning:', warningErr.stack)
 
-      return this.options.onWarning(warningErr)
+      return this.options.ctx.onWarning(warningErr)
     }
 
     ipc.on('warning', handleWarning)
@@ -607,7 +604,7 @@ export class ProjectConfigManager {
     return dfd
   }
 
-  async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.modeOptions, withBrowsers = true): Promise<FullConfig> {
+  async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
     if (this._cachedFullConfig) {
       return this._cachedFullConfig
     }

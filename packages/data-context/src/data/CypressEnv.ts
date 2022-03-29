@@ -7,17 +7,10 @@ type CypressEnvOptions = {
 }
 
 export class CypressEnv {
-  private _cypressEnvPromise: Promise<Cypress.ConfigOptions> | undefined
-  private _error: Error | undefined
-
   constructor (private options: CypressEnvOptions) {}
 
   async loadCypressEnvFile (): Promise<Cypress.ConfigOptions> {
-    if (!this._cypressEnvPromise) {
-      this._cypressEnvPromise = this.readAndValidateCypressEnvFile()
-    }
-
-    return this._cypressEnvPromise
+    return this.readAndValidateCypressEnvFile()
   }
 
   private async readAndValidateCypressEnvFile () {
