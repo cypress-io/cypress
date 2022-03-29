@@ -581,13 +581,16 @@ export class ProjectLifecycleManager {
     this._configResult = { state: 'loading', value: promise }
 
     return promise.then(async (result) => {
+      // if multiple calls to this function are run in parallel,
+      // check that we are resolving the last promise
       if (this._configResult.value === promise) {
         debug(`config is loaded for file`, this.configFilePath)
-        this._configResult = { state: 'loaded', value: result }
         this.validateConfigFile(this.configFilePath, result.initialConfig)
         await this.onConfigLoaded(child, ipc, result)
+        this._configResult = { state: 'loaded', value: result }
       }
 
+      // this code is run even in an outdated promise
       this.ctx.emitter.toLaunchpad()
 
       return result.initialConfig
@@ -723,6 +726,7 @@ export class ProjectLifecycleManager {
       return this.initializeConfig()
     }
 
+    // if the config is still being resolved,
     if (this._configResult.state === 'loading' || this._configResult.state === 'pending') {
       debug('reloadConfig first load')
 
@@ -833,7 +837,7 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * Called on the completion of the
+   * Called on the completion of the resolve of the config file.
    */
   private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
@@ -882,8 +886,10 @@ export class ProjectLifecycleManager {
         // If we're handling the events, we don't want any notifications
         // to send to the client until the `.finally` of this block.
         // TODO: Remove when GraphQL Subscriptions lands
-        await this.handleSetupTestingTypeReply(ipc, val)
-        this._eventsIpcResult = { state: 'loaded', value: val }
+        this._eventsIpcResult = {
+          state: 'loaded',
+          value: await this.handleSetupTestingTypeReply(ipc, val),
+        }
       }
 
       return val
@@ -1239,7 +1245,7 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply) {
+  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply): Promise<SetupNodeEventsReply> {
     this._registeredEvents = {}
     this.watchRequires('setupNodeEvents', result.requires)
     debug('handleSetupTestingTypeReply')
@@ -1308,7 +1314,7 @@ export class ProjectLifecycleManager {
     this._pendingInitialize?.resolve(finalConfig)
 
     if (this._currentTestingType && finalConfig.specPattern) {
-      return this.ctx.actions.project.setSpecsFoundBySpecPattern({
+      await this.ctx.actions.project.setSpecsFoundBySpecPattern({
         path: this.projectRoot,
         testingType: this._currentTestingType,
         specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
