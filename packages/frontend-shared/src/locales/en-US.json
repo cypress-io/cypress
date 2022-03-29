@@ -249,14 +249,14 @@
     "install": {
       "startButton": "Install",
       "waitForInstall": "Waiting for you to install the dependencies...",
-      "checkForUpdates": "Refresh",
       "installed": "installed",
       "pendingInstall": "pending installation"
     },
     "step": {
       "continue": "Continue",
       "next": "Next Step",
-      "back": "Back"
+      "back": "Back",
+      "skip": "Skip"
     },
     "configFile": {
       "createManually": "Create file manually",
