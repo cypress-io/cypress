@@ -19,7 +19,6 @@ const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
-const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const resolve = require(`../../lib/util/resolve`)
@@ -103,7 +102,7 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(obj.projectRoot)
+      ctx.lifecycleManager.setCurrentProject(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
@@ -151,48 +150,52 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('e2e'), testingType: 'e2e' })
-
           cfg.pluginsFile = false
 
-          return Promise.all([
+          return ctx.lifecycleManager.waitForInitializeSuccess()
+          .then(() => {
+            return Promise.all([
             // open our https server
-            httpsServer.start(8443),
+              httpsServer.start(8443),
 
-            // and open our cypress server
-            (this.server = new ServerE2E()),
+              // and open our cypress server
+              (this.server = new ServerE2E()),
 
-            this.server.open(cfg, {
-              SocketCtor: SocketE2E,
-              getSpec: () => spec,
-              getCurrentBrowser: () => null,
-              createRoutes,
-              testingType: 'e2e',
-              exit: false,
-            })
-            .spread(async (port) => {
-              const automationStub = {
-                use: () => { },
-              }
+              this.server.open(cfg, {
+                SocketCtor: SocketE2E,
+                getSpec: () => spec,
+                getCurrentBrowser: () => null,
+                createRoutes,
+                testingType: 'e2e',
+                exit: false,
+              })
+              .spread(async (port) => {
+                const automationStub = {
+                  use: () => { },
+                }
 
-              await this.server.startWebsockets(automationStub, config, {})
+                await this.server.startWebsockets(automationStub, config, {})
 
-              if (initialUrl) {
-                this.server._onDomainSet(initialUrl)
-              }
+                if (initialUrl) {
+                  this.server._onDomainSet(initialUrl)
+                }
 
-              this.srv = this.server.getHttpServer()
+                this.srv = this.server.getHttpServer()
 
-              this.session = session(this.srv)
+                this.session = session(this.srv)
 
-              this.proxy = `http://localhost:${port}`
-            }),
+                this.proxy = `http://localhost:${port}`
+              }),
 
             // pluginsModule.init(cfg, {
             //   projectRoot: cfg.projectRoot,
             //   testingType: 'e2e',
             // }, ctx),
-          ])
+            ])
+          })
+          .then(() => {
+            ctx.lifecycleManager.setCurrentTestingType('e2e')
+          })
         }
 
         if (this.server) {

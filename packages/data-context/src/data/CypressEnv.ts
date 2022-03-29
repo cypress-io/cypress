@@ -3,34 +3,32 @@ import { getError } from '@packages/errors'
 
 type CypressEnvOptions = {
   envFilePath: string
-  toLaunchpad: (...args: any[]) => void
   validateConfigFile: (file: string | false, config: Cypress.ConfigOptions) => void
 }
 
 export class CypressEnv {
-  #cypressEnvPromise: Promise<Cypress.ConfigOptions> | undefined
+  private _cypressEnvPromise: Promise<Cypress.ConfigOptions> | undefined
+  private _error: Error | undefined
 
   constructor (private options: CypressEnvOptions) {}
 
   async loadCypressEnvFile (): Promise<Cypress.ConfigOptions> {
-    if (!this.#cypressEnvPromise) {
-      this.#cypressEnvPromise = this.#readAndValidateCypressEnvFile()
+    if (!this._cypressEnvPromise) {
+      this._cypressEnvPromise = this.readAndValidateCypressEnvFile()
     }
 
-    return this.#cypressEnvPromise
+    return this._cypressEnvPromise
   }
 
-  async #readAndValidateCypressEnvFile () {
-    const cypressEnv = await this.#readCypressEnvFile()
+  private async readAndValidateCypressEnvFile () {
+    const cypressEnv = await this.readCypressEnvFile()
 
     this.options.validateConfigFile(this.options.envFilePath, cypressEnv)
-    // TODO: Figure out if this is necessary
-    this.options.toLaunchpad()
 
     return cypressEnv
   }
 
-  async #readCypressEnvFile (): Promise<Cypress.ConfigOptions> {
+  private async readCypressEnvFile (): Promise<Cypress.ConfigOptions> {
     try {
       return await fs.readJSON(this.options.envFilePath)
     } catch (err: any) {

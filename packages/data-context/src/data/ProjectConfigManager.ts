@@ -63,9 +63,6 @@ export class ProjectConfigManager {
       validateConfigFile: (filePath, config) => {
         this.validateConfigFile(filePath, config)
       },
-      toLaunchpad: (...args) => {
-        this.options.toLaunchpad(...args)
-      },
     })
 
     return autoBindDebug(this)
@@ -675,9 +672,6 @@ export class ProjectConfigManager {
       envFilePath: this.envFilePath,
       validateConfigFile: (filePath, config) => {
         this.validateConfigFile(filePath, config)
-      },
-      toLaunchpad: (...args) => {
-        this.options.toLaunchpad(...args)
       },
     })
 

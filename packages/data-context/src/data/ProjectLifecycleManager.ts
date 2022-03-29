@@ -361,7 +361,6 @@ export class ProjectLifecycleManager {
 
     // Preemptively load these so that they are available when we need them later
     this.ctx.browser.machineBrowsers().catch(this.onLoadError)
-    this.loadCypressEnvFile().catch(this.onLoadError)
 
     this.verifyProjectRoot(projectRoot)
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
