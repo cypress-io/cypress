@@ -9,6 +9,7 @@
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import SettingsContainer from '../settings/SettingsContainer.vue'
 import { SettingsDocument, Settings_CloudProjectUpdateDocument } from '../generated/graphql'
+import { onMounted } from 'vue'
 
 gql`
 query Settings {
@@ -26,12 +27,10 @@ subscription Settings_cloudProjectUpdate {
 }
 `
 
-useSubscription({ query: Settings_CloudProjectUpdateDocument }, (current, next) => {
-  // Need to investigate why this is needed. When the subscription comes in the cache should update & automatically
-  // re-trigger any affected queries. Maybe due to the fact that the result from cloudProject is a union?
-  query.executeQuery({ requestPolicy: 'cache-only' })
-
-  return next
+onMounted(() => {
+  query.executeQuery()
 })
+
+useSubscription({ query: Settings_CloudProjectUpdateDocument })
 
 </script>

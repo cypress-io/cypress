@@ -56,5 +56,12 @@ export const Subscription = subscriptionType({
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudProjectChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
+
+    t.field('currentProjectChange', {
+      description: 'When direct attributes (branch, loading, etc) change on the current project',
+      type: CurrentProject,
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('currentProjectChange'),
+      resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
   },
 })

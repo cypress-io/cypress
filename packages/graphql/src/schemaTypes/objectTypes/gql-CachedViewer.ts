@@ -8,12 +8,17 @@ export const CachedViewer = objectType({
   `,
   node: 'email',
   definition (t) {
-    t.string('name', {
+    t.string('fullName', {
       description: 'Name of the cached user',
+      resolve: (source) => source.name ?? null,
     })
 
     t.string('email', {
       description: 'Email address of the cached user',
     })
+  },
+  sourceType: {
+    export: 'AuthenticatedUserShape',
+    module: '@packages/data-context/src/data/coreDataShape',
   },
 })

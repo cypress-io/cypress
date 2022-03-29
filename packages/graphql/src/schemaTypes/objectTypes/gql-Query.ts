@@ -51,10 +51,7 @@ export const Query = objectType({
 
     t.field('versions', {
       type: VersionData,
-      maxExecution: {
-        duration: 1000,
-        triggerOnResult: 'versionsResolved',
-      },
+      remoteGuard: 'versionsResolved',
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {
         return ctx.versions.versionData()

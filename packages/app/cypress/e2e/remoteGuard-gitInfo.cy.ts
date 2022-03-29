@@ -1,6 +1,6 @@
 import type { GitInfo } from '@packages/data-context/src/sources'
 
-describe('maxExecution: App', () => {
+describe('remoteGuard: App', () => {
   beforeEach(() => {
     cy.scaffoldProject('todos')
     cy.openProject('todos')

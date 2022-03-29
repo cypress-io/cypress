@@ -1,4 +1,4 @@
-describe('maxExecution: launchpad', () => {
+describe('remoteGuard: launchpad', () => {
   beforeEach(() => {
     cy.scaffoldProject('todos')
     cy.openProject('todos')

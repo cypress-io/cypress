@@ -2,8 +2,8 @@
 ### Do not make changes to this file directly
 
 
-"""Skips any maxExecution guard defined internally on the field"""
-directive @skipMaxExecutionGuard on QUERY
+"""Skips any remoteGuard defined internally on the field"""
+directive @skipRemoteGuard on QUERY
 
 """Represents state of auth based on most recent message from login flow"""
 type AuthState {
@@ -60,11 +60,11 @@ type CachedViewer implements Node {
   """Email address of the cached user"""
   email: String
 
+  """Name of the cached user"""
+  fullName: String
+
   """Relay style Node ID field for the CachedViewer field"""
   id: ID!
-
-  """Name of the cached user"""
-  name: String
 }
 
 """
@@ -1282,6 +1282,11 @@ type Subscription {
   Triggered when there is a change to the info associated with the cloud project (org added, project added)
   """
   cloudViewerChange: Query
+
+  """
+  When direct attributes (branch, loading, etc) change on the current project
+  """
+  currentProjectChange: CurrentProject
 
   """Issued for internal development changes"""
   devChange: DevState

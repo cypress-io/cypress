@@ -92,8 +92,6 @@ gql`
 fragment Auth on Query {
   cloudViewer {
     id
-    email
-    fullName
   }
   authState {
     browserOpened

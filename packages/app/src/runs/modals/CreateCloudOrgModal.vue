@@ -83,7 +83,7 @@ fragment CreateCloudOrgModal on CloudUser {
 `
 
 gql`
-query CloudOrganizationsCheck @skipMaxExecutionGuard {
+query CloudOrganizationsCheck @skipRemoteGuard {
   ...CloudConnectModals
 }
 `

@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
@@ -65,6 +65,10 @@ subscription SpecsPageContainer_specsChange {
 useSubscription({ query: SpecsPageContainer_SpecsChangeDocument })
 
 const query = useQuery({ query: SpecsPageContainerDocument })
+
+onMounted(() => {
+  query.executeQuery()
+})
 
 const isDefaultSpecPattern = computed(() => !!query.data.value?.currentProject?.isDefaultSpecPattern)
 

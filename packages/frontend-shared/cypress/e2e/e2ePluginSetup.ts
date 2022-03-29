@@ -103,13 +103,16 @@ async function makeE2ETasks () {
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let remoteFetchDelay: number | undefined
   let scaffoldedProjects = new Set<string>()
-  let remoteFetchResolve = new Set<((arg?: any) => any)>()
+  let remoteFetchResolve: pDefer.DeferredPromise<any>[] = []
 
-  function flushPendingResolve () {
-    for (const toResolve of remoteFetchResolve) {
-      toResolve()
-    }
-    remoteFetchResolve = new Set()
+  async function flushPendingResolve () {
+    await Promise.allSettled(remoteFetchResolve.map((dfd) => {
+      dfd.resolve()
+
+      return dfd.promise
+    }))
+
+    remoteFetchResolve = []
   }
 
   clearCtx()
@@ -150,7 +153,7 @@ async function makeE2ETasks () {
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
-      flushPendingResolve()
+      await flushPendingResolve()
       testState = {}
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
@@ -158,7 +161,6 @@ async function makeE2ETasks () {
       await ctx.reinitializeCypress()
       sinon.reset()
       sinon.restore()
-      remoteFetchResolve = new Set<((arg?: any) => any)>()
       remoteGraphQLIntercept = undefined
       remoteFetchDelay = undefined
 
@@ -174,10 +176,11 @@ async function makeE2ETasks () {
       sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo, init?: RequestInit) => {
         if (typeof remoteFetchDelay === 'number') {
           // Future idea: look into a stable way of managing via https://github.com/sinonjs/fake-timers
-          await new Promise<any>((resolve) => {
-            remoteFetchResolve.add(resolve)
-            setTimeout(resolve, remoteFetchDelay)
-          })
+          const dfd = pDefer()
+
+          remoteFetchResolve.push(dfd)
+          setTimeout(dfd.resolve, remoteFetchDelay)
+          await dfd.promise
         }
 
         if (String(url).endsWith('/test-runner-graphql')) {
@@ -240,9 +243,9 @@ async function makeE2ETasks () {
 
       return null
     },
-    __internal_clearRemoteFetchDelay () {
+    async __internal_clearRemoteFetchDelay () {
       remoteFetchDelay = undefined
-      flushPendingResolve()
+      await flushPendingResolve()
 
       return null
     },

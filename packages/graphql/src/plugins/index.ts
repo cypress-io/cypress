@@ -2,7 +2,7 @@
 // created by autobarrel, do not modify directly
 
 export * from './nexusDebugFieldPlugin'
-export * from './nexusMaxExecutionPlugin'
+export * from './nexusRemoteGuardPlugin'
 export * from './nexusMutationErrorPlugin'
 export * from './nexusNodePlugin'
 export * from './nexusSlowGuardPlugin'
