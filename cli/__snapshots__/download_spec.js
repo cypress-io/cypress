@@ -44,3 +44,15 @@ https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH
 exports['desktop url from template'] = `
 https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
 `
+
+exports['desktop url from template with escaped dollar sign'] = `
+https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+`
+
+exports['desktop url from template wrapped in quote'] = `
+https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+`
+
+exports['desktop url from template with escaped dollar sign wrapped in quote'] = `
+https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
+`
