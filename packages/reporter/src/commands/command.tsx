@@ -18,7 +18,7 @@ import TestError from '../errors/test-error'
 
 import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
-import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
+import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/command-pin_x12.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
 const md = new Markdown()
@@ -306,7 +306,7 @@ class Command extends Component<Props> {
                   : <Message model={model} />
                 }
                 <span className='command-controls'>
-                  {!model.visible && (
+                  {model.isInvisible && (
                     <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                       <span>
                         <HiddenIcon className='command-invisible' />

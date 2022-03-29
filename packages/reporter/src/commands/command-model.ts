@@ -98,6 +98,11 @@ export default class Command extends Instrument {
     this._isOpen = !this.isOpen
   }
 
+  @computed get isInvisible () {
+    // the visible property is not applicable to all log instruments/types like cy.visit() or cy.readFile()
+    return this.visible !== undefined && !this.visible
+  }
+
   @computed get hasChildren () {
     return this.event ? this.numChildren > 1 : this.numChildren > 0
   }
@@ -111,7 +116,7 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
-    this.visible = props.visible !== undefined ? props.visible : true
+    this.visible = props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
