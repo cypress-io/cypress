@@ -86,11 +86,10 @@ export class ProjectLifecycleManager {
   private _eventRegistrar: EventRegistrar
 
   constructor (private ctx: DataContext) {
+    this._eventRegistrar = new EventRegistrar()
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
-
-    this._eventRegistrar = new EventRegistrar()
 
     process.on('exit', this.onProcessExit)
 
