@@ -1,7 +1,6 @@
 const snapshot = require('snap-shot-it')
 
 import type { SpawnOptions } from 'child_process'
-import os from 'os'
 import stream from 'stream'
 import { expect } from './spec_helper'
 import { dockerSpawner } from './docker'
@@ -790,7 +789,6 @@ const systemTests = {
   },
 
   args (options: ExecOptions) {
-    console.log(options)
     debug('converting options to args %o', { options })
 
     const projectPath = Fixtures.projectPath(options.project)
@@ -800,7 +798,7 @@ const systemTests = {
     if (options.withBinary && options.dockerImage) {
       args.push(`run`, `--project=${projectPath}`)
     } else if (options.withBinary) {
-      args.push('../cli/bin/cypress', `run`, `--project=${projectPath}`)
+      args.push('node_modules/.bin/cypress', `run`, `--project=${projectPath}`)
     } else {
       args.push(
         require.resolve('@packages/server'),
@@ -1049,8 +1047,6 @@ const systemTests = {
 
       // disable frame skipping to make quick Chromium tests have matching snapshots/working video
       CYPRESS_EVERY_NTH_FRAME: 1,
-
-      ...(options.withBinary && !options.dockerImage ? { CYPRESS_RUN_BINARY: `../build/build/${os.platform()}-unpacked/Cypress` } : {}),
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
