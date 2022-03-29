@@ -434,7 +434,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
         expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
         expect(err.message).to.include(`\n- \`http://localhost:3500\`\n`)
         expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
-        expect(err.message).to.include(`\`\ncy.switchToDomain(\'http://foobar.com:3500\', () => {\n  <commands targeting http://www.foobar.com:3500 go here>\n})\n\``)
+        expect(err.message).to.include(`\`\ncy.switchToDomain(\'http://www.foobar.com:3500\', () => {\n  <commands targeting http://www.foobar.com:3500 go here>\n})\n\``)
 
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
         expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)

@@ -58,7 +58,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     cy.isAnticipatingMultiDomainFor(undefined)
 
     // By default origins is just this location.
-    let origins = [cy.getRemoteLocation('originPolicy')]
+    let origins = [location.origin]
 
     const currentCommand = cy.queue.state('current')
 

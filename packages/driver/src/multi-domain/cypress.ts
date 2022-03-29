@@ -19,6 +19,7 @@ import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import $Mocha from '../cypress/mocha'
+import * as cors from '@packages/network/lib/cors'
 
 const createCypress = () => {
   // @ts-ignore
