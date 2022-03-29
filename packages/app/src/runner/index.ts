@@ -126,7 +126,7 @@ function setupRunner (namespace: AutomationElementId) {
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
     randomString: runnerUiStore.randomString,
-    element: `${namespace}-string`,
+    element: runnerUiStore.automationElementId,
   })
 
   getEventManager().start(window.UnifiedRunner.config)
