@@ -1,4 +1,3 @@
-import type { AutomationElementId } from '@packages/types'
 import { defineStore } from 'pinia'
 import { runnerConstants } from '../runner/runner-constants'
 
@@ -27,7 +26,6 @@ export interface RunnerUiState {
   reporterWidth: number
   automationStatus: AutomationStatus
   randomString: string
-  automationElementId: AutomationElementId
 }
 
 export const useRunnerUiStore = defineStore({
@@ -42,7 +40,6 @@ export const useRunnerUiStore = defineStore({
       reporterWidth: runnerConstants.defaultReporterWidth,
       automationStatus: automation.CONNECTING,
       randomString: `${Math.random()}`,
-      automationElementId: `${window.__CYPRESS_CONFIG__.namespace}-string`,
     }
   },
 
