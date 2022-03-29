@@ -28,19 +28,20 @@ declare namespace Cypress {
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
-    getNextAlias: () => string | undefined
+    getNextAlias: IAliases['getNextAlias']
     noop: <T>(v: T) => Cypress.Chainable<T>
-    queue: any
-    retry: (fn: () => any, opts: any) => any
+    queue: CommandQueue
+    retry: IRetries['retry']
     state: State
-    pauseTimers: <T>(shouldPause: boolean) => Cypress.Chainable<T>
+    pauseTimers: ITimer['pauseTimers']
     // TODO: this function refers to clearTimeout at cy/timeouts.ts, which doesn't have any argument.
     // But in many cases like cy/commands/screenshot.ts, it's called with a timeout id string.
     // We should decide whether calling with id is correct or not.
-    clearTimeout: <T>(timeoutId?: string) => Cypress.Chainable<T>
-    isStable: (boolean, string) => void
-    isAnticipatingMultiDomainFor: (string) => void
+    clearTimeout: ITimeouts['clearTimeout']
+    isStable: IStability['isStable']
+    isAnticipatingMultiDomainFor: IStability['isAnticipatingMultiDomainFor']
     fail: (err: Error, options:{ async?: boolean }) => Error
+    getRemoteLocation: ILocation['getRemoteLocation']
   }
 
   interface Cypress {

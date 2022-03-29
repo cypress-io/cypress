@@ -93,9 +93,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       validator.validateLocation(location, originOrDomain)
 
-      const domain = location.superDomain
+      const originPolicy = location.originPolicy
 
-      cy.state('latestActiveDomain', domain)
+      cy.state('latestActiveDomain', originPolicy)
 
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = () => {
@@ -172,9 +172,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', (_data, bridgeReadyDomain) => {
-          if (bridgeReadyDomain === domain) {
+          if (bridgeReadyDomain === originPolicy) {
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
-            communicator.toSpecBridge(domain, 'initialize:cypress', {
+            communicator.toSpecBridge(originPolicy, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
             })
@@ -182,7 +182,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             // once the secondary domain page loads, send along the
             // user-specified callback to run in that domain
             try {
-              communicator.toSpecBridge(domain, 'run:domain:fn', {
+              communicator.toSpecBridge(originPolicy, 'run:domain:fn', {
                 args: options?.args || undefined,
                 fn: callbackFn.toString(),
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
@@ -197,7 +197,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   hookId: state('hookId'),
                   hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
                   multiDomainBaseUrl: location.origin,
-                  parentOrigins: [window.location.origin],
+                  parentOrigins: [cy.getRemoteLocation('originPolicy')],
                   isStable: state('isStable'),
                 },
                 config: preprocessConfig(Cypress.config()),
