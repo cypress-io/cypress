@@ -141,7 +141,7 @@ declare global {
       /**
        * Visits the Cypress launchpad
        */
-      visitLaunchpad(href?: string): Chainable<AUTWindow>
+      visitLaunchpad(config?: {timeout?: number}): Chainable<AUTWindow>
       /**
        * Mocks the system browser retrieval to return the desired browsers
        */
