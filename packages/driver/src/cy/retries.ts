@@ -76,7 +76,7 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
         const autOrigin = Cypress.state('autOrigin')
         const commandOrigin = window.location.origin
 
-        if (commandOrigin !== autOrigin) {
+        if (autOrigin && commandOrigin !== autOrigin) {
           const appendMsg = errByPath('miscellaneous.cross_origin_command', {
             commandOrigin,
             autOrigin,
