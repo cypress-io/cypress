@@ -71,6 +71,7 @@
     "@types/parse-glob": "3.0.29",
     "@types/prettier": "2.4.3",
     "@types/stringify-object": "^3.0.0",
+    "disparity": "^3.0.0",
     "mocha": "7.0.1",
     "rimraf": "3.0.2",
     "tslint": "^6.1.3"
