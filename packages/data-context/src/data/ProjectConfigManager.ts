@@ -12,7 +12,6 @@ import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
 
-const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
@@ -148,7 +147,10 @@ export class ProjectConfigManager {
     this._state = 'loadingNodeEvents'
 
     try {
-      const setupNodeEventsReply = await this.callSetupNodeEventsWithConfig(this._eventsIpc)
+      assert(this._testingType)
+      this._registeredEventsTarget = this._testingType
+      const config = await this.getFullInitialConfig()
+      const setupNodeEventsReply = await this._eventsIpc?.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
       await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
       this._state = 'ready'
@@ -165,44 +167,6 @@ export class ProjectConfigManager {
     } finally {
       this.options.ctx.emitter.toLaunchpad()
     }
-  }
-
-  private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
-    debug('callSetupNodeEvents', this._testingType)
-    assert(this._testingType)
-    const config = await this.getFullInitialConfig()
-
-    this._registeredEventsTarget = this._testingType
-
-    for (const handler of this.options.handlers) {
-      handler(ipc)
-    }
-
-    assert(this._eventsIpc)
-    const promise = this._eventsIpc.registerSetupIpcHandlers()
-
-    const overrides = config[this._testingType] ?? {}
-    const mergedConfig = { ...config, ...overrides }
-
-    // alphabetize config by keys
-    let orderedConfig = {} as Cypress.PluginConfigOptions
-
-    Object.keys(mergedConfig).sort().forEach((key) => {
-      const k = key as keyof typeof mergedConfig
-
-      // @ts-ignore
-      orderedConfig[k] = mergedConfig[k]
-    })
-
-    ipc.send('setupTestingType', this._testingType, {
-      ...orderedConfig,
-      projectRoot: this.options.projectRoot,
-      configFile: this.configFilePath,
-      version: pkg.version,
-      testingType: this._testingType,
-    })
-
-    return promise
   }
 
   private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, loadConfigReply: LoadConfigReply, result: SetupNodeEventsReply) {

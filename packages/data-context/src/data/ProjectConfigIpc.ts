@@ -1,6 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
-import type { TestingType } from '@packages/types'
+import type { FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions } from 'child_process'
 import EventEmitter from 'events'
 import path from 'path'
@@ -9,6 +9,7 @@ import debugLib from 'debug'
 import { autoBindDebug } from '../util'
 import _ from 'lodash'
 
+const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
@@ -140,7 +141,7 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('loadConfig:error', (err) => {
-        this.killChildProcess(this._childProcess)
+        this.killChildProcess()
         reject(err)
       })
 
@@ -151,7 +152,38 @@ export class ProjectConfigIpc extends EventEmitter {
     })
   }
 
-  registerSetupIpcHandlers (): Promise<SetupNodeEventsReply> {
+  async callSetupNodeEventsWithConfig (testingType: TestingType, config: FullConfig, handlers: IpcHandler[]): Promise<SetupNodeEventsReply> {
+    for (const handler of handlers) {
+      handler(this)
+    }
+
+    const promise = this.registerSetupIpcHandlers()
+
+    const overrides = config[testingType] ?? {}
+    const mergedConfig = { ...config, ...overrides }
+
+    // alphabetize config by keys
+    let orderedConfig = {} as Cypress.PluginConfigOptions
+
+    Object.keys(mergedConfig).sort().forEach((key) => {
+      const k = key as keyof typeof mergedConfig
+
+      // @ts-ignore
+      orderedConfig[k] = mergedConfig[k]
+    })
+
+    this.send('setupTestingType', testingType, {
+      ...orderedConfig,
+      projectRoot: this.projectRoot,
+      configFile: this.configFilePath,
+      version: pkg.version,
+      testingType,
+    })
+
+    return promise
+  }
+
+  private registerSetupIpcHandlers (): Promise<SetupNodeEventsReply> {
     return new Promise((resolve, reject) => {
       let resolved = false
 
