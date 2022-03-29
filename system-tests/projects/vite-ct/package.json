@@ -6,7 +6,6 @@
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "@testing-library/cypress": "8.0.2",
     "ansi-regex": "4.1.0",
-    "cypress": "file:../../../cli/build",
     "typescript": "4.2.3",
     "vite": "2.7.10"
   }
