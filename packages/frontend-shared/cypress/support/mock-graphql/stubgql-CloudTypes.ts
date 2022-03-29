@@ -216,8 +216,13 @@ export const CloudOrganizationStubs = {
 
 export const CloudOrganizationConnectionStubs = {
   __typename: 'CloudOrganizationConnection' as const,
-  nodes: [createCloudOrganization(
-    {
+  nodes: [
+    // Created out of alphabetical order to verify that components visually sort them by name
+    createCloudOrganization({
+      id: '2',
+      name: 'Test Org 2',
+    }),
+    createCloudOrganization({
       id: '1',
       name: 'Test Org 1',
       projects: {
@@ -226,17 +231,18 @@ export const CloudOrganizationConnectionStubs = {
         pageInfo: {} as any,
         nodes: [
           createCloudProject({
+            name: 'Test Project 2',
+            slug: 'test-project-2',
+          }),
+          createCloudProject({
             name: 'Test Project 1',
             slug: 'test-project',
           }),
+
         ],
       },
-    },
-  ),
-  createCloudOrganization({
-    id: '2',
-    name: 'Test Org 2',
-  })],
+    }),
+  ],
 }
 
 export const CloudProjectStubs = {

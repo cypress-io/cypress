@@ -61,11 +61,6 @@
     "field": "clientCertificates"
   },
   {
-    "value": "src",
-    "from": "config",
-    "field": "componentFolder"
-  },
-  {
     "value": 4000,
     "from": "default",
     "field": "defaultCommandTimeout"
@@ -132,11 +127,6 @@
     "value": false,
     "from": "default",
     "field": "includeShadowDom"
-  },
-  {
-    "value": "cypress/e2e/integration",
-    "from": "config",
-    "field": "integrationFolder"
   },
   {
     "value": true,
@@ -279,12 +269,9 @@
     "field": "watchForFileChanges"
   },
   {
-    "value": {
-      "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
-      "supportFile": "cypress/e2e/support/e2eSupport.ts"
-    },
+    "field": "specPattern",
     "from": "config",
-    "field": "e2e"
+    "value": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
   },
   {
     "value": {

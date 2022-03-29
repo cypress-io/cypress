@@ -138,11 +138,9 @@ const emits = defineEmits<{
 const step1Modal = ref(false)
 const step2Modal = ref(false)
 
-// probably to be changed for a GQL field
 const selectOption = ref<PossibleOption>()
 
 function applySkipResult (val: PossibleOption) {
-  // TODO: add a GQL mutation here
   selectOption.value = val
   emits('selectOption', selectOption.value)
 }

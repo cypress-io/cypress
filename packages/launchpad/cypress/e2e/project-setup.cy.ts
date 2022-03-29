@@ -122,11 +122,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('@aboutTestingTypes').should('not.exist')
     })
 
-    // Cypress enter key down isn't trigger close callback. Working correctly when manually tested
-    // or when using the cypress-real-evens plugin.
-    // Could be related to this bug? https://github.com/cypress-io/cypress/issues/14864
-    // FIXME: https://github.com/cypress-io/cypress/pull/19726
-    it.skip('closes modal by pressing enter key when close button is focused', () => {
+    it('closes modal by pressing enter key when close button is focused', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
@@ -136,10 +132,8 @@ describe('Launchpad: Setup Project', () => {
       .within(() => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
-        cy.tabUntil((el) => el.text().includes('Close'))
-
         cy.findByRole('button', { name: 'Close' })
-        .should('have.focus')
+        .focus()
         .type('{enter}')
       })
 
@@ -468,6 +462,70 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
       })
 
+      it('can skip setup CT testing for a project', () => {
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+        cy.contains('button', 'Component Testing')
+        .focus()
+        .realPress('Enter')
+
+        cy.findByText('Confirm the front-end framework and bundler used in your project.')
+
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
+
+        cy.get('[data-testid="select-bundler"').should('not.exist')
+        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+
+        cy.findByRole('button', { name: 'Back' }).click()
+        cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
+        cy.findByRole('option', { name: 'React.js' }).click()
+
+        cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
+
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
+        cy.findByRole('option', { name: 'Webpack (v4)' }).click()
+        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+
+        cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+
+        cy.findByRole('button', { name: 'TypeScript' }).click()
+
+        cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
+
+        cy.contains('li', '@cypress/react').findByLabelText('installed').should('be.visible')
+
+        cy.findByRole('button', { name: 'Skip' }).click()
+
+        cy.get('[data-cy=changes]').within(() => {
+          cy.contains('cypress.config.js')
+        })
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.containsPath('cypress/support/component-index.html')
+          cy.containsPath('cypress/support/component.ts')
+          cy.containsPath('cypress/support/commands.ts')
+        })
+
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/component-index.html',
+          'cypress/support/component.ts',
+          'cypress/support/commands.ts',
+        ])
+
+        cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
+      })
+
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
         scaffoldAndOpenProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
@@ -730,6 +788,7 @@ describe('Launchpad: Setup Project', () => {
                 validatePackage(framework.storybookDep.package)
               }
 
+              cy.findByRole('button', { name: 'Skip' }).should('not.exist')
               cy.findByRole('button', { name: 'Continue' }).click()
 
               // Even if user chooses typescript in the previous

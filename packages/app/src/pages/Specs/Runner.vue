@@ -3,7 +3,7 @@
     <!--
       Run Mode is a more minimal UI.
       It does not render things like the SpecList,
-      Side and Top Nav, etc.
+      Side Nav, etc.
       It also has no GraphQL dependency.
     -->
     <SpecRunnerContainerRunMode
@@ -14,7 +14,7 @@
     <!--
       Open Mode is the full Cypress runner UI -
       including things like the SpecList,
-      Side and Top Nav, Selector Playground etc.
+      Side Nav, Selector Playground etc.
       It is driven by GraphQL and urql.
     -->
     <SpecRunnerContainerOpenMode
@@ -25,8 +25,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { SpecPageContainerDocument } from '../../generated/graphql'
+import { gql, useQuery, useSubscription } from '@urql/vue'
+import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument } from '../../generated/graphql'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
 
@@ -35,6 +35,20 @@ query SpecPageContainer {
   ...SpecRunner
 }
 `
+
+gql`
+subscription SpecPageContainer_specsChange {
+  specsChange {
+    id
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
+  }
+}
+`
+
+useSubscription({ query: SpecPageContainer_SpecsChangeDocument })
 
 const isRunMode = window.__CYPRESS_MODE__ === 'run'
 
@@ -59,7 +73,7 @@ const specs = window.__RUN_MODE_SPECS__
 
 <route>
   {
-    name: 'SpecsRunner',
+    name: 'SpecRunner',
     meta: {
       header: false,
       navBarExpandedAllowed: false

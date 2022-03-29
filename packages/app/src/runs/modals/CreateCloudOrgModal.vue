@@ -9,13 +9,13 @@
       <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
-      <div @click="startPolling()">
+      <div @click="startWaitingOrgToBeCreated()">
         <ExternalLink
-          class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
+          class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
           :href="createOrgUrl"
-          :prefix-icon="OrganizationIcon"
-          prefix-icon-class="icon-light-transparent icon-dark-white"
+          :include-graphql-port="true"
         >
+          <i-cy-office-building_x16 class="inline-block icon-dark-white" />
           {{ t('runs.connect.modal.createOrg.button') }}
         </ExternalLink>
       </div>
@@ -23,7 +23,7 @@
     <template #footer>
       <div class="flex gap-16px">
         <Button
-          v-if="polling"
+          v-if="waitingOrgToBeCreated"
           size="lg"
           variant="pending"
         >
@@ -37,7 +37,7 @@
         <Button
           v-else
           size="lg"
-          @click="startPolling()"
+          @click="refetch()"
         >
           {{ t('runs.connect.modal.createOrg.refreshButton') }}
         </Button>
@@ -54,16 +54,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
-import { useIntervalFn } from '@vueuse/core'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
-import { CheckCloudOrganizationsDocument } from '../../generated/graphql'
+import { CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import { useDebounceFn } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -84,15 +83,8 @@ fragment CreateCloudOrgModal on CloudUser {
 `
 
 gql`
-query CheckCloudOrganizations {
-  cloudViewer {
-    id
-    organizations (first:1) {
-      nodes {
-        id
-      }
-    }
-  }
+query CloudOrganizationsCheck {
+  ...CloudConnectModals
 }
 `
 
@@ -101,31 +93,28 @@ const props = defineProps<{
 }>()
 
 const query = useQuery({
-  query: CheckCloudOrganizationsDocument,
+  query: CloudOrganizationsCheckDocument,
   requestPolicy: 'network-only',
+  pause: true,
 })
 
-const polling = ref(false)
+const refetch = useDebounceFn(() => query.executeQuery(), 1000)
 
-const { pause, resume } = useIntervalFn(() => {
-  if (props?.gql?.organizationControl?.nodes?.length || 0 > 0) {
-    pause()
-  } else {
-    query.executeQuery()
-  }
-}, 5000)
+const waitingOrgToBeCreated = ref(false)
 
-function startPolling () {
-  if (!polling.value) {
-    resume()
-    polling.value = true
-  }
+let timer
 
-  setTimeout(() => {
-    pause()
-    polling.value = false
+function startWaitingOrgToBeCreated () {
+  waitingOrgToBeCreated.value = true
+
+  timer = setTimeout(() => {
+    waitingOrgToBeCreated.value = false
   }, 60000)
 }
+
+onBeforeUnmount(() => {
+  window.clearTimeout(timer)
+})
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
 </script>

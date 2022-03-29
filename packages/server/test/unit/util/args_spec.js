@@ -68,8 +68,6 @@ describe('lib/util/args', () => {
         // string properties
         project: true,
         appPath: '/foo/bar',
-        // this option can be string or false
-        configFile: false,
         // unknown properties will be preserved
         somethingElse: 42,
       }
@@ -77,7 +75,6 @@ describe('lib/util/args', () => {
 
       expect(output).to.deep.equal({
         appPath: '/foo/bar',
-        configFile: false,
         somethingElse: 42,
       })
     })

@@ -15,7 +15,7 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('empty session with no data', () => {
     loadSpec({
-      fileName: 'blank_session.cy.js',
+      filePath: 'sessions/blank_session.cy.js',
       passCount: 1,
     })
 
@@ -25,7 +25,7 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('shows message for new, saved, and recreated session', () => {
     loadSpec({
-      fileName: 'recreated_session.cy.js',
+      filePath: 'sessions/recreated_session.cy.js',
       passCount: 3,
     })
 
@@ -59,7 +59,7 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('multiple sessions in a test', () => {
     loadSpec({
-      fileName: 'multiple_sessions.cy.js',
+      filePath: 'sessions/multiple_sessions.cy.js',
       passCount: 1,
     })
 

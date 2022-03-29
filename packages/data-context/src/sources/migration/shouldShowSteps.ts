@@ -4,6 +4,8 @@ import { MIGRATION_STEPS } from '@packages/types'
 import { applyMigrationTransform, getSpecs, tryGetDefaultLegacySupportFile } from '.'
 import type { LegacyCypressConfigJson } from '..'
 
+export const defaultTestFilesGlob = '**/*.{js,ts,jsx,tsx,coffee,cjsx}'
+
 function getTestFilesGlobs (config: LegacyCypressConfigJson, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
   // the config is `e2e`
@@ -15,7 +17,7 @@ function getTestFilesGlobs (config: LegacyCypressConfigJson, type: 'component' |
     return ([] as string[]).concat(glob)
   }
 
-  return ['**/*.{js,ts,jsx,tsx,coffee}']
+  return [defaultTestFilesGlob]
 }
 
 export function getIntegrationTestFilesGlobs (config: LegacyCypressConfigJson): string[] {
@@ -31,7 +33,7 @@ export function isDefaultTestFiles (config: LegacyCypressConfigJson, type: 'comp
     ? getComponentTestFilesGlobs(config)
     : getIntegrationTestFilesGlobs(config)
 
-  return testFiles.length === 1 && testFiles[0] === '**/*.{js,ts,jsx,tsx,coffee}'
+  return testFiles.length === 1 && testFiles[0] === defaultTestFilesGlob
 }
 
 export function getPluginsFile (config: LegacyCypressConfigJson) {

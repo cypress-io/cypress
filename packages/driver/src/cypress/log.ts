@@ -407,9 +407,13 @@ class Log {
   }
 
   end () {
-    // dont set back to passed
-    // if we've already ended
+    // dont set back to passed if we've already ended
     if (this.get('ended')) {
+      // we do need to trigger the change event since
+      // xhr onLoad and proxy-logging updateRequestWithResponse can sometimes
+      // happen in a different order and the log data in each is different
+      this.fireChangeEvent(this)
+
       return
     }
 

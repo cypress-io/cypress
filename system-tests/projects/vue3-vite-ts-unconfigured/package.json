@@ -16,5 +16,5 @@
     "vite": "^2.8.0",
     "vue-tsc": "^0.29.8"
   },
-  "_cySkipYarnInstall": true
+  "_cySkipDepInstall": true
 }
