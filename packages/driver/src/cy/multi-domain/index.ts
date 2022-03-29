@@ -101,6 +101,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         const cleanup = () => {
           Cypress.backend('cross:origin:finished', location.originPolicy)
           communicator.off('queue:finished', onQueueFinished)
+          communicator.off('sync:globals', onSyncGlobals)
         }
 
         onCancel && onCancel(() => {
@@ -126,10 +127,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           _resolve({ subject, unserializableSubjectType })
         }
 
-        communicator.once('sync:globals', ({ config, env }) => {
+        const onSyncGlobals = ({ config, env }) => {
           syncConfigToCurrentDomain(config)
           syncEnvToCurrentDomain(env)
-        })
+        }
+
+        communicator.once('sync:globals', onSyncGlobals)
 
         communicator.once('ran:domain:fn', (details) => {
           const { subject, unserializableSubjectType, err, finished } = details
