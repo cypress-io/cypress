@@ -219,8 +219,6 @@ describe('http/response-middleware', function () {
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://idp.com' })
 
-      expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
-
       return promise
     })
 
