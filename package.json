@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.5.2",
+  "version": "9.5.3",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -163,7 +163,7 @@
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "5.1.1",
     "patch-package": "6.4.7",
-    "plist": "3.0.4",
+    "plist": "3.0.5",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
     "prefixed-list": "1.0.1",
