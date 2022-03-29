@@ -3,7 +3,7 @@ import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/typ
 import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
-import { debounce, isEqual } from 'lodash'
+import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
@@ -252,7 +252,7 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
-    const onSpecsChanged = debounce(async () => {
+    const onSpecsChanged = _.debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       this.ctx.actions.project.setSpecs(specs)
@@ -386,13 +386,13 @@ export class ProjectDataSource {
       })
     }
 
-    return Object.entries(config ?? {}).map(([key, value]) => {
+    return _.sortBy(Object.entries(config ?? {}).map(([key, value]) => {
       if (key === 'env' && value) {
         return mapEnvResolvedConfigToObj(value)
       }
 
       return { ...value, field: key }
-    }) as ResolvedFromConfig[]
+    }), 'field') as ResolvedFromConfig[]
   }
 
   async getCodeGenCandidates (glob: string): Promise<FilePartsShape[]> {
@@ -420,9 +420,9 @@ export class ProjectDataSource {
     const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return isEqual(specPattern, [e2e])
+      return _.isEqual(specPattern, [e2e])
     }
 
-    return isEqual(specPattern, [component])
+    return _.isEqual(specPattern, [component])
   }
 }

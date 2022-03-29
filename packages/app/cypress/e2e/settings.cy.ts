@@ -324,20 +324,22 @@ describe('App: Settings without cloud', () => {
 
   it('have returned browsers', () => {
     cy.scaffoldProject('simple-ct')
-    cy.openProject('simple-ct')
     cy.findBrowsers()
+    cy.openProject('simple-ct')
     cy.startAppServer('component')
 
     cy.visitApp()
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
 
-    cy.get('[data-cy=config-code]').within(() => {
-      const { browsers } = Cypress.config()
+    cy.withCtx((ctx) => ctx._apis.browserApi.getBrowsers()).then((browsers) => {
+      cy.get('[data-cy=config-code]').within(() => {
+        cy.log(browsers.map((b) => b.name).join(', '))
 
-      expect(browsers).to.have.length.greaterThan(1)
+        expect(browsers).to.have.length.greaterThan(1)
 
-      cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
+        cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
+      })
     })
   })
 })
