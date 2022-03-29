@@ -101,19 +101,7 @@ async function makeE2ETasks () {
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
-  let remoteFetchDelay: number | undefined
   let scaffoldedProjects = new Set<string>()
-  let remoteFetchResolve: pDefer.DeferredPromise<any>[] = []
-
-  async function flushPendingResolve () {
-    await Promise.allSettled(remoteFetchResolve.map((dfd) => {
-      dfd.resolve()
-
-      return dfd.promise
-    }))
-
-    remoteFetchResolve = []
-  }
 
   clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
@@ -153,7 +141,6 @@ async function makeE2ETasks () {
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
-      await flushPendingResolve()
       testState = {}
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
@@ -162,7 +149,6 @@ async function makeE2ETasks () {
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
-      remoteFetchDelay = undefined
 
       const fetchApi = ctx.util.fetch
 
@@ -174,15 +160,6 @@ async function makeE2ETasks () {
       const operationCount: Record<string, number> = {}
 
       sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo, init?: RequestInit) => {
-        if (typeof remoteFetchDelay === 'number') {
-          // Future idea: look into a stable way of managing via https://github.com/sinonjs/fake-timers
-          const dfd = pDefer()
-
-          remoteFetchResolve.push(dfd)
-          setTimeout(dfd.resolve, remoteFetchDelay)
-          await dfd.promise
-        }
-
         if (String(url).endsWith('/test-runner-graphql')) {
           const { query, variables } = JSON.parse(String(init?.body))
           const document = parse(query)
@@ -240,17 +217,6 @@ async function makeE2ETasks () {
 
         return fetchApi(url, init)
       })
-
-      return null
-    },
-    async __internal_clearRemoteFetchDelay () {
-      remoteFetchDelay = undefined
-      await flushPendingResolve()
-
-      return null
-    },
-    __internal_setRemoteFetchDelay (ms: number) {
-      remoteFetchDelay = ms
 
       return null
     },

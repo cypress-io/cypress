@@ -1,11 +1,35 @@
+import type Sinon from '@packages/../cli/types/sinon'
+
 describe('remoteGuard: launchpad', () => {
   beforeEach(() => {
     cy.scaffoldProject('todos')
     cy.openProject('todos')
+    cy.withCtx((ctx, o) => {
+      const currentStubbbedFetch = ctx.util.fetch;
+
+      (ctx.util.fetch as Sinon.SinonStub).restore()
+      o.testState.pendingFetches = []
+      o.sinon.stub(ctx.util, 'fetch').callsFake(async (input, init) => {
+        const dfd = o.pDefer()
+
+        o.testState.pendingFetches.push(dfd)
+        const result = await currentStubbbedFetch(input, init)
+
+        setTimeout(dfd.resolve, 60000)
+        await dfd.promise
+
+        return result
+      })
+    })
+  })
+
+  afterEach(() => {
+    cy.withCtx(async (ctx, o) => {
+      o.testState.pendingFetches.map((f) => f.resolve())
+    })
   })
 
   it('loads through to the browser screen when the network is slow', () => {
-    cy.setRemoteFetchDelay(60000)
     cy.loginUser()
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
@@ -14,11 +38,13 @@ describe('remoteGuard: launchpad', () => {
   })
 
   it('shows the versions after they resolve', () => {
-    cy.setRemoteFetchDelay(60000)
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('E2E Testing')
-    cy.clearRemoteFetchDelay()
+    cy.withCtx(async (ctx, o) => {
+      o.testState.pendingFetches.map((f) => f.resolve())
+    })
+
     // This will show up after it resolves
     cy.get('[data-cy=top-nav-cypress-version-current-link]')
   })
