@@ -420,7 +420,7 @@ class Log {
   }
 
   endGroup () {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    this.state('logGroup', _.slice(this.state('logGroup'), 0, -1))
   }
 
   getError (err) {
