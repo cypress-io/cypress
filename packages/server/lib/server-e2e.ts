@@ -118,11 +118,10 @@ export class ServerE2E extends ServerBase<SocketE2E> {
             })
           }
         }).then((warning) => {
-          // once we open set the domain
-          // to root by default
+          // once we open set the domain to root by default
           // which prevents a situation where navigating
           // to http sites redirects to /__/ cypress
-          this._onDomainSet(baseUrl != null ? baseUrl : '<root>')
+          this.remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
           return resolve([port, warning])
         })
@@ -160,7 +159,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     const request = this.request
 
     let handlingLocalFile = false
-    const previousState = _.clone(this._getRemoteState())
+    const previousRemoteState = this.remoteStates.current()
+    const previousRemoteStateIsPrimary = this.remoteStates.isPrimaryOrigin(previousRemoteState.origin)
 
     // nuke any hashes from our url since
     // those those are client only and do
@@ -209,22 +209,17 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
         options.headers['x-cypress-authorization'] = this._fileServer.token
 
-        this._remoteVisitingUrl = true
+        const state = this.remoteStates.set(urlStr, options)
 
-        this._onDomainSet(urlStr, options)
-
-        // TODO: instead of joining remoteOrigin here
-        // we can simply join our fileServer origin
-        // and bypass all the remoteState.visiting shit
-        urlFile = url.resolve(this._remoteFileServer as string, urlStr)
-        urlStr = url.resolve(this._remoteOrigin as string, urlStr)
+        urlFile = url.resolve(state.fileServer as string, urlStr)
+        urlStr = url.resolve(state.origin as string, urlStr)
       }
 
       const onReqError = (err) => {
         // only restore the previous state
         // if our promise is still pending
         if (p.isPending()) {
-          restorePreviousState()
+          restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
         }
 
         return reject(err)
@@ -251,8 +246,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               domain: cors.getSuperDomain(newUrl),
             })
             .then((cookies) => {
-              this._remoteVisitingUrl = false
-
               const statusIs2xxOrAllowedFailure = () => {
                 // is our status code in the 2xx range, or have we disabled failing
                 // on status code?
@@ -303,10 +296,9 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // when the server should cache the request buffer
                 // and set the domain vs not
                 if (isOk && details.isHtml) {
-                  // reset the domain to the new url if we're not
-                  // handling a local file and we aren't in multi-domain
-                  if (!handlingLocalFile && !options.isMultiDomain) {
-                    this._onDomainSet(newUrl, options)
+                  // if we're not handling a local file set the remote state
+                  if (!handlingLocalFile) {
+                    this.remoteStates.set(newUrl as string, options)
                   }
 
                   const responseBufferStream = new stream.PassThrough({
@@ -326,7 +318,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 } else {
                   // TODO: move this logic to the driver too for
                   // the same reasons listed above
-                  restorePreviousState()
+                  restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
                 }
 
                 return resolve(details)
@@ -338,14 +330,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         })
       }
 
-      const restorePreviousState = () => {
-        this._remoteAuth = previousState.auth
-        this._remoteProps = previousState.props
-        this._remoteOrigin = previousState.origin
-        this._remoteStrategy = previousState.strategy
-        this._remoteFileServer = previousState.fileServer
-        this._remoteDomainName = previousState.domainName
-        this._remoteVisitingUrl = previousState.visiting
+      const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
+        this.remoteStates.set(previousRemoteState, { isMultiDomain: !previousRemoteStateIsPrimary })
       }
 
       // if they're POSTing an object, querystringify their POST body

@@ -99,3 +99,11 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
 
   return _.startsWith(normalizedUrl, normalizedOrigin)
 }
+
+export function getOriginPolicy (url: string) {
+  const { port, protocol } = new URL(url)
+
+  // origin policy is comprised of:
+  // protocol + superdomain + port (subdomain is not factored in)
+  return _.compact([`${protocol}//${getSuperDomain(url)}`, port]).join(':')
+}

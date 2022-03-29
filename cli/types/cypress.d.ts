@@ -48,16 +48,12 @@ declare namespace Cypress {
   }
 
   interface RemoteState {
-    auth?: {
-      username: string
-      password: string
-    }
+    auth?: Auth
     domainName: string
     strategy: 'file' | 'http'
     origin: string
-    fileServer: string
+    fileServer: string | null
     props: Record<string, any>
-    visiting: string
   }
 
   interface Backend {
@@ -68,7 +64,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
-    (task: 'ready:for:domain'): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 

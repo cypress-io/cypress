@@ -248,8 +248,19 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    // TODO: un-skip once multiple remote states are supported
-    it.skip('supports auth options and adding auth to subsequent requests', () => {
+    // TODO: test currently fails when redirecting
+    it.skip('supports visit redirects', () => {
+      cy.visit('/fixtures/multi-domain.html')
+      cy.get('a[data-cy="dom-link"]').click()
+
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
+        cy.visit('/redirect?href=http://localhost:3500/fixtures/multi-domain-secondary.html')
+      })
+
+      cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+    })
+
+    it('supports auth options and adding auth to subsequent requests', () => {
       cy.switchToDomain('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/basic_auth', {
           auth: {
@@ -260,24 +271,81 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
         cy.get('body').should('have.text', 'basic auth worked')
 
-        cy.window().then({ timeout: 60000 }, (win) => {
-          return new Cypress.Promise(((resolve, reject) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/basic_auth')
-            xhr.onload = function () {
-              try {
-                expect(this.responseText).to.include('basic auth worked')
-
-                return resolve(win)
-              } catch (err) {
-                return reject(err)
-              }
-            }
-
-            return xhr.send()
-          }))
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/basic_auth'
         })
+
+        cy.get('body').should('have.text', 'basic auth worked')
+      })
+
+      // attaches the auth options for the foobar domain even from another switchToDomain
+      cy.switchToDomain('http://www.idp.com:3500', () => {
+        cy.visit('/fixtures/multi-domain.html')
+
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/basic_auth'
+        })
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.get('body').should('have.text', 'basic auth worked')
+      })
+
+      cy.visit('/fixtures/multi-domain.html')
+
+      // attaches the auth options for the foobar domain from the top-level
+      cy.window().then((win) => {
+        win.location.href = 'http://www.foobar.com:3500/basic_auth'
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.get('body').should('have.text', 'basic auth worked')
+      })
+    })
+
+    it('does not propagate the auth options across tests', (done) => {
+      cy.intercept('/basic_auth', (req) => {
+        req.on('response', (res) => {
+          // clear the www-authenticate header so the browser doesn't prompt for username/password
+          res.headers['www-authenticate'] = ''
+          expect(res.statusCode).to.equal(401)
+          done()
+        })
+      })
+
+      cy.window().then((win) => {
+        win.location.href = 'http://www.foobar.com:3500/fixtures/multi-domain.html'
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.window().then((win) => {
+          win.location.href = 'http://www.foobar.com:3500/basic_auth'
+        })
+      })
+    })
+
+    it('succeeds when visiting local file server first', { baseUrl: undefined }, () => {
+      cy.visit('cypress/fixtures/multi-domain.html')
+
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
+        cy.visit('/fixtures/multi-domain-secondary.html')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+      })
+    })
+
+    it('handles visit failures', { baseUrl: undefined }, (done) => {
+      cy.on('fail', (e) => {
+        expect(e.message).to.include('failed trying to load:\n\nhttp://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(e.message).to.include('500: Internal Server Error')
+
+        done()
+      })
+
+      cy.intercept('*/multi-domain-secondary.html', { statusCode: 500 })
+
+      cy.visit('cypress/fixtures/multi-domain.html')
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
+        cy.visit('fixtures/multi-domain-secondary.html')
       })
     })
   })

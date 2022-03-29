@@ -9,6 +9,7 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+import type { RemoteStates } from './remote_states'
 
 const debug = Debug('cypress:server:routes')
 
@@ -19,7 +20,7 @@ export interface InitializeRoutes {
   getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
-  getRemoteState: () => Cypress.RemoteState
+  remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
   exit?: boolean
@@ -32,7 +33,7 @@ export const createCommonRoutes = ({
   getSpec,
   getCurrentBrowser,
   specsStore,
-  getRemoteState,
+  remoteStates,
   nodeProxy,
   exit,
 }: InitializeRoutes) => {
@@ -48,7 +49,10 @@ export const createCommonRoutes = ({
 
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
-      iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
+      // ensure the remote state gets cleaned up from any previous tests/runs
+      remoteStates.reset()
+
+      iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
     if (testingType === 'component') {
@@ -65,12 +69,15 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
+    // ensure the remote state gets cleaned up from any previous tests/runs
+    remoteStates.reset()
+
     runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
       config,
       testingType,
       getSpec,
       getCurrentBrowser,
-      getRemoteState,
+      remoteStates,
       specsStore,
       exit,
     })

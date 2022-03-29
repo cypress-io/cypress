@@ -129,6 +129,7 @@ const createApp = (port) => {
 
     return res
     .set('WWW-Authenticate', 'Basic')
+    .type('html')
     .sendStatus(401)
   })
 

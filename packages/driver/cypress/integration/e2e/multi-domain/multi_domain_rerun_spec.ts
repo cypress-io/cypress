@@ -5,8 +5,6 @@ describe('multi-domain - rerun', { }, () => {
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
 
-  // this test will hang without the fix for multi-domain rerun
-  // https://github.com/cypress-io/cypress/issues/18043
   it('successfully reruns tests', () => {
     // @ts-ignore
     cy.switchToDomain('http://foobar.com:3500', () => {
