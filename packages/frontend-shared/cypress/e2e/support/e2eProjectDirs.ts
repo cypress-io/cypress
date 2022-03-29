@@ -154,6 +154,7 @@ export const e2eProjectDirs = [
   'various-file-types',
   'vite-ct',
   'vue3-vite-ts-configured',
+  'vue3-vite-ts-configured-bundled-mount',
   'vue3-vite-ts-custom-index-html',
   'vue3-vite-ts-unconfigured',
   'vuecli5vue3-configured',

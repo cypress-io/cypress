@@ -11,6 +11,14 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
+  systemTests.it('create-react-app-configured-bundled-mount', {
+    project: 'create-react-app-configured-bundled-mount',
+    testingType: 'component',
+    spec: 'src/App.cy.jsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
   systemTests.it('vueclivue2-configured', {
     project: 'vueclivue2-configured',
     testingType: 'component',
@@ -37,6 +45,14 @@ describe('component testing projects', function () {
 
   systemTests.it('vue3-vite-ts-configured', {
     project: 'vue3-vite-ts-configured',
+    testingType: 'component',
+    spec: 'src/components/HelloWorld.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it('vue3-vite-ts-configured-bundled-mount', {
+    project: 'vue3-vite-ts-configured-bundled-mount',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.ts',
     browser: 'chrome',

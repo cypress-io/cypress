@@ -1,8 +1,18 @@
 #!/usr/bin/env node
 
+/**
+ * The post-local-install.js script is run after your *local* yarn install.
+ * It is not run by the user.
+ *
+ * This script is responsible for:
+ * 1. re-exporting the types of dependencies shipped by the binary
+ */
+
 // @ts-check
 /* eslint-disable no-console */
 const fs = require('fs-extra')
+const globby = require('globby')
+const path = require('path')
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')
 const { join } = require('path')
@@ -12,13 +22,6 @@ require('./clean')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
-
-// We include the TypeScript definitions for the bundled 3rd party tools
-// thus we need to copy them from "dev" dependencies into our types folder
-// and we need to sometimes tweak these types files to use relative paths
-// This ensures that globals like Cypress.$, Cypress._ etc are property typed
-// yet we do not install "@types/.." packages with "npm install cypress"
-// because they can conflict with user's own libraries
 
 fs.ensureDirSync(join(__dirname, '..', 'types'))
 
@@ -97,4 +100,61 @@ filesToUncomment.forEach((file) => {
   }).join('\n')
 
   fs.writeFileSync(filePath, result)
+})
+
+const npmPkg = [
+  'react',
+  'vue',
+  'mount-utils',
+]
+
+const externalPkg = {
+  vue: [
+    '@vue/test-utils',
+  ],
+}
+
+npmPkg.forEach((pkg) => {
+  fs.removeSync(join(__dirname, `../${pkg}`))
+  const pluginDir = path.dirname(require.resolve(`@cypress/${pkg}/package.json`))
+  const toCopy = globby.sync(['*.d.ts', '**/*.d.ts'], {
+    cwd: path.join(pluginDir, 'dist'),
+  })
+
+  for (const file of toCopy) {
+    const outputFileName = join(__dirname, '..', pkg, file)
+
+    fs.copySync(
+      path.join(pluginDir, 'dist', file),
+      outputFileName,
+    )
+
+    shell.sed('-i', 'from \'@cypress/mount-utils\';', 'from \'../mount-utils\';', outputFileName)
+
+    if (externalPkg[pkg]) {
+      for (const external of externalPkg[pkg]) {
+        shell.sed('-i', `from '${external}';`, `from './${external}';`, outputFileName)
+      }
+    }
+  }
+
+  if (externalPkg[pkg]) {
+    for (const external of externalPkg[pkg]) {
+      const externalPluginDir = path.dirname(require.resolve(require.resolve(`${external}/package.json`), {
+        paths: [path.dirname(require.resolve(`@cypress/${pkg}/package.json`))],
+      }))
+      const toCopyExternal = globby.sync(['*.d.ts', '**/*.d.ts'], {
+        cwd: path.join(externalPluginDir, 'dist'),
+      })
+
+      for (const file of toCopyExternal) {
+        const outputFileName = join(__dirname, '..', pkg, external, file)
+
+        fs.copySync(
+          path.join(externalPluginDir, 'dist', file),
+          outputFileName,
+        )
+      }
+    }
+  }
 })

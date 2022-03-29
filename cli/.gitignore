@@ -12,3 +12,6 @@ types/sinon-chai
 types/net-stubbing.ts
 # ignore CLI output build folder
 build
+vue
+react
+mount-utils

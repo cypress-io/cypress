@@ -47,13 +47,14 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmit
   devServerPublicPathRoute: string
   isOpenMode: boolean
   indexHtmlFile?: string
+  cypressBinaryRoot: string
 }
 
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, indexHtmlFile } = options
+  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, indexHtmlFile, cypressBinaryRoot } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -72,6 +73,13 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   const dynamicWebpackConfig = {
     output: {
       publicPath,
+    },
+    resolve: {
+      alias: {
+        'cypress/vue': path.join(cypressBinaryRoot, 'npm/vue'),
+        'cypress/mount-utils': path.join(cypressBinaryRoot, 'npm/mount-utils'),
+        'cypress/react': path.join(cypressBinaryRoot, 'npm/react'),
+      },
     },
     plugins: [
       new CypressCTOptionsPlugin({

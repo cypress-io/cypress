@@ -5,7 +5,7 @@
  */
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
-import { relative, resolve } from 'pathe'
+import { relative, resolve, join } from 'pathe'
 import { mergeConfig } from 'vite'
 import { configFiles } from './constants'
 import { Cypress, CypressInspect } from './plugins/index'
@@ -15,6 +15,7 @@ const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: StartDevServer) => {
   const root = options.config.projectRoot || resolve(process.cwd())
+  const binaryRoot = options.config.cypressBinaryRoot
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
@@ -31,10 +32,31 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     Falling back to Vite\'s defaults.`)
   }
 
+  debug(`Resolving to Vue, React, and Mount Utils packages here:`,
+    join(binaryRoot, 'npm/vue'),
+    join(binaryRoot, 'npm/react'),
+    join(binaryRoot, 'npm/mount-utils'))
+
   const config = {
     root,
     base: `/${options.config.namespace}/src/`,
     configFile,
+    resolve: {
+      alias: [
+        {
+          find: 'cypress/vue',
+          replacement: join(binaryRoot, 'npm/vue'),
+        },
+        {
+          find: 'cypress/mount-utils',
+          replacement: join(binaryRoot, 'npm/mount-utils'),
+        },
+        {
+          find: 'cypress/react',
+          replacement: join(binaryRoot, 'npm/react'),
+        },
+      ],
+    },
     optimizeDeps: {
       entries: [
         ...options.specs.map((s) => relative(root, s.relative)),
