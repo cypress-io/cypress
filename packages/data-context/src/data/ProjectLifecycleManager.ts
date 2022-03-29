@@ -20,6 +20,7 @@ import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import type { IpcHandler } from './ProjectConfigIpc'
 import pDefer from 'p-defer'
+import { EventRegistrar } from './EventRegistrar'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -82,11 +83,14 @@ export class ProjectLifecycleManager {
   private _cachedInitialConfig: Cypress.ConfigOptions | undefined
   private _cachedFullConfig: FullConfig | undefined
   private _initializedProject: unknown | undefined
+  private _eventRegistrar: EventRegistrar
 
   constructor (private ctx: DataContext) {
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
+
+    this._eventRegistrar = new EventRegistrar
 
     process.on('exit', this.onProcessExit)
 
@@ -222,6 +226,7 @@ export class ProjectLifecycleManager {
       handlers: this.ctx._apis.configApi.getServerPluginHandlers(),
       cypressVersion: this.ctx._apis.configApi.cypressVersion,
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
+      eventRegistrar: this._eventRegistrar,
       onError: (cypressError, title) => {
         if (this.ctx.isRunMode && this._pendingInitialize) {
           this._pendingInitialize.reject(cypressError)
@@ -475,18 +480,15 @@ export class ProjectLifecycleManager {
   }
 
   registerEvent (event: string, callback: Function) {
-    return this._configManager?.registerEvent(event, callback)
+    return this._eventRegistrar.registerEvent(event, callback)
   }
 
   hasNodeEvent (eventName: string) {
-    return this._configManager?.hasNodeEvent(eventName)
+    return this._eventRegistrar.hasNodeEvent(eventName)
   }
 
   executeNodeEvent (event: string, args: any[]) {
-    // TODO: Evaluate everywhere we optionally chain config manager
-    assert(this._configManager)
-
-    return this._configManager?.executeNodeEvent(event, args)
+    return this._eventRegistrar.executeNodeEvent(event, args)
   }
 
   private legacyPluginGuard () {
@@ -645,14 +647,14 @@ export class ProjectLifecycleManager {
     this._pendingInitialize = pDefer()
 
     if (await this.waitForInitializeSuccess()) {
+      if (!this.metaState.hasValidConfigFile) {
+        return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
+      }
+
       if (testingType) {
         this.setCurrentTestingType(testingType)
       } else {
         this.setCurrentTestingType('e2e')
-      }
-
-      if (!this.metaState.hasValidConfigFile) {
-        return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
       }
     }
 
