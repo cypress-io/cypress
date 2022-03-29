@@ -2045,11 +2045,6 @@ describe('lib/config', () => {
   })
 
   context('.setSupportFileAndFolder', () => {
-    const mockSupportDefaults = {
-      supportFolder: false,
-      configFile: 'cypress.json',
-    }
-
     it('does nothing if supportFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -2069,7 +2064,7 @@ describe('lib/config', () => {
         supportFile: 'test/unit/config_spec.js',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2087,7 +2082,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support/e2e.js',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2105,7 +2100,7 @@ describe('lib/config', () => {
         supportFile: false,
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2120,11 +2115,17 @@ describe('lib/config', () => {
       const obj = config.setAbsolutePaths({
         projectRoot,
         supportFile: 'does/not/exist',
+        resolved: {
+          supportFile: {
+            value: 'does/not/exist',
+            from: 'default',
+          },
+        },
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .catch((err) => {
-        expect(stripAnsi(err.message)).to.include('Your supportFile is missing or invalid:')
+        expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
       })
     })
 
@@ -2143,7 +2144,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support/index.ts',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         debug('result is', result)
 
@@ -2170,7 +2171,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support.ts',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         debug('result is', result)
 
@@ -2271,6 +2272,26 @@ describe('lib/config', () => {
       expect(obj).to.deep.eq({
         nodeVersion: 'system',
         resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+  })
+
+  describe('relativeToProjectRoot', () => {
+    context('posix', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = '/root/projects'
+        const supportFile = '/root/projects/cypress/support/e2e.js'
+
+        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq('cypress/support/e2e.js')
+      })
+    })
+
+    context('windows', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = `\\root\\projects`
+        const supportFile = `\\root\\projects\\cypress\\support\\e2e.js`
+
+        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq(`cypress\\support\\e2e.js`)
       })
     })
   })
