@@ -90,7 +90,7 @@ export class ProjectLifecycleManager {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
 
-    this._eventRegistrar = new EventRegistrar
+    this._eventRegistrar = new EventRegistrar()
 
     process.on('exit', this.onProcessExit)
 
