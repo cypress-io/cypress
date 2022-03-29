@@ -55,8 +55,8 @@ export class TestActions {
         for (const { actual, expected } of filesToDiff) {
           try {
             const read = (f: string) => fs.readFileSync(f, 'utf-8')
-            const actualContent = read(actual)
-            const expectedContent = read(expected)
+            const actualContent = read(actual).trim()
+            const expectedContent = read(expected).trim()
             const diff = disparity.unifiedNoColor(actualContent, expectedContent, {})
 
             if (diff !== '') {
