@@ -81,6 +81,7 @@ export const e2eProjectDirs = [
   'no-specs',
   'no-specs-custom-pattern',
   'no-specs-no-storybook',
+  'no-support-file',
   'non-existent-spec',
   'non-proxied',
   'nuxtjs-vue2-configured',
