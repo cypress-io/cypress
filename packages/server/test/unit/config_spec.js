@@ -2125,7 +2125,6 @@ describe('lib/config', () => {
 
       return config.setSupportFileAndFolder(obj)
       .catch((err) => {
-        console.log('Error', err)
         expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
       })
     })
