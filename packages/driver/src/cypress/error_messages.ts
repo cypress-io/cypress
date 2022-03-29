@@ -1805,6 +1805,25 @@ export default {
         docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
     },
+    cannot_visit_different_origin: {
+      message: stripIndent`\
+        ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
+
+        The new URL is considered a different origin because the following parts of the URL are different:
+
+          > {{differences}}
+
+        You may only ${cmd('visit')} same-origin URLs within ${cmd('switchToDomain')}.
+
+        The previous URL you visited was:
+
+          > '{{previousUrl}}'
+
+        You're attempting to visit this URL:
+
+          > '{{attemptedUrl}}'`,
+      docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
+    },
   },
 
   task: {

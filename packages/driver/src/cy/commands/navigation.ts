@@ -13,7 +13,7 @@ import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousDomainVisited: boolean = false
+let previousUrlVisited: string | undefined
 let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
@@ -30,7 +30,7 @@ const reset = (test: any = {}) => {
 
   // continuously reset this
   // before each test run!
-  previousDomainVisited = false
+  previousUrlVisited = undefined
 
   // make sure we reset that we haven't
   // visited about blank again
@@ -90,18 +90,18 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   }
 }
 
-const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) => {
+const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log, isMultiDomain = false }) => {
   const differences: string[] = []
 
-  if (remoteUrl.protocol !== existingUrl.protocol) {
+  if (remote.protocol !== existing.protocol) {
     differences.push('protocol')
   }
 
-  if (remoteUrl.port !== existingUrl.port) {
+  if (remote.port !== existing.port) {
     differences.push('port')
   }
 
-  if (remoteUrl.superDomain !== existingUrl.superDomain) {
+  if (remote.superDomain !== existing.superDomain) {
     differences.push('superdomain')
   }
 
@@ -110,11 +110,15 @@ const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, exist
     args: {
       differences: differences.join(', '),
       previousUrl: previousUrlVisited,
-      attemptedUrl: origin,
+      attemptedUrl: remote.origin,
     },
   }
 
-  $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
+  if (isMultiDomain) {
+    $errUtils.throwErrByPath('switchToDomain.cannot_visit_different_origin', errOpts)
+  } else {
+    $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
+  }
 }
 
 const specifyFileByRelativePath = (url, log) => {
@@ -1021,13 +1025,15 @@ export default (Commands, Cypress, cy, state, config) => {
         const existingHash = remote.hash || ''
         const existingAuth = remote.auth || ''
 
-        if (previousDomainVisited && (remote.originPolicy !== existing.originPolicy)) {
+        if (previousUrlVisited && (remote.originPolicy !== existing.originPolicy)) {
           // if we've already visited a new superDomain
           // then die else we'd be in a terrible endless loop
           // we also need to disable retries to prevent the endless loop
           $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
-          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
+          const params = { remote, existing, previousUrlVisited, log: options._log }
+
+          return cannotVisitDifferentOrigin(params)
         }
 
         // in multi-domain, the window may not have been set yet if nothing has been loaded in the secondary domain,
@@ -1109,7 +1115,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // then go ahead and change the iframe's src
           // and we're good to go
           if (remote.originPolicy === existing.originPolicy) {
-            previousDomainVisited = remote.origin
+            previousUrlVisited = remote.origin
 
             url = $Location.fullyQualifyUrl(url)
 
@@ -1123,14 +1129,19 @@ export default (Commands, Cypress, cy, state, config) => {
           // we need to throw an error since the user tried to visit a new
           // domain which isn't allowed within a multi-domain block
           if (Cypress.isMultiDomain && win) {
+            const existingAutOrigin = $Location.create(win.location.href).origin
+            const params = { remote, existing, previousUrlVisited: existingAutOrigin, log: options._log, isMultiDomain: true }
+
             // TODO: need a better error message
-            return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
+            return cannotVisitDifferentOrigin(params)
           }
 
           // if we've already visited a new origin
           // then die else we'd be in a terrible endless loop
-          if (previousDomainVisited) {
-            return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
+          if (previousUrlVisited) {
+            const params = { remote, existing, previousUrlVisited, log: options._log }
+
+            return cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing domains
