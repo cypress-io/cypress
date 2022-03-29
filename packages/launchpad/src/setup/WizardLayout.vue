@@ -19,6 +19,8 @@
       :back="backLabel"
       :alt="alt"
       :main-variant="mainButtonVariant"
+      :skip="skipLabel"
+      :skip-fn="skipFn"
     >
       <slot name="button-bar" />
     </ButtonBar>
@@ -37,6 +39,7 @@ const props = withDefaults(
   defineProps<{
     next?: string
     back?: string
+    skip?: string
     alt?: string
     showNext?: boolean
     canNavigateForward?: boolean
@@ -44,22 +47,26 @@ const props = withDefaults(
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any
     backFn?: (...args: unknown[]) => any
+    skipFn?: (...args: unknown[]) => any
     mainButtonVariant?: ButtonVariants
   }>(), {
     next: undefined,
     showNext: true,
     back: undefined,
+    skip: undefined,
     alt: undefined,
     canNavigateForward: undefined,
     noContainer: undefined,
     altFn: undefined,
     nextFn: undefined,
     backFn: undefined,
+    skipFn: undefined,
     mainButtonVariant: 'primary',
   },
 )
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
 const backLabel = computed(() => props.back || t('setupPage.step.back'))
+const skipLabel = computed(() => props.skip || t('setupPage.step.skip'))
 
 </script>
