@@ -179,12 +179,11 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
 
     debug('connecting %o', { target })
 
-    const newCri = await chromeRemoteInterface({
+    cri = await chromeRemoteInterface({
       target,
       local: true,
     })
 
-    cri = newCri
     connected = true
 
     maybeDebugCdpMessages(cri)
