@@ -229,7 +229,7 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
 
       if (connected) {
         try {
-          return cri.send(command, params)
+          return await cri.send(command, params)
         } catch (err) {
           if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
             throw err
