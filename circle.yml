@@ -538,6 +538,10 @@ commands:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - run:
+          # Install deps + Cypress binary with yarn if yarn.lock present
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
+      - run:
           name: Run system tests
           command: |
             ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`

@@ -798,7 +798,7 @@ const systemTests = {
     if (options.withBinary && options.dockerImage) {
       args.push(`run`, `--project=${projectPath}`)
     } else if (options.withBinary) {
-      args.push('node_modules/.bin/cypress', `run`, `--project=${projectPath}`)
+      args.push('../node_modules/.bin/cypress', `run`, `--project=${projectPath}`)
     } else {
       args.push(
         require.resolve('@packages/server'),
