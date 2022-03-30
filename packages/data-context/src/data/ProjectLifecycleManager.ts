@@ -841,7 +841,7 @@ export class ProjectLifecycleManager {
   /**
    * Called on the completion of the resolve of the config file.
    */
-  async private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
+  private async onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
 
     // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
@@ -852,12 +852,16 @@ export class ProjectLifecycleManager {
     this._eventProcess = child
     this._eventsIpc = ipc
 
-    // FIXME: if the config just loaded with a new set, we have to re-run the setupNodeEvents
+    if (!this._currentTestingType) {
+      return
+    }
+
+    // if the config just loaded with a new set, we have to re-run the setupNodeEvents
     // the loading status seems to be if a previous instance of setupNodeEvents is still in progress
     // with an older version of the config object.
     // the existing ipcResult promise should be killed and replaced
-    if (!this._currentTestingType || this._eventsIpcResult.state === 'loading') {
-      return
+    if (this._eventsIpcResult.state === 'loading') {
+      this._eventsIpcResult = { state: 'pending' }
     }
 
     // Start the wizard in case testing type is missing
