@@ -76,7 +76,6 @@ export function makeClientTestContext (): ClientTestContext {
       chosenFramework: null,
       chosenManualInstall: false,
       allBundlers,
-      activeBrowser: null,
       warnings: [],
     },
     user: null,
