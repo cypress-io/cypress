@@ -130,7 +130,7 @@ export class ProjectActions {
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
     assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
     assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
-    debug('initializing active project')
+    debug('initializing active project with %O', this.ctx.modeOptions)
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,

@@ -79,6 +79,7 @@ export class DataContext {
   constructor (_config: DataContextConfig) {
     const { modeOptions, ...rest } = _config
 
+    this.debug('constructor arguments %O', { modeOptions, rest })
     this._config = rest
     this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
