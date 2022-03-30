@@ -1291,8 +1291,8 @@ export class ProjectLifecycleManager {
       })
     }
 
-    assert(this._envFileResult.state === 'loaded', 'env file should be loaded')
-    assert(this._configResult.state === 'loaded', 'config should be loaded')
+    assert(this._envFileResult.state === 'loaded', `env file should be loaded but was ${this._envFileResult.state}`)
+    assert(this._configResult.state === 'loaded', `config should be loaded but was ${this._configResult.state}`)
 
     const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.ctx.modeOptions)
 
