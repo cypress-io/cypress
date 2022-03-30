@@ -2417,8 +2417,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    # maybe run all unit tests?
-
     - create-build-artifacts:
         name: darwin-create-build-artifacts
         context:
@@ -2488,6 +2486,12 @@ windows-workflow: &windows-workflow
           - test-runner:sign-windows-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+        requires:
+          - windows-build
+
+    - test-kitchensink:
+        name: windows-test-kitchensink
+        executor: windows
         requires:
           - windows-build
 
