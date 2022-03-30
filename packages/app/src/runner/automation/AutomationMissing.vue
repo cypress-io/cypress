@@ -6,7 +6,7 @@
       :icon="ErrorOutlineIcon"
       :dismissible="false"
       :overflow="false"
-      class="min-w-600px"
+      class="w-full max-w-600px"
     >
       <div class="flex flex-col gap-16px">
         <p>
