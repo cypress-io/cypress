@@ -86,7 +86,7 @@ const testingTypes = computed(() => {
       iconSolid: IconComponentSolid,
       configured: props.gql.currentProject?.isCTConfigured,
     },
-  ]
+  ] as const
 })
 
 const currentTestingType = computed(() => props.gql.currentProject?.currentTestingType as TestingTypeEnum)
