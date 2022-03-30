@@ -994,6 +994,7 @@ jobs:
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
+      - run: node -p process.env
       - persist_to_workspace:
           root: ~/
           paths:
