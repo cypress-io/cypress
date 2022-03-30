@@ -241,11 +241,7 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
     this.debug('is cross-domain, delay until ready:for:domain event')
 
     this.serverBus.once('ready:for:domain', ({ failed }) => {
-      this.debug(`ready for domain${failed ? ' failed' : ''}, let it go`)
-
-      if (!failed) {
-        this.res.wantsInjection = 'fullMultiDomain'
-      }
+      this.debug(`received ready:for:domain${failed ? ' failed' : ''}, let the response proceed`)
 
       this.next()
     })
