@@ -11,6 +11,7 @@ import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
+import * as cors from '@packages/network/lib/cors'
 
 const $ = $Cypress.$
 const ws = client.connect({
@@ -537,6 +538,7 @@ export const eventManager = {
       // established spec bridge, but one that is not the current or next switchToDomain command.
       if (cy.state('latestActiveDomain') === originPolicy) {
         // We remain in an anticipating state until either a load even happens or a timeout.
+        cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
         cy.isAnticipatingMultiDomainFor(undefined)
         cy.isStable(true, 'load')
         // Prints out the newly loaded URL

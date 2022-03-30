@@ -892,6 +892,9 @@ export default {
     retry_timed_out ({ ms }) {
       return `Timed out retrying after ${ms}ms: `
     },
+    cross_origin_command ({ commandOrigin, autOrigin }) {
+      return `The command was expected to run against origin: \`${commandOrigin }\` but the application is at origin: \`${autOrigin}\`.`
+    },
   },
 
   mocha: {
