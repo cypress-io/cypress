@@ -1,1 +1,1 @@
-require('./registerFunction')()
+require('./registerDir')()
