@@ -69,5 +69,6 @@ export default (config) => {
   return {
     browser: config.browser,
     isBrowser: _.partial(isBrowser, config),
+    browserMajorVersion: () => config.browser.majorVersion,
   }
 }
