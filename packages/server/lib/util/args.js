@@ -304,7 +304,7 @@ const parseSpecArgv = (pattern) => {
       rule.comma - offset,
     )
 
-    offset = offsettedBy
+    offset += offsettedBy
     carry = mutated
 
     return res
