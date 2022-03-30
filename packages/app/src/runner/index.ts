@@ -126,7 +126,7 @@ function setupRunner (namespace: AutomationElementId) {
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
     randomString: runnerUiStore.randomString,
-    element: `${namespace}-string`,
+    element: getAutomationElementId(),
   })
 
   getEventManager().start(window.UnifiedRunner.config)
@@ -381,8 +381,13 @@ async function executeSpec (spec: SpecFile) {
   throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')
 }
 
+function getAutomationElementId (): AutomationElementId {
+  return `${window.__CYPRESS_CONFIG__.namespace}-string`
+}
+
 export const UnifiedRunnerAPI = {
   initialize,
   executeSpec,
   teardown,
+  getAutomationElementId,
 }
