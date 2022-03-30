@@ -130,13 +130,13 @@ export class ProjectLifecycleManager {
   }
 
   get configFilePath () {
-    assert(this._configManager)
+    assert(this._configManager, 'Cannot retrieve config file path without a config manager')
 
     return this._configManager.configFilePath
   }
 
   setConfigFilePath (fileName: string) {
-    assert(this._configManager)
+    assert(this._configManager, 'Cannot set config file path without a config manager')
     this._configManager.configFilePath = this._pathToFile(fileName)
   }
 
@@ -236,10 +236,11 @@ export class ProjectLifecycleManager {
           this.ctx.coreData.scaffoldedFiles.filter((f) => {
             if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
               f.status = 'valid'
-              this.ctx.emitter.toLaunchpad()
             }
           })
         }
+
+        this.ctx.emitter.toLaunchpad()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
         this._cachedFullConfig = finalConfig
@@ -267,15 +268,23 @@ export class ProjectLifecycleManager {
 
         this._pendingInitialize?.resolve(finalConfig)
       },
+      refreshLifecycle: async () => this.refreshLifecycle(),
     })
   }
 
-  async reloadConfig () {
-    assert(this._projectRoot)
-    assert(this._configManager)
+  async refreshLifecycle () {
+    assert(this._projectRoot, 'Cannot reload config without a project root')
+    assert(this._configManager, 'Cannot reload config without a config manager')
 
     if (this.readyToInitialize(this._projectRoot)) {
-      await this._configManager.reloadConfig()
+      this._configManager.resetLoadingState()
+      await this.initializeConfig()
+
+      if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+        this._configManager.loadTestingType()
+      } else {
+        this.setCurrentTestingType(null)
+      }
 
       return true
     }
@@ -298,7 +307,7 @@ export class ProjectLifecycleManager {
   }
 
   async initializeConfig () {
-    assert(this._configManager)
+    assert(this._configManager, 'Cannot initialize config without a config manager')
 
     return this._configManager.initializeConfig()
   }
@@ -416,12 +425,13 @@ export class ProjectLifecycleManager {
     this._initializedProject = undefined
     this._currentTestingType = testingType
 
+    assert(this._configManager, 'Cannot set a testing type without a config manager')
+    this._configManager.setTestingType(testingType)
+
     if (!testingType) {
       return
     }
 
-    assert(this._configManager)
-    this._configManager.setTestingType(testingType)
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
       this._configManager.loadTestingType()
     }
@@ -450,19 +460,19 @@ export class ProjectLifecycleManager {
    * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
-    assert(this._configManager)
+    assert(this._configManager, 'Cannot get full config a config manager')
 
     return this._configManager.getFullInitialConfig(options, withBrowsers)
   }
 
   async getConfigFileContents () {
-    assert(this._configManager)
+    assert(this._configManager, 'Cannot get config file contents without a config manager')
 
     return this._configManager.getConfigFileContents()
   }
 
   async loadCypressEnvFile () {
-    assert(this._configManager)
+    assert(this._configManager, 'Cannot load a cypress env file without a config manager')
 
     return this._configManager.loadCypressEnvFile()
   }

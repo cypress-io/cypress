@@ -251,6 +251,33 @@ describe('Choose a Browser Page', () => {
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
     })
+
+    it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
+      cy.openProject('launchpad', ['--e2e'])
+      cy.visitLaunchpad()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      })
+
+      cy.get('h1').should('contain', 'Welcome to Cypress!')
+      cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js',
+`module.exports = {
+  e2e: {
+    setupNodeEvents: (on, config) => config,
+    supportFile: false,
+  },
+}`)
+      })
+
+      cy.get('h1').should('contain', 'Welcome to Cypress!')
+      cy.get('[data-cy-testingtype="e2e"]').should('not.contain', 'Not Configured')
+    })
   })
 
   describe('No System Browsers Detected', () => {

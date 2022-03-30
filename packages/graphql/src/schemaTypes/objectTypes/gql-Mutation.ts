@@ -34,7 +34,7 @@ export const mutation = mutationType({
         })
 
         // Wait for the project config to be reloaded
-        await ctx.lifecycleManager.reloadConfig()
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },

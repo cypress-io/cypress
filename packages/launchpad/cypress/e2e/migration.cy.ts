@@ -938,7 +938,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     })
   })
 
-  it('completes journey for migration-e2e-legacy-plugins-throws-error', () => {
+  it('completes journey for migration-e2e-legacy-plugins-throws-error and recovers', () => {
     scaffoldAndVisitLaunchpad('migration-e2e-legacy-plugins-throws-error')
     // no steps are shown - we show the error that surfaced when executing pluginsFile.
     cy.get(renameAutoStep).should('not.exist')

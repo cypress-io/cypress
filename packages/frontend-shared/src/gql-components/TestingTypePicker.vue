@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="props.gql.currentProject"
-    class="flex justify-center m-24px"
+    class="flex m-24px justify-center"
   >
     <Card
-      v-for="tt in TESTING_TYPES"
+      v-for="tt in testingTypes"
       :key="tt.key"
       :data-cy-testingType="tt.key"
       :title="tt.name"
@@ -68,24 +68,26 @@ const emits = defineEmits<{
   (eventName: 'pick', testingType: TestingTypeEnum, currentTestingType: TestingTypeEnum): void
 }>()
 
-const TESTING_TYPES = [
-  {
-    key: 'e2e',
-    name: t('testingType.e2e.name'),
-    description: t('testingType.e2e.description'),
-    icon: IconE2E,
-    iconSolid: IconE2ESolid,
-    configured: props.gql.currentProject?.isE2EConfigured,
-  },
-  {
-    key: 'component',
-    name: t('testingType.component.name'),
-    description: t('testingType.component.description'),
-    icon: IconComponent,
-    iconSolid: IconComponentSolid,
-    configured: props.gql.currentProject?.isCTConfigured,
-  },
-] as const
+const testingTypes = computed(() => {
+  return [
+    {
+      key: 'e2e',
+      name: t('testingType.e2e.name'),
+      description: t('testingType.e2e.description'),
+      icon: IconE2E,
+      iconSolid: IconE2ESolid,
+      configured: props.gql.currentProject?.isE2EConfigured,
+    },
+    {
+      key: 'component',
+      name: t('testingType.component.name'),
+      description: t('testingType.component.description'),
+      icon: IconComponent,
+      iconSolid: IconComponentSolid,
+      configured: props.gql.currentProject?.isCTConfigured,
+    },
+  ]
+})
 
 const currentTestingType = computed(() => props.gql.currentProject?.currentTestingType as TestingTypeEnum)
 

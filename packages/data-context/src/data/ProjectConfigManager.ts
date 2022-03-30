@@ -26,6 +26,7 @@ type ProjectConfigManagerOptions = {
   onError: (cypressError: CypressError, title?: string | undefined) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
+  refreshLifecycle: () => Promise<boolean>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
@@ -37,7 +38,7 @@ export class ProjectConfigManager {
   private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEventsTarget: TestingType | undefined
-  private _testingType: TestingType | undefined
+  private _testingType: TestingType | null = null
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
   private _cachedLoadConfig: LoadConfigReply | undefined
@@ -71,7 +72,7 @@ export class ProjectConfigManager {
   }
 
   get configFilePath () {
-    assert(this._configFilePath)
+    assert(this._configFilePath, 'configFilePath is undefined')
 
     return this._configFilePath
   }
@@ -80,7 +81,7 @@ export class ProjectConfigManager {
     this._configFilePath = configFilePath
   }
 
-  setTestingType (testingType: TestingType) {
+  setTestingType (testingType: TestingType | null) {
     this._testingType = testingType
   }
 
@@ -101,21 +102,26 @@ export class ProjectConfigManager {
       this._cachedLoadConfig = undefined
       this._cachedFullConfig = undefined
 
-      const result = await this.loadConfig()
+      const loadConfigReply = await this.loadConfig()
 
       // This is necessary as there is a weird timing issue where an error occurs and the config results get loaded
       // TODO: see if this can be !== 'errored'
       if (this._state === 'loadingConfig') {
         debug(`config is loaded for file`, this.configFilePath, this._testingType)
-        this.validateConfigFile(this.configFilePath, result.initialConfig)
+        this.validateConfigFile(this.configFilePath, loadConfigReply.initialConfig)
 
         this._state = 'loadedConfig'
-        this._cachedLoadConfig = result
+        this._cachedLoadConfig = loadConfigReply
 
-        this.options.onInitialConfigLoaded(result.initialConfig)
+        this.options.onInitialConfigLoaded(loadConfigReply.initialConfig)
+
+        this.watchFiles([
+          ...loadConfigReply.requires,
+          this.configFilePath,
+        ])
       }
 
-      return result.initialConfig
+      return loadConfigReply.initialConfig
     } catch (error) {
       debug(`catch %o`, error)
       if (this._eventsIpc) {
@@ -136,7 +142,7 @@ export class ProjectConfigManager {
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.reloadConfig().catch(this.onLoadError)
+      this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
       this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
     }
@@ -147,7 +153,7 @@ export class ProjectConfigManager {
     this._state = 'loadingNodeEvents'
 
     try {
-      assert(this._testingType)
+      assert(this._testingType, 'Cannot setup node events without a testing type')
       this._registeredEventsTarget = this._testingType
       const config = await this.getFullInitialConfig()
       const setupNodeEventsReply = await this._eventsIpc?.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
@@ -221,21 +227,17 @@ export class ProjectConfigManager {
     await this.options.onFinalConfigLoaded(finalConfig)
 
     this.watchFiles([
-      ...loadConfigReply.requires,
       ...result.requires,
-      this.configFilePath,
       this.envFilePath,
     ])
 
     return result
   }
 
-  async reloadConfig () {
+  resetLoadingState () {
     this._loadConfigPromise = undefined
     this._registeredEventsTarget = undefined
-
-    await this.initializeConfig()
-    this.loadTestingType()
+    this._state = 'pending'
   }
 
   private loadConfig () {
@@ -308,7 +310,7 @@ export class ProjectConfigManager {
 
     w.on('all', (evt) => {
       debug(`changed ${file}: ${evt}`)
-      this.reloadConfig().catch(this.onLoadError)
+      this.options.refreshLifecycle().catch(this.onLoadError)
     })
 
     w.on('error', (err) => {
@@ -356,7 +358,7 @@ export class ProjectConfigManager {
   }
 
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
-    assert(this._testingType)
+    assert(this._testingType, 'Cannot build base full config without a testing type')
     this.validateConfigRoot(configFileContents)
 
     const testingTypeOverrides = configFileContents[this._testingType] ?? {}
