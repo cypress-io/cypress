@@ -36,20 +36,13 @@ describe('src/cy/commands/querying', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/19985
-    it('respects timeout option', () => {
-      cy.visit('fixtures/dom.html')
-
-      // Add an element after 4200ms.
-      cy.window().then((w) => {
-        w.eval(`setTimeout(() => {
-        const p = document.createElement('p')
-        p.innerHTML = 'Hello, root world!'
-        document.body.appendChild(p)
-      }, 4200)
-    `)
+    it('respects timeout option', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.not.contain('4000ms')
+        done()
       })
 
-      cy.root({ timeout: 4300 }).should('contain', 'root world')
+      cy.root({ timeout: 50 }).should('contain', 'root world')
     })
 
     describe('.log', () => {
