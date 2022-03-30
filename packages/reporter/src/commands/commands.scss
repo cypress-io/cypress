@@ -82,14 +82,12 @@
     border-top: 0;
   }
 
-  .command-type-child {
-    .command-method {
-      &:before {
-        float: left;
-        content: "-";
-        margin-right: 2px;
-        padding-left: 5px;
-      }
+  .command-type-child > span > div > div > .command-method {
+    &:before {
+      float: left;
+      content: "-";
+      margin-right: 2px;
+      padding-left: 5px;
     }
   }
 

@@ -22,9 +22,7 @@ const md = new Markdown()
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
-const visibleMessage = (model: CommandModel) => {
-  if (model.visible) return ''
-
+const invisibleMessage = (model: CommandModel) => {
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
     'This element is not visible.'
@@ -226,7 +224,7 @@ class Command extends Component<Props> {
           {
             'command-is-studio': model.isStudio,
             'command-is-event': !!model.event,
-            'command-is-invisible': model.visible != null && !model.visible,
+            'command-is-invisible': model.isInvisible,
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
@@ -269,16 +267,18 @@ class Command extends Component<Props> {
               </span>
               <span className='command-controls'>
                 <i className='far fa-times-circle studio-command-remove' onClick={this._removeStudioCommand} />
-                <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-                  <i className='command-invisible far fa-eye-slash' />
-                </Tooltip>
+                {model.isInvisible && (
+                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+                    <i className='command-invisible far fa-eye-slash' />
+                  </Tooltip>
+                )}
                 <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
                   <span className='num-elements'>{model.numElements}</span>
                 </Tooltip>
                 <span className='alias-container'>
                   <Interceptions model={model} />
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
-                  <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
+                  <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
                     <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
                   </Tooltip>
                 </span>
