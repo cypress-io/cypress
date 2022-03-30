@@ -24,7 +24,7 @@
       }"
       :aria-hidden="!isOpen"
       :class="{
-        'overflow-auto': isOpen,
+        'overflow-auto': isOpen && overflow,
       }"
     >
       <slot
@@ -44,11 +44,13 @@ const props = withDefaults(defineProps<{
   initiallyOpen?: boolean
   lazy?: boolean
   disable?: boolean
+  overflow?: boolean
 }>(), {
   initiallyOpen: false,
   maxHeight: '500px',
   lazy: false,
   disable: false,
+  overflow: true,
 })
 
 const [isOpen, toggle] = useToggle(props.initiallyOpen)
