@@ -359,25 +359,23 @@ export class ProjectLifecycleManager {
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  setCurrentTestingType (testingType: TestingType | null) {
+  async setCurrentTestingType (testingType: TestingType | null): Promise<void | SetupNodeEventsReply | Promise<Partial<Cypress.UserConfigOptions>>> {
     debug('setCurrentTestingType', testingType)
     this.setCurrentTestingTypeSync(testingType)
     if (!testingType) {
-      return Promise.resolve()
+      return
     }
 
     if (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType])) {
       return this.loadTestingType()
     }
-
-    return Promise.resolve()
   }
 
   /**
    * Called after we've set the testing type. If we've change from the current
    * IPC used to spawn the config, we need to get a fresh config IPC & re-execute.
    */
-  private loadTestingType () {
+  private async loadTestingType () {
     const testingType = this._currentTestingType
 
     assert(testingType, 'loadTestingType requires a testingType')
@@ -394,8 +392,6 @@ export class ProjectLifecycleManager {
     if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
       return this.setupNodeEvents().catch(this.onLoadError)
     }
-
-    return Promise.resolve()
   }
 
   private killChildProcesses () {
@@ -717,7 +713,7 @@ export class ProjectLifecycleManager {
    * This sources a fresh IPC channel & reads the config. If we detect a change
    * to the config or the list of imported files, we will re-execute the setupNodeEvents
    */
-  reloadConfig () {
+  async reloadConfig (): Promise<Partial<Cypress.UserConfigOptions>> {
     debug('reloadConfig')
     if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
       debug('reloadConfig refresh')
