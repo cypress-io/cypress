@@ -1,11 +1,10 @@
 exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
+  "blacklistHosts",
   "componentFolder",
   "integrationFolder",
   "testFiles",
   "ignoreTestFiles",
-  "pluginsFile",
   "experimentalComponentTesting",
-  "blacklistHosts",
   "experimentalGetCookiesSameSite",
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
@@ -13,7 +12,8 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "experimentalStudio",
   "firefoxGcInterval",
   "nodeVersion",
-  "nodeVersion"
+  "nodeVersion",
+  "pluginsFile"
 ]
 
 exports['src/index .getDefaultValues returns list of public config keys 1'] = {
