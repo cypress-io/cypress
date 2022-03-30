@@ -156,6 +156,9 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
       cy.on('fail', (e) => {
         expect(e.message).to.include('failed trying to load:\n\nhttp://www.idp.com:3500/fixtures/dom.html')
         expect(e.message).to.include('failed because you are attempting to visit a URL that is of a different origin')
+        expect(e.message).to.include('You may only `cy.visit()` same-origin URLs within `cy.switchToDomain()`.')
+        expect(e.message).to.include('The previous URL you visited was:\n\n  > \'http://www.foobar.com:3500\'')
+        expect(e.message).to.include('You\'re attempting to visit this URL:\n\n  > \'http://www.idp.com:3500\'')
 
         done()
       })
@@ -248,16 +251,13 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    // TODO: test currently fails when redirecting
-    it.skip('supports visit redirects', () => {
+    it('supports visit redirects', () => {
       cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="dom-link"]').click()
 
       cy.switchToDomain('http://www.foobar.com:3500', () => {
-        cy.visit('/redirect?href=http://localhost:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
       })
-
-      cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
     })
 
     it('supports auth options and adding auth to subsequent requests', () => {
