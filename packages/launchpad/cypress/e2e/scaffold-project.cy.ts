@@ -17,7 +17,7 @@ import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tas
 // Each subsequent run will compare the scaffolded files in the
 // `expected-cypress-js-e2e` directory to the newly created ones.
 //
-// If there is a descrepancy, the test will fail and show the diff in the command log.
+// If there is a discrepancy, the test will fail and show the diff in the command log.
 //
 // To update your expected files, just delete the `expected-cypress` and re-run the test,
 // or modify them by hand.

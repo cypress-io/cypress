@@ -95,10 +95,12 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
 
   const expectedScaffoldDir = path.join(projectDir, `expected-cypress-${language}-${testingType}`)
 
+  const currentProjectPosix = currentProject.split(path.sep).join(path.posix.sep)
+
   const files = (
     await Promise.all([
-      globby(path.join(currentProject, 'cypress'), { onlyFiles: true }),
-      globby(path.join(currentProject, 'cypress.config.*'), { onlyFiles: true }),
+      globby(path.join(currentProjectPosix, 'cypress'), { onlyFiles: true }),
+      globby(path.join(currentProjectPosix, 'cypress.config.*'), { onlyFiles: true }),
     ])
   ).reduce((acc, curr) => {
     return [acc, curr].flat(2)
@@ -110,7 +112,7 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
 
   const filesToDiff = actualRelativeFiles.map<FileToDiff>((file) => {
     return {
-      actual: path.join(currentProject!, file),
+      actual: path.join(currentProjectPosix, file),
       expected: path.join(expectedScaffoldDir, file),
     }
   })
