@@ -50,7 +50,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:before:unload', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
         const afterWindowBeforeUnload = new Promise<void>((resolve) => {
           Cypress.once('window:before:unload', () => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -58,15 +58,14 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           })
         })
 
-        // TODO: update to use relative path once available
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain.html')
+        cy.visit('/fixtures/multi-domain.html')
 
         cy.wrap(afterWindowBeforeUnload)
       })
     })
 
     it('window:unload', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.switchToDomain('http://www.foobar.com:3500', () => {
         const afterWindowUnload = new Promise<void>((resolve) => {
           Cypress.once('window:unload', () => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -74,8 +73,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           })
         })
 
-        // TODO: update to use relative path once available
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain.html')
+        cy.visit('/fixtures/multi-domain.html')
 
         cy.wrap(afterWindowUnload)
       })

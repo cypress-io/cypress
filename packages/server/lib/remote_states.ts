@@ -55,7 +55,7 @@ export class RemoteStates {
   get (url: string) {
     const state = this.remoteStates.get(cors.getOriginPolicy(url))
 
-    debug('Getting remote state: %o for: %s', state, url)
+    debug('getting remote state: %o for: %s', state, url)
 
     return _.cloneDeep(state)
   }
@@ -74,7 +74,7 @@ export class RemoteStates {
   }
 
   reset () {
-    debug('Resetting remote state')
+    debug('resetting remote state')
 
     const stateArray = Array.from(this.remoteStates.entries())
 
@@ -133,14 +133,20 @@ export class RemoteStates {
       this.originStack[0] = remoteOriginPolicy
     }
 
-    debug('Setting remote state %o for %s', state, remoteOriginPolicy)
+    debug('setting remote state %o for %s', state, remoteOriginPolicy)
 
     return this.get(remoteOriginPolicy) as Cypress.RemoteState
   }
 
   addEventListeners (eventEmitter: EventEmitter) {
     eventEmitter.on('ready:for:domain', ({ originPolicy, failed }) => {
-      if (failed) return
+      if (failed) {
+        debug('received ready:for:domain failed, don\'t add origin to remote states')
+
+        return
+      }
+
+      debug(`received ready:for:domain, add origin ${originPolicy} to remote states`)
 
       const existingOrigin = this.remoteStates.get(originPolicy)
 
@@ -154,6 +160,8 @@ export class RemoteStates {
     })
 
     eventEmitter.on('cross:origin:finished', (originPolicy) => {
+      debug(`received cross:origin:finished, remove ${originPolicy} from origin stack`)
+
       this.removeCurrentOrigin(originPolicy)
     })
   }
@@ -169,7 +177,7 @@ export class RemoteStates {
   private addOrigin (originPolicy) {
     this.originStack.push(originPolicy)
 
-    debug('Added origin: ', originPolicy)
+    debug('added origin: ', originPolicy)
   }
 
   private removeCurrentOrigin (originPolicy) {
@@ -181,6 +189,6 @@ export class RemoteStates {
 
     this.originStack.pop()
 
-    debug('Removed current origin: ', originPolicy)
+    debug('removed current origin: ', originPolicy)
   }
 }
