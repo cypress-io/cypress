@@ -1290,8 +1290,6 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
-    if (this.ctx.coreData.activeBrowser) throw new Error('setInitialActiveBrowser was called, but activeBrowser is already initialized')
-
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
       this.ctx.coreData.cliBrowser = null
