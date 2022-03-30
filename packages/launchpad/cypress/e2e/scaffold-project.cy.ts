@@ -28,7 +28,9 @@ function scaffoldAndOpenE2EProject (
   cy.contains('We added the following files to your project.')
   cy.contains('Continue').click()
   cy.contains('Choose a Browser')
+}
 
+function assertScaffoldedFilesAreCorrect () {
   cy.withCtx(async (ctx) => {
     const result = await ctx.actions.test.snapshotCypressDirectory()
 
@@ -45,5 +47,11 @@ function scaffoldAndOpenE2EProject (
 describe('scaffolding new projects', () => {
   it('scaffolds E2E for a plain JS project', () => {
     scaffoldAndOpenE2EProject('pristine', 'js')
+    assertScaffoldedFilesAreCorrect()
+  })
+
+  it('scaffolds E2E for a plain TS project', () => {
+    scaffoldAndOpenE2EProject('pristine', 'ts')
+    assertScaffoldedFilesAreCorrect()
   })
 })

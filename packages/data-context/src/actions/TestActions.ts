@@ -24,7 +24,7 @@ export class TestActions {
       const projectDir = this.ctx.currentProject.replace(cyTmpDir, systemTestsDir)
       const projectName = projectDir.replace(systemTestsDir, '').slice(1)
 
-      const expectedScaffoldDir = path.join(projectDir, 'expected-cypress')
+      const expectedScaffoldDir = path.join(projectDir, `expected-cypress-${this.ctx.coreData.wizard.chosenLanguage}`)
 
       const files = (
         await Promise.all([
@@ -82,7 +82,7 @@ export class TestActions {
       } else {
         // see if existing snapshots exist compared to source
         // project in `system-tests/projects`
-        // expected-scaffold
+        // expected-cypress-{'js' | 'ts'}
         fs.mkdirSync(expectedScaffoldDir)
 
         await Promise.all(filesToDiff.map(async (files) => {
