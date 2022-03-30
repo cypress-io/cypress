@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import $dom from '../dom'
 import structuredClonePonyfill from 'core-js-pure/actual/structured-clone'
 import $stackUtils from '../cypress/stack_utils'
 import $errUtils from '../cypress/error_utils'
@@ -106,7 +107,8 @@ export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: 
 // Even if native errors can be serialized through postMessage, many properties are omitted on structuredClone(), including prototypical hierarchy
 // because of this, we preprocess native errors to objects and postprocess them once they come back to the primary origin
 
-  if (_.isArray(valueToSanitize)) {
+  // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays. This is important for commands like .selectFile() using buffer streams
+  if (_.isArray(valueToSanitize) || _.isTypedArray(valueToSanitize)) {
     return _.map(valueToSanitize, preprocessForSerialization) as unknown as T
   }
 
@@ -155,4 +157,266 @@ export const reifySerializedError = (serializedError: any, userInvocationStack: 
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 
   return reifiedError
+}
+
+export const preProcessDomElement = (props: any) => {
+  // hydrate values in HTML copy so when serialized they show up correctly in snapshot. This is important for input boxes with typing and other 'value' attributes
+  props.querySelectorAll('input').forEach((input) => {
+    input.setAttribute('value', input.value)
+    if (input.checked) {
+      input.setAttribute('checked', input.checked)
+    }
+  })
+
+  // TODO: figure out reifying option selection
+  // props.querySelectorAll('option').forEach((option) => {
+  //   if (option.selected) {
+  //     option.setAttribute('selected', option.selected)
+  //   }
+  // })
+
+  const el = {
+    value: props?.value,
+    type: props?.type,
+    id: props?.id,
+    tagName: props.tagName,
+    attributes: {},
+    innerHTML: props.innerHTML,
+  }
+
+  // get all attributes and classes off the element
+  props.getAttributeNames().forEach((attributeName) => {
+    el.attributes[attributeName] = props.getAttribute(attributeName)
+  })
+
+  return el
+}
+
+export const postProcessDomElement = (props: any) => {
+  const reifiedEl = document.createElement(props.tagName)
+
+  if (props.value) {
+    reifiedEl.value = props.value
+  }
+
+  try {
+    if (props.type) {
+      reifiedEl.type = props.type
+    }
+  } catch (e) {
+    // swallow this. certain elements this is a read-only property on (such as <select>)
+  }
+
+  if (props.id) {
+    reifiedEl.id = props.id
+  }
+
+  reifiedEl.innerHTML = props.innerHTML
+
+  Object.keys(props.attributes).forEach((attribute) => {
+    reifiedEl.setAttribute(attribute, props.attributes[attribute])
+  })
+
+  return reifiedEl
+}
+
+export const preprocessLogLikeForSerialization = (props) => {
+  try {
+    if (_.isArray(props)) {
+      return props.map((prop) => {
+        try {
+          return preprocessLogLikeForSerialization(prop)
+        } catch (e) {
+          return null
+        }
+      })
+    }
+
+    if (_.isPlainObject(props)) {
+      let objWithOnlyUnserializableProps = _.pickBy(props, (value) => !isSerializableInCurrentBrowser(value))
+
+      let preprocessed: any = preprocessForSerialization(props)
+
+      _.forIn(objWithOnlyUnserializableProps, (value, key) => {
+        try {
+          preprocessed[key] = preprocessLogLikeForSerialization(value)
+        } catch (e) {
+          preprocessed[key] = null
+        }
+      })
+
+      return preprocessed
+    }
+
+    if ($dom.isDom(props)) {
+      // in the case we are dealing with a jQuery array
+      if (props.length !== undefined && $dom.isJquery(props)) {
+        const serializableArray: any[] = []
+
+        // Nuke any prevObjects or unserializable values. common with assertion 'Subject'
+        props.each((key) => serializableArray.push(preprocessLogLikeForSerialization(props[key])))
+
+        return serializableArray
+      }
+
+      const serializableDOM = preProcessDomElement(props)
+
+      serializableDOM.serializationKey = 'dom'
+
+      return serializableDOM
+    }
+
+    if (_.isFunction(props)) {
+      // TODO: re access this. there are functions we want to attempt to unravel/serialize and ones we don't. we might only want to opt into this for console props or something...
+      // sinon proxies are circular and will cause the runner to crash. Do NOT serialize these
+      // @ts-ignore
+      if (props?.isSinonProxy) {
+        return null
+      }
+
+      return {
+        value: preprocessLogLikeForSerialization(props()),
+        serializationKey: 'function',
+      }
+    }
+
+    return preprocessForSerialization(props)
+  } catch (e) {
+    return null
+  }
+}
+
+export const postprocessLogLikeFromSerialization = (props) => {
+  try {
+    if (props?.serializationKey === 'dom') {
+      props.html = function () {
+        let reifiedElement
+
+        // if snapshots exists, this element needs to be matched against the rendered snapshot on the page LAZILY.
+        // a bit of a hack, but we attach the snapshot to the page and then LAZILY select the element
+
+        const attributes = Object.keys(props.attributes).map((attribute) => {
+          return `[${attribute}="${props.attributes[attribute]}"]`
+        }).join('')
+
+        const selector = `${props.tagName}${attributes}`
+
+        reifiedElement = Cypress.$(selector)
+
+        if (reifiedElement.length) {
+          return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+        }
+
+        // if the element couldn't be found, return a synthetic copy that doesn't actually exist on the page
+        return postProcessDomElement(props)
+      }
+
+      return props
+    }
+
+    if (props?.serializationKey === 'function') {
+      const reifiedFunctionData = postprocessLogLikeFromSerialization(props.value)
+
+      return () => reifiedFunctionData
+    }
+
+    // NOTE: transforms arrays into objects to have defined getters for DOM els
+    if (_.isObject(props)) {
+      let postProcessed = {}
+
+      _.forIn(props, (value, key) => {
+        const val = postprocessLogLikeFromSerialization(value)
+
+        if (val?.serializationKey === 'dom') {
+          postProcessed = {
+            ...postProcessed,
+            get [key] () {
+              // only calculate the requested $el from console props AFTER the snapshot has been rendered into the AUT
+              return val.html()
+            },
+          }
+        } else {
+          postProcessed[key] = postprocessLogLikeFromSerialization(value)
+        }
+      })
+
+      if (_.isArray(props)) {
+        // if an array, map the array to or special getter object
+        return new Proxy(postProcessed, {
+          get (target, name) {
+            return target[name] || props[name]
+          },
+        })
+      }
+
+      // otherwise, just returned the object with our special getter
+      return postProcessed
+    }
+
+    return props
+  } catch (e) {
+    return null
+  }
+}
+
+// needs its own method as it needs to be used by the spec bridge on request for the 'final state' snapshot
+export const preprocessSnapshotForSerialization = (snapshot) => {
+  const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot)
+
+  try {
+    preprocessedSnapshot.body.get.value[0] = preprocessLogLikeForSerialization(snapshot.body.get()[0])
+  } catch (e) {
+    return null
+  }
+
+  // @ts-ignore
+  preprocessedSnapshot.styles = cy.getStyles(snapshot)
+
+  return preprocessedSnapshot
+}
+
+export const preprocessLogForSerialization = (logAttrs) => {
+  let { snapshots, ... logAttrsRest } = logAttrs
+
+  const preprocessed = preprocessLogLikeForSerialization(logAttrsRest)
+
+  if (snapshots && preprocessed) {
+    preprocessed.snapshots = snapshots.map((snapshot) => preprocessSnapshotForSerialization(snapshot))
+  }
+
+  return preprocessed
+}
+
+export const postprocessLogFromSerialization = (logAttrs) => {
+  /**
+     * consoleProp DOM elements needs to be reified at console printing runtime AFTER the serialized snapshot
+     * is attached to the DOM so the element can be located.
+     *
+     * In most cases, the HIGHLIGHT_ATTR is used to located the element in the snapshot. If that fails or does not locate an element,
+     * then a new element is created against the snapshot context. This element will NOT be found on the page, but will represent what the element
+     * looked like at the time of the snapshot.
+     */
+  let { snapshots, ... logAttrsRest } = logAttrs
+
+  if (snapshots) {
+    // @ts-ignore
+    snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => {
+      snapshot.body = postprocessLogLikeFromSerialization(snapshot.body)
+
+      // @ts-ignore
+      return cy.createSnapshot(snapshot.name, null, snapshot)
+    })
+  }
+
+  const reified = postprocessLogLikeFromSerialization(logAttrsRest)
+
+  if (reified.$el && reified.$el.length) {
+    // make sure $els are jQuery Arrays to keep was is expected in the log
+    reified.$el = Cypress.$(reified.$el.map((el) => el))
+  }
+
+  reified.snapshots = snapshots
+  reified.crossOriginLog = true
+
+  return reified
 }

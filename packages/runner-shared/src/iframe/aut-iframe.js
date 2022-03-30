@@ -69,9 +69,42 @@ export class AutIframe {
     return Cypress.cy.detachDom(this._contents())
   }
 
+  /**
+   * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
+   * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
+   * Otherwise, if top and the AUT match origins, the method returns true.
+   * If the AUT origin is 'null', that means the src attribute has been stripped off the iframe and is adhering to same origin policy
+   */
+  doesAUTMatchTopOriginPolicy = () => {
+    const Cypress = eventManager.getCypress()
+
+    if (!Cypress) return
+
+    try {
+      const { location: locationAUT } = this.$iframe[0].contentWindow.document
+      const locationTop = Cypress.utils.locExisting(window.location.href)
+
+      return locationTop.origin === locationAUT.origin || locationAUT.origin === 'null'
+    } catch (err) {
+      if (err.name === 'SecurityError') {
+        return false
+      }
+
+      throw err
+    }
+  }
+
+  /**
+   * Removes the src attribute from the AUT iframe, resulting in 'about:blank' being loaded into the iframe
+   * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src for more details
+   */
+  removeSrcAttributeFromAUTIframe = () => {
+    this.$iframe.removeAttr('src')
+  }
+
   visitBlank = ({ type } = { type: null }) => {
     return new Promise((resolve) => {
-      this.$iframe[0].src = 'about:blank'
+      this.removeSrcAttributeFromAUTIframe()
 
       this.$iframe.one('load', () => {
         switch (type) {
@@ -91,6 +124,17 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
+    if (!this.doesAUTMatchTopOriginPolicy()) {
+      this.$iframe.one('load', () => {
+        this.restoreDom(snapshot)
+      })
+
+      // the iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. this should only be done ONCE
+      this.removeSrcAttributeFromAUTIframe()
+
+      return
+    }
+
     const Cypress = eventManager.getCypress()
     const { headStyles, bodyStyles } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot

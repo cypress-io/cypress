@@ -12,6 +12,7 @@ import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
 import * as cors from '@packages/network/lib/cors'
+import { postprocessLogFromSerialization } from '@packages/driver/src/util/serialization'
 
 const $ = $Cypress.$
 const ws = client.connect({
@@ -585,11 +586,15 @@ export const eventManager = {
 
     const crossOriginLogs = {}
 
-    Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
+    Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
+      // if the test is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner
+      if (Cypress.state('test')?.final) return
+
       // Create a new local log representation of the cross origin log.
       // It will be attached to the current command.
       // We also keep a reference to it to update it in the future.
-      crossOriginLogs[attrs.id] = Cypress.log(attrs)
+      // if the test is over and the user enters interactive snapshot mode, set stability to true
+      crossOriginLogs[attrs.id] = Cypress.log(postprocessLogFromSerialization(attrs))
     })
 
     Cypress.primaryOriginCommunicator.on('log:changed', (attrs) => {
@@ -597,7 +602,7 @@ export const eventManager = {
       const log = crossOriginLogs[attrs.id]
 
       // this will trigger a log changed event for the log itself.
-      log?.set(attrs)
+      log?.set(postprocessLogFromSerialization(attrs))
     })
   },
 

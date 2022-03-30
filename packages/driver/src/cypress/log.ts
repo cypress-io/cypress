@@ -444,7 +444,7 @@ class Log {
     this.obj = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
-      visible: $el.length === $el.filter(':visible').length,
+      visible: this.get('crossOriginLog') ? this.get('visible') : $el.length === $el.filter(':visible').length,
     }
 
     return this.set(this.obj, { silent: true })
@@ -505,8 +505,11 @@ class Log {
 
       consoleObj[key] = _this.get('name')
 
+      // in the case a log is being recreated from the specbridge to the primary, consoleProps may be an Object
+      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
+
       // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleProps.apply(this, args))
+      _.extend(consoleObj, consoleObjDefaults)
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
