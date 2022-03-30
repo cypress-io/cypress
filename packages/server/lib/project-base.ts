@@ -506,8 +506,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    debug('initializeConfig')
-    await this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
+    this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
     let theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
       testingType: this.testingType,

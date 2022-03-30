@@ -137,7 +137,7 @@ export class ProjectLifecycleManager {
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
-      this.setCurrentTestingTypeSync(ctx.coreData.currentTestingType)
+      this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
 
     // see timers/parent.js line #93 for why this is necessary
@@ -338,8 +338,12 @@ export class ProjectLifecycleManager {
     return this._runModeExitEarly
   }
 
-  private setCurrentTestingTypeSync (testingType: TestingType | null) {
-    debug('setCurrentTestingTypeSync', testingType)
+  /**
+   * Setting the testing type should automatically handle cleanup of existing
+   * processes and load the config / initialize the plugin process associated
+   * with the chosen testing type.
+   */
+  setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -352,22 +356,13 @@ export class ProjectLifecycleManager {
 
     this._initializedProject = undefined
     this._currentTestingType = testingType
-  }
 
-  /**
-   * Setting the testing type should automatically handle cleanup of existing
-   * processes and load the config / initialize the plugin process associated
-   * with the chosen testing type.
-   */
-  async setCurrentTestingType (testingType: TestingType | null): Promise<void | SetupNodeEventsReply | Promise<Partial<Cypress.UserConfigOptions>>> {
-    debug('setCurrentTestingType', testingType)
-    this.setCurrentTestingTypeSync(testingType)
     if (!testingType) {
       return
     }
 
     if (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType])) {
-      return this.loadTestingType()
+      this.loadTestingType()
     }
   }
 
@@ -375,22 +370,18 @@ export class ProjectLifecycleManager {
    * Called after we've set the testing type. If we've change from the current
    * IPC used to spawn the config, we need to get a fresh config IPC & re-execute.
    */
-  private async loadTestingType () {
+  private loadTestingType () {
     const testingType = this._currentTestingType
 
     assert(testingType, 'loadTestingType requires a testingType')
-
-    debug('loadTestingType', testingType)
 
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
-      return this.reloadConfig().catch(this.onLoadError)
-    }
-
-    if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
-      return this.setupNodeEvents().catch(this.onLoadError)
+      this.reloadConfig().catch(this.onLoadError)
+    } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
+      this.setupNodeEvents().catch(this.onLoadError)
     }
   }
 
@@ -576,20 +567,15 @@ export class ProjectLifecycleManager {
     this._cachedFullConfig = undefined
     this._configResult = { state: 'loading', value: promise }
 
-    return promise.then(async (result) => {
-      // if multiple calls to this function are run in parallel,
-      // check that we are resolving the last promise
+    promise.then((result) => {
       if (this._configResult.value === promise) {
         debug(`config is loaded for file`, this.configFilePath)
-        this.validateConfigFile(this.configFilePath, result.initialConfig)
         this._configResult = { state: 'loaded', value: result }
-        await this.onConfigLoaded(child, ipc, result)
+        this.validateConfigFile(this.configFilePath, result.initialConfig)
+        this.onConfigLoaded(child, ipc, result)
       }
 
-      // this code is run even in an outdated promise
       this.ctx.emitter.toLaunchpad()
-
-      return result.initialConfig
     })
     .catch((err) => {
       debug(`catch %o`, err)
@@ -598,9 +584,9 @@ export class ProjectLifecycleManager {
 
       this.onLoadError(err)
       this.ctx.emitter.toLaunchpad()
-
-      return {}
     })
+
+    return promise.then((v) => v.initialConfig)
   }
 
   private validateTestingTypeConfig (config: Cypress.ConfigOptions) {
@@ -713,18 +699,14 @@ export class ProjectLifecycleManager {
    * This sources a fresh IPC channel & reads the config. If we detect a change
    * to the config or the list of imported files, we will re-execute the setupNodeEvents
    */
-  async reloadConfig (): Promise<Partial<Cypress.UserConfigOptions>> {
-    debug('reloadConfig')
+  reloadConfig () {
     if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
-      debug('reloadConfig refresh')
       this._configResult = { state: 'pending' }
-      this._envFileResult = { state: 'pending' }
-      this._eventsIpcResult = { state: 'pending' }
+      debug('reloadConfig refresh')
 
       return this.initializeConfig()
     }
 
-    // if the config is still being resolved,
     if (this._configResult.state === 'loading' || this._configResult.state === 'pending') {
       debug('reloadConfig first load')
 
@@ -835,9 +817,9 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * Called on the completion of the resolve of the config file.
+   * Called on the completion of the
    */
-  private async onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
+  private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
 
     // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
@@ -848,23 +830,12 @@ export class ProjectLifecycleManager {
     this._eventProcess = child
     this._eventsIpc = ipc
 
-    if (!this._currentTestingType) {
+    if (!this._currentTestingType || this._eventsIpcResult.state === 'loading') {
       return
     }
 
-    // if the config just loaded with a new set, we have to re-run the setupNodeEvents
-    // the loading status seems to be if a previous instance of setupNodeEvents is still in progress
-    // with an older version of the config object.
-    // the existing ipcResult promise should be killed and replaced
-    if (this._eventsIpcResult.state === 'loading') {
-      this._eventsIpcResult = { state: 'pending' }
-    }
-
-    // Start the wizard in case testing type is missing
-    // Once the wizard is done, it will reload the config
-    // and end up here. no need to continue.
     if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      await this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
       return
     }
@@ -878,12 +849,11 @@ export class ProjectLifecycleManager {
       })
     }
 
-    return this.setupNodeEvents().catch(this.onLoadError)
+    this.setupNodeEvents().catch(this.onLoadError)
   }
 
   private setupNodeEvents (): Promise<SetupNodeEventsReply> {
     assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
-    debug('setupNodeEvents')
     const ipc = this._eventsIpc
     const promise = this.callSetupNodeEventsWithConfig(ipc)
 
@@ -891,14 +861,11 @@ export class ProjectLifecycleManager {
 
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
-        debug('setupNodeEvents success')
         // If we're handling the events, we don't want any notifications
         // to send to the client until the `.finally` of this block.
         // TODO: Remove when GraphQL Subscriptions lands
-        this._eventsIpcResult = {
-          state: 'loaded',
-          value: await this.handleSetupTestingTypeReply(ipc, val),
-        }
+        await this.handleSetupTestingTypeReply(ipc, val)
+        this._eventsIpcResult = { state: 'loaded', value: val }
       }
 
       return val
@@ -1254,10 +1221,9 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply): Promise<SetupNodeEventsReply> {
+  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply) {
     this._registeredEvents = {}
     this.watchRequires('setupNodeEvents', result.requires)
-    debug('handleSetupTestingTypeReply')
 
     for (const { event, eventId } of result.registrations) {
       debug('register plugins process event', event, 'with id', eventId)
@@ -1300,8 +1266,8 @@ export class ProjectLifecycleManager {
       })
     }
 
-    assert(this._envFileResult.state === 'loaded', `env file should be loaded but was ${this._envFileResult.state}`)
-    assert(this._configResult.state === 'loaded', `config should be loaded but was ${this._configResult.state}`)
+    assert(this._envFileResult.state === 'loaded')
+    assert(this._configResult.state === 'loaded')
 
     const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.ctx.modeOptions)
 
@@ -1323,7 +1289,7 @@ export class ProjectLifecycleManager {
     this._pendingInitialize?.resolve(finalConfig)
 
     if (this._currentTestingType && finalConfig.specPattern) {
-      await this.ctx.actions.project.setSpecsFoundBySpecPattern({
+      return this.ctx.actions.project.setSpecsFoundBySpecPattern({
         path: this.projectRoot,
         testingType: this._currentTestingType,
         specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
