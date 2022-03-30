@@ -1,8 +1,8 @@
-const path = require('path')
+require('@packages/ts/register')
 
-require('@packages/ts/registerFunction')(path.resolve(__dirname, '../../../../lib'))
 const _ = require('lodash')
 const Jimp = require('jimp')
+const path = require('path')
 const Promise = require('bluebird')
 const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 
