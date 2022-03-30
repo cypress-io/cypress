@@ -21,6 +21,6 @@
   },
   "files": [
     "register.js",
-    "registerFunction.js"
+    "registerDir.js"
   ]
 }
