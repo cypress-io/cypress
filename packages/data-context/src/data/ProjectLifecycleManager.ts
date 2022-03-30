@@ -586,8 +586,8 @@ export class ProjectLifecycleManager {
       if (this._configResult.value === promise) {
         debug(`config is loaded for file`, this.configFilePath)
         this.validateConfigFile(this.configFilePath, result.initialConfig)
-        await this.onConfigLoaded(child, ipc, result)
         this._configResult = { state: 'loaded', value: result }
+        await this.onConfigLoaded(child, ipc, result)
       }
 
       // this code is run even in an outdated promise
@@ -720,8 +720,10 @@ export class ProjectLifecycleManager {
   reloadConfig () {
     debug('reloadConfig')
     if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
-      this._configResult = { state: 'pending' }
       debug('reloadConfig refresh')
+      this._configResult = { state: 'pending' }
+      this._envFileResult = { state: 'pending' }
+      this._eventsIpcResult = { state: 'pending' }
 
       return this.initializeConfig()
     }
@@ -839,7 +841,7 @@ export class ProjectLifecycleManager {
   /**
    * Called on the completion of the resolve of the config file.
    */
-  private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
+  async private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
 
     // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
@@ -850,14 +852,21 @@ export class ProjectLifecycleManager {
     this._eventProcess = child
     this._eventsIpc = ipc
 
+    // FIXME: if the config just loaded with a new set, we have to re-run the setupNodeEvents
+    // the loading status seems to be if a previous instance of setupNodeEvents is still in progress
+    // with an older version of the config object.
+    // the existing ipcResult promise should be killed and replaced
     if (!this._currentTestingType || this._eventsIpcResult.state === 'loading') {
-      return Promise.resolve()
+      return
     }
 
+    // Start the wizard in case testing type is missing
+    // Once the wizard is done, it will reload the config
+    // and end up here. no need to continue.
     if (!this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      await this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
-      return Promise.resolve()
+      return
     }
 
     if (this.ctx.coreData.scaffoldedFiles) {
