@@ -3,7 +3,16 @@
     id="main-pane"
     class="flex border-gray-900 border-l-1"
   >
+    <AutomationElement />
+    <AutomationDisconnected
+      v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
+    />
+    <AutomationMissing
+      v-else-if="runnerUiStore.automationStatus === 'MISSING'"
+      :gql="props.gql.currentProject"
+    />
     <ResizablePanels
+      v-else
       :offset-left="64"
       :max-total-width="windowWidth"
       :initial-panel1-width="specsListWidthPreferences"
@@ -69,13 +78,6 @@
             class="origin-top-left viewport"
             :style="viewportStyle"
           />
-          <AutomationElement />
-          <!--
-            TODO: UNIFY-1341 - Figure out bugs in automation lifecycle
-            Put these guys back in.
-            <AutomationMissing v-if="runnerUiStore.automationStatus === 'MISSING'" />
-            <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
-          -->
         </RemoveClassesDuringScreenshotting>
         <SnapshotControls
           :event-manager="eventManager"
@@ -112,6 +114,8 @@ import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRu
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
+import AutomationDisconnected from './automation/AutomationDisconnected.vue'
+import AutomationMissing from './automation/AutomationMissing.vue'
 
 gql`
 fragment SpecRunner_Preferences on Query {
@@ -133,6 +137,7 @@ fragment SpecRunner on Query {
   currentProject {
     id
     ...SpecRunnerHeader
+    ...AutomationMissing
   }
   ...ChooseExternalEditor
   ...SpecRunner_Preferences
