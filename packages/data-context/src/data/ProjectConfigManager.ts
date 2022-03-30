@@ -286,7 +286,6 @@ export class ProjectConfigManager {
 
   onLoadError = (error: any) => {
     this.closeWatchers()
-    // TODO: this isn't i18n'd
     this.options.onError(error, 'Error Loading Config')
   }
 

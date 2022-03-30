@@ -186,11 +186,6 @@ describe('Routes', () => {
 
                 this.proxy = `http://localhost:${port}`
               }),
-
-            // pluginsModule.init(cfg, {
-            //   projectRoot: cfg.projectRoot,
-            //   testingType: 'e2e',
-            // }, ctx),
             ])
           })
           .then(() => {

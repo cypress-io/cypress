@@ -1,10 +1,21 @@
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
 const renameAutoStep = `[data-cy="migration-step renameAuto"]`
 const renameManualStep = `[data-cy="migration-step renameManual"]`
 const renameSupportStep = `[data-cy="migration-step renameSupport"]`
 const configFileStep = `[data-cy="migration-step configFile"]`
 const setupComponentStep = `[data-cy="migration-step setupComponent"]`
+
+function getPathForPlatform (posixPath: string) {
+  // @ts-ignore
+  const cy = window.Cypress
+  const platform = cy?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
+
+  if (platform === 'win32') return posixPath.replaceAll('/', '\\')
+
+  return posixPath
+}
 
 declare global {
   namespace Cypress {
@@ -941,6 +952,14 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get('[data-testid="error-code-frame"]').contains(`cypress/plugins/index.js:2:9`)
     // correct error from pluginsFile
     cy.contains(`throw Error('Uh oh, there was an error!')`)
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, 'module.exports = (on, config) => {}')
+    }, { path: getPathForPlatform('cypress/plugins/index.js') })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.waitForWizard()
   })
 })
 

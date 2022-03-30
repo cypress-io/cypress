@@ -271,9 +271,16 @@ export class ProjectLifecycleManager {
   }
 
   async reloadConfig () {
+    assert(this._projectRoot)
     assert(this._configManager)
 
-    return this._configManager.reloadConfig()
+    if (this.readyToInitialize(this._projectRoot)) {
+      await this._configManager.reloadConfig()
+
+      return true
+    }
+
+    return false
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
@@ -330,22 +337,9 @@ export class ProjectLifecycleManager {
 
     this._configManager = this.createConfigManager()
 
-    const { needsCypressJsonMigration } = this.refreshMetaState()
-
-    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
-
-    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
-
-      return
-    }
-
-    this.legacyPluginGuard()
-
     // Preemptively load these so that they are available when we need them later
     this.ctx.browser.machineBrowsers().catch(this.onLoadError)
 
-    this.verifyProjectRoot(projectRoot)
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
     this.ctx.update((s) => {
@@ -353,11 +347,29 @@ export class ProjectLifecycleManager {
       s.packageManager = packageManagerUsed
     })
 
-    this.configFileWarningCheck()
-
-    if (this.metaState.hasValidConfigFile) {
+    if (this.readyToInitialize(this._projectRoot)) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
+  }
+
+  readyToInitialize (projectRoot: string): boolean {
+    this.verifyProjectRoot(projectRoot)
+
+    const { needsCypressJsonMigration } = this.refreshMetaState()
+
+    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
+
+    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
+      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
+
+      return false
+    }
+
+    this.legacyPluginGuard()
+
+    this.configFileWarningCheck()
+
+    return this.metaState.hasValidConfigFile
   }
 
   async legacyMigration (legacyConfigPath: string) {
@@ -370,6 +382,8 @@ export class ProjectLifecycleManager {
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
       await this.ctx.actions.migration.initialize(legacyConfig)
+
+      this.ctx.emitter.toLaunchpad()
     } catch (error) {
       this.onLoadError(error)
     }
