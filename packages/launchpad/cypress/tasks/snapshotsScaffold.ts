@@ -99,8 +99,8 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
 
   const files = (
     await Promise.all([
-      globby(path.join(currentProjectPosix, 'cypress'), { onlyFiles: true }),
-      globby(path.join(currentProjectPosix, 'cypress.config.*'), { onlyFiles: true }),
+      globby(path.posix.join(currentProjectPosix, 'cypress'), { onlyFiles: true }),
+      globby(path.posix.join(currentProjectPosix, 'cypress.config.*'), { onlyFiles: true }),
     ])
   ).reduce((acc, curr) => {
     return [acc, curr].flat(2)
