@@ -3,7 +3,11 @@ import globby from 'globby'
 import assert from 'assert'
 import fs from 'fs-extra'
 import disparity from 'disparity'
-import { cyTmpDir } from '@tooling/system-tests/lib/fixtures'
+import tempDir from 'temp-dir'
+
+// Also defined in lib/fixtures, but we do not want to
+// import from system-tests into code we ship in production.
+const cyTmpDir = path.join(tempDir, 'cy-projects')
 
 import type { DataContext } from '..'
 import dedent from 'dedent'
@@ -57,7 +61,9 @@ export class TestActions {
             message: `Expected contents of ${actual} and ${expected} to match. Diff: ${diff}`,
           }
         }
-      } catch (e) {
+      } catch (err) {
+        const e = err as NodeJS.ErrnoException
+
         if (e.code === 'ENOENT') {
           return {
             status: 'fail',
