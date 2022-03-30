@@ -134,18 +134,9 @@ export class ProjectBase<TServer extends Server> extends EE {
   injectCtSpecificConfig (cfg) {
     cfg.resolved.testingType = { value: 'component' }
 
-    // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-    // But if we don't return it in the plugins function, it never gets set
-    // Since there is no chance that it will have any other value here, we set it to "component"
-    // This allows users to not return config in the `cypress/plugins/index.js` file
-    // https://github.com/cypress-io/cypress/issues/16860
-    const rawJson = cfg.rawJson as Cfg
-
     return {
       ...cfg,
       componentTesting: true,
-      viewportHeight: rawJson.viewportHeight ?? 500,
-      viewportWidth: rawJson.viewportWidth ?? 500,
     }
   }
 
