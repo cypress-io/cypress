@@ -190,7 +190,7 @@ async function makeE2ETasks () {
                   query,
                   result,
                   callCount: operationCount[operationName ?? 'unknown'],
-                })
+                }, testState)
               } catch (e) {
                 const err = e as Error
 
@@ -224,7 +224,7 @@ async function makeE2ETasks () {
     },
 
     __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },

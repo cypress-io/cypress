@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.8.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.8.2...@cypress/webpack-dev-server-v1.8.3) (2022-03-15)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** do not encodeUri in loader ([#20575](https://github.com/cypress-io/cypress/issues/20575)) ([1b152fc](https://github.com/cypress-io/cypress/commit/1b152fca1b9ed9894cf7a5b2a964c856f73fc685)), closes [#20593](https://github.com/cypress-io/cypress/issues/20593)
+
 # [@cypress/webpack-dev-server-v1.8.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.8.1...@cypress/webpack-dev-server-v1.8.2) (2022-03-03)
 
 
