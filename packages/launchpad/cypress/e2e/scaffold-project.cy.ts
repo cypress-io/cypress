@@ -1,4 +1,5 @@
 import type { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
 // and add Cypress using the launchpad setup wizard.
@@ -72,38 +73,44 @@ function scaffoldAndOpenCTProject (
   cy.contains('Choose a Browser')
 }
 
-function assertScaffoldedFilesAreCorrect () {
-  cy.withCtx(async (ctx) => {
-    const result = await ctx.actions.test.snapshotCypressDirectory()
+function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cypress.TestingType) {
+  cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
+    cy.task<SnapshotScaffoldTestResult>('snapshotCypressDirectory', {
+      currentProject,
+      testingType,
+      language,
+    })
+    .then((result) => {
+      if (result.status === 'ok') {
+        return result
+      }
 
-    if (result.status === 'ok') {
-      return result
-    }
-
-    throw new Error(result.message)
-  }).then((res) => {
-    cy.log(`✅ ${res.message}`)
+      throw new Error(result.message)
+    })
+    .then((res) => {
+      cy.log(`✅ ${res.message}`)
+    })
   })
 }
 
 describe('scaffolding new projects', () => {
   it('scaffolds E2E for a JS project', () => {
     scaffoldAndOpenE2EProject('pristine', 'js')
-    assertScaffoldedFilesAreCorrect()
+    assertScaffoldedFilesAreCorrect('js', 'e2e')
   })
 
   it('scaffolds E2E for a TS project', () => {
     scaffoldAndOpenE2EProject('pristine', 'ts')
-    assertScaffoldedFilesAreCorrect()
+    assertScaffoldedFilesAreCorrect('ts', 'e2e')
   })
 
   it('scaffolds CT for a JS project', () => {
     scaffoldAndOpenCTProject('pristine', 'js', 'Create React App (v5)')
-    assertScaffoldedFilesAreCorrect()
+    assertScaffoldedFilesAreCorrect('js', 'component')
   })
 
   it('scaffolds CT for a TS project', () => {
     scaffoldAndOpenCTProject('pristine', 'ts', 'Create React App (v5)')
-    assertScaffoldedFilesAreCorrect()
+    assertScaffoldedFilesAreCorrect('ts', 'component')
   })
 })
