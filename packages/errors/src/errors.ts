@@ -579,7 +579,6 @@ export const AllCypressErrors = {
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
   },
-  // TODO: make this relative path, not absolute
   SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
     return errTemplate`\
         Your ${fmt.highlight(`supportFile`)} is missing or invalid: ${fmt.path(supportFilePath)}
@@ -589,6 +588,14 @@ export const AllCypressErrors = {
         Fix your support file, or set supportFile to ${fmt.highlightSecondary(`false`)} if a support file is not necessary for your project.
 
         If you have just renamed the extension of your supportFile, restart Cypress.
+
+        https://on.cypress.io/support-file-missing-or-invalid`
+  },
+  DEFAULT_SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
+    return errTemplate`\
+        Your project does not contain a default ${fmt.highlight(`supportFile`)}. We expect a file matching ${fmt.path(supportFilePath)} to exist.
+
+        If a support file is not necessary for your project, set ${fmt.highlight(`supportFile`)} to ${fmt.highlightSecondary(`false`)}.
 
         https://on.cypress.io/support-file-missing-or-invalid`
   },
