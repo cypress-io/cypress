@@ -3,7 +3,15 @@
     id="main-pane"
     class="flex border-gray-900 border-l-1"
   >
+    <AutomationElement />
+    <AutomationDisconnected
+      v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
+    />
+    <AutomationMissing
+      v-else-if="runnerUiStore.automationStatus === 'MISSING'"
+    />
     <ResizablePanels
+      v-else
       :max-total-width="windowWidth"
       :initial-panel1-width="0"
       :initial-panel2-width="reporterWidth"
@@ -52,13 +60,6 @@
             class="origin-top-left viewport"
             :style="viewportStyle"
           />
-          <AutomationElement />
-          <!--
-            TODO: UNIFY-1341 - Figure out bugs in automation lifecycle
-            Put these guys back in.
-            <AutomationMissing v-if="runnerUiStore.automationStatus === 'MISSING'" />
-            <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
-          -->
         </RemoveClassesDuringScreenshotting>
         <SnapshotControls
           :event-manager="eventManager"
@@ -88,6 +89,8 @@ import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
 import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
+import AutomationDisconnected from './automation/AutomationDisconnected.vue'
+import AutomationMissing from './automation/AutomationMissing.vue'
 
 // See TODO comments within the template block of this file.
 // import AutomationDisconnected from './automation/AutomationDisconnected.vue'
