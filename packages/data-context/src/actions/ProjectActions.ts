@@ -208,18 +208,19 @@ export class ProjectActions {
     }
 
     testingType = testingType || this.ctx.coreData.currentTestingType
+    this.ctx.coreData.currentTestingType = testingType
 
     if (!testingType) throw new Error('Missing testingType in launchProject')
+
+    const browser = this.ctx.coreData.activeBrowser
+
+    if (!browser) throw new Error('Missing browser in launchProject')
 
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
       activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
-
-    const browser = this.ctx.coreData.activeBrowser
-
-    if (!browser) throw new Error('Missing browser in launchProject')
 
     // launchProject expects a spec when opening browser for url navigation.
     // We give it an empty spec if none is passed so as to land on home page
@@ -229,8 +230,6 @@ export class ProjectActions {
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
-
-    this.ctx.coreData.currentTestingType = testingType
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
 
