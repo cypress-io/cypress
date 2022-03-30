@@ -276,19 +276,19 @@ describe('domain validation', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome TJohnson')
   })
 
-  it('creates a spec bridge for https://example.com', () => {
+  it('creates a spec bridge for https://idp.com:3502', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
-    cy.switchToDomain('example.com', () => {
-      cy.visit('https://example.com')
-      cy.get('h1').invoke('text').should('equal', 'Example Domain')
+    cy.switchToDomain('idp.com:3502', () => {
+      cy.visit('https://www.idp.com:3502/fixtures/auth/index.html')
+      cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
     })
   })
 
-  it('creates a spec bridge for http://example.com', () => {
+  it('creates a spec bridge for http://idp.com:3500', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
-    cy.switchToDomain('http://example.com', () => {
-      cy.visit('http://example.com')
-      cy.get('h1').invoke('text').should('equal', 'Example Domain')
+    cy.switchToDomain('http://idp.com:3500', () => {
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+      cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
     })
   })
 })

@@ -2,6 +2,7 @@ import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import { preprocessConfig, preprocessEnv } from '../util/config'
 import { preprocessForSerialization, reifyCrossDomainError } from '../util/serialization'
+import { $Location } from '../cypress/location'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
@@ -169,14 +170,16 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
-    debug('<= to Primary ', event, data, location.origin)
+    const { originPolicy } = $Location.create(window.location.href)
+
+    debug('<= to Primary ', event, data, originPolicy)
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
       window.top?.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,
-        originPolicy: location.origin,
+        originPolicy,
       }, '*')
     })
   }
