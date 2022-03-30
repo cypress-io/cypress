@@ -2,8 +2,6 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-const rowSelector = '[data-cy=specs-list-row]'
-
 function mountWithTestingType (testingType: TestingTypeEnum) {
   cy.mountFragment(Specs_SpecsListFragmentDoc, {
     onResult: (ctx) => {
@@ -43,7 +41,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       // and that only a subset of the specs are displayed
       // (this means the virtualized list is working)
 
-      cy.get('[data-cy="specs-list-row"]')
+      cy.get('[data-cy="spec-list-file"]')
       .should('have.length.above', 2)
       .should('have.length.below', specs.length)
 
@@ -56,10 +54,13 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       .as('specsListInput')
 
       cy.get('@specsListInput').type('garbage 🗑', { delay: 0 })
-      .get(rowSelector)
+      .get('[data-cy-spec-list-file]')
+      .should('not.exist')
+      .get('[data-cy-spec-list-directory]')
       .should('not.exist')
 
       cy.contains(`${defaultMessages.specPage.noResultsMessage} garbage 🗑`)
+      .should('be.visible')
 
       cy.percySnapshot('no results')
 
@@ -67,11 +68,13 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.get('@specsListInput').invoke('val').should('be.empty')
 
       // validate that something re-populated in the specs list
-      cy.get('[data-cy="specs-list-row"]').should('have.length.above', 2)
+      cy.get('[data-cy="spec-list-file"]').should('have.length.above', 2)
 
       cy.get('@specsListInput').type(longestSpec.fileName)
-      cy.get(rowSelector).first().should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
-      cy.get(rowSelector).last().within(() => {
+      cy.get('[data-cy="spec-list-directory"]').first()
+      .should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
+
+      cy.get('[data-cy="spec-list-file"]').last().within(() => {
         cy.contains('a', longestSpec.baseName)
         .should('be.visible')
         .and('have.attr', 'href', `#/specs/runner?file=${longestSpec.relative}`)
@@ -80,7 +83,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       const directory = longestSpec.relative.slice(0, longestSpec.relative.lastIndexOf('/'))
 
       cy.get('@specsListInput').clear().type(directory)
-      cy.get(rowSelector).first().should('contain', directory)
+      cy.get('[data-cy="spec-list-directory"]').first().should('contain', directory)
       cy.percySnapshot('matching directory search')
 
       // test interactions

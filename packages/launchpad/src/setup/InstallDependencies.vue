@@ -6,20 +6,12 @@
     :next-fn="confirmInstalled"
     class="max-w-640px relative"
     :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
+    :skip-fn="!canNavigateForward ? confirmInstalled : undefined"
   >
     <ManualInstall
       :gql="props.gql"
       :packages-installed="packagesInstalled"
     />
-    <Button
-      v-if="!canNavigateForward && !intervalQueryTrigger.isActive.value"
-      class="right-16px bottom-16px absolute"
-      size="lg"
-      variant="link"
-      @click="intervalQueryTrigger.resume()"
-    >
-      {{ t('setupPage.install.checkForUpdates') }}
-    </Button>
   </WizardLayout>
 </template>
 
@@ -35,8 +27,7 @@ import {
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useMutation, useQuery } from '@urql/vue'
-import { useIntervalFn, useTimeoutFn } from '@vueuse/core'
-import Button from '../../../frontend-shared/src/components/Button.vue'
+import { useIntervalFn } from '@vueuse/core'
 
 gql`
 mutation InstallDependencies_scaffoldFiles {
@@ -97,10 +88,6 @@ const intervalQueryTrigger = useIntervalFn(async () => {
 }, 1000, {
   immediate: true,
 })
-
-useTimeoutFn(() => {
-  intervalQueryTrigger.pause()
-}, 180000)
 
 const canNavigateForward = ref(false)
 
