@@ -36,7 +36,7 @@
       />
     </svg>
   </div>
-</template>.
+</template>
 
 <style scoped>
 
