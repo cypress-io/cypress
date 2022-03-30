@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const os = require('os')
 const verify = require(`${lib}/tasks/verify`)
 const spawn = require(`${lib}/exec/spawn`)
 const open = require(`${lib}/exec/open`)
@@ -11,6 +12,7 @@ describe('exec open', function () {
       sinon.stub(util, 'isInstalledGlobally').returns(true)
       sinon.stub(verify, 'start').resolves()
       sinon.stub(spawn, 'start').resolves()
+      os.platform.returns('darwin')
     })
 
     it('verifies download', function () {
@@ -29,6 +31,13 @@ describe('exec open', function () {
           dev: true,
         })
       })
+    })
+
+    it('calls spawn with GTK_USE_PORTAL=1 on linux', async function () {
+      os.platform.returns('linux')
+      await open.start({ dev: true })
+
+      expect(spawn.start.getCalls()[0].args[1].env).to.include({ GTK_USE_PORTAL: '1' })
     })
 
     it('spawns with port', function () {

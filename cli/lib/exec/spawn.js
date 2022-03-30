@@ -85,7 +85,6 @@ module.exports = {
 
     _.defaults(options, {
       dev: false,
-      env: process.env,
       detached: false,
       stdio: getStdio(needsXvfb),
     })
@@ -118,28 +117,31 @@ module.exports = {
         }
 
         // strip dev out of child process options
-        let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
+        /**
+         * @type {import('child_process').SpawnOptions}
+         */
+        let spawnOptions = _.pick(options, 'env', 'detached', 'stdio')
 
         // figure out if we're going to be force enabling or disabling colors.
         // also figure out whether we should force stdout and stderr into thinking
         // it is a tty as opposed to a pipe.
-        stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
+        spawnOptions.env = _.extend({}, process.env, spawnOptions.env, envOverrides)
 
         if (node11WindowsFix) {
-          stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
+          spawnOptions = _.extend({}, spawnOptions, { windowsHide: false })
         }
 
         if (electronLogging) {
-          stdioOptions.env.ELECTRON_ENABLE_LOGGING = true
+          spawnOptions.env.ELECTRON_ENABLE_LOGGING = true
         }
 
         if (util.isPossibleLinuxWithIncorrectDisplay()) {
           // make sure we use the latest DISPLAY variable if any
           debug('passing DISPLAY', process.env.DISPLAY)
-          stdioOptions.env.DISPLAY = process.env.DISPLAY
+          spawnOptions.env.DISPLAY = process.env.DISPLAY
         }
 
-        if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
+        if (spawnOptions.env.ELECTRON_RUN_AS_NODE) {
           // Since we are running electron as node, we need to add an entry point file.
           const serverEntryPoint = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
 
@@ -153,8 +155,8 @@ module.exports = {
         }
 
         debug('spawning Cypress with executable: %s', executable)
-        debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
-        const child = cp.spawn(executable, args, stdioOptions)
+        debug('spawn args %o %o', args, _.omit(spawnOptions, 'env'))
+        const child = cp.spawn(executable, args, spawnOptions)
 
         function resolveOn (event) {
           return function (code, signal) {
@@ -227,7 +229,7 @@ module.exports = {
           throw err
         })
 
-        if (stdioOptions.detached) {
+        if (spawnOptions.detached) {
           child.unref()
         }
       })

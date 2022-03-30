@@ -1,4 +1,5 @@
 const debug = require('debug')('cypress:cli')
+const os = require('os')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
@@ -41,11 +42,21 @@ module.exports = {
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
+    function getOpenModeEnv () {
+      if (os.platform() !== 'linux') return
+
+      // on non-GTK desktop environments (KDE, XFCE, ...), native file pickers will not be used in Electron unless
+      // we explicitly opt-in the the GTK portal functionality
+      // @see https://tristan.partin.io/blog/2021/04/01/electron-linux-and-your-file-chooser/
+      return { GTK_USE_PORTAL: '1' }
+    }
+
     function open () {
       return spawn.start(args, {
         dev: options.dev,
         detached: Boolean(options.detached),
         stdio: 'inherit',
+        env: getOpenModeEnv(),
       })
     }
 
