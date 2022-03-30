@@ -269,6 +269,7 @@ const parseSpecArgv = (pattern) => {
 
     if (token === ',') {
       const isBreakable =
+          (!opens.length && !closes.length) ||
           index > opens[opens.length - 1] &&
           index > closes[closes.length - 1] &&
           opens.length === closes.length
