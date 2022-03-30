@@ -5,7 +5,7 @@ import disparity from 'disparity'
 import dedent from 'dedent'
 import { cyTmpDir } from '@tooling/system-tests/lib/fixtures'
 
-const systemTestsDir = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects')
+const systemTestsDir = path.posix.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects')
 
 export interface SnapshotScaffoldTestResult {
   status: 'ok' | 'fail'
@@ -93,7 +93,7 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
   const projectDir = currentProject.replace(cyTmpDir, systemTestsDir)
   const projectName = projectDir.replace(systemTestsDir, '').slice(1)
 
-  const expectedScaffoldDir = path.join(projectDir, `expected-cypress-${language}-${testingType}`)
+  const expectedScaffoldDir = path.posix.join(projectDir, `expected-cypress-${language}-${testingType}`)
 
   const currentProjectPosix = currentProject.split(path.sep).join(path.posix.sep)
 
@@ -112,8 +112,8 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
 
   const filesToDiff = actualRelativeFiles.map<FileToDiff>((file) => {
     return {
-      actual: path.join(currentProjectPosix, file),
-      expected: path.join(expectedScaffoldDir, file),
+      actual: path.posix.join(currentProjectPosix, file),
+      expected: path.posix.join(expectedScaffoldDir, file),
     }
   })
 
