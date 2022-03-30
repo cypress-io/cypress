@@ -238,12 +238,7 @@ const browsers = computed(() => {
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
-  get () {
-    const { browsers, activeBrowser } = props.gql
-
-    return activeBrowser?.id
-      || browsers?.find((browser) => browser.name === 'electron')?.id
-  },
+  get: () => props.gql.activeBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id,
   set (browserId) {
     if (browserId) {
       setBrowser.executeMutation({ id: browserId })

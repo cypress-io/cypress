@@ -519,22 +519,6 @@ export class ProjectLifecycleManager {
     return _.cloneDeep(fullConfig)
   }
 
-  // private injectCtSpecificConfig (cfg: FullConfig) {
-  //   cfg.resolved.testingType = { value: 'component' }
-  //   // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-  //   // But if we don't return it in the plugins function, it never gets set
-  //   // Since there is no chance that it will have any other value here, we set it to "component"
-  //   // This allows users to not return config in the `cypress/plugins/index.js` file
-  //   // https://github.com/cypress-io/cypress/issues/16860
-  //   const rawJson = cfg.rawJson as Cfg
-  //   return {
-  //     ...cfg,
-  //     componentTesting: true,
-  //     viewportHeight: rawJson.viewportHeight ?? 500,
-  //     viewportWidth: rawJson.viewportWidth ?? 500,
-  //   }
-  // }
-
   async getConfigFileContents () {
     if (this._configResult.state === 'loaded') {
       return this._configResult.value.initialConfig
@@ -1282,16 +1266,7 @@ export class ProjectLifecycleManager {
       }
     }
 
-    if (this.ctx.coreData.cliBrowser) {
-      await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
-    } else {
-      const browsers = await this.ctx.browser.machineBrowsers()
-      // lastBrowser is cached per-project.
-      const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
-
-      this.ctx.coreData.activeBrowser = (prefs?.lastBrowser && browsers!.find((b) => b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel))
-        || browsers![0] as FoundBrowser
-    }
+    await this.setInitialActiveBrowser()
 
     this._pendingInitialize?.resolve(finalConfig)
 
@@ -1308,12 +1283,36 @@ export class ProjectLifecycleManager {
     return result
   }
 
-  private async setActiveBrowser (cliBrowser: string) {
-    // When we're starting up, if we've chosen a browser to run with, check if it exists
-    this.ctx.coreData.cliBrowser = null
+  /**
+   * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
+   *  1. The value of `--browser` passed via CLI.
+   *  2. The last browser selected in `open` mode (by name and channel) for this project.
+   *  3. The first browser found.
+   */
+  async setInitialActiveBrowser () {
+    if (this.ctx.coreData.activeBrowser) throw new Error('setInitialActiveBrowser was called, but activeBrowser is already initialized')
 
+    if (this.ctx.coreData.cliBrowser) {
+      await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
+      this.ctx.coreData.cliBrowser = null
+
+      return
+    }
+
+    // lastBrowser is cached per-project.
+    const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
+    const browsers = await this.ctx.browser.machineBrowsers()
+
+    if (!browsers[0]) throw new Error('No browsers available in setInitialActiveBrowser, cannot set initial active browser')
+
+    this.ctx.coreData.activeBrowser = (prefs?.lastBrowser && browsers.find((b) => {
+      return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
+    })) || browsers[0]
+  }
+
+  private async setActiveBrowserByNameOrPath (nameOrPath: string) {
     try {
-      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(cliBrowser)
+      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath)
 
       this.ctx.coreData.activeBrowser = browser
     } catch (e) {
