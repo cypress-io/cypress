@@ -263,6 +263,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
   it('never redirects to the subdomain', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="username"]\`, but never found it`)
+      expect(err.message).to.include(`The command was expected to run against origin: \`http://idp.com:3500\` but the application is at origin: \`http://localhost:3500\`.`)
       //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -309,6 +310,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
   it('never returns to the primary domain', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="welcome"]\`, but never found it`)
+      expect(err.message).to.include(`The command was expected to run against origin: \`http://localhost:3500\` but the application is at origin: \`http://idp.com:3500\`.`)
       //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -386,6 +388,7 @@ describe('errors', { experimentalSessionSupport: true }, () => {
   it('fails in switchToDomain when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
+      expect(err.message).to.include(`The command was expected to run against origin: \`http://idp.com:3500\` but the application is at origin: \`http://localhost:3500\`.`)
       //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -404,6 +407,23 @@ describe('errors', { experimentalSessionSupport: true }, () => {
     cy.get('[data-cy="welcome"]')
     .invoke('text')
     .should('equal', 'Welcome BJohnson')
+  })
+
+  it('fails with a normal timeout', { defaultCommandTimeout: 50 }, (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
+      //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+      expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+      expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+      expect(err.message).not.to.include(`The command was expected to run against origin:`)
+      done()
+    })
+
+    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+    cy.switchToDomain('http://idp.com:3500', () => {
+      cy.get('[data-cy="cannot_find"]') // Timeout here on command stability achieved by primary domain, this command times out.
+    })
   })
 
   describe('Pre established spec bridge', () => {
