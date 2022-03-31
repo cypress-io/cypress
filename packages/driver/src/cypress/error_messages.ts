@@ -1000,7 +1000,7 @@ export default {
         A command that triggers cross origin navigation must be immediately followed by a ${cmd('switchToDomain')} command:
 
         \`\`\`
-        cy.switchToDomain('${crossOriginUrl.origin}', () => {
+        cy.switchToDomain('${crossOriginUrl.originPolicy}', () => {
           <commands targeting ${crossOriginUrl.origin} go here>
         })
         \`\`\`

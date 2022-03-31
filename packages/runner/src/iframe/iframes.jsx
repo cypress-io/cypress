@@ -171,11 +171,11 @@ export default class Iframes extends Component {
   }
 
   _addCrossDomainIframe = (location) => {
-    const id = `Spec Bridge: ${location.superDomain}`
+    const id = `Spec Bridge: ${location.originPolicy}`
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
-      this.props.eventManager.notifyCrossDomainBridgeReady(location.superDomain)
+      this.props.eventManager.notifyCrossDomainBridgeReady(location.originPolicy)
 
       return
     }
