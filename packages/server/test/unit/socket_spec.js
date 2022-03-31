@@ -7,7 +7,6 @@ const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
 
 const errors = require(`../../lib/errors`)
-const config = require(`../../lib/config`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
@@ -24,7 +23,7 @@ const { sinon } = require('../spec_helper')
 let ctx
 
 describe('lib/socket', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
 
     // Don't bother initializing the child process, etc for this
@@ -36,9 +35,9 @@ describe('lib/socket', () => {
 
     this.server = new ServerE2E()
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       this.cfg = cfg
     })

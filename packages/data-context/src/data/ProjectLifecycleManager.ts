@@ -475,7 +475,6 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * Equivalent to the legacy "config.get()",
    * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {

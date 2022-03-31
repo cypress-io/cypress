@@ -23,7 +23,7 @@ let ctx
 
 // NOTE: todo: come back to this
 describe.skip('lib/project-base', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     Fixtures.scaffold()
 
@@ -39,7 +39,7 @@ describe.skip('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return settings.read(this.todosPath)
     .then((obj = {}) => {
@@ -138,7 +138,7 @@ describe.skip('lib/project-base', () => {
     const supportFile = 'foo/bar/baz'
 
     beforeEach(function () {
-      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar', configFile: 'cypress.config.js' })
+      sinon.stub(ctx.lifecycleManager, 'getInitialFullConfig').withArgs({ foo: 'bar', configFile: 'cypress.config.js' })
       .resolves({ baz: 'quux', supportFile, browsers: [] })
     })
 
@@ -176,7 +176,7 @@ describe.skip('lib/project-base', () => {
     it('does not set cfg.isNewProject when cfg.isTextTerminal', function () {
       const cfg = { isTextTerminal: true, browsers: [] }
 
-      config.get.resolves(cfg)
+      ctx.lifecycleManager.getFullInitialConfig.resolves(cfg)
 
       sinon.stub(this.project, '_setSavedState').resolves(cfg)
 
@@ -193,7 +193,7 @@ describe.skip('lib/project-base', () => {
         chromeWebSecurity: false,
       })
 
-      config.get.restore()
+      ctx.lifecycleManager.getFullInitialConfig.restore()
       sinon.stub(config, 'get').returns(cfg)
 
       await this.project.initializeConfig()

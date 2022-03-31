@@ -22,7 +22,7 @@ describe.skip('lib/plugins/index', () => {
   let configExtras
   let getOptions
 
-  beforeEach(() => {
+  beforeEach(async () => {
     ctx = getCtx()
     plugins._reset()
 
@@ -35,7 +35,7 @@ describe.skip('lib/plugins/index', () => {
       configFile: `${todosPath}/cypress.config.js`,
     }
 
-    ctx.setCurrentProjectAndTestingTypeForTestSetup(todosPath)
+    await ctx.setCurrentProjectAndTestingTypeForTestSetup(todosPath)
 
     getOptions = (overrides = {}) => {
       return {

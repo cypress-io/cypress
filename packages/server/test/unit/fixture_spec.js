@@ -2,7 +2,6 @@ require('../spec_helper')
 
 const path = require('path')
 const Promise = require('bluebird')
-const config = require(`../../lib/config`)
 const fixture = require(`../../lib/fixture`)
 const { fs } = require(`../../lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
@@ -17,7 +16,7 @@ const isWindows = () => {
 let ctx
 
 describe('lib/fixture', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     FixturesHelper.scaffold()
 
@@ -26,9 +25,9 @@ describe('lib/fixture', () => {
       return fs.readFileAsync(path.join(folder, image), encoding)
     }
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getInitialFullConfig()
     .then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
@@ -176,12 +175,12 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     })
 
     // https://github.com/cypress-io/cypress/issues/3739
-    it('can load a fixture with no extension when a same-named folder also exists', () => {
+    it('can load a fixture with no extension when a same-named folder also exists', async () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
 
-      return config.get(projectPath)
+      return ctx.lifecycleManager.getInitialFullConfig()
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((result) => {

@@ -3,7 +3,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
+import type { ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
 import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
@@ -76,20 +76,6 @@ export function isValidCypressInternalEnvValue (value) {
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
-}
-
-export async function get (
-  projectRoot,
-  // Options are only used in testing
-  options?: Partial<AllModeOptions>,
-): Promise<FullConfig> {
-  const ctx = getCtx()
-
-  options ??= ctx.modeOptions
-
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.getFullInitialConfig(options, false)
 }
 
 export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
