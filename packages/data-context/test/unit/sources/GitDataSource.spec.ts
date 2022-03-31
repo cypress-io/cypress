@@ -5,6 +5,12 @@ import simpleGit from 'simple-git'
 import fs from 'fs-extra'
 import { createTestDataContext, scaffoldMigrationProject } from '../helper'
 
+// 0 seconds ago
+// 1 second ago
+// 2 seconds ago
+// a few seconds ago (probably 10+)
+const timeAgoRe = /([0,2-9] seconds|1 second|a few seconds) ago/
+
 describe('GitDataSource', () => {
   it(`gets correct status for files on ${os.platform()}`, async () => {
     const ctx = createTestDataContext()
@@ -46,19 +52,19 @@ describe('GitDataSource', () => {
       ctx.git.gitInfo(xhrSpec),
     ])
 
-    expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(created.lastModifiedHumanReadable).to.match(timeAgoRe)
     expect(created.statusType).to.eql('created')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(created.author).not.to.be.undefined
     expect(created.lastModifiedTimestamp).not.to.be.undefined
 
-    expect(unmodified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(unmodified.lastModifiedHumanReadable).to.match(timeAgoRe)
     expect(unmodified.statusType).to.eql('unmodified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(unmodified.author).not.to.be.undefined
     expect(unmodified.lastModifiedTimestamp).not.to.be.undefined
 
-    expect(modified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(modified.lastModifiedHumanReadable).to.match(timeAgoRe)
     expect(modified.statusType).to.eql('modified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.to.be.undefined

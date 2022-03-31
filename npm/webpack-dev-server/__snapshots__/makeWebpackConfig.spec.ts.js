@@ -12,5 +12,12 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` 1'] = {
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTOptionsPlugin"
-  ]
+  ],
+  "resolve": {
+    "alias": {
+      "cypress/vue": "/root/cypress/npm/vue",
+      "cypress/mount-utils": "/root/cypress/npm/mount-utils",
+      "cypress/react": "/root/cypress/npm/react"
+    }
+  }
 }
