@@ -7,7 +7,7 @@ index 31e00ee..0c56908 100644
    /** @type {string} Cypress run-time config has test files string pattern */
    // @ts-ignore
 -  const testFilePattern = config('testFiles')
-+  const testFilePattern = config(Cypress.testingType).specPattern
++  const testFilePattern = config('specPattern')
  
    // test files chould be:
    //  wild card string "**/*.*" (default)

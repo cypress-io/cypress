@@ -1,3 +1,4 @@
+import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
@@ -113,7 +114,6 @@ describe('Launchpad: Open Mode', () => {
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.actions.electron.showItemInFolder = o.sinon.stub()
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
 
@@ -128,8 +128,17 @@ describe('Launchpad: Open Mode', () => {
       cy.wait('@OpenInFinder')
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.electron.showItemInFolder).to.have.been.calledOnceWith('/some/project')
+        expect((ctx.actions.electron.showItemInFolder as SinonStub).lastCall.lastArg).to.eql('/some/project')
       })
     })
+  })
+
+  it('opens an e2e project without a supportFile', () => {
+    cy.scaffoldProject('no-support-file')
+    cy.openProject('no-support-file', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.contains('Error Loading Config')
+    cy.contains('Your project does not contain a default supportFile.')
+    cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })
 })

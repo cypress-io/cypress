@@ -656,6 +656,11 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
+    DEFAULT_SUPPORT_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/supportFile/**/*.{js,jsx,ts,tsx}'],
+      }
+    },
     CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
@@ -1112,9 +1117,19 @@ describe('visual error templates', () => {
         default: ['custom.config.js', 'custom.json'],
       }
     },
-    TEST_FILES_DEPRECATION: () => {
+    TEST_FILES_RENAMED: () => {
       return {
-        default: [{ name: 'testFiles', configFile: '/path/to/cypress.config.js.ts' }],
+        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    COMPONENT_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    INTEGRATION_FOLDER_REMOVED: () => {
+      return {
+        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
   })

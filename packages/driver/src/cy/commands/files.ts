@@ -72,10 +72,10 @@ export default (Commands, Cypress, cy, state) => {
           }
         }).then(({ filePath, contents }) => {
           // https://github.com/cypress-io/cypress/issues/1558
+          // https://github.com/cypress-io/cypress/issues/20683
           // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
-          // which socket.io uses to transfer the file over the websocket - into a
-          // `Buffer`, which webpack polyfills in the browser.
-          if (options.encoding === null) {
+          // which socket.io uses to transfer the file over the websocket - into a `Buffer`.
+          if (options.encoding === null && contents !== null) {
             contents = Buffer.from(contents)
           }
 

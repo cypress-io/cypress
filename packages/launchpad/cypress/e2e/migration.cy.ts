@@ -527,6 +527,44 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-cjsx', () => {
+    startMigrationFor('migration-e2e-cjsx')
+    // defaults, rename all the things
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.cjsx')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.cjsx')
+
+    runAutoRename()
+
+    cy.wait(100)
+
+    cy.withCtx(async (ctx) => {
+      const specs = ['cypress/e2e/foo.cy.cjsx']
+
+      for (const spec of specs) {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats, `spec file not renamed ${spec}`).to.not.be.null
+      }
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
   it('completes journey for migration-e2e-plugins-modify-config', () => {
     startMigrationFor('migration-e2e-plugins-modify-config')
     // No rename, integrationFolder and testFiles are custom (via plugins)
@@ -743,6 +781,62 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     migrateAndVerifyConfig()
   })
 
+  it('completes journey for migration-e2e-duplicated-spec-names', () => {
+    startMigrationFor('migration-e2e-duplicated-spec-names')
+    // default testFiles - auto
+    cy.get(renameAutoStep).should('exist')
+    cy.get(configFileStep).should('exist')
+
+    cy.get('[data-cy="migrate-before"]').within(() => {
+      cy.get('code').eq(0).should('contain', 'cypress/integration/app-spec2.js')
+      cy.get('code').eq(1).should('contain', 'cypress/integration/app_spec2.js')
+      cy.get('code').eq(2).should('contain', 'cypress/integration/app.spec.js')
+      cy.get('code').eq(3).should('contain', 'cypress/integration/app2_spec.js')
+      cy.get('code').eq(4).should('contain', 'cypress/integration/app_spec.js')
+      cy.get('code').eq(5).should('contain', 'cypress/integration/app-spec.js')
+    })
+
+    cy.get('[data-cy="migrate-after"]').within(() => {
+      cy.get('code').eq(0).should('contain', 'cypress/e2e/app-spec2.cy.js')
+      cy.get('code').eq(1).should('contain', 'cypress/e2e/app_spec2.cy.js')
+      cy.get('code').eq(2).should('contain', 'cypress/e2e/app.cy.js')
+      cy.get('code').eq(3).should('contain', 'cypress/e2e/app2.cy.js')
+      cy.get('code').eq(4).should('contain', 'cypress/e2e/app_spec.cy.js')
+      cy.get('code').eq(5).should('contain', 'cypress/e2e/app-spec.cy.js')
+    })
+
+    runAutoRename()
+
+    cy.wait(100)
+
+    cy.withCtx(async (ctx) => {
+      const specs = [
+        'cypress/e2e/app-spec2.cy.js',
+        'cypress/e2e/app_spec2.cy.js',
+        'cypress/e2e/app.cy.js',
+        'cypress/e2e/app2.cy.js',
+        'cypress/e2e/app_spec.cy.js',
+        'cypress/e2e/app-spec.cy.js',
+      ]
+
+      for (const spec of specs) {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      }
+    })
+
+    migrateAndVerifyConfig()
+
+    cy.withCtx(async (ctx) => {
+      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+
+      expect(integrationFolderStats).to.be.null
+    })
+
+    checkOutcome()
+  })
+
   context('migration-e2e-component-default-test-files', () => {
     it('completes journey', () => {
       startMigrationFor('migration-e2e-component-default-test-files')
@@ -850,7 +944,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
   })
 })
 
-// TODO: toLaunchpad emitter not working in Cypress in Cypress.
+// TODO: UNIFY-1350 toLaunchpad emitter not working in Cypress in Cypress,
+// re-evaluate after conversion to subscriptions
 describe.skip('component testing migration - defaults', () => {
   it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')

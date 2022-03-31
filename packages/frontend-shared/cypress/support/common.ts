@@ -1,4 +1,3 @@
-import '@percy/cypress'
 import '../../src/styles/shared.scss'
 import type { ComponentPublicInstance } from 'vue'
 

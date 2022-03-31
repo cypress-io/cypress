@@ -103,20 +103,20 @@ SNAPSHOT_UPDATE=1 yarn test go_spec
 
 Every folder in [`./projects`](./lib/projects) represents a self-contained Cypress project. When you pass the `project` property to `systemTests.it` or `systemTests.exec`, Cypress launches using this project.
 
-If a test project has a `package.json` file, the `systemTests.exec` helper will attempt to install the correct `node_modules` by running `yarn install` against the project. This is cached in CI and locally to speed up test times.
+If a test project has a `package.json` file, the `systemTests.exec` helper will attempt to install the correct `node_modules` by running `yarn install` or `npm install` (depending on which lockfile is present) against the project. This is cached in CI and locally to speed up test times.
 
 `systemTests.exec` *copies* the project directory to a temporary folder outside of the monorepo root. This means that temporary projects will not inherit the `node_modules` from this package or the monorepo. So, you must add the dependencies required for your project in `dependencies` or `devDependencies`.
 
 The exception is some commonly used packages that are scaffolded for all projects, like `lodash` and `debug`. You can see the list by looking at `scaffoldCommonNodeModules` in [`./lib/fixtures.ts`](./lib/fixtures.ts) These packages do not need to be added to a test project's `package.json`.
 
-You can also set special properties in a test project's `package.json` to influence the helper's behavior when running `yarn`:
+You can also set special properties in a test project's `package.json` to influence the helper's behavior when running `yarn` or `npm`:
 
 `package.json` Property Name | Type | Description
 --- | --- | ---
-`_cySkipYarnInstall` | `boolean` | If `true`, skip the automatic `yarn install` for this package, even though it has a `package.json`.
+`_cySkipDepInstall` | `boolean` | If `true`, skip the automatic `yarn install` or `npm install` for this package, even though it has a `package.json`.
 `_cyYarnV311` | `boolean` | Run the yarn v3.1.1-style install command instead of yarn v1-style.
-`_cyRunScripts` | `boolean` | By default, the automatic `yarn install` will not run postinstall scripts. This option, if set, will cause postinstall scripts to run for this project.
+`_cyRunScripts` | `boolean` | By default, the automatic install will not run postinstall scripts. This option, if set, will cause postinstall scripts to run for this project.
 
-Run `yarn projects:yarn:install` to run `yarn install` for all projects with a `package.json`.
+Run `yarn projects:yarn:install` to run `yarn install`/`npm install` for all applicable projects.
 
-Use the `UPDATE_YARN_LOCK=1` environment variable with `yarn test` or `yarn projects:yarn:install` to allow the `yarn.lock` to be updated and synced back to the monorepo from the temp dir.
+Use the `UPDATE_LOCK_FILE=1` environment variable with `yarn test` or `yarn projects:yarn:install` to allow the `yarn.lock` or `package-lock.json` to be updated and synced back to the monorepo from the temp dir.

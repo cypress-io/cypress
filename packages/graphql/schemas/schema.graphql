@@ -388,6 +388,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """Default spec file name for spec creation"""
+  defaultSpecFileName: String
+
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
@@ -493,6 +496,7 @@ enum ErrorTypeEnum {
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
+  COMPONENT_FOLDER_REMOVED
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION
   CONFIG_FILE_INVALID_DEV_START_EVENT
@@ -526,6 +530,7 @@ enum ErrorTypeEnum {
   DASHBOARD_STALE_RUN
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
   DASHBOARD_UNKNOWN_INVALID_REQUEST
+  DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
   DUPLICATE_TASK_KEY
   ERROR_READING_FILE
@@ -550,6 +555,7 @@ enum ErrorTypeEnum {
   INCOMPATIBLE_PLUGIN_RETRIES
   INCORRECT_CI_BUILD_ID_USAGE
   INDETERMINATE_CI_BUILD_ID
+  INTEGRATION_FOLDER_REMOVED
   INVALID_CONFIG_OPTION
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
@@ -586,7 +592,7 @@ enum ErrorTypeEnum {
   SUPPORT_FILE_NOT_FOUND
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
-  TEST_FILES_DEPRECATION
+  TEST_FILES_RENAMED
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
@@ -723,6 +729,15 @@ type GitInfo {
 
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
+
+  """status type - created or modified"""
+  statusType: GitInfoStatusType
+}
+
+enum GitInfoStatusType {
+  created
+  modified
+  unmodified
 }
 
 """A project which exists on the filesystem but has not been opened"""
@@ -1000,7 +1015,7 @@ type Mutation {
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
-  openExternal(url: String!): Boolean
+  openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
 
   """Open a file on specified line and column in preferred IDE"""
   openFileInIDE(input: FileDetailsInput!): Boolean
@@ -1252,8 +1267,14 @@ type Subscription {
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
+  """"""
+  cloudViewerChange: Query
+
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""

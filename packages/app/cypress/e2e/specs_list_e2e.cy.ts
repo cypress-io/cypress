@@ -14,6 +14,7 @@ describe('App: Spec List (E2E)', () => {
           author: 'Test Author',
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
+          statusType: 'unmodified',
         })
       })
     })
@@ -57,7 +58,7 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('shows a git status for each spec', () => {
-    cy.findAllByTestId('specs-list-row').each((row) => {
+    cy.get('[data-cy="spec-list-file"]').each((row) => {
       cy.wrap(row).contains('.git-info-row', 'Test Author')
     })
   })
