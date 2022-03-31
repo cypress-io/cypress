@@ -363,7 +363,7 @@ export class ProjectLifecycleManager {
 
   /**
    * Handles pre-initialization checks. These will display warnings or throw with errors if catastrophic.
-   * Returns yes, if we're not ready to initialize due to needing to migrate
+   * Returns false, if we're not ready to initialize due to needing to migrate
    *
    * @param projectRoot the project's root
    * @returns true if we can initialize and false if not
