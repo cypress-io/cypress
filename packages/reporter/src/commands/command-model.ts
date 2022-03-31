@@ -119,10 +119,10 @@ export default class Command extends Instrument {
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
-    this.showError = props.showError
+    this.showError = !!props.showError
     this.group = props.group
-    this.hasSnapshot = props.hasSnapshot
-    this.hasConsoleProps = props.hasConsoleProps
+    this.hasSnapshot = !!props.hasSnapshot
+    this.hasConsoleProps = !!props.hasConsoleProps
     this.groupLevel = props.groupLevel || 0
 
     this._checkLongRunning()

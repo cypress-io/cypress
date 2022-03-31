@@ -9,15 +9,17 @@ declare namespace Cypress {
   }
 
   interface InternalLogConfig {
+    // defaults to command
+    instrument?: 'agent' | 'command' | 'route'
     // name of the log
     name?: string
+    // the name override for display purposes only
+    displayName?: string
     // additional information to include in the log if not overridden
     // the render props message
     // defaults to command arguments for command instrument
-    message: string | Array<string> | any[]
-    // defaults to command
-    instrument?: 'agent' | 'command' | 'route'
-    //     // whether or not the xhr route had a corresponding response stubbed out
+    message?: string | Array<string> | any[]
+    // whether or not the xhr route had a corresponding response stubbed out
     isStubbed?: boolean
     alias?: string
     aliasType?: 'agent' | 'route' | 'primitive' | 'dom' | undefined
@@ -44,6 +46,9 @@ declare namespace Cypress {
     // logs defined with instrument=route
     numResponses?: number
     response?: string | object
+    // provide the content to display in the dev tool's console when a log is 
+    // clicked from the Reporter's Command Log
+    consoleProps?: () => ObjectLike
     renderProps?: () => {
       indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
       message?: string

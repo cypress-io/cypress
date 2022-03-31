@@ -24,7 +24,7 @@ const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const invisibleMessage = (model: CommandModel) => {
   if (!model.isInvisible) {
-    return
+    return ''
   }
 
   return model.numElements > 1 ?
