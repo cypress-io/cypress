@@ -7,7 +7,7 @@ import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-cont
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
-import fs from 'fs'
+import fs from 'fs-extra'
 import { buildSchema, execute, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
 
@@ -65,6 +65,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): Promise<void>
+  clearFixtureNodeModules (project: string): void
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -113,11 +114,20 @@ async function makeE2ETasks () {
       Fixtures.removeProject(projectName)
     }
 
+    Fixtures.clearFixtureNodeModules(projectName)
+
     await Fixtures.scaffoldProject(projectName)
 
     await scaffoldCommonNodeModules()
 
-    await scaffoldProjectNodeModules(projectName)
+    try {
+      await scaffoldProjectNodeModules(projectName)
+    } catch (e) {
+      console.error(e)
+      // If we have an error, it's likely that we
+      // await scaffoldProjectNodeModules(projectName, true)
+      throw e
+    }
 
     scaffoldedProjects.add(projectName)
 

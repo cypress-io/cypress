@@ -82,6 +82,16 @@ export function removeProject (name) {
   safeRemove(projectPath(name))
 }
 
+// Removes node_modules that might have been leftover from an initial "yarn"
+// in the fixture dir
+export function clearFixtureNodeModules (name) {
+  try {
+    safeRemove(_path.join(projects, name, 'node_modules'))
+  } catch {
+    //
+  }
+}
+
 // returns the path to project fixture
 // in the cyTmpDir
 export function project (name) {

@@ -163,6 +163,8 @@ export const e2eProjectDirs = [
   'vueclivue3-configured',
   'vueclivue3-custom-index-html',
   'vueclivue3-unconfigured',
+  'wds-3-vanilla-react',
+  'wds-vanilla-react',
   'webpack-dev-server',
   'webpack-preprocessor',
   'webpack-preprocessor-awesome-typescript-loader',

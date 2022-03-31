@@ -318,7 +318,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     fileUrl: generatedDetails.file,
     originalFile,
     relativeFile,
-    absoluteFile: (relativeFile && projectRoot) ? path.join(projectRoot, relativeFile) : undefined,
+    absoluteFile: (relativeFile && projectRoot) ? path.resolve(projectRoot, relativeFile) : undefined,
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,
