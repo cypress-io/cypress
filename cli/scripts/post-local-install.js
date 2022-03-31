@@ -23,6 +23,13 @@ require('./clean')
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
 
+// We include the TypeScript definitions for the bundled 3rd party tools
+// thus we need to copy them from "dev" dependencies into our types folder
+// and we need to sometimes tweak these types files to use relative paths
+// This ensures that globals like Cypress.$, Cypress._ etc are property typed
+// yet we do not install "@types/.." packages with "npm install cypress"
+// because they can conflict with user's own libraries
+
 fs.ensureDirSync(join(__dirname, '..', 'types'))
 
 includeTypes.forEach((folder) => {
