@@ -9,7 +9,7 @@ const LONG_RUNNING_THRESHOLD = 1000
 
 interface RenderProps {
   message?: string
-  indicator?: string
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
   interceptions?: Array<{
     command: 'intercept' | 'route'
     alias?: string
@@ -34,7 +34,6 @@ export interface CommandProps extends InstrumentProps {
   group?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
-
 }
 
 export default class Command extends Instrument {
@@ -48,7 +47,6 @@ export default class Command extends Instrument {
   @observable visible?: boolean = true
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
-  @observable isChild = false
   @observable hookId: string
   @observable isStudio: boolean
   @observable showError?: boolean = false
@@ -64,9 +62,23 @@ export default class Command extends Instrument {
     return this.renderProps.message || this.message
   }
 
+  @computed get isInvisible () {
+    return this.visible !== undefined && !this.visible
+  }
+
+  private countNestedCommands (children) {
+    if (children.length === 0) return 0
+
+    return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
+  }
+
   @computed get numChildren () {
-    // and one to include self so it's the total number of same events
-    return this.children.length + 1
+    if (this.event) {
+      // add one to include self so it's the total number of same events
+      return this.children.length + 1
+    }
+
+    return this.countNestedCommands(this.children)
   }
 
   @computed get isOpen () {
@@ -75,6 +87,7 @@ export default class Command extends Instrument {
     return this._isOpen || (this._isOpen === null
       && (
         (this.group && this.type === 'system' && this.hasChildren) ||
+        (this.hasChildren && !this.event && this.type !== 'system') ||
         _.some(this.children, (v) => v.hasChildren) ||
         _.last(this.children)?.isOpen ||
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
@@ -88,7 +101,7 @@ export default class Command extends Instrument {
   }
 
   @computed get hasChildren () {
-    return this.numChildren > 1
+    return this.event ? this.numChildren > 1 : this.numChildren > 0
   }
 
   constructor (props: CommandProps) {
@@ -104,11 +117,10 @@ export default class Command extends Instrument {
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
-    this.showError = props.showError
+    this.showError = !!props.showError
     this.group = props.group
-    this.hasSnapshot = props.hasSnapshot
-    this.hasConsoleProps = props.hasConsoleProps
-
+    this.hasSnapshot = !!props.hasSnapshot
+    this.hasConsoleProps = !!props.hasConsoleProps
     this._checkLongRunning()
   }
 
@@ -142,7 +154,6 @@ export default class Command extends Instrument {
   }
 
   addChild (command: Command) {
-    command.isChild = true
     command.setGroup(this.id)
     this.children.push(command)
   }

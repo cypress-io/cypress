@@ -129,7 +129,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -206,10 +206,10 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
+  const logGroups = state('logGroup') || []
 
-  if (logGroup) {
-    obj.group = logGroup
+  if (logGroups.length) {
+    obj.group = _.last(logGroups)
   }
 
   if (obj.groupEnd) {
@@ -217,7 +217,7 @@ const defaults = function (state, config, obj) {
   }
 
   if (obj.groupStart) {
-    state('logGroup', (state('logGroup') || []).concat(obj.id))
+    state('logGroup', (logGroups).concat(obj.id))
   }
 
   return obj
@@ -402,6 +402,10 @@ class Log {
     })
 
     return this
+  }
+
+  endGroup () {
+    this.state('logGroup', _.slice(this.state('logGroup'), 0, -1))
   }
 
   getError (err) {
