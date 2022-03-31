@@ -18,9 +18,9 @@ import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@pac
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
-import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
+import { debug } from 'console'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -78,7 +78,6 @@ export class ProjectLifecycleManager {
   private _projectRoot: string | undefined
   private _configManager: ProjectConfigManager | undefined
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
-  private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
   private _cachedInitialConfig: Cypress.ConfigOptions | undefined
   private _cachedFullConfig: FullConfig | undefined
   private _initializedProject: unknown | undefined
@@ -223,8 +222,8 @@ export class ProjectLifecycleManager {
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       eventRegistrar: this._eventRegistrar,
       onError: (cypressError, title) => {
-        if (this.ctx.isRunMode && this._pendingInitialize) {
-          this._pendingInitialize.reject(cypressError)
+        if (this.ctx.isRunMode) {
+          throw cypressError
         } else {
           this.ctx.onError(cypressError, title)
         }
@@ -265,51 +264,45 @@ export class ProjectLifecycleManager {
             additionalIgnorePattern: finalConfig.additionalIgnorePattern,
           })
         }
-
-        this._pendingInitialize?.resolve(finalConfig)
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
     })
   }
 
-  async refreshLifecycle () {
+  async refreshLifecycle (): Promise<FullConfig | null> {
     assert(this._projectRoot, 'Cannot reload config without a project root')
     assert(this._configManager, 'Cannot reload config without a config manager')
 
-    if (this.readyToInitialize(this._projectRoot)) {
+    try {
       this._configManager.resetLoadingState()
-      await this.initializeConfig()
+      const config = await this.initializeConfig()
 
-      if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-        this._configManager.loadTestingType()
-      } else {
-        this.setCurrentTestingType(null)
+      if (config && this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+        return await this._configManager.loadTestingType()
       }
 
-      return true
-    }
+      return await this.setCurrentTestingType(null)
+    } catch (error) {
+      this.onLoadError(error)
 
-    return false
+      return null
+    }
   }
 
-  async waitForInitializeSuccess (): Promise<boolean> {
-    if (this._configManager?.isLoadingConfigFile) {
-      try {
-        await this.initializeConfig()
+  async initializeConfig (): Promise<Partial<Cypress.UserConfigOptions<any>> | null> {
+    try {
+      assert(this._projectRoot, 'Cannot initialize config without a project root')
+      if (await this.readyToInitialize(this._projectRoot)) {
+        assert(this._configManager, 'Cannot initialize config without a config manager')
 
-        return true
-      } catch (error) {
-        return false
+        return await this._configManager.initializeConfig()
       }
+    } catch (error) {
+      debug('initializeConfig error', error)
+      this.onLoadError(error)
     }
 
-    return !this._configManager?.isInError
-  }
-
-  async initializeConfig () {
-    assert(this._configManager, 'Cannot initialize config without a config manager')
-
-    return this._configManager.initializeConfig()
+    return null
   }
 
   private async setActiveBrowser (cliBrowser: string) {
@@ -355,10 +348,6 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
       s.packageManager = packageManagerUsed
     })
-
-    if (this.readyToInitialize(this._projectRoot)) {
-      this._configManager.initializeConfig().catch(this.onLoadError)
-    }
   }
 
   /**
@@ -368,7 +357,7 @@ export class ProjectLifecycleManager {
    * @param projectRoot the project's root
    * @returns true if we can initialize and false if not
    */
-  readyToInitialize (projectRoot: string): boolean {
+  private async readyToInitialize (projectRoot: string): Promise<boolean> {
     this.verifyProjectRoot(projectRoot)
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
@@ -376,7 +365,7 @@ export class ProjectLifecycleManager {
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
+      await this.legacyMigration(legacyConfigPath)
 
       return false
     }
@@ -418,29 +407,37 @@ export class ProjectLifecycleManager {
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  setCurrentTestingType (testingType: TestingType | null) {
-    this.ctx.update((d) => {
-      d.currentTestingType = testingType
-      d.wizard.chosenBundler = null
-      d.wizard.chosenFramework = null
-    })
+  async setCurrentTestingType (testingType: TestingType | null): Promise<FullConfig | null> {
+    try {
+      this.ctx.update((d) => {
+        d.currentTestingType = testingType
+        d.wizard.chosenBundler = null
+        d.wizard.chosenFramework = null
+      })
 
-    if (this._currentTestingType === testingType) {
-      return
-    }
+      if (this._currentTestingType === testingType) {
+        return null
+      }
 
-    this._initializedProject = undefined
-    this._currentTestingType = testingType
+      this._initializedProject = undefined
+      this._currentTestingType = testingType
 
-    assert(this._configManager, 'Cannot set a testing type without a config manager')
-    this._configManager.setTestingType(testingType)
+      assert(this._configManager, 'Cannot set a testing type without a config manager')
+      this._configManager.setTestingType(testingType)
 
-    if (!testingType) {
-      return
-    }
+      if (!testingType) {
+        return null
+      }
 
-    if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
-      this._configManager.loadTestingType()
+      if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
+        return await this._configManager.loadTestingType()
+      }
+
+      return null
+    } catch (error) {
+      this.onLoadError(error)
+
+      return null
     }
   }
 
@@ -469,19 +466,19 @@ export class ProjectLifecycleManager {
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
     assert(this._configManager, 'Cannot get full config a config manager')
 
-    return this._configManager.getFullInitialConfig(options, withBrowsers)
+    return await this._configManager.getFullInitialConfig(options, withBrowsers)
   }
 
   async getConfigFileContents () {
     assert(this._configManager, 'Cannot get config file contents without a config manager')
 
-    return this._configManager.getConfigFileContents()
+    return await this._configManager.getConfigFileContents()
   }
 
   async loadCypressEnvFile () {
     assert(this._configManager, 'Cannot load a cypress env file without a config manager')
 
-    return this._configManager.loadCypressEnvFile()
+    return await this._configManager.loadCypressEnvFile()
   }
 
   reinitializeCypress () {
@@ -653,24 +650,18 @@ export class ProjectLifecycleManager {
     return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
-  async initializeRunMode (testingType: TestingType | null) {
-    this._pendingInitialize = pDefer()
+  async initializeRunMode (testingType: TestingType | null): Promise<FullConfig | null> {
+    if (!this.metaState.hasValidConfigFile) {
+      this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
 
-    if (await this.waitForInitializeSuccess()) {
-      if (!this.metaState.hasValidConfigFile) {
-        return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
-      }
-
-      if (testingType) {
-        this.setCurrentTestingType(testingType)
-      } else {
-        this.setCurrentTestingType('e2e')
-      }
+      return null
     }
 
-    return this._pendingInitialize.promise.finally(() => {
-      this._pendingInitialize = undefined
-    })
+    if (testingType) {
+      return await this.setCurrentTestingType(testingType)
+    }
+
+    return await this.setCurrentTestingType('e2e')
   }
 
   private configFileWarningCheck () {

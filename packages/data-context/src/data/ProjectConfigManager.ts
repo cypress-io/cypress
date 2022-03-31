@@ -26,7 +26,7 @@ type ProjectConfigManagerOptions = {
   onError: (cypressError: CypressError, title?: string | undefined) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
-  refreshLifecycle: () => Promise<boolean>
+  refreshLifecycle: () => Promise<FullConfig | null>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
@@ -137,18 +137,22 @@ export class ProjectConfigManager {
     }
   }
 
-  loadTestingType () {
+  async loadTestingType (): Promise<FullConfig | null> {
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.options.refreshLifecycle().catch(this.onLoadError)
-    } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
+      return await this.options.refreshLifecycle()
     }
+
+    if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
+      return await this.setupNodeEvents(this._cachedLoadConfig)
+    }
+
+    return null
   }
 
-  private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {
+  private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<FullConfig> {
     assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
     this._state = 'loadingNodeEvents'
 
@@ -158,8 +162,11 @@ export class ProjectConfigManager {
       const config = await this.getFullInitialConfig()
       const setupNodeEventsReply = await this._eventsIpc?.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
-      await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
+      const fullConfig = await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
+
       this._state = 'ready'
+
+      return fullConfig
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)
       this._state = 'errored'
@@ -231,7 +238,7 @@ export class ProjectConfigManager {
       this.envFilePath,
     ])
 
-    return result
+    return finalConfig
   }
 
   resetLoadingState () {
@@ -240,7 +247,7 @@ export class ProjectConfigManager {
     this._state = 'pending'
   }
 
-  private loadConfig () {
+  private async loadConfig (): Promise<LoadConfigReply> {
     if (!this._loadConfigPromise) {
       // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
       if (this._eventsIpc) {
@@ -255,7 +262,7 @@ export class ProjectConfigManager {
       this._loadConfigPromise = this._eventsIpc.loadConfig()
     }
 
-    return this._loadConfigPromise
+    return await this._loadConfigPromise
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
@@ -432,11 +439,11 @@ export class ProjectConfigManager {
       return this._cachedLoadConfig?.initialConfig
     }
 
-    return this.initializeConfig()
+    return await this.initializeConfig()
   }
 
   async loadCypressEnvFile () {
-    return this._cypressEnv.loadCypressEnvFile()
+    return await this._cypressEnv.loadCypressEnvFile()
   }
 
   async reloadCypressEnvFile () {
@@ -447,7 +454,7 @@ export class ProjectConfigManager {
       },
     })
 
-    return this._cypressEnv.loadCypressEnvFile()
+    return await this._cypressEnv.loadCypressEnvFile()
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {

@@ -95,8 +95,8 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  setCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setCurrentTestingType(type)
+  async setCurrentTestingType (type: TestingType) {
+    return this.ctx.lifecycleManager.setCurrentTestingType(type)
   }
 
   async setCurrentProject (projectRoot: string) {
@@ -105,10 +105,10 @@ export class ProjectActions {
   }
 
   // Temporary: remove after other refactor lands
-  setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
+  async setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
     this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
-    this.ctx.lifecycleManager.setCurrentTestingType('e2e')
+    await this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
   }

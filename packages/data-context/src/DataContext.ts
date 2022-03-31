@@ -429,16 +429,18 @@ export class DataContext {
   async initializeMode () {
     assert(!this.coreData.hasInitializedMode)
     this.coreData.hasInitializedMode = this._config.mode
-    if (this._config.mode === 'run') {
-      await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
-    } else if (this._config.mode === 'open') {
-      await this.initializeOpenMode()
-      if (this.coreData.currentTestingType && await this.lifecycleManager.waitForInitializeSuccess()) {
-        this.lifecycleManager.setCurrentTestingType(this.coreData.currentTestingType)
+    const config = await this.lifecycleManager.initializeConfig()
+
+    if (config) {
+      if (this._config.mode === 'run') {
+        await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
+      } else if (this._config.mode === 'open') {
+        await this.initializeOpenMode()
+        await this.lifecycleManager.setCurrentTestingType(this.coreData.currentTestingType)
         this.lifecycleManager.scaffoldFilesIfNecessary()
+      } else {
+        throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
       }
-    } else {
-      throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
   }
 

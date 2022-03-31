@@ -155,7 +155,7 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.lifecycleManager.setCurrentTestingType(null)
+        await ctx.lifecycleManager.setCurrentTestingType(null)
 
         return {}
       },
@@ -167,7 +167,7 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.setCurrentTestingType(args.testingType)
 
         // if necessary init the wizard for configuration
         if (ctx.coreData.currentTestingType
@@ -616,7 +616,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.project.setRelaunchBrowser(true)
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.setCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
         return true
@@ -632,7 +632,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.setCurrentTestingType(args.testingType)
 
         if (args.isApp) {
           await ctx.actions.project.reconfigureProject()

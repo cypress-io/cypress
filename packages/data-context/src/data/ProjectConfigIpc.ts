@@ -107,7 +107,7 @@ export class ProjectConfigIpc extends EventEmitter {
     return super.emit(evt, ...args)
   }
 
-  loadConfig (): Promise<LoadConfigReply> {
+  async loadConfig (): Promise<LoadConfigReply> {
     return new Promise((resolve, reject) => {
       if (this._childProcess.stdout && this._childProcess.stderr) {
         // manually pipe plugin stdout and stderr for dashboard capture
@@ -157,8 +157,6 @@ export class ProjectConfigIpc extends EventEmitter {
       handler(this)
     }
 
-    const promise = this.registerSetupIpcHandlers()
-
     const overrides = config[testingType] ?? {}
     const mergedConfig = { ...config, ...overrides }
 
@@ -180,7 +178,7 @@ export class ProjectConfigIpc extends EventEmitter {
       testingType,
     })
 
-    return promise
+    return this.registerSetupIpcHandlers()
   }
 
   private registerSetupIpcHandlers (): Promise<SetupNodeEventsReply> {
