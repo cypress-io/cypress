@@ -57,7 +57,7 @@ const cypressConfig = {
   devServerPublicPathRoute: root,
 } as any as Cypress.PluginConfigOptions
 
-describe('#startDevServer', () => {
+describe.skip('#startDevServer', () => {
   it('serves specs via a webpack dev server', async () => {
     const { port, close } = await devServer({
       cypressConfig,

@@ -1,6 +1,8 @@
 import debugLib from 'debug'
+import type { Configuration } from 'webpack-dev-server-3'
+
 import type { WebpackDevServerConfig } from './devServer'
-import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpack'
+import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:start')
@@ -61,7 +63,7 @@ export function createWebpackDevServer (
 function webpackDevServer4 (
   config: CreateFinalWebpackConfig,
   compiler: object,
-  finalWebpackConfig: object,
+  finalWebpackConfig: Record<string, any>,
 ) {
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
@@ -72,6 +74,7 @@ function webpackDevServer4 (
     ...finalWebpackConfig?.devServer,
     devMiddleware: {
       publicPath: devServerPublicPathRoute,
+      stats: finalWebpackConfig.stats ?? 'minimal',
     },
     hot: false,
   }
@@ -87,11 +90,11 @@ function webpackDevServer4 (
 function webpackDevServer3 (
   config: CreateFinalWebpackConfig,
   compiler: object,
-  finalWebpackConfig: object,
+  finalWebpackConfig: Record<string, any>,
 ) {
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
-  const webpackDevServerConfig = {
+  const webpackDevServerConfig: Configuration = {
     // @ts-ignore
     ...finalWebpackConfig.devServer ?? {},
     hot: false,
@@ -99,6 +102,7 @@ function webpackDevServer3 (
     inline: false,
     publicPath: devServerPublicPathRoute,
     noInfo: false,
+    stats: finalWebpackConfig.stats ?? 'minimal',
   }
 
   const server = new WebpackDevServer(compiler, webpackDevServerConfig)

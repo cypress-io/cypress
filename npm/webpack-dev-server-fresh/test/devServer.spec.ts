@@ -11,7 +11,7 @@ const cypressConfig = {
 describe('devServer', () => {
   it('creates a new devServer webpack4, webpackDevServer3', () => {
     const { devServer } = proxyquire('../src/devServer', {
-      './helpers/sourceRelativeWebpack': {
+      './helpers/sourceRelativeWebpackModules': {
         sourceRelativeWebpackModules: () => {
           return createModuleMatrixResult({
             webpack: 4,
@@ -30,7 +30,7 @@ describe('devServer', () => {
 
   it('creates a new devServer webpack4, webpackDevServer4', () => {
     const { devServer } = proxyquire('../src/devServer', {
-      './helpers/sourceRelativeWebpack': {
+      './helpers/sourceRelativeWebpackModules': {
         sourceRelativeWebpackModules: () => {
           return createModuleMatrixResult({
             webpack: 4,
@@ -49,7 +49,7 @@ describe('devServer', () => {
 
   it('creates a new devServer webpack5, webpackDevServer4', () => {
     const { devServer } = proxyquire('../src/devServer', {
-      './helpers/sourceRelativeWebpack': {
+      './helpers/sourceRelativeWebpackModules': {
         sourceRelativeWebpackModules: () => {
           return createModuleMatrixResult({
             webpack: 5,

@@ -4,7 +4,7 @@ import type WebpackDevServer from 'webpack-dev-server'
 import type { Compiler } from 'webpack'
 
 import { createWebpackDevServer } from './createWebpackDevServer'
-import { sourceRelativeWebpackModules } from './helpers/sourceRelativeWebpack'
+import { sourceRelativeWebpackModules } from './helpers/sourceRelativeWebpackModules'
 import type { AddressInfo } from 'net'
 import debugLib from 'debug'
 import type { Server } from 'http'

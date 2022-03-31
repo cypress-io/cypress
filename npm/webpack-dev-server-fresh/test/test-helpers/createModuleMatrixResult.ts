@@ -1,6 +1,5 @@
 import path from 'path'
-
-import { SourceRelativeWebpackResult } from '../../src/helpers/sourceRelativeWebpack'
+import type { SourceRelativeWebpackResult } from '../../src/helpers/sourceRelativeWebpack'
 
 type ModulesDef = {[K in keyof ModuleMatrixResultOptions]: Record<ModuleMatrixResultOptions[K], string>}
 

@@ -19,7 +19,7 @@ module.exports = defineConfig({
       bundler: 'webpack',
       webpackConfig: {
         ...require('./webpack.config.js'),
-        stats: 'none',
+        stats: 'minimal'
       },
     },
   },

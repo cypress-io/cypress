@@ -1,3 +1,6 @@
+/**
+ * @type {import('webpack').Configuration}
+ */
 module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
@@ -12,5 +15,6 @@ module.exports = {
         },
       },
     ],
-  },
+  }
 }
+

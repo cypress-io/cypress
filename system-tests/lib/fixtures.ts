@@ -53,8 +53,9 @@ export function scaffold () {
 
 /**
  * Given a project name, copy the project's test files to the temp dir.
+ * Returns the scaffolded directory
  */
-export async function scaffoldProject (project: string): Promise<void> {
+export async function scaffoldProject (project: string): Promise<string> {
   const to = _path.join(cyTmpDir, project)
   const from = projectFixturePath(project)
 
@@ -76,6 +77,8 @@ export async function scaffoldProject (project: string): Promise<void> {
       throw e
     }
   }
+
+  return to
 }
 
 export function scaffoldWatch () {
