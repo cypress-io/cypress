@@ -150,7 +150,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
     debug('connecting %o', { target })
 
-    cri = CRI({
+    cri = await CRI({
       host,
       port,
       target,
