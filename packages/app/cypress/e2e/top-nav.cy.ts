@@ -239,7 +239,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: `v${pkg.version}`,
-          href: `https://on.cypress.io/changelog#${String(pkg.version).replace('.', '-')}`,
+          href: `https://on.cypress.io/changelog#${pkg.version.replaceAll('.', '-')}`,
         })
       })
     })
