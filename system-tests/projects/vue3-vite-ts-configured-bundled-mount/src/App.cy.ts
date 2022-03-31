@@ -1,5 +1,5 @@
-import { mount } from "cypress/vue"
-import App from "./App.vue"
+import { mount } from 'cypress/vue'
+import App from './App.vue'
 
 describe('<App />', () => {
   it('renders', () => {
