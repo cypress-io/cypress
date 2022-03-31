@@ -433,6 +433,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
+    name: 'cypressBinaryRoot',
+    defaultValue: path.join(__dirname, '..', '..', '..'),
+    validation: validate.isString,
+    isInternal: true,
+  }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     validation: validate.isString,
@@ -454,11 +459,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
     canUpdateDuringTestTime: false,
-  }, {
-    name: 'cypressBinaryRoot',
-    defaultValue: path.join(__dirname, '..', '..', '..'),
-    validation: validate.isString,
-    isInternal: true,
   },
   {
     name: 'morgan',

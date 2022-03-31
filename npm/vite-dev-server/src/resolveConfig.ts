@@ -15,7 +15,7 @@ const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: StartDevServer) => {
   const root = options.config.projectRoot || resolve(process.cwd())
-  const binaryRoot = options.config.cypressBinaryRoot
+  const binaryRoot = options.config.cypressBinaryRoot!
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
@@ -41,6 +41,20 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     root,
     base: `/${options.config.namespace}/src/`,
     configFile,
+    server: {
+      fs: {
+        // https://vitejs.dev/config/#server-fs-allow
+        //
+        // By default, Vite only allows dependency scanning within the user's own project directories.
+        // Cypress will load npm/* projects as external modules from the binary's location.
+        // Because the Cypress binary is not located within the user's node_modules,
+        // Vite needs to be explicitly allowed to traverse the cypressBinaryRoot directory.
+        //
+        // If `resolve.alias` did not map to a cypressBinaryRoot outside of the user's own project,
+        // then this line would not be necessary.
+        allow: [binaryRoot],
+      },
+    },
     resolve: {
       alias: [
         {
