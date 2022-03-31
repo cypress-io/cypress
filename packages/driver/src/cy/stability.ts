@@ -39,25 +39,25 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingMultiDomainFor (href: string): void {
-    if (state('anticipatingMultiDomain') === href) {
+  isAnticipatingCrossOriginRequestFor (href: string): void {
+    if (state('anticipatingCrossOriginRequest') === href) {
       return
     }
 
-    const whenAnticipatingMultiDomain = state('whenAnticipatingMultiDomain')
+    const whenAnticipatingCrossOriginRequest = state('whenAnticipatingCrossOriginRequest')
 
-    if (!!href && whenAnticipatingMultiDomain) {
-      whenAnticipatingMultiDomain()
+    if (!!href && whenAnticipatingCrossOriginRequest) {
+      whenAnticipatingCrossOriginRequest()
     }
 
-    state('anticipatingMultiDomain', href)
+    state('anticipatingCrossOriginRequest', href)
   },
 
-  whenStableOrAnticipatingMultiDomain (fn, command) {
+  whenStableOrAnticipatingCrossOriginRequest (fn, command) {
     const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
 
     // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingMultiDomain') && commandIsSwitchToDomain) || state('isStable') !== false) {
+    if ((!!state('anticipatingCrossOriginRequest') && commandIsSwitchToDomain) || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -70,7 +70,7 @@ export const create = (Cypress, state) => ({
         fulfilled = true
 
         state('whenStable', null)
-        state('whenAnticipatingMultiDomain', null)
+        state('whenAnticipatingCrossOriginRequest', null)
 
         Promise.try(fn)
         .then(resolve)
@@ -79,9 +79,9 @@ export const create = (Cypress, state) => ({
 
       state('whenStable', onSignal)
 
-      // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
+      // We only care to listen for anticipating cross origin request when the command we're waiting for is switchToDomain
       if (commandIsSwitchToDomain) {
-        state('whenAnticipatingMultiDomain', onSignal)
+        state('whenAnticipatingCrossOriginRequest', onSignal)
       }
     })
   },

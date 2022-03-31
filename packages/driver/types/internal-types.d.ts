@@ -39,7 +39,7 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
-    isAnticipatingMultiDomainFor: IStability['isAnticipatingMultiDomainFor']
+    isAnticipatingCrossOriginRequestFor: IStability['isAnticipatingCrossOriginRequestFor']
     fail: (err: Error, options:{ async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
   }

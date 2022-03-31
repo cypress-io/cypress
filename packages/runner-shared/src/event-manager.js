@@ -536,10 +536,10 @@ export const eventManager = {
       // Sync stable if the expected domain has loaded.
       // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
       // established spec bridge, but one that is not the current or next switchToDomain command.
-      if (cy.state('latestActiveDomain') === originPolicy) {
+      if (cy.state('latestActiveOriginPolicy') === originPolicy) {
         // We remain in an anticipating state until either a load even happens or a timeout.
         cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
-        cy.isAnticipatingMultiDomainFor(undefined)
+        cy.isAnticipatingCrossOriginRequestFor(undefined)
         cy.isStable(true, 'load')
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })
