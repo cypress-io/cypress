@@ -152,7 +152,7 @@ describe('Routes', () => {
         const open = () => {
           cfg.pluginsFile = false
 
-          return ctx.lifecycleManager.waitForInitializeSuccess()
+          return ctx.lifecycleManager.initializeConfig()
           .then(() => {
             return Promise.all([
             // open our https server

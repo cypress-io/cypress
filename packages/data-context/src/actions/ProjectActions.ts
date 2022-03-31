@@ -102,6 +102,7 @@ export class ProjectActions {
   async setCurrentProject (projectRoot: string) {
     await this.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+    await this.ctx.lifecycleManager.initializeConfig()
   }
 
   // Temporary: remove after other refactor lands
@@ -182,7 +183,7 @@ export class ProjectActions {
     }
 
     if (args.open) {
-      this.setCurrentProject(projectRoot).catch(this.ctx.onError)
+      this.setCurrentProject(projectRoot)
     }
   }
 
