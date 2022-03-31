@@ -64,7 +64,7 @@
               </a>
               <span
                 v-if="props.gql?.currentProject?.branch"
-                class="font-normal text-gray-500"
+                class="inline-block font-normal text-gray-500 truncate align-top max-w-200px"
               >
                 ({{ props.gql.currentProject.branch }})
               </span>
