@@ -138,7 +138,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /users',
-            indicator: 'successful',
+            indicator: 'passed',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -194,7 +194,7 @@ describe('aliases', () => {
           event: true,
           name: 'xhr',
           // @ts-ignore
-          renderProps: { message: 'GET --- /posts', indicator: 'successful', interceptions: [{ alias: 'getPosts' }] },
+          renderProps: { message: 'GET --- /posts', indicator: 'passed', interceptions: [{ alias: 'getPosts' }] },
         })
 
         addCommand(runner, {
@@ -204,7 +204,7 @@ describe('aliases', () => {
           event: true,
           name: 'xhr',
           // @ts-ignore
-          renderProps: { message: 'GET --- /posts', indicator: 'successful', interceptions: [{ alias: 'getPosts' }] },
+          renderProps: { message: 'GET --- /posts', indicator: 'passed', interceptions: [{ alias: 'getPosts' }] },
         })
 
         addCommand(runner, {
@@ -298,7 +298,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /users',
-            indicator: 'successful',
+            indicator: 'passed',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -316,7 +316,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /users',
-            indicator: 'successful',
+            indicator: 'passed',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -334,7 +334,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /posts',
-            indicator: 'successful',
+            indicator: 'passed',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -414,13 +414,13 @@ describe('aliases', () => {
     describe('without duplicates', () => {
       beforeEach(() => {
         addCommand(runner, {
-          state: 'successful',
+          state: 'passed',
           name: 'get',
           message: 'body',
           alias: 'barAlias',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'successful' },
+          renderProps: { message: '', indicator: 'passed' },
         })
 
         addCommand(runner, {
@@ -461,23 +461,23 @@ describe('aliases', () => {
     describe('with consecutive duplicates', () => {
       beforeEach(() => {
         addCommand(runner, {
-          state: 'successful',
+          state: 'passed',
           name: 'get',
           message: '[attr=\'dropdown\']',
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'successful' },
+          renderProps: { message: '', indicator: 'passed' },
         })
 
         addCommand(runner, {
-          state: 'successful',
+          state: 'passed',
           name: 'get',
           message: 'select',
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'successful' },
+          renderProps: { message: '', indicator: 'passed' },
         })
 
         addCommand(runner, {
@@ -545,33 +545,33 @@ describe('aliases', () => {
     describe('with non-consecutive duplicates', () => {
       beforeEach(() => {
         addCommand(runner, {
-          state: 'successful',
+          state: 'passed',
           name: 'get',
           message: '[attr=\'dropdown\']',
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'successful' },
+          renderProps: { message: '', indicator: 'passed' },
         })
 
         addCommand(runner, {
-          state: 'successful',
+          state: 'passed',
           name: 'get',
           message: '[attr=\'modal\']',
           alias: 'modal',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'successful' },
+          renderProps: { message: '', indicator: 'passed' },
         })
 
         addCommand(runner, {
-          state: 'successful',
+          state: 'passed',
           name: 'get',
           message: '[attr=\'dropdown\']',
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'successful' },
+          renderProps: { message: '', indicator: 'passed' },
         })
 
         addCommand(runner, {
