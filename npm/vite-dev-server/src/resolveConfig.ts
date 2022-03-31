@@ -6,7 +6,7 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve, join } from 'pathe'
-import { mergeConfig } from 'vite'
+import { mergeConfig, searchForWorkspaceRoot } from 'vite'
 import { configFiles } from './constants'
 import { Cypress, CypressInspect } from './plugins/index'
 import type { StartDevServer } from './types'
@@ -52,7 +52,10 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
         //
         // If `resolve.alias` did not map to a cypressBinaryRoot outside of the user's own project,
         // then this line would not be necessary.
-        allow: [binaryRoot],
+        allow: [
+          searchForWorkspaceRoot(process.cwd()),
+          binaryRoot,
+        ],
       },
     },
     resolve: {
