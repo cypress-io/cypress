@@ -29,7 +29,7 @@ import {
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
 
-function getConfigWithDefaults (legacyConfig: any) {
+export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
 
   legacyOptions.forEach(({ defaultValue, name }) => {
@@ -41,7 +41,7 @@ function getConfigWithDefaults (legacyConfig: any) {
   return newConfig
 }
 
-function getDiff (oldConfig: any, newConfig: any) {
+export function getDiff (oldConfig: any, newConfig: any) {
   // get all the values updated during the process
   const result: any = _.reduce(oldConfig, (acc: any, value, key) => {
     if (!_.isEqual(value, newConfig[key])) {
