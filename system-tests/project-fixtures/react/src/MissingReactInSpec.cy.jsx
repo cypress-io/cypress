@@ -1,8 +1,8 @@
-import React from 'react'
+/// <reference types="cypress" />
 import { mount } from '@cypress/react'
 import { App } from './App'
 
-it('renders learn react link', () => {
+it('is missing React in this file', () => {
   mount(<App />)
   cy.get('h1').contains('Hello World')
 })

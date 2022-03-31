@@ -2971,7 +2971,7 @@ declare namespace Cypress {
     //
     // declare global {
     //   namespace Cypress {
-    //     interface DefineConfigOptions {
+    //     interface DefineDevServerConfig {
     //       webpackConfig?: webpack.Configuration
     //     }
     //   }

@@ -9,7 +9,11 @@ const serverRoot = _path.join(__dirname, '../../packages/server/')
 
 export const projects = _path.join(root, 'projects')
 
+export const projectFixtures = _path.join(root, 'project-fixtures')
+
 export const cyTmpDir = _path.join(tempDir, 'cy-projects')
+
+const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true }).filter((f) => f.isDirectory()).map((f) => f.name)
 
 const safeRemove = (path) => {
   try {
@@ -55,6 +59,23 @@ export async function scaffoldProject (project: string): Promise<void> {
   const from = projectFixturePath(project)
 
   await fs.copy(from, to)
+
+  try {
+    const packageJson = require(`${to}/package.json`)
+    const fixtureDir = packageJson.projectFixtureDirectory
+
+    if (fixtureDir) {
+      if (!projectFixtureDirs.includes(fixtureDir)) {
+        throw new Error(`Invalid project fixture directory: ${fixtureDir}, expected one of ${projectFixtureDirs}`)
+      }
+
+      await fs.copy(_path.join(projectFixtures, fixtureDir), to)
+    }
+  } catch (e) {
+    if (e.code !== 'MODULE_NOT_FOUND') {
+      throw e
+    }
+  }
 }
 
 export function scaffoldWatch () {

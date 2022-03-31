@@ -12,7 +12,7 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
-const customProtocolRegex = /^[^:\/]+:\/+/
+const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 

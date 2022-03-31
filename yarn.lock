@@ -39621,7 +39621,7 @@ snap-shot-it@7.9.3:
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.0"
 
-snap-shot-it@7.9.6:
+snap-shot-it@7.9.6, snap-shot-it@^7.9.6:
   version "7.9.6"
   resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.6.tgz#042c168980a1dc3ba7ffe2bb2beeaa8e9512772d"
   integrity sha512-t/ADZfQ8EUk4J76S5cmynye7qg1ecUFqQfANiOMNy0sFmYUaqfx9K/AWwpdcpr3vFsDptM+zSuTtKD0A1EOLqA==

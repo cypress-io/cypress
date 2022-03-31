@@ -55,7 +55,6 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
     // Stop the clock early, no need to run all the tests on a failed build
     result.compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
       if (stats.hasErrors()) {
-        console.log(stats)
         const errors = stats.compilation.errors
 
         devServerConfig.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))

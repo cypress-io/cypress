@@ -6,5 +6,6 @@
     "babel-loader": "^8.2.4",
     "webpack": "^5",
     "webpack-dev-server": "^4"
-  }
+  },
+  "projectFixtureDirectory": "react"
 }
