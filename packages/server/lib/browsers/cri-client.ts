@@ -101,7 +101,7 @@ const maybeDebugCdpMessages = (cri) => {
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = (target: string, onAsynchronousError: Function, host?: string, port?: number): Promise<CRIWrapper.Client> => {
+export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number): Promise<CRIWrapper.Client> => {
   const subscriptions: {eventName: CRIWrapper.EventName, cb: Function}[] = []
   let enqueuedCommands: {command: CRIWrapper.Command, params: any, p: DeferredPromise }[] = []
 
@@ -111,7 +111,7 @@ export const create = (target: string, onAsynchronousError: Function, host?: str
   let cri
   let client: CRIWrapper.Client
 
-  const reconnect = () => {
+  const reconnect = async () => {
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -122,8 +122,9 @@ export const create = (target: string, onAsynchronousError: Function, host?: str
       return
     }
 
-    return connect()
-    .then(() => {
+    try {
+      await connect()
+
       debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
       subscriptions.forEach((sub) => {
         cri.on(sub.eventName, sub.cb)
@@ -135,81 +136,78 @@ export const create = (target: string, onAsynchronousError: Function, host?: str
       })
 
       enqueuedCommands = []
-    })
-    .catch((err) => {
+    } catch (err) {
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
       // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
       cdpError.isFatalApiErr = true
       onAsynchronousError(cdpError)
-    })
+    }
   }
 
-  const connect = () => {
+  const connect = async () => {
     cri?.close()
 
     debug('connecting %o', { target })
 
-    return CRI({
+    cri = await CRI({
       host,
       port,
       target,
       local: true,
     })
-    .then((newCri) => {
-      cri = newCri
-      connected = true
 
-      maybeDebugCdpMessages(cri)
+    connected = true
 
-      // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
-      cri._notifier.on('disconnect', reconnect)
-    })
+    maybeDebugCdpMessages(cri)
+
+    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
+    cri._notifier.on('disconnect', reconnect)
   }
 
-  return connect()
-  .then(() => {
-    client = {
-      targetId: target,
-      send: async (command, params?) => {
-        const enqueue = () => {
-          return new Promise((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
-          })
+  await connect()
+
+  client = {
+    targetId: target,
+    async send (command: CRIWrapper.Command, params?: object) {
+      const enqueue = () => {
+        return new Promise((resolve, reject) => {
+          enqueuedCommands.push({ command, params, p: { resolve, reject } })
+        })
+      }
+
+      if (connected) {
+        try {
+          return await cri.send(command, params)
+        } catch (err) {
+          if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
+            throw err
+          }
+
+          debug('encountered closed websocket on send %o', { command, params, err })
+
+          const p = enqueue()
+
+          await reconnect()
+
+          return p
         }
+      }
 
-        if (connected) {
-          return cri.send(command, params)
-          .catch((err) => {
-            if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
-              throw err
-            }
+      return enqueue()
+    },
+    on (eventName, cb) {
+      subscriptions.push({ eventName, cb })
+      debug('registering CDP on event %o', { eventName })
 
-            debug('encountered closed websocket on send %o', { command, params, err })
+      return cri.on(eventName, cb)
+    },
+    close () {
+      closed = true
 
-            const p = enqueue()
+      return cri.close()
+    },
+  }
 
-            reconnect()
-
-            return p
-          })
-        }
-
-        return enqueue()
-      },
-      on (eventName, cb) {
-        subscriptions.push({ eventName, cb })
-        debug('registering CDP on event %o', { eventName })
-
-        return cri.on(eventName, cb)
-      },
-      close () {
-        closed = true
-
-        return cri.close()
-      },
-    }
-
-    return client
-  })
+  return client
 }
