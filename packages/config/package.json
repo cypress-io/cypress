@@ -9,7 +9,7 @@
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register test/unit/**/*.spec.ts --exit"
