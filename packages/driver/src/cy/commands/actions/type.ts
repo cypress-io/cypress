@@ -274,6 +274,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
+      const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
 
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
@@ -342,7 +343,7 @@ export default function (Commands, Cypress, cy, state, config) {
               // After Firefox 98,
               // it sends a click event automatically if the element is a <button>
               // it does not if the element is an <input>
-              (Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 98 && $elements.isInput(event.target))
+              (!isFirefoxBefore98 && $elements.isInput(event.target))
             ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
@@ -427,7 +428,7 @@ export default function (Commands, Cypress, cy, state, config) {
               // After Firefox 98,
               // it sends a click event automatically if the element is a <button>
               // it does not if the element is an <input>
-              (Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 98 && $elements.isInput(el))) {
+              (!isFirefoxBefore98 && $elements.isInput(el))) {
               fireClickEvent(el)
             }
           }
