@@ -3,6 +3,7 @@ import path from 'path'
 import { fork } from 'child_process'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
+import _ from 'lodash'
 import type { DataContext } from '..'
 import {
   cleanUpIntegrationFolder,
@@ -23,14 +24,46 @@ import {
   getComponentFolder,
   getIntegrationTestFilesGlobs,
   getSpecPattern,
+  legacyOptions,
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
 
+function getConfigWithDefaults (legacyConfig: any) {
+  const newConfig = _.cloneDeep(legacyConfig)
+
+  legacyOptions.forEach(({ defaultValue, name }) => {
+    if (defaultValue !== undefined && legacyConfig[name] === undefined) {
+      newConfig[name] = typeof defaultValue === 'function' ? defaultValue() : defaultValue
+    }
+  })
+
+  return newConfig
+}
+
+function getDiff (oldConfig: any, newConfig: any) {
+  // get all the values updated during the process
+  const result: any = _.reduce(oldConfig, (acc: any, value, key) => {
+    if (!_.isEqual(value, newConfig[key])) {
+      acc[key] = newConfig[key]
+    }
+
+    return acc
+  }, {})
+
+  // get all the values added during the process
+  return _.reduce(newConfig, (acc: any, value, key) => {
+    // their key is in the new config but not in the old config
+    if (!oldConfig.hasOwnProperty(key)) {
+      acc[key] = value
+    }
+
+    return acc
+  }, result)
+}
+
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
-
-  legacyConfig.env = legacyConfig.env ?? {}
 
   return new Promise((resolve, reject) => {
     // couldn't find a pluginsFile
@@ -51,12 +84,23 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
     const ipc = new LegacyPluginsIpc(fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions))
 
+    const legacyConfigWithDefaults = getConfigWithDefaults(legacyConfig)
+
     ipc.on('ready', () => {
-      ipc.send('loadLegacyPlugins', legacyConfig)
+      ipc.send('loadLegacyPlugins', legacyConfigWithDefaults)
     })
 
     ipc.on('loadLegacyPlugins:reply', (modifiedLegacyConfig) => {
-      resolve(modifiedLegacyConfig)
+      const diff = getDiff(legacyConfigWithDefaults, modifiedLegacyConfig)
+
+      // if env is updated by plugins, avoid adding it to the config file
+      if (diff.env) {
+        delete diff.env
+      }
+
+      const legacyConfigWithChanges = _.merge(legacyConfig, diff)
+
+      resolve(legacyConfigWithChanges)
       ipc.childProcess.kill()
     })
 
