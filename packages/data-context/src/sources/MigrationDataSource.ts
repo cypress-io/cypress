@@ -32,6 +32,7 @@ export type LegacyCypressConfigJson = Partial<{
   testFiles: string | string[]
   ignoreTestFiles: string | string[]
   env: { [key: string]: any }
+  [index: string]: any
 }>
 
 export interface MigrationFile {
