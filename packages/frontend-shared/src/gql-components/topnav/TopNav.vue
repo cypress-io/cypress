@@ -22,7 +22,7 @@
     >
       <div class="font-medium">
         <ExternalLink
-          :href="`https://on.cypress.io/changelog#${String(versions.latest.version).replace('.', '-')}`"
+          :href="`https://on.cypress.io/changelog#${versions.latest.version.replaceAll('.', '-')}`"
           class="text-indigo-500"
           data-cy="latest-version"
         >
@@ -58,7 +58,7 @@
     >
       <div class="whitespace-nowrap">
         <ExternalLink
-          :href="`https://on.cypress.io/changelog#${String(versions.current.version).replace('.', '-')}`"
+          :href="`https://on.cypress.io/changelog#${versions.current.version.replaceAll('.', '-')}`"
           class="font-medium text-amber-800"
           data-cy="current-version"
         >
@@ -88,7 +88,7 @@
 
   <ExternalLink
     v-else-if="versions"
-    :href="`https://on.cypress.io/changelog#${String(versions.current.version).replace('.', '-')}`"
+    :href="`https://on.cypress.io/changelog#${versions.current.version.replaceAll('.', '-')}`"
     class="flex font-medium outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
