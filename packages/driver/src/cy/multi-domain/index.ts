@@ -21,7 +21,7 @@ const normalizeDomain = (domain) => {
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
 
-  const communicator = Cypress.multiDomainCommunicator
+  const communicator = Cypress.multiOriginCommunicator
 
   communicator.on('delaying:html', (request) => {
     // when a secondary domain is detected by the proxy, it holds it up

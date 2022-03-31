@@ -537,7 +537,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           const remoteLocation = this.getRemoteLocation()
 
           cy.state('autOrigin', remoteLocation.originPolicy)
-          this.Cypress.multiDomainCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
+          this.Cypress.multiOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
 
           signalStable()
         } catch (err: any) {

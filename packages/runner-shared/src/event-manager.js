@@ -135,7 +135,7 @@ export const eventManager = {
     })
 
     ws.on('cross:domain:delaying:html', (request) => {
-      Cypress.multiDomainCommunicator.emit('delaying:html', request)
+      Cypress.multiOriginCommunicator.emit('delaying:html', request)
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -323,9 +323,9 @@ export const eventManager = {
     })
 
     // The window.top should not change between test reloads, and we only need to bind the message event once
-    // Forward all message events to the current instance of the multi-domain communicator
+    // Forward all message events to the current instance of the multi-origin communicator
     window.top?.addEventListener('message', ({ data, source }) => {
-      Cypress?.multiDomainCommunicator.onMessage({ data, source })
+      Cypress?.multiOriginCommunicator.onMessage({ data, source })
     }, false)
   },
 
@@ -520,21 +520,21 @@ export const eventManager = {
     })
 
     Cypress.on('test:before:run', (...args) => {
-      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
+      Cypress.multiOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
 
     Cypress.on('test:before:run:async', (...args) => {
-      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
+      Cypress.multiOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     // Inform all spec bridges that the primary domain has begun to unload.
     Cypress.on('window:before:unload', () => {
-      Cypress.multiDomainCommunicator.toAllSpecBridges('before:unload')
+      Cypress.multiOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
-    Cypress.multiDomainCommunicator.on('window:load', ({ url }, originPolicy) => {
-      // Sync stable if the expected domain has loaded.
-      // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
+    Cypress.multiOriginCommunicator.on('window:load', ({ url }, originPolicy) => {
+      // Sync stable if the expected origin has loaded.
+      // Only listen to window load events from the most recent secondary origin, This prevents nondeterminism in the case where we redirect to an already
       // established spec bridge, but one that is not the current or next switchToDomain command.
       if (cy.state('latestActiveDomain') === originPolicy) {
         // We remain in an anticipating state until either a load even happens or a timeout.
@@ -544,55 +544,55 @@ export const eventManager = {
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })
         // Re-broadcast to any other specBridges.
-        Cypress.multiDomainCommunicator.toAllSpecBridges('window:load', { url })
+        Cypress.multiOriginCommunicator.toAllSpecBridges('window:load', { url })
       }
     })
 
-    Cypress.multiDomainCommunicator.on('before:unload', () => {
+    Cypress.multiOriginCommunicator.on('before:unload', () => {
       // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
       // Unstable is unstable regardless of where it initiated from.
       cy.state('isStable', false)
       // Re-broadcast to any other specBridges.
-      Cypress.multiDomainCommunicator.toAllSpecBridges('before:unload')
+      Cypress.multiOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
-    Cypress.multiDomainCommunicator.on('expect:domain', (originPolicy) => {
+    Cypress.multiOriginCommunicator.on('expect:domain', (originPolicy) => {
       localBus.emit('expect:domain', originPolicy)
     })
 
-    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, originPolicy) => {
+    Cypress.multiOriginCommunicator.on('viewport:changed', (viewport, originPolicy) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge(originPolicy, 'viewport:changed:end')
+        Cypress.multiOriginCommunicator.toSpecBridge(originPolicy, 'viewport:changed:end')
       }
 
-      Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
+      Cypress.multiOriginCommunicator.emit('sync:viewport', viewport)
       localBus.emit('viewport:changed', viewport, callback)
     })
 
-    Cypress.multiDomainCommunicator.on('before:screenshot', (config, originPolicy) => {
+    Cypress.multiOriginCommunicator.on('before:screenshot', (config, originPolicy) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge(originPolicy, 'before:screenshot:end')
+        Cypress.multiOriginCommunicator.toSpecBridge(originPolicy, 'before:screenshot:end')
       }
 
       handleBeforeScreenshot(config, callback)
     })
 
-    Cypress.multiDomainCommunicator.on('url:changed', ({ url }) => {
+    Cypress.multiOriginCommunicator.on('url:changed', ({ url }) => {
       localBus.emit('url:changed', url)
     })
 
-    Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
+    Cypress.multiOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
 
     const crossOriginLogs = {}
 
-    Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
+    Cypress.multiOriginCommunicator.on('log:added', (attrs) => {
       // Create a new local log representation of the cross origin log.
       // It will be attached to the current command.
       // We also keep a reference to it to update it in the future.
       crossOriginLogs[attrs.id] = Cypress.log(attrs)
     })
 
-    Cypress.multiDomainCommunicator.on('log:changed', (attrs) => {
+    Cypress.multiOriginCommunicator.on('log:changed', (attrs) => {
       // Retrieve the referenced log and update it.
       const log = crossOriginLogs[attrs.id]
 
@@ -643,7 +643,7 @@ export const eventManager = {
       // but we want to be aggressive here
       // and force GC early and often
       Cypress.removeAllListeners()
-      Cypress.multiDomainCommunicator.removeAllListeners()
+      Cypress.multiOriginCommunicator.removeAllListeners()
 
       localBus.emit('restart')
     })
@@ -693,8 +693,8 @@ export const eventManager = {
   },
 
   notifyCrossDomainBridgeReady (originPolicy) {
-    // Any multi-domain event appends the domain as the third parameter and we do the same here for this short circuit
-    Cypress.multiDomainCommunicator.emit('bridge:ready', undefined, originPolicy)
+    // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
+    Cypress.multiOriginCommunicator.emit('bridge:ready', undefined, originPolicy)
   },
 
   focusTests () {

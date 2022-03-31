@@ -42,7 +42,7 @@ export default (Commands, Cypress, cy, state) => {
   currentViewport = currentViewport || defaultViewport
 
   // sync the global viewport state when the viewport has changed in the primary or secondary
-  Cypress.multiDomainCommunicator.on('sync:viewport', (viewport) => {
+  Cypress.multiOriginCommunicator.on('sync:viewport', (viewport) => {
     currentViewport = viewport
     state(viewport)
   })

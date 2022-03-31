@@ -133,7 +133,7 @@ export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: 
   return valueToSanitize
 }
 
-export const reifyCrossDomainError = (serializedError: any, userInvocationStack: string) => {
+export const reifySerializedError = (serializedError: any, userInvocationStack: string) => {
   // we have no idea what type the error this is... could be 'undefined', a plain old object, or something else entirely
 
   let reifiedError = $errUtils.errByPath('switchToDomain.failed_to_serialize_or_map_thrown_value')
