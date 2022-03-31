@@ -138,7 +138,7 @@ describe.skip('lib/project-base', () => {
     const supportFile = 'foo/bar/baz'
 
     beforeEach(function () {
-      sinon.stub(ctx.lifecycleManager, 'getInitialFullConfig').withArgs({ foo: 'bar', configFile: 'cypress.config.js' })
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').withArgs({ foo: 'bar', configFile: 'cypress.config.js' })
       .resolves({ baz: 'quux', supportFile, browsers: [] })
     })
 

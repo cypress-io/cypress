@@ -15,7 +15,7 @@ describe('lib/files', () => {
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return ctx.lifecycleManager.getInitialFullConfig().then((cfg) => {
+    return ctx.lifecycleManager.getFullInitialConfig().then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
 

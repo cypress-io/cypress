@@ -27,7 +27,7 @@ describe('lib/fixture', () => {
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return ctx.lifecycleManager.getInitialFullConfig()
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
@@ -180,7 +180,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
 
       await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
 
-      return ctx.lifecycleManager.getInitialFullConfig()
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((result) => {
