@@ -11,6 +11,7 @@ import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
+import * as cors from '@packages/network/lib/cors'
 
 const $ = $Cypress.$
 const ws = client.connect({
@@ -531,12 +532,13 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('before:unload')
     })
 
-    Cypress.multiDomainCommunicator.on('window:load', ({ url }, domain) => {
+    Cypress.multiDomainCommunicator.on('window:load', ({ url }, originPolicy) => {
       // Sync stable if the expected domain has loaded.
       // Only listen to window load events from the most recent secondary domain, This prevents nondeterminism in the case where we redirect to an already
       // established spec bridge, but one that is not the current or next switchToDomain command.
-      if (cy.state('latestActiveDomain') === domain) {
+      if (cy.state('latestActiveDomain') === originPolicy) {
         // We remain in an anticipating state until either a load even happens or a timeout.
+        cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
         cy.isAnticipatingMultiDomainFor(undefined)
         cy.isStable(true, 'load')
         // Prints out the newly loaded URL
@@ -554,23 +556,22 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('before:unload')
     })
 
-    Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
-      localBus.emit('expect:domain', domain)
+    Cypress.multiDomainCommunicator.on('expect:domain', (originPolicy) => {
+      localBus.emit('expect:domain', originPolicy)
     })
 
-    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, domain) => {
+    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, originPolicy) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'viewport:changed:end')
+        Cypress.multiDomainCommunicator.toSpecBridge(originPolicy, 'viewport:changed:end')
       }
 
-      // TODO: Do we want to use the multiDomainCommunicator to send these types of messages or Cypress itself?
       Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
       localBus.emit('viewport:changed', viewport, callback)
     })
 
-    Cypress.multiDomainCommunicator.on('before:screenshot', (config, domain) => {
+    Cypress.multiDomainCommunicator.on('before:screenshot', (config, originPolicy) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'before:screenshot:end')
+        Cypress.multiDomainCommunicator.toSpecBridge(originPolicy, 'before:screenshot:end')
       }
 
       handleBeforeScreenshot(config, callback)
@@ -691,9 +692,9 @@ export const eventManager = {
     ws.emit('spec:changed', specFile)
   },
 
-  notifyCrossDomainBridgeReady (domain) {
+  notifyCrossDomainBridgeReady (originPolicy) {
     // Any multi-domain event appends the domain as the third parameter and we do the same here for this short circuit
-    Cypress.multiDomainCommunicator.emit('bridge:ready', undefined, domain)
+    Cypress.multiDomainCommunicator.emit('bridge:ready', undefined, originPolicy)
   },
 
   focusTests () {

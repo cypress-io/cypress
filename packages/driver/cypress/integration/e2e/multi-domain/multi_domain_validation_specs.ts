@@ -5,7 +5,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('localhost', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://localhost/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ localhost') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://localhost') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -15,7 +15,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('127.0.0.1', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://127.0.0.1/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ 127.0.0.1') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://127.0.0.1') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -26,7 +26,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('0000:0000:0000:0000:0000:0000:0000:0001', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://[::1]/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ [::1]') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://[::1]') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -36,7 +36,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('はじめよう.みんな', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://xn--p8j9a0d9c9a.xn--q9jyb4c/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ xn--p8j9a0d9c9a.xn--q9jyb4c') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://xn--p8j9a0d9c9a.xn--q9jyb4c') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -46,7 +46,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('http://foobar1.com:3500', () => {})
       cy.then(() => {
         const expectedSrc = `http://foobar1.com:3500/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar1.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar1.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -56,7 +56,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('https://foobar2.com:3500', () => {})
       cy.then(() => {
         const expectedSrc = `https://foobar2.com:3500/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar2.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar2.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -66,7 +66,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('foobar3.com:3500', () => {})
       cy.then(() => {
         const expectedSrc = `https://foobar3.com:3500/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar3.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar3.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -76,7 +76,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('http://foobar4.com', () => {})
       cy.then(() => {
         const expectedSrc = `http://foobar4.com/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar4.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar4.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -86,7 +86,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('app.foobar5.com', () => {})
       cy.then(() => {
         const expectedSrc = `https://foobar5.com/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar5.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar5.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -96,7 +96,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('foobar6.com', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://foobar6.com/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar6.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar6.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -106,7 +106,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('app.foobar.herokuapp.com', () => {})
       cy.then(() => {
         const expectedSrc = `https://foobar.herokuapp.com/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ foobar.herokuapp.com') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar.herokuapp.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -116,9 +116,71 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('machine-name', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://machine-name/__cypress/multi-domain-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ machine-name') as HTMLIFrameElement
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://machine-name') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
+    it('finds the right spec bridge with a subdomain', () => {
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.window().then((win) => {
+        win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.get('[data-cy="username"]').type('TJohnson')
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.get('[data-cy="welcome"]')
+      .invoke('text')
+      .should('equal', 'Welcome TJohnson')
+    })
+
+    it('uses switchToDomain twice', () => {
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+      cy.switchToDomain('http://idp.com:3500', () => {
+        cy.get('[data-cy="username"]').type('BJohnson')
+        cy.get('[data-cy="login"]').click()
+      }) // Trailing edge wait, waiting to return to the primary domain
+
+      // Verify that the user has logged in on /siteA
+      cy.get('[data-cy="welcome"]')
+      .invoke('text')
+      .should('equal', 'Welcome BJohnson')
+
+      cy.get('[data-cy="logout"]').click()
+
+      cy.window().then((win) => {
+        win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.get('[data-cy="username"]').type('TJohnson')
+        cy.get('[data-cy="login"]').click()
+      }) // Trailing edge wait, waiting to return to the primary domain
+
+      // Verify that the user has logged in on /siteA
+      cy.get('[data-cy="welcome"]')
+      .invoke('text')
+      .should('equal', 'Welcome TJohnson')
+    })
+
+    it('creates a spec bridge for https://idp.com:3502', () => {
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.switchToDomain('idp.com:3502', () => {
+        cy.visit('https://www.idp.com:3502/fixtures/auth/index.html')
+        cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
+      })
+    })
+
+    it('creates a spec bridge for http://idp.com:3500', () => {
+      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.switchToDomain('http://idp.com:3500', () => {
+        cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+        cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
       })
     })
   })

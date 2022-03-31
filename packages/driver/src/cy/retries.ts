@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../cypress/error_utils'
+import * as cors from '@packages/network/lib/cors'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
@@ -73,6 +74,18 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
       }).message
 
       const retryErrProps = modifyErrMsg(error, prependMsg, (msg1, msg2) => {
+        const autOrigin = Cypress.state('autOrigin')
+        const commandOrigin = window.location.origin
+
+        if (autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+          const appendMsg = errByPath('miscellaneous.cross_origin_command', {
+            commandOrigin,
+            autOrigin,
+          }).message
+
+          return `${msg2}${msg1}\n\n${appendMsg}`
+        }
+
         return `${msg2}${msg1}`
       })
 

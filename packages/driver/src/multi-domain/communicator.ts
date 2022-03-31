@@ -2,6 +2,7 @@ import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import { preprocessConfig, preprocessEnv } from '../util/config'
 import { preprocessForSerialization, reifyCrossDomainError } from '../util/serialization'
+import { $Location } from '../cypress/location'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
@@ -38,14 +39,14 @@ export class PrimaryDomainCommunicator extends EventEmitter {
       // where we need to set the crossDomainDriverWindow to source to
       // communicate back to the iframe
       if (messageName === 'bridge:ready' && source) {
-        this.crossDomainDriverWindows[data.domain] = source as Window
+        this.crossDomainDriverWindows[data.originPolicy] = source as Window
       }
 
       if (data?.data?.err) {
         data.data.err = reifyCrossDomainError(data.data.err, this.userInvocationStack as string)
       }
 
-      this.emit(messageName, data.data, data.domain)
+      this.emit(messageName, data.data, data.originPolicy)
 
       return
     }
@@ -169,14 +170,16 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
-    debug('<= to Primary ', event, data, document.domain)
+    const { originPolicy } = $Location.create(window.location.href)
+
+    debug('<= to Primary ', event, data, originPolicy)
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
       window.top?.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,
-        domain: document.domain,
+        originPolicy,
       }, '*')
     })
   }

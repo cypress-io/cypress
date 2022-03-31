@@ -892,6 +892,9 @@ export default {
     retry_timed_out ({ ms }) {
       return `Timed out retrying after ${ms}ms: `
     },
+    cross_origin_command ({ commandOrigin, autOrigin }) {
+      return `The command was expected to run against origin: \`${commandOrigin }\` but the application is at origin: \`${autOrigin}\`.`
+    },
   },
 
   mocha: {
@@ -997,7 +1000,7 @@ export default {
         A command that triggers cross origin navigation must be immediately followed by a ${cmd('switchToDomain')} command:
 
         \`\`\`
-        cy.switchToDomain('${crossOriginUrl.origin}', () => {
+        cy.switchToDomain('${crossOriginUrl.originPolicy}', () => {
           <commands targeting ${crossOriginUrl.origin} go here>
         })
         \`\`\`
