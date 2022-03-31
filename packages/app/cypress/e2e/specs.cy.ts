@@ -474,17 +474,6 @@ describe('App: Index', () => {
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
           .should('be.visible')
         })
-
-        cy.findAllByTestId('card').eq(1).as('StoryCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.component.importFromStory.header,
-          }).should('be.visible')
-          .and('not.be.disabled')
-
-          cy.contains(defaultMessages.createSpec.component.importFromStory.description)
-          .should('be.visible')
-        })
       })
 
       it('shows create first spec page with create from component and create from story options', () => {
@@ -521,109 +510,6 @@ describe('App: Index', () => {
         cy.get('@CloseDialogButton').click()
         cy.findByRole('dialog').should('not.exist')
       })
-
-      context('create from story', () => {
-        beforeEach(() => {
-          cy.get('@StoryCard').click()
-
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.component.importFromStory.header,
-          }).as('CreateFromStoryDialog')
-
-          cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
-        })
-
-        it('shows story dialog that can be dismissed with Close (x) button press', () => {
-          cy.get('@DialogCloseButton').click()
-          cy.findByRole('dialog').should('not.exist')
-        })
-
-        it('shows input for file extension filter', () => {
-          cy.get('@CreateFromStoryDialog').within(() => {
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-            cy.percySnapshot('Create from story generator')
-            cy.findByRole('button', { name: '*.stories.*' }).click()
-            cy.percySnapshot('File list search dropdown')
-            cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
-            .as('ExtensionInput')
-            .clear()
-            .type('foobar')
-
-            cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
-            cy.percySnapshot('No Results')
-
-            cy.findByTestId('no-results-clear').click()
-
-            cy.get('@ExtensionInput').should('have.value', '*.stories.*')
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-          })
-        })
-
-        it('shows input for file name filter', () => {
-          cy.get('@CreateFromStoryDialog').within(() => {
-            cy.findByLabelText('file-name-input').as('FileNameInput')
-            .should('have.value', '')
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-
-            cy.get('@FileNameInput')
-            .type('foobar')
-
-            cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
-
-            cy.findByTestId('no-results-clear').click()
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-
-            cy.get('@FileNameInput')
-            .type('Button.stories.jsx')
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 of 1 Matches')
-            cy.percySnapshot()
-          })
-        })
-
-        it('shows success modal when spec is created from story', () => {
-          cy.get('@CreateFromStoryDialog').within(() => {
-            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
-
-            // TODO: assert visibility of secondary text on hover/focus when
-            // item is made keyboard accessible
-            // https://cypress-io.atlassian.net/browse/UNIFY-864
-            // cy.get('@NewSpecFile).focus()
-            // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
-
-            cy.get('@NewSpecFile').click()
-          })
-
-          cy.percySnapshot()
-
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.successPage.header,
-          }).as('SuccessDialog').within(() => {
-            cy.findByRole('button', { name: 'Close' }).should('be.visible')
-            cy.contains(getPathForPlatform('src/stories/Button.stories.cy.jsx')).should('be.visible')
-
-            cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/${getRunnerHref('src/stories/Button.stories.cy.jsx')}`)
-
-            cy.findByRole('button', { name: 'Create another spec' }).click()
-          })
-
-          // 'Create a new spec' dialog presents with options when user indicates they want to create
-          // another spec.
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.newSpecModalTitle,
-          }).within(() => {
-            cy.findAllByTestId('card').eq(0)
-
-            // the storybook card remains enabled here
-            cy.contains('button', defaultMessages.createSpec.component.importFromStory.header)
-            .should('not.be.disabled')
-          })
-        })
-      })
     })
 
     context('project without storybook', () => {
@@ -644,17 +530,6 @@ describe('App: Index', () => {
           .and('not.be.disabled')
 
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
-          .should('be.visible')
-        })
-
-        cy.findAllByTestId('card').eq(1).as('StoryCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.component.importFromStory.header,
-          }).should('be.visible')
-          .and('be.disabled')
-
-          cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription)
           .should('be.visible')
         })
       })
@@ -767,10 +642,6 @@ describe('App: Index', () => {
           // another spec.
           cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
             cy.findAllByTestId('card').eq(0)
-
-            // the storybook card remains disabled here
-            cy.contains('button', defaultMessages.createSpec.component.importFromStory.header)
-            .should('be.disabled')
           })
         })
 
@@ -901,9 +772,6 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description)
-
-          cy.findAllByTestId('card').eq(1)
-          .and('contain', defaultMessages.createSpec.component.importFromStory.description)
         })
       })
 
@@ -957,11 +825,6 @@ describe('App: Index', () => {
 
       it('shows create first spec page with create from story option', () => {
         cy.findByRole('button', { name: 'New Spec', exact: false }).click()
-
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
-          cy.findAllByTestId('card').eq(1)
-          .and('contain', defaultMessages.createSpec.component.importFromStory.description).click()
-        })
 
         cy.get('[data-cy=file-list-row]').first().click()
 
@@ -1032,30 +895,6 @@ describe('App: Index', () => {
 
           expect(spec).to.exist
         }, { path: getPathForPlatform('src/stories/Button.cy.jsx') })
-      })
-
-      it('should generate spec from story', () => {
-        cy.findByTestId('new-spec-button').click()
-
-        cy.contains('Create from story').click()
-        const storyGlob = '*.stories.*'
-
-        cy.findByTestId('file-match-button').contains(storyGlob)
-        cy.percySnapshot('Story Generator')
-        checkCodeGenCandidates(['Button.stories.jsx'])
-
-        cy.contains('Button.stories.jsx').click()
-        cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.stories.cy.js')).click()
-        cy.contains('composeStories')
-        cy.contains('ExampleWithLongName')
-        cy.percySnapshot('Story Generator Success')
-
-        cy.withCtx(async (ctx, o) => {
-          const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], []))
-          .find((spec) => spec.relative === o.path)
-
-          expect(spec).to.exist
-        }, { path: getPathForPlatform('src/stories/Button.stories.cy.jsx') })
       })
     })
   })
