@@ -155,19 +155,19 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        await ctx.lifecycleManager.setCurrentTestingType(null)
+        await ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}
       },
     })
 
-    t.field('setCurrentTestingType', {
+    t.field('setAndLoadCurrentTestingType', {
       type: 'Query',
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        await ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         // if necessary init the wizard for configuration
         if (ctx.coreData.currentTestingType
@@ -616,7 +616,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.project.setRelaunchBrowser(true)
-        await ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
         return true
@@ -632,7 +632,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
-        await ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         if (args.isApp) {
           await ctx.actions.project.reconfigureProject()

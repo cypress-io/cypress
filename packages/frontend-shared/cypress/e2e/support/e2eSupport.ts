@@ -262,7 +262,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
           return
         })
 
-        await ctx.actions.project.setCurrentTestingType(o.mode)
+        await ctx.actions.project.setAndLoadCurrentTestingType(o.mode)
 
         await isInitialized.promise
 

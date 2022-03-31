@@ -70,7 +70,8 @@ describe('lib/config', () => {
       }
 
       this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
-      await this.ctx.lifecycleManager.setCurrentTestingType('e2e')
+      await this.ctx.lifecycleManager.initializeConfig()
+      this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     })
 
     it('sets projectRoot', function () {

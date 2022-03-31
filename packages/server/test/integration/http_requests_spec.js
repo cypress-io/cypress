@@ -189,7 +189,7 @@ describe('Routes', () => {
             ])
           })
           .then(() => {
-            return ctx.lifecycleManager.setCurrentTestingType('e2e')
+            ctx.lifecycleManager.setCurrentTestingType('e2e')
           })
         }
 

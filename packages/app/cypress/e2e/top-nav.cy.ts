@@ -28,7 +28,13 @@ describe('App Top Nav Workflows', () => {
       it('shows current browser when launched with browser option', () => {
         cy.findBrowsers()
         cy.openProject('launchpad', ['--browser', 'firefox'])
+
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
+        })
+
         cy.startAppServer()
+
         cy.visitApp()
 
         cy.findByTestId('top-nav-active-browser-icon')

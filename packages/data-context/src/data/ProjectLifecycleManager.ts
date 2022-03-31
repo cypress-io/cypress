@@ -280,7 +280,7 @@ export class ProjectLifecycleManager {
         return await this._configManager.loadTestingType()
       }
 
-      return await this.setCurrentTestingType(null)
+      return await this.setAndLoadCurrentTestingType(null)
     } catch (error) {
       this.onLoadError(error)
 
@@ -401,11 +401,28 @@ export class ProjectLifecycleManager {
   }
 
   /**
+   * Sets the testing type, but does load the config for the testing type. Useful for testing without
+   * going through the setup node events process
+   */
+  setCurrentTestingType (testingType: TestingType | null) {
+    this.ctx.update((d) => {
+      d.currentTestingType = testingType
+      d.wizard.chosenBundler = null
+      d.wizard.chosenFramework = null
+    })
+
+    this._currentTestingType = testingType
+
+    assert(this._configManager, 'Cannot set a testing type without a config manager')
+    this._configManager.setTestingType(testingType)
+  }
+
+  /**
    * Setting the testing type should automatically handle cleanup of existing
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  async setCurrentTestingType (testingType: TestingType | null): Promise<FullConfig | null> {
+  async setAndLoadCurrentTestingType (testingType: TestingType | null): Promise<FullConfig | null> {
     try {
       this.ctx.update((d) => {
         d.currentTestingType = testingType
@@ -656,10 +673,10 @@ export class ProjectLifecycleManager {
     }
 
     if (testingType) {
-      return await this.setCurrentTestingType(testingType)
+      return await this.setAndLoadCurrentTestingType(testingType)
     }
 
-    return await this.setCurrentTestingType('e2e')
+    return await this.setAndLoadCurrentTestingType('e2e')
   }
 
   private configFileWarningCheck () {
