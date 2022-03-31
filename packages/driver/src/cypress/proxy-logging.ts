@@ -392,7 +392,7 @@ export default class ProxyLogging {
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
-    proxyRequest.log = this.Cypress.log(logConfig).snapshot('request')
+    proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
 
