@@ -1,0 +1,37 @@
+{
+  "name": "@cypress/webpack-dev-server-fresh",
+  "version": "0.0.0-development",
+  "description": "Launches Webpack Dev Server for Component Testing",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc || echo 'built with type errors'",
+    "dev": "tsc --watch",
+    "postinstall": "yarn build",
+    "cypress:run-cypress-in-cypress": "cross-env HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
+    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
+    "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project .",
+    "test": "yarn test-unit",
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
+  },
+  "dependencies": {
+    "@types/webpack-dev-server-3": "npm:@types/webpack-dev-server@^3",
+    "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
+    "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
+    "speed-measure-webpack-plugin": "1.4.2",
+    "tsutils": "^3.21.0",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-merge": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/speed-measure-webpack-plugin": "^1.3.4",
+    "@types/webpack-4": "npm:@types/webpack@^4",
+    "chai": "^4.3.6",
+    "mocha": "^9.2.2",
+    "proxyquire": "2.1.3",
+    "sinon": "^13.0.1",
+    "ts-node": "^10.7.0",
+    "webpack-4": "npm:webpack@^4",
+    "webpack-5": "npm:webpack@^5",
+    "webpack-dev-server-3": "npm:webpack-dev-server@^3"
+  }
+}
