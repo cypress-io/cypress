@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import EventEmitter from 'events'
 import snapshot from 'snap-shot-it'
 import { makeWebpackConfig } from '../../src/makeWebpackConfig'
+import { join } from 'path'
 
 describe('makeWebpackConfig', () => {
   it('ignores userland webpack `output.publicPath`', async () => {
@@ -12,6 +13,7 @@ describe('makeWebpackConfig', () => {
     }, {
       devServerEvents: new EventEmitter(),
       devServerPublicPathRoute: '/test-public-path',
+      cypressBinaryRoot: join(__dirname, '..', '..', '..', '..'),
       isOpenMode: true,
       supportFile: '/support.js',
       projectRoot: '.',
