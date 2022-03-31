@@ -508,14 +508,10 @@ describe('commands', () => {
     let groupId
 
     beforeEach(() => {
-      addCommand(runner, {
-        name: 'get',
-        message: '#my_element',
-      })
-
       groupId = addCommand(runner, {
         name: 'group',
-        type: 'child',
+        message: 'example group command',
+        type: 'parent',
       })
 
       addCommand(runner, {
@@ -533,15 +529,17 @@ describe('commands', () => {
 
       cy.contains('chained log example') // ensure test content has loaded
 
-      cy.get('.command-name-within')
+      cy.get('.command-name-group')
+      .should('have.class', 'command-is-open')
       .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
+      .should('be.visible')
+      .closest('.command-name-group')
       .click()
 
-      cy.get('.command-name-within')
-      .should('not.have.class', 'command-expander-is-open')
+      cy.get('.command-name-group')
+      .should('not.have.class', 'command-is-open')
 
-      cy.get('.command-name-within')
+      cy.get('.command-name-group')
       .find('.num-children')
       .should('have.text', '1')
       .trigger('mouseover')
@@ -563,23 +561,25 @@ describe('commands', () => {
       .should('have.class', 'command-is-open')
       .find('.command-expander')
       .should('be.visible')
+      .closest('.command-name-group')
       .click()
 
       cy.get('.command-name-group')
       .find('.num-children')
-      .should('not.be.visible')
+      .should('not.exist')
       .percySnapshot()
     })
 
     it('clicking opens and closes the group', () => {
       cy.get('.command-name-group')
       .find('.num-children')
-      .should('not.be.visible')
+      .should('not.exist')
 
       cy.get('.command-name-group')
       .should('have.class', 'command-is-open')
       .find('.command-expander')
       .should('be.visible')
+      .closest('.command-name-group')
       .click()
 
       cy.get('.command-name-group')

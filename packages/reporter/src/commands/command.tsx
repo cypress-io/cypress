@@ -218,11 +218,16 @@ class Command extends Component<Props> {
       return <TestError model={model} onPrintToConsole={this._onClick}/>
     }
 
+    const commandName = model.name ? nameClassName(model.name) : ''
+    const isSystemEvent = model.type === 'system' && model.event
+    const isSessionCommand = commandName === 'session'
+    const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
+
     return (
       <li
         className={cs(
           'command',
-          `command-name-${model.name ? nameClassName(model.name) : ''}`,
+          `command-name-${commandName}`,
           `command-state-${model.state}`,
           `command-type-${model.type}`,
           {
@@ -279,9 +284,11 @@ class Command extends Component<Props> {
                 <span className='alias-container'>
                   <Interceptions model={model} />
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
-                  <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
-                    <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
-                  </Tooltip>
+                  {displayNumOfChildren && (
+                    <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
+                      <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
+                    </Tooltip>
+                  )}
                 </span>
 
               </span>

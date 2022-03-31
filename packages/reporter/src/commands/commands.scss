@@ -92,15 +92,6 @@
     }
   }
 
-  .command-type-system.command-is-event,
-  .command-name-session {
-    > span > .command-wrapper {
-      .num-children {
-        display: none;
-      }
-    }
-  }
-
   .command-wrapper {
     background-color: #eef1f4;
     color: #777;
@@ -526,18 +517,12 @@
     font-style: normal;
   }
 
-  .command-has-num-elements .num-elements,
-  .num-children,
-  .command-has-children.command-is-open
-    > span
-    > .command-wrapper
-    .num-children.has-children {
+  .command-has-num-elements .num-elements {
     display: none;
   }
 
   .command-has-num-elements.no-elements .num-elements,
-  .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-children .num-children.has-children {
+  .command-has-num-elements.multiple-elements .num-elements {
     display: inline;
   }
 
