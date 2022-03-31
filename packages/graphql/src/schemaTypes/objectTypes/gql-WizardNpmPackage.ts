@@ -9,7 +9,24 @@ export const WizardNpmPackage = objectType({
       description: 'The package name that you would npm install',
     })
 
-    t.nonNull.string('description')
-    t.nonNull.string('package')
+    t.nonNull.string('description', {
+      description: 'Short description about the purpose of the package',
+    })
+
+    t.nonNull.string('package', {
+      description: 'Name of the package on npm',
+    })
+
+    t.string('detectedVersion', {
+      description: 'Version of the package the user has installed',
+    })
+
+    t.string('minVersion', {
+      description: 'Minimum version of the package that Cypress works with',
+    })
+
+    t.nonNull.boolean('satisfied', {
+      description: 'If the package is installed, does the version satisfy Cypress minimum requirements',
+    })
   },
 })

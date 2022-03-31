@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
-import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import type { Bundler, WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -64,13 +64,13 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: Bundler | null
-  chosenFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
+  chosenBundler: typeof WIZARD_BUNDLERS[number]['type'] | null
+  chosenFramework: typeof WIZARD_FRAMEWORKS[number]['type'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
   detectedBundler: Bundler | null
-  detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
+  detectedFramework: typeof WIZARD_FRAMEWORKS[number]['type'] | null
 }
 
 export interface MigrationDataShape {

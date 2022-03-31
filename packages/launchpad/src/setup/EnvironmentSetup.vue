@@ -18,7 +18,7 @@
       <SelectFwOrBundler
         v-if="props.gql.framework?.type && bundlers.length > 1"
         class="pt-3px"
-        :options="bundlers || []"
+        :options="bundlers"
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
@@ -74,7 +74,7 @@ fragment EnvironmentSetup on Wizard {
       name
       isDetected
     }
-    category
+    # category
   }
   frameworks {
     id
@@ -82,7 +82,7 @@ fragment EnvironmentSetup on Wizard {
     isSelected
     isDetected
     type
-    category
+    # category
   }
   allBundlers {
     id
@@ -112,15 +112,17 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const bundlers = computed(() => {
-  const _bundlers = props.gql.framework?.supportedBundlers || []
+  const all = props.gql.framework?.supportedBundlers || []
+  console.log(props.gql.framework)
+  const _bundlers = all.map(b => ({
+    disabled: all.length <= 1,
+    ...b,
+  }))
 
-  return _bundlers.map((b) => {
-    return {
-      disabled: _bundlers.length <= 1,
-      ...b,
-    }
-  })
+  console.log({ _bundlers })
+  return _bundlers
 })
+
 const frameworks = computed(() => {
   return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
 })
@@ -136,10 +138,6 @@ mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {
     framework {
       id
       type
-    }
-    packagesToInstall {
-      id
-      package
     }
   }
 }

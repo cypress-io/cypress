@@ -1,3 +1,5 @@
+
+import type { WIZARD_FRAMEWORKS } from '.'
 import type { BUNDLERS, STORYBOOK_DEPS, CODE_GEN_FRAMEWORKS, DEPENDENCIES } from './constants'
 import type { FRONTEND_FRAMEWORKS } from './frameworks'
 
@@ -13,4 +15,6 @@ export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORKS[number]
 
-export type PkgJson = { dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
+export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number]
+
+export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }

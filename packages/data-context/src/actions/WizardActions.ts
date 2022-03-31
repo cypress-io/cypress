@@ -1,6 +1,6 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import { CodeLanguage, CODE_LANGUAGES } from '@packages/types'
-import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect } from '@packages/scaffold-config'
+import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
@@ -29,11 +29,14 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null): void {
-    const next = FRONTEND_FRAMEWORKS.find((x) => x.type === framework)
+  setFramework (framework: typeof WIZARD_FRAMEWORKS[number]['type'] | null): void {
+    const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework)
 
-    this.ctx.coreData.wizard.chosenFramework = framework
+    this.ctx.update(coreData => {
+      coreData.wizard.chosenFramework = framework
+    })
 
+    console.log('next', next)
     if (next?.supportedBundlers?.length === 1) {
       this.setBundler(next?.supportedBundlers?.[0].type)
 
@@ -55,10 +58,12 @@ export class WizardActions {
     }
   }
 
-  setBundler (bundler: Bundler | null) {
-    this.ctx.coreData.wizard.chosenBundler = bundler
+  setBundler (bundler: typeof WIZARD_BUNDLERS[number]['type'] | null) {
+    this.ctx.update(coreData => {
+      coreData.wizard.chosenBundler = bundler
+    })
 
-    return this.data
+    return this.ctx.wizardData
   }
 
   setCodeLanguage (lang: NexusGenEnums['CodeLanguageEnum']) {

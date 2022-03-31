@@ -22,12 +22,16 @@
           class="h-24px my-8px ml-24px w-24px float-right"
           :aria-label="t('setupPage.install.pendingInstall')"
         />
-        <ExternalLink
-          :href="`https://www.npmjs.com/package/${dep.package}`"
-          class="text-indigo-500 text-14px hocus-link-default"
-        >
-          {{ dep.package }}
-        </ExternalLink>
+        <span>
+          <ExternalLink
+            :href="`https://www.npmjs.com/package/${dep.package}`"
+            class="text-indigo-500 text-14px hocus-link-default"
+          >
+            {{ dep.package }}
+          </ExternalLink>
+          <span>{{ dep.minVersion }}</span>
+          <span v-if="!dep.satisfied">Detected {{ dep.detectedVersion }}</span>
+        </span>
         <p
           class="text-gray-500 text-14px leading-5"
           v-html="dep.description"
@@ -55,6 +59,9 @@ fragment ManualInstall on Query {
       name
       description
       package
+      minVersion
+      detectedVersion
+      satisfied
     }
     installDependenciesCommand
   }

@@ -1,113 +1,77 @@
 import Debug from 'debug'
 import { CODE_LANGUAGES } from '@packages/types'
 import {
-  BUNDLERS,
-  DEPENDENCIES,
-  FRONTEND_FRAMEWORKS,
+  WizardDependency,
+  WIZARD_BUNDLERS,
+  WIZARD_FRAMEWORKS,
+  WIZARD_DEPENDENCY_TYPESCRIPT,
+  DependencyToInstall,
+  inPkgJson
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
 import path from 'path'
 import resolve from 'resolve-from'
-import assert from 'assert'
+import fs from 'fs-extra'
 
 const debug = Debug('cypress:data-context:wizard-data-source')
-
-interface PackageToInstall {
-  name: typeof DEPENDENCIES[number]['name']
-  installer: typeof DEPENDENCIES[number]['installer']
-  description: typeof DEPENDENCIES[number]['description']
-  package: typeof DEPENDENCIES[number]['package']
-}
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  async packagesToInstall (): Promise<PackageToInstall[] | null> {
-    if (!this.chosenFramework || !this.chosenBundler) {
-      return null
+  packagesToInstall (): DependencyToInstall[] {
+    if (!this.chosenFramework || !this.chosenBundler || !this.ctx.currentProject) {
+      return []
     }
 
-    const packages: PackageToInstall[] = [...this.chosenFramework.packages]
+    // const pkg = fs.readJsonSync(path.posix.join(this.ctx.currentProject, 'package.json'))
 
-    // find the matching dev server
-    // vite -> @cypress/vite-dev-server
-    // webpack -> @cypress/webpack-dev-server
-    const bundler = BUNDLERS.find((x) => x.type === this.chosenBundler?.type)
+    const packages: DependencyToInstall[] = [...this.chosenFramework.dependencies(this.chosenBundler.type, this.ctx.currentProject)]
 
-    assert(bundler)
-    packages.push(...bundler.dependencies)
-
-    const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
-    const { storybookDep } = this.chosenFramework
-
-    if (storybookInfo && storybookDep) {
-      packages.push(storybookDep)
+    if (this.chosenLanguage?.type === 'ts') {
+      packages.push({
+        ...inPkgJson(WIZARD_DEPENDENCY_TYPESCRIPT, this.ctx.currentProject),
+        dependency: WIZARD_DEPENDENCY_TYPESCRIPT,
+      })
     }
+
+    // TODO: Storybook support.
+    // const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
+
+    // if (storybookInfo && this.chosenFramework.storybookDep) {
+    //   packages.push(this.chosenFramework.storybookDep)
+    // }
+    console.log(JSON.stringify(packages))
 
     return packages
   }
 
-  async installDependenciesCommand () {
+  installedPackages (): string[] {
+    return []
+  }
+
+  installDependenciesCommand () {
     const commands = {
       'npm': 'npm install -D',
       'pnpm': 'pnpm install -D',
       'yarn': 'yarn add -D',
+    } as const
+
+    const deps = this.ctx.wizard.packagesToInstall().map((pack) => `${pack.dependency.package}`).join(' ')
+
+
+    if (!deps?.length) {
+      return ''
     }
-
-    let depsToInstall = (await this.ctx.wizard.packagesToInstall() ?? [])
-
-    if (!depsToInstall?.length) {
-      return null
-    }
-
-    const deps = depsToInstall.map((pack) => `${pack.installer}`).join(' ')
 
     return `${commands[this.ctx.coreData.packageManager ?? 'npm']} ${deps}`
   }
 
-  async installedPackages (): Promise<string[]> {
-    const packagesInitial = await this.packagesToInstall() || []
-
-    if (!this.ctx.currentProject) {
-      throw Error('currentProject is not defined')
-    }
-
-    debug('packages to install: %O in %s', packagesInitial, this.ctx.currentProject)
-
-    const installedPackages: Array<string | null> = packagesInitial.map((p) => {
-      if (this.ctx.currentProject) {
-        debug('package checked: %s', p.package)
-
-        // At startup, node will only resolve the main files of packages it knows of.
-        // Adding a package after the app started will not be resolved in the same way.
-        // It will only be resolved as a package whose main is `index.js`, ignoring the "main" field
-        // to avoid this bug, we resolve a file we know has to be in a node module:
-        // `package.json`
-        const packageJsonPath = path.join(p.package, 'package.json')
-
-        debug('package.json path: %s', packageJsonPath)
-
-        try {
-          resolve(this.ctx.currentProject, packageJsonPath)
-
-          return p.package
-        } catch (e) {
-          debug('ERROR - resolving package "%s": %O', p.package, e)
-        }
-      }
-
-      return null
-    })
-
-    return installedPackages.filter((p) => p !== null) as string[]
-  }
-
   get chosenFramework () {
-    return FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.chosenFramework) || null
+    return WIZARD_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.chosenFramework) || null
   }
 
   get chosenBundler () {
-    return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
+    return WIZARD_BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
   }
 
   get chosenLanguage () {

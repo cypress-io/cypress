@@ -97,9 +97,9 @@ export const HTML_WEBPACK_PLUGIN_5 = {
   description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
 
-export const BUNDLER_WEBPACK_5 = {
-  type: 'webpack5',
-  name: 'Webpack (v5)',
+export const BUNDLER_WEBPACK = {
+  type: 'webpack',
+  name: 'Webpack',
   package: 'webpack',
   installer: 'webpack@^5.0.0',
   description: 'Webpack is a module bundler',
@@ -120,8 +120,7 @@ export const BUNDLER_VITE = {
 } as const
 
 export const BUNDLERS = [
-  BUNDLER_WEBPACK_4,
-  BUNDLER_WEBPACK_5,
+  BUNDLER_WEBPACK,
   BUNDLER_VITE,
 ]
 

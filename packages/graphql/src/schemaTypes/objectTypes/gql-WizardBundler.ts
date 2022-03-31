@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { SupportedBundlerEnum, SupportedPackageEnum } from '../enumTypes'
+import { SupportedBundlerEnum } from '../enumTypes'
 
 export const WizardBundler = objectType({
   name: 'WizardBundler',
@@ -23,11 +23,6 @@ export const WizardBundler = objectType({
 
     t.nonNull.string('name', {
       description: 'Display name of the bundler',
-    })
-
-    t.nonNull.field('package', {
-      type: SupportedPackageEnum,
-      description: 'Name of package on npm',
     })
   },
 })

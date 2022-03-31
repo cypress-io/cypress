@@ -1,6 +1,6 @@
 import { WizardBundler } from './gql-WizardBundler'
 import { objectType } from 'nexus'
-import { FrontendFrameworkEnum, FrontendFrameworkCategoryEnum } from '../enumTypes/gql-WizardEnums'
+import { FrontendFrameworkEnum } from '../enumTypes/gql-WizardEnums'
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -11,11 +11,6 @@ export const WizardFrontendFramework = objectType({
       type: FrontendFrameworkEnum,
       description: 'The name of the framework',
     }),
-
-    t.nonNull.field('category', {
-      type: FrontendFrameworkCategoryEnum,
-      description: 'Classification or label of framework. e.g. React, Vue, or Other',
-    })
 
     t.nonNull.boolean('isSelected', {
       description: 'Whether this is the selected framework in the wizard',
@@ -42,6 +37,6 @@ export const WizardFrontendFramework = objectType({
 
   sourceType: {
     module: '@packages/scaffold-config',
-    export: 'FrontendFramework',
+    export: 'WizardFrontendFramework',
   },
 })
