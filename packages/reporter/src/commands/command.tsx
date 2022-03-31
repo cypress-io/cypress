@@ -23,6 +23,10 @@ const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const invisibleMessage = (model: CommandModel) => {
+  if (!model.isInvisible) {
+    return
+  }
+
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
     'This element is not visible.'
@@ -234,7 +238,6 @@ class Command extends Component<Props> {
             'command-has-console-props': model.hasConsoleProps,
             'multiple-elements': model.numElements > 1,
             'command-has-children': model.hasChildren,
-            'command-is-child': model.isChild,
             'command-is-open': this._isOpen(),
           },
         )}
@@ -267,11 +270,9 @@ class Command extends Component<Props> {
               </span>
               <span className='command-controls'>
                 <i className='far fa-times-circle studio-command-remove' onClick={this._removeStudioCommand} />
-                {model.isInvisible && (
-                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-                    <i className='command-invisible far fa-eye-slash' />
-                  </Tooltip>
-                )}
+                <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+                  <i className='command-invisible far fa-eye-slash' />
+                </Tooltip>
                 <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
                   <span className='num-elements'>{model.numElements}</span>
                 </Tooltip>

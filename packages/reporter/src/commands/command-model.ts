@@ -9,7 +9,7 @@ const LONG_RUNNING_THRESHOLD = 1000
 
 interface RenderProps {
   message?: string
-  indicator?: string
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
   interceptions?: Array<{
     command: 'intercept' | 'route'
     alias?: string
@@ -48,7 +48,6 @@ export default class Command extends Instrument {
   @observable visible?: boolean = true
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
-  @observable isChild = false
   @observable hookId: string
   @observable isStudio: boolean
   @observable showError?: boolean = false
@@ -159,7 +158,6 @@ export default class Command extends Instrument {
   }
 
   addChild (command: Command) {
-    command.isChild = true
     command.setGroup(this.id)
     this.children.push(command)
   }

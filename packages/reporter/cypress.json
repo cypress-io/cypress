@@ -2,7 +2,7 @@
   "projectId": "ypt4pf",
   "baseUrl": "http://localhost:5006",
   "viewportWidth": 400,
-  "viewportHeight": 450,
+  "viewportHeight": 1000,
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
