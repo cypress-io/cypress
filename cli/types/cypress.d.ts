@@ -2868,7 +2868,7 @@ declare namespace Cypress {
     /**
      * Handle Cypress plugins
      */
-    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
   }
 
   /**
@@ -2917,6 +2917,7 @@ declare namespace Cypress {
     namespace: string
     projectRoot: string
     devServerPublicPathRoute: string
+    cypressBinaryRoot: string
   }
 
   /**
@@ -2962,9 +2963,34 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
+  interface DefineDevServerConfig {
+    // This interface can be extended by the user, to inject the types for their
+    // preferred bundler: e.g.
+    //
+    // import type * as webpack from 'webpack'
+    //
+    // declare global {
+    //   namespace Cypress {
+    //     interface DefineConfigOptions {
+    //       webpackConfig?: webpack.Configuration
+    //     }
+    //   }
+    // }
+    [key: string]: any
+  }
+
+  type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
+
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+
+  type DevServerConfigObject = {
+    bundler: 'webpack'
+    framework: 'react'
+    webpackConfig?: PickConfigOpt<'webpackConfig'>
+  }
+
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
-    devServer: DevServerFn<ComponentDevServerOpts>
+    devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigObject
     devServerConfig?: ComponentDevServerOpts
   }
 
@@ -5426,7 +5452,7 @@ declare namespace Cypress {
 
   interface ResolvedDevServerConfig {
     port: number
-    close: (done?: () => any) => void
+    close: (done?: (err?: Error) => any) => void
   }
 
   interface PluginEvents {

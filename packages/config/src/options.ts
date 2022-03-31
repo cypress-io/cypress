@@ -1,4 +1,6 @@
 import os from 'os'
+import path from 'path'
+
 import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
@@ -431,6 +433,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // so we don't consider it a "public" option
     isInternal: true,
     canUpdateDuringTestTime: false,
+  }, {
+    name: 'cypressBinaryRoot',
+    defaultValue: path.join(__dirname, '..', '..', '..'),
+    validation: validate.isString,
+    isInternal: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
