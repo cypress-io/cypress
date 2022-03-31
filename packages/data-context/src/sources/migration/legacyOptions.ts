@@ -281,30 +281,8 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
 
 const runtimeOptions: Array<RuntimeConfigOption> = [
   {
-    name: 'autoOpen',
-    defaultValue: false,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'browsers',
     defaultValue: [],
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'clientRoute',
-    defaultValue: '/__/',
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'configFile',
-    defaultValue: 'cypress.json',
-    // not truly internal, but can only be set via cli,
-    // so we don't consider it a "public" option
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'devServerPublicPathRoute',
-    defaultValue: '/__cypress/src',
-    isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'hosts',
@@ -315,48 +293,8 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'isTextTerminal',
-    defaultValue: false,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'morgan',
-    defaultValue: true,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'namespace',
-    defaultValue: '__cypress',
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'reporterRoute',
-    defaultValue: '/__cypress/reporter',
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'socketId',
-    defaultValue: null,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'socketIoCookie',
-    defaultValue: '__socket.io',
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'socketIoRoute',
-    defaultValue: '/__socket.io',
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'xhrRoute',
-    defaultValue: '/xhrs/',
-    isInternal: true,
     canUpdateDuringTestTime: false,
   },
 ]
