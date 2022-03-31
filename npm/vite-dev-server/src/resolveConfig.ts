@@ -15,7 +15,7 @@ const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: StartDevServer) => {
   const root = options.config.projectRoot || resolve(process.cwd())
-  const binaryRoot = options.config.cypressBinaryRoot!
+  const binaryRoot = options.config.cypressBinaryRoot || join(__dirname, '..', '..', '..')
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 

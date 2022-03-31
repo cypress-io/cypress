@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import webpack from 'webpack'
+import path from 'path'
 import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
@@ -29,7 +30,7 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtmlFile, 
     indexHtmlFile,
     projectRoot,
     devServerPublicPathRoute,
-    cypressBinaryRoot: options.config.cypressBinaryRoot!,
+    cypressBinaryRoot: options.config.cypressBinaryRoot || path.join(__dirname, '..', '..', '..'),
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
     isOpenMode: !isTextTerminal,
