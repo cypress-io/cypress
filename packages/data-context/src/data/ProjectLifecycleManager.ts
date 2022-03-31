@@ -20,7 +20,6 @@ import type { LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
-import { debug } from 'console'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -298,7 +297,6 @@ export class ProjectLifecycleManager {
         return await this._configManager.initializeConfig()
       }
     } catch (error) {
-      debug('initializeConfig error', error)
       this.onLoadError(error)
     }
 
