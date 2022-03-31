@@ -29,6 +29,7 @@ describe('exec open', function () {
           detached: false,
           stdio: 'inherit',
           dev: true,
+          env: undefined,
         })
       })
     })

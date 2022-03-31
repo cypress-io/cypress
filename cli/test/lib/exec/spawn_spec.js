@@ -81,13 +81,19 @@ describe('lib/exec/spawn', function () {
   })
 
   context('.start', function () {
-    // ️️⚠️ NOTE ⚠️
     // when asserting the calls made to spawn the child Cypress process
     // we have to be _very_ careful. Spawn uses process.env object, if an assertion
     // fails, it will print the entire process.env object to the logs, which
     // might contain sensitive environment variables. Think about what the
     // failed assertion might print to the public CI logs and limit
-    // the environment variables when running tests on CI.
+    // the environment variables when running tests on CI. Use `getEnvForSnapshot` to
+    // snapshot only a whitelisted set of environment variables.
+    function getEnvForSnapshot (env) {
+      return _.pick(
+        env,
+        ['FORCE_COLOR', 'DEBUG_COLORS', 'MOCHA_COLORS', 'FORCE_STDIN_TTY', 'FORCE_STDOUT_TTY', 'FORCE_STDERR_TTY'],
+      )
+    }
 
     it('passes args + options to spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
@@ -339,16 +345,14 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('forces colors and streams when supported', function () {
+    it('forces colors and streams when supported', async function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       sinon.stub(util, 'supportsColor').returns(true)
       sinon.stub(tty, 'isatty').returns(true)
 
-      return spawn.start([], { env: {} })
-      .then(() => {
-        snapshot(cp.spawn.firstCall.args[2].env)
-      })
+      await spawn.start([], { env: {} })
+      snapshot(getEnvForSnapshot(cp.spawn.firstCall.args[2].env))
     })
 
     it('sets windowsHide:false property in windows', function () {
@@ -371,16 +375,14 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('does not force colors and streams when not supported', function () {
+    it('does not force colors and streams when not supported', async function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       sinon.stub(util, 'supportsColor').returns(false)
       sinon.stub(tty, 'isatty').returns(false)
 
-      return spawn.start([], { env: {} })
-      .then(() => {
-        snapshot(cp.spawn.firstCall.args[2].env)
-      })
+      await spawn.start([], { env: {} })
+      snapshot(getEnvForSnapshot(cp.spawn.firstCall.args[2].env))
     })
 
     it('pipes when on win32', function () {
