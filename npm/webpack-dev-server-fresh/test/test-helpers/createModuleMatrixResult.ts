@@ -7,7 +7,7 @@ type ModulesDef = {[K in keyof ModuleMatrixResultOptions]: Record<ModuleMatrixRe
 const moduleSources: ModulesDef = {
   webpack: {
     4: 'webpack-4',
-    5: 'webpack-5',
+    5: 'webpack',
   },
   webpackDevServer: {
     3: 'webpack-dev-server-3',

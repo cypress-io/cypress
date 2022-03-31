@@ -25,6 +25,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "component": {
     "specPattern": "**/*.cy.{js,jsx,ts,tsx}"
   },
+  "cypressBinaryRoot": "/root/cypress",
   "defaultCommandTimeout": 4000,
   "downloadsFolder": "cypress/downloads",
   "e2e": {

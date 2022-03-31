@@ -76,7 +76,12 @@ function webpackDevServer4 (
     hot: false,
   }
 
-  return new WebpackDevServer(webpackDevServerConfig, compiler)
+  const server = new WebpackDevServer(webpackDevServerConfig, compiler)
+
+  return {
+    server,
+    compiler,
+  }
 }
 
 function webpackDevServer3 (
@@ -96,5 +101,10 @@ function webpackDevServer3 (
     noInfo: false,
   }
 
-  return new WebpackDevServer(compiler, webpackDevServerConfig)
+  const server = new WebpackDevServer(compiler, webpackDevServerConfig)
+
+  return {
+    server,
+    compiler,
+  }
 }

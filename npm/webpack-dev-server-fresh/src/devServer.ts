@@ -1,12 +1,13 @@
 /// <reference types="cypress" />
 
-import type WebpackDevServer3 from 'webpack-dev-server-3'
 import type WebpackDevServer from 'webpack-dev-server'
+import type { Compiler } from 'webpack'
 
 import { createWebpackDevServer } from './createWebpackDevServer'
 import { sourceRelativeWebpackModules } from './helpers/sourceRelativeWebpack'
 import type { AddressInfo } from 'net'
 import debugLib from 'debug'
+import type { Server } from 'http'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:devServer')
 
@@ -26,10 +27,16 @@ const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react'] as const
  */
 type DevServerCreateResult = {
   version: 3
-  server: WebpackDevServer3
+  server: Server
+  compiler: Compiler
 } | {
   version: 4
   server: WebpackDevServer
+  compiler: Compiler
+}
+
+const normalizeError = (error: Error | string) => {
+  return typeof error === 'string' ? error : error.message
 }
 
 /**
@@ -43,6 +50,20 @@ type DevServerCreateResult = {
 export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
   return new Promise((resolve, reject) => {
     const result = devServer.create(devServerConfig) as DevServerCreateResult
+
+    // When compiling in run mode
+    // Stop the clock early, no need to run all the tests on a failed build
+    result.compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
+      if (stats.hasErrors()) {
+        console.log(stats)
+        const errors = stats.compilation.errors
+
+        devServerConfig.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
+        if (devServerConfig.cypressConfig.isTextTerminal) {
+          process.exit(1)
+        }
+      }
+    })
 
     if (result.version === 3) {
       const srv = result.server.listen(0, '127.0.0.1', () => {
@@ -68,7 +89,6 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
       return
     }
 
-    debugger
     result.server.start().then(() => {
       if (!result.server.options.port) {
         return reject(new Error(`Expected port ${result.server.options.port} to be a number`))
@@ -115,16 +135,19 @@ devServer.create = function (devServerConfig: WebpackDevServerConfig) {
     }
   }
 
-  const server = createWebpackDevServer({
+  const { server, compiler } = createWebpackDevServer({
     devServerConfig,
     frameworkConfig,
     sourceWebpackModulesResult,
   })
 
-  return {
+  const result = {
     server,
+    compiler,
     version: sourceWebpackModulesResult.webpackDevServer.majorVersion,
   }
+
+  return result
 }
 
 export default devServer

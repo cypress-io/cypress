@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import chalk from 'chalk'
 import SpeedMeasurePlugin from 'speed-measure-webpack-plugin'
-import type { Configuration } from 'webpack-5'
+import type { Configuration } from 'webpack'
 
 /**
  * @internal
@@ -57,5 +57,6 @@ export function measureWebpackPerformance (webpackConfig: Configuration) {
     })
     : new SpeedMeasurePlugin()
 
+  // @ts-expect-error
   return smp.wrap(webpackConfig)
 }

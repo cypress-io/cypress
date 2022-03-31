@@ -52,7 +52,7 @@ export function scaffold () {
  */
 export async function scaffoldProject (project: string): Promise<void> {
   const to = _path.join(cyTmpDir, project)
-  const from = _path.join(projects, project)
+  const from = projectFixturePath(project)
 
   await fs.copy(from, to)
 }
@@ -108,6 +108,10 @@ export function get (fixture, encoding: BufferEncoding = 'utf8') {
 
 export function path (fixture) {
   return _path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
+}
+
+export function projectFixturePath (name) {
+  return _path.join(projects, name)
 }
 
 export default module.exports

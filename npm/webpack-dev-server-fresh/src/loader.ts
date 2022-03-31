@@ -3,6 +3,7 @@
 
 import debugFn from 'debug'
 import * as path from 'path'
+import type { LoaderContext } from 'webpack'
 import type { CypressCTWebpackContext } from './CypressCTWebpackPlugin'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
@@ -50,7 +51,7 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 
 // Runs the tests inside the iframe
 export default function loader (this: unknown) {
-  const ctx = this as CypressCTWebpackContext & import('webpack-5').LoaderContext<void>
+  const ctx = this as CypressCTWebpackContext & LoaderContext<void>
 
   // In Webpack 5, a spec added after the dev-server is created won't
   // be included in the compilation. Disabling the caching of this loader ensures

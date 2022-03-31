@@ -1,4 +1,5 @@
-import type { Compiler as Webpack5Compiler, Compilation as Webpack5Compilation } from 'webpack-5'
+import type { Compiler, Compilation } from 'webpack'
+import type webpack from 'webpack'
 import type { EventEmitter } from 'events'
 import _ from 'lodash'
 import fs, { PathLike } from 'fs'
@@ -20,7 +21,10 @@ export interface CypressCTWebpackContext {
   _cypress: CypressCTContextOptions
 }
 
-export type Webpack45Compilation = Webpack5Compilation & {
+/**
+ * @internal
+ */
+export type Webpack45Compilation = Compilation & {
   // TODO: Drop these additional Webpack 4 types
   inputFileSystem: {
     fileSystem: {
@@ -132,7 +136,7 @@ export class CypressCTWebpackPlugin {
     /* istanbul ignore next */
     if ('NormalModule' in this.webpack) {
       // Webpack 5
-      const loader = (this.webpack as typeof import('webpack-5')).NormalModule.getCompilationHooks(compilation).loader
+      const loader = (this.webpack as typeof webpack).NormalModule.getCompilationHooks(compilation).loader
 
       loader.tap('CypressCTPlugin', this.addLoaderContext)
     } else {
@@ -144,10 +148,12 @@ export class CypressCTWebpackPlugin {
   /**
    * The plugin's entrypoint, called once by webpack when the compiler is initialized.
    */
-  apply (compiler: Webpack5Compiler): void {
+  apply (compiler: unknown): void {
+    const _compiler = compiler as Compiler
+
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
-    compiler.hooks.afterCompile.tap('CypressCTPlugin', this.afterCompile)
-    compiler.hooks.afterEmit.tap('CypressCTPlugin', this.afterEmit)
-    compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
+    _compiler.hooks.afterCompile.tap('CypressCTPlugin', this.afterCompile)
+    _compiler.hooks.afterEmit.tap('CypressCTPlugin', this.afterEmit)
+    _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
   }
 }

@@ -1,4 +1,6 @@
 import path from 'path'
+import execa from 'execa'
+
 import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
@@ -70,6 +72,7 @@ interface FixturesShape {
   remove (): void
   removeProject (name): void
   projectPath (name): string
+  projectFixturePath(name): string
   get (fixture, encoding?: BufferEncoding): string
   path (fixture): string
 }
@@ -123,10 +126,12 @@ async function makeE2ETasks () {
     try {
       await scaffoldProjectNodeModules(projectName)
     } catch (e) {
-      console.error(e)
-      // If we have an error, it's likely that we
-      // await scaffoldProjectNodeModules(projectName, true)
-      throw e
+      // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
+      // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
+      await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
+      await execa('rm', ['-rf', 'node_modules'], { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
+
+      await scaffoldProjectNodeModules(projectName, true)
     }
 
     scaffoldedProjects.add(projectName)

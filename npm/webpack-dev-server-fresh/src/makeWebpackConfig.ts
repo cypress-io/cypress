@@ -1,6 +1,7 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import type { Configuration } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
@@ -46,10 +47,10 @@ const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
  */
 export function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
-): Promise<unknown> {
+) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<import('webpack-5').Configuration>
-  const frameworkWebpackConfig = config.frameworkConfig as Partial<import('webpack-5').Configuration>
+  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
 
   const {
     cypressConfig: {
@@ -117,7 +118,6 @@ export function makeWebpackConfig (
   )
 
   mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
-  debugger
 
   debug('Merged webpack config %o', mergedConfig)
 

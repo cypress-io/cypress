@@ -1,7 +1,11 @@
+import Module from 'module'
 import path from 'path'
-import type { Server } from 'http'
-
 import type { WebpackDevServerConfig } from '../devServer'
+
+type ModuleClass = typeof Module & {
+  _load(id: string, parent: Module, isMain: boolean): any
+  _cache: Record<string, Module>
+}
 
 export interface PackageJson {
   name: string
@@ -58,6 +62,8 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
     htmlWebpackPlugin: {},
   } as SourceRelativeWebpackResult
 
+  // First, we source the framework, ensuring it's sourced from the user's project and not the
+  // Cypress binary. This is the path we use to relative-resolve the
   if (config.framework) {
     try {
       const frameworkJsonPath = require.resolve(`${config.framework}/package.json`, {
@@ -106,6 +112,25 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   result.webpack.packageJson = require(webpackJsonPath)
   result.webpack.module = require(result.webpack.importPath)
   result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
+
+  // We now need to make sure that everything we subsequently require "thinks" that the webpack it's
+  // looking for is this one. There are a number of modules that import from webpack directly, such as
+  // this code in html-webpack-plugin v4: https://github.com/jantimon/html-webpack-plugin/blob/fce6b965d9502418af24139068aa415eb466c341/lib/file-watcher-api.js#L7-L14
+  // Instead of trying to patch them all, let's just cheat and tell node when it resolves modules that
+  // it's actually getting the one relative to the searchRoot:
+  const moduleLoad = (Module as ModuleClass)._load;
+
+  (Module as ModuleClass)._load = function (request, parent, isMain) {
+    if (request === 'webpack' || request.startsWith('webpack/')) {
+      const resolvePath = require.resolve(request, {
+        paths: [searchRoot],
+      })
+
+      return moduleLoad(resolvePath, parent, isMain)
+    }
+
+    return moduleLoad(request, parent, isMain)
+  }
 
   // Webpack dev server:
 
@@ -158,8 +183,6 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   result.htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
   result.htmlWebpackPlugin.module = require(result.htmlWebpackPlugin.importPath)
   result.htmlWebpackPlugin.majorVersion = getMajorVersion(result.htmlWebpackPlugin.packageJson, [4, 5])
-
-  console.log(result)
 
   return result
 }

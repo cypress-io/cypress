@@ -462,7 +462,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'morgan',
-    defaultValue: true,
+    defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
     canUpdateDuringTestTime: false,

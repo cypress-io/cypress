@@ -1,6 +1,6 @@
 import path from 'path'
 import debugLib from 'debug'
-import type { Configuration } from 'webpack-5'
+import type { Configuration } from 'webpack'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:makeDefaultWebpackConfig')
