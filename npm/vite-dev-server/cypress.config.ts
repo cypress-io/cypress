@@ -5,7 +5,6 @@ export default defineConfig({
   'video': false,
   'fixturesFolder': false,
   'component': {
-    'supportFile': './cypress/support.js',
     devServer,
   },
 })
