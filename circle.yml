@@ -2061,6 +2061,7 @@ linux-workflow: &linux-workflow
           - build
     # unit, integration and e2e tests
     - cli-visual-tests:
+        context: test-runner:percy
         requires:
           - build
     - unit-tests:
@@ -2117,29 +2118,31 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - runner-integration-tests-chrome:
-        context: test-runner:cypress-record-key
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - runner-integration-tests-firefox:
-        context: test-runner:cypress-record-key
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - runner-integration-tests-electron:
-        context: test-runner:cypress-record-key
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - runner-ct-integration-tests-chrome:
+        context: test-runner:percy
         requires:
           - build
     - desktop-gui-integration-tests-7x:
-        context: test-runner:cypress-record-key
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - desktop-gui-component-tests:
+        context: test-runner:percy
         requires:
           - build
     - reporter-integration-tests:
-        context: test-runner:cypress-record-key
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - ui-components-integration-tests:
@@ -2159,6 +2162,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-design-system:
+        context: test-runner:percy
         requires:
           - build
     - npm-vue:
