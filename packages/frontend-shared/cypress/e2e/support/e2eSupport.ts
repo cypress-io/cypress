@@ -226,7 +226,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
         await ctx.lifecycleManager.waitForInitializeSuccess()
-        ctx.actions.project.setCurrentTestingType(o.mode)
+        ctx.actions.project.setAndLoadCurrentTestingType(o.mode)
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')

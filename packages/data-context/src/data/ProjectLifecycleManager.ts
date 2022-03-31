@@ -283,7 +283,7 @@ export class ProjectLifecycleManager {
       if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
         this._configManager.loadTestingType()
       } else {
-        this.setCurrentTestingType(null)
+        this.setAndLoadCurrentTestingType(null)
       }
 
       return true
@@ -414,11 +414,28 @@ export class ProjectLifecycleManager {
   }
 
   /**
+   * Sets, but doesn't load the current testing type. This is useful
+   * for tests when we don't want to kick off node events
+   */
+  setCurrentTestingType (testingType: TestingType | null) {
+    this.ctx.update((d) => {
+      d.currentTestingType = testingType
+      d.wizard.chosenBundler = null
+      d.wizard.chosenFramework = null
+    })
+
+    this._currentTestingType = testingType
+
+    assert(this._configManager, 'Cannot set a testing type without a config manager')
+    this._configManager.setTestingType(testingType)
+  }
+
+  /**
    * Setting the testing type should automatically handle cleanup of existing
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  setCurrentTestingType (testingType: TestingType | null) {
+  setAndLoadCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -662,9 +679,9 @@ export class ProjectLifecycleManager {
       }
 
       if (testingType) {
-        this.setCurrentTestingType(testingType)
+        this.setAndLoadCurrentTestingType(testingType)
       } else {
-        this.setCurrentTestingType('e2e')
+        this.setAndLoadCurrentTestingType('e2e')
       }
     }
 

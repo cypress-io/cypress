@@ -27,7 +27,6 @@ const runMode = require(`../../lib/modes/run`)
 const api = require(`../../lib/api`)
 const cwd = require(`../../lib/cwd`)
 const user = require(`../../lib/user`)
-const config = require(`../../lib/config`)
 const cache = require(`../../lib/cache`)
 const errors = require(`../../lib/errors`)
 const cypress = require(`../../lib/cypress`)
@@ -455,7 +454,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
-      return config.get(this.pristineWithConfigPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         return fs.rmdir(supportFolder, { recursive: true })
       }).then(() => {
@@ -478,7 +477,7 @@ describe('lib/cypress', () => {
     it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      config.get(this.idsPath)
+      ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -538,7 +537,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      return config.get(this.idsPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 

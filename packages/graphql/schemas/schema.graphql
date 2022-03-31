@@ -1044,10 +1044,10 @@ type Mutation {
   resetWizard: Boolean!
   scaffoldIntegration: [ScaffoldedFile!]!
   scaffoldTestingType: Query
+  setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Query
-  setCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
