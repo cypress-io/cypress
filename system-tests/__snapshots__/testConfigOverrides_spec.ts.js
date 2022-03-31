@@ -182,13 +182,13 @@ exports['testConfigOverrides / fails when passing invalid config values - [chrom
   1) inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`""\`\`
+Instead the value was: \`""\`
       [stack trace lines]
 
   2) inline test config override throws error when executed within cy cmd:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"null"\`\`
+Instead the value was: \`"null"\`
       [stack trace lines]
 
   3) context config overrides throws error
@@ -197,7 +197,7 @@ Instead the value was: \`"null"\`\`
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
   Error
@@ -209,7 +209,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
   Error
@@ -221,7 +221,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
   Error
@@ -234,7 +234,7 @@ https://on.cypress.io/config
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"not_an_http_url"\`\`
+Instead the value was: \`"not_an_http_url"\`
 
 https://on.cypress.io/config
   Error
@@ -246,7 +246,7 @@ https://on.cypress.io/config
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
 
@@ -260,7 +260,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
   Error
@@ -350,14 +350,14 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
        inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`""\`\`
+Instead the value was: \`""\`
       [stack trace lines]
 
   2) runs all tests
        inline test config override throws error when executed within cy cmd:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"null"\`\`
+Instead the value was: \`"null"\`
       [stack trace lines]
 
   3) runs all tests
@@ -367,7 +367,7 @@ Instead the value was: \`"null"\`\`
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
   Error
@@ -380,7 +380,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
   Error
@@ -393,7 +393,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
   Error
@@ -407,7 +407,7 @@ https://on.cypress.io/config
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"not_an_http_url"\`\`
+Instead the value was: \`"not_an_http_url"\`
 
 https://on.cypress.io/config
   Error
@@ -420,7 +420,7 @@ https://on.cypress.io/config
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
 
@@ -435,7 +435,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
   Error
@@ -517,7 +517,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
   Error
@@ -601,13 +601,13 @@ exports['testConfigOverrides / fails when passing invalid config values - [firef
   1) inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`""\`\`
+Instead the value was: \`""\`
       [stack trace lines]
 
   2) inline test config override throws error when executed within cy cmd:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"null"\`\`
+Instead the value was: \`"null"\`
       [stack trace lines]
 
   3) context config overrides throws error
@@ -616,7 +616,7 @@ Instead the value was: \`"null"\`\`
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -627,7 +627,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -638,7 +638,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -650,7 +650,7 @@ https://on.cypress.io/config
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"not_an_http_url"\`\`
+Instead the value was: \`"not_an_http_url"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -661,7 +661,7 @@ https://on.cypress.io/config
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
 
@@ -674,7 +674,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -763,14 +763,14 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
        inline test config override throws error:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`""\`\`
+Instead the value was: \`""\`
       [stack trace lines]
 
   2) runs all tests
        inline test config override throws error when executed within cy cmd:
      Error: Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"null"\`\`
+Instead the value was: \`"null"\`
       [stack trace lines]
 
   3) runs all tests
@@ -780,7 +780,7 @@ Instead the value was: \`"null"\`\`
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -792,7 +792,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -804,7 +804,7 @@ https://on.cypress.io/config
 
 Expected \`defaultCommandTimeout\` to be a number.
 
-Instead the value was: \`"500"\`\`
+Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -817,7 +817,7 @@ https://on.cypress.io/config
 
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`).
 
-Instead the value was: \`"not_an_http_url"\`\`
+Instead the value was: \`"not_an_http_url"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -829,7 +829,7 @@ https://on.cypress.io/config
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
 
@@ -843,7 +843,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
       [stack trace lines]
@@ -924,7 +924,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
 
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
 
-Instead the value was: \`"1"\`\`
+Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
       [stack trace lines]

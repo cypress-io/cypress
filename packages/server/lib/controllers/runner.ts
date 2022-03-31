@@ -33,6 +33,12 @@ export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) =>
 
   const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex(runnerPkg)
 
+  // Chrome plans to make document.domain immutable in Chrome 106, with the default value
+  // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+  // so that we can continue to support tests that visit multiple subdomains in a single spec.
+  // https://github.com/cypress-io/cypress/issues/20147
+  res.setHeader('Origin-Agent-Cluster', '?0')
+
   return res.render(runnerPath, {
     base64Config,
     projectName: config.projectName,

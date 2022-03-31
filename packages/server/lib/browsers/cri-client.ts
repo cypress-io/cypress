@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
 
@@ -48,17 +47,17 @@ interface CRIWrapper {
   /**
    * Get the `protocolVersion` supported by the browser.
    */
-  getProtocolVersion (): Bluebird<Version>
+  getProtocolVersion (): Promise<Version>
   /**
    * Rejects if `protocolVersion` is less than the current version.
    * @param protocolVersion CDP version string (ex: 1.3)
    */
-  ensureMinimumProtocolVersion(protocolVersion: string): Bluebird<void>
+  ensureMinimumProtocolVersion(protocolVersion: string): Promise<void>
   /**
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params?: object): Bluebird<any>
+  send (command: CRI.Command, params?: object): Promise<any>
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
@@ -67,7 +66,7 @@ interface CRIWrapper {
   /**
    * Calls underlying remote interface client close
   */
-  close (): Bluebird<void>
+  close (): Promise<void>
 }
 
 interface Version {
@@ -137,7 +136,7 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
+export const create = async (target: websocketUrl, onAsynchronousError: Function): Promise<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
   let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
 
@@ -147,7 +146,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
   let cri
   let client: CRIWrapper
 
-  const reconnect = () => {
+  const reconnect = async () => {
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -156,8 +155,9 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       return
     }
 
-    return connect()
-    .then(() => {
+    try {
+      await connect()
+
       debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
       subscriptions.forEach((sub) => {
         cri.on(sub.eventName, sub.cb)
@@ -169,98 +169,95 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       })
 
       enqueuedCommands = []
-    })
-    .catch((err) => {
+    } catch (err) {
       onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
-    })
+    }
   }
 
-  const connect = () => {
+  const connect = async () => {
     cri?.close()
 
     debug('connecting %o', { target })
 
-    return chromeRemoteInterface({
+    cri = await chromeRemoteInterface({
       target,
       local: true,
     })
-    .then((newCri) => {
-      cri = newCri
-      connected = true
 
-      maybeDebugCdpMessages(cri)
+    connected = true
 
-      cri.send = Bluebird.promisify(cri.send, { context: cri })
+    maybeDebugCdpMessages(cri)
 
-      // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
-      cri._notifier.on('disconnect', reconnect)
-    })
+    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
+    cri._notifier.on('disconnect', reconnect)
   }
 
-  return connect()
-  .then(() => {
-    const ensureMinimumProtocolVersion = (protocolVersion: string) => {
-      return getProtocolVersion()
-      .then((actual) => {
-        const minimum = getMajorMinorVersion(protocolVersion)
+  await connect()
 
-        if (!isVersionGte(actual, minimum)) {
-          errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
-        }
-      })
+  const ensureMinimumProtocolVersion = async (protocolVersion: string) => {
+    const actual = await getProtocolVersion()
+    const minimum = getMajorMinorVersion(protocolVersion)
+
+    if (!isVersionGte(actual, minimum)) {
+      errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
     }
+  }
 
-    const getProtocolVersion = _.memoize(() => {
-      return client.send('Browser.getVersion')
+  const getProtocolVersion = _.memoize(async () => {
+    let version
+
+    try {
+      version = await client.send('Browser.getVersion')
+    } catch (_) {
       // could be any version <= 1.2
-      .catchReturn({ protocolVersion: '0.0' })
-      .then(({ protocolVersion }) => {
-        return getMajorMinorVersion(protocolVersion)
-      })
-    })
-
-    client = {
-      ensureMinimumProtocolVersion,
-      getProtocolVersion,
-      send: Bluebird.method((command: CRI.Command, params?: object) => {
-        const enqueue = () => {
-          return new Bluebird((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
-          })
-        }
-
-        if (connected) {
-          return cri.send(command, params)
-          .catch((err) => {
-            if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
-              throw err
-            }
-
-            debug('encountered closed websocket on send %o', { command, params, err })
-
-            const p = enqueue()
-
-            reconnect()
-
-            return p
-          })
-        }
-
-        return enqueue()
-      }),
-      on (eventName: CRI.EventName, cb: Function) {
-        subscriptions.push({ eventName, cb })
-        debug('registering CDP on event %o', { eventName })
-
-        return cri.on(eventName, cb)
-      },
-      close () {
-        closed = true
-
-        return cri.close()
-      },
+      version = { protocolVersion: '0.0' }
     }
 
-    return client
+    return getMajorMinorVersion(version.protocolVersion)
   })
-})
+
+  client = {
+    ensureMinimumProtocolVersion,
+    getProtocolVersion,
+    async send (command: CRI.Command, params?: object) {
+      const enqueue = () => {
+        return new Promise((resolve, reject) => {
+          enqueuedCommands.push({ command, params, p: { resolve, reject } })
+        })
+      }
+
+      if (connected) {
+        try {
+          return await cri.send(command, params)
+        } catch (err) {
+          if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
+            throw err
+          }
+
+          debug('encountered closed websocket on send %o', { command, params, err })
+
+          const p = enqueue()
+
+          reconnect()
+
+          return p
+        }
+      }
+
+      return enqueue()
+    },
+    on (eventName: CRI.EventName, cb: Function) {
+      subscriptions.push({ eventName, cb })
+      debug('registering CDP on event %o', { eventName })
+
+      return cri.on(eventName, cb)
+    },
+    close () {
+      closed = true
+
+      return cri.close()
+    },
+  }
+
+  return client
+}

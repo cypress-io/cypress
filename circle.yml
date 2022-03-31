@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - fix-darwin-win32-node-modules-install
+        - use-contexts
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-darwin-win32-node-modules-install, << pipeline.git.branch >> ]
+    - equal: [ use-contexts, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ fix-darwin-win32-node-modules-install, << pipeline.git.branch >> ]
+    - equal: [ use-contexts, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -81,6 +81,7 @@ executors:
     macos:
       # Executor should have Node >= required version
       xcode: "13.0.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: mac
 
@@ -265,7 +266,7 @@ commands:
       - run:
           name: Bail if cache exists
           command: |
-            if [[ -f "/tmp/node_modules_installed" ]]; then
+            if [[ -f "node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
@@ -300,17 +301,18 @@ commands:
                 key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
-      - run: touch /tmp/node_modules_installed
+      - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
-            - /tmp/node_modules_installed
+            - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
             - ~/.yarn
+            - ~/.cy-npm-cache
 
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
@@ -416,9 +418,9 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
-            if [[ -v PACKAGES_RECORD_KEY ]]; then
+            if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
-              CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
@@ -453,7 +455,7 @@ commands:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -586,10 +588,16 @@ commands:
     steps:
       - restore_cached_binary
       - run:
-          name: "Cloning test project: <<parameters.repo>>"
+          name: "Cloning test project and checking out release branch: <<parameters.repo>>"
+          working_directory: ~/
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version.js) || true)
+
+            # install some deps for get-next-version
+            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
+            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+
+            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
 
   test-binary-against-rwa:
     description: |
@@ -1322,7 +1330,7 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1367,7 +1375,7 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1391,7 +1399,7 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             yarn cypress:run --record --parallel --group ui-components
           working_directory: packages/ui-components
       - verify-mocha-results
@@ -1581,25 +1589,25 @@ jobs:
           command: yarn workspace @cypress/eslint-plugin-dev test
 
   npm-cypress-schematic:
-      <<: *defaults
-      steps:
-        - restore_cached_workspace
-        - run:
-            name: Build + Install
-            command: |
-              yarn workspace @cypress/schematic build:all
-            working_directory: npm/cypress-schematic
-        - run:
-            name: Launch
-            command: |
-              yarn launch:test
-            working_directory: npm/cypress-schematic
-        - run:
-            name: Run unit tests
-            command: |
-              yarn test
-            working_directory: npm/cypress-schematic
-        - store-npm-logs
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build + Install
+          command: |
+            yarn workspace @cypress/schematic build:all
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Launch
+          command: |
+            yarn launch:test
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Run unit tests
+          command: |
+            yarn test
+          working_directory: npm/cypress-schematic
+      - store-npm-logs
 
   npm-release:
     <<: *defaults
@@ -1626,7 +1634,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-darwin-win32-node-modules-install" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "use-contexts" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1697,39 +1705,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-test-tiny --record
-      - store-npm-logs
-
-  test-binary-and-npm-against-other-projects:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium
-    resource_class: << parameters.resource_class >>
-    steps:
-      # needs uploaded NPM and test binary
-      - restore_cached_workspace
-      - run: ls -la
-      # make sure JSON files with uploaded urls are present
-      - run: ls -la binary-url.json npm-package-url.json
-      - run: cat binary-url.json
-      - run: cat npm-package-url.json
-      - run:
-          # install NPM from unique urls
-          name: Install Cypress Binary in Dummy Package
-          command: |
-            node scripts/test-unique-npm-and-binary.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --cwd /tmp/testing
-      - run:
-          name: Running other test projects with new NPM package and binary
-          command: |
-            node scripts/test-other-projects.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --provider circle
       - store-npm-logs
 
   test-npm-module-and-verify-binary:
@@ -2086,6 +2061,7 @@ linux-workflow: &linux-workflow
           - build
     # unit, integration and e2e tests
     - cli-visual-tests:
+        context: test-runner:percy
         requires:
           - build
     - unit-tests:
@@ -2126,39 +2102,51 @@ linux-workflow: &linux-workflow
         requires:
           - system-tests-node-modules-install
     - driver-integration-tests-chrome:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - driver-integration-tests-chrome-beta:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - driver-integration-tests-electron:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - runner-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - runner-integration-tests-firefox:
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - runner-integration-tests-electron:
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - runner-ct-integration-tests-chrome:
+        context: test-runner:percy
         requires:
           - build
     - desktop-gui-integration-tests-7x:
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - desktop-gui-component-tests:
+        context: test-runner:percy
         requires:
           - build
     - reporter-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - ui-components-integration-tests:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - npm-webpack-dev-server:
@@ -2174,6 +2162,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-design-system:
+        context: test-runner:percy
         requires:
           - build
     - npm-vue:
@@ -2272,11 +2261,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
@@ -2333,12 +2317,13 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
+        resource_class: macos.x86.medium.gen2
         only-cache-for-root-user: true
 
     - build:
         name: darwin-build
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-node-modules-install
 
@@ -2357,7 +2342,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-build
 
@@ -2366,13 +2351,6 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - darwin-build
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: darwin-test-binary-and-npm-against-other-projects
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
 
 windows-workflow: &windows-workflow
   jobs:
@@ -2412,14 +2390,6 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: windows-test-binary-and-npm-against-other-projects
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-create-build-artifacts
 
 workflows:
   linux:

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 
 // IE doesn't support Array.from or Map.prototype.keys
@@ -8,7 +6,7 @@ const getMapKeys = (map) => {
     return Array.from(map.keys())
   }
 
-  const keys = []
+  const keys: any[] = []
 
   map.forEach((key) => {
     keys.push(key)
@@ -18,6 +16,8 @@ const getMapKeys = (map) => {
 }
 
 class LimitedMap extends Map {
+  private _limit: number
+
   constructor (limit = 100) {
     super()
 

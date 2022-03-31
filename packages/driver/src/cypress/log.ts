@@ -1,11 +1,9 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
 import { HIGHLIGHT_ATTR } from '../cy/snapshots'
-import * as $Events from './events'
+import { extend as extendEvents } from './events'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -20,94 +18,96 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
 
-// mutate attrs by nulling out
-// object properties
-const reduceMemory = (attrs) => {
-  return _.each(attrs, (value, key) => {
-    if (_.isObject(value)) {
-      attrs[key] = null
-    }
-  })
-}
+export const LogUtils = {
+  // mutate attrs by nulling out
+  // object properties
+  reduceMemory: (attrs) => {
+    return _.each(attrs, (value, key) => {
+      if (_.isObject(value)) {
+        attrs[key] = null
+      }
+    })
+  },
 
-const toSerializedJSON = function (attrs) {
-  const { isDom } = $dom
+  toSerializedJSON (attrs) {
+    const { isDom } = $dom
 
-  const stringify = function (value, key) {
-    if (BLACKLIST_PROPS.includes(key)) {
-      return null
-    }
-
-    if (_.isArray(value)) {
-      return _.map(value, stringify)
-    }
-
-    if (isDom(value)) {
-      return $dom.stringify(value, 'short')
-    }
-
-    if (!(!_.isFunction(value) || !groupsOrTableRe.test(key))) {
-      return value()
-    }
-
-    if (_.isFunction(value)) {
-      return value.toString()
-    }
-
-    if (_.isObject(value)) {
-      // clone to nuke circular references
-      // and blow away anything that throws
-      try {
-        return _.mapValues(clone(value), stringify)
-      } catch (err) {
+    const stringify = function (value, key) {
+      if (BLACKLIST_PROPS.includes(key)) {
         return null
       }
+
+      if (_.isArray(value)) {
+        return _.map(value, stringify)
+      }
+
+      if (isDom(value)) {
+        return $dom.stringify(value, 'short')
+      }
+
+      if (_.isFunction(value) && groupsOrTableRe.test(key)) {
+        return value()
+      }
+
+      if (_.isFunction(value)) {
+        return value.toString()
+      }
+
+      if (_.isObject(value)) {
+        // clone to nuke circular references
+        // and blow away anything that throws
+        try {
+          return _.mapValues(clone(value), stringify)
+        } catch (err) {
+          return null
+        }
+      }
+
+      return value
     }
 
-    return value
-  }
+    return _.mapValues(attrs, stringify)
+  },
 
-  return _.mapValues(attrs, stringify)
-}
+  getDisplayProps: (attrs) => {
+    return {
+      ..._.pick(attrs, DISPLAY_PROPS),
+      hasSnapshot: !!attrs.snapshots,
+      hasConsoleProps: !!attrs.consoleProps,
+    }
+  },
 
-const getDisplayProps = (attrs) => {
-  return {
-    ..._.pick(attrs, DISPLAY_PROPS),
-    hasSnapshot: !!attrs.snapshots,
-    hasConsoleProps: !!attrs.consoleProps,
-  }
-}
+  getConsoleProps: (attrs) => {
+    return attrs.consoleProps
+  },
 
-const getConsoleProps = (attrs) => {
-  return attrs.consoleProps
-}
+  getSnapshotProps: (attrs) => {
+    return _.pick(attrs, SNAPSHOT_PROPS)
+  },
 
-const getSnapshotProps = (attrs) => {
-  return _.pick(attrs, SNAPSHOT_PROPS)
-}
+  countLogsByTests (tests: Record<string, any> = {}) {
+    if (_.isEmpty(tests)) {
+      return 0
+    }
 
-const countLogsByTests = function (tests = {}) {
-  if (_.isEmpty(tests)) {
-    return 0
-  }
+    return _
+    .chain(tests)
+    .flatMap((test) => {
+      return [test, test.prevAttempts]
+    })
+    .flatMap<{id: number}>((tests) => {
+      return [].concat(tests.agents, tests.routes, tests.commands)
+    }).compact()
+    .union([{ id: 0 }])
+    .map('id')
+    .max()
+    .value()
+  },
 
-  return _
-  .chain(tests)
-  .flatMap((test) => {
-    return [test, test.prevAttempts]
-  })
-  .flatMap((tests) => {
-    return [].concat(tests.agents, tests.routes, tests.commands)
-  }).compact()
-  .union([{ id: 0 }])
-  .map('id')
-  .max()
-  .value()
-}
-
-// TODO: fix this
-const setCounter = (num) => {
-  return counter = num
+  // TODO: fix this
+  setCounter: (num) => {
+    return counter = num
+  },
 }
 
 const defaults = function (state, config, obj) {
@@ -219,356 +219,363 @@ const defaults = function (state, config, obj) {
   return obj
 }
 
-const Log = function (cy, state, config, obj) {
-  obj = defaults(state, config, obj)
+class Log {
+  cy: any
+  state: any
+  config: any
+  fireChangeEvent: ((log) => (void | undefined))
+  obj: any
 
-  // private attributes of each log
-  const attributes = {}
+  private attributes: Record<string, any> = {}
 
-  return {
-    get (attr) {
-      if (attr) {
-        return attributes[attr]
+  constructor (cy, state, config, fireChangeEvent, obj) {
+    this.cy = cy
+    this.state = state
+    this.config = config
+    this.fireChangeEvent = fireChangeEvent
+    this.obj = defaults(state, config, obj)
+
+    extendEvents(this)
+  }
+
+  get (attr) {
+    if (attr) {
+      return this.attributes[attr]
+    }
+
+    return this.attributes
+  }
+
+  unset (key) {
+    return this.set(key, undefined)
+  }
+
+  invoke (key) {
+    const invoke = () => {
+      // ensure this is a callable function
+      // and set its default to empty object literal
+      const fn = this.get(key)
+
+      if (_.isFunction(fn)) {
+        return fn()
       }
 
-      return attributes
-    },
+      return fn
+    }
 
-    unset (key) {
-      return this.set(key, undefined)
-    },
+    return invoke() || {}
+  }
 
-    invoke (key) {
-      const invoke = () => {
-        // ensure this is a callable function
-        // and set its default to empty object literal
-        const fn = this.get(key)
+  toJSON () {
+    return _
+    .chain(this.attributes)
+    .omit('error')
+    .omitBy(_.isFunction)
+    .extend({
+      err: $errUtils.wrapErr(this.get('error')),
+      consoleProps: this.invoke('consoleProps'),
+      renderProps: this.invoke('renderProps'),
+    })
+    .value()
+  }
 
-        if (_.isFunction(fn)) {
-          return fn()
-        }
+  set (key, val?) {
+    if (_.isString(key)) {
+      this.obj = {}
+      this.obj[key] = val
+    } else {
+      this.obj = key
+    }
 
-        return fn
+    if ('url' in this.obj) {
+      // always stringify the url property
+      this.obj.url = (this.obj.url != null ? this.obj.url : '').toString()
+    }
+
+    // convert onConsole to consoleProps
+    // for backwards compatibility
+    if (this.obj.onConsole) {
+      this.obj.consoleProps = this.obj.onConsole
+    }
+
+    // if we have an alias automatically
+    // figure out what type of alias it is
+    if (this.obj.alias) {
+      _.defaults(this.obj, { aliasType: this.obj.$el ? 'dom' : 'primitive' })
+    }
+
+    // dont ever allow existing id's to be mutated
+    if (this.attributes.id) {
+      delete this.obj.id
+    }
+
+    _.extend(this.attributes, this.obj)
+
+    // if we have an consoleProps function
+    // then re-wrap it
+    if (this.obj && _.isFunction(this.obj.consoleProps)) {
+      this.wrapConsoleProps()
+    }
+
+    if (this.obj && this.obj.$el) {
+      this.setElAttrs()
+    }
+
+    this.fireChangeEvent(this)
+
+    return this
+  }
+
+  pick (...args) {
+    return _.pick(this.attributes, args)
+  }
+
+  snapshot (name?, options: any = {}) {
+    // bail early and don't snapshot if we're in headless mode
+    // or we're not storing tests
+    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
+      return this
+    }
+
+    _.defaults(options, {
+      at: null,
+      next: null,
+    })
+
+    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+
+    const snapshots = this.get('snapshots') || []
+
+    // don't add snapshot if we couldn't create one, which can happen
+    // if the snapshotting process errors
+    // https://github.com/cypress-io/cypress/issues/15816
+    if (snapshot) {
+      // insert at index 'at' or whatever is the next position
+      snapshots[options.at || snapshots.length] = snapshot
+    }
+
+    this.set('snapshots', snapshots)
+
+    if (options.next) {
+      const fn = this.snapshot
+
+      this.snapshot = function () {
+        // restore the fn
+        this.snapshot = fn
+
+        // call orig fn with next as name
+        return fn.call(this, options.next)
+      }
+    }
+
+    return this
+  }
+
+  error (err) {
+    this.set({
+      ended: true,
+      error: err,
+      state: 'failed',
+    })
+
+    return this
+  }
+
+  end () {
+    // dont set back to passed if we've already ended
+    if (this.get('ended')) {
+      // we do need to trigger the change event since
+      // xhr onLoad and proxy-logging updateRequestWithResponse can sometimes
+      // happen in a different order and the log data in each is different
+      this.fireChangeEvent(this)
+
+      return
+    }
+
+    this.set({
+      ended: true,
+      state: 'passed',
+    })
+
+    return this
+  }
+
+  getError (err) {
+    return err.stack || err.message
+  }
+
+  setElAttrs () {
+    const $el = this.get('$el')
+
+    if (!$el) {
+      return
+    }
+
+    if (_.isElement($el)) {
+      // wrap the element in jquery
+      // if its just a plain element
+      return this.set('$el', $($el))
+    }
+
+    // if we've passed something like
+    // <window> or <document> here or
+    // a primitive then unset $el
+    if (!$dom.isJquery($el)) {
+      return this.unset('$el')
+    }
+
+    // make sure all $el elements are visible!
+    this.obj = {
+      highlightAttr: HIGHLIGHT_ATTR,
+      numElements: $el.length,
+      visible: $el.length === $el.filter(':visible').length,
+    }
+
+    return this.set(this.obj, { silent: true })
+  }
+
+  merge (log) {
+    // merges another logs attributes into
+    // ours by also removing / adding any properties
+    // on the original
+
+    // 1. calculate which properties to unset
+    const unsets = _.chain(this.attributes).keys().without(..._.keys(log.get())).value()
+
+    _.each(unsets, (unset) => {
+      return this.unset(unset)
+    })
+
+    // 2. merge in any other properties
+    return this.set(log.get())
+  }
+
+  _shouldAutoEnd () {
+    // must be autoEnd
+    // and not already ended
+    // and not an event
+    // and a command
+    return (this.get('autoEnd') !== false) &&
+      (this.get('ended') !== true) &&
+        (this.get('event') === false) &&
+          (this.get('instrument') === 'command')
+  }
+
+  finish () {
+    // end our command since our subject
+    // has been resolved at this point
+    // unless its already been 'ended'
+    // or has been specifically told not to auto resolve
+    if (this._shouldAutoEnd()) {
+      if (this.get('snapshot') !== false) {
+        this.snapshot()
       }
 
-      return invoke() || {}
-    },
+      return this.end()
+    }
 
-    toJSON () {
-      return _
-      .chain(attributes)
-      .omit('error')
-      .omitBy(_.isFunction)
-      .extend({
-        err: $errUtils.wrapErr(this.get('error')),
-        consoleProps: this.invoke('consoleProps'),
-        renderProps: this.invoke('renderProps'),
-      })
-      .value()
-    },
+    return
+  }
 
-    set (key, val) {
-      if (_.isString(key)) {
-        obj = {}
-        obj[key] = val
+  wrapConsoleProps () {
+    const _this = this
+
+    const { consoleProps } = this.attributes
+
+    this.attributes.consoleProps = function (...args) {
+      const key = _this.get('event') ? 'Event' : 'Command'
+
+      const consoleObj: Record<string, any> = {}
+
+      consoleObj[key] = _this.get('name')
+
+      // merge in the other properties from consoleProps
+      _.extend(consoleObj, consoleProps.apply(this, args))
+
+      // TODO: right here we need to automatically
+      // merge in "Yielded + Element" if there is an $el
+
+      // and finally add error if one exists
+      if (_this.get('error')) {
+        _.defaults(consoleObj, {
+          Error: _this.getError(_this.get('error')),
+        })
+      }
+
+      // add note if no snapshot exists on command instruments
+      if ((_this.get('instrument') === 'command') && !_this.get('snapshots')) {
+        consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
-        obj = key
+        delete consoleObj.Snapshot
       }
 
-      if ('url' in obj) {
-        // always stringify the url property
-        obj.url = (obj.url != null ? obj.url : '').toString()
-      }
-
-      // convert onConsole to consoleProps
-      // for backwards compatibility
-      if (obj.onConsole) {
-        obj.consoleProps = obj.onConsole
-      }
-
-      // if we have an alias automatically
-      // figure out what type of alias it is
-      if (obj.alias) {
-        _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
-      }
-
-      // dont ever allow existing id's to be mutated
-      if (attributes.id) {
-        delete obj.id
-      }
-
-      _.extend(attributes, obj)
-
-      // if we have an consoleProps function
-      // then re-wrap it
-      if (obj && _.isFunction(obj.consoleProps)) {
-        this.wrapConsoleProps()
-      }
-
-      if (obj && obj.$el) {
-        this.setElAttrs()
-      }
-
-      this.fireChangeEvent()
-
-      return this
-    },
-
-    pick (...args) {
-      return _.pick(attributes, args)
-    },
-
-    snapshot (name, options = {}) {
-      // bail early and don't snapshot if we're in headless mode
-      // or we're not storing tests
-      if (!config('isInteractive') || (config('numTestsKeptInMemory') === 0)) {
-        return this
-      }
-
-      _.defaults(options, {
-        at: null,
-        next: null,
-      })
-
-      const snapshot = cy.createSnapshot(name, this.get('$el'))
-
-      const snapshots = this.get('snapshots') || []
-
-      // don't add snapshot if we couldn't create one, which can happen
-      // if the snapshotting process errors
-      // https://github.com/cypress-io/cypress/issues/15816
-      if (snapshot) {
-        // insert at index 'at' or whatever is the next position
-        snapshots[options.at || snapshots.length] = snapshot
-      }
-
-      this.set('snapshots', snapshots)
-
-      if (options.next) {
-        const fn = this.snapshot
-
-        this.snapshot = function () {
-          // restore the fn
-          this.snapshot = fn
-
-          // call orig fn with next as name
-          return fn.call(this, options.next)
-        }
-      }
-
-      return this
-    },
-
-    error (err) {
-      this.set({
-        ended: true,
-        error: err,
-        state: 'failed',
-      })
-
-      return this
-    },
-
-    end () {
-      // dont set back to passed
-      // if we've already ended
-      if (this.get('ended')) {
-        return
-      }
-
-      this.set({
-        ended: true,
-        state: 'passed',
-      })
-
-      return this
-    },
-
-    getError (err) {
-      return err.stack || err.message
-    },
-
-    setElAttrs () {
-      const $el = this.get('$el')
-
-      if (!$el) {
-        return
-      }
-
-      if (_.isElement($el)) {
-        // wrap the element in jquery
-        // if its just a plain element
-        return this.set('$el', $($el), { silent: true })
-      }
-
-      // if we've passed something like
-      // <window> or <document> here or
-      // a primitive then unset $el
-      if (!$dom.isJquery($el)) {
-        return this.unset('$el')
-      }
-
-      // make sure all $el elements are visible!
-      obj = {
-        highlightAttr: HIGHLIGHT_ATTR,
-        numElements: $el.length,
-        visible: $el.length === $el.filter(':visible').length,
-      }
-
-      return this.set(obj, { silent: true })
-    },
-
-    merge (log) {
-      // merges another logs attributes into
-      // ours by also removing / adding any properties
-      // on the original
-
-      // 1. calculate which properties to unset
-      const unsets = _.chain(attributes).keys().without(..._.keys(log.get())).value()
-
-      _.each(unsets, (unset) => {
-        return this.unset(unset)
-      })
-
-      // 2. merge in any other properties
-      return this.set(log.get())
-    },
-
-    _shouldAutoEnd () {
-      // must be autoEnd
-      // and not already ended
-      // and not an event
-      // and a command
-      return (this.get('autoEnd') !== false) &&
-        (this.get('ended') !== true) &&
-          (this.get('event') === false) &&
-            (this.get('instrument') === 'command')
-    },
-
-    finish () {
-      // end our command since our subject
-      // has been resolved at this point
-      // unless its already been 'ended'
-      // or has been specifically told not to auto resolve
-      if (this._shouldAutoEnd()) {
-        if (this.get('snapshot') !== false) {
-          this.snapshot()
-        }
-
-        return this.end()
-      }
-    },
-
-    wrapConsoleProps () {
-      const _this = this
-
-      const { consoleProps } = attributes
-
-      attributes.consoleProps = function (...args) {
-        const key = _this.get('event') ? 'Event' : 'Command'
-
-        const consoleObj = {}
-
-        consoleObj[key] = _this.get('name')
-
-        // merge in the other properties from consoleProps
-        _.extend(consoleObj, consoleProps.apply(this, args))
-
-        // TODO: right here we need to automatically
-        // merge in "Yielded + Element" if there is an $el
-
-        // and finally add error if one exists
-        if (_this.get('error')) {
-          _.defaults(consoleObj, {
-            Error: _this.getError(_this.get('error')),
-          })
-        }
-
-        // add note if no snapshot exists on command instruments
-        if ((_this.get('instrument') === 'command') && !_this.get('snapshots')) {
-          consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
-        } else {
-          delete consoleObj.Snapshot
-        }
-
-        return consoleObj
-      }
-    },
+      return consoleObj
+    }
   }
 }
 
-export default {
-  reduceMemory,
+class LogManager {
+  logs: Record<string, any> = {}
 
-  toSerializedJSON,
+  constructor () {
+    this.fireChangeEvent = this.fireChangeEvent.bind(this)
+  }
 
-  getDisplayProps,
-
-  getConsoleProps,
-
-  getSnapshotProps,
-
-  countLogsByTests,
-
-  setCounter,
-
-  create (Cypress, cy, state, config) {
-    counter = 0
-    const logs = {}
-
-    const trigger = function (log, event) {
+  trigger (log, event) {
     // bail if we never fired our initial log event
-      if (!log._hasInitiallyLogged) {
-        return
-      }
-
-      // bail if we've reset the logs due to a Cypress.abort
-      if (!logs[log.get('id')]) {
-        return
-      }
-
-      const attrs = log.toJSON()
-
-      // only trigger this event if our last stored
-      // emitted attrs do not match the current toJSON
-      if (!_.isEqual(log._emittedAttrs, attrs)) {
-        log._emittedAttrs = attrs
-
-        log.emit(event, attrs)
-
-        return Cypress.action(event, attrs, log)
-      }
+    if (!log._hasInitiallyLogged) {
+      return
     }
 
-    const triggerLog = function (log) {
-      log._hasInitiallyLogged = true
-
-      return trigger(log, 'command:log:added')
+    // bail if we've reset the logs due to a Cypress.abort
+    if (!this.logs[log.get('id')]) {
+      return
     }
 
-    const addToLogs = function (log) {
-      const id = log.get('id')
+    const attrs = log.toJSON()
 
-      logs[id] = true
+    // only trigger this event if our last stored
+    // emitted attrs do not match the current toJSON
+    if (!_.isEqual(log._emittedAttrs, attrs)) {
+      log._emittedAttrs = attrs
+
+      log.emit(event, attrs)
+
+      return Cypress.action(event, attrs, log)
+    }
+  }
+
+  triggerLog (log) {
+    log._hasInitiallyLogged = true
+
+    return this.trigger(log, 'command:log:added')
+  }
+
+  addToLogs (log) {
+    const id = log.get('id')
+
+    this.logs[id] = true
+  }
+
+  // only fire the log:state:changed event
+  // as fast as every 4ms
+  fireChangeEvent (log) {
+    const triggerStateChanged = () => {
+      return this.trigger(log, 'command:log:changed')
     }
 
-    const logFn = function (options = {}) {
+    const debounceFn = _.debounce(triggerStateChanged, 4)
+
+    return debounceFn()
+  }
+
+  createLogFn (cy, state, config) {
+    return (options: any = {}) => {
       if (!_.isObject(options)) {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      const log = Log(cy, state, config, options)
-
-      // add event emitter interface
-      $Events.extend(log)
-
-      const triggerStateChanged = () => {
-        return trigger(log, 'command:log:changed')
-      }
-
-      // only fire the log:state:changed event
-      // as fast as every 4ms
-      log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
+      const log = new Log(cy, state, config, this.fireChangeEvent, options)
 
       log.set(options)
 
@@ -581,11 +588,11 @@ export default {
       // if end was passed in
       // go ahead and end
       if (log.get('end')) {
-        log.end({ silent: true })
+        log.end()
       }
 
       if (log.get('error')) {
-        log.error(log.get('error'), { silent: true })
+        log.error(log.get('error'))
       }
 
       log.wrapConsoleProps()
@@ -607,7 +614,7 @@ export default {
         current.log(log)
       }
 
-      addToLogs(log)
+      this.addToLogs(log)
 
       if (options.sessionInfo) {
         Cypress.emit('session:add', log.toJSON())
@@ -617,19 +624,22 @@ export default {
         return
       }
 
-      triggerLog(log)
+      this.triggerLog(log)
 
       // if not current state then the log is being run
       // with no command reference, so just end the log
       if (!current) {
-        log.end({ silent: true })
+        log.end()
       }
 
       return log
     }
+  }
+}
 
-    logFn._logs = logs
+export function create (Cypress, cy, state, config) {
+  counter = 0
+  const logManager = new LogManager()
 
-    return logFn
-  },
+  return logManager.createLogFn(cy, state, config)
 }

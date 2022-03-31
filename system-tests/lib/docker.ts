@@ -57,7 +57,12 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
 
     for (const k in opts.env) {
       // skip problematic env vars that we don't wanna preserve from `process.env`
-      if (['DISPLAY', 'USER', 'HOME', 'USERNAME', 'PATH'].includes(k)) continue
+      if (
+        ['DISPLAY', 'USER', 'HOME', 'USERNAME', 'PATH'].includes(k)
+        || k.startsWith('npm_')
+      ) {
+        continue
+      }
 
       containerCreateEnv.push([k, opts.env[k]].join('='))
     }
@@ -78,6 +83,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
         Entrypoint: 'bash',
         Tty: false, // so we can use stdout and stderr
         Env: containerCreateEnv,
+        Privileged: true,
         Binds: [
           [path.join(__dirname, '..', '..'), '/cypress'],
           // map tmpDir to the same absolute path on the container to make it easier to reason about paths in tests

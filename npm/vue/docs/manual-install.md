@@ -29,7 +29,6 @@ import '@cypress/vue/dist/support'
 
 ```json
 {
-  "experimentalComponentTesting": true,
   "componentFolder": "src"
 }
 ```
