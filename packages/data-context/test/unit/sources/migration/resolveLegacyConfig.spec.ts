@@ -11,10 +11,10 @@ describe('processConfigViaLegacyPlugins', () => {
 
     expect(result).to.eql({
       'component': {
-        'testFiles': '**/*.spec.js',
+        'testFiles': '**/*.spec.ts',
       },
       'e2e': {
-        'testFiles': '**/*.ts',
+        'testFiles': '**/*.js',
       },
       'integrationFolder': 'tests/e2e',
       'retries': {
