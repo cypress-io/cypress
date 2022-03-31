@@ -264,9 +264,11 @@ class Command extends Component<Props> {
                 <i className='fas fa-spinner fa-spin' />
                 <span>{model.number || ''}</span>
               </span>
-              <span className='command-pin'>
-                <i className='fas fa-thumbtack' />
-              </span>
+              {!model.group && (
+                <span className='command-pin'>
+                  <i className='fas fa-thumbtack' />
+                </span>
+              )}
               <span className='command-method'>
                 <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
               </span>

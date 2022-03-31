@@ -376,6 +376,13 @@ class Log {
   }
 
   error (err) {
+    const logGroups = this.state('logGroup') || []
+
+    // current log was responsible to creating the current log group so end the current group
+    if (_.last(logGroups) === this.attributes.id) {
+      this.endGroup()
+    }
+
     this.set({
       ended: true,
       error: err,
