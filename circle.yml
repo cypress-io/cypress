@@ -1407,6 +1407,7 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: electron
+
   reporter-integration-tests:
     <<: *defaults
     parallelism: 3
@@ -1555,7 +1556,6 @@ jobs:
       - run:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
-          #
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -2150,6 +2150,7 @@ linux-workflow: &linux-workflow
           - build
     # unit, integration and e2e tests
     - cli-visual-tests:
+        context: test-runner:percy
         requires:
           - build
     - unit-tests:
@@ -2206,32 +2207,32 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - reporter-integration-tests:
-        context: test-runner:cypress-record-key
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - ui-components-integration-tests:
@@ -2251,6 +2252,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-design-system:
+        context: test-runner:percy
         requires:
           - build
     - npm-vue:
