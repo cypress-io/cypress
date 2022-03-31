@@ -42,16 +42,17 @@ export function getConfigWithDefaults (legacyConfig: any) {
 }
 
 export function getDiff (oldConfig: any, newConfig: any) {
-  // get all the values updated during the process
+  // get all the values updated
   const result: any = _.reduce(oldConfig, (acc: any, value, key) => {
-    if (!_.isEqual(value, newConfig[key])) {
+    // ignore values that have been removed
+    if (newConfig[key] && !_.isEqual(value, newConfig[key])) {
       acc[key] = newConfig[key]
     }
 
     return acc
   }, {})
 
-  // get all the values added during the process
+  // get all the values added
   return _.reduce(newConfig, (acc: any, value, key) => {
     // their key is in the new config but not in the old config
     if (!oldConfig.hasOwnProperty(key)) {
