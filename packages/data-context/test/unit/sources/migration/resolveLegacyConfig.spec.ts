@@ -10,8 +10,18 @@ describe('processConfigViaLegacyPlugins', () => {
     const result = await processConfigViaLegacyPlugins(projectRoot, {})
 
     expect(result).to.eql({
-      integrationFolder: 'tests/e2e',
-      testFiles: '**/*.spec.js',
+      'component': {
+        'testFiles': '**/*.spec.ts',
+      },
+      'e2e': {
+        'testFiles': '**/*.js',
+      },
+      'integrationFolder': 'tests/e2e',
+      'retries': {
+        'openMode': 0,
+        'runMode': 1,
+      },
+      'testFiles': '**/*.spec.js',
     })
   })
 

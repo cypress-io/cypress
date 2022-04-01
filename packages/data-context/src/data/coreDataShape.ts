@@ -112,7 +112,7 @@ export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
   chosenBrowser: FoundBrowser | null
-  machineBrowsers: Promise<FoundBrowser[]> | FoundBrowser[] | null
+  machineBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>

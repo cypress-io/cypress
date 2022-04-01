@@ -27,10 +27,8 @@ const runMode = require(`../../lib/modes/run`)
 const api = require(`../../lib/api`)
 const cwd = require(`../../lib/cwd`)
 const user = require(`../../lib/user`)
-const config = require(`../../lib/config`)
 const cache = require(`../../lib/cache`)
 const errors = require(`../../lib/errors`)
-const plugins = require(`../../lib/plugins`)
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerE2E } = require(`../../lib/server-e2e`)
@@ -127,7 +125,6 @@ describe('lib/cypress', () => {
     // force cypress to call directly into main without
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
-    sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
@@ -457,7 +454,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
-      return config.get(this.pristineWithConfigPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         return fs.rmdir(supportFolder, { recursive: true })
       }).then(() => {
@@ -480,7 +477,7 @@ describe('lib/cypress', () => {
     it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      config.get(this.idsPath)
+      ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -540,7 +537,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      return config.get(this.idsPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -897,8 +894,6 @@ describe('lib/cypress', () => {
       })
 
       it('can override values in plugins', function () {
-        plugins.init.restore()
-
         return cypress.start([
           `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=false',
           '--env=foo=foo,bar=bar',
@@ -940,7 +935,6 @@ describe('lib/cypress', () => {
 
     describe('plugins', () => {
       beforeEach(() => {
-        plugins.init.restore()
         browsers.open.restore()
 
         const ee = new EE()

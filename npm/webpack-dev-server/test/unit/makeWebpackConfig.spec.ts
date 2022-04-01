@@ -16,6 +16,7 @@ describe('makeWebpackConfig', () => {
       supportFile: '/support.js',
       projectRoot: '.',
       files: [],
+      indexHtmlFile: 'index.html',
     })
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
