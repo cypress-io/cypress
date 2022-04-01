@@ -386,6 +386,13 @@ class Command extends Component<Props> {
   _snapshot (show: boolean) {
     const { model, runnablesStore } = this.props
 
+    // do not trigger the show:snapshot event for commands groups
+    // TODO: remove this behavior in 10.0+ when a group
+    // can both be expanded and collapsed and pinned
+    if (model.hasChildren) {
+      return
+    }
+
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
 
