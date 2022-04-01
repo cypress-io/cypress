@@ -28,6 +28,7 @@ export default defineConfig({
         ],
       },
     },
+    indexHtmlFile: 'cypress/component/support/component-index.html',
   },
   'e2e': {
     baseUrl: 'http://localhost:5555',

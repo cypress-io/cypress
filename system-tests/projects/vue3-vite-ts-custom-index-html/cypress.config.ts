@@ -4,9 +4,9 @@ import { devServer } from '@cypress/vite-dev-server'
 export default defineConfig({
   component: {
     devServer,
-    // optionally provide your Vite config overrides.
     devServerConfig: {
-      indexHtmlFile: 'cypress/support/component-index.html',
+      // optionally provide your Vite config overrides.
     },
+    indexHtmlFile: 'cypress/support/custom-component-index.html'
   },
 })

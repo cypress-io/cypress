@@ -6,7 +6,6 @@ function devServer (cypressDevServerConfig, devServerConfig = {}) {
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig: getBabelWebpackConfig(cypressDevServerConfig.config, devServerConfig),
-    indexHtmlFile: devServerConfig.indexHtmlFile,
   })
 }
 
