@@ -364,6 +364,27 @@ Error: spec iframe stack
       expect(details.relativeFile).to.equal('cypress/integration/spec%with space &^$ emoji👍_你好.js')
       expect(details.absoluteFile).to.equal(`${projectRoot}/cypress/integration/spec%with space &^$ emoji👍_你好.js`)
     })
+
+    it('maintains absolute path when provided', () => {
+      cy.stub($sourceMapUtils, 'getSourcePosition').returns({
+        file: '/root/path/cypress/integration/spec.js',
+        line: 1,
+        column: 0,
+      })
+
+      // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
+      const stack = stripIndent`
+        Error
+          at Object../cypress/integration/spec.js (http://localhost:50129/__cypress/tests?p=/root/path/cypress/integration/spec.js:99:1)
+      `
+
+      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+
+      expect(details.originalFile).to.equal('/root/path/cypress/integration/spec.js')
+      expect(details.relativeFile).to.equal('/root/path/cypress/integration/spec.js')
+      expect(details.absoluteFile).to.equal(`/root/path/cypress/integration/spec.js`)
+    })
   })
 
   context('.stackWithUserInvocationStackSpliced', () => {
