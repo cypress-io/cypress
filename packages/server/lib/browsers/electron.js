@@ -355,11 +355,8 @@ module.exports = {
   },
 
   _listenToOnBeforeHeaders (win) {
-    const isFirstLevelIFrame = (frame) => {
-      if (frame.parent && !frame.parent.parent) return true
-
-      return false
-    }
+    // true if the frame only has a single parent, false otherwise
+    const isFirstLevelIFrame = (frame) => (!!frame?.parent && !frame.parent.parent)
 
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
