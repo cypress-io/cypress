@@ -1541,7 +1541,7 @@ export default {
           }
 
           cy.state('duringUserTestExecution', false)
-          Cypress.multiOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
+          Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
 
           // our runnable is about to run, so let cy know. this enables
           // us to always have a correct runnable set even when we are

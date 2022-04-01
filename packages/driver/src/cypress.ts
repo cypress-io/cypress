@@ -104,7 +104,7 @@ class $Cypress {
   emit: any
   emitThen: any
   emitMap: any
-  multiOriginCommunicator: PrimaryOriginCommunicator
+  primaryOriginCommunicator: PrimaryOriginCommunicator
   specBridgeCommunicator: SpecBridgeCommunicator
   isMultiDomain: boolean
 
@@ -153,7 +153,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
-    this.multiOriginCommunicator = new PrimaryOriginCommunicator()
+    this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
     this.isMultiDomain = false
 
