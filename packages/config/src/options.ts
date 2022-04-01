@@ -387,12 +387,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'viewportHeight',
-    defaultValue: 660,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
     name: 'viewportWidth',
-    defaultValue: 1000,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
