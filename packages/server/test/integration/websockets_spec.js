@@ -33,7 +33,7 @@ describe('Web Sockets', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-    return config.get(this.idsPath, { port: cyPort })
+    return ctx.lifecycleManager.getFullInitialConfig({ port: cyPort })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })

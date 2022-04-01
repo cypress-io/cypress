@@ -46,19 +46,19 @@ describe('GitDataSource', () => {
       ctx.git.gitInfo(xhrSpec),
     ])
 
-    expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(created.statusType).to.eql('created')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(created.author).not.to.be.undefined
     expect(created.lastModifiedTimestamp).not.to.be.undefined
 
-    expect(unmodified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(unmodified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(unmodified.statusType).to.eql('unmodified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(unmodified.author).not.to.be.undefined
     expect(unmodified.lastModifiedTimestamp).not.to.be.undefined
 
-    expect(modified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) second?s ago/)
+    expect(modified.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(modified.statusType).to.eql('modified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.to.be.undefined

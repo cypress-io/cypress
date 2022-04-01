@@ -46,7 +46,7 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
-  indexHtmlFile?: string
+  indexHtmlFile: string
 }
 
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
@@ -84,19 +84,16 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   }
 
   if (userWebpackConfig?.plugins) {
-    userWebpackConfig = {
-      ...userWebpackConfig,
-      plugins: userWebpackConfig.plugins.filter((plugin) => {
-        if (removeList.includes(plugin.constructor.name)) {
+    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
+      if (removeList.includes(plugin.constructor.name)) {
         /* eslint-disable no-console */
-          console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
+        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
 
-          return false
-        }
+        return false
+      }
 
-        return true
-      }),
-    }
+      return true
+    })
   }
 
   if (typeof userWebpackConfig?.module?.unsafeCache === 'function') {

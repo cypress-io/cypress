@@ -27,6 +27,8 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
+    cy.findByRole('button', { name: 'Try again' }).click()
+
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
@@ -61,6 +63,8 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
+    cy.findByRole('button', { name: 'Try again' }).click()
+
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
@@ -79,6 +83,8 @@ describe('Config files error handling', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('h1').should('contain', 'Choose a Browser')
   })

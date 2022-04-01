@@ -43,9 +43,6 @@ export const FRONTEND_FRAMEWORKS = [
       module.exports = {
         component: {
           devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
         },
       }`
       },
@@ -57,9 +54,6 @@ export const FRONTEND_FRAMEWORKS = [
       export default defineConfig({
         component: {
           devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
         },
       })`
       },
@@ -93,9 +87,6 @@ export const FRONTEND_FRAMEWORKS = [
       module.exports = {
         component: {
           devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
         },
       }`
       },
@@ -107,9 +98,6 @@ export const FRONTEND_FRAMEWORKS = [
       export default defineConfig({
         component: {
           devServer,
-          devServerConfig: {
-            indexHtmlFile: 'cypress/support/component-index.html',
-          },
         },
       })`
       },
@@ -150,7 +138,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       }
@@ -167,7 +154,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       })`
@@ -209,7 +195,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       }
@@ -226,7 +211,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       })`
@@ -268,7 +252,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       }
@@ -285,7 +268,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       })`
@@ -327,7 +309,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       }
@@ -344,7 +325,6 @@ export const FRONTEND_FRAMEWORKS = [
           devServer,
           devServerConfig: {
             webpackConfig,
-            indexHtmlFile: 'cypress/support/component-index.html',
           },
         },
       })`
@@ -386,7 +366,6 @@ export const FRONTEND_FRAMEWORKS = [
               devServer,
               devServerConfig: {
                 webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
               },
             },
           }`
@@ -400,7 +379,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 // optionally provide your Vite config overrides.
               },
             },
@@ -424,7 +402,6 @@ export const FRONTEND_FRAMEWORKS = [
               devServer,
               devServerConfig: {
                 webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
               },
             },
           })`
@@ -439,7 +416,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 // optionally provide your Vite config overrides.
               },
             },
@@ -482,7 +458,6 @@ export const FRONTEND_FRAMEWORKS = [
               devServer,
               devServerConfig: {
                 webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
               },
             },
           }`
@@ -496,7 +471,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 // optionally provide your Vite config overrides.
               },
             },
@@ -518,7 +492,6 @@ export const FRONTEND_FRAMEWORKS = [
               devServer,
               devServerConfig: {
                 webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
               },
             },
           })`
@@ -533,7 +506,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 // optionally provide your Vite config overrides.
               },
             },
@@ -576,7 +548,6 @@ export const FRONTEND_FRAMEWORKS = [
               devServer,
               devServerConfig: {
                 webpackConfig,
-                indexHtmlFile: 'cypress/support/component-index.html',
               },
             },
           }`
@@ -590,7 +561,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 // optionally provide your Vite config overrides.
               },
             },
@@ -611,7 +581,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 webpackConfig,
               },
             },
@@ -627,7 +596,6 @@ export const FRONTEND_FRAMEWORKS = [
             component: {
               devServer,
               devServerConfig: {
-                indexHtmlFile: 'cypress/support/component-index.html',
                 // optionally provide your Vite config overrides.
               },
             },
@@ -697,9 +665,6 @@ export const FRONTEND_FRAMEWORKS = [
 
               return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
             },
-            devServerConfig: {
-              indexHtmlFile: 'cypress/support/component-index.html',
-            },
           },
         })`
       },
@@ -715,9 +680,6 @@ export const FRONTEND_FRAMEWORKS = [
               const webpackConfig = await getWebpackConfig()
 
               return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
-            },
-            devServerConfig: {
-              indexHtmlFile: 'cypress/support/component-index.html',
             },
           },
         })`
