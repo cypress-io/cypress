@@ -127,7 +127,8 @@ const defaults = function (state, config, obj: Cypress.InternalLogConfig): Cypre
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
+    // @ts-ignore
+    if (!parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -202,8 +203,6 @@ const defaults = function (state, config, obj: Cypress.InternalLogConfig): Cypre
     },
   })
 
-  logAttributes = sanitizeAttributes(logAttributes)
-
   const logGroup = _.last(state('logGroup')) as number
 
   if (logGroup) {
@@ -219,27 +218,6 @@ const defaults = function (state, config, obj: Cypress.InternalLogConfig): Cypre
   }
 
   return logAttributes
-}
-
-const sanitizeAttributes = (obj) => {
-  if ('url' in obj) {
-    // always stringify the url property
-    obj.url = (obj.url != null ? obj.url : '').toString()
-  }
-
-  // convert onConsole to consoleProps
-  // for backwards compatibility
-  if (obj.onConsole) {
-    obj.consoleProps = obj.onConsole
-  }
-
-  // if we have an alias automatically
-  // figure out what type of alias it is
-  if (obj.alias) {
-    _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
-  }
-
-  return obj
 }
 
 class Log {
@@ -310,7 +288,22 @@ class Log {
       obj = key
     }
 
-    obj = sanitizeAttributes(obj)
+    if ('url' in obj) {
+      // always stringify the url property
+      obj.url = (obj.url != null ? obj.url : '').toString()
+    }
+
+    // convert onConsole to consoleProps
+    // for backwards compatibility
+    if (obj.onConsole) {
+      obj.consoleProps = obj.onConsole
+    }
+
+    // if we have an alias automatically
+    // figure out what type of alias it is
+    if (obj.alias) {
+      _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
+    }
 
     // dont ever allow existing id's to be mutated
     if (this.attributes.id) {
