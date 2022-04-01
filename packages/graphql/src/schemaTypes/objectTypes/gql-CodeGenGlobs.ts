@@ -6,6 +6,5 @@ export const CodeGenGlobs = objectType({
   node: 'component',
   definition (t) {
     t.nonNull.string('component')
-    t.nonNull.string('story')
   },
 })

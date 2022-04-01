@@ -338,7 +338,6 @@ type CodeGenGlobs implements Node {
 
   """Relay style Node ID field for the CodeGenGlobs field"""
   id: ID!
-  story: String!
 }
 
 enum CodeGenType {
