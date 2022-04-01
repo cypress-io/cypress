@@ -101,6 +101,7 @@
     "bin",
     "lib",
     "index.js",
+    "index.mjs",
     "vue/**",
     "react/**",
     "mount-utils/**",
