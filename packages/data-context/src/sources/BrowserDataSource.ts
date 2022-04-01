@@ -32,15 +32,12 @@ export class BrowserDataSource {
     if (!this.ctx.coreData.machineBrowsers) {
       const p = this.ctx._apis.browserApi.getBrowsers()
 
-      this.ctx.coreData.machineBrowsers = p
-      p.then((browsers) => {
-        if (this.ctx.coreData.machineBrowsers === p) {
-          if (browsers[0]) {
-            this.ctx.coreData.chosenBrowser = browsers[0]
-          }
-
-          this.ctx.coreData.machineBrowsers = browsers
+      this.ctx.coreData.machineBrowsers = p.then((browsers) => {
+        if (browsers[0]) {
+          this.ctx.coreData.chosenBrowser = browsers[0]
         }
+
+        return browsers
       }).catch((e) => {
         this.ctx.update((coreData) => {
           coreData.machineBrowsers = null
