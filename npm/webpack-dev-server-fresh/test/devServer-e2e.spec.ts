@@ -5,7 +5,7 @@ import { once, EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
 
-import { devServer } from '../dist'
+import { devServer } from '..'
 
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
