@@ -316,7 +316,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
-  context('Runs - Has requested access to unauthorized project', () => {
+  context('Runs - Unauthorized Project Requested', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\' }')
@@ -343,7 +343,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[href="#/runs"]').click()
     })
 
-    it('if project Id is specified in config file that is not accessible, shows request is in process', () => {
+    it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('be.visible')
     })
   })
