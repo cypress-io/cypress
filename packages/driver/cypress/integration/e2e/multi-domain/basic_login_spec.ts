@@ -188,13 +188,32 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome MarkyMark')
   })
 
-  it('final-auth redirects back to localhost - flat', () => {
+  it.only('final-auth redirects back to localhost - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.switchToDomain('http://foobar.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
     }) // Exits and moves on to the next command
 
+    cy.switchToDomain('http://idp.com:3500', () => { // Parent Domain is localhost
+      cy.get('[data-cy="username"]').type('MarkyMark')
+      cy.get('[data-cy="login"]').click() // Takes you back to localhost
+    }) // Exits and moves on to the next command
+
+    // Verify that the user has logged in
+    cy.get('[data-cy="welcome"]')
+    .invoke('text')
+    .should('equal', 'Welcome MarkyMark')
+  })
+
+  it.only('SAME TEST WITH CMD BETWEEN final-auth redirects back to localhost - flat', () => {
+    cy.visit('/fixtures/auth/index.html')
+    cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
+    cy.switchToDomain('http://foobar.com:3500', () => { // Parent Domain is localhost
+      cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
+    }) // Exits and moves on to the next command
+
+    cy.log('random log/command -- will hang')
     cy.switchToDomain('http://idp.com:3500', () => { // Parent Domain is localhost
       cy.get('[data-cy="username"]').type('MarkyMark')
       cy.get('[data-cy="login"]').click() // Takes you back to localhost
