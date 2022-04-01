@@ -1099,6 +1099,7 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome
+            run-webpack-dev-server-fresh-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1433,7 +1434,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  webpack-dev-server-fresh-integration-tests:
+  run-webpack-dev-server-fresh-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -2250,6 +2251,10 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
+    - run-webpack-dev-server-fresh-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2259,16 +2264,13 @@ linux-workflow: &linux-workflow
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
-    - webpack-dev-server-fresh-integration-tests:
-        requires:
-          - build
     - ui-components-integration-tests:
         context: test-runner:cypress-record-key
         requires:
           - build
     - npm-webpack-dev-server:
         requires:
-          - build
+          - system-tests-node-modules-install
     - npm-vite-dev-server:
         requires:
           - build

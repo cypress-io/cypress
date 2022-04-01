@@ -2985,7 +2985,7 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
-  type DevServerConfigObject = {
+  interface DevServerConfigObject {
     bundler: 'webpack'
     framework: 'react'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
