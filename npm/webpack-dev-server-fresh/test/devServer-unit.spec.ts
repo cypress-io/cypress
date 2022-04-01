@@ -8,6 +8,7 @@ import EventEmitter from 'events'
 const cypressConfig = {
   projectRoot: path.join(__dirname, 'test-fixtures'),
   devServerPublicPathRoute: path.join(__dirname, './test-public-path'),
+  indexHtmlFile: path.join(__dirname, 'component-index.html'),
 } as Cypress.PluginConfigOptions
 
 describe('devServer', () => {
