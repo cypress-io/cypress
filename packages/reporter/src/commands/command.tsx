@@ -31,6 +31,13 @@ const invisibleMessage = (model: CommandModel) => {
     'One or more matched elements are not visible.' :
     'This element is not visible.'
 }
+const numberOfChildrenMessage = (numChildren, event?: boolean) => {
+  if (event) {
+    return `This event occurred ${numChildren} times`
+  }
+
+  return `${numChildren} ${numChildren > 1 ? 'logs' : 'log'} currently hidden`
+}
 
 const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: Alias, model: CommandModel) => {
   if (model.aliasType !== 'route') {
@@ -264,7 +271,7 @@ class Command extends Component<Props> {
                 <i className='fas fa-spinner fa-spin' />
                 <span>{model.number || ''}</span>
               </span>
-              {!model.group && (
+              {!model.hasChildren && (
                 <span className='command-pin'>
                   <i className='fas fa-thumbtack' />
                 </span>
@@ -287,7 +294,7 @@ class Command extends Component<Props> {
                   <Interceptions model={model} />
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
                   {displayNumOfChildren && (
-                    <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
+                    <Tooltip placement='top' title={numberOfChildrenMessage(model.numChildren, model.event)} className='cy-tooltip'>
                       <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
                     </Tooltip>
                   )}
@@ -385,6 +392,13 @@ class Command extends Component<Props> {
   // optimize for both snapshot showing + restoring
   _snapshot (show: boolean) {
     const { model, runnablesStore } = this.props
+
+    // do not trigger the show:snapshot event for commands groups
+    // TODO: remove this behavior in 10.0+ when a group
+    // can both be expanded and collapsed and pinned
+    if (model.hasChildren) {
+      return
+    }
 
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
