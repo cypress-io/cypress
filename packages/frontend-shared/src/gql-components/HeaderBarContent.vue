@@ -62,12 +62,20 @@
               >
                 {{ props.gql?.currentProject?.title }}
               </a>
-              <span
+              <template
                 v-if="props.gql?.currentProject?.branch"
-                class="inline-block font-normal text-gray-500 truncate align-top max-w-200px"
               >
-                ({{ props.gql.currentProject.branch }})
-              </span>
+                <Tooltip placement="right">
+                  <span
+                    class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
+                  >
+                    ({{ props.gql.currentProject.branch }})
+                  </span>
+                  <template #popper>
+                    {{ props.gql.currentProject.branch }}
+                  </template>
+                </Tooltip>
+              </template>
             </li>
             <li
               v-if="props.gql?.currentProject?.currentTestingType"
@@ -177,6 +185,7 @@ import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
+import { Tooltip } from 'floating-vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
 
@@ -331,3 +340,17 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   return true
 }
 </script>
+
+<style lang="scss">
+@import "floating-vue/dist/style.css";
+
+.v-popper.v-popper--theme-tooltip {
+  @apply inline-block;
+}
+
+.v-popper__popper.v-popper--theme-tooltip {
+  .v-popper__inner {
+    @apply bg-gray-900 py-2 px-4;
+  }
+}
+</style>
