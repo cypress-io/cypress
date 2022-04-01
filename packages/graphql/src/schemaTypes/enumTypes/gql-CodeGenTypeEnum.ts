@@ -2,5 +2,5 @@ import { enumType } from 'nexus'
 
 export const CodeGenTypeEnum = enumType({
   name: 'CodeGenType',
-  members: ['story', 'component', 'e2e', 'scaffoldIntegration'],
+  members: ['component', 'e2e', 'scaffoldIntegration'],
 })

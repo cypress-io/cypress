@@ -455,63 +455,6 @@ describe('App: Index', () => {
     viewportHeight: 768,
     viewportWidth: 1024,
   }, () => {
-    context('project with storybook', () => {
-      beforeEach(() => {
-        cy.scaffoldProject('no-specs')
-        cy.openProject('no-specs')
-        cy.startAppServer('component')
-        cy.visitApp()
-
-        // With no specs present, the page renders two cards, one for creating from found components,
-        // another for creating from found stories.
-        cy.findAllByTestId('card').eq(0).as('ComponentCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.component.importFromComponent.header,
-          }).should('be.visible')
-          .and('not.be.disabled')
-
-          cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
-          .should('be.visible')
-        })
-      })
-
-      it('shows create first spec page with create from component and create from story options', () => {
-        cy.findByRole('heading', {
-          level: 1,
-          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-        }).should('be.visible')
-
-        cy.findByTestId('create-spec-page-description')
-        .should('be.visible')
-        .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
-
-        cy.get('@ComponentCard').should('be.visible')
-        cy.get('@StoryCard').should('be.visible')
-
-        cy.findByTestId('no-specs-message')
-        .should('be.visible')
-        .and('contain', defaultMessages.createSpec.noSpecsMessage)
-
-        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
-        .should('be.visible')
-        .and('not.be.disabled')
-        .click()
-
-        cy.findByRole('dialog', {
-          name: defaultMessages.components.specPatternModal.title,
-        }).should('be.visible').within(() => {
-          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io/test-type-options' })
-          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
-          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
-          cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
-        })
-
-        cy.get('@CloseDialogButton').click()
-        cy.findByRole('dialog').should('not.exist')
-      })
-    })
-
     context('project without storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-no-storybook')
@@ -544,7 +487,6 @@ describe('App: Index', () => {
         .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
 
         cy.get('@ComponentCard').should('be.visible')
-        cy.get('@StoryCard').should('be.visible')
 
         cy.findByTestId('no-specs-message').should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
@@ -820,31 +762,6 @@ describe('App: Index', () => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
           }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/MyTest.cy.jsx')}`)
-        })
-      })
-
-      it('shows create first spec page with create from story option', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
-
-        cy.get('[data-cy=file-list-row]').first().click()
-
-        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/stories/Button.stories.cy.jsx'))
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
-        cy.get('input').clear()
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
-
-        cy.get('input').clear().type(getPathForPlatform('src/specs-folder/Button.stories.cy.jsx'))
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-        cy.contains('h2', defaultMessages.createSpec.successPage.header)
-
-        cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/specs-folder/Button.stories.cy.jsx')).click()
-
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
-          cy.findByRole('link', {
-            name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/Button.stories.cy.jsx')}`)
         })
       })
     })

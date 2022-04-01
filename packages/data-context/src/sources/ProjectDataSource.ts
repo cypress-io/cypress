@@ -19,7 +19,6 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
-import { STORIES_GLOB } from '.'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -363,7 +362,6 @@ export class ProjectDataSource {
 
     return {
       component: framework?.glob ?? looseComponentGlob,
-      story: STORIES_GLOB,
     }
   }
 
