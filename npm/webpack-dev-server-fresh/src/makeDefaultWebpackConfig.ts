@@ -38,7 +38,7 @@ export function makeDefaultWebpackConfig (
     plugins: [
       new HtmlWebpackPlugin({
         // Todo: Add indexHtmlFile when it gets added as a config property
-        template: indexHtmlFile || path.resolve(__dirname, '..', 'index-template.html'),
+        template: indexHtmlFile,
       }) as any,
     ],
   }
