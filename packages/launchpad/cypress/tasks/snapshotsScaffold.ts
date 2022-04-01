@@ -5,7 +5,7 @@ import disparity from 'disparity'
 import dedent from 'dedent'
 import { cyTmpDir } from '@tooling/system-tests/lib/fixtures'
 
-const systemTestsDir = path.posix.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects')
+const systemTestsDir = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects')
 
 export interface SnapshotScaffoldTestResult {
   status: 'ok' | 'fail'
@@ -78,9 +78,14 @@ interface SnapshotCypressDirectoryOptions {
   currentProject: string
   language: 'js' | 'ts'
   testingType: Cypress.TestingType
+  ctFramework?: string
 }
 
-export async function snapshotCypressDirectory ({ currentProject, language, testingType }: SnapshotCypressDirectoryOptions): Promise<SnapshotScaffoldTestResult> {
+function removeHyphensAndBrackets (str: string) {
+  return str.toLowerCase().replaceAll(' ', '-').replaceAll('(', '').replaceAll(')', '')
+}
+
+export async function snapshotCypressDirectory ({ currentProject, language, testingType, ctFramework }: SnapshotCypressDirectoryOptions): Promise<SnapshotScaffoldTestResult> {
   if (!currentProject.startsWith(cyTmpDir)) {
     throw Error(dedent`
       snapshotCypressDirectory is designed to be used with system-tests infrastructure.
@@ -93,14 +98,18 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
   const projectDir = currentProject.replace(cyTmpDir, systemTestsDir)
   const projectName = projectDir.replace(systemTestsDir, '').slice(1)
 
-  const expectedScaffoldDir = path.posix.join(projectDir, `expected-cypress-${language}-${testingType}`)
+  let expectedScaffoldDir = path.join(projectDir, `expected-cypress-${language}-${testingType}`)
 
-  const currentProjectPosix = currentProject.split(path.sep).join(path.posix.sep)
+  if (ctFramework) {
+    expectedScaffoldDir += `-${removeHyphensAndBrackets(ctFramework)}`
+  }
+
+  const joinPosix = (...s: string[]) => path.join(...s).split(path.sep).join(path.posix.sep)
 
   const files = (
     await Promise.all([
-      globby(path.posix.join(currentProjectPosix, 'cypress'), { onlyFiles: true }),
-      globby(path.posix.join(currentProjectPosix, 'cypress.config.*'), { onlyFiles: true }),
+      globby(joinPosix(currentProject, 'cypress'), { onlyFiles: true }),
+      globby(joinPosix(currentProject, 'cypress.config.*'), { onlyFiles: true }),
     ])
   ).reduce((acc, curr) => {
     return [acc, curr].flat(2)
@@ -112,8 +121,8 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
 
   const filesToDiff = actualRelativeFiles.map<FileToDiff>((file) => {
     return {
-      actual: path.posix.join(currentProjectPosix, file),
-      expected: path.posix.join(expectedScaffoldDir, file),
+      actual: path.join(currentProject, file),
+      expected: path.join(expectedScaffoldDir, file),
     }
   })
 

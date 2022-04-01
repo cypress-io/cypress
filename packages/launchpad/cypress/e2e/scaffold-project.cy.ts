@@ -73,12 +73,13 @@ function scaffoldAndOpenCTProject (
   cy.contains('Choose a Browser')
 }
 
-function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cypress.TestingType) {
+function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string) {
   cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
     cy.task<SnapshotScaffoldTestResult>('snapshotCypressDirectory', {
       currentProject,
       testingType,
       language,
+      ctFramework,
     })
     .then((result) => {
       if (result.status === 'ok') {
@@ -106,11 +107,11 @@ describe('scaffolding new projects', () => {
 
   it('scaffolds CT for a JS project', () => {
     scaffoldAndOpenCTProject('pristine', 'js', 'Create React App (v5)')
-    assertScaffoldedFilesAreCorrect('js', 'component')
+    assertScaffoldedFilesAreCorrect('js', 'component', 'Create React App (v5)')
   })
 
   it('scaffolds CT for a TS project', () => {
     scaffoldAndOpenCTProject('pristine', 'ts', 'Create React App (v5)')
-    assertScaffoldedFilesAreCorrect('ts', 'component')
+    assertScaffoldedFilesAreCorrect('ts', 'component', 'Create React App (v5)')
   })
 })
