@@ -56,6 +56,7 @@ const config = {
   supportFile: '',
   isTextTerminal: true,
   devServerPublicPathRoute: root,
+  indexHtmlFile: path.join(__dirname, 'component-index.html'),
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
