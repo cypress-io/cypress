@@ -154,4 +154,17 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
     cy.percySnapshot()
   })
+
+  it('set the correct viewport values from CLI', () => {
+    cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333'])
+    cy.startAppServer()
+
+    cy.visitApp()
+    cy.contains('dom-content.spec').click()
+
+    cy.get('.toggle-specs-wrapper').click()
+
+    cy.get('#unified-runner').should('have.css', 'width', '333px')
+    cy.get('#unified-runner').should('have.css', 'height', '333px')
+  })
 })
