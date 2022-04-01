@@ -264,7 +264,7 @@ class Command extends Component<Props> {
                 <i className='fas fa-spinner fa-spin' />
                 <span>{model.number || ''}</span>
               </span>
-              {!model.group && (
+              {!model.hasChildren && (
                 <span className='command-pin'>
                   <i className='fas fa-thumbtack' />
                 </span>
