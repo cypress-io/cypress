@@ -1439,10 +1439,11 @@ jobs:
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1516,6 +1517,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
