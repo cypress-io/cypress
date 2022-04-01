@@ -31,7 +31,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating a cross origin request
     // @ts-ignore
-    cy.isAnticipatingCrossOriginRequestFor(request.href)
+    cy.isAnticipatingCrossOriginResponseFor(request)
 
     // If we haven't seen a switchToDomain and cleared the timeout within 300ms,
     // go ahead and inform the server 'ready:for:domain' failed and to release the

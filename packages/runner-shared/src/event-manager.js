@@ -539,7 +539,7 @@ export const eventManager = {
       if (cy.state('latestActiveOriginPolicy') === originPolicy) {
         // We remain in an anticipating state until either a load even happens or a timeout.
         cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
-        cy.isAnticipatingCrossOriginRequestFor(undefined)
+        cy.isAnticipatingCrossOriginResponseFor(undefined)
         cy.isStable(true, 'load')
         // Prints out the newly loaded URL
         Cypress.emit('internal:window:load', { type: 'cross:domain', url })

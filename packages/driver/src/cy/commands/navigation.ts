@@ -50,12 +50,12 @@ const isValidVisitMethod = (method) => {
 const timedOutWaitingForPageLoad = (ms, log) => {
   debug('timedOutWaitingForPageLoad')
 
-  const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginRequest')
+  const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginResponse')?.href
 
   // Were we anticipating a cross domain page when we timed out?
   if (anticipatedCrossOriginHref) {
     // We remain in an anticipating state until either a load even happens or a timeout.
-    cy.isAnticipatingCrossOriginRequestFor(undefined)
+    cy.isAnticipatingCrossOriginResponseFor(undefined)
 
     // By default origins is just this location.
     let originPolicies = [$Location.create(location.href).originPolicy]

@@ -39,25 +39,25 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingCrossOriginRequestFor (href: string): void {
-    if (state('anticipatingCrossOriginRequest') === href) {
+  isAnticipatingCrossOriginResponseFor (request: {href: string}): void {
+    if (state('anticipatingCrossOriginResponse') === request) {
       return
     }
 
-    const whenAnticipatingCrossOriginRequest = state('whenAnticipatingCrossOriginRequest')
+    const whenAnticipatingCrossOriginResponse = state('whenAnticipatingCrossOriginResponse')
 
-    if (!!href && whenAnticipatingCrossOriginRequest) {
-      whenAnticipatingCrossOriginRequest()
+    if (!!request?.href && whenAnticipatingCrossOriginResponse) {
+      whenAnticipatingCrossOriginResponse()
     }
 
-    state('anticipatingCrossOriginRequest', href)
+    state('anticipatingCrossOriginResponse', request)
   },
 
-  whenStableOrAnticipatingCrossOriginRequest (fn, command) {
+  whenStableOrAnticipatingCrossOriginResponse (fn, command) {
     const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
 
     // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingCrossOriginRequest') && commandIsSwitchToDomain) || state('isStable') !== false) {
+    if ((!!state('anticipatingCrossOriginResponse') && commandIsSwitchToDomain) || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -70,7 +70,7 @@ export const create = (Cypress, state) => ({
         fulfilled = true
 
         state('whenStable', null)
-        state('whenAnticipatingCrossOriginRequest', null)
+        state('whenAnticipatingCrossOriginResponse', null)
 
         Promise.try(fn)
         .then(resolve)
@@ -81,7 +81,7 @@ export const create = (Cypress, state) => ({
 
       // We only care to listen for anticipating cross origin request when the command we're waiting for is switchToDomain
       if (commandIsSwitchToDomain) {
-        state('whenAnticipatingCrossOriginRequest', onSignal)
+        state('whenAnticipatingCrossOriginResponse', onSignal)
       }
     })
   },

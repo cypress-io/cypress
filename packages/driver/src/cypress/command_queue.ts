@@ -143,7 +143,7 @@ export class CommandQueue extends Queue<Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.stability.whenStableOrAnticipatingCrossOriginRequest(() => {
+    return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
@@ -306,7 +306,7 @@ export class CommandQueue extends Queue<Command> {
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.stability.whenStableOrAnticipatingCrossOriginRequest(() => {
+        return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
           Cypress.action('cy:command:queue:end')
 
           return null
