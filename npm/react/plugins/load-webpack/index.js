@@ -15,7 +15,7 @@ function normalizeWebpackPath (config, webpackConfigPath) {
  * **Important:** `webpackFilename` path is relative to the project root (cypress.config.{ts|js} location)
  * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
  */
-function devServer (cypressDevServerConfig, { webpackFilename, indexHtmlFile }) {
+function devServer (cypressDevServerConfig, { webpackFilename }) {
   const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(cypressDevServerConfig.config, webpackFilename))
 
   if (!webpackConfig) {
@@ -25,7 +25,6 @@ function devServer (cypressDevServerConfig, { webpackFilename, indexHtmlFile }) 
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig,
-    indexHtmlFile,
   })
 }
 

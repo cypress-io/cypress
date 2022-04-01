@@ -2,6 +2,15 @@ import debugLib from 'debug'
 
 const debugLibCache: Record<string, debugLib.Debugger> = {}
 
+/**
+ * This function enables trace logging on all function calls and setters for a given class.
+ * If you add:
+ *
+ * return autoBindDebug(this)
+ *
+ * to the constructor of the class for which you want to enable logging, you can then
+ * set DEBUG=cypress-trace:<ClassName> to utilize the logging
+ */
 export function autoBindDebug <T extends object> (obj: T): T {
   const ns = `cypress-trace:${obj.constructor.name}`
   const debug = debugLibCache[ns] = debugLibCache[ns] || debugLib(ns)
