@@ -4,6 +4,7 @@ import type { WebpackDevServerConfig } from '../devServer'
 
 type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
+  _resolveFilename(request: string, parent: Module, isMain: boolean, options?: { paths: string[] }): string
   _cache: Record<string, Module>
 }
 
@@ -47,6 +48,9 @@ export interface SourceRelativeWebpackResult {
     majorVersion: 4 | 5
   }
 }
+
+const originalModuleLoad = (Module as ModuleClass)._load
+const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 
 /**
  * Based on the current project config, we look for the closest webpack,
@@ -111,14 +115,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   result.webpack.importPath = path.dirname(webpackJsonPath)
   result.webpack.packageJson = require(webpackJsonPath)
   result.webpack.module = require(result.webpack.importPath)
-  result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
-
-  // We now need to make sure that everything we subsequently require "thinks" that the webpack it's
-  // looking for is this one. There are a number of modules that import from webpack directly, such as
-  // this code in html-webpack-plugin v4: https://github.com/jantimon/html-webpack-plugin/blob/fce6b965d9502418af24139068aa415eb466c341/lib/file-watcher-api.js#L7-L14
-  // Instead of trying to patch them all, let's just cheat and tell node when it resolves modules that
-  // it's actually getting the one relative to the searchRoot:
-  const moduleLoad = (Module as ModuleClass)._load;
+  result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5]);
 
   (Module as ModuleClass)._load = function (request, parent, isMain) {
     if (request === 'webpack' || request.startsWith('webpack/')) {
@@ -126,10 +123,20 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
         paths: [searchRoot],
       })
 
-      return moduleLoad(resolvePath, parent, isMain)
+      return originalModuleLoad(resolvePath, parent, isMain)
     }
 
-    return moduleLoad(request, parent, isMain)
+    return originalModuleLoad(request, parent, isMain)
+  };
+
+  (Module as ModuleClass)._resolveFilename = function (request, parent, isMain, options) {
+    if (request === 'webpack' || request.startsWith('webpack/') && !options?.paths) {
+      return originalModuleResolveFilename(request, parent, isMain, {
+        paths: [searchRoot],
+      })
+    }
+
+    return originalModuleResolveFilename(request, parent, isMain, options)
   }
 
   // Webpack dev server:
@@ -198,4 +205,9 @@ function getMajorVersion <T extends number> (json: PackageJson, acceptedVersions
   }
 
   return Number(major) as T
+}
+
+export function restoreLoadHook () {
+  (Module as ModuleClass)._load = originalModuleLoad;
+  (Module as ModuleClass)._resolveFilename = originalModuleResolveFilename
 }

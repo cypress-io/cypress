@@ -5,7 +5,7 @@ import { once, EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
 
-import { devServer } from '../'
+import { devServer } from '../dist'
 
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
@@ -33,9 +33,6 @@ const requestSpecFile = (file: string, port: number) => {
 
 const root = path.join(__dirname, '..')
 
-const webpackConfigV3 = {
-  devServer: { contentBase: root },
-}
 const webpackConfig = {
   devServer: { static: { directory: root } },
 }
@@ -57,7 +54,7 @@ const cypressConfig = {
   devServerPublicPathRoute: root,
 } as any as Cypress.PluginConfigOptions
 
-describe.skip('#startDevServer', () => {
+describe('#devServer', () => {
   it('serves specs via a webpack dev server', async () => {
     const { port, close } = await devServer({
       cypressConfig,
@@ -70,12 +67,20 @@ describe.skip('#startDevServer', () => {
 
     expect(response).to.eq('const foo = () => {}\n')
 
-    await close()
+    await new Promise<void>((resolve, reject) => {
+      close((err) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve()
+      })
+    })
   })
 
   it('serves specs in directory with [] chars via a webpack dev server', async () => {
     const { port, close } = await devServer({
-      config,
+      cypressConfig,
       webpackConfig,
       specs: createSpecs('[foo]/bar.spec.js'),
       devServerEvents: new EventEmitter(),
@@ -151,12 +156,20 @@ describe.skip('#startDevServer', () => {
     })
 
     await once(devServerEvents, 'dev-server:compile:success')
-    await close()
+    await new Promise<void>((resolve, reject) => {
+      close((err) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve()
+      })
+    })
   })
 
   it('emits dev-server:compile:error event on error compilation', async () => {
     const devServerEvents = new EventEmitter()
-    const exitSpy = sinon.stub()
+    const exitSpy = sinon.stub(process, 'exit')
 
     const badSpec = `${root}/test/fixtures/compilation-fails.spec.js`
     const { close } = await devServer({
@@ -170,7 +183,7 @@ describe.skip('#startDevServer', () => {
         },
       ],
       devServerEvents,
-    }, exitSpy as any)
+    })
 
     const [err] = await once(devServerEvents, 'dev-server:compile:error')
 
@@ -179,18 +192,24 @@ describe.skip('#startDevServer', () => {
     expect(err).to.contain('> this is an invalid spec file')
     expect(exitSpy.calledOnce).to.be.true
 
-    await close()
+    await new Promise<void>((resolve, reject) => {
+      close((err) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve()
+      })
+    })
   })
 
   it('touches browser.js when a spec file is added and recompile', async function () {
     const devServerEvents = new EventEmitter()
     const { close } = await devServer({
       webpackConfig,
-      options: {
-        config,
-        specs: createSpecs('foo.spec.js'),
-        devServerEvents,
-      },
+      cypressConfig,
+      specs: createSpecs('foo.spec.js'),
+      devServerEvents,
     })
 
     const newSpec: Cypress.Cypress['spec'] = {
@@ -209,25 +228,41 @@ describe.skip('#startDevServer', () => {
 
     expect(oldmtime).to.not.equal(updatedmtime)
 
-    await close()
+    await new Promise<void>((resolve, reject) => {
+      close((err) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve()
+      })
+    })
   })
 
   it('accepts the devServer signature', async function () {
     const devServerEvents = new EventEmitter()
     const { port, close } = await devServer(
       {
-        config,
+        cypressConfig,
         specs: createSpecs('foo.spec.js'),
         devServerEvents,
+        webpackConfig,
       },
-      { webpackConfig },
     )
 
     const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
 
     expect(response).to.eq('const foo = () => {}\n')
 
-    await close()
+    await new Promise<void>((resolve, reject) => {
+      close((err) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve()
+      })
+    })
   })
 })
 .timeout(5000)

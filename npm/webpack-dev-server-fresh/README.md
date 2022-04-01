@@ -45,7 +45,7 @@ This module should be primarily covered by system-tests / open-mode tests. All s
 
 webpack${major}_wds${devServerMajor}-$framework{-$variant}
 
-webpack4_wds3-vanilla
+webpack4_wds3-react
 webpack4_wds4-next-11
 webpack5_wds3-next-12
 webpack4_wds4-create-react-app

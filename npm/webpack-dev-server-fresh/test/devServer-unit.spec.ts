@@ -3,9 +3,11 @@ import proxyquire from 'proxyquire'
 import { expect } from 'chai'
 
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
+import EventEmitter from 'events'
 
 const cypressConfig = {
   projectRoot: path.join(__dirname, 'test-fixtures'),
+  devServerPublicPathRoute: path.join(__dirname, './test-public-path'),
 } as Cypress.PluginConfigOptions
 
 describe('devServer', () => {
@@ -21,7 +23,9 @@ describe('devServer', () => {
     }) as typeof import('../src/devServer')
 
     const result = devServer.create({
+      specs: [],
       cypressConfig,
+      devServerEvents: new EventEmitter(),
     })
 
     expect(result.server).to.be.instanceOf(require('webpack-dev-server-3'))
@@ -40,7 +44,9 @@ describe('devServer', () => {
     }) as typeof import('../src/devServer')
 
     const result = devServer.create({
+      specs: [],
       cypressConfig,
+      devServerEvents: new EventEmitter(),
     })
 
     expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
@@ -59,7 +65,9 @@ describe('devServer', () => {
     }) as typeof import('../src/devServer')
 
     const result = devServer.create({
+      specs: [],
       cypressConfig,
+      devServerEvents: new EventEmitter(),
     })
 
     expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
