@@ -290,6 +290,32 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect(o.testState.cloudProjectRequestAccessWasCalled).to.eql(true)
       })
     })
+
+    it('updates the button text when the request access button is clicked', () => {
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'Runs_currentProject_cloudProject_batched') {
+          for (const proj of obj!.result!.data!.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectUnauthorized'
+            proj.message = 'Cloud Project Unauthorized'
+            proj.hasRequestedAccess = false
+            testState.project = proj
+          }
+        }
+
+        if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
+          obj!.result!.data!.cloudProjectRequestAccess = {
+            ...testState.project,
+            hasRequestedAccess: true,
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp('/runs')
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
+      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('exist')
+    })
   })
 
   context('Runs - Has requested access to unauthorized project', () => {
