@@ -1553,7 +1553,6 @@ jobs:
       - run:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
-          #
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1629,26 +1628,26 @@ jobs:
           command: yarn workspace @cypress/eslint-plugin-dev test
 
   npm-cypress-schematic:
-      <<: *defaults
-      resource_class: small
-      steps:
-        - restore_cached_workspace
-        - run:
-            name: Build + Install
-            command: |
-              yarn workspace @cypress/schematic build:all
-            working_directory: npm/cypress-schematic
-        - run:
-            name: Launch
-            command: |
-              yarn launch:test
-            working_directory: npm/cypress-schematic
-        - run:
-            name: Run unit tests
-            command: |
-              yarn test
-            working_directory: npm/cypress-schematic
-        - store-npm-logs
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build + Install
+          command: |
+            yarn workspace @cypress/schematic build:all
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Launch
+          command: |
+            yarn launch:test
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Run unit tests
+          command: |
+            yarn test
+          working_directory: npm/cypress-schematic
+      - store-npm-logs
 
   npm-release:
     <<: *defaults
@@ -1675,7 +1674,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-           if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "marktnoonan/backmerge-develop-3-8-22" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-use-contexts" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2205,27 +2204,27 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
