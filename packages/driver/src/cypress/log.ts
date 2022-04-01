@@ -247,7 +247,6 @@ class Log {
   state: any
   config: any
   fireChangeEvent: ((log) => (void | undefined))
-  // obj: Record<string, any> = {}
 
   private attributes: Cypress.LogAttributes
 
@@ -586,14 +585,15 @@ class LogManager {
 
       const log = new Log(cy, state, config, this.fireChangeEvent, options)
 
+      log.set(options)
+
       // if snapshot was passed
       // in, go ahead and snapshot
       if (log.get('snapshot')) {
         log.snapshot()
       }
 
-      // if end was passed in
-      // go ahead and end
+      // if end was passed in go ahead and end
       if (log.get('end')) {
         log.end()
       }
