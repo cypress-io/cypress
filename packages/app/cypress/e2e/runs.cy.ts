@@ -300,9 +300,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
             proj.hasRequestedAccess = false
             testState.project = proj
           }
-        }
-
-        if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
+        } else if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
           obj!.result!.data!.cloudProjectRequestAccess = {
             ...testState.project,
             hasRequestedAccess: true,
