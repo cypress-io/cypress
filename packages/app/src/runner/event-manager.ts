@@ -458,6 +458,8 @@ export class EventManager {
 
     Cypress.on('log:added', (log) => {
       // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
+      // Cypress logs will only trigger an update every 4 seconds so there is a
+      // chance the runner has been torn down when the update is triggered.
       if (!Cypress.runner) {
         return
       }

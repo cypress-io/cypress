@@ -1,5 +1,7 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
+/// <reference path="./cy/logGroup.d.ts" />
+/// <reference path="./cypress/log.d.ts" />
 
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
@@ -39,7 +41,6 @@ declare namespace Cypress {
     sinon: sinon.SinonApi
     utils: CypressUtils
     state: State
-
     originalConfig: Record<string, any>
   }
 

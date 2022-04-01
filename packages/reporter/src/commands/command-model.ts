@@ -62,9 +62,23 @@ export default class Command extends Instrument {
     return this.renderProps.message || this.message
   }
 
+  @computed get isInvisible () {
+    return this.visible !== undefined && !this.visible
+  }
+
+  private countNestedCommands (children) {
+    if (children.length === 0) return 0
+
+    return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
+  }
+
   @computed get numChildren () {
-    // and one to include self so it's the total number of same events
-    return this.event ? this.children.length + 1 : this.children.length
+    if (this.event) {
+      // add one to include self so it's the total number of same events
+      return this.children.length + 1
+    }
+
+    return this.countNestedCommands(this.children)
   }
 
   @computed get isOpen () {
@@ -107,7 +121,6 @@ export default class Command extends Instrument {
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
     this.hasConsoleProps = !!props.hasConsoleProps
-
     this._checkLongRunning()
   }
 
