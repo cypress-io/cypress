@@ -43,12 +43,12 @@ Unit tests can be run with `npm test`. Integration tests can be run with `yarn c
 
 This module should be primarily covered by system-tests / open-mode tests. All system-tests directories should be created using the notation:
 
-webpack${major}_wds${devServerMajor}-$framework{-$variant}
+`webpack${major}_wds${devServerMajor}-$framework{-$variant}`
 
-webpack4_wds3-react
-webpack4_wds4-next-11
-webpack5_wds3-next-12
-webpack4_wds4-create-react-app
+- webpack4_wds3-react
+- webpack4_wds4-next-11
+- webpack5_wds3-next-12
+- webpack4_wds4-create-react-app
 
 ## Architecture
 
