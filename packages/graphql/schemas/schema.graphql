@@ -345,7 +345,6 @@ enum CodeGenType {
   component
   e2e
   scaffoldIntegration
-  story
 }
 
 enum CodeLanguageEnum {
