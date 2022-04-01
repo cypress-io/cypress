@@ -19,6 +19,7 @@ export function makeDefaultWebpackConfig (
     packageJson: { version },
     importPath,
   } = config.sourceWebpackModulesResult.htmlWebpackPlugin
+  const indexHtmlFile = config.devServerConfig.cypressConfig.indexHtmlFile
   const HtmlWebpackPlugin = _HtmlWebpackPlugin as typeof import('html-webpack-plugin-5')
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
@@ -37,7 +38,7 @@ export function makeDefaultWebpackConfig (
     plugins: [
       new HtmlWebpackPlugin({
         // Todo: Add indexHtmlFile when it gets added as a config property
-        template: /* indexHtmlFile || */ path.resolve(__dirname, '..', 'index-template.html'),
+        template: indexHtmlFile || path.resolve(__dirname, '..', 'index-template.html'),
       }) as any,
     ],
   }

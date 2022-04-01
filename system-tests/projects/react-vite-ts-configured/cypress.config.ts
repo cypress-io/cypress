@@ -5,7 +5,6 @@ export default defineConfig({
   component: {
     devServer,
     devServerConfig: {
-      indexHtmlFile: 'cypress/support/component-index.html',
       // optionally provide your Vite config overrides.
     },
   },

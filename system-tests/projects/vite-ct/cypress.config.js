@@ -7,5 +7,6 @@ module.exports = {
 
       return startDevServer({ options: cypressDevServerConfig })
     },
+    indexHtmlFile: 'cypress/component/support/component-index.html',
   },
 }
