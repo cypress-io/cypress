@@ -13,8 +13,6 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
     emitOnly: !shouldEmitLog,
   }
 
-  const subject = userOptions.$el || null
-
   const log = Cypress.log(options)
 
   if (!_.isFunction(fn)) {
@@ -25,17 +23,20 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
   // commands inside group() callback and commands chained to it.
   const restoreCmdIndex = cy.state('index') + 1
 
-  cy.queue.insert(restoreCmdIndex, $Command.create({
-    args: [subject],
-    name: 'group-restore',
-    fn: (subject) => {
-      if (log) {
-        log.endGroup()
-      }
+  const endLogGroupCmd = $Command.create({
+    name: 'restore-log-group',
+    injected: true,
+  })
 
-      return subject
-    },
-  }))
+  const forwardYieldedSubject = () => {
+    if (log) {
+      log.endGroup()
+    }
+
+    return endLogGroupCmd.get('prev').get('subject')
+  }
+
+  cy.queue.insert(restoreCmdIndex, endLogGroupCmd.set('fn', forwardYieldedSubject))
 
   return fn(log)
 }
