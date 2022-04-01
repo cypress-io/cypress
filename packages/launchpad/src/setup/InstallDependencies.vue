@@ -8,15 +8,12 @@
     :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
     :skip-fn="!canNavigateForward ? confirmInstalled : undefined"
   >
-    <ManualInstall
-      :gql="props.gql"
-      :packages-installed="packagesInstalled"
-    />
+    <ManualInstall :gql="props.gql" />
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
@@ -64,27 +61,18 @@ const queryInstalled = useQuery({
   query: Wizard_InstalledPackagesDocument,
 })
 
-const packagesInstalled = ref<string[]>([])
+const intervalQueryTrigger = useIntervalFn(async () => {
+  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
 
-const toInstall = computed(() => {
-  return props.gql.wizard.packagesToInstall?.map((p) => p.package)
+  const allDepsSatisified = res.data.value?.wizard?.packagesToInstall?.every(pkg => pkg.satisfied)
+
+  if (allDepsSatisified) {
+    intervalQueryTrigger.pause()
+    canNavigateForward.value = true
+  }
+}, 1000, {
+  immediate: true,
 })
-
-// TODO: UNIFY-1350 convert this to a subscription
-// const intervalQueryTrigger = useIntervalFn(async () => {
-//   const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
-
-//   packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
-//     (pkg) => pkg,
-//   ) || []
-
-//   if (toInstall.value?.every((pkg) => packagesInstalled.value.includes(pkg))) {
-//     intervalQueryTrigger.pause()
-//     canNavigateForward.value = true
-//   }
-// }, 1000, {
-//   immediate: true,
-// })
 
 const canNavigateForward = ref(false)
 

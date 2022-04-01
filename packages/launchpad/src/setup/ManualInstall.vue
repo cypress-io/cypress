@@ -22,15 +22,22 @@
           class="h-24px my-8px ml-24px w-24px float-right"
           :aria-label="t('setupPage.install.pendingInstall')"
         />
-        <span>
+        <span class="text-14px ">
           <ExternalLink
             :href="`https://www.npmjs.com/package/${dep.package}`"
-            class="text-indigo-500 text-14px hocus-link-default"
+            class="text-indigo-500 hocus-link-default"
           >
             {{ dep.package }}
           </ExternalLink>
-          <span>{{ dep.minVersion }}</span>
-          <span v-if="!dep.satisfied">Detected {{ dep.detectedVersion }}</span>
+          <span class="rounded-md border border-gray-400 ml-6px">
+            <span class="p-4px">{{ dep.minVersion }}</span>
+            <span 
+              v-if="!dep.satisfied"
+              class="border-l border-gray-400 bg-gray-100 text-gray-600"
+            >
+              Detected {{ dep.detectedVersion }}
+            </span>
+          </span>
         </span>
         <p
           class="text-gray-500 text-14px leading-5"

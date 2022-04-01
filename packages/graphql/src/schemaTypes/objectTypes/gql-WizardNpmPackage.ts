@@ -21,7 +21,7 @@ export const WizardNpmPackage = objectType({
       description: 'Version of the package the user has installed',
     })
 
-    t.string('minVersion', {
+    t.nonNull.string('minVersion', {
       description: 'Minimum version of the package that Cypress works with',
     })
 

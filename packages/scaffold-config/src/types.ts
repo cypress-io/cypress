@@ -16,5 +16,3 @@ export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 export type FrontendFramework = typeof FRONTEND_FRAMEWORKS[number]
 
 export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number]
-
-export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }

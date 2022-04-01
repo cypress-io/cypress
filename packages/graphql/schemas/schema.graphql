@@ -1413,7 +1413,7 @@ type WizardNpmPackage implements Node {
   id: ID!
 
   """Minimum version of the package that Cypress works with"""
-  minVersion: String
+  minVersion: String!
 
   """The package name that you would npm install"""
   name: String!
