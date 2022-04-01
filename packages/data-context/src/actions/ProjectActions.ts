@@ -95,8 +95,8 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  setCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setCurrentTestingType(type)
+  setAndLoadCurrentTestingType (type: TestingType) {
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
   async setCurrentProject (projectRoot: string) {

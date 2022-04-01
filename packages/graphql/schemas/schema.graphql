@@ -1010,9 +1010,6 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
-  """Initialize the migration wizard to the first step"""
-  migrateStart: Query
-
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -1029,14 +1026,14 @@ type Mutation {
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
-  """Re-initializes Cypress from the initial CLI options"""
-  reinitializeCypress: Query
-
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
   """Reset the Auth State"""
   resetAuthState: Query!
+
+  """Resets errors and attempts to reload the config"""
+  resetErrorsAndLoadConfig: Query
 
   """
   Resets the latest version call to capture additional telemetry for the current user
@@ -1047,10 +1044,10 @@ type Mutation {
   resetWizard: Boolean!
   scaffoldIntegration: [ScaffoldedFile!]!
   scaffoldTestingType: Query
+  setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Query
-  setCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
