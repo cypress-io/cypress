@@ -1087,9 +1087,19 @@ describe('visual error templates', () => {
         default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT: () => {
+      return {
+        default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
     CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT: () => {
       return {
         default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E: () => {
+      return {
+        default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
