@@ -1,11 +1,25 @@
-import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
+import type { Wizard, WizardBundler } from '../generated/test-graphql-types.gen'
 import { CODE_LANGUAGES } from '@packages/types/src/constants'
-import { BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import * as wizardDeps from '@packages/scaffold-config/src/dependencies'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
 
-export const allBundlers = BUNDLERS.map((bundler, idx) => {
+const testBundlerVite = {
+  type: 'vite',
+  name: 'Vite'
+} as const
+
+const testBundlerWebpack = {
+  type: 'webpack',
+  name: 'Webpack'
+} as const
+
+const testBundlers = [
+  testBundlerWebpack,
+  testBundlerVite
+] as const
+
+export const allBundlers = testBundlers.map((bundler, idx) => {
   return {
     ...testNodeId('WizardBundler'),
     isSelected: idx === 0,
@@ -14,9 +28,14 @@ export const allBundlers = BUNDLERS.map((bundler, idx) => {
   }
 })
 
+const testFrameworks = [
+  { name: 'Create React App (v5)', type: 'reactscripts', supportedBundlers: [testBundlerWebpack] },
+  { name: 'Vue.js (v3)', type: 'vue3', supportedBundlers: [testBundlerVite, testBundlerWebpack] },
+] as const
+
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
-  installDependenciesCommand: 'npm install -D @cypress/react @cypress/webpack-dev-server',
+  installDependenciesCommand: `npm install -D ${wizardDeps.WIZARD_DEPENDENCY_REACT_SCRIPTS.package} ${wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT.package}`,
   packagesToInstall: [
     {
       __typename: 'WizardNpmPackage',
@@ -33,11 +52,12 @@ export const stubWizard: MaybeResolver<Wizard> = {
     },
   ],
   allBundlers,
-  frameworks: WIZARD_FRAMEWORKS.map((framework, idx) => {
+  frameworks: testFrameworks.map(({ name, type, supportedBundlers }, idx) => {
     return {
       ...testNodeId('WizardFrontendFramework'),
-      ...framework,
-      supportedBundlers: framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>,
+      name,
+      type,
+      supportedBundlers: supportedBundlers as unknown as WizardBundler[],
       isSelected: idx === 0,
       isDetected: false,
     }

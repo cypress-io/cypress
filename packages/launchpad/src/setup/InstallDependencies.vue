@@ -51,9 +51,6 @@ fragment InstallDependencies on Query {
 
 gql`
 fragment Wizard_InstalledPackages_Data on Query {
-  wizard {
-    installedPackages
-  }
   ...InstallDependencies
 }
 `
@@ -74,20 +71,20 @@ const toInstall = computed(() => {
 })
 
 // TODO: UNIFY-1350 convert this to a subscription
-const intervalQueryTrigger = useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
+// const intervalQueryTrigger = useIntervalFn(async () => {
+//   const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
 
-  packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
-    (pkg) => pkg,
-  ) || []
+//   packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
+//     (pkg) => pkg,
+//   ) || []
 
-  if (toInstall.value?.every((pkg) => packagesInstalled.value.includes(pkg))) {
-    intervalQueryTrigger.pause()
-    canNavigateForward.value = true
-  }
-}, 1000, {
-  immediate: true,
-})
+//   if (toInstall.value?.every((pkg) => packagesInstalled.value.includes(pkg))) {
+//     intervalQueryTrigger.pause()
+//     canNavigateForward.value = true
+//   }
+// }, 1000, {
+//   immediate: true,
+// })
 
 const canNavigateForward = ref(false)
 
