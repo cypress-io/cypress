@@ -1327,9 +1327,6 @@ type Wizard {
 
   """Command to install required command"""
   installDependenciesCommand: String
-
-  """The list of packages to install that are currently installed"""
-  installedPackages: [String!]
   language: WizardCodeLanguage
 
   """

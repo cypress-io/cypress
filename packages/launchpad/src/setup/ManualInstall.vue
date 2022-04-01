@@ -13,7 +13,7 @@
         class="border-b border-b-gray-100 py-16px last-of-type:border-b-0"
       >
         <i-cy-status-download-done_x24
-          v-if="props.packagesInstalled.includes(dep.package)"
+          v-if="dep.satisfied"
           class="h-24px my-12px ml-24px w-24px float-right"
           :aria-label="t('setupPage.install.installed')"
         />
@@ -77,6 +77,5 @@ const projectFolder = computed(() => props.gql.currentProject?.title ?? '')
 
 const props = defineProps<{
   gql: ManualInstallFragment
-  packagesInstalled: string[]
 }>()
 </script>

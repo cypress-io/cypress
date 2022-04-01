@@ -40,13 +40,8 @@ export class WizardDataSource {
     // if (storybookInfo && this.chosenFramework.storybookDep) {
     //   packages.push(this.chosenFramework.storybookDep)
     // }
-    console.log(JSON.stringify(packages))
 
     return packages
-  }
-
-  installedPackages (): string[] {
-    return []
   }
 
   installDependenciesCommand () {

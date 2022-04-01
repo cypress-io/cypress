@@ -1,6 +1,7 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
 import { CODE_LANGUAGES } from '@packages/types/src/constants'
-import { BUNDLERS, CYPRESS_REACT_LATEST, CYPRESS_WEBPACK, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import * as wizardDeps from '@packages/scaffold-config/src/dependencies'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
 
@@ -18,23 +19,25 @@ export const stubWizard: MaybeResolver<Wizard> = {
   installDependenciesCommand: 'npm install -D @cypress/react @cypress/webpack-dev-server',
   packagesToInstall: [
     {
-      ...testNodeId('WizardNpmPackage'),
-      ...CYPRESS_REACT_LATEST,
+      __typename: 'WizardNpmPackage',
+      id: 'cra',
+      satisfied: true,
+      ...wizardDeps.WIZARD_DEPENDENCY_REACT_SCRIPTS,
     },
     {
-      ...testNodeId('WizardNpmPackage'),
-      ...CYPRESS_WEBPACK,
+      __typename: 'WizardNpmPackage',
+      id: 'typescript',
+      satisfied: false,
+      detectedVersion:'2.0.1',
+      ...wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT,
     },
   ],
   allBundlers,
-  frameworks: FRONTEND_FRAMEWORKS.map((framework, idx) => {
-    // get around readonly errors
-    const supportedBundlers = framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>
-
+  frameworks: WIZARD_FRAMEWORKS.map((framework, idx) => {
     return {
       ...testNodeId('WizardFrontendFramework'),
       ...framework,
-      supportedBundlers,
+      supportedBundlers: framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>,
       isSelected: idx === 0,
       isDetected: false,
     }

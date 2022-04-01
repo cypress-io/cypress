@@ -9,7 +9,7 @@ describe('<ManualInstall />', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
-          <ManualInstall gql={gqlVal} packagesInstalled={[]}/>
+          <ManualInstall gql={gqlVal} />
         </div>
       ),
     })
@@ -24,7 +24,7 @@ describe('<ManualInstall />', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
-          <ManualInstall gql={gqlVal} packagesInstalled={[]} />
+          <ManualInstall gql={gqlVal} />
         </div>
       ),
     })
@@ -60,7 +60,7 @@ describe('<ManualInstall />', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
-          <ManualInstall gql={gqlVal} packagesInstalled={['@cypress/react']} />
+          <ManualInstall gql={gqlVal} />
         </div>
       ),
     })

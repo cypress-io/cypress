@@ -60,11 +60,6 @@ export const Wizard = objectType({
       }
     })
 
-    t.list.nonNull.string('installedPackages', {
-      description: 'The list of packages to install that are currently installed',
-      resolve: (source, args, ctx) => ctx.wizard.installedPackages()
-    })
-
     t.string('installDependenciesCommand', {
       description: 'Command to install required command',
       resolve: (source, args, ctx) => ctx.wizard.installDependenciesCommand()
