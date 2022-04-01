@@ -1098,7 +1098,7 @@ jobs:
             run-app-integration-tests-chrome,
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
-            run-launchpad-integration-tests-chrome
+            run-launchpad-integration-tests-chrome,
             run-webpack-dev-server-fresh-integration-tests
       - run:
           command: |
