@@ -543,11 +543,11 @@ describe('commands', () => {
       .find('.num-children')
       .should('have.text', '1')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', '1 logs currently hidden')
+      .get('.cy-tooltip').should('have.text', '1 log currently hidden')
       .percySnapshot()
     })
 
-    it('group is closed by default when last nested command failed', () => {
+    it('group is open by default when last nested command failed', () => {
       addCommand(runner, {
         name: 'log',
         message: 'chained log example',
