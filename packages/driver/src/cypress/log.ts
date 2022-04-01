@@ -110,7 +110,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state, config, obj: Cypress.InternalLogConfig): Cypress.LogAttributes {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -127,7 +127,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -178,7 +178,7 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
-  _.defaults(obj, {
+  let logAttributes: Cypress.LogAttributes = _.defaults(obj, {
     id: (counter += 1),
     state: 'pending',
     instrument: 'command',
@@ -202,18 +202,41 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
+  logAttributes = sanitizeAttributes(logAttributes)
+
+  const logGroup = _.last(state('logGroup')) as number
 
   if (logGroup) {
-    obj.group = logGroup
+    logAttributes.group = logGroup
   }
 
-  if (obj.groupEnd) {
+  if (logAttributes.groupEnd) {
     state('logGroup', _.slice(state('logGroup'), 0, -1))
   }
 
-  if (obj.groupStart) {
-    state('logGroup', (state('logGroup') || []).concat(obj.id))
+  if (logAttributes.groupStart) {
+    state('logGroup', (state('logGroup') || []).concat(logAttributes.id))
+  }
+
+  return logAttributes
+}
+
+const sanitizeAttributes = (obj) => {
+  if ('url' in obj) {
+    // always stringify the url property
+    obj.url = (obj.url != null ? obj.url : '').toString()
+  }
+
+  // convert onConsole to consoleProps
+  // for backwards compatibility
+  if (obj.onConsole) {
+    obj.consoleProps = obj.onConsole
+  }
+
+  // if we have an alias automatically
+  // figure out what type of alias it is
+  if (obj.alias) {
+    _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
   }
 
   return obj
@@ -224,16 +247,16 @@ class Log {
   state: any
   config: any
   fireChangeEvent: ((log) => (void | undefined))
-  obj: any
+  // obj: Record<string, any> = {}
 
-  private attributes: Record<string, any> = {}
+  private attributes: Cypress.LogAttributes
 
   constructor (cy, state, config, fireChangeEvent, obj) {
     this.cy = cy
     this.state = state
     this.config = config
     this.fireChangeEvent = fireChangeEvent
-    this.obj = defaults(state, config, obj)
+    this.attributes = defaults(state, config, obj)
 
     extendEvents(this)
   }
@@ -280,44 +303,30 @@ class Log {
   }
 
   set (key, val?) {
+    let obj: Record<string, any> = {}
+
     if (_.isString(key)) {
-      this.obj = {}
-      this.obj[key] = val
+      obj[key] = val
     } else {
-      this.obj = key
+      obj = key
     }
 
-    if ('url' in this.obj) {
-      // always stringify the url property
-      this.obj.url = (this.obj.url != null ? this.obj.url : '').toString()
-    }
-
-    // convert onConsole to consoleProps
-    // for backwards compatibility
-    if (this.obj.onConsole) {
-      this.obj.consoleProps = this.obj.onConsole
-    }
-
-    // if we have an alias automatically
-    // figure out what type of alias it is
-    if (this.obj.alias) {
-      _.defaults(this.obj, { aliasType: this.obj.$el ? 'dom' : 'primitive' })
-    }
+    obj = sanitizeAttributes(obj)
 
     // dont ever allow existing id's to be mutated
     if (this.attributes.id) {
-      delete this.obj.id
+      delete obj.id
     }
 
-    _.extend(this.attributes, this.obj)
+    _.extend(this.attributes, obj)
 
     // if we have an consoleProps function
     // then re-wrap it
-    if (this.obj && _.isFunction(this.obj.consoleProps)) {
+    if (obj && _.isFunction(obj.consoleProps)) {
       this.wrapConsoleProps()
     }
 
-    if (this.obj && this.obj.$el) {
+    if (obj && obj.$el) {
       this.setElAttrs()
     }
 
@@ -425,13 +434,13 @@ class Log {
     }
 
     // make sure all $el elements are visible!
-    this.obj = {
+    const snapshotAttrs = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
       visible: $el.length === $el.filter(':visible').length,
     }
 
-    return this.set(this.obj, { silent: true })
+    return this.set(snapshotAttrs, { silent: true })
   }
 
   merge (log) {
@@ -490,7 +499,7 @@ class Log {
       consoleObj[key] = _this.get('name')
 
       // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleProps.apply(this, args))
+      _.extend(consoleObj, consoleProps?.apply(this, args))
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
@@ -576,8 +585,6 @@ class LogManager {
       }
 
       const log = new Log(cy, state, config, this.fireChangeEvent, options)
-
-      log.set(options)
 
       // if snapshot was passed
       // in, go ahead and snapshot
