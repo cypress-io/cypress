@@ -188,7 +188,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=16.5.0",
+    "node": ">=16.13.2",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
