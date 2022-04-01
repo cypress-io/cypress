@@ -65,7 +65,7 @@
               <template
                 v-if="props.gql?.currentProject?.branch"
               >
-                <Tooltip placement="right">
+                <Tooltip>
                   <span
                     class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
                   >
@@ -79,7 +79,7 @@
             </li>
             <li
               v-if="props.gql?.currentProject?.currentTestingType"
-              class="mx-2px align-middle inline-block"
+              class="mx-2px inline-block align-middle"
               aria-hidden
             >
               <i-cy-chevron-right_x16
@@ -185,9 +185,9 @@ import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
-import { Tooltip } from 'floating-vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
+import Tooltip from '../components/Tooltip.vue'
 
 gql`
 subscription HeaderBarContent_authChange {
@@ -340,17 +340,3 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   return true
 }
 </script>
-
-<style lang="scss">
-@import "floating-vue/dist/style.css";
-
-.v-popper.v-popper--theme-tooltip {
-  @apply inline-block;
-}
-
-.v-popper__popper.v-popper--theme-tooltip {
-  .v-popper__inner {
-    @apply bg-gray-900 py-2 px-4;
-  }
-}
-</style>
