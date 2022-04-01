@@ -1,5 +1,9 @@
 import Promise from 'bluebird'
 
+// the following are special commands that can continue and execute when
+// the AUT is unstable
+const commandsToRunRegardlessOfStability = ['switchToDomain', 'log', 'end-logGroup']
+
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (Cypress, state) => ({
   isStable: (stable: boolean = true, event: string) => {
@@ -54,10 +58,10 @@ export const create = (Cypress, state) => ({
   },
 
   whenStableOrAnticipatingMultiDomain (fn, command) {
-    const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
+    const shouldRunCommand = commandsToRunRegardlessOfStability.includes(command?.get('name')) || false
 
     // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingMultiDomain') && commandIsSwitchToDomain) || state('isStable') !== false) {
+    if ((!!state('anticipatingMultiDomain') && shouldRunCommand) || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -80,7 +84,7 @@ export const create = (Cypress, state) => ({
       state('whenStable', onSignal)
 
       // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
-      if (commandIsSwitchToDomain) {
+      if (command?.get('name') === 'switchToDomain' || false) {
         state('whenAnticipatingMultiDomain', onSignal)
       }
     })

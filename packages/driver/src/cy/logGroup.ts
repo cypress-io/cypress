@@ -24,7 +24,7 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
   const restoreCmdIndex = cy.state('index') + 1
 
   const endLogGroupCmd = $Command.create({
-    name: 'restore-log-group',
+    name: 'end-logGroup',
     injected: true,
   })
 
