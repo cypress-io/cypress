@@ -1,5 +1,8 @@
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 
+// @ts-ignore
+const platform = window.Cypress.platform
+
 const renameAutoStep = `[data-cy="migration-step renameAuto"]`
 const renameManualStep = `[data-cy="migration-step renameManual"]`
 const renameSupportStep = `[data-cy="migration-step renameSupport"]`
@@ -938,7 +941,9 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     cy.contains('Error Loading Config')
     // correct location of error
-    cy.get('[data-testid="error-code-frame"]').contains(`cypress/plugins/index.js:2:9`)
+    const pluginsPath = platform === 'win32' ? 'cypress\\plugins\\index.js:2:9' : 'cypress/plugins/index.js:2:9'
+
+    cy.get('[data-testid="error-code-frame"]').contains(pluginsPath)
     // correct error from pluginsFile
     cy.contains(`throw Error('Uh oh, there was an error!')`)
   })
