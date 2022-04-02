@@ -12,16 +12,21 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
 
   const version = require(compiler).version
 
+  /**
+   * NOTE: This circumvents a limitation of ts-node
+   *
+   * The "preserveValueImports" option was introduced in TypeScript 4.5.0
+   * https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#disabling-import-elision
+   *
+   * If we pass an unknown compiler option to ts-node,
+   * it ignores all options passed.
+   * If we want `module: "commonjs"` to always be used,
+   * we need to only set options that are supported in this version of TypeScript.
+   */
   const compilerOptions = {
     module: 'commonjs',
     ...(semver.satisfies(version, '>=4.5.0')
-      // The "preserveValueImports" option only exists from TypeScript 4.5.0
-      // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#disabling-import-elision
-      //
-      // If ts-node finds an option that TS does not know,
-      // it ignores all options passed.
-      // If we want commonjs to always be used, even in older versions of TS
-      // we need to only add this option when it is supported
+      // Only adding this option for TS >= 4.5.0
       ? { preserveValueImports: false }
       : {}
     ),
