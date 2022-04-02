@@ -10,7 +10,7 @@ const debug = debugLib('cypress:server:ts-node')
 const getTsNodeOptions = (tsPath, registeredFile) => {
   const compiler = process.env.TS_NODE_COMPILER || tsPath
 
-  const version = require(`${compiler}/package.json`).version
+  const version = require(compiler).version
 
   const compilerOptions = {
     module: 'commonjs',
