@@ -12,6 +12,9 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
    */
   const opts = {
     compiler: process.env.TS_NODE_COMPILER || tsPath, // use the user's installed typescript
+    compilerOptions: {
+      module: 'commonjs',
+    },
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
     dir: path.dirname(registeredFile),
