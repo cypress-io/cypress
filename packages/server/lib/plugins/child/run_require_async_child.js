@@ -94,8 +94,6 @@ function run (ipc, file, projectRoot) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
       }
-
-      debug('Tried to load with ts-node. Got error:\n\n%O', err)
     }
 
     debug('User is loading an ESM config file')
