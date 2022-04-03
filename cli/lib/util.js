@@ -356,6 +356,10 @@ const util = {
     return process.cwd()
   },
 
+  pkgBuildInfo () {
+    return pkg.buildInfo
+  },
+
   pkgVersion () {
     return pkg.version
   },

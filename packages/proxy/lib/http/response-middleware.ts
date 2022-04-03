@@ -261,6 +261,17 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.wantsInjection = getInjectionLevel()
   }
 
+  if (this.res.wantsInjection) {
+    // Chrome plans to make document.domain immutable in Chrome 106, with the default value
+    // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+    // so that we can continue to support tests that visit multiple subdomains in a single spec.
+    // https://github.com/cypress-io/cypress/issues/20147
+    //
+    // We set the header here only for proxied requests that have scripts injected that set the domain.
+    // Other proxied requests are ignored.
+    this.res.setHeader('Origin-Agent-Cluster', '?0')
+  }
+
   this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode && isReqMatchOriginPolicy && (
     (this.res.wantsInjection === 'full')
     || resContentTypeIsJavaScript(this.incomingRes)
