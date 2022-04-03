@@ -1,6 +1,6 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { CodeLanguage, CODE_LANGUAGES } from '@packages/types'
-import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import { CODE_LANGUAGES } from '@packages/types'
+import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
@@ -12,8 +12,8 @@ const debug = Debug('cypress:data-context:wizard-actions')
 import type { DataContext } from '..'
 
 interface WizardGetCodeComponent {
-  chosenLanguage: CodeLanguage
-  chosenFramework: FrontendFramework
+  chosenLanguage: 'js' | 'ts'
+  chosenFramework: typeof WIZARD_FRAMEWORKS[number]
 }
 
 export class WizardActions {
@@ -29,16 +29,15 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: typeof WIZARD_FRAMEWORKS[number]['type'] | null): void {
-    const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework)
+  setFramework (framework: typeof WIZARD_FRAMEWORKS[number] | null): void {
+    const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework?.type)
 
-    this.ctx.update(coreData => {
+    this.ctx.update((coreData) => {
       coreData.wizard.chosenFramework = framework
     })
 
-    console.log('next', next)
     if (next?.supportedBundlers?.length === 1) {
-      this.setBundler(next?.supportedBundlers?.[0].type)
+      this.setBundler(next?.supportedBundlers?.[0])
 
       return
     }
@@ -48,28 +47,30 @@ export class WizardActions {
     // if the previous bundler was incompatible with the
     // new framework that was selected, we need to reset it
     const doesNotSupportChosenBundler = (chosenBundler && !new Set(
-      this.ctx.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
-    ).has(chosenBundler)) ?? false
+      this.ctx.coreData.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+    ).has(chosenBundler.type)) ?? false
 
-    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework?.type ?? null
 
-    if (doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
+    if (!prevFramework || doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
       this.setBundler(null)
     }
   }
 
-  setBundler (bundler: typeof WIZARD_BUNDLERS[number]['type'] | null) {
-    this.ctx.update(coreData => {
+  setBundler (bundler: typeof WIZARD_BUNDLERS[number] | null) {
+    this.ctx.update((coreData) => {
       coreData.wizard.chosenBundler = bundler
     })
 
-    return this.ctx.wizardData
+    return this.ctx.coreData.wizard
   }
 
   setCodeLanguage (lang: NexusGenEnums['CodeLanguageEnum']) {
-    this.ctx.coreData.wizard.chosenLanguage = lang
+    this.ctx.update((coreData) => {
+      coreData.wizard.chosenLanguage = lang
+    })
 
-    return this.data
+    return this.ctx.coreData.wizard
   }
 
   async completeSetup () {
@@ -86,11 +87,13 @@ export class WizardActions {
 
   /// reset wizard status, useful for when changing to a new project
   resetWizard () {
-    this.data.chosenBundler = null
-    this.data.chosenFramework = null
-    this.data.chosenLanguage = 'js'
+    this.ctx.update((coreData) => {
+      coreData.wizard.chosenBundler = null
+      coreData.wizard.chosenFramework = null
+      coreData.wizard.chosenLanguage = 'js'
+    })
 
-    return this.data
+    return this.ctx.coreData.wizard
   }
 
   async initialize () {
@@ -115,15 +118,15 @@ export class WizardActions {
 
       if (detected) {
         this.ctx.update((coreData) => {
-          coreData.wizard.detectedFramework = detected.framework?.type ?? null
-          coreData.wizard.chosenFramework = detected.framework?.type ?? null
+          coreData.wizard.detectedFramework = detected.framework ?? null
+          coreData.wizard.chosenFramework = detected.framework ?? null
 
           if (!detected.framework?.supportedBundlers[0]) {
             return
           }
 
-          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0].type
-          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0].type
+          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
+          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
         })
       }
     } catch {
@@ -185,15 +188,15 @@ export class WizardActions {
 
   private async scaffoldComponent () {
     debug('scaffoldComponent')
-    const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
+    const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.coreData.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
 
     return await Promise.all([
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
-      this.scaffoldSupport('component', chosenLanguage.type),
-      this.scaffoldSupport('commands', chosenLanguage.type),
+      this.scaffoldSupport('component', chosenLanguage),
+      this.scaffoldSupport('commands', chosenLanguage),
       this.getComponentIndexHtml({
         chosenFramework,
         chosenLanguage,
@@ -225,11 +228,15 @@ export class WizardActions {
     if (testingType === 'component') {
       const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
 
-      const { chosenBundler, chosenFramework } = this.ctx.wizard
+      const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
 
       assert(chosenFramework && chosenLanguage && chosenBundler)
 
-      return chosenFramework.config[chosenLanguage.type](chosenBundler.type)
+      return chosenFramework.createCypressConfig({
+        language: chosenLanguage.type,
+        bundler: chosenBundler.type,
+        framework: chosenFramework.type,
+      })
     }
 
     return this.wizardGetConfigCodeE2E(language)

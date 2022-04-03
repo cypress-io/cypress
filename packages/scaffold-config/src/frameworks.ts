@@ -1,27 +1,13 @@
 import path from 'path'
+import dedent from 'dedent'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import { satisfies } from 'semver'
 import resolveFrom from 'resolve-from'
 
-type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
+export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
-const WIZARD_BUNDLER_WEBPACK = {
-  type: 'webpack',
-  name: 'Webpack'
-} as const
-
-const WIZARD_BUNDLER_VITE = {
-  type: 'vite',
-  name: 'Vite'
-} as const
-
-export const WIZARD_BUNDLERS = [
-  WIZARD_BUNDLER_VITE,
-  WIZARD_BUNDLER_WEBPACK
-] as const
-
-type WizardBundler = typeof WIZARD_BUNDLERS[number]['type']
+type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]['type']
 
 export type WizardDependency = typeof dependencies.WIZARD_DEPENDENCIES[number]
 
@@ -36,18 +22,19 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
   try {
     const loc = resolveFrom(projectPath, path.join(dependency.package, 'package.json'))
     const pkg = fs.readJsonSync(loc) as PkgJson
+
     return {
       dependency,
       detectedVersion: pkg.version,
       loc,
-      satisfied: Boolean(pkg.version && satisfies(pkg.version, dependency.minVersion))
+      satisfied: Boolean(pkg.version && satisfies(pkg.version, dependency.minVersion)),
     }
-  } catch (e) { 
+  } catch (e) {
     return {
       dependency,
       detectedVersion: null,
       loc: null,
-      satisfied: false
+      satisfied: false,
     }
   }
 }
@@ -60,101 +47,155 @@ function getBundlerDependency (bundler: WizardBundler, projectPath: string): Dep
   }
 }
 
+interface CreateCypressConfig {
+  framework: typeof WIZARD_FRAMEWORKS[number]['type']
+  bundler: WizardBundler
+  language: 'js' | 'ts'
+}
+
+function createCypressConfig (config: CreateCypressConfig): string {
+  if (config.language === 'ts') {
+    return dedent`
+      import { defineConfig } from 'cypress'
+
+      export default defineConfig({
+        component: {
+          framework: '${config.framework}',
+          bundler: '${config.bundler}'
+        },
+      }`
+  }
+
+  return dedent`
+    module.exports = {
+      component: {
+        framework: '${config.framework}',
+        bundler: '${config.bundler}'
+      },
+    }`
+}
+
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
     family: 'template',
     name: 'Create React App',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => [
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-    ],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
+      ]
+    },
+    createCypressConfig,
   },
   {
     type: 'vueclivue2',
     family: 'template',
     name: 'Vue CLI (Vue 2)',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => [
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-    ],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
+      ]
+    },
+    createCypressConfig,
   },
   {
     type: 'vueclivue3',
     family: 'template',
     name: 'Vue CLI (Vue 3)',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_3,
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => [
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
-    ],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
+      ]
+    },
+    createCypressConfig,
   },
   {
     type: 'nextjs',
     family: 'template',
     name: 'Next.js',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => [
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-    ],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
+      ]
+    },
+    createCypressConfig,
   },
   {
     type: 'nuxtjs',
     family: 'template',
     name: 'Nuxt.js',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK],
+    detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
-    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => [
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
-      inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
-    ],
+    dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
+      return [
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
+      ]
+    },
+    createCypressConfig,
   },
   {
     type: 'vue2',
     family: 'library',
     name: 'Vue.js 2',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK, WIZARD_BUNDLER_VITE],
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
+    createCypressConfig,
   },
   {
     type: 'vue3',
     family: 'library',
     name: 'Vue.js 3',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK, WIZARD_BUNDLER_VITE],
+    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_3,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
-        getBundlerDependency(bundler, projectPath), 
+        getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ]
     },
+    createCypressConfig,
   },
   {
     type: 'react',
     family: 'library',
     name: 'React.js',
-    supportedBundlers: [WIZARD_BUNDLER_WEBPACK, WIZARD_BUNDLER_VITE],
+    detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
-        getBundlerDependency(bundler, projectPath), 
+        getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ]
     },
+    createCypressConfig,
   },
-] as const 
+] as const
 
 // export type WizardFramework = typeof WIZARD_FRAMEWORKS[number]
 

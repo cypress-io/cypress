@@ -59,14 +59,12 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
-    isSelected
     isDetected
   }
   framework {
     type
     id
     name
-    isSelected
     isDetected
     supportedBundlers {
       id
@@ -79,7 +77,6 @@ fragment EnvironmentSetup on Wizard {
   frameworks {
     id
     name
-    isSelected
     isDetected
     type
     # category
@@ -93,8 +90,8 @@ fragment EnvironmentSetup on Wizard {
   language {
     id
     name
-    isSelected
     type
+    isSelected
   }
   allLanguages {
     id
@@ -113,13 +110,13 @@ const { t } = useI18n()
 
 const bundlers = computed(() => {
   const all = props.gql.framework?.supportedBundlers || []
-  console.log(props.gql.framework)
-  const _bundlers = all.map(b => ({
-    disabled: all.length <= 1,
-    ...b,
-  }))
+  const _bundlers = all.map((b) => {
+    return {
+      disabled: all.length <= 1,
+      ...b,
+    }
+  })
 
-  console.log({ _bundlers })
   return _bundlers
 })
 

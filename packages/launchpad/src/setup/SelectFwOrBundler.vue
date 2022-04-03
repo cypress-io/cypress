@@ -66,7 +66,6 @@ interface RootOption {
   name: string
   description?: string
   id: string
-  isSelected?: boolean
   isDetected?: boolean
   disabled?: boolean
 }

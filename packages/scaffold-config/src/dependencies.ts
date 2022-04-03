@@ -83,7 +83,7 @@ export const WIZARD_DEPENDENCY_STORYBOOK_REACT = {
   name: ' Testing React',
   package: '@storybook/testing-react',
   description: 'Testing utilities that allow you to reuse your stories in your unit tests',
-  minVersion: '>=1.0.0'
+  minVersion: '>=1.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_STORYBOOK_VUE_2 = {
@@ -91,7 +91,7 @@ export const WIZARD_DEPENDENCY_STORYBOOK_VUE_2 = {
   name: ' Testing Vue 2',
   package: '@storybook/testing-vue',
   description: 'Testing utilities that allow you to reuse your stories in your unit tests',
-  minVersion: '>=0.0.2'
+  minVersion: '>=0.0.2',
 } as const
 
 export const WIZARD_DEPENDENCY_STORYBOOK_VUE_3 = {
@@ -99,9 +99,8 @@ export const WIZARD_DEPENDENCY_STORYBOOK_VUE_3 = {
   name: ' Testing Vue 3',
   package: '@storybook/testing-vue3',
   description: 'Testing utilities that allow you to reuse your stories in your unit tests',
-  minVersion: '>=0.0.2'
+  minVersion: '>=0.0.2',
 } as const
-
 
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
@@ -117,4 +116,9 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_STORYBOOK_VUE_3,
   WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
   WIZARD_DEPENDENCY_STORYBOOK_REACT,
+] as const
+
+export const WIZARD_BUNDLERS = [
+  WIZARD_DEPENDENCY_WEBPACK,
+  WIZARD_DEPENDENCY_VITE,
 ] as const

@@ -18,12 +18,12 @@ export const Wizard = objectType({
 
     t.field('bundler', {
       type: WizardBundler,
-      resolve: (source, args, ctx) => ctx.wizard.chosenBundler ?? null,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.chosenBundler ?? null,
     })
 
     t.field('framework', {
       type: WizardFrontendFramework,
-      resolve: (source, args, ctx) => ctx.wizard.chosenFramework ?? null,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.chosenFramework ?? null,
     })
 
     t.nonNull.list.nonNull.field('frameworks', {
@@ -34,7 +34,7 @@ export const Wizard = objectType({
 
     t.field('language', {
       type: WizardCodeLanguage,
-      resolve: (source, args, ctx) => ctx.wizard.chosenLanguage ?? null,
+      resolve: (source, args, ctx) => CODE_LANGUAGES.find((x) => x.type === ctx.coreData.wizard.chosenLanguage) ?? null,
     })
 
     t.nonNull.list.nonNull.field('allLanguages', {
@@ -47,22 +47,22 @@ export const Wizard = objectType({
       type: WizardNpmPackage,
       description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
       resolve: (source, args, ctx) => {
-        return ctx.wizard.packagesToInstall().map(pkg => {
+        return ctx.wizard.packagesToInstall().map((pkg) => {
           return {
             name: pkg.dependency.name,
             package: pkg.dependency.package,
             description: pkg.dependency.description,
             minVersion: pkg.dependency.minVersion,
             detectedVersion: pkg.detectedVersion,
-            satisfied: pkg.satisfied
+            satisfied: pkg.satisfied,
           }
         })
-      }
+      },
     })
 
     t.string('installDependenciesCommand', {
       description: 'Command to install required command',
-      resolve: (source, args, ctx) => ctx.wizard.installDependenciesCommand()
+      resolve: (source, args, ctx) => ctx.wizard.installDependenciesCommand(),
     })
   },
   sourceType: {
