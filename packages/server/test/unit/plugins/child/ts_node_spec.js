@@ -9,7 +9,7 @@ const tsNodeUtil = require('../../../../lib/plugins/child/ts_node')
 describe('lib/plugins/child/ts_node', () => {
   beforeEach(() => {
     sinon.stub(tsnode, 'register')
-    sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
+    sinon.stub(resolve, 'typescript').returns('typescript/lib/typescript.js')
   })
 
   describe('typescript registration', () => {
@@ -18,10 +18,10 @@ describe('lib/plugins/child/ts_node', () => {
 
       expect(tsnode.register).to.be.calledWith({
         transpileOnly: true,
-        compiler: '/path/to/typescript.js',
+        compiler: 'typescript/lib/typescript.js',
         dir: '/path/to/plugins',
         compilerOptions: {
-          module: 'CommonJS',
+          module: 'commonjs',
         },
       })
     })
