@@ -16,6 +16,12 @@ describe('e2e typescript in plugins file', function () {
     })
   })
 
+  it('use vue\'s tsconfig.json to run config', function () {
+    return systemTests.exec(this, {
+      project: 'ts-proj-4-5',
+    })
+  })
+
   // https://github.com/cypress-io/cypress/issues/7575
   it('allows esModuleInterop to be overridden with true via tsconfig.json', function () {
     return systemTests.exec(this, {
