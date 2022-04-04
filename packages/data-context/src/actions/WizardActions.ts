@@ -229,12 +229,13 @@ export class WizardActions {
 
       const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
 
-      assert(chosenFramework && chosenLanguage && chosenBundler)
+      assert(chosenFramework && chosenLanguage && chosenBundler && this.ctx.currentProject)
 
       return chosenFramework.createCypressConfig({
         language: chosenLanguage.type,
         bundler: chosenBundler.type,
         framework: chosenFramework.type,
+        projectRoot: this.ctx.currentProject,
       })
     }
 

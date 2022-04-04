@@ -2,6 +2,7 @@ import path from 'path'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
+import { defineConfigAvailable } from '@packages/data-context/src/sources/migration/codegen'
 import semver from 'semver'
 import resolveFrom from 'resolve-from'
 
@@ -55,19 +56,30 @@ interface CreateCypressConfig {
   framework: typeof WIZARD_FRAMEWORKS[number]['type']
   bundler: WizardBundler
   language: 'js' | 'ts'
+  projectRoot: string
 }
 
 function createCypressConfig (config: CreateCypressConfig): string {
   if (config.language === 'ts') {
-    return dedent`
-      import { defineConfig } from 'cypress'
+    if (defineConfigAvailable(config.projectRoot)) {
+      return dedent`
+        import { defineConfig } from 'cypress'
 
-      export default defineConfig({
+        export default defineConfig({
+          component: {
+            framework: '${config.framework}',
+            bundler: '${config.bundler}'
+          },
+        })`
+    }
+
+    return dedent`
+      export default {
         component: {
           framework: '${config.framework}',
           bundler: '${config.bundler}'
         },
-      })`
+      }`
   }
 
   return dedent`
