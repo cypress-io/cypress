@@ -46,7 +46,7 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
-  indexHtmlFile?: string
+  indexHtmlFile: string
 }
 
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')

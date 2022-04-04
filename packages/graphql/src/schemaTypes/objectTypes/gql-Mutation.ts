@@ -25,12 +25,17 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('reinitializeCypress', {
+    t.field('resetErrorsAndLoadConfig', {
       type: Query,
-      description: 'Re-initializes Cypress from the initial CLI options',
+      description: 'Resets errors and attempts to reload the config',
       resolve: async (_, args, ctx) => {
-        await ctx.reinitializeCypress(ctx.modeOptions)
-        await ctx.initializeMode()
+        ctx.update((d) => {
+          d.baseError = null
+          d.warnings = []
+        })
+
+        // Wait for the project config to be reloaded
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },
@@ -151,24 +156,28 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.lifecycleManager.setCurrentTestingType(null)
+        ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}
       },
     })
 
-    t.field('setCurrentTestingType', {
+    t.field('setAndLoadCurrentTestingType', {
       type: 'Query',
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         // if necessary init the wizard for configuration
         if (ctx.coreData.currentTestingType
           && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           await ctx.actions.wizard.initialize()
+
+          if (ctx.wizardData.chosenLanguage === 'ts') {
+            ctx.lifecycleManager.scaffoldFilesIfNecessary()
+          }
         }
 
         return {}
@@ -473,16 +482,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('migrateStart', {
-      description: 'Initialize the migration wizard to the first step',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
-
-        return {}
-      },
-    })
-
     t.field('migrateRenameSpecs', {
       description: 'While migrating to 10+ renames files to match the new .cy pattern',
       type: Query,
@@ -594,7 +593,7 @@ export const mutation = mutationType({
         }
 
         // Wait for the project config to be reloaded
-        await ctx.lifecycleManager.reloadConfig()
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },
@@ -618,7 +617,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.project.setRelaunchBrowser(true)
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
         return true
@@ -634,7 +633,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         if (args.isApp) {
           await ctx.actions.project.reconfigureProject()
