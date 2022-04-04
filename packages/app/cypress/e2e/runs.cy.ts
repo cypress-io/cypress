@@ -173,10 +173,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Create Project', () => {
     it('when a project is created, injects new projectId into the config file', () => {
-      const newProjectId = Math.random().toString()
+      let newProjectId
 
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          newProjectId = Math.random().toString()
           obj.result.data!.cloudProjectCreate = {
             slug: newProjectId,
             id: 'newId',
