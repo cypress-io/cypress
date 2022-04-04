@@ -1,7 +1,6 @@
 require('../spec_helper')
 
 const files = require('../../lib/files')
-const config = require('../../lib/config')
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const { getCtx } = require('../../lib/makeDataContext')
 
@@ -16,7 +15,7 @@ describe('lib/files', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath).then((cfg) => {
+    return ctx.lifecycleManager.getFullInitialConfig().then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
