@@ -18,7 +18,11 @@ function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
   }, { configFile })
 }
 
-describe('scaffolding component testing', { taskTimeout: 1000 * 60 }, () => {
+const ONE_MINUTE = 1000 * 60
+
+describe('scaffolding component testing', {
+  taskTimeout: ONE_MINUTE,
+}, () => {
   context('vuecli4vue2', () => {
     it('scaffolds component testing for Vue CLI 4 w/ Vue 2 project', () => {
       startSetupFor('vueclivue2-unconfigured')
@@ -96,7 +100,7 @@ describe('scaffolding component testing', { taskTimeout: 1000 * 60 }, () => {
       startSetupFor('nuxtjs-vue2-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Nuxt.js (detected)')
+      cy.get('button').should('be.visible').contains('Nuxt.js(detected)')
       cy.get('button').contains('Next Step').click()
       cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.js`)
