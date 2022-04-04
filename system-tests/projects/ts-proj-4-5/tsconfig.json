@@ -1,3 +1,6 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.web.json"
+  "compilerOptions": {
+    "module": "es2015",
+    "preserveValueImports": true
+  }
 }
