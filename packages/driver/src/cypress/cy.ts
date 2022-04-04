@@ -138,8 +138,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
-  isAnticipatingMultiDomainFor: IStability['isAnticipatingMultiDomainFor']
-  whenStableOrAnticipatingMultiDomain: IStability['whenStableOrAnticipatingMultiDomain']
+  isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
+  whenStableOrAnticipatingCrossOriginResponse: IStability['whenStableOrAnticipatingCrossOriginResponse']
 
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
@@ -251,8 +251,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
-    this.isAnticipatingMultiDomainFor = stability.isAnticipatingMultiDomainFor
-    this.whenStableOrAnticipatingMultiDomain = stability.whenStableOrAnticipatingMultiDomain
+    this.isAnticipatingCrossOriginResponseFor = stability.isAnticipatingCrossOriginResponseFor
+    this.whenStableOrAnticipatingCrossOriginResponse = stability.whenStableOrAnticipatingCrossOriginResponse
 
     const assertions = createAssertions(Cypress, this)
 

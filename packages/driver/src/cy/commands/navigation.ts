@@ -50,24 +50,24 @@ const isValidVisitMethod = (method) => {
 const timedOutWaitingForPageLoad = (ms, log) => {
   debug('timedOutWaitingForPageLoad')
 
-  const anticipatedCrossOriginHref = cy.state('anticipatingMultiDomain')
+  const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginResponse')?.href
 
   // Were we anticipating a cross domain page when we timed out?
   if (anticipatedCrossOriginHref) {
     // We remain in an anticipating state until either a load even happens or a timeout.
-    cy.isAnticipatingMultiDomainFor(undefined)
+    cy.isAnticipatingCrossOriginResponseFor(undefined)
 
     // By default origins is just this location.
-    let origins = [$Location.create(location.href).originPolicy]
+    let originPolicies = [$Location.create(location.href).originPolicy]
 
     const currentCommand = cy.queue.state('current')
 
     if (currentCommand?.get('name') === 'switchToDomain') {
       // If the current command is a switchDomain command, we should have gotten a request on the origin it expects.
-      origins = [cy.state('latestActiveDomain')]
+      originPolicies = [cy.state('latestActiveOriginPolicy')]
     } else if (Cypress.isMultiDomain && cy.queue.isOnLastCommand()) {
       // If this is multi-domain and the we're on the last command, we should have gotten a request on the origin of one of the parents.
-      origins = cy.state('parentOrigins')
+      originPolicies = cy.state('parentOriginPolicies')
     }
 
     $errUtils.throwErrByPath('navigation.switch_to_domain_load_timed_out', {
@@ -75,7 +75,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
         configFile: Cypress.config('configFile'),
         ms,
         crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
-        origins,
+        originPolicies,
       },
       onFail: log,
     })
@@ -870,7 +870,7 @@ export default (Commands, Cypress, cy, state, config) => {
       url = $Location.normalize(url)
 
       if (Cypress.isMultiDomain) {
-        url = $Location.qualifyWithBaseUrl(Cypress.state('multiDomainBaseUrl'), url)
+        url = $Location.qualifyWithBaseUrl(Cypress.state('switchToDomainBaseUrl'), url)
       } else {
         const baseUrl = config('baseUrl')
 
