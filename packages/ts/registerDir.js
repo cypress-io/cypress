@@ -8,9 +8,9 @@ const path = require('path')
 // build has been done correctly
 module.exports = function (scopeDir) {
   try {
-  // Prevent double-compiling if we're testing the app and already have ts-node hook installed
-  // TODO(tim): e2e testing does not like this, I guess b/c it's currently using the tsconfig
-  // for the app project?
+    // Prevent double-compiling if we're testing the app and already have ts-node hook installed
+    // TODO(tim): e2e testing does not like this, I guess b/c it's currently using the tsconfig
+    // for the app project?
     if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       debug('registering ts-node on directory', scopeDir)
       const tsNode = require('ts-node')
@@ -32,9 +32,9 @@ module.exports = function (scopeDir) {
       debug('skipping ts-node registration while testing the app')
     }
 
-  // do we need to prevent any other TypeScript hooks?
+    // do we need to prevent any other TypeScript hooks?
   } catch (e) {
-  // continue running without TypeScript require hook
+    // continue running without TypeScript require hook
     debug('Running without ts-node hook in environment "%s"', process.env.CYPRESS_INTERNAL_ENV)
   }
 }
