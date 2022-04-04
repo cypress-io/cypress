@@ -35,7 +35,7 @@ export const Query = objectType({
     t.field('migration', {
       type: Migration,
       description: 'Metadata about the migration, null if we aren\'t showing it',
-      resolve: (root, args, ctx) => ctx.coreData.migration,
+      resolve: (root, args, ctx) => ctx.coreData.migration.legacyConfigForMigration ? ctx.coreData.migration : null,
     })
 
     t.nonNull.field('dev', {
