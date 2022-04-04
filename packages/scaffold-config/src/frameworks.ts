@@ -67,7 +67,7 @@ function createCypressConfig (config: CreateCypressConfig): string {
           framework: '${config.framework}',
           bundler: '${config.bundler}'
         },
-      }`
+      })`
   }
 
   return dedent`
