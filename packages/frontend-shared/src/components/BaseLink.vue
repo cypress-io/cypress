@@ -3,6 +3,7 @@
   <a
     :href="props.href"
     :class="classes"
+    @keypress.space.enter.prevent="open"
   ><slot /></a>
 </template>
 
