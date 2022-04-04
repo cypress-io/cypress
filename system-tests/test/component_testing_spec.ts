@@ -27,14 +27,6 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('create-react-app-configured-bundled-mount', {
-    project: 'create-react-app-configured-bundled-mount',
-    testingType: 'component',
-    spec: 'src/App.cy.jsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('vueclivue2-configured', {
     project: 'vueclivue2-configured',
     testingType: 'component',
