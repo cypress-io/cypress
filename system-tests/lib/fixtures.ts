@@ -18,7 +18,9 @@ const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true
 const safeRemove = (path) => {
   try {
     fs.removeSync(path)
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as NodeJS.ErrnoException
+
     // Windows does not like the en masse deleting of files, since the AV will hold
     // a lock on files when they are written. This skips deleting if the lock is
     // encountered.

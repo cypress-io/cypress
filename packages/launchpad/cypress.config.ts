@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
 import { devServer } from '@cypress/vite-dev-server'
+import { snapshotCypressDirectory } from './cypress/tasks/snapshotsScaffold'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -35,6 +36,10 @@ export default defineConfig({
     async setupNodeEvents (on, config) {
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
+
+      on('task', {
+        snapshotCypressDirectory,
+      })
 
       return await e2ePluginSetup(on, config)
     },
