@@ -146,6 +146,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               error: err.message,
             })
 
+            wrappedErr.name = err.name
+
             // Prevent cypress from trying to add the function to the error log
             wrappedErr.onFail = () => {}
 
