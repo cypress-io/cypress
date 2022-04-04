@@ -99,7 +99,7 @@ function createCypressConfig (config: CreateCypressConfig): string {
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
-    configFramework: 'react-scripts',
+    configFramework: 'create-react-app',
     category: 'template',
     name: 'Create React App',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
