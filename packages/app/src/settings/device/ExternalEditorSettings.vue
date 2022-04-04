@@ -36,7 +36,11 @@ const { t } = useI18n()
 const setPreferredBinaryEditor = useMutation(ExternalEditorSettings_SetPreferredEditorBinaryDocument)
 
 function handleChoseEditor (binary: string) {
-  setPreferredBinaryEditor.executeMutation({ value: JSON.stringify({ preferredEditorBinary: binary }) })
+  if (binary) {
+    setPreferredBinaryEditor.executeMutation({ value: JSON.stringify({ preferredEditorBinary: binary }) })
+  } else {
+    setPreferredBinaryEditor.executeMutation({ value: JSON.stringify({ preferredEditorBinary: '' }) })
+  }
 }
 
 gql`

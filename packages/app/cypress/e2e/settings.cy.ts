@@ -307,6 +307,47 @@ describe('App: Settings', () => {
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
   })
+
+  describe('external editor (null binary)', () => {
+    beforeEach(() => {
+      cy.startAppServer('e2e')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+        o.sinon.stub(ctx.actions.file, 'openFile')
+        ctx.coreData.localSettings.availableEditors = [
+          ...ctx.coreData.localSettings.availableEditors,
+          // don't rely on CI machines to have specific editors installed
+          // so just adding one here
+          {
+            id: 'null-binary-editor',
+            name: 'Null binary editor',
+          },
+        ]
+
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
+      })
+
+      cy.visitApp('settings')
+      cy.contains('Device Settings').click()
+    })
+
+    it('handles null binary field in editor', () => {
+      cy.contains('Choose your editor...').click()
+      cy.contains('Null binary editor').click()
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/bin/unknown')
+      })
+
+      // navigate away and come back
+      // preferred editor selected from dropdown should have been persisted
+      cy.visitApp()
+      cy.get('[href="#/settings"]').click()
+      cy.wait(200)
+      cy.get('[data-cy="Device Settings"]').click()
+
+      cy.get('[data-cy="custom-editor"]').should('not.exist')
+    })
+  })
 })
 
 describe('App: Settings without cloud', () => {

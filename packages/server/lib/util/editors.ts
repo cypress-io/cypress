@@ -19,7 +19,7 @@ const createEditor = (editor: Editor): Editor => {
   return {
     id: editor.id,
     name: editor.name,
-    binary: editor.binary,
+    binary: editor.binary ?? '',
   }
 }
 
