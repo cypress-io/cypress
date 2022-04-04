@@ -82,7 +82,7 @@ function createCypressConfig (config: CreateCypressConfig): string {
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
-    family: 'template',
+    category: 'template',
     name: 'Create React App',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
@@ -99,7 +99,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vueclivue2',
-    family: 'template',
+    category: 'template',
     name: 'Vue CLI (Vue 2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -116,7 +116,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vueclivue3',
-    family: 'template',
+    category: 'template',
     name: 'Vue CLI (Vue 3)',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
@@ -133,7 +133,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'nextjs',
-    family: 'template',
+    category: 'template',
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -150,7 +150,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'nuxtjs',
-    family: 'template',
+    category: 'template',
     name: 'Nuxt.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -167,7 +167,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vue2',
-    family: 'library',
+    category: 'library',
     name: 'Vue.js 2',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
@@ -183,7 +183,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vue3',
-    family: 'library',
+    category: 'library',
     name: 'Vue.js 3',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
@@ -200,7 +200,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'react',
-    family: 'library',
+    category: 'library',
     name: 'React.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],

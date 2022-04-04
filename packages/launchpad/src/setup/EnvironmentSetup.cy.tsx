@@ -1,13 +1,12 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 import { CODE_LANGUAGES } from '@packages/types/src/constants'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
   it('default component', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       render: (gqlVal) => (
-        <div class="m-10">
+        <div class='m-10'>
           <EnvironmentSetup
             gql={gqlVal}
             nextFn={cy.stub()}
@@ -24,7 +23,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     .click()
     .should('have.attr', 'aria-expanded', 'true')
 
-    const frameworkIconName = (frameworkName) => {
+    const frameworkIconName = (frameworkName: string) => {
       if (frameworkName.includes('React')) {
         return 'react-logo'
       }
@@ -40,10 +39,10 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       return `${Cypress._.lowerCase(frameworkName).replace(' ', '')}-logo`
     }
 
-    WIZARD_FRAMEWORKS.forEach((framework) => {
-      cy.findByRole('option', { name: framework.name })
+    ;['Create React App (v5)', 'Vue.js (v3)'].forEach((name) => {
+      cy.findByRole('option', { name })
       .find('svg')
-      .should('have.attr', 'data-cy', frameworkIconName(framework.name))
+      .should('have.attr', 'data-cy', frameworkIconName(name))
     })
 
     CODE_LANGUAGES.forEach((lang) => {
@@ -60,7 +59,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
         res.frameworks[0].isDetected = true
       },
       render: (gqlVal) => (
-        <div class="m-10">
+        <div class='m-10'>
           <EnvironmentSetup
             gql={gqlVal}
             nextFn={cy.stub()}
@@ -74,19 +73,19 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (v4) (detected)' }).should('be.visible')
+    cy.findByRole('option', { name: 'Create React App (v5) (detected)' }).should('be.visible')
   })
 
   it('shows the description of bundler as Dev Server', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {
         res.framework = {
-          ...res.frameworks[3],
+          ...res.frameworks[1],
           supportedBundlers: res.allBundlers,
         }
       },
       render: (gqlVal) => (
-        <div class="m-10">
+        <div class='m-10'>
           <EnvironmentSetup
             gql={gqlVal}
             nextFn={cy.stub()}

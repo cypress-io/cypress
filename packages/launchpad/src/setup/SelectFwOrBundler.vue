@@ -61,7 +61,6 @@
 </template>
 
 <script lang="ts">
-
 interface RootOption {
   name: string
   description?: string
@@ -129,5 +128,4 @@ const selectOption = (opt) => {
     emit('selectBundler', opt.type)
   }
 }
-
 </script>

@@ -72,14 +72,14 @@ fragment EnvironmentSetup on Wizard {
       name
       isDetected
     }
-    # category
+    category
   }
   frameworks {
     id
     name
     isDetected
     type
-    # category
+    category
   }
   allBundlers {
     id

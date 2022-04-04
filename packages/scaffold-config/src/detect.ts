@@ -15,7 +15,7 @@ interface DetectFramework {
 // and the bundler, which could be Vite.
 export function detect (projectPath: string): DetectFramework {
   // first see if it's a template
-  for (const framework of WIZARD_FRAMEWORKS.filter((x) => x.family === 'template')) {
+  for (const framework of WIZARD_FRAMEWORKS.filter((x) => x.category === 'template')) {
     const hasAllDeps = [...framework.detectors].every((dep) => {
       return inPkgJson(dep, projectPath).satisfied
     })
@@ -34,7 +34,7 @@ export function detect (projectPath: string): DetectFramework {
   }
 
   // if not a template, they probably just installed/configured on their own.
-  for (const library of WIZARD_FRAMEWORKS.filter((x) => x.family === 'library')) {
+  for (const library of WIZARD_FRAMEWORKS.filter((x) => x.category === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
     const hasLibrary = [...library.detectors].every((dep) => inPkgJson(dep, projectPath).satisfied)

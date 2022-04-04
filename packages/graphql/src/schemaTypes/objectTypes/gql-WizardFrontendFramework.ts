@@ -10,9 +10,11 @@ export const WizardFrontendFramework = objectType({
     t.nonNull.field('type', {
       type: FrontendFrameworkEnum,
       description: 'The name of the framework',
-      resolve: (source, args, ctx) => {
-        return source.type
-      },
+    }),
+
+    t.nonNull.field('category', {
+      type: 'String',
+      description: 'The category (framework, like react-scripts, or library, like react',
     }),
 
     t.nonNull.boolean('isSelected', {
@@ -26,8 +28,7 @@ export const WizardFrontendFramework = objectType({
     })
 
     t.nonNull.string('name', {
-      description: 'The name of the framework',
-      resolve: (source, args, ctx) => source.name,
+      description: 'The display name of the framework',
     })
 
     t.nonNull.list.nonNull.field('supportedBundlers', {
