@@ -84,6 +84,20 @@ describe('detect', () => {
     expect(actual.bundler.type).to.eq('webpack')
   })
 
+  it(`Vue CLI 5 w/ Vue 3`, async () => {
+    const projectPath = await scaffoldMigrationProject('vuecli5vue3-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { devDependency: '@vue/cli-service', version: '5.0.0' },
+      { dependency: 'vue', version: '3.2.0' },
+    ])
+
+    const actual = detect(projectPath)
+
+    expect(actual.framework.type).to.eq('vueclivue3')
+    expect(actual.bundler.type).to.eq('webpack')
+  })
+
   it(`Vue CLI w/ Vue 3`, async () => {
     const projectPath = await scaffoldMigrationProject('vueclivue3-unconfigured')
 

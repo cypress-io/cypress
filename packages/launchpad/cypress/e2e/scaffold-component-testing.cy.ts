@@ -8,36 +8,25 @@ function startSetupFor (project: typeof e2eProjectDirs[number]) {
   cy.get(`[data-testid="select-framework"]`)
 }
 
+// TODO: assert against all scaffolded files once
+// https://github.com/cypress-io/cypress/pull/20818 is merged
 function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
   cy.withCtx(async (ctx, o) => {
     const configStats = await ctx.actions.file.checkIfFileExists(o.configFile)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
-
-    await ctx.actions.migration.assertSuccessfulConfigScaffold(o.configFile)
   }, { configFile })
 }
 
-// function fakeInstalledDeps () {
-//   cy.withCtx(async (ctx, o) => {
-//     const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
-
-//     o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
-//   })
-// }
-
-describe('scaffolding component testing', () => {
+describe('scaffolding component testing', { taskTimeout: 1000 * 60 }, () => {
   context('vuecli4vue2', () => {
     it('scaffolds component testing for Vue CLI 4 w/ Vue 2 project', () => {
       startSetupFor('vueclivue2-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI 4 (Vue 2)(detected)')
+      cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -47,12 +36,9 @@ describe('scaffolding component testing', () => {
       startSetupFor('vueclivue3-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI 4 (Vue 3)(detected)')
+      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -62,12 +48,9 @@ describe('scaffolding component testing', () => {
       startSetupFor('vuecli5vue3-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI 5 (Vue 3)(detected)')
+      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -77,12 +60,9 @@ describe('scaffolding component testing', () => {
       startSetupFor('create-react-app-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Create React App (v5)(detected)')
+      cy.get('button').should('be.visible').contains('Create React App(detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -94,10 +74,7 @@ describe('scaffolding component testing', () => {
       // should detect correctly
       cy.get('button').should('be.visible').contains('React.js(detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
   })
@@ -107,12 +84,9 @@ describe('scaffolding component testing', () => {
       startSetupFor('vue3-vite-ts-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue.js (v3)(detected)')
+      cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
   })
@@ -122,12 +96,9 @@ describe('scaffolding component testing', () => {
       startSetupFor('nuxtjs-vue2-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Nuxt.js (v2)(detected)')
+      cy.get('button').should('be.visible').contains('Nuxt.js (detected)')
       cy.get('button').contains('Next Step').click()
-
-      fakeInstalledDeps()
-
-      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.findByRole('button', { name: 'Skip' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })

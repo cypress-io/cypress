@@ -4,7 +4,6 @@ import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-c
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
-import fs from 'fs-extra'
 import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:wizard-actions')
@@ -112,7 +111,7 @@ export class WizardActions {
     this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
     try {
-      const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
+      const detected = detect(this.ctx.currentProject)
 
       debug('detected %o', detected)
 

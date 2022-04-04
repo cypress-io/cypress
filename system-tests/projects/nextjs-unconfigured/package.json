@@ -20,6 +20,5 @@
     "eslint-config-next": "12.1.0",
     "html-webpack-plugin": "^4.0.0",
     "webpack-dev-server": "^4.0.0"
-  },
-  "_cySkipDepInstall": true
+  }
 }
