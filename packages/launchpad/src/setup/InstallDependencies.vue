@@ -64,7 +64,7 @@ const queryInstalled = useQuery({
 const intervalQueryTrigger = useIntervalFn(async () => {
   const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
 
-  const allDepsSatisified = res.data.value?.wizard?.packagesToInstall?.every(pkg => pkg.satisfied)
+  const allDepsSatisified = res.data.value?.wizard?.packagesToInstall?.every((pkg) => pkg.satisfied)
 
   if (allDepsSatisified) {
     intervalQueryTrigger.pause()

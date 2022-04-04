@@ -6,17 +6,17 @@ import { testNodeId } from './clientTestUtils'
 
 const testBundlerVite = {
   type: 'vite',
-  name: 'Vite'
+  name: 'Vite',
 } as const
 
 const testBundlerWebpack = {
   type: 'webpack',
-  name: 'Webpack'
+  name: 'Webpack',
 } as const
 
 const testBundlers = [
   testBundlerWebpack,
-  testBundlerVite
+  testBundlerVite,
 ] as const
 
 export const allBundlers = testBundlers.map((bundler, idx) => {
@@ -47,7 +47,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       __typename: 'WizardNpmPackage',
       id: 'typescript',
       satisfied: false,
-      detectedVersion:'2.0.1',
+      detectedVersion: '2.0.1',
       ...wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT,
     },
   ],
