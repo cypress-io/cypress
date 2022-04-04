@@ -2858,7 +2858,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: CoreConfigOptions
+    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
 
     /**
      * An array of objects defining the certificates
@@ -2869,6 +2869,8 @@ declare namespace Cypress {
      * Handle Cypress plugins
      */
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
+
+    indexHtmlFile: string
   }
 
   /**
@@ -2971,7 +2973,7 @@ declare namespace Cypress {
   /**
    * Config options that can be assigned on cypress.config.{ts|js} file
    */
-  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern'>
+  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern' | 'indexHtmlFile'>
 
   /**
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,

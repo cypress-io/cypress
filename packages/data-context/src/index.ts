@@ -12,6 +12,8 @@ export type {
   GlobalPubSub,
 } from './globalPubSub'
 
+export * from './util/pluginHandlers'
+
 import { globalPubSub } from './globalPubSub'
 
 export { globalPubSub }
