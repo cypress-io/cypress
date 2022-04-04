@@ -16,7 +16,7 @@ describe('e2e typescript in plugins file', function () {
     })
   })
 
-  it('use vue\'s tsconfig.json to run config', function () {
+  it('can use a tsconfig.json with preserveValueImports: true to run config', function () {
     return systemTests.exec(this, {
       project: 'ts-proj-4-5',
     })
