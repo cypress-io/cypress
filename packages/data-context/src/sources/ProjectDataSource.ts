@@ -1,6 +1,6 @@
 import os from 'os'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
-import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
 import { debounce, isEqual } from 'lodash'
@@ -337,13 +337,13 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
-  frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
+  frameworkLoader = this.ctx.loader<string, typeof WIZARD_FRAMEWORKS[number] | null>((projectRoots) => {
     return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
   })
 
   private guessFramework (projectRoot: string) {
-    const guess = FRONTEND_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map((x) => x.dependency).reduce(
+    const guess = WIZARD_FRAMEWORKS.find((framework) => {
+      const lookingForDeps = framework.detectors.map((x) => x.package).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
         {},
       )

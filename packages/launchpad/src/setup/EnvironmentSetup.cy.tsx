@@ -1,7 +1,7 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import { CODE_LANGUAGES } from '../../../types/src/constants'
-import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { CODE_LANGUAGES } from '@packages/types/src/constants'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
   it('default component', () => {
@@ -40,7 +40,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       return `${Cypress._.lowerCase(frameworkName).replace(' ', '')}-logo`
     }
 
-    FRONTEND_FRAMEWORKS.forEach((framework) => {
+    WIZARD_FRAMEWORKS.forEach((framework) => {
       cy.findByRole('option', { name: framework.name })
       .find('svg')
       .should('have.attr', 'data-cy', frameworkIconName(framework.name))

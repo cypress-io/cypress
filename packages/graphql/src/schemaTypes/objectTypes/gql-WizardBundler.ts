@@ -6,14 +6,9 @@ export const WizardBundler = objectType({
   description: 'Wizard bundler',
   node: 'type',
   definition (t) {
-    t.boolean('isSelected', {
-      description: 'Whether this is the selected framework bundler',
-      resolve: (source, args, ctx) => ctx.wizardData.chosenBundler === source.type,
-    })
-
     t.nonNull.boolean('isDetected', {
       description: 'Whether this is the detected bundler',
-      resolve: (source, args, ctx) => ctx.wizardData.detectedBundler === source.type,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.detectedBundler?.type === source.type,
     })
 
     t.nonNull.field('type', {

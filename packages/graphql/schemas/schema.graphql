@@ -1343,9 +1343,6 @@ type WizardBundler implements Node {
   """Whether this is the detected bundler"""
   isDetected: Boolean!
 
-  """Whether this is the selected framework bundler"""
-  isSelected: Boolean
-
   """Display name of the bundler"""
   name: String!
 

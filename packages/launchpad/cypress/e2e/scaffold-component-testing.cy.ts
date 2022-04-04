@@ -18,13 +18,13 @@ function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
   }, { configFile })
 }
 
-function fakeInstalledDeps () {
-  cy.withCtx(async (ctx, o) => {
-    const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
+// function fakeInstalledDeps () {
+//   cy.withCtx(async (ctx, o) => {
+//     const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
 
-    o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
-  })
-}
+//     o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
+//   })
+// }
 
 describe('scaffolding component testing', () => {
   context('vuecli4vue2', () => {
