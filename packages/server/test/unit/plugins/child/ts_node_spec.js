@@ -15,7 +15,7 @@ describe('lib/plugins/child/ts_node', () => {
 
   describe('typescript registration', () => {
     it('registers ts-node if typescript is installed', () => {
-      typescriptObject.version = '1.1.1'
+      sinon.stub(typescriptObject, 'version').value('1.1.1')
       tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')
 
       expect(tsnode.register).to.be.calledWith({
@@ -29,7 +29,7 @@ describe('lib/plugins/child/ts_node', () => {
     })
 
     it('registers ts-node with preserveValueImports if typescript 4.5.0 is installed', () => {
-      typescriptObject.version = '4.5.0'
+      sinon.stub(typescriptObject, 'version').value('4.5.0')
       tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')
 
       expect(tsnode.register).to.be.calledWith({
