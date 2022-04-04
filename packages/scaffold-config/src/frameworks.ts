@@ -158,7 +158,7 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
     createCypressConfig,

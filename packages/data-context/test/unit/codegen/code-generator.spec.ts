@@ -1,5 +1,5 @@
 import { parse } from '@babel/parser'
-import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
@@ -280,7 +280,7 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[0])
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[0])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
@@ -302,7 +302,7 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[0])
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[0])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.stories.jsx'),
@@ -324,7 +324,7 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
@@ -346,7 +346,7 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.ts'),
