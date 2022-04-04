@@ -1,10 +1,9 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
+import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
-import type { Configuration } from 'webpack'
-import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
-import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
-import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
+import makeDefaultWebpackConfig from './webpack.config'
+import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -36,37 +35,33 @@ if (process.platform === 'linux') {
   removeList.push('CaseSensitivePathsPlugin')
 }
 
+export interface UserWebpackDevServerOptions {
+  /**
+   * if `true` will compile all the specs together when the first one is request and can slow up initial build time.
+   * @default false
+  */
+  disableLazyCompilation?: boolean
+}
+
+interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
+  devServerPublicPathRoute: string
+  isOpenMode: boolean
+  indexHtmlFile: string
+}
+
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
-const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
-
-/**
- * Creates a webpack 4/5 compatible webpack "configuration"
- * to pass to the sourced webpack function
- */
-export function makeWebpackConfig (
-  config: CreateFinalWebpackConfig,
-) {
-  const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
-  const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
-
-  const {
-    cypressConfig: {
-      projectRoot,
-      devServerPublicPathRoute,
-      supportFile,
-    },
-    specs: files,
-    devServerEvents,
-  } = config.devServerConfig
+export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
+  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, indexHtmlFile } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
+
   debug(`New webpack entries %o`, files)
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)
 
+  const entry = path.resolve(__dirname, './browser.js')
   const publicPath = (path.sep === posixSeparator)
     ? path.join(devServerPublicPathRoute, posixSeparator)
     // The second line here replaces backslashes on windows with posix compatible slash
@@ -79,12 +74,11 @@ export function makeWebpackConfig (
       publicPath,
     },
     plugins: [
-      new CypressCTWebpackPlugin({
+      new CypressCTOptionsPlugin({
         files,
         projectRoot,
         devServerEvents,
         supportFile,
-        webpack,
       }),
     ],
   }
@@ -110,14 +104,13 @@ export function makeWebpackConfig (
     }
   }
 
-  const mergedConfig = merge(
-    userWebpackConfig ?? {},
-    frameworkWebpackConfig ?? {},
-    makeDefaultWebpackConfig(config),
+  const mergedConfig = merge<webpack.Configuration>(
+    userWebpackConfig,
+    makeDefaultWebpackConfig(indexHtmlFile),
     dynamicWebpackConfig,
   )
 
-  mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  mergedConfig.entry = entry
 
   debug('Merged webpack config %o', mergedConfig)
 

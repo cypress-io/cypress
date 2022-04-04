@@ -11,6 +11,6 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` 1'] = {
   },
   "plugins": [
     "HtmlWebpackPlugin",
-    "CypressCTWebpackPlugin"
+    "CypressCTOptionsPlugin"
   ]
 }

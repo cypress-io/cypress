@@ -1,6 +1,6 @@
 import systemTests from '../lib/system-tests'
 
-describe('@cypress/webpack-dev-server-fresh', function () {
+describe('@cypress/webpack-dev-server/fresh', function () {
   systemTests.setup()
 
   describe('react', () => {
