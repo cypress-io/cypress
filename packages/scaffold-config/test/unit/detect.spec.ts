@@ -187,6 +187,12 @@ describe('detect', () => {
 
   it(`no framework or library`, async () => {
     const projectPath = await scaffoldMigrationProject('pristine')
+
+    // remove common node_modules or we will find a bunch of frameworks
+    // we want to simulate someone having nothing installed, including
+    // monorepo like situations where there can be multiple levels of
+    // node_modules above the projectPath.
+    fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
     const actual = detect(projectPath)
 
     expect(actual.framework).to.be.undefined
