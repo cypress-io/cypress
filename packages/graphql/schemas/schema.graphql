@@ -1396,8 +1396,8 @@ type WizardFrontendFramework implements Node {
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
 
-  """The name of the framework"""
-  type: FrontendFrameworkEnum!
+  """The unique identifier for a framework of library"""
+  type: String!
 }
 
 """Details about an NPM Package listed during the wizard install"""

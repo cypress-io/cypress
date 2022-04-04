@@ -1,6 +1,5 @@
 import { WizardBundler } from './gql-WizardBundler'
 import { objectType } from 'nexus'
-import { FrontendFrameworkEnum } from '../enumTypes/gql-WizardEnums'
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -8,8 +7,8 @@ export const WizardFrontendFramework = objectType({
   node: 'type',
   definition (t) {
     t.nonNull.field('type', {
-      type: FrontendFrameworkEnum,
-      description: 'The name of the framework',
+      type: 'String',
+      description: 'The unique identifier for a framework of library',
     }),
 
     t.nonNull.field('category', {

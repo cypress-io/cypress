@@ -174,10 +174,6 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType
           && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           await ctx.actions.wizard.initialize()
-
-          if (ctx.wizardData.chosenLanguage === 'ts') {
-            ctx.lifecycleManager.scaffoldFilesIfNecessary()
-          }
         }
 
         return {}

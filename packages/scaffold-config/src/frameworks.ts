@@ -27,12 +27,17 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
   try {
     const loc = resolveFrom(projectPath, path.join(dependency.package, 'package.json'))
     const pkg = fs.readJsonSync(loc) as PkgJson
+    const pkgVersion = semver.coerce(pkg.version)
+
+    if (!pkgVersion) {
+      throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
+    }
 
     return {
       dependency,
       detectedVersion: pkg.version,
       loc,
-      satisfied: Boolean(pkg.version && semver.satisfies(pkg.version, dependency.minVersion)),
+      satisfied: Boolean(pkg.version && semver.satisfies(pkgVersion, dependency.minVersion)),
     }
   } catch (e) {
     return {
@@ -53,7 +58,7 @@ function getBundlerDependency (bundler: WizardBundler, projectPath: string): Dep
 }
 
 interface CreateCypressConfig {
-  framework: typeof WIZARD_FRAMEWORKS[number]['type']
+  framework: typeof WIZARD_FRAMEWORKS[number]['configFramework']
   bundler: WizardBundler
   language: 'js' | 'ts'
   projectRoot: string
@@ -94,6 +99,7 @@ function createCypressConfig (config: CreateCypressConfig): string {
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
+    configFramework: 'react-scripts',
     category: 'template',
     name: 'Create React App',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -111,6 +117,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vueclivue2',
+    configFramework: 'vue-cli',
     category: 'template',
     name: 'Vue CLI (Vue 2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
@@ -128,6 +135,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vueclivue3',
+    configFramework: 'vue-cli',
     category: 'template',
     name: 'Vue CLI (Vue 3)',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -146,6 +154,7 @@ export const WIZARD_FRAMEWORKS = [
   {
     type: 'nextjs',
     category: 'template',
+    configFramework: 'nextjs',
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -162,6 +171,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'nuxtjs',
+    configFramework: 'nuxtjs',
     category: 'template',
     name: 'Nuxt.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
@@ -179,6 +189,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vue2',
+    configFramework: 'vue',
     category: 'library',
     name: 'Vue.js 2',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
@@ -195,6 +206,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'vue3',
+    configFramework: 'vue',
     category: 'library',
     name: 'Vue.js 3',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
@@ -212,6 +224,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'react',
+    configFramework: 'react',
     category: 'library',
     name: 'React.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT],

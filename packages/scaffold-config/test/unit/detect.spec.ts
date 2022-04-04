@@ -141,6 +141,20 @@ describe('detect', () => {
     expect(actual.bundler.type).to.eq('vite')
   })
 
+  it(`React with Vite using pre-release version`, async () => {
+    const projectPath = await scaffoldMigrationProject('react-vite-ts-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { devDependency: 'vite', version: '2.5.0-alpha.4' },
+      { dependency: 'react', version: '17.0.0' },
+    ])
+
+    const actual = detect(projectPath)
+
+    expect(actual.framework.type).to.eq('react')
+    expect(actual.bundler.type).to.eq('vite')
+  })
+
   it(`Vue with Vite`, async () => {
     const projectPath = await scaffoldMigrationProject('vue3-vite-ts-unconfigured')
 

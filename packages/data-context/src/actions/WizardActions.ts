@@ -90,6 +90,8 @@ export class WizardActions {
       coreData.wizard.chosenBundler = null
       coreData.wizard.chosenFramework = null
       coreData.wizard.chosenLanguage = 'js'
+      coreData.wizard.detectedBundler = null
+      coreData.wizard.detectedFramework = null
     })
 
     return this.ctx.coreData.wizard
@@ -100,11 +102,7 @@ export class WizardActions {
       return
     }
 
-    this.ctx.update((coreData) => {
-      coreData.wizard.detectedFramework = null
-      coreData.wizard.detectedBundler = null
-      coreData.wizard.detectedLanguage = null
-    })
+    this.resetWizard()
 
     await this.detectLanguage()
     debug('detectedLanguage %s', this.data.detectedLanguage)
@@ -234,7 +232,7 @@ export class WizardActions {
       return chosenFramework.createCypressConfig({
         language: chosenLanguage.type,
         bundler: chosenBundler.type,
-        framework: chosenFramework.type,
+        framework: chosenFramework.configFramework,
         projectRoot: this.ctx.currentProject,
       })
     }
