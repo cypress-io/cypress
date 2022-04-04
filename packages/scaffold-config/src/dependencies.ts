@@ -74,7 +74,7 @@ export const WIZARD_DEPENDENCY_NUXT = {
   type: 'nuxt',
   name: 'Nuxt',
   package: 'nuxt',
-  installer: 'nuxt',
+  installer: 'nuxt@2',
   description: 'The Intuitive Vue Framework',
   minVersion: '^2.0.0',
 } as const

@@ -1,6 +1,7 @@
 // necessary to have mocha types working correctly
 import 'mocha'
 import path from 'path'
+import fs from 'fs-extra'
 import { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 import Fixtures from '@tooling/system-tests/lib/fixtures'
 import { DataContext, DataContextConfig } from '../../src'
@@ -16,7 +17,13 @@ export function getSystemTestProject<T extends typeof e2eProjectDirs[number]> (p
   return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>
 }
 
-export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
+export function removeCommonNodeModules () {
+  fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
+}
+
+fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
+
+export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]): Promise<string> {
   Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)

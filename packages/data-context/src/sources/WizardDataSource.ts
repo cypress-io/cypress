@@ -45,7 +45,8 @@ export class WizardDataSource {
 
     const deps = this.ctx.wizard.packagesToInstall()
     .filter((pack) => !pack.satisfied)
-    .map((pack) => `${pack.dependency.installer}@${pack.dependency.minVersion}`).join(' ')
+    .map((pack) => pack.dependency.installer)
+    .join(' ')
 
     if (!deps?.length) {
       return ''
