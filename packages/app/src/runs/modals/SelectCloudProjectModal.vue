@@ -273,7 +273,7 @@ async function createOrConnectProject () {
 
   if (isNewProject) {
     const { data } = await createCloudProjectMutation.executeMutation({
-      orgId: pickedOrganization.value.id,
+      orgId: pickedOrganization.value!.id,
       name: projectName.value,
       public: projectAccess.value === 'public',
     })
