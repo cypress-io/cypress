@@ -225,15 +225,16 @@ class Log {
   state: any
   config: any
   fireChangeEvent: ((log) => (void | undefined))
+  obj: Partial<Cypress.LogAttributes>
 
-  private attributes: Cypress.LogAttributes
+  private attributes: Partial<Cypress.LogAttributes> = {}
 
   constructor (cy, state, config, fireChangeEvent, obj) {
     this.cy = cy
     this.state = state
     this.config = config
     this.fireChangeEvent = fireChangeEvent
-    this.attributes = defaults(state, config, obj)
+    this.obj = defaults(state, config, obj)
 
     extendEvents(this)
   }
@@ -280,45 +281,44 @@ class Log {
   }
 
   set (key, val?) {
-    let obj: Record<string, any> = {}
-
     if (_.isString(key)) {
-      obj[key] = val
+      this.obj = {}
+      this.obj[key] = val
     } else {
-      obj = key
+      this.obj = key
     }
 
-    if ('url' in obj) {
+    if ('url' in this.obj) {
       // always stringify the url property
-      obj.url = (obj.url != null ? obj.url : '').toString()
+      this.obj.url = (this.obj.url != null ? this.obj.url : '').toString()
     }
 
     // convert onConsole to consoleProps
     // for backwards compatibility
-    if (obj.onConsole) {
-      obj.consoleProps = obj.onConsole
+    if (this.obj.onConsole) {
+      this.obj.consoleProps = this.obj.onConsole
     }
 
     // if we have an alias automatically
     // figure out what type of alias it is
-    if (obj.alias) {
-      _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
+    if (this.obj.alias) {
+      _.defaults(this.obj, { aliasType: this.obj.$el ? 'dom' : 'primitive' })
     }
 
     // dont ever allow existing id's to be mutated
     if (this.attributes.id) {
-      delete obj.id
+      delete this.obj.id
     }
 
-    _.extend(this.attributes, obj)
+    _.extend(this.attributes, this.obj)
 
     // if we have an consoleProps function
     // then re-wrap it
-    if (obj && _.isFunction(obj.consoleProps)) {
+    if (this.obj && _.isFunction(this.obj.consoleProps)) {
       this.wrapConsoleProps()
     }
 
-    if (obj && obj.$el) {
+    if (this.obj && this.obj.$el) {
       this.setElAttrs()
     }
 
@@ -426,13 +426,13 @@ class Log {
     }
 
     // make sure all $el elements are visible!
-    const snapshotAttrs = {
+    this.obj = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
       visible: $el.length === $el.filter(':visible').length,
     }
 
-    return this.set(snapshotAttrs, { silent: true })
+    return this.set(this.obj, { silent: true })
   }
 
   merge (log) {
