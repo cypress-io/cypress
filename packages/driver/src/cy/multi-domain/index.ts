@@ -23,7 +23,7 @@ const normalizeOrigin = (originOrDomain) => {
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
 
-  const communicator = Cypress.multiDomainCommunicator
+  const communicator = Cypress.primaryOriginCommunicator
 
   communicator.on('delaying:html', (request) => {
     // when a cross origin request is detected by the proxy, it holds it up

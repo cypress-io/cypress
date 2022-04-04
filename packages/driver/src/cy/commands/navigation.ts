@@ -588,7 +588,7 @@ export default (Commands, Cypress, cy, state, config) => {
     } catch (e) {} // eslint-disable-line no-empty
   })
 
-  Cypress.multiDomainCommunicator.on('visit:url', ({ url }) => {
+  Cypress.primaryOriginCommunicator.on('visit:url', ({ url }) => {
     $utils.iframeSrc(Cypress.$autIframe, url)
   })
 
