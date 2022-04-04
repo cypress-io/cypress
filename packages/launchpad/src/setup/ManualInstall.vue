@@ -31,8 +31,8 @@
           </ExternalLink>
           <span class="rounded-md border border-gray-400 ml-6px">
             <span class="p-4px">{{ dep.minVersion }}</span>
-            <span 
-              v-if="!dep.satisfied"
+            <span
+              v-if="!dep.satisfied && dep.detectedVersion"
               class="border-l border-gray-400 bg-gray-100 text-gray-600"
             >
               Detected {{ dep.detectedVersion }}
