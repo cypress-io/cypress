@@ -269,7 +269,9 @@ const setProjectIdMutation = useMutation(SelectCloudProjectModal_SetProjectIdDoc
 async function createOrConnectProject () {
   let projectId: string | undefined
 
-  if (newProject.value && pickedOrganization.value) {
+  const isNewProject = Boolean(newProject.value && pickedOrganization.value)
+
+  if (isNewProject) {
     const { data } = await createCloudProjectMutation.executeMutation({
       orgId: pickedOrganization.value.id,
       name: projectName.value,

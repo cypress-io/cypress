@@ -171,6 +171,46 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
+  context('Runs - Create Project', () => {
+    it('when a project is created, injects new projectId into the config file', () => {
+      const newProjectId = Math.random().toString()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          obj.result.data!.cloudProjectCreate = {
+            slug: newProjectId,
+            id: 'newId',
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.not.equal(newProjectId)
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.equal(newProjectId)
+      })
+    })
+  })
+
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
@@ -218,22 +258,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText('Mock Project').click()
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
       cy.get('[data-cy="runs"]')
-    })
-
-    it('inserts a projectId into their `cypress.config.js` file after clicking Create Project', () => {
-      cy.__incorrectlyVisitAppWithIntercept('/runs')
-      cy.intercept('mutation-SelectCloudProjectModal_CreateCloudProjectDocument').as('CreateCloudProject')
-
-      cy.findByText(defaultMessages.runs.errors.notfound.button).click()
-      cy.get('[aria-modal="true"]').should('exist')
-      cy.get('[data-cy="selectProject"] button').click()
-      cy.findByText('Mock Project').click()
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
-      cy.get('button').contains('Create project').click()
-
-      cy.wait('@CreateCloudProject').then((interception: Interception) => {
-        expect(interception.request.url).to.include('graphql/mutation-SelectCloudProjectModal_CreateCloudProjectDocument')
-      })
     })
   })
 
