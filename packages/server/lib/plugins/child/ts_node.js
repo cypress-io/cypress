@@ -8,9 +8,7 @@ const semver = require('semver')
 const debug = debugLib('cypress:server:ts-node')
 
 const getTsNodeOptions = (tsPath, registeredFile) => {
-  const compiler = process.env.TS_NODE_COMPILER || tsPath
-
-  const version = require(compiler).version
+  const version = require(tsPath).version || '0.0.0'
 
   /**
    * NOTE: This circumvents a limitation of ts-node
@@ -36,7 +34,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
    * @type {import('ts-node').RegisterOptions}
    */
   const opts = {
-    compiler, // use the user's installed typescript
+    compiler: process.env.TS_NODE_COMPILER || tsPath, // use the user's installed typescript
     compilerOptions,
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
