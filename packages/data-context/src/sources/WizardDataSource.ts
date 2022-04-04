@@ -43,7 +43,7 @@ export class WizardDataSource {
       'yarn': 'yarn add -D',
     } as const
 
-    const deps = this.ctx.wizard.packagesToInstall().map((pack) => `${pack.dependency.package}`).join(' ')
+    const deps = this.ctx.wizard.packagesToInstall().map((pack) => `${pack.dependency.installer}`).join(' ')
 
     if (!deps?.length) {
       return ''

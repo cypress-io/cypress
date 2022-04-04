@@ -1,100 +1,150 @@
 import { expect } from 'chai'
+import fs from 'fs-extra'
 import { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 import { detect } from '../../src'
 import Fixtures from '@tooling/system-tests/lib/fixtures'
 import path from 'path'
-import fs from 'fs-extra'
 
 export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)
 
-  return fs.readJSONSync(path.join(Fixtures.projectPath(project), 'package.json'))
+  return path.join(Fixtures.projectPath(project))
+}
+
+interface DepToFake {
+  dependency: string
+  version: string
+}
+
+interface DevDepToFake {
+  devDependency: string
+  version: string
+}
+
+function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFake>) {
+  fs.mkdirSync(path.join(cwd, 'node_modules'))
+  for (const dep of deps) {
+    const depName = 'dependency' in dep ? dep.dependency : dep.devDependency
+    const nodeModules = path.join(cwd, 'node_modules', depName)
+
+    fs.mkdirpSync(nodeModules)
+    fs.writeJsonSync(
+      path.join(cwd, 'node_modules', depName, 'package.json'),
+      { main: 'index.js', version: dep.version },
+    )
+  }
 }
 
 describe('detect', () => {
   it('Create React App v4', async () => {
-    const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
-    const actual = detect({ ...pkg, dependencies: { ...pkg.dependencies, 'react-scripts': '4.0.0' } })
+    const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
-    expect(actual.framework.type).to.eq('crav4')
+    fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
+    const actual = detect(projectPath)
+
+    expect(actual.framework.type).to.eq('reactscripts')
   })
 
   it('Create React App v5', async () => {
-    const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
-    const actual = detect(pkg)
+    const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
-    expect(actual.framework.type).to.eq('crav5')
+    fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '4.0.0' }])
+    const actual = detect(projectPath)
+
+    expect(actual.framework.type).to.eq('reactscripts')
   })
 
   it('React App with webpack 5', async () => {
-    const pkg = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
-    const actual = detect(pkg)
+    const projectPath = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { dependency: 'react', version: '16.0.0' },
+      { devDependency: 'webpack', version: '5.0.0' },
+    ])
+
+    const actual = detect(projectPath)
 
     expect(actual.framework.type).to.eq('react')
-    expect(actual.bundler).to.eq('webpack5')
+    expect(actual.bundler.type).to.eq('webpack')
   })
 
-  it(`Vue CLI 4 w/ Vue 2`, async () => {
-    const pkg = await scaffoldMigrationProject('vueclivue2-unconfigured')
-    const actual = detect(pkg)
+  it(`Vue CLI w/ Vue 2`, async () => {
+    const projectPath = await scaffoldMigrationProject('vueclivue2-unconfigured')
 
-    expect(actual.framework.type).to.eq('vuecli4vue2')
+    fakeDepsInNodeModules(projectPath, [
+      { devDependency: '@vue/cli-service', version: '4.0.0' },
+      { dependency: 'vue', version: '2.5.0' },
+    ])
+
+    const actual = detect(projectPath)
+
+    expect(actual.framework.type).to.eq('vueclivue2')
+    expect(actual.bundler.type).to.eq('webpack')
   })
 
-  it(`Vue CLI 4 w/ Vue 3`, async () => {
-    const pkg = await scaffoldMigrationProject('vueclivue3-unconfigured')
-    const actual = detect(pkg)
+  it(`Vue CLI w/ Vue 3`, async () => {
+    const projectPath = await scaffoldMigrationProject('vueclivue3-unconfigured')
 
-    expect(actual.framework.type).to.eq('vuecli4vue3')
-  })
+    fakeDepsInNodeModules(projectPath, [
+      { devDependency: '@vue/cli-service', version: '5.0.0' },
+      { dependency: 'vue', version: '3.2.0' },
+    ])
 
-  it(`Vue CLI 5 w/ Vue 3`, async () => {
-    const pkg = await scaffoldMigrationProject('vuecli5vue3-unconfigured')
-    const actual = detect(pkg)
+    const actual = detect(projectPath)
 
-    expect(actual.framework.type).to.eq('vuecli5vue3')
+    expect(actual.framework.type).to.eq('vueclivue3')
+    expect(actual.bundler.type).to.eq('webpack')
   })
 
   it(`React with Vite`, async () => {
-    const pkg = await scaffoldMigrationProject('react-vite-ts-unconfigured')
-    const actual = detect(pkg)
+    const projectPath = await scaffoldMigrationProject('react-vite-ts-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { devDependency: 'vite', version: '2.0.0' },
+      { dependency: 'react', version: '17.0.0' },
+    ])
+
+    const actual = detect(projectPath)
 
     expect(actual.framework.type).to.eq('react')
-    expect(actual.bundler).to.eq('vite')
+    expect(actual.bundler.type).to.eq('vite')
   })
 
   it(`Vue with Vite`, async () => {
-    const pkg = await scaffoldMigrationProject('vue3-vite-ts-unconfigured')
-    const actual = detect(pkg)
+    const projectPath = await scaffoldMigrationProject('vue3-vite-ts-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { devDependency: 'vite', version: '2.0.0' },
+      { dependency: 'vue', version: '3.0.0' },
+    ])
+
+    const actual = detect(projectPath)
 
     expect(actual.framework.type).to.eq('vue3')
-    expect(actual.bundler).to.eq('vite')
+    expect(actual.bundler.type).to.eq('vite')
   })
 
-  it(`Next.js`, async () => {
-    const pkg = await scaffoldMigrationProject('nextjs-unconfigured')
-    const actual = detect(pkg)
-
-    expect(actual.framework.type).to.eq('nextjs')
-    expect(actual.bundler).to.eq(undefined)
-  })
-
-  ;['10', '11', '12'].forEach((v) => {
+  ;['10.0.0', '11.0.0', '12.0.0'].forEach((v) => {
     it(`Next.js v${v}`, async () => {
-      const pkg = await scaffoldMigrationProject('nextjs-unconfigured')
-      const actual = detect({ ...pkg, dependencies: {
-        'next': v,
-      } })
+      const projectPath = await scaffoldMigrationProject('nextjs-unconfigured')
+
+      fakeDepsInNodeModules(projectPath, [
+        { dependency: 'react', version: '18.0.0' },
+        { dependency: 'next', version: v },
+      ])
+
+      const actual = detect(projectPath)
 
       expect(actual.framework.type).to.eq('nextjs')
-      expect(actual.bundler).to.eq(undefined)
+      expect(actual.bundler.type).to.eq('webpack')
     })
   })
 
   it(`no framework or library`, async () => {
-    const actual = detect({})
+    const projectPath = await scaffoldMigrationProject('pristine')
+    const actual = detect(projectPath)
 
     expect(actual.framework).to.be.undefined
     expect(actual.bundler).to.be.undefined

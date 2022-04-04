@@ -2,7 +2,7 @@ import path from 'path'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
-import { satisfies } from 'semver'
+import semver from 'semver'
 import resolveFrom from 'resolve-from'
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
@@ -31,7 +31,7 @@ export function inPkgJson (dependency: WizardDependency, projectPath: string): D
       dependency,
       detectedVersion: pkg.version,
       loc,
-      satisfied: Boolean(pkg.version && satisfies(pkg.version, dependency.minVersion)),
+      satisfied: Boolean(pkg.version && semver.satisfies(pkg.version, dependency.minVersion)),
     }
   } catch (e) {
     return {

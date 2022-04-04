@@ -16,7 +16,9 @@ interface DetectFramework {
 export function detect (projectPath: string): DetectFramework {
   // first see if it's a template
   for (const framework of WIZARD_FRAMEWORKS.filter((x) => x.family === 'template')) {
-    const hasAllDeps = [...framework.detectors].every((dep) => inPkgJson(dep, projectPath))
+    const hasAllDeps = [...framework.detectors].every((dep) => {
+      return inPkgJson(dep, projectPath).satisfied
+    })
 
     // so far all the templates we support only have 1 bundler,
     // for example CRA only works with webpack,
@@ -26,6 +28,7 @@ export function detect (projectPath: string): DetectFramework {
     if (hasAllDeps && framework.supportedBundlers.length === 1) {
       return {
         framework,
+        bundler: framework.supportedBundlers[0],
       }
     }
   }
@@ -34,12 +37,12 @@ export function detect (projectPath: string): DetectFramework {
   for (const library of WIZARD_FRAMEWORKS.filter((x) => x.family === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
-    const hasLibrary = [...library.detectors].every((dep) => inPkgJson(dep, projectPath))
+    const hasLibrary = [...library.detectors].every((dep) => inPkgJson(dep, projectPath).satisfied)
 
     for (const bundler of WIZARD_BUNDLERS) {
-      const hasBundler = inPkgJson(bundler, projectPath)
+      const detectBundler = inPkgJson(bundler, projectPath)
 
-      if (hasLibrary && hasBundler) {
+      if (hasLibrary && detectBundler.satisfied) {
         return {
           framework: library,
           bundler,
