@@ -3,6 +3,22 @@ import systemTests from '../lib/system-tests'
 describe('component testing projects', function () {
   systemTests.setup()
 
+  systemTests.it('react-webpack-vanilla', {
+    project: 'react-webpack-vanilla',
+    testingType: 'component',
+    spec: '__tests__/App.cy.js',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it('react-webpack-vanilla-bundled', {
+    project: 'react-webpack-vanilla-bundled',
+    testingType: 'component',
+    spec: '__tests__/App.cy.js',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
   systemTests.it('create-react-app-configured', {
     project: 'create-react-app-configured',
     testingType: 'component',

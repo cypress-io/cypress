@@ -1,0 +1,13 @@
+{
+  "name": "react-webpack-vanilla",
+  "dependencies": {
+    "react": "18.0.0",
+    "react-dom": "18.0.0"
+  },
+  "devDependencies": {
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "html-webpack-plugin": "^4.0.0",
+    "webpack": "5.71.0",
+    "webpack-dev-server": "^4.0.0"
+  }
+}
