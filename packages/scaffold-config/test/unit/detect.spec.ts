@@ -23,6 +23,21 @@ interface DevDepToFake {
   version: string
 }
 
+/**
+ * The way we detect dependencies is by using resolve-from (https://www.npmjs.com/package/resolve-from).
+ * In these unit tests, we don't want to actually run `npm install`, since it is slow,
+ * so this function fakes that the dependencies are installed by creating pretend dependency like this:
+ * `node_modules/<dependency>/package.json.
+ * Inside `package.json` we add the minimal:
+ *
+ * {
+ *   "version": "5.0.0",
+ *   "main": "index.js"
+ * }
+ *
+ * We have some real e2e tests that actually run `npm install`.
+ * Those are in launchpad/cypress/e2e/scaffold-component-testing.cy.ts.
+ */
 function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFake>) {
   fs.mkdirSync(path.join(cwd, 'node_modules'))
   for (const dep of deps) {
