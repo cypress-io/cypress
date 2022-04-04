@@ -142,7 +142,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           Cypress.backend('ready:for:domain', { originPolicy: location.originPolicy })
 
           if (err) {
-            return _reject(err)
+            const wrappedErr = $errUtils.errByPath('switchToDomain.ran_domain_fn_errored', {
+              error: err.message,
+            })
+
+            // Prevent cypress from trying to add the function to the error log
+            wrappedErr.onFail = () => {}
+
+            return _reject(wrappedErr)
           }
 
           // if there are not commands and a synchronous return from the callback,
@@ -159,7 +166,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // to stack up listeners on it after it's originally bound
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
-            // @ts-ignore
             if (err?.name === 'CypressError') {
               // This is a Cypress error thrown from the secondary domain after the command queue has finished, do not wrap it as a spec or app error.
               cy.fail(err, { async: true })
@@ -209,6 +215,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
                 error: err.message,
               })
+
+              // Prevent cypress from trying to add the function to the error log
+              wrappedErr.onFail = () => {}
 
               _reject(wrappedErr)
             }

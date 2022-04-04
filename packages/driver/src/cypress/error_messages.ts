@@ -1748,6 +1748,14 @@ export default {
 
       This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
+    ran_domain_fn_errored: {
+      message: stripIndent`
+      ${cmd('switchToDomain')} failed with the following error:
+
+        > {{error}}
+
+        Note: Variables must either be defined within the ${cmd('switchToDomain')} command or passed in using the args option.`,
+    },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
         ${cmd('switchToDomain')} failed because you are mixing up async and sync code.
