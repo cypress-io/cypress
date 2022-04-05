@@ -27,6 +27,110 @@ describe('Command model', () => {
     clock.restore()
   })
 
+  context('.isInvisible', () => {
+    let command: CommandModel
+
+    it('sets isInvisible to true for command has visible elements associated to it', () => {
+      command = new CommandModel(commandProps({ visible: true }))
+      expect(command.isInvisible).to.be.false
+    })
+
+    it('sets isInvisible to false for command has hidden elements associated to it', () => {
+      command = new CommandModel(commandProps({ visible: false }))
+      expect(command.isInvisible).to.be.true
+    })
+
+    it('sets isInvisible to false for command that does not associate with visibility', () => {
+      command = new CommandModel(commandProps({ visible: undefined }))
+      expect(command.isInvisible).to.be.false
+    })
+  })
+
+  context('.numChildren', () => {
+    context('event log', () => {
+      it('with no children', () => {
+        const command = new CommandModel(commandProps({ event: true }))
+
+        expect(command.numChildren).to.eq(1)
+      })
+
+      it('with children', () => {
+        const command = new CommandModel(commandProps({ event: true }))
+
+        command.addChild(new CommandModel(commandProps()))
+        expect(command.numChildren).to.eq(2)
+
+        command.addChild(new CommandModel(commandProps()))
+        expect(command.numChildren).to.eq(3)
+      })
+    })
+
+    context('command log', () => {
+      it('with no children', () => {
+        const command = new CommandModel(commandProps({}))
+
+        expect(command.numChildren).to.eq(0)
+      })
+
+      it('with children', () => {
+        const command = new CommandModel(commandProps({}))
+
+        command.addChild(new CommandModel(commandProps()))
+        expect(command.numChildren).to.eq(1)
+
+        command.addChild(new CommandModel(commandProps()))
+        expect(command.numChildren).to.eq(2)
+      })
+
+      it('with children that are a command group', () => {
+        const command = new CommandModel(commandProps({}))
+
+        command.addChild(new CommandModel(commandProps()))
+
+        const commandGroup = new CommandModel(commandProps())
+
+        commandGroup.addChild(new CommandModel(commandProps()))
+        commandGroup.addChild(new CommandModel(commandProps()))
+
+        command.addChild(commandGroup)
+        expect(command.numChildren).to.eq(4)
+      })
+    })
+  })
+
+  context('.hasChildren', () => {
+    context('event log', () => {
+      it('with no children', () => {
+        const command = new CommandModel(commandProps({ event: true }))
+
+        expect(command.hasChildren).to.be.false
+      })
+
+      it('with one or more children', () => {
+        const command = new CommandModel(commandProps({ event: true }))
+
+        command.addChild(new CommandModel(commandProps()))
+
+        expect(command.hasChildren).to.be.true
+      })
+    })
+
+    context('command log', () => {
+      it('with no children', () => {
+        const command = new CommandModel(commandProps({}))
+
+        expect(command.hasChildren).to.be.false
+      })
+
+      it('with one or more children', () => {
+        const command = new CommandModel(commandProps({}))
+
+        command.addChild(new CommandModel(commandProps()))
+        expect(command.hasChildren).to.be.true
+      })
+    })
+  })
+
   context('.isLongRunning', () => {
     describe('when model is pending on initialization and LONG_RUNNING_THRESHOLD passes', () => {
       let command: CommandModel
@@ -46,26 +150,26 @@ describe('Command model', () => {
         expect(command.isLongRunning).to.be.false
       })
     })
-  })
 
-  describe('when model is not pending on initialization, is updated to pending, and LONG_RUNNING_THRESHOLD passes', () => {
-    let command: CommandModel
+    describe('when model is not pending on initialization, is updated to pending, and LONG_RUNNING_THRESHOLD passes', () => {
+      let command: CommandModel
 
-    beforeEach(() => {
-      command = new CommandModel(commandProps({ state: null }))
-      clock.tick(300)
-      command.update({ state: 'pending' } as CommandProps)
-    })
+      beforeEach(() => {
+        command = new CommandModel(commandProps({ state: null }))
+        clock.tick(300)
+        command.update({ state: 'pending' } as CommandProps)
+      })
 
-    it('sets isLongRunning to true if model is still pending', () => {
-      clock.tick(LONG_RUNNING_THRESHOLD)
-      expect(command.isLongRunning).to.be.true
-    })
+      it('sets isLongRunning to true if model is still pending', () => {
+        clock.tick(LONG_RUNNING_THRESHOLD)
+        expect(command.isLongRunning).to.be.true
+      })
 
-    it('does not set isLongRunning to true if model is no longer pending', () => {
-      command.state = 'passed'
-      clock.tick(LONG_RUNNING_THRESHOLD)
-      expect(command.isLongRunning).to.be.false
+      it('does not set isLongRunning to true if model is no longer pending', () => {
+        command.state = 'passed'
+        clock.tick(LONG_RUNNING_THRESHOLD)
+        expect(command.isLongRunning).to.be.false
+      })
     })
   })
 })

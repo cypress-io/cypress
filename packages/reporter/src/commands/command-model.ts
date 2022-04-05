@@ -44,7 +44,7 @@ export default class Command extends Instrument {
   @observable number?: number
   @observable numElements: number
   @observable timeout?: number
-  @observable visible?: boolean = true
+  @observable isInvisible?: boolean = false
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
   @observable hookId: string
@@ -60,10 +60,6 @@ export default class Command extends Instrument {
 
   @computed get displayMessage () {
     return this.renderProps.message || this.message
-  }
-
-  @computed get isInvisible () {
-    return this.visible !== undefined && !this.visible
   }
 
   private countNestedCommands (children) {
@@ -113,7 +109,7 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
-    this.visible = props.visible
+    this.isInvisible = props.visible !== undefined && !props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
@@ -131,7 +127,7 @@ export default class Command extends Instrument {
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
-    this.visible = props.visible
+    this.isInvisible = props.visible !== undefined && !props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
