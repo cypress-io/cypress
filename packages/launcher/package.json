@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean": "node scripts/clean.js || true",
+    "clean": "rimraf --glob \"lib/*.js\" && rimraf --glob \"lib/**/*.js\" || true",
     "clean-deps": "rimraf node_modules",
     "clean-js": "yarn clean",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -17,7 +17,7 @@
     "execa": "4.0.0",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "plist": "3.0.4",
+    "plist": "3.0.5",
     "semver": "7.3.5",
     "win-version-info": "5.0.1"
   },
@@ -29,7 +29,6 @@
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
     "rimraf": "3.0.2",
-    "shelljs": "0.8.5",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",
     "typescript": "^4.2.3"

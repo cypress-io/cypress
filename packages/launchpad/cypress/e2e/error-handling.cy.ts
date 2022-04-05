@@ -20,6 +20,8 @@ describe('Error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com', supportFile: false } }`)
     })
 
+    cy.findByRole('button', { name: 'Try again' }).click()
+
     cy.get('body')
     .should('not.contain.text', 'Error Loading Config')
   })
@@ -53,6 +55,8 @@ describe('Error handling', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
     .should('not.contain.text', 'Error Loading Config')

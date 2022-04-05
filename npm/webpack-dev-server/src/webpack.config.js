@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
  * @param {string} [template] - base template to use
  * @returns {import('webpack').Configuration}
  */
-module.exports = function makeDefaultConfig (indexHtmlFile) {
+module.exports = function makeDefaultConfig (template) {
   return {
     mode: 'development',
     optimization: {
@@ -17,8 +17,6 @@ module.exports = function makeDefaultConfig (indexHtmlFile) {
       filename: '[name].js',
       path: path.resolve(__dirname, 'dist'),
     },
-    plugins: [new HtmlWebpackPlugin({
-      template: indexHtmlFile || path.resolve(__dirname, '..', 'index-template.html'),
-    })],
+    plugins: [new HtmlWebpackPlugin({ template })],
   }
 }

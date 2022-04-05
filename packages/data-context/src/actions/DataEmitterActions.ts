@@ -28,6 +28,10 @@ abstract class DataEmitterEvents {
     this._emit('cloudViewerChange')
   }
 
+  /**
+   * Emitted when the browserStatus field has changed due to the browser
+   * having opened or closed.
+   */
   browserStatusChange () {
     this._emit('browserStatusChange')
   }
