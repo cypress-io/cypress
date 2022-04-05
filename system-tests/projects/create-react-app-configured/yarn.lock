@@ -1105,23 +1105,28 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
-"@cypress/mount-utils@*":
+"@cypress/mount-utils@1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@cypress/mount-utils/-/mount-utils-1.0.2.tgz#afbc4f8c350b7cd86edc5ad0db0cbe1e0181edc8"
   integrity sha512-Fn3fdTiyayHoy8Ol0RSu4MlBH2maQ2ZEXeEVKl/zHHXEQpld5HX3vdNLhK5YLij8cLynA4DxOT/nO9iEnIiOXw==
 
-"@cypress/react@file:../../../npm/react":
-  version "0.0.0-development"
+"@cypress/react@5.12.4":
+  version "5.12.4"
+  resolved "https://registry.yarnpkg.com/@cypress/react/-/react-5.12.4.tgz#c40e2ec7da065b7c5f53df029f9ff5a131c9a8f2"
+  integrity sha512-d44InxWKmwQKyCMQT/3n1UplYa39yKEQTPlb2HhXF6ickqtmhxw7kePv00yrJpBc9gy2jUkNUOfCbtt2uz1kUw==
   dependencies:
-    "@cypress/mount-utils" "*"
+    "@cypress/mount-utils" "1.0.2"
     debug "^4.3.2"
     find-webpack "2.2.1"
     find-yarn-workspace-root "2.0.0"
 
-"@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":
-  version "0.0.0-development"
+"@cypress/webpack-dev-server@1.8.4":
+  version "1.8.4"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-dev-server/-/webpack-dev-server-1.8.4.tgz#00c1d7510dccfcaef6ec69f70342d011bbdefc19"
+  integrity sha512-kDg57ozD4vzIwHa0FhT44IoMKqsgFy7WV5SbBjWLBPdoOhuCdf22gy8VukaxwYqh+MFKxqVJ7hqVLErmMgpAYA==
   dependencies:
     debug "^4.3.2"
+    lodash "^4.17.21"
     semver "^7.3.4"
     webpack-merge "^5.4.0"
 
