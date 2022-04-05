@@ -10,17 +10,19 @@ const PROJECT_FIXTURE_DIRECTORY = 'system-tests/projects'
 const DIR_PATH = path.join(monorepoPaths.root, PROJECT_FIXTURE_DIRECTORY)
 const OUTPUT_PATH = path.join(monorepoPaths.pkgFrontendShared, 'cypress/e2e/support/e2eProjectDirs.ts')
 
-export async function e2eTestScaffold () {
+export async function e2eTestScaffold (cleanupEmpty = true) {
   const possibleDirectories = await fs.readdir(DIR_PATH)
   const dirs = await Promise.all(possibleDirectories.map(async (dir) => {
     const fullPath = path.join(DIR_PATH, dir)
     const stat = await fs.stat(fullPath)
 
     if (stat.isDirectory()) {
-      const files = await fs.readdir(fullPath)
-
-      if (files.filter((f) => !f.startsWith('.')).length) {
+      if (await hasVisibleFileRecursive(fullPath)) {
         return fullPath
+      }
+
+      if (cleanupEmpty) {
+        await fs.remove(fullPath)
       }
 
       return null
@@ -54,8 +56,47 @@ export async function e2eTestScaffoldWatch () {
   })
 
   fixtureWatcher.on('addDir', _.debounce(() => {
-    e2eTestScaffold()
+    e2eTestScaffold(false)
   }))
 
   await e2eTestScaffold()
+}
+
+/**
+ * From the basePath, checks for a valid file within that directory. Used to ignore empty
+ * system tests directories left over from switching branches
+ */
+async function hasVisibleFileRecursive (basePath: string): Promise<boolean> {
+  if (basePath.endsWith('node_modules')) {
+    return false
+  }
+
+  const files = await fs.readdir(basePath)
+
+  const toCheck = await Promise.all(files.filter((f) => !f.startsWith('.')).map(async (f) => {
+    try {
+      return {
+        file: f,
+        stat: await fs.stat(path.join(basePath, f)),
+      }
+    } catch {
+      return null
+    }
+  }))
+
+  if (toCheck.some((f) => f?.stat.isFile())) {
+    return true
+  }
+
+  const directories = toCheck.filter((f) => f?.stat.isDirectory())
+
+  if (directories.length) {
+    for (const dir of directories) {
+      if (dir?.file && await hasVisibleFileRecursive(path.join(basePath, dir?.file))) {
+        return true
+      }
+    }
+  }
+
+  return false
 }

@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import EventEmitter from 'events'
 import { create } from '../../../lib/browsers/cri-client'
 
@@ -20,8 +19,6 @@ describe('lib/browsers/cri-client', function () {
   let getClient: () => ReturnType<typeof create>
 
   beforeEach(function () {
-    sinon.stub(Bluebird, 'promisify').returnsArg(0)
-
     send = sinon.stub()
     onError = sinon.stub()
 

@@ -22,18 +22,19 @@ describe('remoteGuard: App', () => {
               author: 'Test User',
               lastModifiedTimestamp: new Date().toString(),
               lastModifiedHumanReadable: '1 day ago',
+              statusType: 'unmodified',
             }
           }
         })
       })
 
       cy.visitApp()
-      cy.contains('fixture.js', { timeout: 100 }).closest('[data-cy="specs-list-row"]').should('not.contain', 'Modified just now')
+      cy.contains('fixture.js', { timeout: 100 }).closest('[data-cy="spec-list-file"]').should('not.contain', 'Modified just now')
       cy.withCtx((ctx, o) => {
         o.testState.resolve.forEach((r) => r())
       })
 
-      cy.contains('fixture.js').closest('[data-cy="specs-list-row"]').should('contain', 'Modified just now')
+      cy.contains('fixture.js').closest('[data-cy="spec-list-file"]').should('contain', 'Modified just now')
     })
   })
 })

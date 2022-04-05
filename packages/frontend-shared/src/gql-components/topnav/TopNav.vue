@@ -22,7 +22,7 @@
     >
       <div class="font-medium">
         <ExternalLink
-          :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+          :href="changelogLink(versions.latest.version)"
           class="text-indigo-500"
           data-cy="latest-version"
         >
@@ -58,7 +58,7 @@
     >
       <div class="whitespace-nowrap">
         <ExternalLink
-          :href="`${releasesUrl}/tag/v${versions.current.version}`"
+          :href="changelogLink(versions.current.version)"
           class="font-medium text-amber-800"
           data-cy="current-version"
         >
@@ -88,7 +88,7 @@
 
   <ExternalLink
     v-else-if="versions"
-    :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+    :href="changelogLink(versions.current.version)"
     class="flex font-medium outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
@@ -97,7 +97,7 @@
       class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
     />
     <span>
-      v{{ versions.latest.version }}
+      v{{ versions.current.version }}
     </span>
   </ExternalLink>
 
@@ -210,8 +210,6 @@ import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 
 const { t } = useI18n()
-
-const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
 fragment TopNav_Versions on Query {
@@ -357,5 +355,9 @@ const installCommand = computed(() => {
 onKeyStroke(['Enter', ' ', 'Escape'], (event) => {
   resetPrompt(event)
 })
+
+const changelogLink = (version) => {
+  return `https://on.cypress.io/changelog#${version.replaceAll('.', '-')}`
+}
 
 </script>
