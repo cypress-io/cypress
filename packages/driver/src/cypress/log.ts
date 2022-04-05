@@ -232,7 +232,8 @@ class Log {
     this.cy = cy
     this.state = state
     this.config = config
-    this.fireChangeEvent = fireChangeEvent
+    // only fire the log:state:changed event as fast as every 4ms
+    this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
 
     extendEvents(this)
@@ -568,16 +569,8 @@ class LogManager {
     this.logs[id] = true
   }
 
-  // only fire the log:state:changed event
-  // as fast as every 4ms
   fireChangeEvent (log) {
-    const triggerStateChanged = () => {
-      return this.trigger(log, 'command:log:changed')
-    }
-
-    const debounceFn = _.debounce(triggerStateChanged, 4)
-
-    return debounceFn()
+    return this.trigger(log, 'command:log:changed')
   }
 
   createLogFn (cy, state, config) {
