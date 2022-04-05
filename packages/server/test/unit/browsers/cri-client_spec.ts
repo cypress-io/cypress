@@ -12,7 +12,9 @@ describe('lib/browsers/cri-client', function () {
     create: typeof create
   }
   let send: sinon.SinonStub
-  let criImport: sinon.SinonStub
+  let criImport: sinon.SinonStub & {
+    New: sinon.SinonStub
+  }
   let criStub: {
     send: typeof send
     close: sinon.SinonStub
