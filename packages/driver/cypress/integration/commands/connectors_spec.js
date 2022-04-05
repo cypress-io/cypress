@@ -80,8 +80,8 @@ describe('src/cy/commands/connectors', () => {
 
       it('does not insert a mocha callback', () => {
         cy.noop().then(() => {
-          // queue: visit -> then -> noop -> then
-          expect(cy.queue.length).to.eq(4)
+          // queue: visit -> noop -> then
+          expect(cy.queue.length).to.eq(3)
         })
       })
 

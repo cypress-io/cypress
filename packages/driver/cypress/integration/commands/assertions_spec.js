@@ -61,7 +61,6 @@ describe('src/cy/commands/assertions', () => {
       .then((obj) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
-          { name: 'then', snapshots: 0, retries: 0 },
           { name: 'noop', snapshots: 0, retries: 0 },
           { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
@@ -197,7 +196,6 @@ describe('src/cy/commands/assertions', () => {
         .then(() => {
           expect(testCommands()).to.eql([
             { name: 'visit', snapshots: 1, retries: 0 },
-            { name: 'then', snapshots: 0, retries: 0 },
             // cy.get() has 2 snapshots, 1 for itself, and 1
             // for the .should(...) assertion.
 
@@ -2993,7 +2991,6 @@ describe('src/cy/commands/assertions', () => {
       cy.on('fail', (err) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
-          { name: 'then', snapshots: 0, retries: 0 },
           { name: 'get', snapshots: 1, retries: 0 },
         ])
 
