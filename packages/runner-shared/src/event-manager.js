@@ -431,15 +431,11 @@ export const eventManager = {
     })
 
     Cypress.on('log:changed', (log) => {
-      // Cypress logs will only trigger an update every 4 seconds so there is a
-      // chance the runner has been torn down when the update is triggered.
-      if (Cypress.runner) {
-        const displayProps = Cypress.runner.getDisplayPropsForLog(log)
+      const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-        this._interceptStudio(displayProps)
+      this._interceptStudio(displayProps)
 
-        reporterBus.emit('reporter:log:state:changed', displayProps)
-      }
+      reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
     Cypress.on('before:screenshot', (config, cb) => {
