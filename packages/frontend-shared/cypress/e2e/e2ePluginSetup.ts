@@ -1,4 +1,6 @@
 import path from 'path'
+import execa from 'execa'
+
 import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
@@ -7,7 +9,7 @@ import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-cont
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
-import fs from 'fs'
+import fs from 'fs-extra'
 import { buildSchema, execute, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
 
@@ -65,10 +67,12 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): Promise<void>
+  clearFixtureNodeModules (project: string): void
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
   projectPath (name): string
+  projectFixturePath(name): string
   get (fixture, encoding?: BufferEncoding): string
   path (fixture): string
 }
@@ -115,11 +119,22 @@ async function makeE2ETasks () {
       Fixtures.removeProject(projectName)
     }
 
+    Fixtures.clearFixtureNodeModules(projectName)
+
     await Fixtures.scaffoldProject(projectName)
 
     await scaffoldCommonNodeModules()
 
-    await scaffoldProjectNodeModules(projectName)
+    try {
+      await scaffoldProjectNodeModules(projectName)
+    } catch (e) {
+      // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
+      // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
+      await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
+      await fs.remove(path.join(Fixtures.projectFixturePath(projectName), 'node_modules'))
+
+      await scaffoldProjectNodeModules(projectName, true)
+    }
 
     scaffoldedProjects.add(projectName)
 
