@@ -2,13 +2,13 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
-  beforeEach(() => {
-    cy.scaffoldProject('component-tests')
-    cy.openProject('component-tests')
-    cy.startAppServer('component')
-  })
-
   context('Runs Page', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     it('resolves the runs page', () => {
       cy.loginUser()
       cy.visitApp()
@@ -33,6 +33,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Login', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     it('when logged out, shows call to action', () => {
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
@@ -131,9 +137,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Connect Project', () => {
     it('opens Connect Project modal after clicking Connect Project button', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.visitApp()
@@ -167,9 +173,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef42\'}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithInvalidProjectId.config.js'])
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -217,9 +223,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Unauthorized Project', () => {
     beforeEach(() => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
 
       cy.loginUser()
     })
@@ -278,9 +284,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Unauthorized Project Requested', () => {
     beforeEach(() => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\' }')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -310,9 +316,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - No Runs', () => {
     it('when no runs and not connected, shows connect to dashboard button', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null }')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -335,9 +341,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays how to record prompt when connected and no runs', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -360,8 +366,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays a copy button', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+
       cy.withCtx(async (ctx, o) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
         o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
       })
 
@@ -389,6 +398,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Runs List', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     it('displays a list of recorded runs if a run has been recorded', () => {
       cy.loginUser()
       cy.visitApp()
@@ -446,6 +461,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   describe('no internet connection', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     afterEach(() => {
       cy.goOnline()
     })

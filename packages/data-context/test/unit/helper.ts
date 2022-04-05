@@ -32,9 +32,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run') 
     appApi: {} as AppApiShape,
     localSettingsApi: {} as LocalSettingsApiShape,
     authApi: {} as AuthApiShape,
-    configApi: {
-      getServerPluginHandlers: () => [],
-    } as InjectedConfigApi,
+    configApi: {} as InjectedConfigApi,
     projectApi: {} as ProjectApiShape,
     electronApi: {
       copyTextToClipboard: (text) => {},
