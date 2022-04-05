@@ -4,6 +4,7 @@ exports['config/lib/index .getBreakingKeys returns list of breaking config keys 
   "experimentalGetCookiesSameSite",
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
+  "experimentalSessionSupport",
   "experimentalShadowDomSupport",
   "firefoxGcInterval",
   "nodeVersion",

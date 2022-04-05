@@ -508,6 +508,10 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalSessionSupport',
+    errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+    isWarning: true,
+  }, {
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
