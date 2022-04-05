@@ -6,6 +6,8 @@ describe('cy.pause() works with --headed and --no-exit', () => {
   systemTests.it('passes', {
     spec: 'pause_simple_spec.js',
     snapshot: false,
+    headed: true,
+    noExit: true,
     expectedExitCode: 0,
   })
 })
