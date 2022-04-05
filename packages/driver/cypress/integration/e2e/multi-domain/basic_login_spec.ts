@@ -208,6 +208,7 @@ describe('Multi-step Auth', () => {
 
   // TODO: Switch to domain does not work in switch to domain yet.
   it.skip('final auth redirects back to localhost - nested - approval first', () => {
+    // @ts-ignore
     cy.createDomain('http://foobar.com:3500', { primaryDomain: 'localhost' }, () => { // Parent Domain is localhost
       cy.visit('http://www.foobar.com:3500/fixtures/auth/approval.html')
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
