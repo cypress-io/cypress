@@ -210,8 +210,6 @@ export class ProjectActions {
     testingType = testingType || this.ctx.coreData.currentTestingType
     this.ctx.coreData.currentTestingType = testingType
 
-    if (!testingType) throw new Error('Missing testingType in launchProject')
-
     const browser = this.ctx.coreData.activeBrowser
 
     if (!browser) throw new Error('Missing browser in launchProject')
