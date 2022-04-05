@@ -6,24 +6,8 @@ const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
-    before(() => {
-      cy
-      .visit('/fixtures/generic.html')
-      .then(function (win) {
-        this.body = win.document.body.outerHTML
-      })
-    })
-
     beforeEach(function () {
-      const doc = cy.state('document')
-
-      this.win = cy.state('window')
-
-      $(doc.body).empty().html(this.body)
-    })
-
-    afterEach(function () {
-      cy.state('window', this.win)
+      cy.visit('/fixtures/generic.html')
     })
 
     it('calls into window.location.reload', () => {
@@ -971,7 +955,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('location getter overrides', () => {
-      before(() => {
+      beforeEach(function () {
         cy
         .visit('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
         .window().as('win').then((win) => {
@@ -980,9 +964,7 @@ describe('src/cy/commands/navigation', () => {
           // overriding the location getters
           expect(win.location.href).to.include('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
         })
-      })
 
-      beforeEach(function () {
         this.win = cy.state('window')
 
         this.eq = (attr, str) => {

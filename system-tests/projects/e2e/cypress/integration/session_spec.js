@@ -1,7 +1,6 @@
 /// <reference types="cypress" />
 window.top.__cySkipValidateConfig = true
 Cypress.config('isInteractive', true)
-Cypress.config('experimentalSessionSupport', true)
 
 const expectCurrentSessionData = (obj) => {
   cy.then(() => {
@@ -214,7 +213,7 @@ describe('navigates to about:blank between tests and shows warning about session
   it('t1', () => {
     // only warns after initial blank page
     // unfortunately this fails when run alongside other tests
-    // cy.contains('experimentalSessionSupport').should('not.exist')
+    // cy.contains('experimentalMultiDomain').should('not.exist')
     cy.contains('default blank page')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
@@ -222,7 +221,7 @@ describe('navigates to about:blank between tests and shows warning about session
   })
 
   it('t2', () => {
-    cy.contains('Because experimentalSessionSupport')
+    cy.contains('Because experimentalMultiDomain')
     cy.contains('default blank page')
   })
 })
@@ -722,40 +721,40 @@ describe.skip('consoleProps', () => {
 // bar.foo.com data.
 describe('ignores setting insecure context data when on secure context', () => {
   describe('no cross origin secure origins, nothing to clear', () => {
-    it('sets insecure content', { experimentalSessionSupport: false }, () => {
+    it('sets insecure content', { experimentalMultiDomain: false }, () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('nothing to clear - 1/2', { experimentalSessionSupport: false }, () => {
+    it('nothing to clear - 1/2', { experimentalMultiDomain: false }, () => {
       cy.visit('https://localhost:4466/form')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')
       })
     })
 
-    it('nothing to clear - 2/2', { experimentalSessionSupport: true }, () => {
+    it('nothing to clear - 2/2', () => {
       top.logSpy = logSpy
       expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
     })
   })
 
   describe('only secure origins cleared', () => {
-    it('sets insecure content', { experimentalSessionSupport: false }, () => {
+    it('sets insecure content', { experimentalMultiDomain: false }, () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionSupport: false }, () => {
+    it('switches to secure context - clears only secure context data - 1/2', { experimentalMultiDomain: false }, () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/foo')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')
       })
     })
 
-    it('clears only secure context data - 2/2', { experimentalSessionSupport: true }, () => {
+    it('clears only secure context data - 2/2', () => {
       top.logSpy = logSpy
       expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
     })
@@ -763,7 +762,7 @@ describe('ignores setting insecure context data when on secure context', () => {
 })
 
 describe('errors', () => {
-  it('throws error when experimentalSessionSupport not enabled', { experimentalSessionSupport: false }, (done) => {
+  it('throws error when experimentalMultiDomain not enabled', { experimentalMultiDomain: false }, (done) => {
     cy.on('fail', ({ message }) => {
       expect(message).contain('You must enable')
       done()

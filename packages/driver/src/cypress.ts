@@ -164,33 +164,10 @@ class $Cypress {
   }
 
   configure (config: Cypress.ObjectLike = {}) {
-    // config.remote
-    // {
-    //   origin: "http://localhost:2020"
-    //   domainName: "localhost"
-    //   props: null
-    //   strategy: "file"
-    // }
+    const domainName = config.remote ? config.remote.domainName : undefined
 
-    // -- or --
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   domainName: "google.com"
-    //   strategy: "http"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    let d = config.remote ? config.remote.domainName : undefined
-
-    // set domainName but allow us to turn
-    // off this feature in testing
-    if (d) {
-      document.domain = d
+    if (domainName) {
+      document.domain = domainName
     }
 
     // a few static props for the host OS, browser
@@ -280,7 +257,7 @@ class $Cypress {
       return null
     }
 
-    this.Cookies = $Cookies.create(config.namespace, d)
+    this.Cookies = $Cookies.create(config.namespace, domainName)
 
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore

@@ -118,7 +118,7 @@ exports['e2e sessions / session tests'] = `
       ✓ clears only secure context data - 2/2
 
   errors
-    ✓ throws error when experimentalSessionSupport not enabled
+    ✓ throws error when experimentalMultiDomain not enabled
     ✓ throws if session has not been defined during current test
     ✓ throws if multiple session calls with same name but different options
 

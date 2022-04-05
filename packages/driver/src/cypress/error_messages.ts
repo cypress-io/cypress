@@ -1530,7 +1530,7 @@ export default {
       message: 'Your `cy.session` **validate** callback {{reason}}',
     },
     experimentNotEnabled: {
-      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
+      message: 'experimentalMultiDomain is not enabled. You must enable the experimentalMultiDomain flag in order to use Cypress session commands',
       docsUrl: 'https://on.cypress.io/session',
     },
     session: {

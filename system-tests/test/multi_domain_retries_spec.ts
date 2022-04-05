@@ -32,7 +32,6 @@ describe('e2e multi domain retries', () => {
     expectedExitCode: 1,
     config: {
       experimentalMultiDomain: true,
-      experimentalSessionSupport: true,
       retries: 2,
     },
     async onRun (exec) {

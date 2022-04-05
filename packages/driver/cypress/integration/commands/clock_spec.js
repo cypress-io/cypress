@@ -115,6 +115,8 @@ describe('src/cy/commands/clock', () => {
 
     // this test was written to catch a bug in lolex (dep, now @sinonjs/fake-timers) 3 and was fixed by lolex 4 upgrade,
     it('doesn\'t override window.performance members', () => {
+      cy.visit('/fixtures/empty.html')
+
       cy.clock()
       .then((clock) => {
         cy.window().then((win) => {

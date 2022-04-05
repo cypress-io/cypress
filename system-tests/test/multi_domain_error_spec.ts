@@ -32,7 +32,6 @@ describe('e2e multi domain errors', () => {
     expectedExitCode: 1,
     config: {
       experimentalMultiDomain: true,
-      experimentalSessionSupport: true,
     },
     async onRun (exec) {
       const res = await exec()
@@ -41,7 +40,7 @@ describe('e2e multi domain errors', () => {
       expect(res.stdout).to.contain('Timed out retrying after 1000ms: Expected to find element: `#doesnotexist`, but never found it.')
 
       // check to make sure the snapshot contains the 'switchToDomain' sourcemap. TODO: This is probably more appropriate for a cy-in-cy test
-      expect(res.stdout).to.contain('http://localhost:3500/__cypress/tests?p=cypress/integration/multi_domain_error_spec.ts:103:12')
+      expect(res.stdout).to.contain('http://localhost:3500/__cypress/tests?p=cypress/integration/multi_domain_error_spec.ts:102:12')
     },
   })
 })

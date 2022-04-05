@@ -1,7 +1,6 @@
 import { assertLogLength } from '../../../../support/utils'
 
-// @ts-ignore / session support is needed for visiting about:blank between tests
-context('log', { experimentalSessionSupport: true }, () => {
+context('log', () => {
   let logs: any = []
   let lastTestLogId = ''
 

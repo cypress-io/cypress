@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain - cookie login', { experimentalSessionSupport: true }, () => {
+describe('multi-domain - cookie login', () => {
   const verifyLoggedIn = (username) => {
     cy.get('h1')
     .invoke('text')

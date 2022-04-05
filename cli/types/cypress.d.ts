@@ -1041,7 +1041,7 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalSessionSupport` config option is enabled.
+      * Only available if the `experimentalMultiDomain` config option is enabled.
       *
       * @see https://on.cypress.io/session
       */
@@ -2824,11 +2824,6 @@ declare namespace Cypress {
      * @default 'top'
      */
     scrollBehavior: scrollBehaviorOptions
-    /**
-     * Enable experimental session support. See https://on.cypress.io/session
-     * @default false
-     */
-    experimentalSessionSupport: boolean
     /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false

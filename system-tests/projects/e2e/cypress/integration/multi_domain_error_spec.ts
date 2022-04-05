@@ -1,4 +1,3 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', () => {
   beforeEach(() => {
     cy.visit('/multi_domain.html')

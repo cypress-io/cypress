@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain', { experimentalSessionSupport: true }, () => {
+describe('multi-domain', () => {
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.switchToDomain('localhost', () => undefined)

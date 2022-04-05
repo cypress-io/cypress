@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain', { experimentalSessionSupport: true }, () => {
+describe('multi-domain', () => {
   it('window:before:load event', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.on('window:before:load', (win: {testPrimaryDomainBeforeLoad: boolean}) => {

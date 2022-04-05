@@ -1,6 +1,6 @@
 const helpers = require('../support/helpers')
 
-const { runIsolatedCypress } = helpers.createCypress({ config: { experimentalSessionSupport: true } })
+const { runIsolatedCypress } = helpers.createCypress({ config: { experimentalMultiDomain: true } })
 
 describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeight: 660 }, () => {
   it('empty session with no data', () => {
