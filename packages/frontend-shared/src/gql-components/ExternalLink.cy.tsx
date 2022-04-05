@@ -27,7 +27,7 @@ describe('<ExternalLink />', () => {
       })
     })
 
-    cy.get('[data-cy="external"]')
+    cy.contains('a', 'Click me!')
     .click()
 
     cy.wrap(urlStub).should('have.been.calledWith', 'https://on.cypress.io/ci')
@@ -45,7 +45,7 @@ describe('<ExternalLink />', () => {
       })
     })
 
-    cy.get('[data-cy="external"]')
+    cy.contains('a', 'Click me!')
     .click()
 
     cy.wrap(urlStub).should('have.been.calledWith', 'https://on.cypress.io/ci')
@@ -63,11 +63,12 @@ describe('<ExternalLink />', () => {
       })
     })
 
-    cy.get('[data-cy="external"]')
+    cy.contains('a', 'Click me!')
     .focus()
     .realPress('Enter')
 
     cy.wrap(urlStub).should('have.been.calledWith', 'https://on.cypress.io/ci')
+    cy.get('@onClickSpy').should('have.been.calledOnce')
   })
 
   it('opens external link on click and enter', () => {
@@ -81,11 +82,8 @@ describe('<ExternalLink />', () => {
       })
     })
 
-    cy.get('[data-cy="external"]')
+    cy.contains('a', 'Click me!')
     .click()
-
-    cy.get('[data-cy="external"]')
-    .focus()
     .realPress('Enter')
 
     cy.wrap(urlStub).should('have.been.calledTwice')
@@ -103,7 +101,7 @@ describe('<ExternalLink />', () => {
       })
     })
 
-    cy.get('[data-cy="external"]')
+    cy.contains('a', 'Click me!')
     .focus()
     .realPress('Space')
 
