@@ -54,6 +54,7 @@ declare namespace Cypress {
     (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
     (k: 'document', v?: Document): Document
     (k: 'window', v?: Window): Window
+    (k: 'logGroupIds', v?: Array<InternalLogConfig['id']>): Array<InternalLogConfig['id']>
     (k: string, v?: any): any
     state: Cypress.state
   }

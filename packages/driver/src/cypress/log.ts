@@ -110,7 +110,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state: Cypress.State, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -202,18 +202,18 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroups = state('logGroup') || []
+  const logGroupIds = state('logGroupIds') || []
 
-  if (logGroups.length) {
-    obj.group = _.last(logGroups)
+  if (logGroupIds.length) {
+    obj.group = _.last(logGroupIds)
   }
 
   if (obj.groupEnd) {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    state('logGroupIds', _.slice(logGroupIds, 0, -1))
   }
 
   if (obj.groupStart) {
-    state('logGroup', (logGroups).concat(obj.id))
+    state('logGroupIds', (logGroupIds).concat(obj.id))
   }
 
   return obj
@@ -221,7 +221,7 @@ const defaults = function (state, config, obj) {
 
 class Log {
   cy: any
-  state: any
+  state: Cypress.State
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any
@@ -372,10 +372,10 @@ class Log {
   }
 
   error (err) {
-    const logGroups = this.state('logGroup') || []
+    const logGroupIds = this.state('logGroupIds') || []
 
     // current log was responsible to creating the current log group so end the current group
-    if (_.last(logGroups) === this.attributes.id) {
+    if (_.last(logGroupIds) === this.attributes.id) {
       this.endGroup()
     }
 
@@ -408,7 +408,7 @@ class Log {
   }
 
   endGroup () {
-    this.state('logGroup', _.slice(this.state('logGroup'), 0, -1))
+    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
   }
 
   getError (err) {
