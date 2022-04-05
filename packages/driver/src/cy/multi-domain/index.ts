@@ -9,32 +9,41 @@ import { LogUtils } from '../../cypress/log'
 
 const reHttp = /^https?:\/\//
 
-const normalizeDomain = (domain) => {
-  // add the protocol if it's not present
-  if (!reHttp.test(domain)) {
-    domain = `https://${domain}`
+const normalizeOrigin = (originOrDomain) => {
+  let origin = originOrDomain
+
+  // If just a domain, convert it to an origin by adding the protocol
+  if (!reHttp.test(originOrDomain)) {
+    origin = `https://${originOrDomain}`
   }
 
-  return $Location.normalize(domain)
+  return $Location.normalize(origin)
 }
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
 
-  const communicator = Cypress.multiDomainCommunicator
+  const communicator = Cypress.primaryOriginCommunicator
 
   communicator.on('delaying:html', (request) => {
-    // when a secondary domain is detected by the proxy, it holds it up
+    // when a cross origin request is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
-    // ahead because we're anticipating multi-domain
-    // @ts-ignore
-    cy.isAnticipatingMultiDomainFor(request.href)
+    // ahead because we're anticipating a cross origin request
+    cy.isAnticipatingCrossOriginResponseFor(request)
+    const location = $Location.create(request.href)
+
+    // If this event has occurred while a switchToDomain command is running with
+    // the same origin policy, do not set the time out and allow switchToDomain
+    // to handle the ready for domain event
+    if (cy.state('currentActiveOriginPolicy') === location.originPolicy) {
+      return
+    }
 
     // If we haven't seen a switchToDomain and cleared the timeout within 300ms,
     // go ahead and inform the server 'ready:for:domain' failed and to release the
     // response. This typically happens during a redirect where the user does
-    // not have a switchToDomain for the intermediary domain.
+    // not have a switchToDomain for the intermediary origin.
     timeoutId = setTimeout(() => {
       Cypress.backend('ready:for:domain', { failed: true })
     }, 300)
@@ -47,7 +56,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
-      // domain run, so it can't have its own timeout
+      // origin run, so it can't have its own timeout
       cy.clearTimeout()
 
       if (!config('experimentalMultiDomain')) {
@@ -88,17 +97,21 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       })
 
       // use URL to ensure unicode characters are correctly handled
-      const url = new URL(normalizeDomain(originOrDomain)).toString()
+      const url = new URL(normalizeOrigin(originOrDomain)).toString()
       const location = $Location.create(url)
 
       validator.validateLocation(location, originOrDomain)
 
       const originPolicy = location.originPolicy
 
-      cy.state('latestActiveDomain', originPolicy)
+      // This is intentionally not reset after leaving the switchToDomain command.
+      cy.state('latestActiveOriginPolicy', originPolicy)
+      // This is set while IN the switchToDomain command.
+      cy.state('currentActiveOriginPolicy', originPolicy)
 
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = () => {
+          cy.state('currentActiveOriginPolicy', undefined)
           Cypress.backend('cross:origin:finished', location.originPolicy)
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
@@ -138,7 +151,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           const { subject, unserializableSubjectType, err, finished } = details
 
           // lets the proxy know to allow the response for the secondary
-          // domain html through, so the page will finish loading
+          // origin html through, so the page will finish loading
           Cypress.backend('ready:for:domain', { originPolicy: location.originPolicy })
 
           if (err) {
@@ -169,7 +182,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
             if (err?.name === 'CypressError') {
-              // This is a Cypress error thrown from the secondary domain after the command queue has finished, do not wrap it as a spec or app error.
+              // This is a Cypress error thrown from the secondary origin after the command queue has finished, do not wrap it as a spec or app error.
               cy.fail(err, { async: true })
             } else {
               // @ts-ignore
@@ -179,16 +192,16 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
 
         // fired once the spec bridge is set up and ready to receive messages
-        communicator.once('bridge:ready', (_data, bridgeReadyDomain) => {
-          if (bridgeReadyDomain === originPolicy) {
+        communicator.once('bridge:ready', (_data, specBridgeOriginPolicy) => {
+          if (specBridgeOriginPolicy === originPolicy) {
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
             communicator.toSpecBridge(originPolicy, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
             })
 
-            // once the secondary domain page loads, send along the
-            // user-specified callback to run in that domain
+            // once the secondary origin page loads, send along the
+            // user-specified callback to run in that origin
             try {
               communicator.toSpecBridge(originPolicy, 'run:domain:fn', {
                 args: options?.args || undefined,
@@ -202,12 +215,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   viewportHeight: Cypress.state('viewportHeight'),
                   runnable: serializeRunnable(Cypress.state('runnable')),
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
-                  hookId: state('hookId'),
-                  hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
-                  multiDomainBaseUrl: location.origin,
-                  parentOrigins: [cy.getRemoteLocation('originPolicy')],
-                  isStable: state('isStable'),
-                  autOrigin: state('autOrigin'),
+                  hookId: Cypress.state('hookId'),
+                  switchToDomainBaseUrl: location.origin,
+                  parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
+                  isStable: Cypress.state('isStable'),
+                  autOrigin: Cypress.state('autOrigin'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

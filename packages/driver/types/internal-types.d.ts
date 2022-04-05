@@ -39,7 +39,7 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
-    isAnticipatingMultiDomainFor: IStability['isAnticipatingMultiDomainFor']
+    isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
     fail: (err: Error, options:{ async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
   }
@@ -59,8 +59,8 @@ declare namespace Cypress {
     state: State
     events: Events
     emit: (event: string, payload?: any) => void
-    multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
-    specBridgeCommunicator: import('../src/multi-domain/communicator').SpecBridgeDomainCommunicator
+    primaryOriginCommunicator: import('../src/multi-domain/communicator').PrimaryOriginCommunicator
+    specBridgeCommunicator: import('../src/multi-domain/communicator').SpecBridgeCommunicator
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void
     isMultiDomain: boolean

@@ -37,7 +37,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
-import { PrimaryDomainCommunicator, SpecBridgeDomainCommunicator } from './multi-domain/communicator'
+import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './multi-domain/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -101,11 +101,12 @@ class $Cypress {
   isCy: any
   log: any
   isBrowser: any
+  browserMajorVersion: any
   emit: any
   emitThen: any
   emitMap: any
-  multiDomainCommunicator: PrimaryDomainCommunicator
-  specBridgeCommunicator: SpecBridgeDomainCommunicator
+  primaryOriginCommunicator: PrimaryOriginCommunicator
+  specBridgeCommunicator: SpecBridgeCommunicator
   isMultiDomain: boolean
 
   // attach to $Cypress to access
@@ -153,8 +154,8 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
-    this.multiDomainCommunicator = new PrimaryDomainCommunicator()
-    this.specBridgeCommunicator = new SpecBridgeDomainCommunicator()
+    this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
+    this.specBridgeCommunicator = new SpecBridgeCommunicator()
     this.isMultiDomain = false
 
     this.events = $Events.extend(this)

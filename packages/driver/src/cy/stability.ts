@@ -39,25 +39,25 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingMultiDomainFor (href: string): void {
-    if (state('anticipatingMultiDomain') === href) {
+  isAnticipatingCrossOriginResponseFor (request: {href: string}): void {
+    if (state('anticipatingCrossOriginResponse') === request) {
       return
     }
 
-    const whenAnticipatingMultiDomain = state('whenAnticipatingMultiDomain')
+    const whenAnticipatingCrossOriginResponse = state('whenAnticipatingCrossOriginResponse')
 
-    if (!!href && whenAnticipatingMultiDomain) {
-      whenAnticipatingMultiDomain()
+    if (!!request?.href && whenAnticipatingCrossOriginResponse) {
+      whenAnticipatingCrossOriginResponse()
     }
 
-    state('anticipatingMultiDomain', href)
+    state('anticipatingCrossOriginResponse', request)
   },
 
-  whenStableOrAnticipatingMultiDomain (fn, command) {
+  whenStableOrAnticipatingCrossOriginResponse (fn, command) {
     const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
 
     // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingMultiDomain') && commandIsSwitchToDomain) || state('isStable') !== false) {
+    if ((!!state('anticipatingCrossOriginResponse') && commandIsSwitchToDomain) || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -70,7 +70,7 @@ export const create = (Cypress, state) => ({
         fulfilled = true
 
         state('whenStable', null)
-        state('whenAnticipatingMultiDomain', null)
+        state('whenAnticipatingCrossOriginResponse', null)
 
         Promise.try(fn)
         .then(resolve)
@@ -79,9 +79,9 @@ export const create = (Cypress, state) => ({
 
       state('whenStable', onSignal)
 
-      // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
+      // We only care to listen for anticipating cross origin request when the command we're waiting for is switchToDomain
       if (commandIsSwitchToDomain) {
-        state('whenAnticipatingMultiDomain', onSignal)
+        state('whenAnticipatingCrossOriginResponse', onSignal)
       }
     })
   },
