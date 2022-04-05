@@ -237,8 +237,7 @@ const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
   get: () => {
-    // NOTE: The activeBrowser is set to the first detected browser
-    // found during project initialization. It should always be defined.
+    // NOTE: The activeBrowser is set during project initialization. It should always be defined.
     if (!props.gql.activeBrowser) throw new Error('Missing activeBrowser in selectedBrowserId')
 
     return props.gql.activeBrowser.id
