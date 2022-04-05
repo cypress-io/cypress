@@ -174,6 +174,10 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
+after(() => {
+  taskInternal('__internal__after', undefined)
+})
+
 function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number} = {}) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName, options)

@@ -103,6 +103,8 @@ async function makeE2ETasks () {
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
+  const cachedCwd = process.cwd()
+
   clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
@@ -133,8 +135,19 @@ async function makeE2ETasks () {
     async __internal__before () {
       Fixtures.remove()
       scaffoldedProjects = new Set()
+      process.chdir(cachedCwd)
 
       return { launchpadPort }
+    },
+
+    /**
+     * Force a reset to the correct CWD after all tests have completed, just incase this
+     * was modified by any code under test.
+     */
+    __internal__after () {
+      process.chdir(cachedCwd)
+
+      return null
     },
 
     /**
