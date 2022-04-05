@@ -5,6 +5,7 @@
     :href="props.href"
     :use-default-hocus="props.useDefaultHocus"
     @click.prevent="open"
+    @keypress.enter.prevent="open"
   ><slot /></BaseLink>
 </template>
 
