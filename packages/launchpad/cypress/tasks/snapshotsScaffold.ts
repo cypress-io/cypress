@@ -121,8 +121,8 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
 
   const filesToDiff = actualRelativeFiles.map<FileToDiff>((file) => {
     return {
-      actual: path.join(currentProject, file),
-      expected: path.join(expectedScaffoldDir, file),
+      actual: joinPosix(path.join(currentProject, file)),
+      expected: joinPosix(path.join(expectedScaffoldDir, file)),
     }
   })
 
