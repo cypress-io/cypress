@@ -125,7 +125,7 @@ type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][
 type EditorType = 'found' | 'custom'
 
 const selectedWellKnownEditor: Editor | undefined = props.gql.localSettings.availableEditors.find((editor) => {
-  return editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
+  return editor.binary && editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
 })
 
 const customBinary = ref<string>(

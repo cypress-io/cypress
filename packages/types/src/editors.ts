@@ -1,6 +1,6 @@
 export interface Editor {
   id: string
-  binary?: string
+  binary: string
   name: string
 }
 
