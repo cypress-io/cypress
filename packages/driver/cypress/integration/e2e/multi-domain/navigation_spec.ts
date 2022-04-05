@@ -200,6 +200,27 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
+describe('event timing', { experimentalSessionSupport: true }, () => {
+  it('does not timeout when receiving a delaying:html event after switchToDomain has started, but before the spec bridge is ready', () => {
+    cy.visit('/fixtures/multi-domain.html')
+    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+
+    cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.log('inside switchToDomain foobar')
+    })
+
+    // Honestly it's surprising this command runs, this command is run from localhost but executes against a cross origin aut (foobar.com)
+    cy.window().then((win) => {
+      win.location.href = 'http://www.idp.com:3500/fixtures/multi-domain.html'
+    })
+
+    cy.switchToDomain('http://idp.com:3500', () => {
+      cy.log('inside switchToDomain idp')
+    })
+  })
+})
+
+// @ts-ignore / session support is needed for visiting about:blank between tests
 describe('delayed navigation', { experimentalSessionSupport: true, defaultCommandTimeout: 2000 }, () => {
   it('localhost -> localhost', () => {
     cy.visit('/fixtures/auth/delayedNavigate.html')

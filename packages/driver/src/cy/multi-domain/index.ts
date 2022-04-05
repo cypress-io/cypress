@@ -31,7 +31,16 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating a cross origin request
     // @ts-ignore
+
     cy.isAnticipatingCrossOriginResponseFor(request)
+    const location = $Location.create(request.href)
+
+    // If this event has occurred while a switchToDomain command is running with
+    // the same origin policy, do not set the time out and allow switchToDomain
+    // to handle the ready for domain event
+    if (cy.state('currentActiveOriginPolicy') === location.originPolicy) {
+      return
+    }
 
     // If we haven't seen a switchToDomain and cleared the timeout within 300ms,
     // go ahead and inform the server 'ready:for:domain' failed and to release the
@@ -97,10 +106,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       const originPolicy = location.originPolicy
 
+      // This is not reset after leaving the switchToDomain command.
       cy.state('latestActiveOriginPolicy', originPolicy)
+      // This is set while IN the switchToDomain command.
+      cy.state('currentActiveOriginPolicy', originPolicy)
 
       return new Bluebird((resolve, reject, onCancel) => {
         const cleanup = () => {
+          cy.state('currentActiveOriginPolicy', undefined)
           Cypress.backend('cross:origin:finished', location.originPolicy)
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
@@ -196,12 +209,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   viewportHeight: Cypress.state('viewportHeight'),
                   runnable: serializeRunnable(Cypress.state('runnable')),
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
-                  hookId: state('hookId'),
-                  hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
+                  hookId: Cypress.state('hookId'),
+                  hasVisitedAboutBlank: Cypress.state('hasVisitedAboutBlank'),
                   switchToDomainBaseUrl: location.origin,
                   parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
-                  isStable: state('isStable'),
-                  autOrigin: state('autOrigin'),
+                  isStable: Cypress.state('isStable'),
+                  autOrigin: Cypress.state('autOrigin'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
