@@ -169,6 +169,10 @@ export const e2eProjectDirs = [
   'webpack-preprocessor-awesome-typescript-loader',
   'webpack-preprocessor-ts-loader',
   'webpack-preprocessor-ts-loader-compiler-options',
+  'webpack4_wds3-react',
+  'webpack4_wds4-react',
+  'webpack5_wds3-react',
+  'webpack5_wds4-react',
   'working-preprocessor',
   'yarn-v3.1.1-pnp'
 ] as const

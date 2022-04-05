@@ -68,6 +68,7 @@
     "noErrorTruncation": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "useUnknownInCatchVariables": false
   }
 }
