@@ -16,7 +16,7 @@ export default defineConfig({
       // to make everything fast, that Vite does
       // not seem to like.
       // https://vitejs.dev/config/#server-fs-allow
-      allow: ['/root/.cache/', '/tmp/', '/Users/', '/private/', '/home'],
+      allow: ['/root/.cache/', '/tmp/', '/Users/', '/private/', '/home', '/root'],
     },
   },
 })
