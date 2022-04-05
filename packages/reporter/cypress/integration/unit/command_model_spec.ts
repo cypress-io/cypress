@@ -27,22 +27,22 @@ describe('Command model', () => {
     clock.restore()
   })
 
-  context('.isInvisible', () => {
+  context('.visible', () => {
     let command: CommandModel
 
-    it('sets isInvisible to true for command has visible elements associated to it', () => {
+    it('sets visible to true for command has visible elements associated to it', () => {
       command = new CommandModel(commandProps({ visible: true }))
-      expect(command.isInvisible).to.be.false
+      expect(command.visible).to.be.true
     })
 
-    it('sets isInvisible to false for command has hidden elements associated to it', () => {
+    it('sets visible to false for command has hidden elements associated to it', () => {
       command = new CommandModel(commandProps({ visible: false }))
-      expect(command.isInvisible).to.be.true
+      expect(command.visible).to.be.false
     })
 
-    it('sets isInvisible to false for command that does not associate with visibility', () => {
+    it('sets visible to true for command that does not associate with visibility', () => {
       command = new CommandModel(commandProps({ visible: undefined }))
-      expect(command.isInvisible).to.be.false
+      expect(command.visible).to.be.true
     })
   })
 

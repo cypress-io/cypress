@@ -44,7 +44,7 @@ export default class Command extends Instrument {
   @observable number?: number
   @observable numElements: number
   @observable timeout?: number
-  @observable isInvisible?: boolean = false
+  @observable visible?: boolean
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
   @observable hookId: string
@@ -119,7 +119,7 @@ export default class Command extends Instrument {
     this.timeout = props.timeout
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
-    this.isInvisible = props.visible !== undefined && !props.visible
+    this.visible = props.visible === undefined || props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
@@ -139,7 +139,7 @@ export default class Command extends Instrument {
     this.renderProps = props.renderProps || {}
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
-    this.isInvisible = props.visible !== undefined && !props.visible
+    this.visible = props.visible === undefined || props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
