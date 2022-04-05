@@ -461,6 +461,12 @@ export class ProjectLifecycleManager {
     }
   }
 
+  loadTestingType () {
+    assert(this._configManager, 'Cannot load a testing type without a config manager')
+
+    this._configManager.loadTestingType()
+  }
+
   scaffoldFilesIfNecessary () {
     if (this._currentTestingType && this._projectMetaState.hasValidConfigFile && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
       this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
