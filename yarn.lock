@@ -2971,7 +2971,7 @@
     debug "^4.1.0"
     globals "^11.1.0"
 
-"@babel/traverse@^7.0.0", "@babel/traverse@^7.1.0", "@babel/traverse@^7.12.10", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.16.7", "@babel/traverse@^7.16.8", "@babel/traverse@^7.17.0", "@babel/traverse@^7.17.3", "@babel/traverse@^7.4.3", "@babel/traverse@^7.4.5", "@babel/traverse@^7.6.0", "@babel/traverse@^7.7.0", "@babel/traverse@^7.8.3", "@babel/traverse@^7.9.0":
+"@babel/traverse@^7.0.0", "@babel/traverse@^7.1.0", "@babel/traverse@^7.12.10", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.16.7", "@babel/traverse@^7.16.8", "@babel/traverse@^7.17.0", "@babel/traverse@^7.17.3", "@babel/traverse@^7.4.3", "@babel/traverse@^7.4.5", "@babel/traverse@^7.6.0", "@babel/traverse@^7.7.0", "@babel/traverse@^7.8.3", "@babel/traverse@^7.9.0":
   version "7.17.3"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.17.3.tgz#0ae0f15b27d9a92ba1f2263358ea7c4e7db47b57"
   integrity sha512-5irClVky7TxRWIRtxlh2WPUUOLhcPN06AGgaQSB8AEwuyEBgJVuJ5imdHm5zxk8w0QS5T+tDfnDxAlhWjpb7cw==
@@ -8834,40 +8834,10 @@
     "@storybook/core-client" "6.2.7"
     "@storybook/core-server" "6.2.7"
 
-"@storybook/csf-tools@^6.4.0-alpha.38":
-  version "6.4.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@storybook/csf-tools/-/csf-tools-6.4.0-beta.4.tgz#87e7afd9050c4b09755106bc5cb3fc31e9a1b271"
-  integrity sha512-CctTaXCpmfKQHVXuAyXcHoUXjDYfXTbNGLZkQ3jnceGvf/oMqp7bqennpM7CnnHayk0sOnlppAwnQDABb2RCog==
-  dependencies:
-    "@babel/core" "^7.12.10"
-    "@babel/generator" "^7.12.11"
-    "@babel/parser" "^7.12.11"
-    "@babel/plugin-transform-react-jsx" "^7.12.12"
-    "@babel/preset-env" "^7.12.11"
-    "@babel/traverse" "^7.12.11"
-    "@babel/types" "^7.12.11"
-    "@mdx-js/mdx" "^1.6.22"
-    "@storybook/csf" "0.0.2--canary.6aca495.0"
-    core-js "^3.8.2"
-    fs-extra "^9.0.1"
-    global "^4.4.0"
-    js-string-escape "^1.0.1"
-    lodash "^4.17.20"
-    prettier "^2.2.1"
-    regenerator-runtime "^0.13.7"
-    ts-dedent "^2.0.0"
-
 "@storybook/csf@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@storybook/csf/-/csf-0.0.1.tgz#95901507dc02f0bc6f9ac8ee1983e2fc5bb98ce6"
   integrity sha512-USTLkZze5gkel8MYCujSRBVIrUQ3YPBrLOx7GNk/0wttvVtlzWXAq9eLbQ4p/NicGxP+3T7KPEMVV//g+yubpw==
-  dependencies:
-    lodash "^4.17.15"
-
-"@storybook/csf@0.0.2--canary.6aca495.0":
-  version "0.0.2--canary.6aca495.0"
-  resolved "https://registry.yarnpkg.com/@storybook/csf/-/csf-0.0.2--canary.6aca495.0.tgz#1569819337b0414e6e5575680c96505eda803d0b"
-  integrity sha512-SRKP/zXfHQ/tAlqVAysXGyVrYvILwyDuhisXP6hpXW7BHej2BXVxR4LizA5AFpj99j066KbxdHKFMNmrncZEuw==
   dependencies:
     lodash "^4.17.15"
 
@@ -35129,7 +35099,7 @@ preserve@^0.2.0:
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
   integrity sha1-gV7R9uvGWSb4ZbMQwHE7yzMVzks=
 
-prettier@2.5.1, prettier@^2.2.1:
+prettier@2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.5.1.tgz#fff75fa9d519c54cf0fce328c1017d94546bc56a"
   integrity sha512-vBZcPRUR5MZJwoyi3ZoyQlc1rXeEck8KgeC9AwwOn+exuxLxq5toTRDTSaVrXHxelDMHy9zlicw8u66yxoSUFg==
