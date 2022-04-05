@@ -1742,19 +1742,15 @@ export default {
     },
     run_domain_fn_errored: {
       message: stripIndent`
-      ${cmd('switchToDomain')} failed with the following error:
-
-        > {{error}}
+      {{error}}
 
       This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
-    ran_domain_fn_errored: {
+    ran_domain_fn_reference_error: {
       message: stripIndent`
-      ${cmd('switchToDomain')} failed with the following error:
+        {{error}}
 
-        > {{error}}
-
-        Note: Variables must either be defined within the ${cmd('switchToDomain')} command or passed in using the args option.`,
+        Variables must either be defined within the ${cmd('switchToDomain')} command or passed in using the args option.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\

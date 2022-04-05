@@ -155,16 +155,20 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           Cypress.backend('ready:for:domain', { originPolicy: location.originPolicy })
 
           if (err) {
-            const wrappedErr = $errUtils.errByPath('switchToDomain.ran_domain_fn_errored', {
-              error: err.message,
-            })
+            if (err?.name === 'ReferenceError') {
+              const wrappedErr = $errUtils.errByPath('switchToDomain.ran_domain_fn_reference_error', {
+                error: err.message,
+              })
 
-            wrappedErr.name = err.name
+              wrappedErr.name = err.name
 
-            // Prevent cypress from trying to add the function to the error log
-            wrappedErr.onFail = () => {}
+              // Prevent cypress from trying to add the function to the error log
+              wrappedErr.onFail = () => {}
 
-            return _reject(wrappedErr)
+              return _reject(wrappedErr)
+            }
+
+            return _reject(err)
           }
 
           // if there are not commands and a synchronous return from the callback,
@@ -229,6 +233,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
                 error: err.message,
               })
+
+              wrappedErr.name = err.name
 
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}
