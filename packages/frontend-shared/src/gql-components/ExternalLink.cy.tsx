@@ -2,21 +2,14 @@ import ExternalLink from './ExternalLink.vue'
 import { ExternalLink_OpenExternalDocument } from '../generated/graphql'
 
 describe('<ExternalLink />', () => {
-  let fnStub
-
   beforeEach(() => {
-    const obj = {
-      get () {
-        return true
-      },
-    }
-
-    fnStub = cy.stub(obj, 'get')
+    const onClickSpy = cy.spy().as('onClickSpy')
 
     cy.mount(() => (
       <ExternalLink
         href='https://on.cypress.io/ci'
-        onClick={obj.get}
+        // @ts-ignore - vue @click isn't represented in JSX
+        onClick={onClickSpy}
       >
         Click me!
       </ExternalLink>
@@ -38,7 +31,7 @@ describe('<ExternalLink />', () => {
     .click()
 
     cy.wrap(urlStub).should('have.been.calledWith', 'https://on.cypress.io/ci')
-    cy.wrap(fnStub).should('have.been.calledOnce')
+    cy.get('@onClickSpy').should('have.been.calledOnce')
   })
 
   it('opens external link on click and triggers onClick function', () => {
@@ -56,7 +49,7 @@ describe('<ExternalLink />', () => {
     .click()
 
     cy.wrap(urlStub).should('have.been.calledWith', 'https://on.cypress.io/ci')
-    cy.wrap(fnStub).should('have.been.calledOnce')
+    cy.get('@onClickSpy').should('have.been.calledOnce')
   })
 
   it('opens external link on enter', () => {
@@ -96,7 +89,7 @@ describe('<ExternalLink />', () => {
     .realPress('Enter')
 
     cy.wrap(urlStub).should('have.been.calledTwice')
-    cy.wrap(fnStub).should('have.been.calledTwice')
+    cy.get('@onClickSpy').should('have.been.calledTwice')
   })
 
   it('do not open external link on space bar trigger', () => {
@@ -115,6 +108,6 @@ describe('<ExternalLink />', () => {
     .realPress('Space')
 
     cy.wrap(urlStub).should('not.be.called')
-    cy.wrap(fnStub).should('not.be.called')
+    cy.get('@onClickSpy').should('not.be.called')
   })
 })
