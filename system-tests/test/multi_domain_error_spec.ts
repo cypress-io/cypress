@@ -31,7 +31,7 @@ describe('e2e multi domain errors', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      experimentalMultiDomain: true,
+      experimentalLoginFlows: true,
     },
     async onRun (exec) {
       const res = await exec()

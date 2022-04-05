@@ -186,9 +186,9 @@ describe('multi-domain', () => {
 
   describe('errors', () => {
     // @ts-ignore
-    it('errors if experimental flag is not enabled', { experimentalMultiDomain: false }, (done) => {
+    it('errors if experimental flag is not enabled', { experimentalLoginFlows: false }, (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires enabling the experimentalMultiDomain flag')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires enabling the experimentalLoginFlows flag')
 
         done()
       })

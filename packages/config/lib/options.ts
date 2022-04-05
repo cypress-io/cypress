@@ -158,7 +158,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalMultiDomain',
+    name: 'experimentalLoginFlows',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,

@@ -1530,7 +1530,7 @@ export default {
       message: 'Your `cy.session` **validate** callback {{reason}}',
     },
     experimentNotEnabled: {
-      message: 'experimentalMultiDomain is not enabled. You must enable the experimentalMultiDomain flag in order to use Cypress session commands',
+      message: 'experimentalLoginFlows is not enabled. You must enable the experimentalLoginFlows flag in order to use Cypress session commands',
       docsUrl: 'https://on.cypress.io/session',
     },
     session: {
@@ -1716,7 +1716,7 @@ export default {
   switchToDomain: {
     docsUrl: 'https://on.cypress.io/switchToDomain',
     experiment_not_enabled: {
-      message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
+      message: `${cmd('switchToDomain')} requires enabling the experimentalLoginFlows flag`,
     },
     invalid_origin_argument: {
       message: `${cmd('switchToDomain')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,

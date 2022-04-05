@@ -278,7 +278,7 @@ export default function (Commands, Cypress, cy) {
   }
 
   function throwIfNoSessionSupport () {
-    if (!Cypress.config('experimentalMultiDomain')) {
+    if (!Cypress.config('experimentalLoginFlows')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled')
     }
   }
@@ -482,7 +482,7 @@ export default function (Commands, Cypress, cy) {
 
     registerSessionHooks () {
       Cypress.on('test:before:run:async', () => {
-        if (Cypress.config('experimentalMultiDomain')) {
+        if (Cypress.config('experimentalLoginFlows')) {
           currentTestRegisteredSessions.clear()
 
           return navigateAboutBlank(false)

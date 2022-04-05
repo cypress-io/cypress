@@ -2227,7 +2227,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('waits for stability at the end of the command queue when not stable', { experimentalMultiDomain: false }, (done) => {
+    it('waits for stability at the end of the command queue when not stable', { experimentalLoginFlows: false }, (done) => {
       cy
       .visit('/fixtures/generic.html')
       .then((win) => {
@@ -2250,7 +2250,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('does not wait for stability at the end of the command queue when not stable with experimentalMultiDomain', (done) => {
+    it('does not wait for stability at the end of the command queue when not stable with experimentalLoginFlows', (done) => {
       const onLoad = cy.spy()
 
       cy

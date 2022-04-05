@@ -253,7 +253,7 @@
           "default": false,
           "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode."
         },
-        "experimentalMultiDomain": {
+        "experimentalLoginFlows": {
           "type": "boolean",
           "default": false,
           "description": "Enables multi-domain support in Cypress, including the switchToDomain command."

@@ -108,7 +108,7 @@ async function setupRemote (remotePort, automation, options) {
     sendDebuggerCommandFn: criClient.send,
     onFn: criClient.on,
     automation,
-    experimentalMultiDomain: options.experimentalMultiDomain,
+    experimentalLoginFlows: options.experimentalLoginFlows,
   })
 
   await cdpAutomation.enable()

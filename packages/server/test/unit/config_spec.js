@@ -1495,7 +1495,7 @@ describe('lib/config', () => {
             exit: { value: true, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalMultiDomain: { value: false, from: 'default' },
+            experimentalLoginFlows: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
@@ -1585,7 +1585,7 @@ describe('lib/config', () => {
             exit: { value: true, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalMultiDomain: { value: false, from: 'default' },
+            experimentalLoginFlows: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             env: {

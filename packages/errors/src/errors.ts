@@ -1052,7 +1052,7 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.5.0`)} and replaced with ${fmt.highlight(`experimentalMultiDomain`)}. Please update your config to use ${fmt.highlight(`experimentalMultiDomain`)} instead.
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.5.0`)} and replaced with ${fmt.highlight(`experimentalLoginFlows`)}. Please update your config to use ${fmt.highlight(`experimentalLoginFlows`)} instead.
         
         https://on.cypress.io/migration-guide`
   },

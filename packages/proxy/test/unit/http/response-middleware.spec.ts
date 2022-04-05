@@ -158,7 +158,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('doesn\'t do anything when "experimentalMultiDomain" config flag is not set to true"', function () {
+    it('doesn\'t do anything when "experimentalLoginFlows" config flag is not set to true"', function () {
       prepareContext({
         incomingRes: {
           headers: {
@@ -186,7 +186,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -209,7 +209,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -234,7 +234,7 @@ describe('http/response-middleware', function () {
           proxiedUrl: 'http://www.foobar.com/test',
         },
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -260,7 +260,7 @@ describe('http/response-middleware', function () {
           proxiedUrl: 'http://www.foobar.com/test',
         },
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -286,7 +286,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -400,7 +400,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('doesn\'t inject anything when html does not match origin policy and "experimentalMultiDomain" config flag is NOT set to true', function () {
+    it('doesn\'t inject anything when html does not match origin policy and "experimentalLoginFlows" config flag is NOT set to true', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://foobar.com',
@@ -421,7 +421,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('injects "fullMultiDomain" when "experimentalMultiDomain" config flag is set to true for cross-domain html"', function () {
+    it('injects "fullMultiDomain" when "experimentalLoginFlows" config flag is set to true for cross-domain html"', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://foobar.com',
@@ -436,7 +436,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -461,7 +461,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://example.com', 'http://foobar.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -547,7 +547,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -814,7 +814,7 @@ describe('http/response-middleware', function () {
             append: appendStub,
           },
           config: {
-            experimentalMultiDomain: false,
+            experimentalLoginFlows: false,
           },
         })
 
@@ -938,7 +938,7 @@ describe('http/response-middleware', function () {
           },
         },
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
         getCurrentBrowser () {
           return { family: 'chromium' }

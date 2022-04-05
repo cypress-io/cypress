@@ -1041,7 +1041,7 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalMultiDomain` config option is enabled.
+      * Only available if the `experimentalLoginFlows` config option is enabled.
       *
       * @see https://on.cypress.io/session
       */
@@ -2833,7 +2833,7 @@ declare namespace Cypress {
      * Enables multi-domain support in Cypress, including the switchToDomain command.
      * @default false
      */
-    experimentalMultiDomain: boolean
+    experimentalLoginFlows: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false

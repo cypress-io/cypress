@@ -133,7 +133,7 @@ describe('e2e sessions', () => {
     spec: 'session_spec.js',
     snapshot: true,
     config: {
-      experimentalMultiDomain: true,
+      experimentalLoginFlows: true,
       video: false,
     },
   })
@@ -142,7 +142,7 @@ describe('e2e sessions', () => {
     spec: 'session_persist_spec_1.js,session_persist_spec_2.js',
     snapshot: true,
     config: {
-      experimentalMultiDomain: true,
+      experimentalLoginFlows: true,
       video: false,
     },
   })

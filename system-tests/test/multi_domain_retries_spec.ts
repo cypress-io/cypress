@@ -31,7 +31,7 @@ describe('e2e multi domain retries', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      experimentalMultiDomain: true,
+      experimentalLoginFlows: true,
       retries: 2,
     },
     async onRun (exec) {
