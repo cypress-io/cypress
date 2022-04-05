@@ -104,7 +104,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       const originPolicy = location.originPolicy
 
-      // This is not reset after leaving the switchToDomain command.
+      // This is intentionally not reset after leaving the switchToDomain command.
       cy.state('latestActiveOriginPolicy', originPolicy)
       // This is set while IN the switchToDomain command.
       cy.state('currentActiveOriginPolicy', originPolicy)
