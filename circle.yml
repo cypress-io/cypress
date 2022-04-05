@@ -1098,7 +1098,8 @@ jobs:
             run-app-integration-tests-chrome,
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
-            run-launchpad-integration-tests-chrome
+            run-launchpad-integration-tests-chrome,
+            run-webpack-dev-server-fresh-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1433,6 +1434,28 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-webpack-dev-server-fresh-integration-tests:
+    <<: *defaults
+    # parallelism: 3 TODO: Add parallelism once we have more specs
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group webpack-dev-server-fresh
+          working_directory: npm/webpack-dev-server-fresh
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs      
+
   ui-components-integration-tests:
     <<: *defaults
     steps:
@@ -1494,9 +1517,13 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-dev-server-fresh test
 
   npm-vite-dev-server:
     <<: *defaults
@@ -2226,6 +2253,10 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
+    - run-webpack-dev-server-fresh-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2241,7 +2272,7 @@ linux-workflow: &linux-workflow
           - build
     - npm-webpack-dev-server:
         requires:
-          - build
+          - system-tests-node-modules-install
     - npm-vite-dev-server:
         requires:
           - build
