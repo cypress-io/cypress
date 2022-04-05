@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@cypress/request": "^2.88.10",
+    "@cypress/vue": "0.0.0-development",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^14.14.31",
     "@types/sinonjs__fake-timers": "8.1.1",
@@ -102,6 +103,10 @@
     "lib",
     "index.js",
     "index.mjs",
+    "vue.js",
+    "vue.mjs",
+    "react/**",
+    "mount-utils/**",
     "types/**/*.d.ts",
     "types/net-stubbing.ts"
   ],
@@ -116,6 +121,10 @@
     ".": {
       "import": "./index.mjs",
       "require": "./index.js"
+    },
+    "./vue": {
+      "import": "./vue.mjs",
+      "require": "./vue.js"
     },
     "./package.json": {
       "import": "./package.json",
