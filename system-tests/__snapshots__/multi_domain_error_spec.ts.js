@@ -1,4 +1,4 @@
-exports['e2e multi domain errors / captures the stack trace correctly for multi-domain errors to point users to their "switchToDomain" callback'] = `
+exports['e2e multi domain errors / captures the stack trace correctly for multi-domain errors to point users to their "cy.origin" callback'] = `
 
 ====================================================================================================
 
@@ -13,7 +13,7 @@ exports['e2e multi domain errors / captures the stack trace correctly for multi-
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  multi_domain_error_spec.ts                                                      (1 of 1)
 
 
@@ -50,12 +50,12 @@ exports['e2e multi domain errors / captures the stack trace correctly for multi-
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_error_spec.ts/multi-domain -- trie     (1280x720)
-     s to find an element that doesn't exist and fails (failed).png                                 
+     s to find an element that doesn't exist and fails (failed).png
 
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/multi_domain_error_spec.ts.mp4      (X second)
 
 
@@ -64,11 +64,11 @@ exports['e2e multi domain errors / captures the stack trace correctly for multi-
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  multi_domain_error_spec.ts               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -
 
 
 `

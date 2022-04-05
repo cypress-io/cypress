@@ -17,7 +17,7 @@ context('log', { experimentalSessionSupport: true }, () => {
   })
 
   it('logs in primary and secondary domains', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in multi-domain') {
@@ -43,7 +43,7 @@ context('log', { experimentalSessionSupport: true }, () => {
   })
 
   it('has a different id in a second test', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in multi-domain') {

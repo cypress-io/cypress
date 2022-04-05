@@ -411,7 +411,7 @@ describe('remote states', () => {
 
       expect(currentState.origin).to.equal('http://localhost:3500')
 
-      // simulate a switchToDomain by calling ready:for:domain followed by setting
+      // simulate a cy.origin by calling ready:for:domain followed by setting
       // the origin with specific auth options and finally calling cross:origin:finished
       this.eventEmitter.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
       this.remoteStates.set('http://cypress.io', { auth: { username: 'u', password: 'p' }, isMultiDomain: true })

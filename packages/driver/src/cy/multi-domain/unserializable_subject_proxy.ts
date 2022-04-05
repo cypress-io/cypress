@@ -38,7 +38,7 @@ export const createUnserializableSubjectProxy = (type: string) => {
      * @param argumentsList args passed.
      */
     apply () {
-      $errUtils.throwErrByPath('switchToDomain.failed_to_serialize_function')
+      $errUtils.throwErrByPath('origin.failed_to_serialize_function')
     },
 
     /**
@@ -55,9 +55,9 @@ export const createUnserializableSubjectProxy = (type: string) => {
 
       // Provide a slightly different message if the object was meant to be a symbol.
       if (type === 'symbol') {
-        $errUtils.throwErrByPath('switchToDomain.failed_to_serialize_symbol')
+        $errUtils.throwErrByPath('origin.failed_to_serialize_symbol')
       } else {
-        $errUtils.throwErrByPath('switchToDomain.failed_to_serialize_object')
+        $errUtils.throwErrByPath('origin.failed_to_serialize_object')
       }
     },
   })

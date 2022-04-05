@@ -136,7 +136,7 @@ export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: 
 export const reifySerializedError = (serializedError: any, userInvocationStack: string) => {
   // we have no idea what type the error this is... could be 'undefined', a plain old object, or something else entirely
 
-  let reifiedError = $errUtils.errByPath('switchToDomain.failed_to_serialize_or_map_thrown_value')
+  let reifiedError = $errUtils.errByPath('origin.failed_to_serialize_or_map_thrown_value')
 
   if (_.isArray(serializedError)) {
     // if the error is an array of anything, create a normal error with the stringified values of the passed in array
