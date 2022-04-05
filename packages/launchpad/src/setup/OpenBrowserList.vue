@@ -140,7 +140,7 @@
         size="sm"
         variant="text"
         :prefix-icon="ArrowRightIcon"
-        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in -translate-y-1px duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-2px"
+        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:-translate-x-2px"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
