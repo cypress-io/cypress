@@ -223,16 +223,19 @@ class Log {
   cy: any
   state: any
   config: any
-  fireChangeEvent: ((log) => (void | undefined))
   obj: any
+
+  // https://github.com/cypress-io/cypress/pull/20886
+  // It is defined in `createLogFn`.
+  // Otherwise, it causes flaky failures.
+  fireChangeEvent: any
 
   private attributes: Record<string, any> = {}
 
-  constructor (cy, state, config, fireChangeEvent, obj) {
+  constructor (cy, state, config, obj) {
     this.cy = cy
     this.state = state
     this.config = config
-    this.fireChangeEvent = fireChangeEvent
     this.obj = defaults(state, config, obj)
 
     extendEvents(this)
@@ -321,7 +324,7 @@ class Log {
       this.setElAttrs()
     }
 
-    this.fireChangeEvent(this)
+    this.fireChangeEvent()
 
     return this
   }
@@ -387,7 +390,7 @@ class Log {
       // we do need to trigger the change event since
       // xhr onLoad and proxy-logging updateRequestWithResponse can sometimes
       // happen in a different order and the log data in each is different
-      this.fireChangeEvent(this)
+      this.fireChangeEvent()
 
       return
     }
@@ -517,10 +520,6 @@ class Log {
 class LogManager {
   logs: Record<string, any> = {}
 
-  constructor () {
-    this.fireChangeEvent = this.fireChangeEvent.bind(this)
-  }
-
   trigger (log, event) {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
@@ -557,25 +556,21 @@ class LogManager {
     this.logs[id] = true
   }
 
-  // only fire the log:state:changed event
-  // as fast as every 4ms
-  fireChangeEvent (log) {
-    const triggerStateChanged = () => {
-      return this.trigger(log, 'command:log:changed')
-    }
-
-    const debounceFn = _.debounce(triggerStateChanged, 4)
-
-    return debounceFn()
-  }
-
   createLogFn (cy, state, config) {
     return (options: any = {}) => {
       if (!_.isObject(options)) {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      const log = new Log(cy, state, config, this.fireChangeEvent, options)
+      const log = new Log(cy, state, config, options)
+
+      const triggerStateChanged = () => {
+        return this.trigger(log, 'command:log:changed')
+      }
+
+      // only fire the log:state:changed event
+      // as fast as every 4ms
+      log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
 
       log.set(options)
 
