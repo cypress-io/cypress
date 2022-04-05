@@ -1794,18 +1794,8 @@ describe('src/cy/commands/connectors', () => {
   })
 
   describe('without jquery', () => {
-    before(() => {
-      cy
-      .visit('/fixtures/dom.html')
-      .then(function (win) {
-        this.body = win.document.body.outerHTML
-      })
-    })
-
-    beforeEach(function () {
-      const doc = cy.state('document')
-
-      $(doc.body).empty().html(this.body)
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
     })
 
     context('#each', () => {

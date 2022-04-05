@@ -8,18 +8,8 @@ export {}
 describe('src/dom/coordinates', () => {
   let doc: Document
 
-  before(() => {
-    return cy
-    .visit('/fixtures/generic.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   beforeEach(function () {
-    doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/generic.html')
 
     this.$button = $('<button style=\'position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black\'>foo</button>')
     .appendTo(cy.$$('body'))

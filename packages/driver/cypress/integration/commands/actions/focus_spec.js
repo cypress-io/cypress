@@ -7,17 +7,7 @@ const getActiveElement = () => {
 
 describe('src/cy/commands/actions/focus', () => {
   before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#focus', () => {
