@@ -246,7 +246,7 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
 
       // Keep track of '*.enable' commands so they can be resent when
       // reconnecting
-      if (command.endsWith('enable')) {
+      if (command.endsWith('.enable')) {
         enableCommands.push(command)
       }
 
