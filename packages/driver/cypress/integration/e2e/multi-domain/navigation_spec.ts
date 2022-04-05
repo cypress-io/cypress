@@ -209,7 +209,7 @@ describe('event timing', { experimentalSessionSupport: true }, () => {
       cy.log('inside switchToDomain foobar')
     })
 
-    // Honestly it's surprising this command runs, this command is run from localhost but executes against a cross origin aut (foobar.com)
+    // This command is run from localhost against the cross origin aut. Updating href is one of the few allowed commands. See https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#location
     cy.window().then((win) => {
       win.location.href = 'http://www.idp.com:3500/fixtures/multi-domain.html'
     })
