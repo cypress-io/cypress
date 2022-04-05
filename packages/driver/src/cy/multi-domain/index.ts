@@ -30,8 +30,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating a cross origin request
-    // @ts-ignore
-
     cy.isAnticipatingCrossOriginResponseFor(request)
     const location = $Location.create(request.href)
 
