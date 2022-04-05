@@ -2985,10 +2985,14 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
-  interface DevServerConfigObject {
+  type DevServerConfigObject = {
     bundler: 'webpack'
     framework: 'react'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
+  } | {
+    bundler: 'vite'
+    framework: 'react'
+    viteConfig?: Omit<PickConfigOpt<'viteConfig'>, 'base' | 'root'>
   }
 
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
