@@ -1807,6 +1807,10 @@ export default {
         message: `${cmd('session')} use is not supported in the ${cmd('switchToDomain')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
+      Cypress_session: {
+        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using it outside of the callback instead.`,
+        docsUrl: 'https://on.cypress.io/session-api',
+      },
     },
   },
 

@@ -130,15 +130,6 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
     })
   })
 
-  // TODO: Before implementing, understand how Cypress.session.* and cy.session() are supposed to function within the context of multi-domain
-  context.skip('session', () => {
-    it('clearAllSavedSessions() functions as expected', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
-        Cypress.session.clearAllSavedSessions()
-      })
-    })
-  })
-
   context('properties', () => {
     it('has arch property synced from primary', () => {
       cy.switchToDomain('http://foobar.com:3500', { args: Cypress.arch }, (theArch) => {
@@ -238,6 +229,18 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () =>
       cy.switchToDomain('http://foobar.com:3500', () => {
         // @ts-ignore
         Cypress.Cookies.preserveOnce({})
+      })
+    })
+
+    it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of multi-domain', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using it outside of the callback instead.')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/session-api')
+        done()
+      })
+
+      cy.switchToDomain('http://foobar.com:3500', () => {
+        Cypress.session.clearAllSavedSessions()
       })
     })
   })
