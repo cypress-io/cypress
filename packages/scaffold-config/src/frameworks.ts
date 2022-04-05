@@ -64,7 +64,7 @@ interface CreateCypressConfig {
   projectRoot: string
 }
 
-function createCypressConfig (config: CreateCypressConfig): string {
+export function createCypressConfig (config: CreateCypressConfig): string {
   if (config.language === 'ts') {
     if (defineConfigAvailable(config.projectRoot)) {
       return dedent`
@@ -72,8 +72,10 @@ function createCypressConfig (config: CreateCypressConfig): string {
 
         export default defineConfig({
           component: {
-            framework: '${config.framework}',
-            bundler: '${config.bundler}'
+            devServer: {
+              framework: '${config.framework}',
+              bundler: '${config.bundler}'
+            }
           },
         })`
     }
@@ -81,8 +83,10 @@ function createCypressConfig (config: CreateCypressConfig): string {
     return dedent`
       export default {
         component: {
-          framework: '${config.framework}',
-          bundler: '${config.bundler}'
+          devServer: {
+            framework: '${config.framework}',
+            bundler: '${config.bundler}'
+          }
         },
       }`
   }
@@ -90,8 +94,10 @@ function createCypressConfig (config: CreateCypressConfig): string {
   return dedent`
     module.exports = {
       component: {
-        framework: '${config.framework}',
-        bundler: '${config.bundler}'
+        devServer: {
+          framework: '${config.framework}',
+          bundler: '${config.bundler}'
+        }
       },
     }`
 }
