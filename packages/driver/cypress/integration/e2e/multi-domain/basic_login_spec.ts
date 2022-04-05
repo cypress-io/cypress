@@ -93,8 +93,10 @@ describe('basic login', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
       })
 
+      // @ts-ignore
       // TODO: Add createDomain primary domain config does not exist yet
       it.skip('D logs in with primary set via switch to domain config', { baseUrl: undefined, primaryDomain: 'localhost' }, () => {
+        // @ts-ignore
         cy.createDomain('http://idp.com:3500', () => { // PrimaryDomain set to localhost
           cy.visit('http://www.idp.com/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
