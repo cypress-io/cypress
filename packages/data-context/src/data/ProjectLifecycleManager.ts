@@ -279,8 +279,6 @@ export class ProjectLifecycleManager {
   async setInitialActiveBrowser () {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
-      // TODO: does this really need to be nulled here? seems like a possible source of bugs since it makes this fn not idempotent
-      this.ctx.coreData.cliBrowser = null
 
       return
     }

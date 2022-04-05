@@ -40,7 +40,7 @@ describe('ProjectLifecycleManager', () => {
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.coreData.cliBrowser).to.be.null
+      expect(ctx.coreData.cliBrowser).to.eq('electron')
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
     })
 
