@@ -208,6 +208,12 @@ export class ProjectActions {
     }
 
     testingType = testingType || this.ctx.coreData.currentTestingType
+
+    // It's strange to have no testingType here, but `launchProject` is called when switching testing types,
+    // so it needs to short-circuit and return here.
+    // TODO: Untangle this. https://cypress-io.atlassian.net/browse/UNIFY-1528
+    if (!testingType) return
+
     this.ctx.coreData.currentTestingType = testingType
 
     const browser = this.ctx.coreData.activeBrowser
