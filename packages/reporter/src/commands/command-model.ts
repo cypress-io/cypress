@@ -63,7 +63,9 @@ export default class Command extends Instrument {
   }
 
   private countNestedCommands (children) {
-    if (children.length === 0) return 0
+    if (children.length === 0) {
+      return 0
+    }
 
     return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
   }
@@ -97,7 +99,13 @@ export default class Command extends Instrument {
   }
 
   @computed get hasChildren () {
-    return this.event ? this.numChildren > 1 : this.numChildren > 0
+    if (this.event) {
+      // if the command is an event log, we add one to the number of children count to include
+      // itself in the total number of same events that render when the group is closed
+      return this.numChildren > 1
+    }
+
+    return this.numChildren > 0
   }
 
   constructor (props: CommandProps) {
@@ -109,6 +117,8 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
     this.isInvisible = props.visible !== undefined && !props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
@@ -127,6 +137,8 @@ export default class Command extends Instrument {
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
     this.isInvisible = props.visible !== undefined && !props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
