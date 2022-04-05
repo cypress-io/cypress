@@ -280,7 +280,8 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
-      return
+      // only finish if `cliBrowser` was successfully set - we must have an activeBrowser once this function resolves
+      if (this.ctx.coreData.activeBrowser) return
     }
 
     // lastBrowser is cached per-project.
