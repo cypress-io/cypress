@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@cypress/request": "^2.88.10",
-    "@cypress/vue": "0.0.0-development",
+    "@cypress/vue": "file:../npm/vue",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^14.14.31",
     "@types/sinonjs__fake-timers": "8.1.1",
