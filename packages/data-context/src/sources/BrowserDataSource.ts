@@ -32,8 +32,7 @@ export class BrowserDataSource {
     if (!this.ctx.coreData.machineBrowsers) {
       const p = this.ctx._apis.browserApi.getBrowsers()
 
-      this.ctx.coreData.machineBrowsers = p
-      p.then(async (browsers) => {
+      this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
         if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
 
         return browsers

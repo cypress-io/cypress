@@ -6,7 +6,7 @@ module.exports = {
     devServer,
     devServerConfig: {
       webpackConfig,
-      indexHtmlFile: 'cypress/support/component-index.html',
     },
+    indexHtmlFile: 'cypress/support/custom-component-index.html',
   },
 }

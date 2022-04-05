@@ -1,11 +1,5 @@
 declare namespace CypressNextDevServer {
-  interface CypressNextDevServerConfig {
-    /**
-     * Path to an index.html file that will serve as the template in
-     * which your components will be rendered.
-     */
-    indexHtmlFile?: string
-  }
+  interface CypressNextDevServerConfig {}
 
   /**
    * Sets up a Cypress component testing environment for your NextJs application

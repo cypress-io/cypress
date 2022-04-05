@@ -1,8 +1,7 @@
-const path = require('path')
 const findNextWebpackConfig = require('./findNextWebpackConfig')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
-async function devServer (cypressDevServerConfig, { indexHtmlFile } = {}) {
+async function devServer (cypressDevServerConfig) {
   const webpackConfig = await findNextWebpackConfig(cypressDevServerConfig.config)
 
   // require('webpack') now points to nextjs bundled version
@@ -11,7 +10,6 @@ async function devServer (cypressDevServerConfig, { indexHtmlFile } = {}) {
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig,
-    indexHtmlFile: indexHtmlFile || path.resolve(__dirname, 'index-template.html'),
   })
 }
 

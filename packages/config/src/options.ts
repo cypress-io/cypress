@@ -8,7 +8,9 @@ export type BreakingOptionErrorKey =
   | 'INTEGRATION_FOLDER_REMOVED'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
+  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E'
   | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
   | 'EXPERIMENTAL_SAMESITE_REMOVED'
   | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
@@ -148,6 +150,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     // runner-ct overrides
     defaultValue: {
       specPattern: defaultSpecPattern.component,
+      indexHtmlFile: 'cypress/support/component-index.html',
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -384,12 +387,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'viewportHeight',
-    defaultValue: 660,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
     name: 'viewportWidth',
-    defaultValue: 1000,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
@@ -641,10 +644,22 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['component', 'e2e'],
   },
+  {
+    name: 'indexHtmlFile',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
+    isWarning: false,
+    testingTypes: ['component'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
-  e2e: [],
+  e2e: [
+    {
+      name: 'indexHtmlFile',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
+      isWarning: false,
+    },
+  ],
   component: [
     {
       name: 'baseUrl',
