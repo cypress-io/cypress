@@ -143,7 +143,7 @@ const selectedEditor = ref<Editor | undefined>(
 )
 
 const emit = defineEmits<{
-  (e: 'choseEditor', binary: string): void
+  (e: 'choseEditor', binary: string | null): void
 }>()
 
 watch(customBinary, (val) => {
