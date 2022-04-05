@@ -268,7 +268,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    it.only('handles users throwing functions', (done) => {
+    it('handles users throwing functions', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
         expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
