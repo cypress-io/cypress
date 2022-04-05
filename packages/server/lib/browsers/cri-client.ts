@@ -23,6 +23,9 @@ type websocketUrl = string
  */
 namespace CRI {
   export type Command =
+    'Page.enable' |
+    'Network.enable' |
+    'Console.enable' |
     'Browser.getVersion' |
     'Page.bringToFront' |
     'Page.captureScreenshot' |
@@ -138,6 +141,7 @@ type DeferredPromise = { resolve: Function, reject: Function }
 
 export const create = async (target: websocketUrl, onAsynchronousError: Function): Promise<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
+  const enableCommands: CRI.Command[] = []
   let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
@@ -158,7 +162,14 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
     try {
       await connect()
 
-      debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
+      debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands })
+
+      // '*.enable' commands need to be resent on reconnect or any events in
+      // that namespace will no longer be received
+      await Promise.all(enableCommands.map((cmdName) => {
+        return cri.send(cmdName)
+      }))
+
       subscriptions.forEach((sub) => {
         cri.on(sub.eventName, sub.cb)
       })
@@ -175,13 +186,20 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
   }
 
   const connect = async () => {
-    cri?.close()
+    await cri?.close()
 
     debug('connecting %o', { target })
 
     cri = await chromeRemoteInterface({
       target,
       local: true,
+      // Minor optimization. chrome-remote-interface creates a DSL based on
+      // this so you can call methods instead of using the event emitter
+      // (e.g. cri.Network.enable() instead of cri.send('Network.enable'))
+      // We only use the event emitter, so if we pass in an empty protcol,
+      // it will keep c-r-i from looping through it and needlessly creating
+      // the DSL
+      protocol: { domains: [] },
     })
 
     connected = true
@@ -226,10 +244,20 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
         })
       }
 
+      // Keep track of '*.enable' commands so they can be resent when
+      // reconnecting
+      if (command.endsWith('enable')) {
+        enableCommands.push(command)
+      }
+
       if (connected) {
         try {
           return await cri.send(command, params)
         } catch (err) {
+          // This error occurs when the browser has been left open for a long
+          // time and/or the user's computer has been put to sleep. The
+          // socket disconnects and we need to recreate the socket and
+          // connection
           if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
             throw err
           }
@@ -257,6 +285,9 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
 
       return cri.close()
     },
+
+    // @ts-ignore
+    reconnect,
   }
 
   return client
