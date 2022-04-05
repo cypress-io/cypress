@@ -118,7 +118,7 @@ import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 const props = defineProps<{
   title: string
   gql: EmptyGeneratorFragment
-  type: 'e2e' | 'component' | 'story'
+  type: 'e2e' | 'component'
   specFileName: string
   erroredCodegenCandidate?: string
 }>()
