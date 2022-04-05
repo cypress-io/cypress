@@ -9,14 +9,13 @@
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "tslint": "tslint --config ../ts/tslint.json --project .",
-    "clean": "rimraf './{src,test}/**/*!(.stories).js'",
+    "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js"
   },
   "dependencies": {
     "@babel/code-frame": "7.8.3",
     "@babel/parser": "7.13.0",
-    "@storybook/csf-tools": "^6.4.0-alpha.38",
     "@urql/core": "2.3.1",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.3",
