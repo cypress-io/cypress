@@ -23,7 +23,8 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "chromeWebSecurity": true,
   "clientCertificates": [],
   "component": {
-    "specPattern": "**/*.cy.{js,jsx,ts,tsx}"
+    "specPattern": "**/*.cy.{js,jsx,ts,tsx}",
+    "indexHtmlFile": "cypress/support/component-index.html"
   },
   "defaultCommandTimeout": 4000,
   "downloadsFolder": "cypress/downloads",

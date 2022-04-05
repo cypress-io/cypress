@@ -18,7 +18,7 @@ export class LegacyPluginsIpc extends EventEmitter {
 
   send(event: 'loadLegacyPlugins', legacyConfig: LegacyCypressConfigJson): boolean
   send (event: string, ...args: any[]) {
-    if (this.childProcess.killed) {
+    if (this.childProcess.killed || !this.childProcess.connected) {
       return false
     }
 

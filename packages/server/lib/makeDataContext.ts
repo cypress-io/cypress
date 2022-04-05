@@ -26,7 +26,6 @@ import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
-import plugins from './plugins'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
 
@@ -56,15 +55,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     configApi: {
-      getServerPluginHandlers: plugins.getServerPluginHandlers,
       allowedConfig: configUtils.allowed,
       cypressVersion: pkg.version,
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
-      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
-      validateLaunchpadConfigBreakingChanges: configUtils.validateNoBreakingConfigLaunchpad,
-      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,

@@ -4,12 +4,6 @@ declare namespace CypressCracoDevServer {
      * The object exported of your craco.config.js file
      */
     cracoConfig: any
-
-    /**
-     * Path to an index.html file that will serve as the template in
-     * which your components will be rendered.
-     */
-    indexHtmlFile?: string
   }
 
   /**

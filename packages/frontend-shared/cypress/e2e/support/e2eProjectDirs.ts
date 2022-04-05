@@ -144,6 +144,7 @@ export const e2eProjectDirs = [
   'todos',
   'ts-installed',
   'ts-proj',
+  'ts-proj-4-5',
   'ts-proj-custom-names',
   'ts-proj-esmoduleinterop-true',
   'ts-proj-tsconfig-in-plugins',
