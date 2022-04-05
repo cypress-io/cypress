@@ -647,6 +647,8 @@ export const AllCypressErrors = {
     return errTemplate`
       Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
+      ${fmt.off(err.message)}
+
       We stopped running your tests because your config file crashed.
 
       ${fmt.stackTrace(err)}

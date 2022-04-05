@@ -245,7 +245,12 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
           initializeActiveProjectStub.restore()
         }
 
-        function onStartAppError (e: Error) {
+        function onStartAppError (e: Error & {messageMarkdown?: string}) {
+          // Cypress Error
+          if (e.messageMarkdown) {
+            e.message = e.messageMarkdown
+          }
+
           isInitialized.reject(e)
           restoreStubs()
         }
@@ -261,6 +266,11 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
             return result
           } catch (e) {
+            // Cypress Error
+            if (e.messageMarkdown) {
+              e.message = e.messageMarkdown
+            }
+
             isInitialized.reject(e)
           } finally {
             restoreStubs()
