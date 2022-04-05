@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@cypress/vue": "^3.0.0",
+    "@cypress/vue": "file:../../../npm/vue",
     "vue": "^3.2.25"
   },
   "devDependencies": {

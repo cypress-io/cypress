@@ -4,6 +4,11 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  resolve: {
+    dedupe: [
+      'vue',
+    ],
+  },
   server: {
     fs: {
       // this is needed to run on CI since we
@@ -11,7 +16,7 @@ export default defineConfig({
       // to make everything fast, that Vite does
       // not seem to like.
       // https://vitejs.dev/config/#server-fs-allow
-      allow: ['/root/.cache/', '/tmp/', '/Users/', '/private/'],
+      allow: ['/root/.cache/', '/tmp/', '/Users/', '/private/', '/home'],
     },
   },
 })
