@@ -461,7 +461,7 @@ declare namespace Cypress {
     Commands: {
       add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
       add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
-      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, PrevSubjectMap['element']>): void
+      add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
       add<T extends keyof Chainable, S extends PrevSubject>(
           name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void

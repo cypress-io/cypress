@@ -83,7 +83,7 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
-    subject // $ExpectType JQuerySelector
+    subject // $ExpectType any
     subject.selector // $ExpectType string
     arg // $ExpectType string
     return
