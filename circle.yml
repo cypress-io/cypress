@@ -38,7 +38,8 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ use-contexts, << pipeline.git.branch >> ]
+    
+    - equal: [ new-cmd-group-9.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>

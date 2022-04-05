@@ -281,7 +281,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.get('.num-children').should('not.be.visible')
+          cy.get('.num-children').should('not.exist')
 
           cy.contains('.command-interceptions', 'getPosts')
         })
@@ -535,7 +535,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.get('.num-children').should('not.be.visible')
+          cy.get('.num-children').should('not.exist')
 
           cy.contains('.command-alias', 'dropdown')
         })
