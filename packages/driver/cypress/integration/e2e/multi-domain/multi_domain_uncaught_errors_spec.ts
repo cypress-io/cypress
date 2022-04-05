@@ -1,4 +1,7 @@
-// @ts-ignore
+// FIXME: sync thrown errors inside of multi-domain cause cross origin errors in firefox when using experimentalSessionSupport
+// This is likely due to cypress being re declared while on a cross origin iframe before the application navigates back.
+// To reproduce, just add "experimentalSessionSupport" = true into the describe block below
+
 describe('multi-domain - uncaught errors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')

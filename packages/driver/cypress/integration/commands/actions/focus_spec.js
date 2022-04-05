@@ -6,7 +6,7 @@ const getActiveElement = () => {
 }
 
 describe('src/cy/commands/actions/focus', () => {
-  before(() => {
+  beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
 

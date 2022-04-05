@@ -272,10 +272,6 @@ describe('src/cy/commands/navigation', () => {
   })
 
   context('#go', () => {
-    beforeEach(() => {
-      cy.visit('/fixtures/generic.html')
-    })
-
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
@@ -404,6 +400,8 @@ describe('src/cy/commands/navigation', () => {
       defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
+        cy.visit('/fixtures/generic.html')
+
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

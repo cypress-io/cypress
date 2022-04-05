@@ -33,7 +33,7 @@ describe('src/cy/commands/commands', () => {
     cy.command('get', 'body').then(() => {
       const names = cy.queue.names()
 
-      expect(names).to.deep.eq(['get', 'then'])
+      expect(names).to.deep.eq(['visit', 'get', 'then'])
     })
   })
 
