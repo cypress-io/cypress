@@ -262,6 +262,54 @@ Error: spec iframe stack
       ])
     })
 
+    it('strips webpack protocol and maintains absolute path', () => {
+      $sourceMapUtils.getSourcePosition.returns({
+        file: 'cypress:////root/absolute/path/some_other_file.ts',
+        line: 2,
+        column: 1,
+      })
+
+      $sourceMapUtils.getSourcePosition.onCall(1).returns({
+        file: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee',
+        line: 4,
+        column: 3,
+      })
+
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+
+      expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
+    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:2)
+    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:4)\
+`)
+
+      expect(sourceStack.parsed).to.eql([
+        {
+          message: 'Error: spec iframe stack',
+          whitespace: '',
+        },
+        {
+          function: 'foo.bar',
+          fileUrl: 'http://localhost:1234/source_map_spec.js',
+          originalFile: 'cypress:////root/absolute/path/some_other_file.ts',
+          relativeFile: '/root/absolute/path/some_other_file.ts',
+          absoluteFile: '/root/absolute/path/some_other_file.ts',
+          line: 2,
+          column: 2,
+          whitespace: '    ',
+        },
+        {
+          function: 'Context.<anonymous>',
+          fileUrl: 'http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js',
+          originalFile: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee',
+          relativeFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
+          absoluteFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
+          line: 4,
+          column: 4,
+          whitespace: '    ',
+        },
+      ])
+    })
+
     it('returns empty object if there\'s no stack', () => {
       expect($stackUtils.getSourceStack()).to.eql({})
     })
@@ -363,6 +411,27 @@ Error: spec iframe stack
       expect(details.originalFile).to.equal('webpack:///cypress/integration/spec%with space &^$ emoji👍_你好.js')
       expect(details.relativeFile).to.equal('cypress/integration/spec%with space &^$ emoji👍_你好.js')
       expect(details.absoluteFile).to.equal(`${projectRoot}/cypress/integration/spec%with space &^$ emoji👍_你好.js`)
+    })
+
+    it('maintains absolute path when provided', () => {
+      cy.stub($sourceMapUtils, 'getSourcePosition').returns({
+        file: '/root/path/cypress/integration/spec.js',
+        line: 1,
+        column: 0,
+      })
+
+      // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
+      const stack = stripIndent`
+        Error
+          at Object../cypress/integration/spec.js (http://localhost:50129/__cypress/tests?p=/root/path/cypress/integration/spec.js:99:1)
+      `
+
+      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+
+      expect(details.originalFile).to.equal('/root/path/cypress/integration/spec.js')
+      expect(details.relativeFile).to.equal('/root/path/cypress/integration/spec.js')
+      expect(details.absoluteFile).to.equal(`/root/path/cypress/integration/spec.js`)
     })
   })
 
