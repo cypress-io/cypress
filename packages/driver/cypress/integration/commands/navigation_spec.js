@@ -276,6 +276,7 @@ describe('src/cy/commands/navigation', () => {
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
+      cy.visit('/fixtures/generic.html')
       const timeout = cy.spy(Promise.prototype, 'timeout')
 
       cy
@@ -400,8 +401,6 @@ describe('src/cy/commands/navigation', () => {
       defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
-        cy.visit('/fixtures/generic.html')
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
