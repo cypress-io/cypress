@@ -71,7 +71,7 @@ export const Cypress = (
         const viteImport = `<script type="module" src="${options.cypressConfig.devServerPublicPathRoute}/@vite/client"></script>`
 
         // If we're doing cy-in-cy, we need to be able to access the Cypress instance from the parent frame.
-        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        if (process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING) {
           transformedIndexHtml = transformedIndexHtml.replace(viteImport, `<script>document.domain = 'localhost';</script>${viteImport}`)
         }
 

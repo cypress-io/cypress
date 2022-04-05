@@ -10,9 +10,6 @@ declare global {
   }
 }
 
-// Used to inject the frame in the page
-process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
-
 module.exports = defineConfig({
   component: {
     devServer: {
