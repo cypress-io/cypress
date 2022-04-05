@@ -73,7 +73,6 @@ fragment CreateSpecModal on Query {
     defaultSpecFileName
     ...EmptyGenerator
     ...ComponentGeneratorStepOne_codeGenGlob
-    ...StoryGeneratorStepOne_codeGenGlob
   }
 }
 `

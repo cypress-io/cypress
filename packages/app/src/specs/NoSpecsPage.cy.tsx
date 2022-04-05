@@ -46,8 +46,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
 
       cy.contains(text.importFromComponent.header).should('be.visible')
       cy.contains(text.importFromComponent.description).should('be.visible')
-      cy.contains(text.importFromStory.header).should('be.visible')
-      cy.contains(text.importFromStory.notSetupDescription).should('be.visible')
       cy.percySnapshot()
     })
   })
