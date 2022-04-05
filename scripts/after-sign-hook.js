@@ -7,7 +7,7 @@ let electron_notarize = require('electron-notarize')
 
 /* eslint-disable no-console */
 
-module.exports = async function (params) {
+async function notarizeElectronApp (params) {
   // Only notarize the app on Mac OS only.
   if (process.platform !== 'darwin') {
     console.log('not Mac, skipping after sign hook')
@@ -36,18 +36,27 @@ module.exports = async function (params) {
     throw new Error('Missing Apple password for notarization: NOTARIZE_APP_PASSWORD')
   }
 
-  try {
-    await electron_notarize.notarize({
-      appBundleId: appId,
-      appPath,
-      appleId: process.env.NOTARIZE_APP_APPLE_ID,
-      appleIdPassword: process.env.NOTARIZE_APP_PASSWORD,
-    })
-  } catch (error) {
-    console.error('could not notarize application')
-    console.error(error)
-    throw error
-  }
+  await electron_notarize.notarize({
+    appBundleId: appId,
+    appPath,
+    appleId: process.env.NOTARIZE_APP_APPLE_ID,
+    appleIdPassword: process.env.NOTARIZE_APP_PASSWORD,
+  })
 
   console.log(`Done notarizing ${appId}`)
+}
+
+module.exports = async function (params) {
+  try {
+    await notarizeElectronApp(params)
+  } catch (e) {
+    if (process.env.CI) {
+      console.error('could not notarize application')
+      console.error(e)
+      throw e
+    }
+
+    console.log('Ignoring notarizing error because not in CI')
+    console.error(e)
+  }
 }

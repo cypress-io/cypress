@@ -4,7 +4,6 @@
   "target": "zip",
   "mac": {
     "target": "zip",
-    "forceCodeSigning": true,
     "publish": null,
     "hardenedRuntime": true,
     "entitlements": "./scripts/entitlements.mac.inherit.plist",
