@@ -51,14 +51,6 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('vue3-vite-ts-configured', {
-    project: 'vue3-vite-ts-configured',
-    testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.ts',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('vue3-vite-ts-configured-bundled-mount', {
     project: 'vue3-vite-ts-configured-bundled-mount',
     testingType: 'component',
@@ -67,8 +59,16 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
+  systemTests.it('vue3-vite-ts-configured', {
+    project: 'vue3-vite-ts-configured',
+    testingType: 'component',
+    spec: 'src/components/HelloWorld.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
   // TODO: Figure out correct dependencies to make Next.js, 11-12  work.
-  systemTests.it.skip('nextjs-configured', {
+  systemTests.it('nextjs-configured', {
     project: 'nextjs-configured',
     testingType: 'component',
     spec: 'components/button.cy.jsx',
