@@ -84,7 +84,6 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
     subject // $ExpectType any
-    subject.selector // $ExpectType string
     arg // $ExpectType string
     return
   })
