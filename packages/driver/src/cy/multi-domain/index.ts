@@ -128,7 +128,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         const _reject = (err) => {
           cleanup()
-          log.error(err)
+          log?.error(err)
           reject(err)
         }
 
