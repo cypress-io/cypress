@@ -1,6 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
-import { getPathForPlatform } from '../../src/paths'
 
 describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
@@ -100,11 +99,11 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
-    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
+    cy.visitApp(`/specs/runner?file=${badFilePath}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
-    cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
+    cy.contains(badFilePath).should('be.visible')
     cy.location()
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
@@ -121,7 +120,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
 
     cy.contains('Dom Content').should('be.visible')
 
@@ -131,7 +130,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
+      cy.contains(goodFilePath).should('be.visible')
       cy.location()
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')
