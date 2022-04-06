@@ -209,25 +209,21 @@ export class ProjectActions {
 
     testingType = testingType || this.ctx.coreData.currentTestingType
 
-    if (!testingType) {
-      return null
-    }
+    // It's strange to have no testingType here, but `launchProject` is called when switching testing types,
+    // so it needs to short-circuit and return here.
+    // TODO: Untangle this. https://cypress-io.atlassian.net/browse/UNIFY-1528
+    if (!testingType) return
+
+    this.ctx.coreData.currentTestingType = testingType
+
+    const browser = this.ctx.coreData.activeBrowser
+
+    if (!browser) throw new Error('Missing browser in launchProject')
 
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
       activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
-    }
-
-    // Ensure that we have loaded browsers to choose from
-    if (this.ctx.appData.refreshingBrowsers) {
-      await this.ctx.appData.refreshingBrowsers
-    }
-
-    const browser = this.ctx.coreData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
-
-    if (!browser) {
-      return null
     }
 
     // launchProject expects a spec when opening browser for url navigation.
@@ -238,8 +234,6 @@ export class ProjectActions {
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
-
-    this.ctx.coreData.currentTestingType = testingType
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
 
@@ -256,10 +250,6 @@ export class ProjectActions {
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
 
     return this.api.removeProjectFromCache(projectRoot)
-  }
-
-  syncProjects () {
-    //
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
