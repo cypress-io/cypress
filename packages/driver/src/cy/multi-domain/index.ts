@@ -9,12 +9,12 @@ import { LogUtils } from '../../cypress/log'
 
 const reHttp = /^https?:\/\//
 
-const normalizeOrigin = (originOrDomain) => {
-  let origin = originOrDomain
+const normalizeOrigin = (urlOrDomain) => {
+  let origin = urlOrDomain
 
   // If just a domain, convert it to an origin by adding the protocol
-  if (!reHttp.test(originOrDomain)) {
-    origin = `https://${originOrDomain}`
+  if (!reHttp.test(urlOrDomain)) {
+    origin = `https://${urlOrDomain}`
   }
 
   return $Location.normalize(origin)
@@ -50,7 +50,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   })
 
   Commands.addAll({
-    origin<T> (originOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
+    origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
       // store the invocation stack in the case that `cy.origin` errors
       communicator.userInvocationStack = state('current').get('userInvocationStack')
 
@@ -79,7 +79,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const log = Cypress.log({
         name: 'origin',
         type: 'parent',
-        message: originOrDomain,
+        message: urlOrDomain,
         end: true,
       })
 
@@ -93,14 +93,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       validator.validate({
         callbackFn,
         options,
-        originOrDomain,
+        urlOrDomain,
       })
 
       // use URL to ensure unicode characters are correctly handled
-      const url = new URL(normalizeOrigin(originOrDomain)).toString()
+      const url = new URL(normalizeOrigin(urlOrDomain)).toString()
       const location = $Location.create(url)
 
-      validator.validateLocation(location, originOrDomain)
+      validator.validateLocation(location, urlOrDomain)
 
       const originPolicy = location.originPolicy
 
