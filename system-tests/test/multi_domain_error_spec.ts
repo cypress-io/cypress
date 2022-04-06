@@ -24,7 +24,7 @@ describe('e2e multi domain errors', () => {
     },
   })
 
-  systemTests.it('captures the stack trace correctly for multi-domain errors to point users to their "switchToDomain" callback', {
+  systemTests.it('captures the stack trace correctly for multi-domain errors to point users to their "cy.origin" callback', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'multi_domain_error_spec.ts',
@@ -40,7 +40,7 @@ describe('e2e multi domain errors', () => {
       expect(res.stdout).to.contain('AssertionError')
       expect(res.stdout).to.contain('Timed out retrying after 1000ms: Expected to find element: `#doesnotexist`, but never found it.')
 
-      // check to make sure the snapshot contains the 'switchToDomain' sourcemap. TODO: This is probably more appropriate for a cy-in-cy test
+      // check to make sure the snapshot contains the 'cy.origin' sourcemap. TODO: This is probably more appropriate for a cy-in-cy test
       expect(res.stdout).to.contain('http://localhost:3500/__cypress/tests?p=cypress/integration/multi_domain_error_spec.ts:103:12')
     },
   })

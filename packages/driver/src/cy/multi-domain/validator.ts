@@ -17,7 +17,7 @@ export class Validator {
     if (!isString(originOrDomain)) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.invalid_origin_argument', {
+      $errUtils.throwErrByPath('origin.invalid_origin_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(originOrDomain) },
       })
@@ -27,7 +27,7 @@ export class Validator {
       if (!isPlainObject(options)) {
         this.onFailure()
 
-        $errUtils.throwErrByPath('switchToDomain.invalid_options_argument', {
+        $errUtils.throwErrByPath('origin.invalid_options_argument', {
           onFail: this.log,
           args: { arg: $utils.stringify(options) },
         })
@@ -38,7 +38,7 @@ export class Validator {
       if (extraneousKeys.length) {
         this.onFailure()
 
-        $errUtils.throwErrByPath('switchToDomain.extraneous_options_argument', {
+        $errUtils.throwErrByPath('origin.extraneous_options_argument', {
           onFail: this.log,
           args: {
             extraneousKeys: extraneousKeys.join(', '),
@@ -51,7 +51,7 @@ export class Validator {
     if (typeof callbackFn !== 'function') {
       this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
+      $errUtils.throwErrByPath('origin.invalid_fn_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(callbackFn) },
       })
@@ -63,7 +63,7 @@ export class Validator {
     if (location.search.length > 0 || location.pathname.length > 1 || location.hash.length > 0) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('switchToDomain.invalid_origin_argument', {
+      $errUtils.throwErrByPath('origin.invalid_origin_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(originOrDomain) },
       })

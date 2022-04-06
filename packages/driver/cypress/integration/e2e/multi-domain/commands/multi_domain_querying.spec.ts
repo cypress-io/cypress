@@ -6,19 +6,19 @@ context('multi-domain querying', { experimentalSessionSupport: true }, () => {
   })
 
   it('.get()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#input')
     })
   })
 
   it('.contains()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.contains('Nested Find')
     })
   })
 
   it('.within()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').within(() => {
         cy.get('#input')
       })
@@ -26,7 +26,7 @@ context('multi-domain querying', { experimentalSessionSupport: true }, () => {
   })
 
   it('.root()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.root().should('match', 'html')
     })
   })

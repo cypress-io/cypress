@@ -829,19 +829,19 @@ namespace CypressKeyboardTests {
 }
 
 namespace CypressMultiDomainTests {
-  cy.switchToDomain('example.com', () => {})
-  cy.switchToDomain('example.com', { args: {}}, (value: object) => {})
-  cy.switchToDomain('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
-  cy.switchToDomain('example.com', { args: [1, 'value', true ] }, (value: Array<(number | string | boolean)>) => {})
-  cy.switchToDomain('example.com', { args : 'value'}, (value: string) => {})
-  cy.switchToDomain('example.com', { args: 1 }, (value: number) => {})
-  cy.switchToDomain('example.com', { args: true }, (value: boolean) => {})
+  cy.origin('example.com', () => {})
+  cy.origin('example.com', { args: {}}, (value: object) => {})
+  cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
+  cy.origin('example.com', { args: [1, 'value', true ] }, (value: Array<(number | string | boolean)>) => {})
+  cy.origin('example.com', { args : 'value'}, (value: string) => {})
+  cy.origin('example.com', { args: 1 }, (value: number) => {})
+  cy.origin('example.com', { args: true }, (value: boolean) => {})
 
-  cy.switchToDomain() // $ExpectError
-  cy.switchToDomain('example.com') // $ExpectError
-  cy.switchToDomain(true) // $ExpectError
-  cy.switchToDomain('example.com', {}) // $ExpectError
-  cy.switchToDomain('example.com', {}, {}) // $ExpectError
-  cy.switchToDomain('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
-  cy.switchToDomain('example.com', {}, (value: undefined) => {}) // $ExpectError
+  cy.origin() // $ExpectError
+  cy.origin('example.com') // $ExpectError
+  cy.origin(true) // $ExpectError
+  cy.origin('example.com', {}) // $ExpectError
+  cy.origin('example.com', {}, {}) // $ExpectError
+  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
+  cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
 }

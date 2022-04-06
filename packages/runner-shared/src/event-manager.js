@@ -535,7 +535,7 @@ export const eventManager = {
     Cypress.primaryOriginCommunicator.on('window:load', ({ url }, originPolicy) => {
       // Sync stable if the expected origin has loaded.
       // Only listen to window load events from the most recent secondary origin, This prevents nondeterminism in the case where we redirect to an already
-      // established spec bridge, but one that is not the current or next switchToDomain command.
+      // established spec bridge, but one that is not the current or next cy.origin command.
       if (cy.state('latestActiveOriginPolicy') === originPolicy) {
         // We remain in an anticipating state until either a load even happens or a timeout.
         cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))

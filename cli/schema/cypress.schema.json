@@ -256,7 +256,7 @@
         "experimentalMultiDomain": {
           "type": "boolean",
           "default": false,
-          "description": "Enables multi-domain support in Cypress, including the switchToDomain command."
+          "description": "Enables multi-domain support in Cypress, including the cy.origin command."
         },
         "experimentalSourceRewriting": {
           "type": "boolean",
