@@ -988,12 +988,12 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
-    switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, origins }) {
+    switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
       return stripIndent`\
 
         Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
 
-        - ${origins.map((origin) => `\`${origin}\``).join('\n       -')}
+        - ${originPolicies.map((originPolicy) => `\`${originPolicy}\``).join('\n       -')}
 
         Your page did not fire its \`load\` event within \`${ms}ms\`.
 

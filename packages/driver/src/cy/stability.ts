@@ -2,7 +2,7 @@ import Promise from 'bluebird'
 
 // the following are special commands that can continue and execute when
 // the AUT is unstable
-const commandsToRunRegardlessOfStability = ['switchToDomain', 'log', 'end-logGroup']
+const commandsToRunRegardlessOfStability = ['log', 'end-logGroup']
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (Cypress, state) => ({
@@ -43,25 +43,26 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingMultiDomainFor (href: string): void {
-    if (state('anticipatingMultiDomain') === href) {
+  isAnticipatingCrossOriginResponseFor (request: {href: string}): void {
+    if (state('anticipatingCrossOriginResponse') === request) {
       return
     }
 
-    const whenAnticipatingMultiDomain = state('whenAnticipatingMultiDomain')
+    const whenAnticipatingCrossOriginResponse = state('whenAnticipatingCrossOriginResponse')
 
-    if (!!href && whenAnticipatingMultiDomain) {
-      whenAnticipatingMultiDomain()
+    if (!!request?.href && whenAnticipatingCrossOriginResponse) {
+      whenAnticipatingCrossOriginResponse()
     }
 
-    state('anticipatingMultiDomain', href)
+    state('anticipatingCrossOriginResponse', request)
   },
 
-  whenStableOrAnticipatingMultiDomain (fn, command) {
+  whenStableOrAnticipatingCrossOriginResponse (fn, command) {
     const shouldRunCommand = commandsToRunRegardlessOfStability.includes(command?.get('name')) || false
+    const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
 
     // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingMultiDomain') && shouldRunCommand) || state('isStable') !== false) {
+    if ((!!state('anticipatingCrossOriginResponse') && commandIsSwitchToDomain) || shouldRunCommand || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -74,7 +75,7 @@ export const create = (Cypress, state) => ({
         fulfilled = true
 
         state('whenStable', null)
-        state('whenAnticipatingMultiDomain', null)
+        state('whenAnticipatingCrossOriginResponse', null)
 
         Promise.try(fn)
         .then(resolve)
@@ -85,7 +86,7 @@ export const create = (Cypress, state) => ({
 
       // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
       if (command?.get('name') === 'switchToDomain' || false) {
-        state('whenAnticipatingMultiDomain', onSignal)
+        state('whenAnticipatingCrossOriginResponse', onSignal)
       }
     })
   },

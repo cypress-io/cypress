@@ -370,6 +370,23 @@ describe('lib/browsers/electron', () => {
         })
       })
 
+      it('does not add header if frame is not available', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            url: 'http://localhost:3000/index.html',
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
       it('adds X-Cypress-Is-AUT-Frame header to AUT iframe request', function () {
         sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
 
