@@ -923,7 +923,7 @@ describe('Server', () => {
             fileServer: this.fileServer,
           })
 
-          this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+          this.server.socket.localBus.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
           expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
@@ -990,14 +990,14 @@ describe('Server', () => {
           })
         })
 
-        it('doesn\'t override existing remote state on ready:for:domain', function () {
+        it('doesn\'t override existing remote state on ready:for:origin', function () {
           nock('http://www.cypress.io/')
           .get('/')
           .reply(200, '<html>content</html>', {
             'Content-Type': 'text/html',
           })
 
-          this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+          this.server.socket.localBus.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
           return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isMultiDomain: true })
           .then(() => {
@@ -1015,7 +1015,7 @@ describe('Server', () => {
               fileServer: null,
             })
 
-            this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+            this.server.socket.localBus.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
             // Verify the existing secondary remote state is not overridden
             expect(this.server.remoteStates.current()).to.deep.eq({
@@ -1073,7 +1073,7 @@ describe('Server', () => {
 
         context('#reset()', () => {
           it('returns undefined for not found remote state', function () {
-            this.server.socket.localBus.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+            this.server.socket.localBus.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
             expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.true
             expect(this.server.remoteStates.get('http://cypress.io')).to.not.be.undefined

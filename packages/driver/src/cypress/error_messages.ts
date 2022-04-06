@@ -988,7 +988,7 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
-    switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
+    cross_origin_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
       return stripIndent`\
 
         Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):

@@ -100,7 +100,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     cy.isStable(true, 'primary onload')
 
     cy.state('autOrigin', cors.getOriginPolicy(url))
-    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+    Cypress.emit('internal:window:load', { type: 'cross:origin', url })
   }
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js

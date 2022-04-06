@@ -82,7 +82,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     cy.state('runnable').state = 'passed'
   }
 
-  Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
+  Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunDomainFnOptions) => {
     const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
@@ -95,7 +95,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
 
-    // resync the config/env before running the domain:fn
+    // resync the config/env before running the origin:fn
     syncConfigToCurrentDomain(config)
     syncEnvToCurrentDomain(env)
 
@@ -130,7 +130,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         // value
         const subject = hasCommands ? undefined : await value
 
-        Cypress.specBridgeCommunicator.toPrimary('ran:domain:fn', {
+        Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', {
           subject,
           finished: !hasCommands,
         }, {
@@ -149,7 +149,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       }
     } catch (err) {
       setRunnableStateToPassed()
-      Cypress.specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
+      Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', { err }, { syncGlobals: true })
 
       return
     }
