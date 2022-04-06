@@ -245,13 +245,20 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
           initializeActiveProjectStub.restore()
         }
 
-        function onStartAppError (e: Error & {messageMarkdown?: string}) {
-          // Cypress Error
+        function formatError (e: Error & {messageMarkdown?: string, originalError?: Error}) {
           if (e.messageMarkdown) {
             e.message = e.messageMarkdown
+            if (e.originalError) {
+              e.message += e.originalError.message
+            }
           }
 
-          isInitialized.reject(e)
+          return e
+        }
+
+        function onStartAppError (e: Error) {
+          // Cypress Error
+          isInitialized.reject(formatError(e))
           restoreStubs()
         }
 
@@ -266,12 +273,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
             return result
           } catch (e) {
-            // Cypress Error
-            if (e.messageMarkdown) {
-              e.message = e.messageMarkdown
-            }
-
-            isInitialized.reject(e)
+            isInitialized.reject(formatError(e))
           } finally {
             restoreStubs()
           }
