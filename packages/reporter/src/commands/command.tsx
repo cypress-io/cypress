@@ -23,7 +23,7 @@ const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const invisibleMessage = (model: CommandModel) => {
-  if (!model.isInvisible) {
+  if (model.visible) {
     return ''
   }
 
@@ -240,7 +240,7 @@ class Command extends Component<Props> {
           {
             'command-is-studio': model.isStudio,
             'command-is-event': !!model.event,
-            'command-is-invisible': model.isInvisible,
+            'command-is-invisible': !model.visible,
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
