@@ -39,6 +39,16 @@ export interface StyleOptions {
 
 export const ROOT_SELECTOR = '[data-cy-root]'
 
+export const getContainerEl = () => {
+  const els = document.querySelector(ROOT_SELECTOR)
+
+  if (els) {
+    return els[0]
+  }
+
+  throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
+}
+
 /**
  * Remove any style or extra link elements from the iframe placeholder
  * left from any previous test

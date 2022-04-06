@@ -8,7 +8,7 @@ import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
 import {
   injectStylesBeforeElement,
   StyleOptions,
-  ROOT_SELECTOR,
+  getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
 
@@ -55,13 +55,7 @@ Cypress.on('run:start', () => {
   initialInnerHtml = document.head.innerHTML
   Cypress.on('test:before:run', () => {
     Cypress.vueWrapper?.unmount()
-    // @ts-ignore
-    const document: Document = cy.state('document')
-    let el = document.querySelector(ROOT_SELECTOR)[0]
-
-    if (!el) {
-      throw Error(`no element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
-    }
+    const el = getContainerEl()
 
     el.innerHTML = ''
     document.head.innerHTML = initialInnerHtml
@@ -238,11 +232,7 @@ export function mount (
     // @ts-ignore
     const document: Document = cy.state('document')
 
-    let el = document.querySelector(ROOT_SELECTOR)[0]
-
-    if (!el) {
-      throw Error(`no element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
-    }
+    const el = getContainerEl()
 
     injectStylesBeforeElement(options, document, el)
 

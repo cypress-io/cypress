@@ -4,6 +4,7 @@ import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
   StyleOptions,
+  getContainerEl,
   ROOT_SELECTOR,
   setupHooks,
 } from '@cypress/mount-utils'
@@ -13,7 +14,7 @@ import {
  */
 const injectStyles = (options: MountOptions) => {
   return () => {
-    const el = document.querySelector(ROOT_SELECTOR)[0]
+    const el = getContainerEl()
 
     return injectStylesBeforeElement(options, document, el)
   }
@@ -66,7 +67,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
 
     lastMountedReactDom = reactDomToUse
 
-    const el = document.querySelector(ROOT_SELECTOR)[0]
+    const el = getContainerEl()
 
     if (!el) {
       throw new Error(
@@ -185,7 +186,7 @@ const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => 
 // NOTE: we cannot use unmount here because
 // we are not in the context of a test
 const preMountCleanup = () => {
-  const el = document.querySelector(ROOT_SELECTOR)[0]
+  const el = getContainerEl()
 
   if (el && lastMountedReactDom) {
     lastMountedReactDom.unmountComponentAtNode(el)
