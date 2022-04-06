@@ -2,7 +2,7 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
-const pkg = require('../package.json')
+const pkg = require('../../../package.json')
 const paths = require('./paths')
 const log = require('debug')('cypress:electron')
 const fs = require('fs-extra')
@@ -12,7 +12,7 @@ let electronVersion
 
 // ensure we have an electronVersion set in package.json
 if (!(electronVersion = pkg.devDependencies.electron)) {
-  throw new Error('Missing \'electron\' devDependency in ./package.json')
+  throw new Error('Missing \'electron\' devDependency in root package.json')
 }
 
 module.exports = {
