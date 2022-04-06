@@ -113,8 +113,9 @@ export const WIZARD_FRAMEWORKS = [
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
-        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ]
     },
     createCypressConfig,
@@ -132,6 +133,7 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
@@ -150,6 +152,7 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
+        inPkgJson(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ]
     },
@@ -203,6 +206,7 @@ export const WIZARD_FRAMEWORKS = [
     storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
+        getBundlerDependency(bundler, projectPath),
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
