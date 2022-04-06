@@ -274,6 +274,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
+      const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
 
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
@@ -334,9 +335,16 @@ export default function (Commands, Cypress, cy, state, config) {
           }
 
           if (
-            // Firefox sends a click event when the Space key is pressed.
-            // We don't want to send it twice.
-            !Cypress.isBrowser('firefox') &&
+            (
+              // Before Firefox 98,
+              // Firefox sends a click event when the Space key is pressed.
+              // We don't want to send it twice.
+              !Cypress.isBrowser('firefox') ||
+              // After Firefox 98,
+              // it sends a click event automatically if the element is a <button>
+              // it does not if the element is an <input>
+              (!isFirefoxBefore98 && $elements.isInput(event.target))
+            ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
             // When event is prevented, the click event should not be emitted
@@ -352,6 +360,16 @@ export default function (Commands, Cypress, cy, state, config) {
             fireClickEvent(event.target)
 
             keydownEvents = []
+
+            // After Firefox 98,
+            // Firefox doesn't update checkbox automatically even if the click event is sent.
+            if (Cypress.isBrowser('firefox')) {
+              if (event.target.type === 'checkbox') {
+                event.target.checked = !event.target.checked
+              } else if (event.target.type === 'radio') { // when checked is false, here cannot be reached because of the above condition
+                event.target.checked = true
+              }
+            }
           }
         },
 
@@ -404,8 +422,13 @@ export default function (Commands, Cypress, cy, state, config) {
           // https://github.com/cypress-io/cypress/issues/19541
           // Send click event on type('{enter}')
           if (sendClickEvent) {
-            // Firefox sends a click event automatically.
-            if (!Cypress.isBrowser('firefox')) {
+            if (
+              // Before Firefox 98, it sends a click event automatically.
+              !Cypress.isBrowser('firefox') ||
+              // After Firefox 98,
+              // it sends a click event automatically if the element is a <button>
+              // it does not if the element is an <input>
+              (!isFirefoxBefore98 && $elements.isInput(el))) {
               fireClickEvent(el)
             }
           }
