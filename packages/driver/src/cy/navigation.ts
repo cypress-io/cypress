@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { $Location } from '../cypress/location'
 
 export const bothUrlsMatchAndOneHasHash = (current, remote, eitherShouldHaveHash: boolean = false): boolean => {
@@ -25,6 +26,11 @@ export const historyNavigationTriggeredHashChange = (state): boolean => {
   }
 
   const urls = state('urls')
+
+  if (_.isEmpty(urls)) {
+    return false
+  }
+
   const urlPosition = state('urlPosition')
   const currentUrl = $Location.create(urls[urlPosition])
 
