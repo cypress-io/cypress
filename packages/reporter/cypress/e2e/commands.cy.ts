@@ -421,7 +421,6 @@ describe('commands', () => {
       .should('not.exist')
 
       cy.get('.command-name-within')
-      .click()
       .find('.command-expander')
       .should('not.have.class', 'command-expander-is-open')
     })
