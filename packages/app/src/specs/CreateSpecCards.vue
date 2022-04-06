@@ -21,11 +21,16 @@ const props = defineProps<{
   gql: CreateSpecCardsFragment
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (eventName: 'select', id: GeneratorId): void
 }>()
 
 const generators = computed(() => generatorList.filter((g) => g.matches(props.gql.currentProject?.currentTestingType)))
+
+// if there is only one generator, jump to step 2
+if (generators.value.length === 1) {
+  emit('select', generators.value[0].id)
+}
 
 gql`
 fragment CreateSpecCards on Query {

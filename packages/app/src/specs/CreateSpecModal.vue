@@ -22,7 +22,7 @@
         v-model:title="title"
         :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
-        type="e2e"
+        :type="props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
         @restart="currentGeneratorId = undefined"
         @close="close"
@@ -71,8 +71,11 @@ fragment CreateSpecModal on Query {
     id
     fileExtensionToUse
     defaultSpecFileName
+    codeGenGlobs {
+      id
+      component
+    }
     ...EmptyGenerator
-    ...ComponentGeneratorStepOne_codeGenGlob
   }
 }
 `

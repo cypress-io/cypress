@@ -332,7 +332,6 @@ export class ProjectActions {
 
     const parsed = path.parse(codeGenCandidate)
 
-    const defaultCText = '.cy'
     const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
     const getFileExtension = () => {
@@ -340,15 +339,11 @@ export class ProjectActions {
         return ''
       }
 
-      if (codeGenType === 'e2e') {
-        return (
-          possibleExtensions.find((ext) => {
-            return codeGenCandidate.endsWith(ext + parsed.ext)
-          }) || parsed.ext
-        )
-      }
-
-      return defaultCText
+      return (
+        possibleExtensions.find((ext) => {
+          return codeGenCandidate.endsWith(ext + parsed.ext)
+        }) || parsed.ext
+      )
     }
 
     const getCodeGenPath = () => {
@@ -371,36 +366,6 @@ export class ProjectActions {
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    if ((codeGenType === 'component') && !erroredCodegenCandidate) {
-      const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
-      const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
-
-      let foundExt
-
-      for await (const ext of possibleExtensions) {
-        const file = filePathRelative.replace(defaultCText, ext)
-
-        const matchesSpecPattern = await this.ctx.project.matchesSpecPattern(file)
-
-        if (matchesSpecPattern) {
-          foundExt = ext
-          break
-        }
-      }
-
-      if (!foundExt) {
-        return {
-          fileName: filePathRelative,
-          erroredCodegenCandidate: codeGenPath,
-        }
-      }
-
-      codeGenOptions = {
-        ...codeGenOptions,
-        fileName: codeGenOptions.fileName.replace(defaultCText, foundExt),
-      }
-    }
 
     const codeGenResults = await codeGenerator(
       { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
