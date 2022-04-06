@@ -1,3 +1,6 @@
+# You must keep cli/.gitignore in sync with cli/.npmignore
+# becuase .npmignore is preferred when publishing
+# See: https://stackoverflow.com/a/24942436
 types/blob-util
 types/bluebird
 types/chai
@@ -15,7 +18,7 @@ build
 
 # ignore packages synced at build-time via
 # the sync-exported-npm-with-cli.js script
-# BUT THESE PACKAGES MUST BE IGNORED IN .npmignore
+# BUT THESE PACKAGES MUST BE NEGATED IN .npmignore
 # or else they won't be published
 vue
 react

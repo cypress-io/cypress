@@ -1,3 +1,23 @@
-!vue
-!react
-!mount-utils
+# You must keep cli/.gitignore in sync with cli/.npmignore
+# becuase .npmignore is preferred when publishing
+# See: https://stackoverflow.com/a/24942436
+types/blob-util
+types/bluebird
+types/chai
+types/chai-jquery
+types/jquery
+types/lodash
+types/mocha
+types/minimatch
+types/sinon
+types/sinon-chai
+# copied from net-stubbing package on build
+types/net-stubbing.ts
+# ignore CLI output build folder
+build
+
+# BUT THESE PACKAGES MUST BE NEGATED IN .npmignore
+# or else they won't be published
+!vue/**
+!react/**
+!mount-utils/**
