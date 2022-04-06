@@ -10,6 +10,7 @@
   }
 
   .command {
+    background-color: #eef1f4;
     cursor: default;
     margin: 0;
   }
@@ -82,23 +83,12 @@
     border-top: 0;
   }
 
-  .command-type-child {
-    .command-method {
-      &:before {
-        float: left;
-        content: "-";
-        margin-right: 2px;
-        padding-left: 5px;
-      }
-    }
-  }
-
-  .command-type-system.command-is-event,
-  .command-name-session {
-    > span > .command-wrapper {
-      .num-children {
-        display: none;
-      }
+  .command-type-child > span > div > div > .command-method {
+    &:before {
+      float: left;
+      content: "-";
+      margin-right: 2px;
+      padding-left: 5px;
     }
   }
 
@@ -527,18 +517,12 @@
     font-style: normal;
   }
 
-  .command-has-num-elements .num-elements,
-  .num-children,
-  .command-has-children.command-is-open
-    > span
-    > .command-wrapper
-    .num-children.has-children {
+  .command-has-num-elements .num-elements {
     display: none;
   }
 
   .command-has-num-elements.no-elements .num-elements,
-  .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-children .num-children.has-children {
+  .command-has-num-elements.multiple-elements .num-elements {
     display: inline;
   }
 
