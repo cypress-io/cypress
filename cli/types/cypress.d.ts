@@ -2835,7 +2835,7 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables multi-domain support in Cypress, including the origin command.
+     * Enables multi-domain support in Cypress, including the cy.origin command.
      * @default false
      */
     experimentalMultiDomain: boolean
