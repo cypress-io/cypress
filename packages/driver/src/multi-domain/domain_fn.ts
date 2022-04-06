@@ -1,7 +1,7 @@
 import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
-import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
+import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 
@@ -96,8 +96,8 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     window.__cySkipValidateConfig = skipConfigValidation || false
 
     // resync the config/env before running the origin:fn
-    syncConfigToCurrentDomain(config)
-    syncEnvToCurrentDomain(env)
+    syncConfigToCurrentOrigin(config)
+    syncEnvToCurrentOrigin(env)
 
     cy.state('onFail', (err) => {
       setRunnableStateToPassed()
