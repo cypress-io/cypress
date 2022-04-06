@@ -1,5 +1,5 @@
 <template>
-  <Tooltip :placement="placement">
+  <Tooltip>
     <slot />
     <template #popper>
       <slot name="popper" />
@@ -11,9 +11,9 @@
 import { Tooltip } from 'floating-vue'
 
 withDefaults(defineProps<{
-  placement?: string
+  color?: string
 }>(), {
-  placement: 'bottom',
+  color: 'dark',
 })
 
 </script>
@@ -30,4 +30,14 @@ withDefaults(defineProps<{
     @apply bg-gray-900 py-2 px-4;
   }
 }
+
+.v-popper__wrapper {
+  transform: scaleY(0);
+  @apply origin-top transition-transform;
+}
+
+.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
+  transform: scaleY(1);
+}
+
 </style>

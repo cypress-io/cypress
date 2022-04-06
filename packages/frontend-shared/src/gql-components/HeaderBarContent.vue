@@ -65,7 +65,9 @@
               <template
                 v-if="props.gql?.currentProject?.branch"
               >
-                <Tooltip>
+                <Tooltip
+                  placement="bottom"
+                >
                   <span
                     class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
                   >
