@@ -3,7 +3,7 @@ import $errUtils from '../../cypress/error_utils'
 import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
-import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
+import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../util/config'
 import { $Location } from '../../cypress/location'
 import { LogUtils } from '../../cypress/log'
 
@@ -141,8 +141,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
 
         const onSyncGlobals = ({ config, env }) => {
-          syncConfigToCurrentDomain(config)
-          syncEnvToCurrentDomain(env)
+          syncConfigToCurrentOrigin(config)
+          syncEnvToCurrentOrigin(env)
         }
 
         communicator.once('sync:globals', onSyncGlobals)
@@ -218,7 +218,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
-              const wrappedErr = $errUtils.errByPath('origin.run_domain_fn_errored', {
+              const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })
 

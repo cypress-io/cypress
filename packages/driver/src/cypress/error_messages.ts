@@ -1742,7 +1742,7 @@ export default {
     invalid_fn_argument: {
       message: `${cmd('origin')} requires the last argument to be a function. You passed: \`{{arg}}\``,
     },
-    run_domain_fn_errored: {
+    run_origin_fn_errored: {
       message: stripIndent`
       ${cmd('origin')} failed with the following error:
 
