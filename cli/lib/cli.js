@@ -285,7 +285,7 @@ const addCypressOpenCommand = (program) => {
 }
 
 const maybeAddInspectFlags = (program) => {
-  if (process.argv.includes('--dev')) {
+  if (process.argv.includes('--inspect') || process.argv.includes('--inspect-brk')) {
     return program
     .option('--inspect', 'Node option')
     .option('--inspect-brk', 'Node option')

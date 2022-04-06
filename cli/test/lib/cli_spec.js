@@ -21,8 +21,11 @@ const { expect } = require('chai')
 describe('cli', () => {
   require('mocha-banner').register()
 
+  const processArgv = process.argv
+
   beforeEach(() => {
     logger.reset()
+    process.argv = []
     sinon.stub(process, 'exit')
 
     os.platform.returns('darwin')
@@ -36,6 +39,10 @@ describe('cli', () => {
 
       return cli.init(cliArgs)
     }
+  })
+
+  afterEach(() => {
+    process.argv = processArgv
   })
 
   context('unknown option', () => {
@@ -520,6 +527,18 @@ describe('cli', () => {
       // sinon.stub(open, 'start').resolves()
       this.exec('open --port 7878 --global')
       expect(open.start).to.be.calledWith({ port: '7878', global: true })
+    })
+
+    it('calls open.start with inspect', () => {
+      process.argv = ['--inspect']
+      this.exec('open --port 7878 --inspect')
+      expect(open.start).to.be.calledWith({ inspect: true, port: '7878' })
+    })
+
+    it('calls open.start with inspect-brk', () => {
+      process.argv = ['--inspect-brk']
+      this.exec('open --port 7878 --inspect-brk')
+      expect(open.start).to.be.calledWith({ inspectBrk: true, port: '7878' })
     })
 
     it('calls open.start + catches errors', (done) => {
