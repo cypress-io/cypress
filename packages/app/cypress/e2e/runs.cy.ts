@@ -344,7 +344,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
-  context('Runs - Unauthorized Project Requested', () => {
+  context('Runs - Pending authorization to project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
