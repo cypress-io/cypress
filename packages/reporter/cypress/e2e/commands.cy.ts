@@ -419,10 +419,6 @@ describe('commands', () => {
       cy.get('.command-name-within')
       .find('.num-children')
       .should('not.exist')
-
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('not.have.class', 'command-expander-is-open')
     })
 
     it('displays with nested logs', () => {
