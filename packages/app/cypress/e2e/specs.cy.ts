@@ -1,4 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from '../../src/paths'
 import { getRunnerHref } from './support/get-runner-href'
 
@@ -812,6 +813,147 @@ describe('App: Index', () => {
 
           expect(spec).to.exist
         }, { path: getPathForPlatform('src/stories/Button.cy.jsx') })
+      })
+    })
+  })
+
+  describe('Spec Watcher', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('no-specs')
+      cy.openProject('no-specs')
+      cy.startAppServer('e2e')
+      cy.visitApp()
+
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('updates spec list when files are added to/removed from areas matching specPattern', () => {
+      cy.withCtx(async (ctx) => {
+        // Directory is added to root so it does not match specPattern
+        await ctx.actions.file.writeFileInProject('test-1.cy.js', 'it()')
+      })
+
+      // No Specs Found page renders, as the added dir does not match the specPattern
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        // Directory contents are moved into cypress/e2e dir
+        await ctx.actions.file.moveFileInProject('test-1.cy.js', 'cypress/e2e/test-1.cy.js')
+      })
+
+      // Specs list should now show, with the spec from the moved dir now matching the specPattern
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Writing more specs to directory
+        await ctx.actions.file.writeFileInProject('cypress/e2e/test-2.cy.js', 'it()')
+        await ctx.actions.file.writeFileInProject('cypress/e2e/test-3.cy.js', 'it()')
+      })
+
+      // Specs list should show all added specs
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-2.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-3.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Files are moved back to root, where they no will no longer match specPattern
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-1.cy.js', 'test-1.cy.js')
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-2.cy.js', 'test-2.cy.js')
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-3.cy.js', 'test-3.cy.js')
+      })
+
+      // No Specs Found page now renders, as all previously matching specs were moved
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('updates spec list when directories are added to/removed from areas matching specPattern', () => {
+      cy.withCtx(async (ctx) => {
+        // Directory is added to root so it does not match specPattern
+        await ctx.actions.file.writeFileInProject('testDir/test-1.cy.js', 'it()')
+      })
+
+      // No Specs Found page renders, as the added dir does not match the specPattern
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        // Directory contents are moved into cypress/e2e dir
+        await ctx.actions.file.moveFileInProject('testDir', 'cypress/e2e/testDir')
+      })
+
+      // Specs list should now show, with the spec from the moved dir now matching the specPattern
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Writing more specs to directory
+        await ctx.actions.file.writeFileInProject('cypress/e2e/testDir/test-2.cy.js', 'it()')
+        await ctx.actions.file.writeFileInProject('cypress/e2e/testDir/test-3.cy.js', 'it()')
+      })
+
+      // Specs list should show all added specs
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-2.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-3.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Directory is moved back to root, where it no will no longer match specPattern
+        await ctx.actions.file.moveFileInProject('cypress/e2e/testDir', 'testDir')
+      })
+
+      // No Specs Found page now renders, as all previously matching specs were moved
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('debounces spec updates if many additions occur', () => {
+      const specs = [...Array(20)].map((v, index) => {
+        return `test-${index}.cy.js`
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.actions.project, 'setSpecs')
+        for (const spec of o.specs) {
+          await ctx.actions.file.writeFileInProject(`cypress/e2e/${spec}`, 'it()')
+        }
+      }, { specs })
+
+      cy.contains('20 Matches')
+
+      cy.withRetryableCtx((ctx, o) => {
+        // setSpecs is debounced, the number of calls should be less than the number of files removed
+        // in such rapid succession.
+        expect((ctx.actions.project.setSpecs as SinonStub).callCount).to.be.lessThan(20)
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        (ctx.actions.project.setSpecs as SinonStub).resetHistory()
+        for (const spec of o.specs) {
+          await ctx.actions.file.removeFileInProject(`cypress/e2e/${spec}`)
+        }
+      }, { specs })
+
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withRetryableCtx((ctx) => {
+        // setSpecs is debounced, the number of calls should be less than the number of files removed
+        // in such rapid succession.
+        expect((ctx.actions.project.setSpecs as SinonStub).callCount).to.be.lessThan(20)
       })
     })
   })
