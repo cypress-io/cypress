@@ -394,7 +394,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       const onCrossOriginWindowLoad = ({ url }) => {
         options._log.set('message', '--page loaded--').snapshot().end()
 
-        //Updating the URL state, This is done to display the new url event when we return to the primary origin
+        // Updating the URL state, This is done to display the new url event when we return to the primary origin
         let urls = state('urls') || []
         let urlPosition = state('urlPosition')
 
