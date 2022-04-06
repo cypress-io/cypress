@@ -110,7 +110,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state: Cypress.State, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -127,7 +127,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -202,18 +202,18 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
+  const logGroupIds = state('logGroupIds') || []
 
-  if (logGroup) {
-    obj.group = logGroup
+  if (logGroupIds.length) {
+    obj.group = _.last(logGroupIds)
   }
 
   if (obj.groupEnd) {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    state('logGroupIds', _.slice(logGroupIds, 0, -1))
   }
 
   if (obj.groupStart) {
-    state('logGroup', (state('logGroup') || []).concat(obj.id))
+    state('logGroupIds', (logGroupIds).concat(obj.id))
   }
 
   return obj
@@ -221,7 +221,7 @@ const defaults = function (state, config, obj) {
 
 class Log {
   cy: any
-  state: any
+  state: Cypress.State
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any
@@ -373,6 +373,13 @@ class Log {
   }
 
   error (err) {
+    const logGroupIds = this.state('logGroupIds') || []
+
+    // current log was responsible to creating the current log group so end the current group
+    if (_.last(logGroupIds) === this.attributes.id) {
+      this.endGroup()
+    }
+
     this.set({
       ended: true,
       error: err,
@@ -399,6 +406,10 @@ class Log {
     })
 
     return this
+  }
+
+  endGroup () {
+    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
   }
 
   getError (err) {
