@@ -84,8 +84,8 @@ export const create = (Cypress, state) => ({
 
       state('whenStable', onSignal)
 
-      // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
-      if (command?.get('name') === 'switchToDomain' || false) {
+      // We only care to listen for anticipating cross origin request when the command we're waiting for is switchToDomain
+      if (commandIsSwitchToDomain) {
         state('whenAnticipatingCrossOriginResponse', onSignal)
       }
     })
