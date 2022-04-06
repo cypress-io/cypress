@@ -28,7 +28,7 @@
     "@packages/web-config": "0.0.0-development",
     "@popperjs/core": "2.9.2",
     "@reach/dialog": "0.10.5",
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.3.1",
     "cross-env": "6.0.3",
