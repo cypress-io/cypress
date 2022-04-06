@@ -34,24 +34,6 @@ describe('<ExternalLink />', () => {
     cy.get('@onClickSpy').should('have.been.calledOnce')
   })
 
-  it('opens external link on click and triggers onClick function', () => {
-    const urlStub = cy.stub()
-
-    cy.stubMutationResolver(ExternalLink_OpenExternalDocument, (defineResult, { url }) => {
-      urlStub(url)
-
-      return defineResult({
-        openExternal: true,
-      })
-    })
-
-    cy.contains('a', 'Click me!')
-    .click()
-
-    cy.wrap(urlStub).should('have.been.calledWith', 'https://on.cypress.io/ci')
-    cy.get('@onClickSpy').should('have.been.calledOnce')
-  })
-
   it('opens external link on enter', () => {
     const urlStub = cy.stub()
 
