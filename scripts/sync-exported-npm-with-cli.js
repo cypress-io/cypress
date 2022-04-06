@@ -65,7 +65,7 @@ packlist({ path: currentPackageDir })
     subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
   }
 
-  if (cliPackageConfig.files.includes(exportName)) {
+  if (!cliPackageConfig.files.includes(exportName)) {
     cliPackageConfig.files.push(exportName)
   }
 
