@@ -279,7 +279,11 @@ export default function (Commands, Cypress, cy) {
 
   function throwIfNoSessionSupport () {
     if (!Cypress.config('experimentalLoginFlows')) {
-      $errUtils.throwErrByPath('sessions.experimentNotEnabled')
+      $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
+        args: {
+          experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
+        },
+      })
     }
   }
 

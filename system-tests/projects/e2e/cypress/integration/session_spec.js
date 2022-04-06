@@ -764,7 +764,27 @@ describe('ignores setting insecure context data when on secure context', () => {
 describe('errors', () => {
   it('throws error when experimentalLoginFlows not enabled', { experimentalLoginFlows: false }, (done) => {
     cy.on('fail', ({ message }) => {
-      expect(message).contain('You must enable')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag')
+      done()
+    })
+
+    cy.session('sessions-not-enabled')
+  })
+
+  it('throws error when experimentalSessionSupport is enabled through test config', { experimentalLoginFlows: false, experimentalSessionSupport: true }, (done) => {
+    cy.on('fail', ({ message }) => {
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.5.0. Please see the migration guide for updating.')
+      done()
+    })
+
+    cy.session('sessions-not-enabled')
+  })
+
+  it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalLoginFlows: false }, (done) => {
+    Cypress.config('experimentalSessionSupport', true)
+
+    cy.on('fail', ({ message }) => {
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.5.0. Please see the migration guide for updating.')
       done()
     })
 
