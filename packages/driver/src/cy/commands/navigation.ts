@@ -52,7 +52,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
 
   const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginResponse')?.href
 
-  // Were we anticipating a cross domain page when we timed out?
+  // Were we anticipating a cross origin page when we timed out?
   if (anticipatedCrossOriginHref) {
     // We remain in an anticipating state until either a load even happens or a timeout.
     cy.isAnticipatingCrossOriginResponseFor(undefined)
@@ -63,14 +63,14 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     const currentCommand = cy.queue.state('current')
 
     if (currentCommand?.get('name') === 'origin') {
-      // If the current command is a switchDomain command, we should have gotten a request on the origin it expects.
+      // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
       originPolicies = [cy.state('latestActiveOriginPolicy')]
     } else if (Cypress.isMultiDomain && cy.queue.isOnLastCommand()) {
       // If this is multi-domain and the we're on the last command, we should have gotten a request on the origin of one of the parents.
       originPolicies = cy.state('parentOriginPolicies')
     }
 
-    $errUtils.throwErrByPath('navigation.switch_to_domain_load_timed_out', {
+    $errUtils.throwErrByPath('navigation.cross_origin_load_timed_out', {
       args: {
         configFile: Cypress.config('configFile'),
         ms,
@@ -391,10 +391,10 @@ const stabilityChanged = (Cypress, state, config, stable) => {
         resolve()
       }
 
-      const onCrossDomainWindowLoad = ({ url }) => {
+      const onCrossOriginWindowLoad = ({ url }) => {
         options._log.set('message', '--page loaded--').snapshot().end()
 
-        //Updating the URL state, This is done to display the new url event when we return to the primary domain
+        // Updating the URL state, This is done to display the new url event when we return to the primary origin
         let urls = state('urls') || []
         let urlPosition = state('urlPosition')
 
@@ -412,7 +412,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
         resolve()
       }
 
-      const onCrossDomainFailure = (err) => {
+      const onCrossOriginFailure = (err) => {
         options._log.set('message', '--page loaded--').snapshot().end()
         options._log.set('state', 'failed')
         options._log.set('error', err)
@@ -422,12 +422,12 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
       const onInternalWindowLoad = (details) => {
         switch (details.type) {
-          case 'same:domain':
+          case 'same:origin':
             return onWindowLoad(details.window)
-          case 'cross:domain':
-            return onCrossDomainWindowLoad(details)
-          case 'cross:domain:failure':
-            return onCrossDomainFailure(details.error)
+          case 'cross:origin':
+            return onCrossOriginWindowLoad(details)
+          case 'cross:origin:failure':
+            return onCrossOriginFailure(details.error)
           default:
             throw new Error(`Unexpected internal:window:load type: ${details?.type}`)
         }
@@ -1033,9 +1033,9 @@ export default (Commands, Cypress, cy, state, config) => {
           return cannotVisitDifferentOrigin(params)
         }
 
-        // in multi-domain, the window may not have been set yet if nothing has been loaded in the secondary domain,
-        // it's also possible for a new test to start and for a cross-domain failure to occur if the win is set but
-        // the AUT hasn't yet navigated to the secondary domain
+        // in multi-domain, the window may not have been set yet if nothing has been loaded in the secondary origin,
+        // it's also possible for a new test to start and for a cross-origin failure to occur if the win is set but
+        // the AUT hasn't yet navigated to the secondary origin
         if (win) {
           try {
             const current = $Location.create(win.location.href)
@@ -1058,7 +1058,7 @@ export default (Commands, Cypress, cy, state, config) => {
               })
             }
           } catch (e) {
-            // if this is a cross-domain error, skip it
+            // if this is a cross-origin error, skip it
             if (e.name !== 'SecurityError') {
               throw e
             }
@@ -1141,7 +1141,7 @@ export default (Commands, Cypress, cy, state, config) => {
             return cannotVisitDifferentOrigin(params)
           }
 
-          // tell our backend we're changing domains
+          // tell our backend we're changing origins
           // TODO: add in other things we want to preserve
           // state for like scrollTop
           let s: Record<string, any> = {

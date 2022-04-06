@@ -4,7 +4,7 @@
 /// <reference path="./cypress/log.d.ts" />
 
 interface InternalWindowLoadDetails {
-  type: 'same:domain' | 'cross:domain' | 'cross:domain:failure'
+  type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'
   error?: Error
   window?: AUTWindow
 }
@@ -22,7 +22,7 @@ declare namespace Cypress {
   }
 
   interface Backend {
-    (task: 'ready:for:domain', args: { originPolicy?: string , failed?: boolean}): boolean
+    (task: 'ready:for:origin', args: { originPolicy?: string , failed?: boolean}): boolean
     (task: 'cross:origin:finished', originPolicy: string): boolean
   }
 

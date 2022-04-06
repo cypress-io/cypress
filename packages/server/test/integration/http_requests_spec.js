@@ -3027,8 +3027,8 @@ describe('Routes', () => {
           'Content-Type': 'text/html',
         })
 
-        this.server._eventBus.on('cross:domain:delaying:html', () => {
-          this.server._eventBus.emit('ready:for:domain', { originPolicy: 'http://foobar.com' })
+        this.server._eventBus.on('cross:origin:delaying:html', () => {
+          this.server._eventBus.emit('ready:for:origin', { originPolicy: 'http://foobar.com' })
         })
 
         return this.rp({
