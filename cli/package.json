@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@cypress/request": "^2.88.10",
-    "@cypress/vue": "file:../npm/vue",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^14.14.31",
     "@types/sinonjs__fake-timers": "8.1.1",
@@ -103,12 +102,10 @@
     "lib",
     "index.js",
     "index.mjs",
-    "vue.js",
-    "vue.mjs",
-    "react/**",
-    "mount-utils/**",
     "types/**/*.d.ts",
-    "types/net-stubbing.ts"
+    "types/net-stubbing.ts",
+    "react",
+    "vue"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -123,12 +120,16 @@
       "require": "./index.js"
     },
     "./vue": {
-      "import": "./vue.mjs",
-      "require": "./vue.js"
+      "import": "./vue/dist/cypress-vue.esm-bundler.js",
+      "require": "./vue/dist/cypress-vue.cjs.js"
     },
     "./package.json": {
       "import": "./package.json",
       "require": "./package.json"
+    },
+    "./react": {
+      "import": "./react/dist/cypress-react.esm-bundler.js",
+      "require": "./react/dist/cypress-react.cjs.js"
     }
   }
 }
