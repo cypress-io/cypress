@@ -33,25 +33,25 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     cy.isAnticipatingCrossOriginResponseFor(request)
     const location = $Location.create(request.href)
 
-    // If this event has occurred while a switchToDomain command is running with
-    // the same origin policy, do not set the time out and allow switchToDomain
+    // If this event has occurred while a cy.origin command is running with
+    // the same origin policy, do not set the time out and allow cy.origin
     // to handle the ready for domain event
     if (cy.state('currentActiveOriginPolicy') === location.originPolicy) {
       return
     }
 
-    // If we haven't seen a switchToDomain and cleared the timeout within 300ms,
+    // If we haven't seen a cy.origin and cleared the timeout within 300ms,
     // go ahead and inform the server 'ready:for:domain' failed and to release the
     // response. This typically happens during a redirect where the user does
-    // not have a switchToDomain for the intermediary origin.
+    // not have a cy.origin for the intermediary origin.
     timeoutId = setTimeout(() => {
       Cypress.backend('ready:for:domain', { failed: true })
     }, 300)
   })
 
   Commands.addAll({
-    switchToDomain<T> (originOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
-      // store the invocation stack in the case that `switchToDomain` errors
+    origin<T> (originOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
+      // store the invocation stack in the case that `cy.origin` errors
       communicator.userInvocationStack = state('current').get('userInvocationStack')
 
       clearTimeout(timeoutId)
@@ -60,7 +60,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       cy.clearTimeout()
 
       if (!config('experimentalMultiDomain')) {
-        $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
+        $errUtils.throwErrByPath('origin.experiment_not_enabled')
       }
 
       let options
@@ -77,7 +77,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const log = Cypress.log({
-        name: 'switchToDomain',
+        name: 'origin',
         type: 'parent',
         message: originOrDomain,
         end: true,
@@ -104,9 +104,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       const originPolicy = location.originPolicy
 
-      // This is intentionally not reset after leaving the switchToDomain command.
+      // This is intentionally not reset after leaving the cy.origin command.
       cy.state('latestActiveOriginPolicy', originPolicy)
-      // This is set while IN the switchToDomain command.
+      // This is set while IN the cy.origin command.
       cy.state('currentActiveOriginPolicy', originPolicy)
 
       return new Bluebird((resolve, reject, onCancel) => {
@@ -156,11 +156,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           if (err) {
             if (err?.name === 'ReferenceError') {
-              const wrappedErr = $errUtils.errByPath('switchToDomain.ran_domain_fn_reference_error', {
+              const wrappedErr = $errUtils.errByPath('origin.ran_domain_fn_reference_error', {
                 error: err.message,
               })
 
               wrappedErr.name = err.name
+              wrappedErr.stack = err.stack
 
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}
@@ -220,7 +221,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   runnable: serializeRunnable(Cypress.state('runnable')),
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: Cypress.state('hookId'),
-                  switchToDomainBaseUrl: location.origin,
+                  originCommandBaseUrl: location.origin,
                   parentOriginPolicies: [cy.getRemoteLocation('originPolicy')],
                   isStable: Cypress.state('isStable'),
                   autOrigin: Cypress.state('autOrigin'),
@@ -230,11 +231,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
-              const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
+              const wrappedErr = $errUtils.errByPath('origin.run_domain_fn_errored', {
                 error: err.message,
               })
 
               wrappedErr.name = err.name
+              wrappedErr.stack = err.stack
 
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}

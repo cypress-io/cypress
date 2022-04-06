@@ -6,37 +6,37 @@ context('multi-domain misc', { experimentalSessionSupport: true }, () => {
   })
 
   it('.end()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').end().should('be.null')
     })
   })
 
   it('.exec()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
     })
   })
 
   it('.focused()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
     })
   })
 
   it('.wrap()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap({ foo: 'bar' }).should('deep.equal', { foo: 'bar' })
     })
   })
 
   it('.debug()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').debug().should('have.id', 'button')
     })
   })
 
   it('.pause()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
         cy.once('paused', () => {
           Cypress.emit('resume:all')
@@ -53,7 +53,7 @@ context('multi-domain misc', { experimentalSessionSupport: true }, () => {
   })
 
   it('.task()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.task('return:arg', 'works').should('eq', 'works')
     })
   })
@@ -70,7 +70,7 @@ it('verifies number of cy commands', () => {
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
     'focused', 'get', 'contains', 'root', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
-    'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'switchToDomain',
+    'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
   ]
   const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
   const removedCommands = Cypress._.difference(expectedCommands, actualCommands)

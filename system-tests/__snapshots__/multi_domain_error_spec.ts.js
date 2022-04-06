@@ -1,4 +1,4 @@
-exports['e2e multi domain errors / captures the stack trace correctly for multi-domain errors to point users to their "switchToDomain" callback'] = `
+exports['e2e multi domain errors / captures the stack trace correctly for multi-domain errors to point users to their "cy.origin" callback'] = `
 
 ====================================================================================================
 

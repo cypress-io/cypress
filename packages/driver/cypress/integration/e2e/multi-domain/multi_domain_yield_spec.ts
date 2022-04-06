@@ -16,7 +16,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields a value', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -24,7 +24,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields the cy value even if a return is present', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -41,12 +41,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 5)
       expect(logs[4].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` failed because you are mixing up async and sync code.')
+      expect(err.message).to.include('`cy.origin()` failed because you are mixing up async and sync code.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -56,13 +56,13 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields synchronously', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       return 'From a secondary domain'
     }).should('equal', 'From a secondary domain')
   })
 
   it('yields asynchronously', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       return new Promise((resolve: (val: string) => any, reject) => {
         setTimeout(() => {
           resolve('From a secondary domain')
@@ -72,7 +72,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('succeeds if subject cannot be serialized and is not accessed synchronously', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       return {
         symbol: Symbol(''),
       }
@@ -85,12 +85,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 7)
       expect(logs[6].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.origin()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       return {
         symbol: Symbol(''),
       }
@@ -101,7 +101,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('succeeds if subject cannot be serialized and is not accessed', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {
@@ -114,12 +114,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.origin()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then((subject) => subject.text())
@@ -130,12 +130,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.origin()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap({
         key: () => {
           return 'whoops'
@@ -150,12 +150,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.origin()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap({
         key: Symbol('whoops'),
       })
@@ -167,12 +167,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to functions not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.origin()` could not serialize the subject due to functions not being supported by the structured clone algorithm.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap(() => {
         return 'text'
       })
@@ -187,12 +187,12 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to symbols not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.origin()` could not serialize the subject due to symbols not being supported by the structured clone algorithm.')
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap(Symbol('symbol'))
     })
     .should('equal', 'symbol')
@@ -206,13 +206,13 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
       if (!isChromium) {
         assertLogLength(logs, 8)
         expect(logs[7].get('error')).to.eq(err)
-        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
+        expect(err.message).to.include('`cy.origin()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
       }
 
       done()
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap({
         key: new Error('Boom goes the dynamite'),
       })
@@ -224,7 +224,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   })
 
   it('yields an object containing valid types', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wrap({
         array: [
           1,

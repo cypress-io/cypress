@@ -6,19 +6,19 @@ context('multi-domain window', { experimentalSessionSupport: true }, () => {
   })
 
   it('.window()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.window().should('have.property', 'top')
     })
   })
 
   it('.document()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.document().should('have.property', 'charset').and('eq', 'UTF-8')
     })
   })
 
   it('.title()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.title().should('include', 'DOM Fixture')
     })
   })

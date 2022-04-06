@@ -12,7 +12,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-    cy.switchToDomain('http://foobar.com:3500', { args: expectedViewport }, (expectedViewport) => {
+    cy.origin('http://foobar.com:3500', { args: expectedViewport }, (expectedViewport) => {
       const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
 
       expect(secondaryViewport).to.deep.equal(expectedViewport)
@@ -26,14 +26,14 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('runs commands in secondary domain', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
         .should('equal', 'From a secondary domain')
       })
 
-      cy.log('after switchToDomain')
+      cy.log('after cy.origin')
     })
 
     it('passes runnable state to the secondary domain', () => {
@@ -72,7 +72,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
         ctx: {},
       }
 
-      cy.switchToDomain('http://foobar.com:3500', { args: expectedRunnable }, (expectedRunnable) => {
+      cy.origin('http://foobar.com:3500', { args: expectedRunnable }, (expectedRunnable) => {
         const actualRunnable = cy.state('runnable')
 
         expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
@@ -91,18 +91,18 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('handles querying nested elements', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy
         .get('form button')
         .invoke('text')
         .should('equal', 'Submit')
       })
 
-      cy.log('after switchToDomain')
+      cy.log('after cy.origin')
     })
 
     it('sets up window.Cypress in secondary domain', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="cypress-check"]')
         .invoke('text')
@@ -112,39 +112,39 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
     describe('data argument', () => {
       it('passes object to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { foo: 'foo', bar: 'bar' } }, ({ foo, bar }) => {
+        cy.origin('http://foobar.com:3500', { args: { foo: 'foo', bar: 'bar' } }, ({ foo, bar }) => {
           expect(foo).to.equal('foo')
           expect(bar).to.equal('bar')
         })
       })
 
       it('passes array to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: ['foo', 'bar'] }, ([foo, bar]) => {
+        cy.origin('http://foobar.com:3500', { args: ['foo', 'bar'] }, ([foo, bar]) => {
           expect(foo).to.equal('foo')
           expect(bar).to.equal('bar')
         })
       })
 
       it('passes string to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: 'foo' }, (foo) => {
+        cy.origin('http://foobar.com:3500', { args: 'foo' }, (foo) => {
           expect(foo).to.equal('foo')
         })
       })
 
       it('passes number to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: 1 }, (num) => {
+        cy.origin('http://foobar.com:3500', { args: 1 }, (num) => {
           expect(num).to.equal(1)
         })
       })
 
       it('passes boolean to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: true }, (bool) => {
+        cy.origin('http://foobar.com:3500', { args: true }, (bool) => {
           expect(bool).to.be.true
         })
       })
 
       it('passes mixed types to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { foo: 'foo', num: 1, bool: true } }, ({ foo, num, bool }) => {
+        cy.origin('http://foobar.com:3500', { args: { foo: 'foo', num: 1, bool: true } }, ({ foo, num, bool }) => {
           expect(foo).to.equal('foo')
           expect(num).to.equal(1)
           expect(bool).to.be.true
@@ -157,7 +157,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       it('propagates secondary domain errors to the primary that occur within the test', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('variable is not defined')
-          expect(err.message).to.include(`Variables must either be defined within the \`cy.switchToDomain()\` command or passed in using the args option.`)
+          expect(err.message).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
           //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -166,7 +166,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
         const variable = 'string'
 
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           cy.log(variable)
         })
       })
@@ -177,7 +177,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           done()
         })
 
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           throw 'oops'
         })
       })
@@ -189,7 +189,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
             resolve(undefined)
           })
 
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
             throw 'oops'
           })
         })
@@ -206,7 +206,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           done()
         })
 
-        cy.switchToDomain('http://foobar.com:3500', { args: timeout }, (timeout) => {
+        cy.origin('http://foobar.com:3500', { args: timeout }, (timeout) => {
           cy.get('#doesnt-exist', {
             timeout,
           })
@@ -222,7 +222,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
           done()
         })
 
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           cy.get('#doesnt-exist')
         })
       })
@@ -238,7 +238,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
         const variable = () => {}
 
-        cy.switchToDomain('http://idp.com:3500', { args: variable }, (variable) => {
+        cy.origin('http://idp.com:3500', { args: variable }, (variable) => {
           variable()
         })
       })

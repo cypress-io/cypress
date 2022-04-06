@@ -999,10 +999,10 @@ export default {
 
         A cross origin request for \`${crossOriginUrl.href}\` was detected.
 
-        A command that triggers cross origin navigation must be immediately followed by a ${cmd('switchToDomain')} command:
+        A command that triggers cross origin navigation must be immediately followed by a ${cmd('origin')} command:
 
         \`\`\`
-        cy.switchToDomain('${crossOriginUrl.originPolicy}', () => {
+        cy.origin('${crossOriginUrl.originPolicy}', () => {
           <commands targeting ${crossOriginUrl.origin} go here>
         })
         \`\`\`
@@ -1715,20 +1715,20 @@ export default {
     },
   },
 
-  switchToDomain: {
-    docsUrl: 'https://on.cypress.io/switchToDomain',
+  origin: {
+    docsUrl: 'https://on.cypress.io/origin',
     experiment_not_enabled: {
-      message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
+      message: `${cmd('origin')} requires enabling the experimentalMultiDomain flag`,
     },
     invalid_origin_argument: {
-      message: `${cmd('switchToDomain')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
+      message: `${cmd('origin')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
     },
     invalid_options_argument: {
-      message: `${cmd('switchToDomain')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
+      message: `${cmd('origin')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
     },
     extraneous_options_argument ({ extraneousKeys, validOptionKeys }) {
       return stripIndent`\
-        ${cmd('switchToDomain')} detected extraneous keys in your options configuration.
+        ${cmd('origin')} detected extraneous keys in your options configuration.
 
         The extraneous keys detected were:
 
@@ -1740,7 +1740,7 @@ export default {
       `
     },
     invalid_fn_argument: {
-      message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
+      message: `${cmd('origin')} requires the last argument to be a function. You passed: \`{{arg}}\``,
     },
     run_domain_fn_errored: {
       message: stripIndent`
@@ -1752,11 +1752,11 @@ export default {
       message: stripIndent`
         {{error}}
 
-        Variables must either be defined within the ${cmd('switchToDomain')} command or passed in using the args option.`,
+        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
-        ${cmd('switchToDomain')} failed because you are mixing up async and sync code.
+        ${cmd('origin')} failed because you are mixing up async and sync code.
 
         In your callback function you invoked one or more cy commands but then returned a synchronous value.
 
@@ -1768,49 +1768,49 @@ export default {
     },
     failed_to_serialize_object: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
+      ${cmd('origin')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
 
       To properly serialize this subject, remove or serialize any unsupported properties.`,
     },
     failed_to_serialize_function: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the subject due to functions not being supported by the structured clone algorithm.`,
+      ${cmd('origin')} could not serialize the subject due to functions not being supported by the structured clone algorithm.`,
     },
     failed_to_serialize_symbol: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
+      ${cmd('origin')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
     },
     failed_to_serialize_or_map_thrown_value: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
+      ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
     unsupported: {
       route: {
-        message: `${cmd('route')} has been deprecated and use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        message: `${cmd('route')} has been deprecated and use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
       server: {
-        message: `${cmd('server')} has been deprecated and use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        message: `${cmd('server')} has been deprecated and use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
       Server: {
-        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
       Cookies_preserveOnce: {
-        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('switchToDomain')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
+        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/session',
       },
-      switchToDomain: {
-        message: `${cmd('switchToDomain')} use is not currently supported in the ${cmd('switchToDomain')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
+      origin: {
+        message: `${cmd('origin')} use is not currently supported in the ${cmd('origin')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20718',
       },
       intercept: {
-        message: `${cmd('intercept')} use is not supported in the ${cmd('switchToDomain')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
+        message: `${cmd('intercept')} use is not supported in the ${cmd('origin')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20720',
       },
       session: {
-        message: `${cmd('session')} use is not supported in the ${cmd('switchToDomain')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
+        message: `${cmd('session')} use is not supported in the ${cmd('origin')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
     },
@@ -2089,7 +2089,7 @@ export default {
 
             > {{differences}}
 
-          You may only ${cmd('visit')} same-origin URLs within ${args.isMultiDomain ? cmd('switchToDomain') : 'a single test'}.
+          You may only ${cmd('visit')} same-origin URLs within ${args.isMultiDomain ? cmd('origin') : 'a single test'}.
 
           The previous URL you visited was:
 
