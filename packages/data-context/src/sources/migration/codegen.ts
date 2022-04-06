@@ -2,8 +2,10 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
-import prettier from 'prettier'
 import type { TestingType } from '@packages/types'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
+
 import { formatMigrationFile } from './format'
 import { substitute } from './autoRename'
 import { supportFileRegexps } from './regexps'
@@ -445,10 +447,8 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
 }
 
 export function formatConfig (config: string) {
-  return prettier.format(config, {
-    semi: false,
-    singleQuote: true,
-    endOfLine: 'lf',
-    parser: 'babel',
-  })
+  const ast = parse(config)
+  const output = generate(ast)
+
+  return output.code
 }
