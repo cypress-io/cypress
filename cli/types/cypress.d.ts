@@ -2992,7 +2992,7 @@ declare namespace Cypress {
   } | {
     bundler: 'vite'
     framework: 'react'
-    viteConfig?: Omit<PickConfigOpt<'viteConfig'>, 'base' | 'root'>
+    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
   }
 
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
