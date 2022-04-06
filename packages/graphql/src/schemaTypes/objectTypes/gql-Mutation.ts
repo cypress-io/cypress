@@ -585,11 +585,7 @@ export const mutation = mutationType({
         projectId: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
-        } catch {
-          // ignore error as not useful for end user to see
-        }
+        await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
 
         // Wait for the project config to be reloaded
         await ctx.lifecycleManager.refreshLifecycle()
