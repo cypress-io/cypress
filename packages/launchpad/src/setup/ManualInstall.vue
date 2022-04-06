@@ -29,13 +29,13 @@
           >
             {{ dep.package }}
           </ExternalLink>
-          <span class="rounded-md border border-gray-400 ml-6px">
+          <span class="border rounded-md font-semibold border-gray-100 text-xs ml-6px text-gray-700">
             <span class="p-4px">{{ dep.minVersion }}</span>
             <span
               v-if="!dep.satisfied && dep.detectedVersion"
-              class="border-l border-gray-400 bg-gray-100 text-gray-600"
+              class="border-l font-medium bg-gray-50 border-gray-100 px-4px text-gray-600"
             >
-              Detected {{ dep.detectedVersion }}
+              detected {{ dep.detectedVersion }}
             </span>
           </span>
         </span>
