@@ -14,7 +14,7 @@
       <ChooseExternalEditor
         v-if="props.gql.localSettings"
         :gql="props.gql"
-        @chose-editor="val => preferredEditor = val"
+        @chose-editor="val => preferredEditor = val ?? ''"
       />
       <div
         v-else
