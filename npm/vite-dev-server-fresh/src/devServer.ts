@@ -3,7 +3,7 @@ import getPort from 'get-port'
 import { createServer as viteCreateServer } from 'vite'
 import { createViteDevServerConfig } from './resolveConfig'
 
-const debug = debugFn('cypress:vite-dev-server:index')
+const debug = debugFn('cypress:vite-dev-server:devServer')
 
 const ALL_FRAMEWORKS = ['react', 'vue'] as const
 
