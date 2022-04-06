@@ -150,7 +150,7 @@ export class RemoteStates {
 
       const existingOrigin = this.remoteStates.get(originPolicy)
 
-      // since this is just the switchToDomain starting, we don't want to override
+      // since this is just the cy.origin starting, we don't want to override
       // the existing origin if it already exists
       if (!existingOrigin) {
         this.set(originPolicy, { isMultiDomain: true })

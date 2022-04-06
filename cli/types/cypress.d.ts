@@ -1900,27 +1900,27 @@ declare namespace Cypress {
 
     /**
      * Enables running Cypress commands in a secondary domain
-     * @see https://on.cypress.io/switchToDomain
+     * @see https://on.cypress.io/origin
      * @example
-     *    cy.switchToDomain('example.com', () => {
+     *    cy.origin('example.com', () => {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    switchToDomain(originOrDomain: string, fn: () => void): Chainable
+    origin(originOrDomain: string, fn: () => void): Chainable
 
-    // TODO: when we find other options to put into the 'data' argument of switchToDomain, we may want to overload this type with
-    // a 'data' paramater that contains all data options, including args, and one that contains all data options, excluding args.
+    // TODO: when we find other options to put into the 'data' argument of cy.origin, we may want to overload this type with
+    // a 'data' parameter that contains all data options, including args, and one that contains all data options, excluding args.
     // This will provide better typings support for whatever args is set to as opposed to an optional undefined
     /**
      * Enables running Cypress commands in a secondary domain
-     * @see https://on.cypress.io/switchToDomain
+     * @see https://on.cypress.io/origin
      * @example
-     *    cy.switchToDomain('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
+     *    cy.origin('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
      *      expect(key).to.equal('value')
      *      expect(foo).to.equal('foo')
      *    })
      */
-    switchToDomain<T>(originOrDomain: string, options: {
+    origin<T>(originOrDomain: string, options: {
       args: T
     }, fn: (args: T) => void): Chainable
 
@@ -2835,7 +2835,7 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables multi-domain support in Cypress, including the switchToDomain command.
+     * Enables multi-domain support in Cypress, including the cy.origin command.
      * @default false
      */
     experimentalMultiDomain: boolean
@@ -5764,6 +5764,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
+    /** additional information to include in the log */
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean

@@ -7,7 +7,7 @@ describe('multi-domain - rerun', { }, () => {
 
   it('successfully reruns tests', () => {
     // @ts-ignore
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {

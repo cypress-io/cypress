@@ -62,7 +62,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
 
     const currentCommand = cy.queue.state('current')
 
-    if (currentCommand?.get('name') === 'switchToDomain') {
+    if (currentCommand?.get('name') === 'origin') {
       // If the current command is a switchDomain command, we should have gotten a request on the origin it expects.
       originPolicies = [cy.state('latestActiveOriginPolicy')]
     } else if (Cypress.isMultiDomain && cy.queue.isOnLastCommand()) {
@@ -870,7 +870,7 @@ export default (Commands, Cypress, cy, state, config) => {
       url = $Location.normalize(url)
 
       if (Cypress.isMultiDomain) {
-        url = $Location.qualifyWithBaseUrl(Cypress.state('switchToDomainBaseUrl'), url)
+        url = $Location.qualifyWithBaseUrl(Cypress.state('originCommandBaseUrl'), url)
       } else {
         const baseUrl = config('baseUrl')
 

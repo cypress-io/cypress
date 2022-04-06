@@ -145,11 +145,11 @@ export default (Commands, Cypress, cy, state, config) => {
       options.url = $Location.normalize(options.url)
 
       // If passed a relative url, determine the fully qualified URL to use.
-      // In the multi-origin version of the driver, we use switchToDomainBaseUrl,
+      // In the multi-origin version of the driver, we use originCommandBaseUrl,
       // which is set to the origin that is associated with it.
-      // In the primary driver (where switchToDomainBaseUrl is undefined), we
+      // In the primary driver (where originCommandBaseUrl is undefined), we
       // use the baseUrl or remote origin.
-      const originOrBase = Cypress.state('switchToDomainBaseUrl') || config('baseUrl') || cy.getRemoteLocation('origin')
+      const originOrBase = Cypress.state('originCommandBaseUrl') || config('baseUrl') || cy.getRemoteLocation('origin')
 
       if (originOrBase) {
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)

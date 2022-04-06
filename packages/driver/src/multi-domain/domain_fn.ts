@@ -60,7 +60,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     const stateUpdates = {
       ...state,
-      redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
+      redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each cy.origin command.
     }
 
     // Setup the runnable
@@ -118,7 +118,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {
-        $errUtils.throwErrByPath('switchToDomain.callback_mixes_sync_and_async', {
+        $errUtils.throwErrByPath('origin.callback_mixes_sync_and_async', {
           args: { value: $utils.stringify(value) },
         })
       } else {

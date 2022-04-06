@@ -8,7 +8,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
     cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.on('window:before:load', (win: {testSecondaryWindowBeforeLoad: boolean}) => {
         win.testSecondaryWindowBeforeLoad = true
       })
@@ -34,7 +34,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('form:submitted', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const afterFormSubmitted = new Promise<void>((resolve) => {
           Cypress.once('form:submitted', (e) => {
             const $form = cy.$$('form')
@@ -50,7 +50,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:before:unload', () => {
-      cy.switchToDomain('http://www.foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowBeforeUnload = new Promise<void>((resolve) => {
           Cypress.once('window:before:unload', () => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -65,7 +65,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:unload', () => {
-      cy.switchToDomain('http://www.foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowUnload = new Promise<void>((resolve) => {
           Cypress.once('window:unload', () => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -80,7 +80,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:alert', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const afterWindowAlert = new Promise<void>((resolve) => {
           Cypress.once('window:alert', (text) => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -95,7 +95,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:confirm', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const afterWindowConfirm = new Promise<void>((resolve) => {
           Cypress.once('window:confirm', (text) => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -110,7 +110,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:confirmed - true when no window:confirm listeners return false', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const afterWindowConfirmed = new Promise<void>((resolve) => {
           Cypress.once('window:confirmed', (text, returnedFalse) => {
             expect(location.host).to.equal('foobar.com:3500')
@@ -130,7 +130,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:confirmed - false when any window:confirm listeners return false', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const afterWindowConfirmed = new Promise<void>((resolve) => {
           Cypress.once('window:confirmed', (text, returnedFalse) => {
             expect(location.host).to.equal('foobar.com:3500')
