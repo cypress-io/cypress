@@ -2830,7 +2830,7 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables multi-domain support in Cypress, including the switchToDomain command.
+     * Enables cross-origin login support in Cypress, including the `cy.origin` and `cy.session` commands.
      * @default false
      */
     experimentalLoginFlows: boolean

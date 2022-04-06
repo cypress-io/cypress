@@ -256,7 +256,7 @@
         "experimentalLoginFlows": {
           "type": "boolean",
           "default": false,
-          "description": "Enables multi-domain support in Cypress, including the switchToDomain command."
+          "description": "Enables cross-origin login support in Cypress, including the `cy.origin` and `cy.session` commands."
         },
         "experimentalSourceRewriting": {
           "type": "boolean",
