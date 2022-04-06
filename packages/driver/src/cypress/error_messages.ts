@@ -1748,7 +1748,7 @@ export default {
 
       This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
-    ran_domain_fn_reference_error: {
+    ran_origin_fn_reference_error: {
       message: stripIndent`
         {{error}}
 

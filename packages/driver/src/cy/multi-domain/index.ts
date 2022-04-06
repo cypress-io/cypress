@@ -156,7 +156,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           if (err) {
             if (err?.name === 'ReferenceError') {
-              const wrappedErr = $errUtils.errByPath('origin.ran_domain_fn_reference_error', {
+              const wrappedErr = $errUtils.errByPath('origin.ran_origin_fn_reference_error', {
                 error: err.message,
               })
 
