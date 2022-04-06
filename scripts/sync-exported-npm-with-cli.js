@@ -10,26 +10,33 @@ const path = require('path')
 const packlist = require('npm-packlist')
 const fs = require('fs')
 
-// 1. Get the full path to the cli where Cypress's package.json is defined
-const cliPath = path.join(__dirname, '..', 'cli')
-const cliPackageConfig = require(path.join(cliPath, 'package.json'))
+shell.set('-v') // verbose
+shell.set('-e') // any error is fatal
 
 // 2. This script will be run in a postbuild task for each npm package
 // that will be re-exported by Cypress
 const currentPackageDir = process.cwd()
-const currentPackageConfig = require(path.join(process.cwd(), 'package.json'))
 
-// Typically, these packages are independently published as @cypress/package-name
-// e.g. @cypress/vue => import whatever from 'cypress/vue'
-// The files will wind up at cypress/cli/vue/*
-const exportName = currentPackageConfig.name.replace('@cypress/', '')
-const outDir = path.join(cliPath, exportName)
-
-// 3. We'll run npm's own "packlist" to make sure we don't miss any files
-// that are defined as exported in the package.json['files'] key
+// 1. We'll run npm's own "packlist" against the npm package to be published (@cypress/react, etc)
+// to make sure we don't miss any files when we copy them over to the CLI package
+// The files that will be returned here are the ones from @cypress/react's package.json['files'] key.
 packlist({ path: currentPackageDir })
 .then((files) => {
-  files.forEach(async (f) => {
+  // 2. Move all of the files that would be published under @cypress/react
+  // to be copied under cli/react (drop the @cypress namespace)
+  const cliPath = path.join(__dirname, '..', 'cli')
+
+  // Typically, these packages are independently published as @cypress/package-name
+  // e.g. @cypress/vue => import whatever from 'cypress/vue'
+  // The files will wind up at cypress/cli/vue/*
+  const currentPackageConfig = require(path.join(process.cwd(), 'package.json'))
+  const exportName = currentPackageConfig.name.replace('@cypress/', '')
+  const outDir = path.join(cliPath, exportName)
+
+  // 3. For each file, mkdir if not exists, and then copy the dist'd assets over
+  // Shell is synchronous by default, but we don't actually need to await for the results
+  // to write to the `cliPackageConfig` at the end
+  files.forEach((f) => {
     // mkdir if not exists
     const { dir } = path.parse(f)
 
@@ -37,28 +44,35 @@ packlist({ path: currentPackageDir })
       shell.mkdir('-p', path.join(outDir, dir))
     }
 
-    await shell.cp(path.join(currentPackageDir, f), path.join(outDir, f))
+    shell.cp(path.join(currentPackageDir, f), path.join(outDir, f))
   })
 
-  // After everything is copied, let's update the Cypress cli package.json['exports'] option
-  // Now, we'll construct the exports map, using the module and main exports.
-  const isModule = cliPackageConfig.type === 'module'
+  // After everything is copied, let's update the Cypress cli package.json['exports'] map.
+  const isModule = currentPackageConfig.type === 'module'
+
+  const cliPackageConfig = require(path.join(cliPath, 'package.json'))
+
   const subPackageExports = cliPackageConfig.exports[`./${exportName}`] = {}
   const esmEntry = isModule ? currentPackageConfig.main : currentPackageConfig.module
 
   if (esmEntry) {
+    // ./react/dist/cypress-react-esm.js, etc
     subPackageExports.import = `./${exportName}/${esmEntry}`
   }
 
   if (!isModule) {
+    // ./react/dist/cypress-react-cjs.js, etc
     subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
   }
 
-  if (cliPackageConfig.files.indexOf(exportName) === -1) {
+  if (cliPackageConfig.files.includes(exportName)) {
     cliPackageConfig.files.push(exportName)
   }
 
-  const output = JSON.stringify(cliPackageConfig, null, 2)
+  const output = `${JSON.stringify(cliPackageConfig, null, 2) }\n`
+
+  // eslint-disable-next-line no-console
+  console.log('Writing to CLI package.json for', exportName)
 
   fs.writeFileSync(path.join(cliPath, 'package.json'), output, 'utf-8')
 })

@@ -954,6 +954,9 @@ commands:
       - run:
           command: ls -la types
           working_directory: cli/build
+      - run:
+          command: ls -la vue mount-utils react
+          working_directory: cli/build
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]

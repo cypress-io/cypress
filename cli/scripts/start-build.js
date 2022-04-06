@@ -22,6 +22,22 @@ includeTypes.forEach((folder) => {
   shell.cp('-R', source, 'build/types')
 })
 
+// TODO: Add a typescript or rollup build step
+// The only reason start-build.js exists
+// is because the cli package does not have an actual
+// build process to compile index.js and lib
 shell.exec('babel lib -d build/lib')
 shell.exec('babel index.js -o build/index.js')
 shell.cp('index.mjs', 'build/index.mjs')
+
+// For each npm package that is re-published via cypress/*
+// make sure that it is also copied into the build directory
+const npmModulesToCopy = [
+  'mount-utils',
+  'react',
+  'vue',
+]
+
+npmModulesToCopy.forEach((folder) => {
+  shell.cp('-R', folder, `build/${folder}`)
+})
