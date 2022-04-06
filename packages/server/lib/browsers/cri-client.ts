@@ -166,13 +166,6 @@ export const create = async (target: string, onAsynchronousError: Function, host
       port,
       target,
       local: true,
-      // Minor optimization. chrome-remote-interface creates a DSL based on
-      // this so you can call methods instead of using the event emitter
-      // (e.g. cri.Network.enable() instead of cri.send('Network.enable'))
-      // We only use the event emitter, so if we pass in an empty protcol,
-      // it will keep c-r-i from looping through it and needlessly creating
-      // the DSL
-      protocol: { domains: [] },
     })
 
     connected = true
