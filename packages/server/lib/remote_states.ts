@@ -87,7 +87,7 @@ export class RemoteStates {
     return this.get(this.originStack[this.originStack.length - 1]) as Cypress.RemoteState
   }
 
-  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {}, isMultiDomain?: boolean } = {}): Cypress.RemoteState {
+  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {}, isCrossOrigin?: boolean } = {}): Cypress.RemoteState {
     let state
 
     if (_.isString(urlOrState)) {
@@ -119,7 +119,7 @@ export class RemoteStates {
 
     const remoteOriginPolicy = cors.getOriginPolicy(state.origin)
 
-    if (options.isMultiDomain) {
+    if (options.isCrossOrigin) {
       this.remoteStates.set(remoteOriginPolicy, state)
     } else {
       // convert map to array
@@ -153,7 +153,7 @@ export class RemoteStates {
       // since this is just the cy.origin starting, we don't want to override
       // the existing origin if it already exists
       if (!existingOrigin) {
-        this.set(originPolicy, { isMultiDomain: true })
+        this.set(originPolicy, { isCrossOrigin: true })
       }
 
       this.addOrigin(originPolicy)

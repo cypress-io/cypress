@@ -62,7 +62,7 @@ describe('http/request-middleware', () => {
 
     it('sets wantsInjection to full when a request is buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isMultiDomain: false } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: false } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -80,9 +80,9 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('sets wantsInjection to fullMultiDomain when a multi-domain request is buffered', async () => {
+    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isMultiDomain: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -96,13 +96,13 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
       .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
       })
     })
 
     it('wantsInjection is not set when the request is not buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isMultiDomain: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
 
       buffers.set(buffer)
 

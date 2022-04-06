@@ -65,8 +65,8 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     if (currentCommand?.get('name') === 'origin') {
       // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
       originPolicies = [cy.state('latestActiveOriginPolicy')]
-    } else if (Cypress.isMultiDomain && cy.queue.isOnLastCommand()) {
-      // If this is multi-domain and the we're on the last command, we should have gotten a request on the origin of one of the parents.
+    } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
+      // If this is a cross origin spec bridge and the we're on the last command, we should have gotten a request on the origin of one of the parents.
       originPolicies = cy.state('parentOriginPolicies')
     }
 
@@ -90,7 +90,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   }
 }
 
-const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log, isMultiDomain = false }) => {
+const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log, isCrossOriginSpecBridge = false }) => {
   const differences: string[] = []
 
   if (remote.protocol !== existing.protocol) {
@@ -111,7 +111,7 @@ const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log,
       differences: differences.join(', '),
       previousUrl: previousUrlVisited,
       attemptedUrl: remote.origin,
-      isMultiDomain,
+      isCrossOriginSpecBridge,
     },
   }
 
@@ -474,7 +474,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 }
 
 // filter the options to only the REQUEST_URL_OPTS options, normalize the timeout
-// value to the responseTimeout, and add the isMultiDomain value.
+// value to the responseTimeout, and add the isCrossOriginSpecBridge value.
 //
 // there are really two timeout values - pageLoadTimeout
 // and the underlying responseTimeout. for the purposes
@@ -489,7 +489,7 @@ const normalizeOptions = (options) => {
   .pick(REQUEST_URL_OPTS)
   .extend({
     timeout: options.responseTimeout,
-    isMultiDomain: Cypress.isMultiDomain,
+    isCrossOrigin: Cypress.isCrossOriginSpecBridge,
   })
   .value()
 }
@@ -869,7 +869,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       url = $Location.normalize(url)
 
-      if (Cypress.isMultiDomain) {
+      if (Cypress.isCrossOriginSpecBridge) {
         url = $Location.qualifyWithBaseUrl(Cypress.state('originCommandBaseUrl'), url)
       } else {
         const baseUrl = config('baseUrl')
@@ -950,9 +950,9 @@ export default (Commands, Cypress, cy, state, config) => {
 
           knownCommandCausedInstability = true
 
-          // if this is multi-domain, we need to tell the primary to change
+          // if this is a cross origin spec bridge, we need to tell the primary to change
           // the AUT iframe since we don't have access to it
-          if (Cypress.isMultiDomain) {
+          if (Cypress.isCrossOriginSpecBridge) {
             return Cypress.specBridgeCommunicator.toPrimary('visit:url', { url })
           }
 
@@ -1033,7 +1033,7 @@ export default (Commands, Cypress, cy, state, config) => {
           return cannotVisitDifferentOrigin(params)
         }
 
-        // in multi-domain, the window may not have been set yet if nothing has been loaded in the secondary origin,
+        // in a cross origin spec bridge, the window may not have been set yet if nothing has been loaded in the secondary origin,
         // it's also possible for a new test to start and for a cross-origin failure to occur if the win is set but
         // the AUT hasn't yet navigated to the secondary origin
         if (win) {
@@ -1122,12 +1122,12 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           }
 
-          // if we are in multi-domain and the origin policies weren't the same,
+          // if we are in a cross origin spec bridge and the origin policies weren't the same,
           // we need to throw an error since the user tried to visit a new
-          // domain which isn't allowed within a multi-domain block
-          if (Cypress.isMultiDomain && win) {
+          // origin which isn't allowed within a cy.origin block
+          if (Cypress.isCrossOriginSpecBridge && win) {
             const existingAutOrigin = $Location.create(win.location.href).origin
-            const params = { remote, existing, previousUrlVisited: existingAutOrigin, log: options._log, isMultiDomain: true }
+            const params = { remote, existing, previousUrlVisited: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true }
 
             // TODO: need a better error message
             return cannotVisitDifferentOrigin(params)
@@ -1250,10 +1250,10 @@ export default (Commands, Cypress, cy, state, config) => {
         // so that we nuke the previous state. subsequent
         // visits will not navigate to about:blank so that
         // our history entries are intact
-        // skip for multi-domain since multi-domain requires
+        // skip for cross origin spec bridges since they require
         // experimentalSessionSupport which already visits
         // about:blank between tests
-        if (!hasVisitedAboutBlank && !Cypress.isMultiDomain) {
+        if (!hasVisitedAboutBlank && !Cypress.isCrossOriginSpecBridge) {
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 

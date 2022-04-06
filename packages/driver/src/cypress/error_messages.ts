@@ -2089,7 +2089,7 @@ export default {
 
             > {{differences}}
 
-          You may only ${cmd('visit')} same-origin URLs within ${args.isMultiDomain ? cmd('origin') : 'a single test'}.
+          You may only ${cmd('visit')} same-origin URLs within ${args.isCrossOriginSpecBridge ? cmd('origin') : 'a single test'}.
 
           The previous URL you visited was:
 
