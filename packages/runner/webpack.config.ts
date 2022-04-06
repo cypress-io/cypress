@@ -84,7 +84,7 @@ mainConfig.resolve = {
 }
 
 // @ts-ignore
-const multiDomainConfig: webpack.Configuration = {
+const crossOriginConfig: webpack.Configuration = {
   mode: 'development',
   ...getSimpleConfig(),
   entry: {
@@ -110,7 +110,7 @@ const mainInjectionConfig: webpack.Configuration = {
 }
 
 // @ts-ignore
-const multiDomainInjectionConfig: webpack.Configuration = {
+const crossOriginInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
   entry: {
@@ -125,6 +125,6 @@ const multiDomainInjectionConfig: webpack.Configuration = {
 export default [
   mainConfig,
   mainInjectionConfig,
-  multiDomainConfig,
-  multiDomainInjectionConfig,
+  crossOriginConfig,
+  crossOriginInjectionConfig,
 ]
