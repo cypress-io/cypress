@@ -46,7 +46,6 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
       id: 'super-unique-id',
       __typename: 'CodeGenGlobs',
       component: '**/*.vue',
-      story: '**/*.stories.*',
     },
     currentBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
