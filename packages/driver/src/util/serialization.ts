@@ -261,6 +261,7 @@ export const preprocessLogLikeForSerialization = (props) => {
 
       const serializableDOM = preProcessDomElement(props)
 
+      // @ts-ignore
       serializableDOM.serializationKey = 'dom'
 
       return serializableDOM
