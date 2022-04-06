@@ -92,7 +92,7 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
-    this.props.eventManager.on('expect:domain', this._addCrossDomainIframe)
+    this.props.eventManager.on('expect:origin', this._addCrossOriginIframe)
 
     this._disposers.push(autorun(() => {
       this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
@@ -170,19 +170,19 @@ export default class Iframes extends Component {
     return $autIframe
   }
 
-  _addCrossDomainIframe = (location) => {
+  _addCrossOriginIframe = (location) => {
     const id = `Spec Bridge: ${location.originPolicy}`
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
-      this.props.eventManager.notifyCrossDomainBridgeReady(location.originPolicy)
+      this.props.eventManager.notifyCrossOriginBridgeReady(location.originPolicy)
 
       return
     }
 
     this._addIframe({
       id,
-      // the cross domain iframe is added to the document body instead of the
+      // the cross origin iframe is added to the document body instead of the
       // container since it needs to match the size of the top window for screenshots
       $container: $(document.body),
       className: 'spec-bridge-iframe',
@@ -228,7 +228,7 @@ export default class Iframes extends Component {
     const cb = this.props.state.callbackAfterUpdate
 
     // call the clientWidth to force the browser to repaint for viewport changes
-    // otherwise firefox may fail when changing the viewport in multi-domain
+    // otherwise firefox may fail when changing the viewport in between origins
     this.refs.container.clientWidth
 
     if (cb) {

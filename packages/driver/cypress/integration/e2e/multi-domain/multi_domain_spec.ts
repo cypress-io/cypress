@@ -153,18 +153,20 @@ describe('multi-domain', () => {
 
     describe('errors', () => {
     // TODO: Proper stack trace printing still needs to be addressed here
-      it('propagates secondary domain errors to the primary that occur within the test', () => {
-        return new Promise((resolve) => {
-          cy.on('fail', (e) => {
-            expect(e.message).to.equal('done is not defined')
-            resolve(undefined)
-          })
+      it('propagates secondary domain errors to the primary that occur within the test', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('variable is not defined')
+          expect(err.message).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
+          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+          expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+          done()
+        })
 
-          cy.origin('http://foobar.com:3500', () => {
-          // done is not defined on purpose here as we want to test the error gets sent back to the primary domain correctly
-          // @ts-ignore
-            done()
-          })
+        const variable = 'string'
+
+        cy.origin('http://foobar.com:3500', () => {
+          cy.log(variable)
         })
       })
 
@@ -221,6 +223,22 @@ describe('multi-domain', () => {
 
         cy.origin('http://foobar.com:3500', () => {
           cy.get('#doesnt-exist')
+        })
+      })
+
+      it('has non serializable arguments', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(`This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`)
+          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+          expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+          done()
+        })
+
+        const variable = () => {}
+
+        cy.origin('http://idp.com:3500', { args: variable }, (variable) => {
+          variable()
         })
       })
     })

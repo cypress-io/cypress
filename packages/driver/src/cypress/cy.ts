@@ -585,7 +585,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         this.Cypress.emit('internal:window:load', {
-          type: 'cross:domain:failure',
+          type: 'cross:origin:failure',
           error: e,
         })
 

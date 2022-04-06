@@ -238,15 +238,15 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
 
   // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
   if (this.config.experimentalLoginFlows && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
-    this.debug('is cross-domain, delay until ready:for:domain event')
+    this.debug('is cross-origin, delay until ready:for:origin event')
 
-    this.serverBus.once('ready:for:domain', ({ failed }) => {
-      this.debug(`received ready:for:domain${failed ? ' failed' : ''}, let the response proceed`)
+    this.serverBus.once('ready:for:origin', ({ failed }) => {
+      this.debug(`received ready:for:origin${failed ? ' failed' : ''}, let the response proceed`)
 
       this.next()
     })
 
-    this.serverBus.emit('cross:domain:delaying:html', {
+    this.serverBus.emit('cross:origin:delaying:html', {
       href: this.req.proxiedUrl,
     })
 

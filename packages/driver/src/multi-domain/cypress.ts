@@ -91,7 +91,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
-  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called in 'onBeforeAppWindowLoad'.
+  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
 
   cy.overrides.wrapNativeMethods(autWindow)
@@ -100,7 +100,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     cy.isStable(true, 'primary onload')
 
     cy.state('autOrigin', cors.getOriginPolicy(url))
-    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+    Cypress.emit('internal:window:load', { type: 'cross:origin', url })
   }
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
@@ -126,7 +126,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return undefined
     },
     onLoad () {
-      // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called on 'load'.
+      // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called on 'load'.
       Cypress.action('app:navigation:changed', 'page navigation event (\'load\')')
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow)

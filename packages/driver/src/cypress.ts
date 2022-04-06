@@ -634,7 +634,7 @@ class $Cypress {
 
       case 'app:window:load':
         this.emit('internal:window:load', {
-          type: 'same:domain',
+          type: 'same:origin',
           window: args[0],
         })
 

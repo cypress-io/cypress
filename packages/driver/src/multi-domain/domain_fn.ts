@@ -1,7 +1,7 @@
 import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
-import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
+import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 
@@ -82,7 +82,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     cy.state('runnable').state = 'passed'
   }
 
-  Cypress.specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
+  Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunDomainFnOptions) => {
     const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
@@ -95,9 +95,9 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
 
-    // resync the config/env before running the domain:fn
-    syncConfigToCurrentDomain(config)
-    syncEnvToCurrentDomain(env)
+    // resync the config/env before running the origin:fn
+    syncConfigToCurrentOrigin(config)
+    syncEnvToCurrentOrigin(env)
 
     cy.state('onFail', (err) => {
       setRunnableStateToPassed()
@@ -130,7 +130,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         // value
         const subject = hasCommands ? undefined : await value
 
-        Cypress.specBridgeCommunicator.toPrimary('ran:domain:fn', {
+        Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', {
           subject,
           finished: !hasCommands,
         }, {
@@ -149,7 +149,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       }
     } catch (err) {
       setRunnableStateToPassed()
-      Cypress.specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
+      Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', { err }, { syncGlobals: true })
 
       return
     }

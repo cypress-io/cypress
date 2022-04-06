@@ -13,8 +13,8 @@ const onAutomationRequest = (...args) => {
   webSocket.emit('automation:request', ...args)
 }
 
-webSocket.on('cross:domain:delaying:html', (request) => {
-  // Until we do nested switch to domain, we just need to know what the request was for error messaging.
+webSocket.on('cross:origin:delaying:html', (request) => {
+  // Until we do nested cy.origin, we just need to know what the request was for error messaging.
   cy.isAnticipatingCrossOriginResponseFor(request)
 })
 

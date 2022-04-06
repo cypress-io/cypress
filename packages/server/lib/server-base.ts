@@ -164,13 +164,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._httpsProxy, 'open')
   }
 
-  setupMultiDomain () {
-    this._eventBus.on('cross:domain:delaying:html', (request) => {
-      this.socket.localBus.once('ready:for:domain', (args) => {
-        this._eventBus.emit('ready:for:domain', args)
+  setupCrossOriginRequestHandling () {
+    this._eventBus.on('cross:origin:delaying:html', (request) => {
+      this.socket.localBus.once('ready:for:origin', (args) => {
+        this._eventBus.emit('ready:for:origin', args)
       })
 
-      this.socket.toDriver('cross:domain:delaying:html', request)
+      this.socket.toDriver('cross:origin:delaying:html', request)
     })
   }
 
@@ -233,7 +233,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         exit,
       }
 
-      this.setupMultiDomain()
+      this.setupCrossOriginRequestHandling()
       this.remoteStates.addEventListeners(this.socket.localBus)
 
       const runnerSpecificRouter = testingType === 'e2e'

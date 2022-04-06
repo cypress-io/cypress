@@ -150,7 +150,6 @@ export const reifySerializedError = (serializedError: any, userInvocationStack: 
     reifiedError = new Error(`${serializedError}`)
   }
 
-  // @ts-ignore
   reifiedError.onFail = () => {}
 
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)

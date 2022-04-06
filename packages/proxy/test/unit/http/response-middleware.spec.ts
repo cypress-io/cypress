@@ -196,7 +196,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('waits for server signal if req is not of a previous origin, letting it continue after receiving ready:for:domain', function () {
+    it('waits for server signal if req is not of a previous origin, letting it continue after receiving ready:for:origin', function () {
       prepareContext({
         req: {
           isAUTFrame: true,
@@ -215,14 +215,14 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://idp.com' })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ originPolicy: 'http://idp.com' })
 
       return promise
     })
 
-    it('waits for server signal if res is html, letting it continue after receiving ready:for:domain', function () {
+    it('waits for server signal if res is html, letting it continue after receiving ready:for:origin', function () {
       prepareContext({
         incomingRes: {
           headers: {
@@ -240,14 +240,14 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.foobar.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ originPolicy: 'http://foobar.com' })
 
       return promise
     })
 
-    it('waits for server signal if incomingRes is rendered html, letting it continue after receiving ready:for:domain', function () {
+    it('waits for server signal if incomingRes is rendered html, letting it continue after receiving ready:for:origin', function () {
       prepareContext({
         req: {
           headers: {
@@ -266,14 +266,14 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.foobar.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ originPolicy: 'http://foobar.com' })
 
       return promise
     })
 
-    it('waits for server signal, letting it continue after receiving ready:for:domain failed', function () {
+    it('waits for server signal, letting it continue after receiving ready:for:origin failed', function () {
       prepareContext({
         req: {
           isAUTFrame: true,
@@ -292,9 +292,9 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ failed: true })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ failed: true })
 
       return promise
     })
@@ -309,7 +309,7 @@ describe('http/response-middleware', function () {
       // set the secondary remote states
       remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('ready:for:domain', { originPolicy })
+        eventEmitter.emit('ready:for:origin', { originPolicy })
       })
 
       ctx = {
@@ -592,7 +592,7 @@ describe('http/response-middleware', function () {
       // set the secondary remote states
       remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('ready:for:domain', { originPolicy })
+        eventEmitter.emit('ready:for:origin', { originPolicy })
       })
 
       ctx = {
@@ -914,7 +914,7 @@ describe('http/response-middleware', function () {
       // set the secondary remote states
       remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('ready:for:domain', { originPolicy })
+        eventEmitter.emit('ready:for:origin', { originPolicy })
       })
 
       return {

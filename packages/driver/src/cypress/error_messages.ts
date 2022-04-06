@@ -988,7 +988,7 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
-    switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
+    cross_origin_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
       return stripIndent`\
 
         Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
@@ -1752,13 +1752,17 @@ export default {
     invalid_fn_argument: {
       message: `${cmd('origin')} requires the last argument to be a function. You passed: \`{{arg}}\``,
     },
-    run_domain_fn_errored: {
+    run_origin_fn_errored: {
       message: stripIndent`
-      ${cmd('origin')} failed with the following error:
-
-        > {{error}}
+      {{error}}
 
       This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
+    },
+    ran_origin_fn_reference_error: {
+      message: stripIndent`
+        {{error}}
+
+        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\

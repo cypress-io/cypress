@@ -262,7 +262,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw document.createElement('h1')
       })
@@ -275,7 +274,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw () => undefined
       })
@@ -288,7 +286,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw Symbol('foo')
       })
@@ -301,7 +298,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw new Promise(() => {})
       })
@@ -323,7 +319,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         class CustomError extends Error {
           private _name = 'CustomError'
@@ -360,7 +355,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         class FooBar {
           private _metasyntaticList = ['foo']
@@ -389,7 +383,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw 'oops'
       })
@@ -402,7 +395,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw ['why would anyone do this?', 'this is odd']
       })
@@ -415,7 +407,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw 2
       })
@@ -428,7 +419,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw true
       })
@@ -441,7 +431,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw null
       })
@@ -454,7 +443,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw undefined
       })
@@ -467,7 +455,6 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      // @ts-ignore
       cy.origin('http://foobar.com:3500', () => {
         throw new Date()
       })
