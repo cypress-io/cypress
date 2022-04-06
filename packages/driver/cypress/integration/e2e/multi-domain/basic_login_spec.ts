@@ -1,5 +1,4 @@
-// @ts-nocheck / session support is needed for visiting about:blank between tests
-describe('basic login', { experimentalSessionSupport: true }, () => {
+describe('basic login', () => {
   // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary domain, login and redirect back to site.
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
@@ -94,8 +93,10 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
         cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
       })
 
+      // @ts-ignore
       // TODO: Add createDomain primary domain config does not exist yet
       it.skip('D logs in with primary set via switch to domain config', { baseUrl: undefined, primaryDomain: 'localhost' }, () => {
+        // @ts-ignore
         cy.createDomain('http://idp.com:3500', () => { // PrimaryDomain set to localhost
           cy.visit('http://www.idp.com/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
@@ -167,8 +168,7 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
   })
 })
 
-// session support is needed for visiting about:blank between tests
-describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
+describe('Multi-step Auth', () => {
   // TODO: Switch to domain does not work in switch to domain yet.
   it.skip('final auth redirects back to localhost - nested', () => {
     cy.visit('/fixtures/auth/index.html')
@@ -208,6 +208,7 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
 
   // TODO: Switch to domain does not work in switch to domain yet.
   it.skip('final auth redirects back to localhost - nested - approval first', () => {
+    // @ts-ignore
     cy.createDomain('http://foobar.com:3500', { primaryDomain: 'localhost' }, () => { // Parent Domain is localhost
       cy.visit('http://www.foobar.com:3500/fixtures/auth/approval.html')
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com

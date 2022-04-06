@@ -1,5 +1,4 @@
-// @ts-ignore
-context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
+context('multi-domain navigation', () => {
   it('.go()', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()

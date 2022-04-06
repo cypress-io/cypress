@@ -237,7 +237,7 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   const isAUTFrame = this.req.isAUTFrame
 
   // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
-  if (this.config.experimentalMultiDomain && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+  if (this.config.experimentalLoginFlows && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-origin, delay until ready:for:origin event')
 
     this.serverBus.once('ready:for:origin', ({ failed }) => {
@@ -281,7 +281,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalMultiDomain && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalLoginFlows && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- multi-domain injection')
 
       return 'fullMultiDomain'
@@ -457,7 +457,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
 
   if (cookies) {
     const needsMultiDomainHandling = (
-      this.config.experimentalMultiDomain
+      this.config.experimentalLoginFlows
       && determineIfNeedsMultiDomainHandling(this)
     )
     const browser = this.getCurrentBrowser() || { family: null }

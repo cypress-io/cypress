@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain test retries', { experimentalSessionSupport: true }, () => {
+describe('multi-domain test retries', () => {
   beforeEach(() => {
     cy.visit('/multi_domain.html')
     cy.get('a[data-cy="multi_domain_secondary_link"]').click()

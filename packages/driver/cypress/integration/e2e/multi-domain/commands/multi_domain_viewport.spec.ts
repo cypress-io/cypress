@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain viewport', { experimentalSessionSupport: true }, () => {
+context('multi-domain viewport', () => {
   it('syncs the viewport from the primary to secondary', () => {
     // change the viewport in the primary first
     cy.viewport(320, 480)

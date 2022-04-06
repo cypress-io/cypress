@@ -1414,6 +1414,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
     })
 
+    it('warns if experimentalSessionSupport is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalSessionSupport', true, {
+        experimentalSessionSupport: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
+    })
+
     it('warns if experimentalShadowDomSupport is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -1485,9 +1495,8 @@ describe('lib/config', () => {
             exit: { value: true, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalMultiDomain: { value: false, from: 'default' },
+            experimentalLoginFlows: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
@@ -1576,9 +1585,8 @@ describe('lib/config', () => {
             exit: { value: true, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalMultiDomain: { value: false, from: 'default' },
+            experimentalLoginFlows: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             env: {
               foo: {

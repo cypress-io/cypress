@@ -6,24 +6,8 @@ const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
-    before(() => {
-      cy
-      .visit('/fixtures/generic.html')
-      .then(function (win) {
-        this.body = win.document.body.outerHTML
-      })
-    })
-
     beforeEach(function () {
-      const doc = cy.state('document')
-
-      this.win = cy.state('window')
-
-      $(doc.body).empty().html(this.body)
-    })
-
-    afterEach(function () {
-      cy.state('window', this.win)
+      cy.visit('/fixtures/generic.html')
     })
 
     it('calls into window.location.reload', () => {
@@ -288,24 +272,11 @@ describe('src/cy/commands/navigation', () => {
   })
 
   context('#go', () => {
-    before(() => {
-      cy
-      .visit('/fixtures/generic.html')
-      .then(function (win) {
-        this.body = win.document.body.outerHTML
-      })
-    })
-
-    beforeEach(function () {
-      const doc = cy.state('document')
-
-      $(doc.body).empty().html(this.body)
-    })
-
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
+      cy.visit('/fixtures/generic.html')
       const timeout = cy.spy(Promise.prototype, 'timeout')
 
       cy
@@ -971,7 +942,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('location getter overrides', () => {
-      before(() => {
+      beforeEach(function () {
         cy
         .visit('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
         .window().as('win').then((win) => {
@@ -980,9 +951,7 @@ describe('src/cy/commands/navigation', () => {
           // overriding the location getters
           expect(win.location.href).to.include('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
         })
-      })
 
-      beforeEach(function () {
         this.win = cy.state('window')
 
         this.eq = (attr, str) => {
@@ -2258,7 +2227,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('waits for stability at the end of the command queue when not stable', { experimentalMultiDomain: false }, (done) => {
+    it('waits for stability at the end of the command queue when not stable', { experimentalLoginFlows: false }, (done) => {
       cy
       .visit('/fixtures/generic.html')
       .then((win) => {
@@ -2281,7 +2250,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('does not wait for stability at the end of the command queue when not stable with experimentalMultiDomain', (done) => {
+    it('does not wait for stability at the end of the command queue when not stable with experimentalLoginFlows', (done) => {
       const onLoad = cy.spy()
 
       cy

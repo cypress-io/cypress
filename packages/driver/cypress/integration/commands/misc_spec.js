@@ -2,18 +2,8 @@ const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/jquery.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/jquery.html')
   })
 
   context('#end', () => {

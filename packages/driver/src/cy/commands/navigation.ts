@@ -1251,7 +1251,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // visits will not navigate to about:blank so that
         // our history entries are intact
         // skip for multi-domain since multi-domain requires
-        // experimentalSessionSupport which already visits
+        // session support which already visits
         // about:blank between tests
         if (!hasVisitedAboutBlank && !Cypress.isMultiDomain) {
           hasVisitedAboutBlank = true

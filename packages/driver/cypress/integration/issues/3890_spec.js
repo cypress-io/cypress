@@ -2,24 +2,14 @@
 const { $ } = Cypress
 
 describe('issue 3890 overwriting cy.route command', () => {
-  before(() => {
+  beforeEach(function () {
     cy
     .visit('/fixtures/jquery.html')
     .then(function (win) {
       const h = $(win.document.head)
 
       h.find('script').remove()
-
-      this.head = h.prop('outerHTML')
-      this.body = win.document.body.outerHTML
     })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.head).empty().html(this.head)
-    $(doc.body).empty().html(this.body)
   })
 
   it('stores route as an alias', () => {
