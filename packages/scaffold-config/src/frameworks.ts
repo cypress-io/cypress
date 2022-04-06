@@ -121,6 +121,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
+    mountModule: 'cypress/react',
   },
   {
     type: 'vueclivue2',
@@ -140,6 +141,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
+    mountModule: 'cypress/vue2',
   },
   {
     type: 'vueclivue3',
@@ -159,6 +161,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
+    mountModule: 'cypress/vue',
   },
   {
     type: 'nextjs',
@@ -177,6 +180,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
+    mountModule: 'cypress/react',
   },
   {
     type: 'nuxtjs',
@@ -195,6 +199,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
+    mountModule: 'cypress/vue2',
   },
   {
     type: 'vue2',
@@ -213,6 +218,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
+    mountModule: 'cypress/vue2',
   },
   {
     type: 'vue3',
@@ -231,6 +237,7 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
+    mountModule: 'cypress/vue',
   },
   {
     type: 'react',
@@ -249,5 +256,6 @@ export const WIZARD_FRAMEWORKS = [
     createCypressConfig,
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
+    mountModule: 'cypress/react',
   },
 ] as const
