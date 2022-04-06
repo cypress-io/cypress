@@ -36,7 +36,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
-    cy.findByTestId('playground-selector').clear().type('#__cy_root')
+    cy.findByTestId('playground-selector').clear().type('[data-cy-root]')
 
     snapshotAUTPanel('cy.get selector')
 
@@ -44,7 +44,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     cy.window().then((win) => cy.spy(win.console, 'log'))
     cy.findByTestId('playground-print').click().window().then((win) => {
-      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.get(\'#__cy_root\')')
+      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.get(\'[data-cy-root]\')')
     })
 
     cy.findByLabelText('Selector Methods').click()

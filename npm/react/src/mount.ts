@@ -4,7 +4,7 @@ import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
   StyleOptions,
-  ROOT_ID,
+  ROOT_SELECTOR,
   setupHooks,
 } from '@cypress/mount-utils'
 
@@ -13,7 +13,7 @@ import {
  */
 const injectStyles = (options: MountOptions) => {
   return () => {
-    const el = document.getElementById(ROOT_ID)
+    const el = document.querySelector(ROOT_SELECTOR)[0]
 
     return injectStylesBeforeElement(options, document, el)
   }
@@ -66,7 +66,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
 
     lastMountedReactDom = reactDomToUse
 
-    const el = document.getElementById(ROOT_ID)
+    const el = document.querySelector(ROOT_SELECTOR)[0]
 
     if (!el) {
       throw new Error(
@@ -156,7 +156,7 @@ export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<J
 
 const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
   return cy.then(() => {
-    const selector = `#${ROOT_ID}`
+    const selector = ROOT_SELECTOR
 
     return cy.get(selector, { log: false }).then(($el) => {
       if (lastMountedReactDom) {
@@ -185,7 +185,7 @@ const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => 
 // NOTE: we cannot use unmount here because
 // we are not in the context of a test
 const preMountCleanup = () => {
-  const el = document.getElementById(ROOT_ID)
+  const el = document.querySelector(ROOT_SELECTOR)[0]
 
   if (el && lastMountedReactDom) {
     lastMountedReactDom.unmountComponentAtNode(el)

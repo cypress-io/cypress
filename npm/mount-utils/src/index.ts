@@ -37,7 +37,7 @@ export interface StyleOptions {
   cssFile: string | string[]
 }
 
-export const ROOT_ID = '__cy_root'
+export const ROOT_SELECTOR = '[data-cy-root]'
 
 /**
  * Remove any style or extra link elements from the iframe placeholder

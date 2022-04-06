@@ -1,9 +1,9 @@
 import { initial, initialCT, session, sessionLifecycle, visitFailure } from './Blank'
-import { ROOT_ID } from '@cypress/mount-utils'
+import { ROOT_SELECTOR } from '@cypress/mount-utils'
 
 describe('initial - e2e', () => {
   beforeEach(() => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = initial()
   })
@@ -19,7 +19,7 @@ describe('initial - e2e', () => {
 
 describe('initial - ct', () => {
   it('works', () => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = initialCT()
 
@@ -27,7 +27,7 @@ describe('initial - ct', () => {
   })
 
   it('links to docs', () => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = initialCT()
 
@@ -36,7 +36,7 @@ describe('initial - ct', () => {
 
   it('works with small viewport', () => {
     cy.viewport(200, 1000)
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = initial()
 
@@ -46,7 +46,7 @@ describe('initial - ct', () => {
 
 describe('session', () => {
   it('works', () => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = session()
 
@@ -56,7 +56,7 @@ describe('session', () => {
 
 describe('sessionLifecycle', () => {
   it('works', () => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = sessionLifecycle()
 
@@ -68,7 +68,7 @@ describe('sessionLifecycle', () => {
 
 describe('visitFailure', () => {
   it('works', () => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = visitFailure({ url: 'http://foo.cypress.io' })
 
@@ -76,7 +76,7 @@ describe('visitFailure', () => {
   })
 
   it('works with details', () => {
-    const root = document.getElementById(ROOT_ID)!
+    const root = document.querySelector(ROOT_SELECTOR)[0]!
 
     root.innerHTML = visitFailure({ url: 'http://foo.cypress.io', status: 404, statusText: 'Not Found', contentType: 'text/html' })
 
