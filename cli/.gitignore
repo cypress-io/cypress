@@ -15,6 +15,8 @@ build
 
 # ignore packages synced at build-time via
 # the sync-exported-npm-with-cli.js script
+# BUT THESE PACKAGES MUST BE IGNORED IN .npmignore
+# or else they won't be published
 vue
 react
 mount-utils
