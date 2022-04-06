@@ -364,24 +364,14 @@ describe('src/cy/commands/window', () => {
   })
 
   context('#title', () => {
-    before(() => {
+    beforeEach(() => {
       cy
       .visit('/fixtures/generic.html')
       .then(function (win) {
         const h = $(win.document.head)
 
         h.find('script').remove()
-
-        this.head = h.prop('outerHTML')
-        this.body = win.document.body.outerHTML
       })
-    })
-
-    beforeEach(function () {
-      const doc = cy.state('document')
-
-      $(doc.head).empty().html(this.head)
-      $(doc.body).empty().html(this.body)
     })
 
     it('returns the pages title as a string', () => {

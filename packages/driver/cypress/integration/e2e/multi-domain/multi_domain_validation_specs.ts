@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain', { experimentalSessionSupport: true }, () => {
+describe('multi-domain', () => {
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
@@ -187,9 +186,9 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
 
   describe('errors', () => {
     // @ts-ignore
-    it('errors if experimental flag is not enabled', { experimentalMultiDomain: false }, (done) => {
+    it('errors if experimental flag is not enabled', { experimentalLoginFlows: false }, (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.origin()` requires enabling the experimentalMultiDomain flag')
+        expect(err.message).to.equal('`cy.origin()` requires enabling the experimentalLoginFlows flag')
 
         done()
       })

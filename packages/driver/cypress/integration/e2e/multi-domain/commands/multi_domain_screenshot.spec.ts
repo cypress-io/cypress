@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain screenshot', { experimentalSessionSupport: true }, () => {
+context('multi-domain screenshot', () => {
   context('set viewport', () => {
     beforeEach(() => {
       this.serverResult = {

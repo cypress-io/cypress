@@ -31,7 +31,7 @@ const onServer = function (app) {
   })
 
   app.get('/cross_origin_iframe/:name', (req, res) => {
-    res.send(`<html><body><h1>cross_origin_iframe ${req.params.name}</h1><iframe src="https://127.0.0.2:44665/set-localStorage/${req.params.name}"</body></html>`)
+    res.send(`<html><body><h1>cross_origin_iframe ${req.params.name}</h1><iframe src="https://127.0.0.1:44665/set-localStorage/${req.params.name}"</body></html>`)
   })
 
   app.get('/set-localStorage/:name', (req, res) => {
@@ -97,7 +97,7 @@ const onServer = function (app) {
 
   app.get('/cors', (req, res) => {
     res.send(`<script>
-      fetch('https://127.0.0.2:44665/cross_origin')
+      fetch('https://127.0.0.1:44665/cross_origin')
       .then((res) => res.text())
       .then(text => {
         if (text.includes('cross origin')) document.write('success!')
@@ -133,7 +133,7 @@ describe('e2e sessions', () => {
     spec: 'session_spec.js',
     snapshot: true,
     config: {
-      experimentalSessionSupport: true,
+      experimentalLoginFlows: true,
       video: false,
     },
   })
@@ -142,7 +142,7 @@ describe('e2e sessions', () => {
     spec: 'session_persist_spec_1.js,session_persist_spec_2.js',
     snapshot: true,
     config: {
-      experimentalSessionSupport: true,
+      experimentalLoginFlows: true,
       video: false,
     },
   })

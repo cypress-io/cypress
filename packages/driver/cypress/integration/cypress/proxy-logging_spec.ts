@@ -104,6 +104,8 @@ describe('Proxy Logging', () => {
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
     it('xhr log has response body/status code when xhr response is logged first', (done) => {
+      cy.visit('/fixtures/empty.html')
+
       cy.window()
       .then({ timeout: 10000 }, (win) => {
         cy.on('log:changed', (log) => {
@@ -149,6 +151,8 @@ describe('Proxy Logging', () => {
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
     it('xhr log has response body/status code when xhr response is logged second', (done) => {
+      cy.visit('/fixtures/empty.html')
+
       cy.window()
       .then({ timeout: 10000 }, (win) => {
         cy.on('log:changed', (log) => {
@@ -460,6 +464,7 @@ describe('Proxy Logging', () => {
         }
 
         beforeEach(() => {
+          cy.visit('/fixtures/empty.html')
           cy.window()
           .then(({ XMLHttpRequest }) => {
             $XMLHttpRequest = XMLHttpRequest

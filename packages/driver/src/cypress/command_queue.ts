@@ -296,7 +296,7 @@ export class CommandQueue extends Queue<Command> {
         Cypress.action('cy:command:queue:before:end')
 
         // If we're in multi-domain we no longer have to wait for stability at the end of the command queue.
-        if (Cypress.config('experimentalMultiDomain')) {
+        if (Cypress.config('experimentalLoginFlows')) {
           Cypress.action('cy:command:queue:end')
 
           return null

@@ -439,7 +439,7 @@ const _setAutomation = async (client, automation, options) => {
     sendDebuggerCommandFn: client.send,
     onFn: client.on,
     automation,
-    experimentalMultiDomain: options.experimentalMultiDomain,
+    experimentalLoginFlows: options.experimentalLoginFlows,
   })
 
   await cdpAutomation.enable()

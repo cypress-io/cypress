@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests+
-describe('multi-domain Cypress API', { experimentalSessionSupport: true }, () => {
+describe('multi-domain Cypress API', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()

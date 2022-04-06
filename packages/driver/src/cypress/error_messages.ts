@@ -1531,9 +1531,19 @@ export default {
     validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}',
     },
-    experimentNotEnabled: {
-      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
-      docsUrl: 'https://on.cypress.io/session',
+    experimentNotEnabled (experimentalSessionSupport) {
+      if (experimentalSessionSupport) {
+        return {
+          message: stripIndent`
+          ${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.`,
+          docsUrl: 'https://on.cypress.io/migration-guide',
+        }
+      }
+
+      return {
+        message: `${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag`,
+        docsUrl: 'https://on.cypress.io/session',
+      }
     },
     session: {
       duplicateId: {
@@ -1718,7 +1728,7 @@ export default {
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
     experiment_not_enabled: {
-      message: `${cmd('origin')} requires enabling the experimentalMultiDomain flag`,
+      message: `${cmd('origin')} requires enabling the experimentalLoginFlows flag`,
     },
     invalid_origin_argument: {
       message: `${cmd('origin')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,

@@ -1050,6 +1050,12 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/migration-guide`
   },
+  EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)} and replaced with ${fmt.highlight(`experimentalLoginFlows`)}. Please update your config to use ${fmt.highlight(`experimentalLoginFlows`)} instead.
+        
+        https://on.cypress.io/migration-guide`
+  },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalShadowDomSupport`)} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.

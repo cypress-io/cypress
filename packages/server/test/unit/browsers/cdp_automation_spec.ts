@@ -76,7 +76,7 @@ context('lib/browsers/cdp_automation', () => {
         sendDebuggerCommandFn: this.sendDebuggerCommand,
         onFn: this.onFn,
         automation: {} as Automation,
-        experimentalMultiDomain: false,
+        experimentalLoginFlows: false,
       })
 
       await this.automation.enable()

@@ -1041,7 +1041,7 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalSessionSupport` config option is enabled.
+      * Only available if the `experimentalLoginFlows` config option is enabled.
       *
       * @see https://on.cypress.io/session
       */
@@ -2825,20 +2825,15 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
-     * Enable experimental session support. See https://on.cypress.io/session
-     * @default false
-     */
-    experimentalSessionSupport: boolean
-    /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables multi-domain support in Cypress, including the cy.origin command.
+     * Enables cross-origin login support in Cypress, including the `cy.origin` and `cy.session` commands.
      * @default false
      */
-    experimentalMultiDomain: boolean
+    experimentalLoginFlows: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
