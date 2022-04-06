@@ -1,6 +1,6 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import { CODE_LANGUAGES } from '@packages/types'
-import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, supportFileBody, commandsFileBody } from '@packages/scaffold-config'
+import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
@@ -210,7 +210,18 @@ export class WizardActions {
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
 
-    const fileContent = fileName === 'commands' ? commandsFileBody(language) : supportFileBody(fileName, language)
+    let fileContent: string | undefined
+
+    if (fileName === 'commands') {
+      fileContent = commandsFileBody(language)
+    } else if (fileName === 'e2e') {
+      fileContent = supportFileE2E(language)
+    } else if (fileName === 'component') {
+      assert(this.ctx.coreData.wizard.chosenFramework)
+      fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+    }
+
+    assert(fileContent)
 
     await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 

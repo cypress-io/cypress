@@ -2,10 +2,10 @@ import type { CodeLanguage } from '@packages/types'
 import dedent from 'dedent'
 import type { WizardFrontendFramework } from '.'
 
-export function supportFileBody (fileName: 'e2e' | 'component', language: CodeLanguage['type']) {
+export function supportFileE2E (language: CodeLanguage['type']) {
   return dedent`
     // ***********************************************************
-    // This example support/${fileName}.${language} is processed and
+    // This example support/e2e.${language} is processed and
     // loaded automatically before your test files.
     //
     // This is a great place to put global configuration and
