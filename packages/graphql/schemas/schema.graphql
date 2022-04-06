@@ -434,7 +434,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
-  storybook: Storybook
   title: String!
 }
 
@@ -1246,15 +1245,6 @@ type Spec implements Node {
 enum SpecType {
   component
   integration
-}
-
-"""Storybook"""
-type Storybook implements Node {
-  """Relay style Node ID field for the Storybook field"""
-  id: ID!
-
-  """Folder containing storybook configuration files"""
-  storybookRoot: String!
 }
 
 type Subscription {

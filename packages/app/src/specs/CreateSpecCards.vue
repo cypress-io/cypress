@@ -32,10 +32,6 @@ fragment CreateSpecCards on Query {
   currentProject {
     id
     currentTestingType
-    storybook {
-      id
-      storybookRoot
-    }
   }
 }
 `

@@ -9,7 +9,6 @@ import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
-import { Storybook } from './gql-Storybook'
 
 export const PackageManagerEnum = enumType({
   name: 'PackageManagerEnum',
@@ -178,11 +177,6 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => {
         return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
       },
-    })
-
-    t.field('storybook', {
-      type: Storybook,
-      resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
     })
 
     t.nonNull.field('codeGenGlobs', {
