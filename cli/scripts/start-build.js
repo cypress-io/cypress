@@ -29,15 +29,3 @@ includeTypes.forEach((folder) => {
 shell.exec('babel lib -d build/lib')
 shell.exec('babel index.js -o build/index.js')
 shell.cp('index.mjs', 'build/index.mjs')
-
-// For each npm package that is re-published via cypress/*
-// make sure that it is also copied into the build directory
-const npmModulesToCopy = [
-  'mount-utils',
-  'react',
-  'vue',
-]
-
-npmModulesToCopy.forEach((folder) => {
-  shell.cp('-R', folder, `build/${folder}`)
-})
