@@ -13,7 +13,7 @@ const fs = require('fs')
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
 
-// 2. This script will be run in a postbuild task for each npm package
+// This script will be run in a postbuild task for each npm package
 // that will be re-exported by Cypress
 const currentPackageDir = process.cwd()
 
