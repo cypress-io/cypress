@@ -266,7 +266,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
         await isInitialized.promise
 
-        if (!ctx.lifecycleManager.browsers?.[0]) throw new Error('No browsers available in startAppServer')
+        if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
 
         await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
