@@ -42,9 +42,16 @@ packlist({ path: currentPackageDir })
 
   // After everything is copied, let's update the Cypress cli package.json['exports'] option
   // Now, we'll construct the exports map, using the module and main exports.
-  cliPackageConfig.exports[`./${exportName}`] = {
-    import: `./${exportName}/${currentPackageConfig.module}`,
-    require: `./${exportName}/${currentPackageConfig.main}`,
+  const isModule = cliPackageConfig.type === 'module'
+  const subPackageExports = cliPackageConfig.exports[`./${exportName}`] = {}
+  const esmEntry = isModule ? currentPackageConfig.main : currentPackageConfig.module
+
+  if (esmEntry) {
+    subPackageExports.import = `./${exportName}/${esmEntry}`
+  }
+
+  if (!isModule) {
+    subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
   }
 
   if (cliPackageConfig.files.indexOf(exportName) === -1) {
@@ -53,5 +60,5 @@ packlist({ path: currentPackageDir })
 
   const output = JSON.stringify(cliPackageConfig, null, 2)
 
-  fs.writeFile(path.join(cliPath, 'package.json'), output, 'utf-8')
+  fs.writeFileSync(path.join(cliPath, 'package.json'), output, 'utf-8')
 })

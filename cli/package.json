@@ -105,7 +105,8 @@
     "types/**/*.d.ts",
     "types/net-stubbing.ts",
     "react",
-    "vue"
+    "vue",
+    "mount-utils"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -130,6 +131,9 @@
     "./react": {
       "import": "./react/dist/cypress-react.esm-bundler.js",
       "require": "./react/dist/cypress-react.cjs.js"
+    },
+    "./mount-utils": {
+      "require": "./mount-utils/dist/index.js"
     }
   }
 }
