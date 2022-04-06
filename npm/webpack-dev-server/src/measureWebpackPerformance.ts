@@ -56,5 +56,6 @@ export function measureWebpackPerformance (webpackConfig: Configuration): Config
     })
     : new SpeedMeasurePlugin()
 
+  // @ts-ignore
   return smp.wrap(webpackConfig)
 }

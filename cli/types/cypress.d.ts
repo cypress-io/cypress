@@ -2341,7 +2341,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
   }
 
   interface Failable {
@@ -2858,7 +2858,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: CoreConfigOptions
+    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
 
     /**
      * An array of objects defining the certificates
@@ -2868,7 +2868,9 @@ declare namespace Cypress {
     /**
      * Handle Cypress plugins
      */
-    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
+
+    indexHtmlFile: string
   }
 
   /**
@@ -2917,6 +2919,7 @@ declare namespace Cypress {
     namespace: string
     projectRoot: string
     devServerPublicPathRoute: string
+    cypressBinaryRoot: string
   }
 
   /**
@@ -2962,16 +2965,41 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
+  interface DefineDevServerConfig {
+    // This interface can be extended by the user, to inject the types for their
+    // preferred bundler: e.g.
+    //
+    // import type * as webpack from 'webpack'
+    //
+    // declare global {
+    //   namespace Cypress {
+    //     interface DefineDevServerConfig {
+    //       webpackConfig?: webpack.Configuration
+    //     }
+    //   }
+    // }
+    [key: string]: any
+  }
+
+  type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
+
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+
+  interface DevServerConfigObject {
+    bundler: 'webpack'
+    framework: 'react'
+    webpackConfig?: PickConfigOpt<'webpackConfig'>
+  }
+
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
-    devServer: DevServerFn<ComponentDevServerOpts>
+    devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigObject
     devServerConfig?: ComponentDevServerOpts
   }
 
   /**
    * Config options that can be assigned on cypress.config.{ts|js} file
    */
-  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern'>
+  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern' | 'indexHtmlFile'>
 
   /**
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
@@ -5426,7 +5454,7 @@ declare namespace Cypress {
 
   interface ResolvedDevServerConfig {
     port: number
-    close: (done?: () => any) => void
+    close: (done?: (err?: Error) => any) => void
   }
 
   interface PluginEvents {

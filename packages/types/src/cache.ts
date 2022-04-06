@@ -4,9 +4,9 @@ export interface Cache {
   USER: CachedUser
 }
 
-export interface Preferences {
-  testingType: 'e2e' | 'component' | null
-}
+import type { AllowedState } from './preferences'
+
+export type Preferences = AllowedState
 
 export interface CachedUser {
   authToken: string

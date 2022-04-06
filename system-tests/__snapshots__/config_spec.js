@@ -387,3 +387,33 @@ The componentFolder configuration option is now invalid when set on the config o
  
 
 `
+
+exports['e2e config throws an error if indexHtml is set on the root level 1'] = `
+The indexHtmlFile configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
+
+It is now configured separately as a testing type property: component.indexHtmlFile
+
+{
+  component: {
+    indexHtmlFile: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if indexHtml is set on the e2e level 1'] = `
+The e2e.indexHtmlFile configuration option is not valid for e2e testing.
+
+Please remove this option or add this as a component testing type property: component.indexHtmlFile
+
+{
+  e2e: {
+    indexHtmlFile: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
+
+`

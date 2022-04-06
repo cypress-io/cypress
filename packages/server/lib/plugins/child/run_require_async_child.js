@@ -64,11 +64,21 @@ function run (ipc, file, projectRoot) {
     return true
   }
 
-  const isValidDevServer = (config) => {
+  const getValidDevServer = (config) => {
     const { devServer } = config
 
     if (devServer && typeof devServer === 'function') {
-      return true
+      return { devServer, objApi: false }
+    }
+
+    if (devServer && typeof devServer === 'object') {
+      if (devServer.bundler === 'webpack') {
+        return { devServer: require('@cypress/webpack-dev-server-fresh').devServer, objApi: true }
+      }
+
+      if (devServer.bundler === 'vite') {
+        return { devServer: require('@cypress/vite-dev-server-fresh').devServer, objApi: true }
+      }
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
@@ -152,16 +162,31 @@ function run (ipc, file, projectRoot) {
         }
 
         if (testingType === 'component') {
-          if (!isValidDevServer((result.component || {}))) {
+          const devServerInfo = getValidDevServer(result.component || {})
+
+          if (!devServerInfo) {
             return
           }
+
+          const { devServer, objApi } = devServerInfo
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
-            const { devServer } = result.component
+            on('dev-server:start', (devServerOpts) => {
+              if (objApi) {
+                const { specs, devServerEvents } = devServerOpts
 
-            on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
+                return devServer({
+                  cypressConfig: config,
+                  ...result.component.devServer,
+                  specs,
+                  devServerEvents,
+                })
+              }
+
+              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+            })
 
             return setupNodeEvents(on, config)
           })

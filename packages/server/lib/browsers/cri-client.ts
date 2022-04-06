@@ -17,6 +17,9 @@ const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or C
  */
 export namespace CRIWrapper {
   export type Command =
+    'Page.enable' |
+    'Network.enable' |
+    'Console.enable' |
     'Browser.getVersion' |
     'Page.bringToFront' |
     'Page.captureScreenshot' |
@@ -101,8 +104,9 @@ const maybeDebugCdpMessages = (cri) => {
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = (target: string, onAsynchronousError: Function, host?: string, port?: number): Promise<CRIWrapper.Client> => {
+export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number): Promise<CRIWrapper.Client> => {
   const subscriptions: {eventName: CRIWrapper.EventName, cb: Function}[] = []
+  const enableCommands: CRIWrapper.Command[] = []
   let enqueuedCommands: {command: CRIWrapper.Command, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
@@ -111,7 +115,7 @@ export const create = (target: string, onAsynchronousError: Function, host?: str
   let cri
   let client: CRIWrapper.Client
 
-  const reconnect = () => {
+  const reconnect = async () => {
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -122,9 +126,17 @@ export const create = (target: string, onAsynchronousError: Function, host?: str
       return
     }
 
-    return connect()
-    .then(() => {
-      debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
+    try {
+      await connect()
+
+      debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands })
+
+      // '*.enable' commands need to be resent on reconnect or any events in
+      // that namespace will no longer be received
+      await Promise.all(enableCommands.map((cmdName) => {
+        return cri.send(cmdName)
+      }))
+
       subscriptions.forEach((sub) => {
         cri.on(sub.eventName, sub.cb)
       })
@@ -135,81 +147,91 @@ export const create = (target: string, onAsynchronousError: Function, host?: str
       })
 
       enqueuedCommands = []
-    })
-    .catch((err) => {
+    } catch (err) {
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
       // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
       cdpError.isFatalApiErr = true
       onAsynchronousError(cdpError)
-    })
+    }
   }
 
-  const connect = () => {
-    cri?.close()
+  const connect = async () => {
+    await cri?.close()
 
     debug('connecting %o', { target })
 
-    return CRI({
+    cri = await CRI({
       host,
       port,
       target,
       local: true,
     })
-    .then((newCri) => {
-      cri = newCri
-      connected = true
 
-      maybeDebugCdpMessages(cri)
+    connected = true
 
-      // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
-      cri._notifier.on('disconnect', reconnect)
-    })
+    maybeDebugCdpMessages(cri)
+
+    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
+    cri._notifier.on('disconnect', reconnect)
   }
 
-  return connect()
-  .then(() => {
-    client = {
-      targetId: target,
-      send: async (command, params?) => {
-        const enqueue = () => {
-          return new Promise((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
-          })
+  await connect()
+
+  client = {
+    targetId: target,
+    async send (command: CRIWrapper.Command, params?: object) {
+      const enqueue = () => {
+        return new Promise((resolve, reject) => {
+          enqueuedCommands.push({ command, params, p: { resolve, reject } })
+        })
+      }
+
+      // Keep track of '*.enable' commands so they can be resent when
+      // reconnecting
+      if (command.endsWith('.enable')) {
+        enableCommands.push(command)
+      }
+
+      if (connected) {
+        try {
+          return await cri.send(command, params)
+        } catch (err) {
+          // This error occurs when the browser has been left open for a long
+          // time and/or the user's computer has been put to sleep. The
+          // socket disconnects and we need to recreate the socket and
+          // connection
+          if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
+            throw err
+          }
+
+          debug('encountered closed websocket on send %o', { command, params, err })
+
+          const p = enqueue()
+
+          await reconnect()
+
+          return p
         }
+      }
 
-        if (connected) {
-          return cri.send(command, params)
-          .catch((err) => {
-            if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
-              throw err
-            }
+      return enqueue()
+    },
+    on (eventName, cb) {
+      subscriptions.push({ eventName, cb })
+      debug('registering CDP on event %o', { eventName })
 
-            debug('encountered closed websocket on send %o', { command, params, err })
+      return cri.on(eventName, cb)
+    },
+    close () {
+      closed = true
 
-            const p = enqueue()
+      return cri.close()
+    },
 
-            reconnect()
+    // @ts-ignore
+    reconnect,
+  }
 
-            return p
-          })
-        }
-
-        return enqueue()
-      },
-      on (eventName, cb) {
-        subscriptions.push({ eventName, cb })
-        debug('registering CDP on event %o', { eventName })
-
-        return cri.on(eventName, cb)
-      },
-      close () {
-        closed = true
-
-        return cri.close()
-      },
-    }
-
-    return client
-  })
+  return client
 }

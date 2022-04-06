@@ -144,9 +144,7 @@ describe('findSpecs', () => {
       appApi: {} as AppApiShape,
       localSettingsApi: {} as LocalSettingsApiShape,
       authApi: {} as AuthApiShape,
-      configApi: {
-        getServerPluginHandlers: () => [],
-      } as InjectedConfigApi,
+      configApi: {} as InjectedConfigApi,
       projectApi: {} as ProjectApiShape,
       electronApi: {} as ElectronApiShape,
       browserApi: {} as BrowserApiShape,

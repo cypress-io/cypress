@@ -9,6 +9,7 @@
     "script"
   ],
   "compilerOptions": {
+    "lib": ["es2020"],
     "strict": true,
     "allowJs": false,
     "noImplicitAny": true,

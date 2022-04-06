@@ -24,8 +24,8 @@
     <TransitionQuickFade>
       <PopoverPanel
         static
-        class="bg-white rounded shadow top-36px right-0 z-10 absolute"
-        :class="open ? '' : 'hidden'"
+        class="bg-white rounded shadow top-36px z-10 absolute"
+        :class="{'hidden': !open, 'right-0': align === 'right', 'left-0': align === 'left'}"
       >
         <ul
           v-if="props.variant !== 'panel'"
@@ -44,7 +44,11 @@ import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.
 
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 
-const props = defineProps<{
-  variant?: string
-}>()
+const props = withDefaults(defineProps<{
+  variant?: 'panel'
+  align?: 'left' | 'right'
+}>(), {
+  variant: undefined,
+  align: 'right',
+})
 </script>

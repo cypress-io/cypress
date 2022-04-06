@@ -49,6 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ marktnoonan/merg-develop-2022-4-5, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -431,9 +432,9 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
-            if [[ -v PACKAGES_RECORD_KEY ]]; then
+            if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
-              CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
@@ -1107,7 +1108,8 @@ jobs:
             run-app-integration-tests-chrome,
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
-            run-launchpad-integration-tests-chrome
+            run-launchpad-integration-tests-chrome,
+            run-webpack-dev-server-fresh-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1428,7 +1430,7 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1442,6 +1444,28 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-webpack-dev-server-fresh-integration-tests:
+    <<: *defaults
+    # parallelism: 3 TODO: Add parallelism once we have more specs
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group webpack-dev-server-fresh
+          working_directory: npm/webpack-dev-server-fresh
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs      
+
   ui-components-integration-tests:
     <<: *defaults
     steps:
@@ -1452,7 +1476,7 @@ jobs:
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             yarn cypress:run --record --parallel --group ui-components
           working_directory: packages/ui-components
       - verify-mocha-results
@@ -1503,9 +1527,13 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-dev-server-fresh test
 
   npm-vite-dev-server:
     <<: *defaults
@@ -1565,7 +1593,6 @@ jobs:
       - run:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
-          #
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1641,26 +1668,26 @@ jobs:
           command: yarn workspace @cypress/eslint-plugin-dev test
 
   npm-cypress-schematic:
-      <<: *defaults
-      resource_class: small
-      steps:
-        - restore_cached_workspace
-        - run:
-            name: Build + Install
-            command: |
-              yarn workspace @cypress/schematic build:all
-            working_directory: npm/cypress-schematic
-        - run:
-            name: Launch
-            command: |
-              yarn launch:test
-            working_directory: npm/cypress-schematic
-        - run:
-            name: Run unit tests
-            command: |
-              yarn test
-            working_directory: npm/cypress-schematic
-        - store-npm-logs
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build + Install
+          command: |
+            yarn workspace @cypress/schematic build:all
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Launch
+          command: |
+            yarn launch:test
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Run unit tests
+          command: |
+            yarn test
+          working_directory: npm/cypress-schematic
+      - store-npm-logs
 
   npm-release:
     <<: *defaults
@@ -2154,6 +2181,7 @@ linux-workflow: &linux-workflow
           - build
     # unit, integration and e2e tests
     - cli-visual-tests:
+        context: test-runner:percy
         requires:
           - build
     - unit-tests:
@@ -2194,51 +2222,61 @@ linux-workflow: &linux-workflow
         requires:
           - system-tests-node-modules-install
     - driver-integration-tests-chrome:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - driver-integration-tests-chrome-beta:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - driver-integration-tests-electron:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
+    - run-webpack-dev-server-fresh-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
-        context: test-runner:launchpad-tests
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
     - reporter-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
     - ui-components-integration-tests:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - npm-webpack-dev-server:
         requires:
-          - build
+          - system-tests-node-modules-install
     - npm-vite-dev-server:
         requires:
           - build
@@ -2249,6 +2287,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-design-system:
+        context: test-runner:percy
         requires:
           - build
     - npm-vue:

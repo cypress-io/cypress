@@ -153,41 +153,13 @@ fragment SpecRunnerHeader on CurrentProject {
   id
   currentTestingType
 
-  currentBrowser {
+  activeBrowser {
     id
     displayName
     majorVersion
   }
   config
   ...VerticalBrowserListItems
-}
-`
-
-gql`
-fragment SpecRunnerHeader_Browser on Browser {
-  id
-  name
-  displayName
-}
-`
-
-gql`
-mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
-  launchpadSetBrowser(id: $browserId) {
-    id
-    currentBrowser {
-      id
-      displayName
-      majorVersion
-    }
-    browsers {
-      id
-      isSelected
-    }
-  }
-  launchOpenProject(specPath: $specPath) {
-    id
-  }
 }
 `
 
@@ -223,7 +195,7 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const togglePlayground = () => _togglePlayground(autIframe)
 
 // Have to spread gql props since binding it to v-model causes error when testing
-const selectedBrowser = ref({ ...props.gql.currentBrowser })
+const selectedBrowser = ref({ ...props.gql.activeBrowser })
 
 const activeSpecPath = specStore.activeSpec?.absolute
 
