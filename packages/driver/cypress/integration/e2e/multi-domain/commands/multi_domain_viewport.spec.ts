@@ -6,7 +6,7 @@ context('multi-domain viewport', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const viewportChangedSpy = cy.spy()
 
       cy.on('viewport:changed', viewportChangedSpy)
@@ -31,7 +31,7 @@ context('multi-domain viewport', () => {
 
     context('.viewport()', () => {
       it('changes the viewport', () => {
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           cy.window().then((win) => {
             expect(win.innerHeight).to.equal(660)
             expect(win.innerWidth).to.equal(1000)
@@ -47,7 +47,7 @@ context('multi-domain viewport', () => {
       })
 
       it('resets the viewport between tests', () => {
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           cy.window().then((win) => {
             expect(win.innerHeight).to.equal(660)
             expect(win.innerWidth).to.equal(1000)
@@ -56,8 +56,8 @@ context('multi-domain viewport', () => {
       })
 
       context('cy.on(\'viewport:changed\')', () => {
-        it('calls viewport:changed handler in switchToDomain', () => {
-          cy.switchToDomain('http://foobar.com:3500', () => {
+        it('calls viewport:changed handler in cy.origin', () => {
+          cy.origin('http://foobar.com:3500', () => {
             const viewportChangedSpy = cy.spy()
 
             cy.on('viewport:changed', viewportChangedSpy)
@@ -73,7 +73,7 @@ context('multi-domain viewport', () => {
 
           cy.on('viewport:changed', viewportChangedSpy)
 
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
             cy.viewport(320, 480)
           }).then(() => {
             expect(viewportChangedSpy).not.to.be.called
@@ -86,8 +86,8 @@ context('multi-domain viewport', () => {
 
         before(() => {
           viewportChangedSpyPrimary = cy.spy()
-          cy.switchToDomain('http://foobar.com:3500', () => {
-          // using global since a function can't be passed to switchToDomain
+          cy.origin('http://foobar.com:3500', () => {
+          // using global since a function can't be passed to cy.origin
           // and we need to be able to remove the listener in the 'after' hook
             globalThis.viewportChangedSpySecondary = cy.spy()
           })
@@ -95,15 +95,15 @@ context('multi-domain viewport', () => {
 
         after(() => {
           Cypress.off('viewport:changed', viewportChangedSpyPrimary)
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
             Cypress.off('viewport:changed', globalThis.viewportChangedSpySecondary)
           })
 
           delete globalThis.viewportChangedSpySecondary
         })
 
-        it('calls viewport:changed handler in switchToDomain', () => {
-          cy.switchToDomain('http://foobar.com:3500', () => {
+        it('calls viewport:changed handler in cy.origin', () => {
+          cy.origin('http://foobar.com:3500', () => {
             Cypress.on('viewport:changed', globalThis.viewportChangedSpySecondary)
 
             cy.viewport(320, 480).then(() => {
@@ -115,7 +115,7 @@ context('multi-domain viewport', () => {
         it('does NOT call viewport:changed handler of primary', () => {
           Cypress.on('viewport:changed', viewportChangedSpyPrimary)
 
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
             cy.viewport(320, 480)
           }).then(() => {
             expect(viewportChangedSpyPrimary).not.to.be.called
@@ -128,7 +128,7 @@ context('multi-domain viewport', () => {
 
         cy.on('viewport:changed', viewportChangedSpy)
 
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
         // change the viewport in the secondary first
           cy.viewport(320, 480)
 
@@ -149,7 +149,7 @@ context('multi-domain viewport', () => {
       })
 
       it('syncs the viewport across multiple domains', () => {
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           cy.viewport(320, 480)
           cy.window().then((win) => {
             expect(win.innerWidth).to.equal(320)
@@ -161,7 +161,7 @@ context('multi-domain viewport', () => {
           win.location.href = 'http://www.idp.com:3500/fixtures/multi-domain.html'
         })
 
-        cy.switchToDomain('http://idp.com:3500', () => {
+        cy.origin('http://idp.com:3500', () => {
           const viewportChangedSpy = cy.spy()
 
           cy.on('viewport:changed', viewportChangedSpy)

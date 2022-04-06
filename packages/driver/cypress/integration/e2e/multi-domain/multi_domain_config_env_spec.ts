@@ -30,7 +30,7 @@
             resolve()
           })
 
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
             // @ts-ignore
             Cypress.config('chromeWebSecurity', false)
           })
@@ -41,7 +41,7 @@
     context('serializable', () => {
       it(`syncs initial Cypress.${fnName}() from the primary domain to the secondary (synchronously)`, () => {
         Cypress[fnName](USED_KEYS.foo, 'bar')
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const bar = Cypress[fnName](USED_KEYS.foo)
 
           expect(bar).to.equal('bar')
@@ -50,7 +50,7 @@
 
       it(`syncs serializable values in the Cypress.${fnName}() again to the secondary even after spec bridge is created`, () => {
         Cypress[fnName](USED_KEYS.foo, 'baz')
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const baz = Cypress[fnName](USED_KEYS.foo)
 
           expect(baz).to.equal('baz')
@@ -58,7 +58,7 @@
       })
 
       it(`syncs serializable Cypress.${fnName}() values outwards from secondary (synchronously)`, () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           Cypress[fnName](USED_KEYS.bar, 'baz')
         }).then(() => {
           const baz = Cypress[fnName](USED_KEYS.bar)
@@ -70,7 +70,7 @@
       it(`syncs serializable Cypress.${fnName}() values outwards from secondary even if the value is undefined`, () => {
         Cypress[fnName](USED_KEYS.foo, 'bar')
 
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           Cypress[fnName](USED_KEYS.foo, undefined)
         }).then(() => {
           expect(Cypress[fnName]('foo')).to.be.undefined
@@ -78,7 +78,7 @@
       })
 
       it(`syncs serializable Cypress.${fnName}() values outwards from secondary (commands/async)`, () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           cy.then(() => {
             Cypress[fnName](USED_KEYS.bar, 'quux')
           })
@@ -90,7 +90,7 @@
       })
 
       it(`persists Cypress.${fnName}() changes made in the secondary, assuming primary has not overwritten with a serializable value`, () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const quux = Cypress[fnName](USED_KEYS.bar)
 
           expect(quux).to.equal('quux')
@@ -104,9 +104,9 @@
         },
       }, () => {
         return new Promise<void>((resolve) => {
-          cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+          cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
             setTimeout(() => {
-              // this value STILL gets set, but will be blown away on the next switchToDomain with whatever exists in the primary
+              // this value STILL gets set, but will be blown away on the next origin with whatever exists in the primary
               Cypress[fnName](USED_KEYS.baz, 'qux')
             }, 100)
 
@@ -126,7 +126,7 @@
           [USED_KEYS.baz]: 'quux',
         },
       }, () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           // in previous test, 'baz' was set to 'qux' after the callback window was closed.
           // this should be overwritten by 'quux' that exists in the primary
           const quux = Cypress[fnName](USED_KEYS.baz)
@@ -141,7 +141,7 @@
           [USED_KEYS.baz]: undefined,
         },
       }, () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const isNowUndefined = Cypress[fnName](USED_KEYS.baz)
 
           expect(isNowUndefined).to.be.undefined
@@ -154,7 +154,7 @@
 
       it('does not sync unserializable values from the primary to the secondary', () => {
         Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const isUndefined = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isUndefined).to.be.undefined
@@ -163,7 +163,7 @@
 
       it('does not overwrite unserializable values in the primary when none exist in the secondary', () => {
         Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
-        cy.switchToDomain('http://foobar.com:3500', () => undefined)
+        cy.origin('http://foobar.com:3500', () => undefined)
 
         const isFunc = Cypress[fnName](USED_KEYS.unserializable)
 
@@ -172,7 +172,7 @@
 
       it('overwrites unserializable values in the primary when serializable values of same key exist in secondary', () => {
         Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           Cypress[fnName](USED_KEYS.unserializable, undefined)
         }).then(() => {
           const isNowUndefined = Cypress[fnName](USED_KEYS.unserializable)
@@ -182,7 +182,7 @@
       })
 
       it('overwrites unserializable values in the secondary when serializable values of same key exist in primary', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const unserializableFuncSecondary = () => undefined
 
           Cypress[fnName](USED_KEYS.unserializable, unserializableFuncSecondary)
@@ -190,7 +190,7 @@
           Cypress[fnName](USED_KEYS.unserializable, undefined)
         })
 
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const isUndefined = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isUndefined).to.be.undefined
@@ -203,7 +203,7 @@
 
       it('does not overwrite unserializable values in the primary when unserializable values of same key exist in secondary', () => {
         Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const unserializableFuncSecondary = () => undefined
 
           Cypress[fnName](USED_KEYS.unserializable, unserializableFuncSecondary)
@@ -222,7 +222,7 @@
 
         Cypress[fnName](USED_KEYS.unserializable, partiallyUnserializableObject)
 
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const doesNotContainPartialAProperty = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(doesNotContainPartialAProperty?.a).to.be.undefined
@@ -245,7 +245,7 @@
       }, function () {
         Cypress[fnName](USED_KEYS.error, new Error('error'))
 
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const isUndefined = Cypress[fnName](USED_KEYS.error)
 
           expect(isUndefined).to.be.undefined
@@ -258,7 +258,7 @@
       }, () => {
         Cypress[fnName](USED_KEYS.error, new Error('error'))
 
-        cy.switchToDomain('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+        cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const isErrorObj = Cypress[fnName](USED_KEYS.error)
 
           // We preserve the error structure, but on preprocessing to the spec bridge, the error is converted to a flat object

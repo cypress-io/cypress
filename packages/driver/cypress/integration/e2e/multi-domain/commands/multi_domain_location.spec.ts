@@ -5,13 +5,13 @@ context('multi-domain location', () => {
   })
 
   it('.hash()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.hash().should('be.empty')
     })
   })
 
   it('.location()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.location().should((location) => {
         expect(location.href).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
         expect(location.origin).to.equal('http://www.foobar.com:3500')
@@ -20,7 +20,7 @@ context('multi-domain location', () => {
   })
 
   it('.url()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.url().should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
     })
   })

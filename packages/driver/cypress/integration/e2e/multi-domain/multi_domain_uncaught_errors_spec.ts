@@ -16,21 +16,21 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.then(() => {
           expect(true).to.be.false
         })
       })
     })
 
-    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', (done) => {
+    it('fails the current test/command if sync errors are thrown from the cy.origin callback', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
       cy.on('fail', (err, runnable) => {
         // TODO: we likely need to change the messaging around this error to make it clear to multi-domain users that
-        // this behavior is configurable with 'uncaught:exception', but it MUST be declared inside the switchToDomain callback
+        // this behavior is configurable with 'uncaught:exception', but it MUST be declared inside the cy.origin callback
         // and that 'uncaught:exception' will NOT be triggered outside that callback (inside the primary domain)
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('sync error')
@@ -45,7 +45,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('.trigger-sync-error').click()
       })
     })
@@ -58,7 +58,7 @@ describe('multi-domain - uncaught errors', () => {
 
       cy.on('fail', failureSpy)
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.on('uncaught:exception', () => false)
         cy.get('.trigger-sync-error').click()
       }).then(() => {
@@ -78,7 +78,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => true)
         cy.get('.trigger-sync-error').click()
       })
@@ -86,8 +86,8 @@ describe('multi-domain - uncaught errors', () => {
 
     // if we mutate the error, the app's listeners for 'error' or
     // 'unhandledrejection' will have our wrapped error instead of the original
-    it('original error is not mutated for "error" in the switchToDomain', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+    it('original error is not mutated for "error" in the origin', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-sync-error').click()
@@ -98,7 +98,7 @@ describe('multi-domain - uncaught errors', () => {
   })
 
   describe('async errors', () => {
-    it('fails the current test/command if async errors are thrown from the switchToDomain callback', (done) => {
+    it('fails the current test/command if async errors are thrown from the cy.origin callback', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
@@ -107,13 +107,13 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
 
         // add the cy.wait here to keep commands streaming in, forcing the
-        // switchToDomain callback window to be open long enough for the error to occur
+        // cy.origin callback window to be open long enough for the error to occur
         cy.wait(250)
       })
     })
@@ -137,16 +137,16 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('.trigger-async-error').click()
 
         // add the cy.wait here to keep commands streaming in,
-        // forcing the switchToDomain callback window to be open long enough for an async error to occur
+        // forcing the cy.origin callback window to be open long enough for an async error to occur
         cy.wait(1000)
       })
     })
 
-    it('passes the current test/command if async errors are thrown from the secondary domain AUT, but the switchToDomain callback is finished running', () => {
+    it('passes the current test/command if async errors are thrown from the secondary domain AUT, but the cy.origin callback is finished running', () => {
       const uncaughtExceptionSpy = cy.spy()
       const failureSpy = cy.spy()
 
@@ -154,7 +154,7 @@ describe('multi-domain - uncaught errors', () => {
 
       cy.on('fail', failureSpy)
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
         cy.get('.trigger-async-error').click()
       }).then(() => {
@@ -163,7 +163,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', (done) => {
+    it('fails the current test/command if async errors are thrown from the cy.origin callback after it is finished running', (done) => {
       cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
@@ -172,7 +172,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         setTimeout(() => {
           throw new Error('setTimeout error')
         }, 50)
@@ -184,7 +184,7 @@ describe('multi-domain - uncaught errors', () => {
 
   describe('unhandled rejections', () => {
     it('unhandled rejection triggers uncaught:exception and has promise as third argument', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const r = cy.state('runnable')
 
         const afterUncaughtException = new Promise<void>((resolve) => {
@@ -208,7 +208,7 @@ describe('multi-domain - uncaught errors', () => {
     })
 
     it('original error is not mutated for "unhandledrejection"', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.once('uncaught:exception', () => false)
 
         cy.get('.trigger-unhandled-rejection').click()
@@ -217,7 +217,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    it('fails the current test/command if a promise is rejected from the test code in switchToDomain', (done) => {
+    it('fails the current test/command if a promise is rejected from the test code in cy.origin', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')
@@ -227,16 +227,16 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
 
         // add the cy.wait here to keep commands streaming in, forcing the
-        // switchToDomain callback window to be open long enough for the error to occur
+        // cy.origin callback window to be open long enough for the error to occur
         cy.wait(250)
       })
     })
 
-    it('fails the current test/command if a promise is rejected from the switchToDomain callback after it is finished running', (done) => {
+    it('fails the current test/command if a promise is rejected from the cy.origin callback after it is finished running', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')
@@ -246,7 +246,7 @@ describe('multi-domain - uncaught errors', () => {
         done()
       })
 
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         Promise.reject(new Error('rejected promise'))
       })
 
@@ -258,12 +258,12 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing dom elements', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw document.createElement('h1')
       })
     })
@@ -271,12 +271,12 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing functions', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw () => undefined
       })
     })
@@ -284,12 +284,12 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing symbols', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw Symbol('foo')
       })
     })
@@ -297,12 +297,12 @@ describe('multi-domain - uncaught errors', () => {
     it('handles users throwing promises', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw new Promise(() => {})
       })
     })
@@ -324,7 +324,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         class CustomError extends Error {
           private _name = 'CustomError'
           get name () {
@@ -361,7 +361,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         class FooBar {
           private _metasyntaticList = ['foo']
           get metasyntaticList (): string[] {
@@ -390,7 +390,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw 'oops'
       })
     })
@@ -403,7 +403,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw ['why would anyone do this?', 'this is odd']
       })
     })
@@ -416,7 +416,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw 2
       })
     })
@@ -429,7 +429,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw true
       })
     })
@@ -442,7 +442,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw null
       })
     })
@@ -455,7 +455,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw undefined
       })
     })
@@ -463,12 +463,12 @@ describe('multi-domain - uncaught errors', () => {
     it('handles throwing of arbitrary data types that are serializable but cannot be mapped to an error', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
-        expect(err.message).to.equal('`cy.switchToDomain()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
+        expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
       })
 
       // @ts-ignore
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         throw new Date()
       })
     })

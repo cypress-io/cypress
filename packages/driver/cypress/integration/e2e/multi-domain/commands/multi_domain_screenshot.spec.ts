@@ -21,7 +21,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('captures the fullPage', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({ capture: 'fullPage' })
@@ -35,7 +35,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('captures the runner', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({ capture: 'runner' })
@@ -47,7 +47,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('captures the viewport', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({ capture: 'viewport' })
@@ -79,7 +79,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('supports multiple titles', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot()
@@ -90,7 +90,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('supports the blackout option', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({
@@ -108,7 +108,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('supports element screenshots', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.get('.tall-element').screenshot()
@@ -120,7 +120,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('supports screenshot retrying with appropriate naming', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.state('runnable')._currentRetry = 2
@@ -133,7 +133,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('calls the onBeforeScreenshot callback', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onBeforeScreenshot = cy.stub()
 
@@ -143,7 +143,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('calls the onAfterScreenshot callback', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onAfterScreenshot = cy.stub()
 
@@ -153,7 +153,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('supports the Cypress.screenshot callbacks', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onAfterScreenshot = cy.stub()
         const onBeforeScreenshot = cy.stub()
@@ -170,7 +170,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('supports pausing timers', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
         cy.window().then((win) => {
@@ -203,7 +203,7 @@ context('multi-domain screenshot', () => {
     })
 
     it('does not pause timers when disableTimersAndAnimations is false', () => {
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
         cy.window().then((win) => {
@@ -233,7 +233,7 @@ context('multi-domain screenshot', () => {
         expect(err.message).to.include('setTimeout error after screenshot')
       })
 
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
 
         cy.window().then((win) => {
@@ -258,7 +258,7 @@ context('multi-domain screenshot', () => {
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
       })
 
-      cy.switchToDomain('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+      cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
 
         cy.window().then((win) => {

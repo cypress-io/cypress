@@ -5,7 +5,7 @@ context('multi-domain spies, stubs, and clock', () => {
   })
 
   it('spy()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.spy(foo, 'bar')
@@ -15,7 +15,7 @@ context('multi-domain spies, stubs, and clock', () => {
   })
 
   it('stub()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.stub(foo, 'bar')
@@ -26,7 +26,7 @@ context('multi-domain spies, stubs, and clock', () => {
 
   context('resets stubs', () => {
     it('creates the stub', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const stubEnv = cy.stub(Cypress, 'env').withArgs('foo').returns('bar')
 
         expect(Cypress.env('foo')).to.equal('bar')
@@ -37,7 +37,7 @@ context('multi-domain spies, stubs, and clock', () => {
     })
 
     it('verifies the stub got restored', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         expect(Cypress.env('foo')).to.be.undefined
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
@@ -47,7 +47,7 @@ context('multi-domain spies, stubs, and clock', () => {
 
   context('resets spies', () => {
     it('creates the spy', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         const stubEnv = cy.spy(Cypress, 'env')
 
         Cypress.env()
@@ -58,7 +58,7 @@ context('multi-domain spies, stubs, and clock', () => {
     })
 
     it('verifies the spy got restored', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
       })
@@ -66,7 +66,7 @@ context('multi-domain spies, stubs, and clock', () => {
   })
 
   it('clock() and tick()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
       cy.clock(now)

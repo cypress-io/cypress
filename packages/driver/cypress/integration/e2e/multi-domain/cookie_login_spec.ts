@@ -9,7 +9,7 @@ describe('multi-domain - cookie login', () => {
     cy.session('ZJohnson', () => {
       cy.visit('/fixtures/multi-domain.html')
       cy.get('[data-cy="cookie-login"]').click()
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('ZJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -30,7 +30,7 @@ describe('multi-domain - cookie login', () => {
     })
 
     it('works with no SameSite, no Secure', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('AJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -39,7 +39,7 @@ describe('multi-domain - cookie login', () => {
     })
 
     it('works with SameSite=None, Secure', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="sameSite"]').select('None')
         cy.get('[data-cy="secure"]').check()
         cy.get('[data-cy="username"]').type('BJohnson')
@@ -50,7 +50,7 @@ describe('multi-domain - cookie login', () => {
     })
 
     it('works with SameSite=None, no Secure', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="sameSite"]').select('None')
         cy.get('[data-cy="username"]').type('CJohnson')
         cy.get('[data-cy="login"]').click()
@@ -60,7 +60,7 @@ describe('multi-domain - cookie login', () => {
     })
 
     it('works with SameSite=Lax, Secure', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="sameSite"]').select('Lax')
         cy.get('[data-cy="secure"]').check()
         cy.get('[data-cy="username"]').type('DJohnson')
@@ -71,7 +71,7 @@ describe('multi-domain - cookie login', () => {
     })
 
     it('works with SameSite=Strict, Secure', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="sameSite"]').select('Strict')
         cy.get('[data-cy="secure"]').check()
         cy.get('[data-cy="username"]').type('EJohnson')
@@ -82,7 +82,7 @@ describe('multi-domain - cookie login', () => {
     })
 
     it('works with invalid SameSite, Secure', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="sameSite"]').select('Invalid')
         cy.get('[data-cy="secure"]').check()
         cy.get('[data-cy="username"]').type('FJohnson')

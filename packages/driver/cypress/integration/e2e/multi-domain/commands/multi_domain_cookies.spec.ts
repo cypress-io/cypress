@@ -5,7 +5,7 @@ context('multi-domain cookies', () => {
   })
 
   it('.getCookie(), .getCookies(), and .setCookie()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.getCookies().should('be.empty')
 
       cy.setCookie('foo', 'bar')
@@ -16,7 +16,7 @@ context('multi-domain cookies', () => {
   })
 
   it('.clearCookie()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.setCookie('foo', 'bar')
       cy.getCookie('foo').should('not.be.null')
       cy.clearCookie('foo')
@@ -25,7 +25,7 @@ context('multi-domain cookies', () => {
   })
 
   it('.clearCookies()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.setCookie('foo', 'bar')
       cy.setCookie('faz', 'baz')
 

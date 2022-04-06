@@ -5,7 +5,7 @@ context('multi-domain files', () => {
   })
 
   it('.fixture()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.fixture('example.json').then((json) => {
         expect(json).to.be.an('object')
         expect(json.example).to.be.true
@@ -14,7 +14,7 @@ context('multi-domain files', () => {
   })
 
   it('.readFile()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.readFile('cypress/fixtures/example.json').then((json) => {
         expect(json).to.be.an('object')
         expect(json.example).to.be.true
@@ -23,7 +23,7 @@ context('multi-domain files', () => {
   })
 
   it('.writeFile()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
       cy.stub(Cypress, 'backend').resolves({

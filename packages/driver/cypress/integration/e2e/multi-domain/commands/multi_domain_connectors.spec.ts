@@ -5,7 +5,7 @@ context('multi-domain connectors', () => {
   })
 
   it('.each()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-name>[name="colors"]').each(($element, index) => {
         expect($element.prop('type')).to.equal('checkbox')
       })
@@ -13,19 +13,19 @@ context('multi-domain connectors', () => {
   })
 
   it('.its()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id>input').its('length').should('eq', 3)
     })
   })
 
   it('.invoke()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').invoke('text').should('eq', 'button')
     })
   })
 
   it('.spread()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const arr = ['foo', 'bar', 'baz']
 
       cy.wrap(arr).spread((foo, bar, baz) => {
@@ -37,7 +37,7 @@ context('multi-domain connectors', () => {
   })
 
   it('.then()', () => {
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id>input').then(($list) => {
         expect($list).to.have.length(3)
       })

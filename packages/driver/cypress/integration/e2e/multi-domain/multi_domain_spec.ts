@@ -11,7 +11,7 @@ describe('multi-domain', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-    cy.switchToDomain('http://foobar.com:3500', { args: expectedViewport }, (expectedViewport) => {
+    cy.origin('http://foobar.com:3500', { args: expectedViewport }, (expectedViewport) => {
       const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
 
       expect(secondaryViewport).to.deep.equal(expectedViewport)
@@ -25,14 +25,14 @@ describe('multi-domain', () => {
     })
 
     it('runs commands in secondary domain', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
         .should('equal', 'From a secondary domain')
       })
 
-      cy.log('after switchToDomain')
+      cy.log('after cy.origin')
     })
 
     it('passes runnable state to the secondary domain', () => {
@@ -71,7 +71,7 @@ describe('multi-domain', () => {
         ctx: {},
       }
 
-      cy.switchToDomain('http://foobar.com:3500', { args: expectedRunnable }, (expectedRunnable) => {
+      cy.origin('http://foobar.com:3500', { args: expectedRunnable }, (expectedRunnable) => {
         const actualRunnable = cy.state('runnable')
 
         expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
@@ -90,18 +90,18 @@ describe('multi-domain', () => {
     })
 
     it('handles querying nested elements', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy
         .get('form button')
         .invoke('text')
         .should('equal', 'Submit')
       })
 
-      cy.log('after switchToDomain')
+      cy.log('after cy.origin')
     })
 
     it('sets up window.Cypress in secondary domain', () => {
-      cy.switchToDomain('http://foobar.com:3500', () => {
+      cy.origin('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="cypress-check"]')
         .invoke('text')
@@ -111,39 +111,39 @@ describe('multi-domain', () => {
 
     describe('data argument', () => {
       it('passes object to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { foo: 'foo', bar: 'bar' } }, ({ foo, bar }) => {
+        cy.origin('http://foobar.com:3500', { args: { foo: 'foo', bar: 'bar' } }, ({ foo, bar }) => {
           expect(foo).to.equal('foo')
           expect(bar).to.equal('bar')
         })
       })
 
       it('passes array to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: ['foo', 'bar'] }, ([foo, bar]) => {
+        cy.origin('http://foobar.com:3500', { args: ['foo', 'bar'] }, ([foo, bar]) => {
           expect(foo).to.equal('foo')
           expect(bar).to.equal('bar')
         })
       })
 
       it('passes string to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: 'foo' }, (foo) => {
+        cy.origin('http://foobar.com:3500', { args: 'foo' }, (foo) => {
           expect(foo).to.equal('foo')
         })
       })
 
       it('passes number to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: 1 }, (num) => {
+        cy.origin('http://foobar.com:3500', { args: 1 }, (num) => {
           expect(num).to.equal(1)
         })
       })
 
       it('passes boolean to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: true }, (bool) => {
+        cy.origin('http://foobar.com:3500', { args: true }, (bool) => {
           expect(bool).to.be.true
         })
       })
 
       it('passes mixed types to callback function', () => {
-        cy.switchToDomain('http://foobar.com:3500', { args: { foo: 'foo', num: 1, bool: true } }, ({ foo, num, bool }) => {
+        cy.origin('http://foobar.com:3500', { args: { foo: 'foo', num: 1, bool: true } }, ({ foo, num, bool }) => {
           expect(foo).to.equal('foo')
           expect(num).to.equal(1)
           expect(bool).to.be.true
@@ -160,7 +160,7 @@ describe('multi-domain', () => {
             resolve(undefined)
           })
 
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
           // done is not defined on purpose here as we want to test the error gets sent back to the primary domain correctly
           // @ts-ignore
             done()
@@ -174,7 +174,7 @@ describe('multi-domain', () => {
           done()
         })
 
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           throw 'oops'
         })
       })
@@ -186,7 +186,7 @@ describe('multi-domain', () => {
             resolve(undefined)
           })
 
-          cy.switchToDomain('http://foobar.com:3500', () => {
+          cy.origin('http://foobar.com:3500', () => {
             throw 'oops'
           })
         })
@@ -203,7 +203,7 @@ describe('multi-domain', () => {
           done()
         })
 
-        cy.switchToDomain('http://foobar.com:3500', { args: timeout }, (timeout) => {
+        cy.origin('http://foobar.com:3500', { args: timeout }, (timeout) => {
           cy.get('#doesnt-exist', {
             timeout,
           })
@@ -219,7 +219,7 @@ describe('multi-domain', () => {
           done()
         })
 
-        cy.switchToDomain('http://foobar.com:3500', () => {
+        cy.origin('http://foobar.com:3500', () => {
           cy.get('#doesnt-exist')
         })
       })

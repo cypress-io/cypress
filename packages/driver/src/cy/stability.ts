@@ -54,10 +54,10 @@ export const create = (Cypress, state) => ({
   },
 
   whenStableOrAnticipatingCrossOriginResponse (fn, command) {
-    const commandIsSwitchToDomain = command?.get('name') === 'switchToDomain' || false
+    const commandIsOrigin = command?.get('name') === 'origin' || false
 
-    // switchToDomain is a special command that can continue even when unstable.
-    if ((!!state('anticipatingCrossOriginResponse') && commandIsSwitchToDomain) || state('isStable') !== false) {
+    // origin is a special command that can continue even when unstable.
+    if ((!!state('anticipatingCrossOriginResponse') && commandIsOrigin) || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -79,8 +79,8 @@ export const create = (Cypress, state) => ({
 
       state('whenStable', onSignal)
 
-      // We only care to listen for anticipating cross origin request when the command we're waiting for is switchToDomain
-      if (commandIsSwitchToDomain) {
+      // We only care to listen for anticipating cross origin request when the command we're waiting for is origin
+      if (commandIsOrigin) {
         state('whenAnticipatingCrossOriginResponse', onSignal)
       }
     })
