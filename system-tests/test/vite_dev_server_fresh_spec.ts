@@ -11,6 +11,7 @@ describe('@cypress/vite-dev-server-fresh', function () {
       spec: null,
       configFile: 'cypress-vite.config.ts',
       expectedExitCode: 2,
+      snapshot: true,
     })
 
     systemTests.it('runs specs in vite 2.9.1', {
@@ -20,6 +21,7 @@ describe('@cypress/vite-dev-server-fresh', function () {
       spec: null,
       configFile: 'cypress-vite.config.ts',
       expectedExitCode: 2,
+      snapshot: true,
     })
   })
 })
