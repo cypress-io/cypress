@@ -42,12 +42,12 @@ describe('cross origin automations', function () {
       localStorage.key1 = 'val1'
     })
 
-    .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.2:44665', 'current_origin'] }))
+    .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.1:44665', 'current_origin'] }))
     .then((result) => {
       expect(result).deep.eq({
         localStorage: [
           { origin: 'https://localhost:4466', value: { key1: 'val1' } },
-          { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } },
+          { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } },
         ],
         sessionStorage: [],
       })
@@ -61,12 +61,12 @@ describe('cross origin automations', function () {
       sessionStorage.key1 = 'val'
     })
 
-    .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.2:44665', 'current_origin'] }))
+    .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.1:44665', 'current_origin'] }))
     .then((result) => {
       expect(result).deep.eq({
         localStorage: [
           { origin: 'https://localhost:4466', value: { key1: 'val' } },
-          { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } },
+          { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } },
         ],
         sessionStorage: [
           { origin: 'https://localhost:4466', value: { key1: 'val' } },
@@ -88,18 +88,18 @@ describe('cross origin automations', function () {
       return Cypress.session.setStorage({
         localStorage: [
         // set localStorage on different origin
-          { origin: 'https://127.0.0.2:44665', value: { key2: 'val' }, clear: true },
+          { origin: 'https://127.0.0.1:44665', value: { key2: 'val' }, clear: true },
           // set localStorage on current origin
           { value: { key3: 'val' }, clear: true },
         ],
       })
     })
-    .then(() => Cypress.session.getStorage({ origin: ['current_url', 'https://127.0.0.2:44665'] }))
+    .then(() => Cypress.session.getStorage({ origin: ['current_url', 'https://127.0.0.1:44665'] }))
     .then((result) => {
       expect(result).deep.eq({
         localStorage: [
           { origin: 'https://localhost:4466', value: { key3: 'val' } },
-          { origin: 'https://127.0.0.2:44665', value: { key2: 'val' } },
+          { origin: 'https://127.0.0.1:44665', value: { key2: 'val' } },
         ],
         sessionStorage: [],
       })
@@ -114,7 +114,7 @@ describe('cross origin automations', function () {
 
     .then(() => Cypress.session.getStorage({ origin: '*' }))
     .then((result) => {
-      expect(result.localStorage).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }, { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } }])
+      expect(result.localStorage).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }, { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } }])
     })
   })
 
@@ -170,7 +170,7 @@ describe('with a blank session', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/foo', '/cross_origin_iframe/foo'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } },
       ],
     })
   })
@@ -193,7 +193,7 @@ describe('clears session data beforeEach test even with no session', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/foo', '/cross_origin_iframe/foo'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } },
       ],
     })
   })
@@ -267,7 +267,7 @@ describe('save/restore session with cookies and localStorage', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies', '/form'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'cookies' } },
       ],
     })
   })
@@ -276,7 +276,7 @@ describe('save/restore session with cookies and localStorage', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'cookies' } },
       ],
     })
   })
@@ -298,7 +298,7 @@ describe('multiple sessions in test', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/alice', '/cross_origin_iframe/alice', '/form'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'alice' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'alice' } },
         { origin: 'https://localhost:4466', value: { username: 'alice' } },
       ],
     })
@@ -310,7 +310,7 @@ describe('multiple sessions in test', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'bob' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'bob' } },
         { origin: 'https://localhost:4466', value: { username: 'bob' } },
       ],
     })
@@ -329,7 +329,7 @@ describe('multiple sessions in test - can switch without redefining', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/alice', '/cross_origin_iframe/alice', '/form'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'alice' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'alice' } },
         { origin: 'https://localhost:4466', value: { username: 'alice' } },
       ],
     })
@@ -349,7 +349,7 @@ describe('multiple sessions in test - can switch without redefining', () => {
     expectCurrentSessionData({
       cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
       localStorage: [
-        { origin: 'https://127.0.0.2:44665', value: { name: 'bob' } },
+        { origin: 'https://127.0.0.1:44665', value: { name: 'bob' } },
         { origin: 'https://localhost:4466', value: { username: 'bob' } },
       ],
     })
@@ -443,7 +443,7 @@ describe('options.validate reruns steps when resolving false in cypress command'
       // cy.wait(10000)
     }
 
-    cy.request('https://127.0.0.2:44665/redirect').then((res) => {
+    cy.request('https://127.0.0.1:44665/redirect').then((res) => {
       return callCount !== 2
     })
   })
@@ -476,7 +476,7 @@ describe('options.validate reruns steps when failing cy.request', () => {
   SuiteWithValidateFn('validate_fail_command_2', (callCount) => {
     const status = callCount === 2 ? 500 : 200
 
-    cy.request(`https://127.0.0.2:44665/status/${status}`)
+    cy.request(`https://127.0.0.1:44665/status/${status}`)
   })
 })
 
@@ -686,13 +686,13 @@ describe.skip('consoleProps', () => {
           ],
         },
         {
-          'name': '🍪 Cookies - 127.0.0.2 (1)',
+          'name': '🍪 Cookies - 127.0.0.1 (1)',
           'data': [
             {
               'name': '/set-localStorage/foo',
               'value': 'value',
               'path': '/',
-              'domain': '127.0.0.2',
+              'domain': '127.0.0.1',
               'secure': true,
               'httpOnly': false,
               'sameSite': 'no_restriction',
@@ -700,7 +700,7 @@ describe.skip('consoleProps', () => {
           ],
         },
         {
-          'name': '📁 Storage - 127.0.0.2 (1)',
+          'name': '📁 Storage - 127.0.0.1 (1)',
           'data': [
             {
               'key': 'name',
@@ -773,7 +773,7 @@ describe('errors', () => {
 
   it('throws error when experimentalSessionSupport is enabled through test config', { experimentalLoginFlows: false, experimentalSessionSupport: true }, (done) => {
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.5.0. Please see the migration guide for updating.')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
       done()
     })
 
@@ -784,7 +784,7 @@ describe('errors', () => {
     Cypress.config('experimentalSessionSupport', true)
 
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.5.0. Please see the migration guide for updating.')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
       done()
     })
 

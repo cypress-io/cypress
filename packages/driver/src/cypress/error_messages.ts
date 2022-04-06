@@ -1533,7 +1533,7 @@ export default {
       if (experimentalSessionSupport) {
         return {
           message: stripIndent`
-          ${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.5.0. Please see the migration guide for updating.`,
+          ${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.`,
           docsUrl: 'https://on.cypress.io/migration-guide',
         }
       }
