@@ -357,7 +357,7 @@ describe('commands', () => {
       })
     })
 
-    it('group is closed by default when all nested command have passed', () => {
+    it('group is open by default when all nested command have passed', () => {
       addCommand(runner, {
         name: 'log',
         message: 'chained log example',
@@ -367,13 +367,14 @@ describe('commands', () => {
 
       cy.get('.command-name-within')
       .find('.command-expander')
-      .should('not.have.class', 'command-expander-is-open')
+      .should('have.class', 'command-expander-is-open')
+      .click()
 
       cy.get('.command-name-within')
       .find('.num-children')
       .should('have.text', '1')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', '1 logs currently hidden')
+      .get('.cy-tooltip').should('have.text', '1 log currently hidden')
       .percySnapshot()
     })
 
@@ -400,7 +401,18 @@ describe('commands', () => {
     it('clicking opens and closes the group', () => {
       cy.get('.command-name-within')
       .find('.command-expander')
+      .should('have.class', 'command-expander-is-open')
+      .click()
+
+      cy.get('.command-name-within')
+      .find('.command-expander')
       .should('not.have.class', 'command-expander-is-open')
+      .closest('.command')
+      .find('.num-children')
+      .should('have.text', '1')
+
+      cy.get('.command-name-within')
+      .find('.command-expander')
       .click()
       .should('have.class', 'command-expander-is-open')
 
@@ -409,15 +421,7 @@ describe('commands', () => {
       .should('not.exist')
 
       cy.get('.command-name-within')
-      .find('.command-expander')
       .click()
-      .should('not.have.class', 'command-expander-is-open')
-
-      cy.get('.command-name-within')
-      .find('.num-children')
-      .should('have.text', '1')
-
-      cy.get('.command-name-within')
       .find('.command-expander')
       .should('not.have.class', 'command-expander-is-open')
     })
@@ -457,7 +461,7 @@ describe('commands', () => {
 
       cy.get('.command-name-within2')
       .find('.command-expander')
-      .should('not.have.class', 'command-expander-is-open')
+      .should('have.class', 'command-expander-is-open')
       .click()
 
       cy.percySnapshot()
