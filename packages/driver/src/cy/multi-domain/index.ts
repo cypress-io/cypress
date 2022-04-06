@@ -155,6 +155,20 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           Cypress.backend('ready:for:origin', { originPolicy: location.originPolicy })
 
           if (err) {
+            if (err?.name === 'ReferenceError') {
+              const wrappedErr = $errUtils.errByPath('origin.ran_domain_fn_reference_error', {
+                error: err.message,
+              })
+
+              wrappedErr.name = err.name
+              wrappedErr.stack = err.stack
+
+              // Prevent cypress from trying to add the function to the error log
+              wrappedErr.onFail = () => {}
+
+              return _reject(wrappedErr)
+            }
+
             return _reject(err)
           }
 
@@ -172,7 +186,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // to stack up listeners on it after it's originally bound
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
-            // @ts-ignore
             if (err?.name === 'CypressError') {
               // This is a Cypress error thrown from the secondary origin after the command queue has finished, do not wrap it as a spec or app error.
               cy.fail(err, { async: true })
@@ -221,6 +234,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })
+
+              wrappedErr.name = err.name
+              wrappedErr.stack = err.stack
+
+              // Prevent cypress from trying to add the function to the error log
+              wrappedErr.onFail = () => {}
 
               _reject(wrappedErr)
             }
