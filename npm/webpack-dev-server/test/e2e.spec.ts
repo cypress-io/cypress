@@ -8,12 +8,12 @@ import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
 import { devServer, startDevServer } from '../'
 
-const requestSpecFile = (port: number) => {
+const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
     const opts = {
       host: 'localhost',
       port,
-      path: '/test/fixtures/foo.spec.js',
+      path: encodeURI(file),
     }
 
     const callback = (response: EventEmitter) => {
@@ -41,19 +41,22 @@ const webpackConfig = {
 
 }
 
-const specs: Cypress.Cypress['spec'][] = [
-  {
-    name: `${root}/test/fixtures/foo.spec.js`,
-    relative: `${root}/test/fixtures/foo.spec.js`,
-    absolute: `${root}/test/fixtures/foo.spec.js`,
-  },
-]
+const createSpecs = (name: string): Cypress.Cypress['spec'][] => {
+  return [
+    {
+      name: `${root}/test/fixtures/${name}`,
+      relative: `${root}/test/fixtures/${name}`,
+      absolute: `${root}/test/fixtures/${name}`,
+    },
+  ]
+}
 
 const config = {
   projectRoot: root,
   supportFile: '',
   isTextTerminal: true,
   devServerPublicPathRoute: root,
+  indexHtmlFile: path.join(__dirname, 'component-index.html'),
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
@@ -62,16 +65,92 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents: new EventEmitter(),
       },
     })
 
-    const response = await requestSpecFile(port as number)
+    const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
 
     expect(response).to.eq('const foo = () => {}\n')
 
     await close()
+  })
+
+  it('serves specs in directory with [] chars via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('[foo]/bar.spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/[foo]/bar.spec.js', port as number)
+
+    expect(response).to.eq(`it('this is a spec with a path containing []', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
+  it('serves specs in directory with non English chars via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('サイプレス.spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/サイプレス.spec.js', port as number)
+
+    expect(response).to.eq(`it('サイプレス', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
+  it('serves specs in directory with ... in the file name via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('[...bar].spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/[...bar].spec.js', port as number)
+
+    expect(response).to.eq(`it('...bar', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
+  })
+
+  it('serves a file with spaces via a webpack dev server', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config,
+        specs: createSpecs('foo bar.spec.js'),
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestSpecFile('/test/fixtures/foo bar.spec.js', port as number)
+
+    expect(response).to.eq(`it('this is a spec with a path containing a space', () => {})\n`)
+
+    return new Promise((res) => {
+      close(() => res())
+    })
   })
 
   it('emits dev-server:compile:success event on successful compilation', async () => {
@@ -80,7 +159,7 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents,
       },
     })
@@ -125,7 +204,7 @@ describe('#startDevServer', () => {
       webpackConfig,
       options: {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents,
       },
     })
@@ -154,13 +233,13 @@ describe('#startDevServer', () => {
     const { port, close } = await devServer(
       {
         config,
-        specs,
+        specs: createSpecs('foo.spec.js'),
         devServerEvents,
       },
       { webpackConfig },
     )
 
-    const response = await requestSpecFile(port as number)
+    const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
 
     expect(response).to.eq('const foo = () => {}\n')
 

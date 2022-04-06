@@ -24,3 +24,4 @@ includeTypes.forEach((folder) => {
 
 shell.exec('babel lib -d build/lib')
 shell.exec('babel index.js -o build/index.js')
+shell.cp('index.mjs', 'build/index.mjs')

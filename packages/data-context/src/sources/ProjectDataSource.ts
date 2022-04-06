@@ -1,4 +1,5 @@
 import os from 'os'
+import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
 import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
@@ -19,7 +20,6 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
-import { STORIES_GLOB } from '.'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -258,8 +258,13 @@ export class ProjectDataSource {
       this.ctx.actions.project.setSpecs(specs)
     })
 
-    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
+    this._specWatcher = chokidar.watch(specPattern, {
+      ignoreInitial: true,
+      cwd: projectRoot,
+    })
+
     this._specWatcher.on('add', onSpecsChanged)
+    this._specWatcher.on('change', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
   }
 
@@ -318,12 +323,17 @@ export class ProjectDataSource {
     return false
   }
 
+  destroy () {
+    this.stopSpecWatcher()
+  }
+
   stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
+    this._specWatcher.close().catch(() => {})
+    this._specWatcher = null
   }
 
   getCurrentSpecByAbsolute (absolute: string) {
@@ -362,7 +372,6 @@ export class ProjectDataSource {
 
     return {
       component: framework?.glob ?? looseComponentGlob,
-      story: STORIES_GLOB,
     }
   }
 

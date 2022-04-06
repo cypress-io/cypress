@@ -135,25 +135,12 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  it('can navigate to project from e2e menu', () => {
-    cy.scaffoldProject('todos')
-    cy.openProject('todos', ['--e2e'])
+  it('opens an e2e project without a supportFile', () => {
+    cy.scaffoldProject('no-support-file')
+    cy.openProject('no-support-file', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.get('[data-cy=header-bar-content]').contains('todos').click()
-
-    cy.get('h1').should('contain', 'Welcome to Cypress!')
-  })
-
-  it('can navigate to project from ct menu', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--component'])
-    cy.visitLaunchpad()
-    cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
-    cy.get('h1').should('contain', 'Project Setup')
-    cy.get('[data-cy=header-bar-content]').contains('launchpad').click()
-
-    cy.get('h1').should('contain', 'Welcome to Cypress!')
+    cy.contains('Error Loading Config')
+    cy.contains('Your project does not contain a default supportFile.')
+    cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })
 })

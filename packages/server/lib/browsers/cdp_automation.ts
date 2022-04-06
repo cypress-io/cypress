@@ -293,15 +293,18 @@ export class CdpAutomation {
 
       case 'clear:cookie':
         return this.getCookie(data)
-        // resolve with the value of the removed cookie
-        // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
-        // that matches the cookie domain that is really stored
+        // always resolve with the value of the removed cookie. also, getting
+        // the cookie via CDP first will ensure that we send a cookie `domain`
+        // to CDP that matches the cookie domain that is really stored
         .then((cookieToBeCleared) => {
           if (!cookieToBeCleared) {
             return cookieToBeCleared
           }
 
-          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain')).then(() => cookieToBeCleared)
+          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          .then(() => {
+            return cookieToBeCleared
+          })
         })
 
       case 'clear:cookies':

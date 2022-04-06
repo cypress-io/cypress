@@ -120,7 +120,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       ),
     })
 
-    cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v8.7.0')
+    cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/changelog#8-7-0')
     cy.percySnapshot()
   })
 

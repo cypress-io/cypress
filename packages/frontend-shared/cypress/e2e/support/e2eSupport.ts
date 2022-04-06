@@ -19,6 +19,7 @@ configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
+const SIXTY_SECONDS = 60 * 1000
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 
@@ -174,7 +175,11 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
-function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number} = {}) {
+after(() => {
+  taskInternal('__internal__after', undefined)
+})
+
+function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number } = { timeout: SIXTY_SECONDS }) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName, options)
   })
@@ -225,7 +230,8 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
-        ctx.actions.project.setCurrentTestingType(o.mode)
+        await ctx.lifecycleManager.waitForInitializeSuccess()
+        ctx.actions.project.setAndLoadCurrentTestingType(o.mode)
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
@@ -336,7 +342,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   return cy.task<CyTaskResult<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
     _log.set('result', result)
     _log.end()
 
@@ -451,7 +457,9 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
     .click()
 
     cy.withRetryableCtx(async (ctx, o) => {
-      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq(o.href)
+      // The actual openExternal call may include the GQL port, so we only assert that it starts with the requested href
+      // rather than equalling it exactly.
+      expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg.startsWith(o.href)).to.be.true
     }, { href, log: false })
 
     return cy.get('@Link')

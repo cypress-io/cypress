@@ -95,8 +95,8 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  setCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setCurrentTestingType(type)
+  setAndLoadCurrentTestingType (type: TestingType) {
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
   async setCurrentProject (projectRoot: string) {
@@ -372,7 +372,7 @@ export class ProjectActions {
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
-    if ((codeGenType === 'component' || codeGenType === 'story') && !erroredCodegenCandidate) {
+    if ((codeGenType === 'component') && !erroredCodegenCandidate) {
       const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
       const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
 
@@ -416,7 +416,7 @@ export class ProjectActions {
     const cfg = await this.ctx.project.getConfig()
 
     if (cfg && this.ctx.currentProject) {
-      const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
+      const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
 
       await this.setSpecsFoundBySpecPattern({
         path: this.ctx.currentProject,
