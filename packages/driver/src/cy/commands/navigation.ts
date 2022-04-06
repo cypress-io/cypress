@@ -66,7 +66,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
       // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
       originPolicies = [cy.state('latestActiveOriginPolicy')]
     } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
-      // If this is a cross origin spec bridge and the we're on the last command, we should have gotten a request on the origin of one of the parents.
+      // If this is a cross origin spec bridge and we're on the last command, we should have gotten a request on the origin of one of the parents.
       originPolicies = cy.state('parentOriginPolicies')
     }
 
