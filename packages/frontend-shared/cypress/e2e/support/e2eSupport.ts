@@ -245,11 +245,14 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
           initializeActiveProjectStub.restore()
         }
 
+        // Used to format a Cypress error in a way that makes sense to the cy-in-cy
+        // open mode reporter. Typically we'll see all the details we need in the
+        // terminal or in the Cypress UI components, but in the reporter we need to format it a bit
         function formatError (e: Error & {messageMarkdown?: string, originalError?: Error}) {
           if (e.messageMarkdown) {
             e.message = e.messageMarkdown
             if (e.originalError) {
-              e.message += e.originalError.message
+              e.message = `${e.message}\n\n${e.originalError.message}`
             }
           }
 
