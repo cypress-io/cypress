@@ -104,9 +104,9 @@
     "index.mjs",
     "types/**/*.d.ts",
     "types/net-stubbing.ts",
-    "react",
-    "vue",
-    "mount-utils"
+    "react/**",
+    "vue/**",
+    "mount-utils/**"
   ],
   "bin": {
     "cypress": "bin/cypress"
