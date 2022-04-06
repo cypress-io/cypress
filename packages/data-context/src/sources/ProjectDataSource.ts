@@ -256,9 +256,9 @@ export class ProjectDataSource {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       this.ctx.actions.project.setSpecs(specs)
-    })
+    }, 200)
 
-    this._specWatcher = chokidar.watch(specPattern, {
+    this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
       cwd: projectRoot,
     })
@@ -266,6 +266,8 @@ export class ProjectDataSource {
     this._specWatcher.on('add', onSpecsChanged)
     this._specWatcher.on('change', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
+    this._specWatcher.on('addDir', onSpecsChanged)
+    this._specWatcher.on('unlinkDir', onSpecsChanged)
   }
 
   async defaultSpecFileName () {
