@@ -9,7 +9,11 @@ const serverRoot = _path.join(__dirname, '../../packages/server/')
 
 export const projects = _path.join(root, 'projects')
 
+export const projectFixtures = _path.join(root, 'project-fixtures')
+
 export const cyTmpDir = _path.join(tempDir, 'cy-projects')
+
+const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true }).filter((f) => f.isDirectory()).map((f) => f.name)
 
 const safeRemove = (path) => {
   try {
@@ -51,12 +55,32 @@ export function scaffold () {
 
 /**
  * Given a project name, copy the project's test files to the temp dir.
+ * Returns the scaffolded directory
  */
-export async function scaffoldProject (project: string): Promise<void> {
+export async function scaffoldProject (project: string): Promise<string> {
   const to = _path.join(cyTmpDir, project)
-  const from = _path.join(projects, project)
+  const from = projectFixturePath(project)
 
   await fs.copy(from, to)
+
+  try {
+    const packageJson = require(`${to}/package.json`)
+    const fixtureDir = packageJson.projectFixtureDirectory
+
+    if (fixtureDir) {
+      if (!projectFixtureDirs.includes(fixtureDir)) {
+        throw new Error(`Invalid project fixture directory: ${fixtureDir}, expected one of ${projectFixtureDirs}`)
+      }
+
+      await fs.copy(_path.join(projectFixtures, fixtureDir), to)
+    }
+  } catch (e) {
+    if (e.code !== 'MODULE_NOT_FOUND') {
+      throw e
+    }
+  }
+
+  return to
 }
 
 export function scaffoldWatch () {
@@ -84,6 +108,16 @@ export function removeProject (name) {
   safeRemove(projectPath(name))
 }
 
+// Removes node_modules that might have been leftover from an initial "yarn"
+// in the fixture dir
+export function clearFixtureNodeModules (name) {
+  try {
+    safeRemove(_path.join(projects, name, 'node_modules'))
+  } catch {
+    //
+  }
+}
+
 // returns the path to project fixture
 // in the cyTmpDir
 export function project (name) {
@@ -100,6 +134,10 @@ export function get (fixture, encoding: BufferEncoding = 'utf8') {
 
 export function path (fixture) {
   return _path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
+}
+
+export function projectFixturePath (name) {
+  return _path.join(projects, name)
 }
 
 export default module.exports

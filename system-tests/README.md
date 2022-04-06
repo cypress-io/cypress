@@ -63,6 +63,20 @@ There are many more options available for `systemTests.it` and `systemTests.setu
 
 These tests run in the `system-tests-*` CI jobs.
 
+### Reusable Project Fixtures
+
+In some situations, we want to test the same cypress project against multiple `node_modules` configurations. This is very common in component testing, where we want to ensure that the `cypress/react` package is compatible with different versions of React, or ensure that the `cypress/webpack-dev-server` is compatible with different versions of webpack.
+
+The [project-fixtures](./project-fixtures) directory helps us here. Rather than duplicating the same set of files and needing to update in multiple places, we can specify a Cypress project in a folder, and if the project's `package.json` specifies a:
+
+```
+"projectFixtureDirectory": "$PROJECT_FIXTURE_FOLDER"`
+```
+
+We will automatically copy the contents of the `project-fixtures` folder into the project just after it has been scaffolded.
+
+See the [package.json](./projects/webpack4_wds3-react/package.json) for the [webpack4_wds3-react](./projects/webpack4_wds3-react) package as an example of this pattern, and the [webpack-dev-server-fresh react tests](../npm/webpack-dev-server-fresh/cypress/e2e/react.cy.ts) as an example use.
+
 ### Developing Docker-based tests against built binary
 
 Specs in the [`./test`](./test) directory are run against an unbuilt Cypress App. They don't test `cypress` NPM package installation or other prod app behavior. This is done so that they can run as fast as possible in CI, without waiting for a full build of the Cypress App.
