@@ -158,10 +158,16 @@ export const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => 
     state: 'passed',
     testId: 'r3',
     testCurrentRetry: 0,
+    timeout: 4000,
     type: 'parent',
     url: 'http://example.com',
     hasConsoleProps: true,
   }
 
-  runner.emit('reporter:log:add', Object.assign(defaultLog, log))
+  const commandLog = Object.assign(defaultLog, log)
+
+  runner.emit('reporter:log:add', commandLog)
+
+  // return command log id to enable adding new command to command group
+  return commandLog.id
 }
