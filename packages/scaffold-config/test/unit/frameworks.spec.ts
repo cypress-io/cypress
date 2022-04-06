@@ -21,7 +21,7 @@ describe('createCypressConfig', () => {
             framework: 'create-react-app',
             bundler: 'webpack'
           }
-        },
+        }
       }`
 
     expect(actual).to.eq(expected)
@@ -44,7 +44,7 @@ describe('createCypressConfig', () => {
             framework: 'create-react-app',
             bundler: 'webpack'
           }
-        },
+        }
       })`
 
     expect(actual).to.eq(expected)
@@ -65,7 +65,7 @@ describe('createCypressConfig', () => {
             framework: 'create-react-app',
             bundler: 'webpack'
           }
-        },
+        }
       }`
 
     expect(actual).to.eq(expected)

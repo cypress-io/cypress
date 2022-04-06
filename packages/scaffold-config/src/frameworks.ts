@@ -76,7 +76,7 @@ export function createCypressConfig (config: CreateCypressConfig): string {
               framework: '${config.framework}',
               bundler: '${config.bundler}'
             }
-          },
+          }
         })`
     }
 
@@ -87,7 +87,7 @@ export function createCypressConfig (config: CreateCypressConfig): string {
             framework: '${config.framework}',
             bundler: '${config.bundler}'
           }
-        },
+        }
       }`
   }
 
@@ -98,7 +98,7 @@ export function createCypressConfig (config: CreateCypressConfig): string {
           framework: '${config.framework}',
           bundler: '${config.bundler}'
         }
-      },
+      }
     }`
 }
 

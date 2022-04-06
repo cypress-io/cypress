@@ -1,4 +1,4 @@
-import type { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import type { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
@@ -45,8 +45,8 @@ function scaffoldAndOpenE2EProject (
 function scaffoldAndOpenCTProject (
   name: Parameters<typeof cy.scaffoldProject>[0],
   language: 'js' | 'ts',
-  framework: typeof FRONTEND_FRAMEWORKS[number]['name'],
-  bundler?: typeof FRONTEND_FRAMEWORKS[number]['supportedBundlers'][number]['name'],
+  framework: typeof WIZARD_FRAMEWORKS[number]['name'],
+  bundler?: typeof WIZARD_FRAMEWORKS[number]['supportedBundlers'][number]['name'],
   args?: Parameters<typeof cy.openProject>[1],
 ) {
   cy.scaffoldProject(name)
@@ -60,9 +60,10 @@ function scaffoldAndOpenCTProject (
   cy.contains('Component Testing').click()
   cy.contains(language === 'js' ? 'JavaScript' : 'TypeScript').click()
 
-  cy.contains('Pick a framework').click()
+  cy.contains('React.js(detected)').click()
   cy.contains(framework).click()
   if (bundler) {
+    cy.contains('Webpack(detected)').click()
     cy.contains(bundler).click()
   }
 
@@ -106,12 +107,12 @@ describe('scaffolding new projects', () => {
   })
 
   it('scaffolds CT for a JS project', () => {
-    scaffoldAndOpenCTProject('pristine', 'js', 'Create React App (v5)')
+    scaffoldAndOpenCTProject('pristine', 'js', 'Create React App')
     assertScaffoldedFilesAreCorrect('js', 'component', 'Create React App (v5)')
   })
 
   it('scaffolds CT for a TS project', () => {
-    scaffoldAndOpenCTProject('pristine', 'ts', 'Create React App (v5)')
+    scaffoldAndOpenCTProject('pristine', 'ts', 'Create React App')
     assertScaffoldedFilesAreCorrect('ts', 'component', 'Create React App (v5)')
   })
 })
