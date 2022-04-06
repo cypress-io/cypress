@@ -68,8 +68,8 @@ https://on.cypress.io/cross-origin-violation
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/navigation_cross_origin_errors.ts/navigation cr     (1280x720)
-     oss origin errors -- displays cross origin failures when experimentalLoginFlows               
-      is turned off (failed).png                                                                    
+     oss origin errors -- displays cross origin failures when experimentalLoginFlows                
+     is turned off (failed).png                                                                     
 
 
   (Video)
