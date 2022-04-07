@@ -9,14 +9,6 @@ const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []
 
-afterEach(() => {
-  // Visiting about.blank to cleanup any sockets left over between each test,
-  // such as __vite_ping
-  cy.window().then((win) => {
-    win.location.href = 'about:blank'
-  })
-})
-
 for (const project of VITE_REACT) {
   if (ONLY_PROJECTS.length && !ONLY_PROJECTS.includes(project)) {
     continue
