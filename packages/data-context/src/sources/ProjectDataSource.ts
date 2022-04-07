@@ -258,8 +258,13 @@ export class ProjectDataSource {
     const onProjectFileSystemChange = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
+      if (isEqual(this.specs, specs)) {
+        // If no differences are found, we do not need to emit events
+        return
+      }
+
       this.ctx.actions.project.setSpecs(specs)
-    }, 200)
+    }, 250)
 
     // We respond to all changes to the project's filesystem when
     // files or directories are added and removed that are not explicitly
@@ -267,7 +272,7 @@ export class ProjectDataSource {
     this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
       cwd: projectRoot,
-      ignored: [...excludeSpecPattern, ...additionalIgnore],
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnore],
     })
 
     // the 'all' event includes: add, addDir, change, unlink, unlinkDir
