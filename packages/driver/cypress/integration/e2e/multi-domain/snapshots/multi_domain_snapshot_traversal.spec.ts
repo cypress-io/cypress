@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain snapshot traversal', { experimentalSessionSupport: true }, () => {
+context('cross-origin snapshot traversal', { experimentalSessionSupport: true }, () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
@@ -39,7 +39,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').children()
     })
   })
@@ -65,7 +65,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').closest('form')
     })
   })
@@ -94,7 +94,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id>input').eq(1)
     })
   })
@@ -122,7 +122,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-name>input')
       .filter('[name="dogs"]')
     })
@@ -154,7 +154,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').find('input')
     })
   })
@@ -185,7 +185,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id>input').first()
     })
   })
@@ -216,7 +216,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id>input').last()
     })
   })
@@ -242,7 +242,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#input').next()
     })
   })
@@ -271,7 +271,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#input').nextAll()
     })
   })
@@ -297,7 +297,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#input').nextUntil('#age')
     })
   })
@@ -331,7 +331,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id>input').not('#age')
     })
   })
@@ -357,7 +357,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').parent()
     })
   })
@@ -386,7 +386,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').parents()
     })
   })
@@ -412,7 +412,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').parentsUntil('body')
     })
   })
@@ -438,7 +438,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#age').prev()
     })
   })
@@ -467,7 +467,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#age').prevAll()
     })
   })
@@ -493,7 +493,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#age').prevUntil('#input')
     })
   })
@@ -522,7 +522,7 @@ context('multi-domain snapshot traversal', { experimentalSessionSupport: true },
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#input').siblings()
     })
   })

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain snapshot cookies', { experimentalSessionSupport: true }, () => {
+context('cross-origin snapshot cookies', { experimentalSessionSupport: true }, () => {
   let logs: Map<string, any>
 
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain snapshot spies, stubs, and clock', { experimentalSessionSupport: true }, () => {
+context('cross-origin snapshot spies, stubs, and clock', { experimentalSessionSupport: true }, () => {
   let logs: Map<string, any>
 
   beforeEach(() => {

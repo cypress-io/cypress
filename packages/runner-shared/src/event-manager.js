@@ -586,7 +586,7 @@ export const eventManager = {
 
     const crossOriginLogs = {}
 
-    Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
+    Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
       // if the test is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner
       if (Cypress.state('test')?.final) return
 

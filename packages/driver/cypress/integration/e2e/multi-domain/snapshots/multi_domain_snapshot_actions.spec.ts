@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-describe('multi-domain snapshot actions', () => {
+describe('cross-origin snapshot actions', () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button')
     })
   })
@@ -63,7 +63,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').as('buttonAlias')
     })
   })
@@ -115,7 +115,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button-inside-a').click()
     })
   })
@@ -162,7 +162,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').dblclick()
     })
   })
@@ -209,7 +209,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').rightclick()
     })
   })
@@ -279,7 +279,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('input#input').type('foo')
     })
   })
@@ -310,7 +310,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('form#multiple-inputs-and-input-submit input[name="fname"]').type('foo')
       cy.get('form#multiple-inputs-and-input-submit input[name="lname"]').type('bar')
       cy.get('form#multiple-inputs-and-input-submit').submit()
@@ -333,7 +333,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       // FIXME: snapshot shows the primary domain. Should be secondary
       cy.get('#input').focus()
     })
@@ -355,7 +355,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       // FIXME: snapshot shows the primary domain (before type). Should be secondary
       cy.get('#input').type('foo').blur()
     })
@@ -379,7 +379,7 @@ describe('multi-domain snapshot actions', () => {
     })
 
     cy.get('a[data-cy="dom-link"]').click()
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       // FIXME: snapshot shows the primary domain. Should be secondary
       cy.get('#input').type('foo').clear()
     })

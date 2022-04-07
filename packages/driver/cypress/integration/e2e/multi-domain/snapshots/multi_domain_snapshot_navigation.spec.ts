@@ -1,7 +1,7 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore
-context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
+context('multi-origin snapshot navigation', { experimentalSessionSupport: true }, () => {
   let logs: Map<string, any>
 
   beforeEach(() => {

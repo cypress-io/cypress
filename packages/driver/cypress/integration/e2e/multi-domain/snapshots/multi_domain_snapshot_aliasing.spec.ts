@@ -1,7 +1,7 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain snapshot aliasing', { experimentalSessionSupport: true }, () => {
+context('cross-origin snapshot aliasing', { experimentalSessionSupport: true }, () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
@@ -37,7 +37,7 @@ context('multi-domain snapshot aliasing', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.origin('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').as('buttonAlias')
     })
   })
