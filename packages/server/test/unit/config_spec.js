@@ -4,7 +4,7 @@ const _ = require('lodash')
 const debug = require('debug')('test')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { getCtx } = require('@packages/data-context')
 
 const config = require(`../../lib/config`)
