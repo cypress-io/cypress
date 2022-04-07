@@ -67,6 +67,7 @@
               >
                 <Tooltip
                   placement="bottom"
+                  class="inline-block"
                 >
                   <span
                     class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"

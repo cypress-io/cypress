@@ -21,13 +21,14 @@ withDefaults(defineProps<{
 <style lang="scss">
 @import "floating-vue/dist/style.css";
 
-.v-popper.v-popper--theme-tooltip {
-  @apply inline-block;
-}
-
 .v-popper__popper.v-popper--theme-tooltip {
   .v-popper__inner {
     @apply bg-gray-900 py-2 px-4;
+  }
+  .v-popper__arrow-inner,
+  .v-popper__arrow-outer {
+    // NOTE: we can't use @apply to here because having !important breaks things
+    border-color: #2e3247;
   }
 }
 
