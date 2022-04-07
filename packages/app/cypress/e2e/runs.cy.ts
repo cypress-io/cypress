@@ -171,6 +171,44 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
+  context('Runs - Create Project', () => {
+    it('when a project is created, injects new projectId into the config file', () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          obj.result.data!.cloudProjectCreate = {
+            slug: 'newProjectId',
+            id: 'newId',
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.not.equal('newProjectId')
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.equal('newProjectId')
+      })
+    })
+  })
+
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
@@ -280,9 +318,33 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect(o.testState.cloudProjectRequestAccessWasCalled).to.eql(true)
       })
     })
+
+    it('updates the button text when the request access button is clicked', () => {
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'Runs_currentProject_cloudProject_batched') {
+          for (const proj of obj!.result!.data!.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectUnauthorized'
+            proj.message = 'Cloud Project Unauthorized'
+            proj.hasRequestedAccess = false
+            testState.project = proj
+          }
+        } else if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
+          obj!.result!.data!.cloudProjectRequestAccess = {
+            ...testState.project,
+            hasRequestedAccess: true,
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp('/runs')
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
+      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('exist')
+    })
   })
 
-  context('Runs - Unauthorized Project Requested', () => {
+  context('Runs - Pending authorization to project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
