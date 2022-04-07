@@ -52,7 +52,7 @@ export class ErrorDataSource {
       return null
     }
 
-    const codeBlock = codeFrameColumns(await this.ctx.file.readFile(absolute), {
+    const codeBlock = codeFrameColumns(await this.ctx.fs.readFile(absolute, 'utf8'), {
       start: { line, column },
     }, {
       linesAbove: 2,
