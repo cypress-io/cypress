@@ -453,7 +453,7 @@ describe('App: Index', () => {
           cy.get('[data-cy="create-spec-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/writing-and-organizing-tests')
 
           cy.withCtx(async (ctx, o) => {
-            const stats = await ctx.actions.file.checkIfFileExists(o.path)
+            const stats = await ctx.file.checkIfFileExists(o.path)
 
             expect(stats?.isFile()).to.be.true
           }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
