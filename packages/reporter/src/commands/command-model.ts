@@ -100,11 +100,6 @@ export default class Command extends Instrument {
     this._isOpen = !this.isOpen
   }
 
-  @computed get isInvisible () {
-    // the visible property is not applicable to all log instruments/types like cy.visit() or cy.readFile()
-    return this.visible !== undefined && !this.visible
-  }
-
   @computed get hasChildren () {
     if (this.event) {
       // if the command is an event log, we add one to the number of children count to include

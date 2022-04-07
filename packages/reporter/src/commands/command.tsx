@@ -316,7 +316,7 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
-                {model.isInvisible && (
+                {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
                       <HiddenIcon className='command-invisible' />
@@ -416,13 +416,6 @@ class Command extends Component<Props> {
   // optimize for both snapshot showing + restoring
   _snapshot (show: boolean) {
     const { model, runnablesStore } = this.props
-
-    // do not trigger the show:snapshot event for commands groups
-    // TODO: remove this behavior in 10.0+ when a group
-    // can both be expanded and collapsed and pinned
-    if (model.hasChildren) {
-      return
-    }
 
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
