@@ -228,8 +228,8 @@ export class IframeModel {
       }
 
       // go get the final cross origin snapshot. Do this optimistically while we render the selected snapshot
-      Cypress.multiDomainCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
-      Cypress.multiDomainCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
+      Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
         // TODO: should be an opportunity to refactor based on whats in serialization postprocess for snapshots
         finalSnapshot.body = postprocessLogLikeFromSerialization(finalSnapshot.body)
         const reifiedSnapshot = Cypress.cy.createSnapshot(finalSnapshot.name, null, finalSnapshot)
