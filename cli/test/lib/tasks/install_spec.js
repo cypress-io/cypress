@@ -101,7 +101,7 @@ describe('/lib/tasks/install', function () {
       it('installs to the expected pre-release cache dir', async function () {
         state.getVersionDir.restore()
         await runInstall()
-        expect(unzip.start).to.be.calledWithMatch({ installDir: sinon.match(/\/Cypress\/beta\-aBranchName\-3b7f0b5c$/) })
+        expect(unzip.start).to.be.calledWithMatch({ installDir: sinon.match(/\/Cypress\/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/) })
       })
     })
 
