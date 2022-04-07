@@ -90,7 +90,9 @@ describe('App: Index', () => {
             'waiting',
             'window',
           ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
-        ].map(getPathForPlatform)
+        ]
+
+        const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
         it('scaffolds example files when card is clicked', () => {
           cy.get('@ScaffoldCard').click()
@@ -106,9 +108,9 @@ describe('App: Index', () => {
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {
-              return options.expectedScaffoldPaths.includes(path)
-            })).to.have.lengthOf(options.expectedScaffoldPaths.length)
-          }, { expectedScaffoldPaths })
+              return options.expectedScaffoldPathsForPlatform.includes(path)
+            })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
+          }, { expectedScaffoldPathsForPlatform })
 
           cy.percySnapshot()
 
