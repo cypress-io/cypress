@@ -6,8 +6,9 @@ import { createEventManager, createTestAutIframe } from '../../cypress/component
 const snapshotWithSnapshots = { ...autSnapshot }
 const snapshotPinned = { ...autSnapshot, snapshots: [] }
 
-const snapshotControlsSelector = '[data-testid=snapshot-controls]'
-const unpinButtonSelector = '[data-testid=unpin]'
+const snapshotControlsSelector = '[data-cy=snapshot-controls]'
+const pinnedIconSelector = '[data-cy=pin]'
+const unpinButtonSelector = '[data-cy=unpin]'
 
 describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => {
   afterEach(() => {
@@ -39,6 +40,15 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     cy.get('body')
     .findByText('Pinned')
     .should('be.visible')
+  })
+
+  it('renders the "pinned" icon in snapshot message', () => {
+    mountSnapshotControls()
+    const snapshotStore = useSnapshotStore()
+
+    snapshotStore.pinSnapshot(snapshotPinned)
+
+    cy.get(pinnedIconSelector).should('be.visible')
   })
 
   it('pinned snapshots should not be dismissible', () => {

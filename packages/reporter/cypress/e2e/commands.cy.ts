@@ -302,6 +302,9 @@ describe('commands', () => {
       cy.contains('#exists').click()
       cy.tick(1500)
       cy.get('.cy-tooltip').should('not.exist')
+
+      // snapshot here to ensure tooltip has disappeared to prevent flaky percy screenshots
+      cy.percySnapshot()
     })
 
     it('prints to console', () => {

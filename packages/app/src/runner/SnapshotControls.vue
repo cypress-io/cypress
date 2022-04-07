@@ -2,13 +2,16 @@
   <div
     v-if="renderSnapshotControls"
     class="inset-x-0 bottom-24 absolute"
-    data-testid="snapshot-controls"
+    data-cy="snapshot-controls"
   >
     <div class="flex justify-center">
       <div
         class="rounded flex bg-gray-1000 shadow min-h-40px py-4px px-8px text-gray-600 gap-4px items-center"
       >
-        <i-cy-object-pin_x16 class="icon-dark-purple-400 icon-light-purple-800" />
+        <i-cy-command-pin_x12
+          class="icon-dark-purple-400 icon-light-purple-800"
+          data-cy="pin"
+        />
         <span
           v-if="snapshotStore.messageTitle"
           class="rounded min-h-24px p-4px text-14px text-gray-600 capitalize block"
@@ -35,7 +38,7 @@
         >
           <i-cy-delete_x16
             class="icon-dark-gray-200"
-            data-testid="unpin"
+            data-cy="unpin"
           />
         </button>
       </div>
