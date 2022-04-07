@@ -373,7 +373,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   fail (err, options: { async?: boolean } = {}) {
-    // if an onFail handler is provided, call this in it's place (currently used for cross-origin support)
+    // if an onFail handler is provided, call this in its place (currently used for cross-origin support)
     if (this.state('onFail')) {
       return this.state('onFail')(err)
     }
