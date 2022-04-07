@@ -121,7 +121,7 @@ const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
       return
     }
 
-    router.push({ path: '/specs/runner', query: { file: row.data.relative } })
+    router.push({ path: '/specs/runner', query: { file: row.data.relative.replace(/\\/g, '/') } })
   } else {
     row.toggle()
   }
