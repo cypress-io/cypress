@@ -289,7 +289,7 @@ export const postprocessLogLikeFromSerialization = (props) => {
  * @returns a serializable form of a snapshot, including a serializable <body> with styles
  */
 export const preprocessSnapshotForSerialization = (snapshot) => {
-  const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot)
+  const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot, true)
 
   try {
     preprocessedSnapshot.body.get.value[0] = preprocessLogLikeForSerialization(snapshot.body.get()[0])
