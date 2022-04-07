@@ -74,8 +74,17 @@
       >
         <router-link
           class="outline-none"
-          :to="{ path: '/specs/runner', query: { file: result.file.relative } }
-          "
+          :to="{
+            name: 'SpecRunner',
+            query: {
+              file: result.file.relative
+            },
+            params: props.type === 'component'
+              ? {
+                shouldShowTroubleRenderingAlert: true
+              }
+              : undefined
+          }"
         >
           <Button
             size="lg"
