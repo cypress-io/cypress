@@ -4,7 +4,7 @@ import { action } from 'mobx'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { studioRecorder } from '../studio'
 import { eventManager } from '../event-manager'
-import { postprocessLogLikeFromSerialization } from '@packages/driver/src/util/serialization'
+import { postprocessLogLikeFromSerialization } from '@packages/driver/src/util/serialization/log'
 
 export class IframeModel {
   constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, isAUTSameOrigin, removeSrc }) {

@@ -12,7 +12,7 @@ import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
 import * as cors from '@packages/network/lib/cors'
-import { postprocessLogFromSerialization } from '@packages/driver/src/util/serialization'
+import { postprocessLogFromSerialization } from '@packages/driver/src/util/serialization/log'
 
 const $ = $Cypress.$
 const ws = client.connect({

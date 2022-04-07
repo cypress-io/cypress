@@ -1,4 +1,4 @@
-import { preprocessLogForSerialization } from '../../util/serialization'
+import { preprocessLogForSerialization } from '../../util/serialization/log'
 
 export const handleLogs = (Cypress: Cypress.Cypress) => {
   const onLogAdded = (attrs) => {
