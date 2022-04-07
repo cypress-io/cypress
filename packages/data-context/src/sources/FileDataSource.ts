@@ -25,7 +25,7 @@ export class FileDataSource {
   async readFileInProject (relative: string) {
     assert(this.ctx.currentProject, `Cannot readFileInProject without active project`)
 
-    return this.ctx.fs.readFileSync(path.join(this.ctx.currentProject, relative), 'utf-8')
+    return this.ctx.fs.readFile(path.join(this.ctx.currentProject, relative), 'utf-8')
   }
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
