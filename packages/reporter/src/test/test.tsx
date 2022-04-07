@@ -18,7 +18,7 @@ import StateIcon from '../lib/state-icon'
 import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
 import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
 import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
-// import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
   events: Events
@@ -175,11 +175,11 @@ class Test extends Component<TestProps> {
         <span className='visually-hidden'>{model.state}</span>
       </span>
       <span className='runnable-controls'>
-        {/* <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
           <span>
             <WarningIcon className="runnable-controls-status" />
           </span>
-        </Tooltip> */}
+        </Tooltip>
         <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
           <a onClick={this._launchStudio} className='runnable-controls-studio'>
             <WandIcon />
