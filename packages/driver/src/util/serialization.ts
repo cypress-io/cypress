@@ -25,6 +25,12 @@ const isSerializableInCurrentBrowser = (value: any) => {
       return false
     }
 
+    // In some instances of structuredClone, Bluebird promises are considered serializable, but can be very deep objects
+    // For ours needs, we really do NOT want to serialize these
+    if (value instanceof Cypress.Promise) {
+      return false
+    }
+
     return true
   } catch (e) {
     return false
@@ -220,12 +226,12 @@ export const postProcessDomElement = (props: any) => {
   return reifiedEl
 }
 
-export const preprocessLogLikeForSerialization = (props) => {
+export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
   try {
     if (_.isArray(props)) {
       return props.map((prop) => {
         try {
-          return preprocessLogLikeForSerialization(prop)
+          return preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions)
         } catch (e) {
           return null
         }
@@ -233,13 +239,25 @@ export const preprocessLogLikeForSerialization = (props) => {
     }
 
     if (_.isPlainObject(props)) {
-      let objWithOnlyUnserializableProps = _.pickBy(props, (value) => !isSerializableInCurrentBrowser(value))
+      // only attempt to try and serialize dom elements and function (if attemptToSerializeFunctions is set to true)
+      let objWithPossiblySerializableProps = _.pickBy(props, (value) => {
+        const isSerializable = isSerializableInCurrentBrowser(value)
 
-      let preprocessed: any = preprocessForSerialization(props)
+        if (!isSerializable && $dom.isDom(value) || _.isFunction(value) || _.isObject(value)) {
+          return true
+        }
 
-      _.forIn(objWithOnlyUnserializableProps, (value, key) => {
+        return false
+      })
+
+      let objWithOnlySerializableProps = _.pickBy(props, (value) => isSerializableInCurrentBrowser(value))
+
+      // get the onces we know we can serialize here
+      let preprocessed: any = preprocessForSerialization(objWithOnlySerializableProps)
+
+      _.forIn(objWithPossiblySerializableProps, (value, key) => {
         try {
-          preprocessed[key] = preprocessLogLikeForSerialization(value)
+          preprocessed[key] = preprocessLogLikeForSerialization(value, attemptToSerializeFunctions)
         } catch (e) {
           preprocessed[key] = null
         }
@@ -254,7 +272,7 @@ export const preprocessLogLikeForSerialization = (props) => {
         const serializableArray: any[] = []
 
         // Nuke any prevObjects or unserializable values. common with assertion 'Subject'
-        props.each((key) => serializableArray.push(preprocessLogLikeForSerialization(props[key])))
+        props.each((key) => serializableArray.push(preprocessLogLikeForSerialization(props[key], attemptToSerializeFunctions)))
 
         return serializableArray
       }
@@ -267,18 +285,21 @@ export const preprocessLogLikeForSerialization = (props) => {
       return serializableDOM
     }
 
+    /**
+     * When preprocessing a log, there might be certain functions we want to attempt to serialize.
+     * One of these instances is the 'table' key in consoleProps, which has contents that CAN be serialized.
+     * If there are other functions that have serializable contents, the invoker/developer will need to be EXPLICIT
+     * in what needs serialization. Otherwise, functions should NOT be serialized.
+     */
     if (_.isFunction(props)) {
-      // TODO: re access this. there are functions we want to attempt to unravel/serialize and ones we don't. we might only want to opt into this for console props or something...
-      // sinon proxies are circular and will cause the runner to crash. Do NOT serialize these
-      // @ts-ignore
-      if (props?.isSinonProxy || props.length > 0) {
-        return null
+      if (attemptToSerializeFunctions) {
+        return {
+          value: preprocessLogLikeForSerialization(props(), attemptToSerializeFunctions),
+          serializationKey: 'function',
+        }
       }
 
-      return {
-        value: preprocessLogLikeForSerialization(props()),
-        serializationKey: 'function',
-      }
+      return null
     }
 
     return preprocessForSerialization(props)
@@ -376,13 +397,29 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
   return preprocessedSnapshot
 }
 
+// attempt here is to be very EXPLICIT on what DOM elements and Functions we wish to serialize.
+// If not explicitly handled in this function for something that is otherwise unserializable, the value will be omitted
 export const preprocessLogForSerialization = (logAttrs) => {
-  let { snapshots, ... logAttrsRest } = logAttrs
+  let { snapshots, consoleProps, $el, ...logAttrsRest } = logAttrs
 
   const preprocessed = preprocessLogLikeForSerialization(logAttrsRest)
 
-  if (snapshots && preprocessed) {
-    preprocessed.snapshots = snapshots.map((snapshot) => preprocessSnapshotForSerialization(snapshot))
+  if (preprocessed) {
+    if (snapshots) {
+      preprocessed.snapshots = snapshots.map((snapshot) => preprocessSnapshotForSerialization(snapshot))
+    }
+
+    if (consoleProps) {
+      const { table, ...consolePropsRest } = consoleProps
+
+      preprocessed.consoleProps = preprocessLogLikeForSerialization(consolePropsRest)
+
+      if (table) {
+        preprocessed.consoleProps.table = preprocessLogLikeForSerialization(table, true)
+      }
+    }
+
+    preprocessed.$el = preprocessLogLikeForSerialization($el)
   }
 
   return preprocessed
