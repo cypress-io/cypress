@@ -3,7 +3,6 @@ import _ from 'lodash'
 import { $Command } from '../../../cypress/command'
 import $errUtils from '../../../cypress/error_utils'
 import group from '../../logGroup'
-import type { LogGroupConfig } from '../../logGroup'
 
 export default (Commands, Cypress, cy, state) => {
   const withinFn = (subject, fn) => {
@@ -91,7 +90,7 @@ export default (Commands, Cypress, cy, state) => {
 
       options = _.defaults({}, userOptions, { log: true })
 
-      const groupOptions: LogGroupConfig = {
+      const groupOptions: Cypress.LogGroup.Config = {
         log: options.log,
         $el: subject,
         message: '',
