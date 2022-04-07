@@ -4,12 +4,12 @@ import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/suppo
 
 type ProjectDirs = typeof e2eProjectDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []
 
-for (const project of WEBPACK_REACT) {
+for (const project of VITE_REACT) {
   if (ONLY_PROJECTS.length && !ONLY_PROJECTS.includes(project)) {
     continue
   }
@@ -17,7 +17,7 @@ for (const project of WEBPACK_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project, ['--config-file', 'cypress-webpack.config.ts'])
+      cy.openProject(project, ['--config-file', 'cypress-vite.config.ts'])
       cy.startAppServer('component')
     })
 
