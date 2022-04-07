@@ -24,7 +24,6 @@ function createEntry (options) {
     external: [
       'react',
       'react-dom',
-      '@cypress/mount-utils',
     ],
     plugins: [
       resolve(), commonjs(),

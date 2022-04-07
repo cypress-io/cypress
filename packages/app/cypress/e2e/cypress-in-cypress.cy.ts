@@ -80,7 +80,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.contains('li', 'Electron').click()
 
       cy.withCtx((ctx) => {
-        expect(ctx.coreData.chosenBrowser?.displayName).eq('Electron')
+        expect(ctx.coreData.activeBrowser?.displayName).eq('Electron')
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
     })
