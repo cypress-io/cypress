@@ -12,7 +12,7 @@ context('cross-origin snapshot viewport', { experimentalSessionSupport: true }, 
     })
 
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   it('.viewport()', (done) => {

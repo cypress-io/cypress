@@ -29,7 +29,7 @@ context('multi-origin snapshot navigation', { experimentalSessionSupport: true }
     })
 
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
@@ -85,7 +85,7 @@ context('multi-origin snapshot navigation', { experimentalSessionSupport: true }
     cy.origin('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-      cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+      cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
     })
   })
 })
