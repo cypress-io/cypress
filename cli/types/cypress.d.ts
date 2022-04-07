@@ -1906,7 +1906,7 @@ declare namespace Cypress {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    origin(originOrDomain: string, fn: () => void): Chainable
+    origin(urlOrDomain: string, fn: () => void): Chainable
 
     // TODO: when we find other options to put into the 'data' argument of cy.origin, we may want to overload this type with
     // a 'data' parameter that contains all data options, including args, and one that contains all data options, excluding args.
@@ -1920,7 +1920,7 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    origin<T>(originOrDomain: string, options: {
+    origin<T>(urlOrDomain: string, options: {
       args: T
     }, fn: (args: T) => void): Chainable
 
