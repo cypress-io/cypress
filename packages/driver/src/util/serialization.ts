@@ -271,7 +271,7 @@ export const preprocessLogLikeForSerialization = (props) => {
       // TODO: re access this. there are functions we want to attempt to unravel/serialize and ones we don't. we might only want to opt into this for console props or something...
       // sinon proxies are circular and will cause the runner to crash. Do NOT serialize these
       // @ts-ignore
-      if (props?.isSinonProxy) {
+      if (props?.isSinonProxy || props.length > 0) {
         return null
       }
 
