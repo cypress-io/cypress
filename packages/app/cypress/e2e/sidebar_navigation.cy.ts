@@ -176,7 +176,7 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.project, 'setCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
         o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
       })
 
@@ -186,7 +186,7 @@ describe('Sidebar Navigation', () => {
 
       cy.withCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(true)
-        expect(ctx.actions.project.setCurrentTestingType).to.have.been.calledWith('component')
+        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('component')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
 
@@ -327,7 +327,7 @@ describe('Sidebar Navigation', () => {
       }).should('be.visible')
 
       cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.project, 'setCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
         o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
       })
 
@@ -337,7 +337,7 @@ describe('Sidebar Navigation', () => {
 
       cy.withCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(true)
-        expect(ctx.actions.project.setCurrentTestingType).to.have.been.calledWith('e2e')
+        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
     })

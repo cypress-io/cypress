@@ -16,7 +16,7 @@ const platform = os.platform()
 
 export interface BrowserApiShape {
   close(): Promise<any>
-  ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser | undefined>
+  ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser>
   getBrowsers(): Promise<FoundBrowser[]>
   focusActiveBrowserWindow(): Promise<any>
 }
@@ -32,15 +32,10 @@ export class BrowserDataSource {
     if (!this.ctx.coreData.machineBrowsers) {
       const p = this.ctx._apis.browserApi.getBrowsers()
 
-      this.ctx.coreData.machineBrowsers = p
-      p.then((browsers) => {
-        if (this.ctx.coreData.machineBrowsers === p) {
-          if (browsers[0]) {
-            this.ctx.coreData.chosenBrowser = browsers[0]
-          }
+      this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
+        if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
 
-          this.ctx.coreData.machineBrowsers = browsers
-        }
+        return browsers
       }).catch((e) => {
         this.ctx.update((coreData) => {
           coreData.machineBrowsers = null
@@ -59,11 +54,11 @@ export class BrowserDataSource {
   }
 
   isSelected (obj: FoundBrowser) {
-    if (!this.ctx.coreData.chosenBrowser) {
+    if (!this.ctx.coreData.activeBrowser) {
       return false
     }
 
-    return this.idForBrowser(this.ctx.coreData.chosenBrowser) === this.idForBrowser(obj)
+    return this.idForBrowser(this.ctx.coreData.activeBrowser) === this.idForBrowser(obj)
   }
 
   isFocusSupported (obj: FoundBrowser) {

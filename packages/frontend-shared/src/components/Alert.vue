@@ -4,10 +4,11 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="rounded-t rounded-b outline-none overflow-hidden group"
+    :overflow="overflow"
+    class="rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
-      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
+      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse, 'overflow-hidden': overflow}]"
     :max-height="maxHeight"
   >
     <template #target="{ open }">
@@ -108,6 +109,7 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean
   iconClasses?: string
   maxHeight?: string
+  overflow?: boolean
 }>(), {
   title: undefined,
   modelValue: true,
@@ -117,6 +119,7 @@ const props = withDefaults(defineProps<{
   bodyClass: undefined,
   iconClasses: '',
   maxHeight: undefined,
+  overflow: true,
 })
 
 const title = computed(() => props.title ?? 'Alert')

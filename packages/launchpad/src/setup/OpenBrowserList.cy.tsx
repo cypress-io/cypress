@@ -14,9 +14,6 @@ describe('<OpenBrowserList />', () => {
 
   it('renders a long list of found browsers correctly', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
-      onResult: (result) => {
-        result.currentBrowser = null
-      },
       render: (gqlVal) =>
         (<div class="border-current border-1 resize overflow-auto">
           <OpenBrowserList gql={gqlVal}/>
@@ -36,19 +33,11 @@ describe('<OpenBrowserList />', () => {
     cy.get('[data-cy-browser="fake"]').should('have.attr', 'aria-disabled', 'true')
     cy.get('[data-cy-browser="fake"] img').should('have.attr', 'src').should('include', 'generic-browser')
 
-    // If no default value, should choose electron
-    cy.get('[data-cy-browser="electron"]').should('have.attr', 'aria-checked', 'true')
-    cy.get('[data-cy="launch-button"]').contains(defaultMessages.openBrowser.startE2E.replace('{browser}', 'Electron'))
-    cy.get('[data-cy="launch-button"]').get('[data-cy="icon-testing-type-e2e"]')
-
     cy.percySnapshot()
   })
 
   it('displays a tooltip for an unsupported browser', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
-      onResult: (result) => {
-        result.currentBrowser = null
-      },
       render: (gqlVal) =>
         (<div class="border-current border-1 resize overflow-auto">
           <div class="h-40" />
@@ -122,22 +111,42 @@ describe('<OpenBrowserList />', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.browserStatus = 'open'
-        res.currentBrowser = longBrowsersList.find((browser) => !browser.isFocusSupported) || null
+        res.activeBrowser!.isFocusSupported = false
       },
-      render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
-          <OpenBrowserList
-            gql={gqlVal}
-            onCloseBrowser={cy.stub().as('closeBrowser')}/>
-        </div>),
+      render: (gqlVal) => {
+        return (
+          <div class="border-current border-1 resize overflow-auto">
+            <OpenBrowserList
+              gql={gqlVal}
+              onCloseBrowser={cy.stub().as('closeBrowser')}/>
+          </div>)
+      },
     })
 
-    cy.get('[data-cy-browser]').each((browser) => cy.wrap(browser).should('have.attr', 'aria-disabled', 'true'))
     cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
     cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
-    cy.contains('button', defaultMessages.openBrowser.close).click()
-    cy.get('@closeBrowser').should('have.been.called')
 
     cy.percySnapshot()
+  })
+
+  it('throws when activeBrowser is null', (done) => {
+    cy.once('uncaught:exception', (err) => {
+      expect(err.message).to.include('Missing activeBrowser in selectedBrowserId')
+      done()
+    })
+
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (res) => {
+        res.activeBrowser = null
+      },
+      render: (gqlVal) => {
+        return (
+          <div class="border-current border-1 resize overflow-auto">
+            <OpenBrowserList
+              gql={gqlVal}
+              onCloseBrowser={cy.stub().as('closeBrowser')}/>
+          </div>)
+      },
+    })
   })
 })

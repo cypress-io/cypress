@@ -37,6 +37,11 @@ system-tests/projects/config-with-ts-syntax-error/**
 # cli/types is linted by tslint/dtslint
 cli/types
 
+# cli/react, cli/vue, and cli/mount-utils are all copied from dist'd builds
+cli/react
+cli/vue
+cli/mount-utils
+
 # packages/example is not linted (think about changing this)
 packages/example
 
@@ -91,3 +96,6 @@ system-tests/projects/nuxtjs-vue2-unconfigured/**/*
 system-tests/projects/nuxtjs-vue2-configured/**/*
 
 system-tests/projects/react-app-webpack-5-unconfigured/**/*
+
+system-tests/project-fixtures/**
+system-tests/projects/**/*/expected-cypress*/**/*

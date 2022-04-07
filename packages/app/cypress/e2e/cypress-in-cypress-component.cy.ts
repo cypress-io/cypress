@@ -145,4 +145,15 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       )
     })
   })
+
+  it('set the correct viewport values from CLI', () => {
+    cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('TestComponent.spec').click()
+
+    cy.get('#unified-runner').should('have.css', 'width', '333px')
+    cy.get('#unified-runner').should('have.css', 'height', '333px')
+  })
 })

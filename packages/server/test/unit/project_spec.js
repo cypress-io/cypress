@@ -3,7 +3,7 @@ require('../spec_helper')
 const path = require('path')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { sinon } = require('../spec_helper')
 const user = require(`../../lib/user`)
 const config = require(`../../lib/config`)
@@ -138,7 +138,7 @@ describe.skip('lib/project-base', () => {
     const supportFile = 'foo/bar/baz'
 
     beforeEach(function () {
-      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar', configFile: 'cypress.config.js' })
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').withArgs({ foo: 'bar', configFile: 'cypress.config.js' })
       .resolves({ baz: 'quux', supportFile, browsers: [] })
     })
 
@@ -176,7 +176,7 @@ describe.skip('lib/project-base', () => {
     it('does not set cfg.isNewProject when cfg.isTextTerminal', function () {
       const cfg = { isTextTerminal: true, browsers: [] }
 
-      config.get.resolves(cfg)
+      ctx.lifecycleManager.getFullInitialConfig.resolves(cfg)
 
       sinon.stub(this.project, '_setSavedState').resolves(cfg)
 
@@ -193,7 +193,7 @@ describe.skip('lib/project-base', () => {
         chromeWebSecurity: false,
       })
 
-      config.get.restore()
+      ctx.lifecycleManager.getFullInitialConfig.restore()
       sinon.stub(config, 'get').returns(cfg)
 
       await this.project.initializeConfig()

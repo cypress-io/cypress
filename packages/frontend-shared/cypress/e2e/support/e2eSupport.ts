@@ -4,7 +4,7 @@ import { installCustomPercyCommand } from '@packages/ui-components/cypress/suppo
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
 import { addNetworkCommands } from '../../support/onlineNetwork'
-import { e2eProjectDirs } from './e2eProjectDirs'
+import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
@@ -19,14 +19,13 @@ configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
-
-export type ProjectFixture = typeof e2eProjectDirs[number]
+const SIXTY_SECONDS = 60 * 1000
 
 export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
   retry?: boolean
   retryDelay?: number // default 1000
   retryCount?: number // default 5
-  projectName?: ProjectFixture
+  projectName?: ProjectFixtureDir
   [key: string]: any
 }
 
@@ -36,7 +35,7 @@ export interface WithCtxInjected extends WithCtxOptions {
   sinon: typeof sinon
   pDefer: typeof pDefer
   testState: Record<string, any>
-  projectDir(projectName: ProjectFixture): string
+  projectDir(projectName: ProjectFixtureDir): string
 }
 
 export interface RemoteGraphQLInterceptPayload {
@@ -174,13 +173,17 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
-function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number} = {}) {
+after(() => {
+  taskInternal('__internal__after', undefined)
+})
+
+function scaffoldProject (projectName: ProjectFixtureDir, options: { timeout?: number } = { timeout: SIXTY_SECONDS }) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName, options)
   })
 }
 
-function addProject (projectName: ProjectFixture, open = false) {
+function addProject (projectName: ProjectFixtureDir, open = false) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
     return taskInternal('__internal_addProject', { projectName, open })
   })
@@ -201,8 +204,8 @@ function openGlobalMode (argv?: string[]) {
   })
 }
 
-function openProject (projectName: ProjectFixture, argv: string[] = []) {
-  if (!e2eProjectDirs.includes(projectName)) {
+function openProject (projectName: ProjectFixtureDir, argv: string[] = []) {
+  if (!fixtureDirs.includes(projectName)) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
@@ -225,7 +228,8 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
-        ctx.actions.project.setCurrentTestingType(o.mode)
+        await ctx.lifecycleManager.waitForInitializeSuccess()
+        ctx.actions.project.setAndLoadCurrentTestingType(o.mode)
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
@@ -239,8 +243,23 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
           initializeActiveProjectStub.restore()
         }
 
+        // Used to format a Cypress error in a way that makes sense to the cy-in-cy
+        // open mode reporter. Typically we'll see all the details we need in the
+        // terminal or in the Cypress UI components, but in the reporter we need to format it a bit
+        function formatError (e: Error & {messageMarkdown?: string, originalError?: Error}) {
+          if (e.messageMarkdown) {
+            e.message = e.messageMarkdown
+            if (e.originalError) {
+              e.message = `${e.message}\n\n${e.originalError.message}`
+            }
+          }
+
+          return e
+        }
+
         function onStartAppError (e: Error) {
-          isInitialized.reject(e)
+          // Cypress Error
+          isInitialized.reject(formatError(e))
           restoreStubs()
         }
 
@@ -255,7 +274,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
             return result
           } catch (e) {
-            isInitialized.reject(e)
+            isInitialized.reject(formatError(e))
           } finally {
             restoreStubs()
           }
@@ -265,6 +284,9 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
         await isInitialized.promise
 
+        if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
+
+        await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
         return ctx.appServerPort
@@ -336,7 +358,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   return cy.task<CyTaskResult<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
     _log.set('result', result)
     _log.end()
 

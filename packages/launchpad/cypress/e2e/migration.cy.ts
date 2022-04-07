@@ -1,10 +1,24 @@
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
+
+// @ts-ignore
+const platform = window.Cypress.platform
 
 const renameAutoStep = `[data-cy="migration-step renameAuto"]`
 const renameManualStep = `[data-cy="migration-step renameManual"]`
 const renameSupportStep = `[data-cy="migration-step renameSupport"]`
 const configFileStep = `[data-cy="migration-step configFile"]`
 const setupComponentStep = `[data-cy="migration-step setupComponent"]`
+
+function getPathForPlatform (posixPath: string) {
+  // @ts-ignore
+  const cy = window.Cypress
+  const platform = cy?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
+
+  if (platform === 'win32') return posixPath.replaceAll('/', '\\')
+
+  return posixPath
+}
 
 declare global {
   namespace Cypress {
@@ -18,13 +32,13 @@ Cypress.Commands.add('waitForWizard', () => {
   return cy.get('[data-cy="migration-wizard"]')
 })
 
-function scaffoldAndVisitLaunchpad (project: typeof e2eProjectDirs[number], argv?: string[]) {
+function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[]) {
   cy.scaffoldProject(project)
   cy.openProject(project, argv)
   cy.visitLaunchpad()
 }
 
-function startMigrationFor (project: typeof e2eProjectDirs[number], argv?: string[]) {
+function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
   cy.waitForWizard()
 }
@@ -927,7 +941,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     })
   })
 
-  it('completes journey for migration-e2e-legacy-plugins-throws-error', () => {
+  it('completes journey for migration-e2e-legacy-plugins-throws-error and recovers', () => {
     scaffoldAndVisitLaunchpad('migration-e2e-legacy-plugins-throws-error')
     // no steps are shown - we show the error that surfaced when executing pluginsFile.
     cy.get(renameAutoStep).should('not.exist')
@@ -938,9 +952,19 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     cy.contains('Error Loading Config')
     // correct location of error
-    cy.get('[data-testid="error-code-frame"]').contains(`cypress/plugins/index.js:2:9`)
+    const pluginsPath = platform === 'win32' ? 'cypress\\plugins\\index.js:2:9' : 'cypress/plugins/index.js:2:9'
+
+    cy.get('[data-testid="error-code-frame"]').contains(pluginsPath)
     // correct error from pluginsFile
     cy.contains(`throw Error('Uh oh, there was an error!')`)
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, 'module.exports = (on, config) => {}')
+    }, { path: getPathForPlatform('cypress/plugins/index.js') })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.waitForWizard()
   })
 })
 

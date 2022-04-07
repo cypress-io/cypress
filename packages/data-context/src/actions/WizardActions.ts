@@ -77,6 +77,8 @@ export class WizardActions {
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
+
+    this.ctx.lifecycleManager.loadTestingType()
   }
 
   /// reset wizard status, useful for when changing to a new project

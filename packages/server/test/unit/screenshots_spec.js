@@ -6,8 +6,7 @@ const Jimp = require('jimp')
 const { Buffer } = require('buffer')
 const dataUriToBuffer = require('data-uri-to-buffer')
 const sizeOf = require('image-size')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const config = require(`../../lib/config`)
+const Fixtures = require('@tooling/system-tests')
 const screenshots = require(`../../lib/screenshots`)
 const { fs } = require(`../../lib/util/fs`)
 const plugins = require(`../../lib/plugins`)
@@ -62,7 +61,7 @@ describe('lib/screenshots', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((config1) => {
       this.config = config1
     })

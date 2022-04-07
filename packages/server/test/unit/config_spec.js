@@ -4,7 +4,7 @@ const _ = require('lodash')
 const debug = require('debug')('test')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { getCtx } = require('@packages/data-context')
 
 const config = require(`../../lib/config`)
@@ -58,23 +58,25 @@ describe('lib/config', () => {
 
   context('.get', () => {
     beforeEach(function () {
-      const ctx = getCtx()
+      this.ctx = getCtx()
 
       this.projectRoot = '/_test-output/path/to/project'
 
-      ctx.lifecycleManager.setCurrentTestingType('e2e')
-      sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
+      sinon.stub(this.ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
+
+      this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
+      this.ctx.lifecycleManager.setCurrentTestingType('e2e')
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
-        sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
+        sinon.stub(this.ctx.lifecycleManager._configManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
+        sinon.stub(this.ctx.lifecycleManager._configManager, 'reloadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
 
     it('sets projectRoot', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then((obj) => {
         expect(obj.projectRoot).to.eq(this.projectRoot)
 
@@ -85,7 +87,7 @@ describe('lib/config', () => {
     it('sets projectName', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then((obj) => {
         expect(obj.projectName).to.eq('project')
       })
@@ -97,7 +99,7 @@ describe('lib/config', () => {
 
       this.setup(settings, envSettings)
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         expect(settings).to.deep.equal({ foo: 'bar' })
         expect(envSettings).to.deep.equal({ baz: 'qux' })
@@ -110,21 +112,21 @@ describe('lib/config', () => {
       })
 
       it('can override default port', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.port).to.eq(8080)
         })
       })
 
       it('updates browserUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.browserUrl).to.eq('http://localhost:8080/__/')
         })
       })
 
       it('updates proxyUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.proxyUrl).to.eq('http://localhost:8080')
         })
@@ -134,11 +136,11 @@ describe('lib/config', () => {
     context('validation', () => {
       beforeEach(function () {
         this.expectValidationPasses = () => {
-          return config.get(this.projectRoot) // shouldn't throw
+          return this.ctx.lifecycleManager.getFullInitialConfig() // shouldn't throw
         }
 
         this.expectValidationFails = (errorMessage = 'validation error') => {
-          return config.get(this.projectRoot)
+          return this.ctx.lifecycleManager.getFullInitialConfig()
           .then(() => {
             throw new Error('should throw validation error')
           }).catch((err) => {
