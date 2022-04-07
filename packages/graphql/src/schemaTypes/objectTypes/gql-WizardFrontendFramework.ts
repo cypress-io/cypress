@@ -9,7 +9,7 @@ export const WizardFrontendFramework = objectType({
   definition (t) {
     t.nonNull.field('type', {
       type: FrontendFrameworkEnum,
-      description: 'The unique identifier for a framework of library',
+      description: 'The unique identifier for a framework or library',
     }),
 
     t.nonNull.field('category', {
