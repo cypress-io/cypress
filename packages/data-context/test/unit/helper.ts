@@ -1,8 +1,7 @@
 // necessary to have mocha types working correctly
 import 'mocha'
 import path from 'path'
-import { fixtureDirs } from '@tooling/system-tests'
-import Fixtures from '@tooling/system-tests/lib/fixtures'
+import Fixtures, { fixtureDirs } from '@tooling/system-tests'
 import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'

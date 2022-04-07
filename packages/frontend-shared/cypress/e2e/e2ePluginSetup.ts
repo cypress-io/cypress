@@ -82,7 +82,7 @@ async function makeE2ETasks () {
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
-  const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
+  const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli')

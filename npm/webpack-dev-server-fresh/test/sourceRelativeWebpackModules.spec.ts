@@ -1,4 +1,4 @@
-import * as Fixtures from '@tooling/system-tests/lib/fixtures'
+import * as Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import type { fixtureDirs } from '@tooling/system-tests'
 import { expect } from 'chai'
