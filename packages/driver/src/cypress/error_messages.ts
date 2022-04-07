@@ -1730,8 +1730,8 @@ export default {
     experiment_not_enabled: {
       message: `${cmd('origin')} requires enabling the experimentalLoginFlows flag`,
     },
-    invalid_origin_argument: {
-      message: `${cmd('origin')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
+    invalid_url_argument: {
+      message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
     invalid_options_argument: {
       message: `${cmd('origin')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
