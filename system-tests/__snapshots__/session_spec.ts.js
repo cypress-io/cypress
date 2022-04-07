@@ -118,20 +118,22 @@ exports['e2e sessions / session tests'] = `
       ✓ clears only secure context data - 2/2
 
   errors
-    ✓ throws error when experimentalSessionSupport not enabled
+    ✓ throws error when experimentalLoginFlows not enabled
+    ✓ throws error when experimentalSessionSupport is enabled through test config
+    ✓ throws error when experimentalSessionSupport is enabled through Cypress.config
     ✓ throws if session has not been defined during current test
     ✓ throws if multiple session calls with same name but different options
 
 
-  54 passing
+  56 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        55                                                                               │
-  │ Passing:      54                                                                               │
+  │ Tests:        57                                                                               │
+  │ Passing:      56                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -149,9 +151,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX       55       54        -        1        - │
+  │ ✔  session_spec.js                          XX:XX       57       56        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       55       54        -        1        -  
+    ✔  All specs passed!                        XX:XX       57       56        -        1        -  
 
 
 `

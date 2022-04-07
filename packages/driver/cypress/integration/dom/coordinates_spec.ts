@@ -6,23 +6,11 @@ const { $ } = Cypress
 export {}
 
 describe('src/dom/coordinates', () => {
-  let doc: Document
-
-  before(() => {
-    return cy
-    .visit('/fixtures/generic.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   beforeEach(function () {
-    doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
-
-    this.$button = $('<button style=\'position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black\'>foo</button>')
-    .appendTo(cy.$$('body'))
+    cy.visit('/fixtures/generic.html').then(() => {
+      this.$button = $('<button style=\'position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black\'>foo</button>')
+      .appendTo(cy.$$('body'))
+    })
   })
 
   // this is necessary so that document.elementFromPoint
@@ -110,17 +98,17 @@ describe('src/dom/coordinates', () => {
 
   context('.getElementAtPointFromViewport', () => {
     it('returns same element based on x/y coords', function () {
-      expect(Cypress.dom.getElementAtPointFromViewport(doc, 100, 60)).to.eq(this.$button.get(0))
+      expect(Cypress.dom.getElementAtPointFromViewport(cy.state('document'), 100, 60)).to.eq(this.$button.get(0))
     })
 
     it('does not return if element is hidden', function () {
       this.$button.hide()
 
-      expect(Cypress.dom.getElementAtPointFromViewport(doc, 100, 60)).not.to.eq(this.$button.get(0))
+      expect(Cypress.dom.getElementAtPointFromViewport(cy.state('document'), 100, 60)).not.to.eq(this.$button.get(0))
     })
 
     it('returns null if no element was found', function () {
-      expect(Cypress.dom.getElementAtPointFromViewport(doc, 1e9, 1e9)).to.be.null
+      expect(Cypress.dom.getElementAtPointFromViewport(cy.state('document'), 1e9, 1e9)).to.be.null
     })
   })
 

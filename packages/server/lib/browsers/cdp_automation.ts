@@ -180,18 +180,18 @@ export interface CdpOptions {
   sendDebuggerCommandFn: SendDebuggerCommand
   onFn: OnFn
   automation: Automation
-  experimentalMultiDomain: boolean
+  experimentalLoginFlows: boolean
 }
 
 export class CdpAutomation {
   sendDebuggerCommandFn: SendDebuggerCommand
   automation: Automation
-  experimentalMultiDomain: boolean
+  experimentalLoginFlows: boolean
 
   constructor (options: CdpOptions) {
     this.sendDebuggerCommandFn = options.sendDebuggerCommandFn
     this.automation = options.automation
-    this.experimentalMultiDomain = options.experimentalMultiDomain
+    this.experimentalLoginFlows = options.experimentalLoginFlows
 
     options.onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     options.onFn('Network.responseReceived', this.onResponseReceived)
@@ -263,7 +263,7 @@ export class CdpAutomation {
         // be sent with a request. This standardizes it by filtering out ones
         // that are secure but not on a secure context
 
-        if (this.experimentalMultiDomain) {
+        if (this.experimentalLoginFlows) {
           // localhost is considered a secure context (even when http:)
           // and it's required for multi-domain when visiting a secondary
           // domain so that all its cookies are sent. This may be a

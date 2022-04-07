@@ -2,7 +2,7 @@ const { assertLogLength } = require('../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/angular', () => {
-  before(() => {
+  beforeEach(() => {
     cy.visit('/fixtures/angular.html')
   })
 

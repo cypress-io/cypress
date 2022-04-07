@@ -567,7 +567,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // means the page navigated to a different domain
 
         // With multi-domain this is an expected error that may or may not be bad, we will rely on the page load timeout to throw if we don't end up where we expect to be.
-        if (this.config('experimentalMultiDomain') && err.name === 'SecurityError') {
+        if (this.config('experimentalLoginFlows') && err.name === 'SecurityError') {
           // TODO: capture that this security error has happened to provide better error messages.
           return
         }
@@ -585,7 +585,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         this.Cypress.emit('internal:window:load', {
-          type: 'cross:domain:failure',
+          type: 'cross:origin:failure',
           error: e,
         })
 

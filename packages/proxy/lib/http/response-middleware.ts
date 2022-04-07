@@ -229,24 +229,24 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
-  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
+const MaybeDelayForCrossOrigin: ResponseMiddleware = function () {
+  const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.current())
   const isPreviousOrigin = this.remoteStates.isInOriginStack(this.req.proxiedUrl)
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
   const isAUTFrame = this.req.isAUTFrame
 
   // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
-  if (this.config.experimentalMultiDomain && isCrossDomain && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
-    this.debug('is cross-domain, delay until ready:for:domain event')
+  if (this.config.experimentalLoginFlows && isCrossOrigin && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    this.debug('is cross-origin, delay until ready:for:origin event')
 
-    this.serverBus.once('ready:for:domain', ({ failed }) => {
-      this.debug(`received ready:for:domain${failed ? ' failed' : ''}, let the response proceed`)
+    this.serverBus.once('ready:for:origin', ({ failed }) => {
+      this.debug(`received ready:for:origin${failed ? ' failed' : ''}, let the response proceed`)
 
       this.next()
     })
 
-    this.serverBus.emit('cross:domain:delaying:html', {
+    this.serverBus.emit('cross:origin:delaying:html', {
       href: this.req.proxiedUrl,
     })
 
@@ -281,10 +281,10 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalMultiDomain && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
-      this.debug('- multi-domain injection')
+    if (this.config.experimentalLoginFlows && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+      this.debug('- cross origin injection')
 
-      return 'fullMultiDomain'
+      return 'fullCrossOrigin'
     }
 
     if (!isHTML || (!isReqMatchOriginPolicy && !isAUTFrame)) {
@@ -388,13 +388,13 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const determineIfNeedsMultiDomainHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+const determineIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const previousAUTRequestUrl = ctx.getPreviousAUTRequestUrl()
 
-  // A cookie needs multi-domain handling if it's an AUT request and
+  // A cookie needs cross origin handling if it's an AUT request and
   // either the request itself is cross-origin or the origins between
   // requests don't match, since the browser won't set them in that
-  // case and if it's secondary-domain -> primary-domain, we don't
+  // case and if it's secondary-origin -> primary-origin, we don't
   // recognize the request as cross-origin
   return (
     !!ctx.req.isAUTFrame &&
@@ -456,18 +456,18 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (cookies) {
-    const needsMultiDomainHandling = (
-      this.config.experimentalMultiDomain
-      && determineIfNeedsMultiDomainHandling(this)
+    const needsCrossOriginHandling = (
+      this.config.experimentalLoginFlows
+      && determineIfNeedsCrossOriginHandling(this)
     )
     const browser = this.getCurrentBrowser() || { family: null }
     const url = new URL(this.req.proxiedUrl)
     const isLocalhost = uri.isLocalhost(url)
 
-    debug('force SameSite=None?', needsMultiDomainHandling)
+    debug('force SameSite=None?', needsCrossOriginHandling)
 
     ;([] as string[]).concat(cookies).forEach((cookie) => {
-      if (needsMultiDomainHandling) {
+      if (needsCrossOriginHandling) {
         cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url })
       }
 
@@ -601,7 +601,7 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  MaybeDelayForMultiDomain,
+  MaybeDelayForCrossOrigin,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,

@@ -1,6 +1,5 @@
 ['config', 'env'].forEach((fnName) => {
-  // @ts-ignore
-  describe(`multi-domain - Cypress.${fnName}()`, { experimentalSessionSupport: true }, () => {
+  describe(`multi-domain - Cypress.${fnName}()`, () => {
     const USED_KEYS = {
       foo: 'multi-domain-foo',
       bar: 'multi-domain-bar',

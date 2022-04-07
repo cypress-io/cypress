@@ -107,7 +107,7 @@ class $Cypress {
   emitMap: any
   primaryOriginCommunicator: PrimaryOriginCommunicator
   specBridgeCommunicator: SpecBridgeCommunicator
-  isMultiDomain: boolean
+  isCrossOriginSpecBridge: boolean
 
   // attach to $Cypress to access
   // all of the constructors
@@ -156,7 +156,7 @@ class $Cypress {
     this.onSpecReady = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
-    this.isMultiDomain = false
+    this.isCrossOriginSpecBridge = false
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
@@ -165,33 +165,10 @@ class $Cypress {
   }
 
   configure (config: Cypress.ObjectLike = {}) {
-    // config.remote
-    // {
-    //   origin: "http://localhost:2020"
-    //   domainName: "localhost"
-    //   props: null
-    //   strategy: "file"
-    // }
+    const domainName = config.remote ? config.remote.domainName : undefined
 
-    // -- or --
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   domainName: "google.com"
-    //   strategy: "http"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    let d = config.remote ? config.remote.domainName : undefined
-
-    // set domainName but allow us to turn
-    // off this feature in testing
-    if (d) {
-      document.domain = d
+    if (domainName) {
+      document.domain = domainName
     }
 
     // a few static props for the host OS, browser
@@ -212,8 +189,8 @@ class $Cypress {
     // slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
-    // true if this Cypress belongs to multi-domain
-    this.isMultiDomain = config.isMultiDomain || false
+    // true if this Cypress belongs to a cross origin spec bridge
+    this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
 
     // enable long stack traces when
     // we not are running headlessly
@@ -229,14 +206,14 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isMultiDomain')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (this.isMultiDomain ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
+      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
@@ -281,7 +258,7 @@ class $Cypress {
       return null
     }
 
-    this.Cookies = $Cookies.create(config.namespace, d)
+    this.Cookies = $Cookies.create(config.namespace, domainName)
 
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
@@ -657,7 +634,7 @@ class $Cypress {
 
       case 'app:window:load':
         this.emit('internal:window:load', {
-          type: 'same:domain',
+          type: 'same:origin',
           window: args[0],
         })
 

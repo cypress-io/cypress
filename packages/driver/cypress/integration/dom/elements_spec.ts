@@ -135,38 +135,43 @@ describe('src/dom/elements', () => {
     })
 
     it('DOM element does not exist', () => {
-      cy.visit('/fixtures/dom.html')
-      const $el = $('foo-bar-baz')
+      cy.visit('/fixtures/dom.html').then(() => {
+        const $el = $('foo-bar-baz')
 
-      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+        expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+      })
     })
 
     it('when html', () => {
-      cy.visit('/fixtures/dom.html')
-      const $el = $('html')
+      cy.visit('/fixtures/dom.html').then(() => {
+        const $el = $('html')
 
-      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+        expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+      })
     })
 
     it('when body', () => {
-      cy.visit('/fixtures/dom.html')
-      const $el = $('body')
+      cy.visit('/fixtures/dom.html').then(() => {
+        const $el = $('body')
 
-      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+        expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+      })
     })
 
     it('when document', () => {
-      cy.visit('/fixtures/dom.html')
-      const $el = $('document')
+      cy.visit('/fixtures/dom.html').then(() => {
+        const $el = $('document')
 
-      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+        expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+      })
     })
 
     it('when existing DOM element', () => {
-      cy.visit('/fixtures/dom.html')
-      const $el = $('input')
+      cy.visit('/fixtures/dom.html').then(() => {
+        const $el = $('input')
 
-      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.false
+        expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.false
+      })
     })
   })
 

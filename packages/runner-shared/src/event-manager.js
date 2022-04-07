@@ -134,7 +134,7 @@ export const eventManager = {
       })
     })
 
-    ws.on('cross:domain:delaying:html', (request) => {
+    ws.on('cross:origin:delaying:html', (request) => {
       Cypress.primaryOriginCommunicator.emit('delaying:html', request)
     })
 
@@ -527,7 +527,7 @@ export const eventManager = {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    // Inform all spec bridges that the primary domain has begun to unload.
+    // Inform all spec bridges that the primary origin has begun to unload.
     Cypress.on('window:before:unload', () => {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
@@ -542,7 +542,7 @@ export const eventManager = {
         cy.isAnticipatingCrossOriginResponseFor(undefined)
         cy.isStable(true, 'load')
         // Prints out the newly loaded URL
-        Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+        Cypress.emit('internal:window:load', { type: 'cross:origin', url })
         // Re-broadcast to any other specBridges.
         Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url })
       }
@@ -556,8 +556,8 @@ export const eventManager = {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
     })
 
-    Cypress.primaryOriginCommunicator.on('expect:domain', (originPolicy) => {
-      localBus.emit('expect:domain', originPolicy)
+    Cypress.primaryOriginCommunicator.on('expect:origin', (originPolicy) => {
+      localBus.emit('expect:origin', originPolicy)
     })
 
     Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, originPolicy) => {
@@ -692,7 +692,7 @@ export const eventManager = {
     ws.emit('spec:changed', specFile)
   },
 
-  notifyCrossDomainBridgeReady (originPolicy) {
+  notifyCrossOriginBridgeReady (originPolicy) {
     // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
     Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, originPolicy)
   },

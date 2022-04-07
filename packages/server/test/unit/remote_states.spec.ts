@@ -94,21 +94,21 @@ describe('remote states', () => {
 
   context('#isSecondaryOrigin', () => {
     it('returns true when the requested url is a secondary origin', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
       const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin('https://staging.google.com')
 
       expect(isSecondaryOrigin).to.be.true
     })
 
     it('returns false when the requested url is the primary origin', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
       const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin('http://localhost:3500')
 
       expect(isSecondaryOrigin).to.be.false
     })
 
     it('returns false when the requested url is not in the origin stack', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
       const isSecondaryOrigin = this.remoteStates.isSecondaryOrigin('https://foobar.com')
 
       expect(isSecondaryOrigin).to.be.false
@@ -123,7 +123,7 @@ describe('remote states', () => {
     })
 
     it('returns false when the requested url is not the primary origin', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
       const isPrimaryOrigin = this.remoteStates.isPrimaryOrigin('http://google.com')
 
       expect(isPrimaryOrigin).to.be.false
@@ -132,7 +132,7 @@ describe('remote states', () => {
 
   context('#removeCurrentOrigin', () => {
     it('removes the current origin from the stack', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
       expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.true
 
       this.remoteStates.removeCurrentOrigin('https://google.com')
@@ -141,7 +141,7 @@ describe('remote states', () => {
     })
 
     it('throws an error when trying to remove the incorrect origin', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
       expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.true
 
       expect(() => this.remoteStates.removeCurrentOrigin('http://notfound.com'))
@@ -151,7 +151,7 @@ describe('remote states', () => {
 
   context('#reset', () => {
     it('resets the origin stack and remote states to the primary', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
 
       expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.true
 
@@ -164,8 +164,8 @@ describe('remote states', () => {
 
   context('#current', () => {
     it('returns the remote state for the current origin in the stack', function () {
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'https://google.com' })
-      this.remoteStates.set('https://staging.google.com/foo/bar', { isMultiDomain: true })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
+      this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: true })
 
       const state = this.remoteStates.current()
 
@@ -185,10 +185,10 @@ describe('remote states', () => {
   })
 
   context('#set', () => {
-    it('sets primary state and origin when isMultiDomain is false', function () {
+    it('sets primary state and origin when isCrossOrigin is false', function () {
       expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
 
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isMultiDomain: false })
+      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: false })
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -206,10 +206,10 @@ describe('remote states', () => {
       expect(this.remoteStates.isPrimaryOrigin('https://staging.google.com')).to.be.true
     })
 
-    it('sets a secondary state when isMultiDomain is true', function () {
+    it('sets a secondary state when isCrossOrigin is true', function () {
       expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
 
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isMultiDomain: true })
+      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: true })
 
       this.remoteStates.addOrigin('https://staging.google.com')
 
@@ -366,24 +366,24 @@ describe('remote states', () => {
   })
 
   context('events', () => {
-    it('can add a secondary remote state on ready:for:domain', function () {
+    it('can add a secondary remote state on ready:for:origin', function () {
       let currentState = this.remoteStates.current()
 
       expect(currentState.origin).to.equal('http://localhost:3500')
 
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
       currentState = this.remoteStates.current()
       expect(currentState.origin).to.equal('http://cypress.io')
       expect(this.remoteStates.isSecondaryOrigin(currentState.origin)).to.be.true
     })
 
-    it('doesn\'t do anything if ready:for:domain failed', function () {
+    it('doesn\'t do anything if ready:for:origin failed', function () {
       let currentState = this.remoteStates.current()
 
       expect(currentState.origin).to.equal('http://localhost:3500')
 
-      this.eventEmitter.emit('ready:for:domain', { failed: true })
+      this.eventEmitter.emit('ready:for:origin', { failed: true })
 
       currentState = this.remoteStates.current()
       expect(currentState.origin).to.equal('http://localhost:3500')
@@ -395,7 +395,7 @@ describe('remote states', () => {
 
       expect(currentState.origin).to.equal('http://localhost:3500')
 
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
       currentState = this.remoteStates.current()
       expect(currentState.origin).to.equal('http://cypress.io')
@@ -406,22 +406,22 @@ describe('remote states', () => {
       expect(currentState.origin).to.equal('http://localhost:3500')
     })
 
-    it('doesn\'t override an existing secondary remote state on ready:for:domain', function () {
+    it('doesn\'t override an existing secondary remote state on ready:for:origin', function () {
       let currentState = this.remoteStates.current()
 
       expect(currentState.origin).to.equal('http://localhost:3500')
 
-      // simulate a cy.origin by calling ready:for:domain followed by setting
+      // simulate a cy.origin by calling ready:for:origin followed by setting
       // the origin with specific auth options and finally calling cross:origin:finished
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
-      this.remoteStates.set('http://cypress.io', { auth: { username: 'u', password: 'p' }, isMultiDomain: true })
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
+      this.remoteStates.set('http://cypress.io', { auth: { username: 'u', password: 'p' }, isCrossOrigin: true })
       currentState = this.remoteStates.current()
       expect(currentState.origin).to.equal('http://cypress.io')
       expect(currentState.auth).to.deep.equal({ username: 'u', password: 'p' })
       this.eventEmitter.emit('cross:origin:finished', 'http://cypress.io')
 
-      // verify calling ready:for:domain doesn't reset the previous state
-      this.eventEmitter.emit('ready:for:domain', { originPolicy: 'http://cypress.io' })
+      // verify calling ready:for:origin doesn't reset the previous state
+      this.eventEmitter.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
 
       currentState = this.remoteStates.current()
       expect(currentState.origin).to.equal('http://cypress.io')

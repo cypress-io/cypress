@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain', { experimentalSessionSupport: true }, () => {
+describe('multi-domain', () => {
   it('passes viewportWidth/Height state to the secondary domain', () => {
     const expectedViewport = [320, 480]
 

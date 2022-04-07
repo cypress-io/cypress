@@ -20,7 +20,7 @@ export const getRunnerInjectionContents = () => {
   return getRunnerContents('injection.js')
 }
 
-export const getRunnerMultiDomainInjectionContents = () => {
+export const getRunnerCrossOriginInjectionContents = () => {
   return getRunnerContents('injection_multi_domain.js')
 }
 

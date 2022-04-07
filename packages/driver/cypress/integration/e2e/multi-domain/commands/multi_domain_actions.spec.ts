@@ -1,5 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain actions', { experimentalSessionSupport: true }, () => {
+context('multi-domain actions', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
   })

@@ -14,7 +14,7 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
-      'MaybeDelayForMultiDomain',
+      'MaybeDelayForCrossOrigin',
       'SetInjectionLevel',
       'OmitProblematicHeaders',
       'MaybePreventCaching',
@@ -130,14 +130,14 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('MaybeDelayForMultiDomain', function () {
-    const { MaybeDelayForMultiDomain } = ResponseMiddleware
+  describe('MaybeDelayForCrossOrigin', function () {
+    const { MaybeDelayForCrossOrigin } = ResponseMiddleware
     let ctx
 
     it('doesn\'t do anything when not html or rendered html', function () {
       prepareContext({})
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -152,13 +152,13 @@ describe('http/response-middleware', function () {
         },
       })
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
     })
 
-    it('doesn\'t do anything when "experimentalMultiDomain" config flag is not set to true"', function () {
+    it('doesn\'t do anything when "experimentalLoginFlows" config flag is not set to true"', function () {
       prepareContext({
         incomingRes: {
           headers: {
@@ -167,7 +167,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -186,17 +186,17 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
     })
 
-    it('waits for server signal if req is not of a previous origin, letting it continue after receiving ready:for:domain', function () {
+    it('waits for server signal if req is not of a previous origin, letting it continue after receiving ready:for:origin', function () {
       prepareContext({
         req: {
           isAUTFrame: true,
@@ -209,20 +209,20 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://idp.com' })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ originPolicy: 'http://idp.com' })
 
       return promise
     })
 
-    it('waits for server signal if res is html, letting it continue after receiving ready:for:domain', function () {
+    it('waits for server signal if res is html, letting it continue after receiving ready:for:origin', function () {
       prepareContext({
         incomingRes: {
           headers: {
@@ -234,20 +234,20 @@ describe('http/response-middleware', function () {
           proxiedUrl: 'http://www.foobar.com/test',
         },
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.foobar.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ originPolicy: 'http://foobar.com' })
 
       return promise
     })
 
-    it('waits for server signal if incomingRes is rendered html, letting it continue after receiving ready:for:domain', function () {
+    it('waits for server signal if incomingRes is rendered html, letting it continue after receiving ready:for:origin', function () {
       prepareContext({
         req: {
           headers: {
@@ -260,20 +260,20 @@ describe('http/response-middleware', function () {
           proxiedUrl: 'http://www.foobar.com/test',
         },
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.foobar.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ originPolicy: 'http://foobar.com' })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ originPolicy: 'http://foobar.com' })
 
       return promise
     })
 
-    it('waits for server signal, letting it continue after receiving ready:for:domain failed', function () {
+    it('waits for server signal, letting it continue after receiving ready:for:origin failed', function () {
       prepareContext({
         req: {
           isAUTFrame: true,
@@ -286,15 +286,15 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com', 'http://example.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html', { href: 'http://www.idp.com/test' })
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ failed: true })
+      ctx.serverBus.once.withArgs('ready:for:origin').args[0][1]({ failed: true })
 
       return promise
     })
@@ -309,7 +309,7 @@ describe('http/response-middleware', function () {
       // set the secondary remote states
       remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('ready:for:domain', { originPolicy })
+        eventEmitter.emit('ready:for:origin', { originPolicy })
       })
 
       ctx = {
@@ -400,7 +400,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('doesn\'t inject anything when html does not match origin policy and "experimentalMultiDomain" config flag is NOT set to true', function () {
+    it('doesn\'t inject anything when html does not match origin policy and "experimentalLoginFlows" config flag is NOT set to true', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://foobar.com',
@@ -421,7 +421,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('injects "fullMultiDomain" when "experimentalMultiDomain" config flag is set to true for cross-domain html"', function () {
+    it('injects "fullCrossOrigin" when "experimentalLoginFlows" config flag is set to true for cross-origin html"', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://foobar.com',
@@ -436,17 +436,17 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
       return testMiddleware([SetInjectionLevel], ctx)
       .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
       })
     })
 
-    it('injects "fullMultiDomain" when request is in origin stack for cross-domain html"', function () {
+    it('injects "fullCrossOrigin" when request is in origin stack for cross-origin html"', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://example.com',
@@ -461,13 +461,13 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://example.com', 'http://foobar.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
       return testMiddleware([SetInjectionLevel], ctx)
       .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
       })
     })
 
@@ -547,7 +547,7 @@ describe('http/response-middleware', function () {
         },
         secondaryOrigins: ['http://foobar.com'],
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
       })
 
@@ -592,7 +592,7 @@ describe('http/response-middleware', function () {
       // set the secondary remote states
       remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('ready:for:domain', { originPolicy })
+        eventEmitter.emit('ready:for:origin', { originPolicy })
       })
 
       ctx = {
@@ -814,7 +814,7 @@ describe('http/response-middleware', function () {
             append: appendStub,
           },
           config: {
-            experimentalMultiDomain: false,
+            experimentalLoginFlows: false,
           },
         })
 
@@ -914,7 +914,7 @@ describe('http/response-middleware', function () {
       // set the secondary remote states
       remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('ready:for:domain', { originPolicy })
+        eventEmitter.emit('ready:for:origin', { originPolicy })
       })
 
       return {
@@ -938,7 +938,7 @@ describe('http/response-middleware', function () {
           },
         },
         config: {
-          experimentalMultiDomain: true,
+          experimentalLoginFlows: true,
         },
         getCurrentBrowser () {
           return { family: 'chromium' }

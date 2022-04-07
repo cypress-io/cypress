@@ -2,7 +2,6 @@
 // This is likely due to cypress being re declared while on a cross origin iframe before the application navigates back.
 // To reproduce, just add "experimentalSessionSupport" = true into the describe block below
 
-// @ts-ignore
 describe('multi-domain - uncaught errors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')

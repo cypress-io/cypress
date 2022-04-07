@@ -50,7 +50,7 @@ module.exports = {
     })
   },
 
-  handleMultiDomainIframe (req, res) {
+  handleCrossOriginIframe (req, res) {
     const iframePath = cwd('lib', 'html', 'multi-domain-iframe.html')
     const domain = req.hostname
 

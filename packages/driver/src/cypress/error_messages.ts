@@ -988,7 +988,7 @@ export default {
 
         If so, increase \`redirectionLimit\` value in configuration.`
     },
-    switch_to_domain_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
+    cross_origin_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
       return stripIndent`\
 
         Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
@@ -1531,9 +1531,19 @@ export default {
     validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}',
     },
-    experimentNotEnabled: {
-      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
-      docsUrl: 'https://on.cypress.io/session',
+    experimentNotEnabled (experimentalSessionSupport) {
+      if (experimentalSessionSupport) {
+        return {
+          message: stripIndent`
+          ${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.`,
+          docsUrl: 'https://on.cypress.io/migration-guide',
+        }
+      }
+
+      return {
+        message: `${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag`,
+        docsUrl: 'https://on.cypress.io/session',
+      }
     },
     session: {
       duplicateId: {
@@ -1718,7 +1728,7 @@ export default {
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
     experiment_not_enabled: {
-      message: `${cmd('origin')} requires enabling the experimentalMultiDomain flag`,
+      message: `${cmd('origin')} requires enabling the experimentalLoginFlows flag`,
     },
     invalid_origin_argument: {
       message: `${cmd('origin')} requires the first argument to be either an origin ('https://app.example.com') or a domain name ('example.com'). The origin or domain name must not contain a path, hash, or query parameters. You passed: \`{{arg}}\``,
@@ -1742,13 +1752,13 @@ export default {
     invalid_fn_argument: {
       message: `${cmd('origin')} requires the last argument to be a function. You passed: \`{{arg}}\``,
     },
-    run_domain_fn_errored: {
+    run_origin_fn_errored: {
       message: stripIndent`
       {{error}}
 
       This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
-    ran_domain_fn_reference_error: {
+    ran_origin_fn_reference_error: {
       message: stripIndent`
         {{error}}
 
@@ -2093,7 +2103,7 @@ export default {
 
             > {{differences}}
 
-          You may only ${cmd('visit')} same-origin URLs within ${args.isMultiDomain ? cmd('origin') : 'a single test'}.
+          You may only ${cmd('visit')} same-origin URLs within ${args.isCrossOriginSpecBridge ? cmd('origin') : 'a single test'}.
 
           The previous URL you visited was:
 

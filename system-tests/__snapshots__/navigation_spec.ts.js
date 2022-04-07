@@ -1,4 +1,4 @@
-exports['e2e cross origin navigation / captures cross origin failures when "experimentalMultiDomain" config value is falsy'] = `
+exports['e2e cross origin navigation / captures cross origin failures when "experimentalLoginFlows" config value is falsy'] = `
 
 ====================================================================================================
 
@@ -18,14 +18,14 @@ exports['e2e cross origin navigation / captures cross origin failures when "expe
 
 
   navigation cross origin errors
-    1) displays cross origin failures when "experimentalMultiDomain" is turned off
+    1) displays cross origin failures when "experimentalLoginFlows" is turned off
 
 
   0 passing
   1 failing
 
   1) navigation cross origin errors
-       displays cross origin failures when "experimentalMultiDomain" is turned off:
+       displays cross origin failures when "experimentalLoginFlows" is turned off:
      CypressError: Cypress detected a cross origin error happened on page load:
 
   > [Cross origin error message]
@@ -68,8 +68,8 @@ https://on.cypress.io/cross-origin-violation
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/navigation_cross_origin_errors.ts/navigation cr     (1280x720)
-     oss origin errors -- displays cross origin failures when experimentalMultiDomain               
-      is turned off (failed).png                                                                    
+     oss origin errors -- displays cross origin failures when experimentalLoginFlows                
+     is turned off (failed).png                                                                     
 
 
   (Video)

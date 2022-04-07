@@ -11,8 +11,7 @@ const reifyLogs = (logs) => {
   })
 }
 
-// @ts-ignore / session support is needed for visiting about:blank between tests
-describe('navigation events', { experimentalSessionSupport: true }, () => {
+describe('navigation events', () => {
   let logs: any = []
 
   beforeEach(() => {
@@ -210,7 +209,7 @@ describe('navigation events', { experimentalSessionSupport: true }, () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('event timing', { experimentalSessionSupport: true }, () => {
+describe('event timing', () => {
   it('does not timeout when receiving a delaying:html event after cy.origin has started, but before the spec bridge is ready', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
@@ -231,7 +230,7 @@ describe('event timing', { experimentalSessionSupport: true }, () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('delayed navigation', { experimentalSessionSupport: true, defaultCommandTimeout: 2000 }, () => {
+describe('delayed navigation', { defaultCommandTimeout: 2000 }, () => {
   it('localhost -> localhost', () => {
     cy.visit('/fixtures/auth/delayedNavigate.html')
     cy.get('[data-cy="to-localhost"]').click()
@@ -270,7 +269,7 @@ describe('delayed navigation', { experimentalSessionSupport: true, defaultComman
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('errors', { experimentalSessionSupport: true }, () => {
+describe('errors', () => {
   it('never calls cy.origin', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
