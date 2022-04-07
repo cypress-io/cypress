@@ -121,6 +121,46 @@ describe('multi-domain', () => {
       })
     })
 
+    it('succeeds on a url with a path and hash', () => {
+      cy.origin('http://www.foobar9.com/login/#hash', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `http://foobar9.com/__cypress/multi-domain-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar9.com') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
+    it('succeeds on a domain with path', () => {
+      cy.origin('foobar10.com/login', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://foobar10.com/__cypress/multi-domain-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar10.com') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
+    it('succeeds on a domain with a hash', () => {
+      cy.origin('foobar11.com/#hash', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://foobar11.com/__cypress/multi-domain-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar11.com') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
+    it('succeeds on a domain with a path and hash', () => {
+      cy.origin('foobar12.com/login/#hash', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://foobar12.com/__cypress/multi-domain-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar12.com') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
     it('succeeds on a public suffix with a subdomain', () => {
       cy.origin('app.foobar.herokuapp.com', () => undefined)
       cy.then(() => {
