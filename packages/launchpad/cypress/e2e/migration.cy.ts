@@ -1,4 +1,4 @@
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
 // @ts-ignore
@@ -32,13 +32,13 @@ Cypress.Commands.add('waitForWizard', () => {
   return cy.get('[data-cy="migration-wizard"]')
 })
 
-function scaffoldAndVisitLaunchpad (project: typeof e2eProjectDirs[number], argv?: string[]) {
+function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[]) {
   cy.scaffoldProject(project)
   cy.openProject(project, argv)
   cy.visitLaunchpad()
 }
 
-function startMigrationFor (project: typeof e2eProjectDirs[number], argv?: string[]) {
+function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
   cy.waitForWizard()
 }

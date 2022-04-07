@@ -4,7 +4,7 @@ import { installCustomPercyCommand } from '@packages/ui-components/cypress/suppo
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
 import { addNetworkCommands } from '../../support/onlineNetwork'
-import { e2eProjectDirs } from './e2eProjectDirs'
+import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
@@ -21,13 +21,11 @@ const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
 const SIXTY_SECONDS = 60 * 1000
 
-export type ProjectFixture = typeof e2eProjectDirs[number]
-
 export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
   retry?: boolean
   retryDelay?: number // default 1000
   retryCount?: number // default 5
-  projectName?: ProjectFixture
+  projectName?: ProjectFixtureDir
   [key: string]: any
 }
 
@@ -37,7 +35,7 @@ export interface WithCtxInjected extends WithCtxOptions {
   sinon: typeof sinon
   pDefer: typeof pDefer
   testState: Record<string, any>
-  projectDir(projectName: ProjectFixture): string
+  projectDir(projectName: ProjectFixtureDir): string
 }
 
 export interface RemoteGraphQLInterceptPayload {
@@ -179,13 +177,13 @@ after(() => {
   taskInternal('__internal__after', undefined)
 })
 
-function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number } = { timeout: SIXTY_SECONDS }) {
+function scaffoldProject (projectName: ProjectFixtureDir, options: { timeout?: number } = { timeout: SIXTY_SECONDS }) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName, options)
   })
 }
 
-function addProject (projectName: ProjectFixture, open = false) {
+function addProject (projectName: ProjectFixtureDir, open = false) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
     return taskInternal('__internal_addProject', { projectName, open })
   })
@@ -206,8 +204,8 @@ function openGlobalMode (argv?: string[]) {
   })
 }
 
-function openProject (projectName: ProjectFixture, argv: string[] = []) {
-  if (!e2eProjectDirs.includes(projectName)) {
+function openProject (projectName: ProjectFixtureDir, argv: string[] = []) {
+  if (!fixtureDirs.includes(projectName)) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
