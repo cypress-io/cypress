@@ -7,6 +7,8 @@ export const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
 
+export { fixtureDirs, ProjectFixtureDir } from './fixtureDirs'
+
 export const projects = _path.join(root, 'projects')
 
 export const projectFixtures = _path.join(root, 'project-fixtures')

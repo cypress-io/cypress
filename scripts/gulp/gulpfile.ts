@@ -43,9 +43,6 @@ gulp.task(
 
     // ... and generate the correct GraphQL types for the frontend
     graphqlCodegenWatch,
-
-    // ... and generate the patsh for the e2e support file watching
-    e2eTestScaffoldWatch,
   ),
 )
 
@@ -62,7 +59,7 @@ gulp.task(
   gulp.parallel(
     webpackRunner,
     gulp.series(
-      makePathMap,
+      gulp.parallel(makePathMap, e2eTestScaffoldWatch),
       gulp.parallel(
         viteClean,
         'codegen',
@@ -74,7 +71,6 @@ gulp.task(
       gulp.parallel(
         viteApp,
         viteLaunchpad,
-        e2eTestScaffoldWatch,
       ),
 
       // And we're finally ready for electron, watching for changes in
@@ -107,6 +103,7 @@ gulp.task('open', startCypressWatch)
 gulp.task('buildProd',
   gulp.series(
     viteClean,
+    e2eTestScaffold,
 
     nexusCodegen,
     graphqlCodegen,

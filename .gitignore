@@ -68,6 +68,7 @@ packages/socket/lib/*.js
 system-tests/.projects
 system-tests/.http-mitm-proxy
 system-tests/fixtures/large-img
+system-tests/lib/fixtureDirs.ts
 
 # from npm/react
 /npm/react/bin/*
