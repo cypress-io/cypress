@@ -21,8 +21,6 @@ export function removeCommonNodeModules () {
   fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
 }
 
-fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
-
 export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]): Promise<string> {
   Fixtures.removeProject(project)
 
