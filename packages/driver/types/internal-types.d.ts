@@ -65,7 +65,7 @@ declare namespace Cypress {
     specBridgeCommunicator: import('../src/multi-domain/communicator').SpecBridgeCommunicator
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void
-    isMultiDomain: boolean
+    isCrossOriginSpecBridge: boolean
     originalConfig: Cypress.ObjectLike
   }
 

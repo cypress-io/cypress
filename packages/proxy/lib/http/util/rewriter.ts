@@ -29,8 +29,8 @@ function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
-    case 'fullMultiDomain':
-      return inject.fullMultiDomain(domainName)
+    case 'fullCrossOrigin':
+      return inject.fullCrossOrigin(domainName)
     case 'partial':
       return inject.partial(domainName)
     default:
