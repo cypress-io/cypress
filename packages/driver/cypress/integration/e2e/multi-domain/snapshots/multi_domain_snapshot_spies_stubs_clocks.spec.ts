@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
@@ -100,7 +101,7 @@ context('cross-origin snapshot spies, stubs, and clock', { experimentalSessionSu
         expect(tickLog.crossOriginLog).to.be.true
         expect(tickLog.name).to.equal('tick')
 
-        const consoleProps = tickLog.consoleProps
+        const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
 
         expect(consoleProps.Command).to.equal('tick')
         expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
