@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-// makes logs coming from secondary domain work with `assertLogLength`
+// makes logs coming from secondary origin work with `assertLogLength`
 const reifyLogs = (logs) => {
   return logs.map((attrs) => {
     return {
@@ -22,7 +22,7 @@ describe('navigation events', () => {
     })
 
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   describe('navigation:changed', () => {
@@ -50,7 +50,7 @@ describe('navigation events', () => {
     // TODO: this test should work but there seems to be a problem where the command queue ends prematurely
     it.skip('navigates forward and back using history', () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.get('a[data-cy="multi-domain-page"]').click()
+        cy.get('a[data-cy="cross-origin-page"]').click()
         .window().then((win) => {
           return new Promise((resolve) => {
             cy.once('navigation:changed', resolve)
@@ -133,8 +133,8 @@ describe('navigation events', () => {
           cy.on('window:load', listener)
         })
 
-        cy.get('a[data-cy="multi-domain-page"]').click()
-        cy.get('a[data-cy="multi-domain-secondary-link').invoke('text').should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.get('a[data-cy="cross-origin-page"]').click()
+        cy.get('a[data-cy="cross-origin-secondary-link').invoke('text').should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
         cy.wrap(afterWindowLoad).then(() => {
           return logs.map((log) => ({ name: log.get('name'), message: log.get('message') }))
         })
@@ -184,7 +184,7 @@ describe('navigation events', () => {
           cy.on('url:changed', listener)
         })
 
-        cy.get('a[data-cy="multi-domain-page"]').click()
+        cy.get('a[data-cy="cross-origin-page"]').click()
         cy.wrap(afterUrlChanged)
       })
     })
@@ -192,7 +192,7 @@ describe('navigation events', () => {
     // TODO: this test should re revisited with the cypress in cypress tests available in 10.0
     it.skip('the runner url updates appropriately', () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.get('a[data-cy="multi-domain-page"]').click()
+        cy.get('a[data-cy="cross-origin-page"]').click()
       })
     })
   })
@@ -202,7 +202,7 @@ describe('navigation events', () => {
 describe('event timing', () => {
   it('does not timeout when receiving a delaying:html event after cy.origin has started, but before the spec bridge is ready', () => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
       cy.log('inside cy.origin foobar')
@@ -276,15 +276,15 @@ describe('errors', () => {
     })
 
     cy.visit('/fixtures/auth/index.html')
-    cy.get('[data-cy="login-foobar"]').click() // Timeout on page load here, we never reach the expected domain
+    cy.get('[data-cy="login-foobar"]').click() // Timeout on page load here, we never reach the expected origin
     cy.get('[data-cy="login-foobar"]')
   })
 
-  it('never redirects to the subdomain', { defaultCommandTimeout: 50 }, (done) => {
+  it('never redirects to the cross origin', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="username"]\`, but never found it`)
       expect(err.message).to.include(`The command was expected to run against origin: \`http://idp.com:3500\` but the application is at origin: \`http://localhost:3500\`.`)
-      //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+      //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
       done()
@@ -302,7 +302,7 @@ describe('errors', () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('redirects to the wrong subdomain', { pageLoadTimeout: 5000 }, (done) => {
+  it('redirects to the wrong cross origin', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://idp.com:3500\`\n`)
@@ -315,7 +315,7 @@ describe('errors', () => {
     })
 
     cy.visit('/fixtures/auth/index.html')
-    cy.get('[data-cy="login-foobar"]').click() // Timeout on page load here, we never reach the expected domain
+    cy.get('[data-cy="login-foobar"]').click() // Timeout on page load here, we never reach the expected origin
     cy.origin('http://idp.com:3500', () => {
       cy.get('[data-cy="username"]').type('BJohnson')
       cy.get('[data-cy="login"]').click()
@@ -327,11 +327,11 @@ describe('errors', () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('never returns to the primary domain', { defaultCommandTimeout: 50 }, (done) => {
+  it('never returns to the primary origin', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="welcome"]\`, but never found it`)
       expect(err.message).to.include(`The command was expected to run against origin: \`http://localhost:3500\` but the application is at origin: \`http://idp.com:3500\`.`)
-      //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+      //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
       done()
@@ -349,7 +349,7 @@ describe('errors', () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('redirects to an unexpected subdomain', { pageLoadTimeout: 5000 }, (done) => {
+  it('redirects to an unexpected cross origin', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://localhost:3500\`\n`)
@@ -376,7 +376,7 @@ describe('errors', () => {
     .should('equal', 'Welcome BJohnson')
   })
 
-  it('redirects to an unexpected subdomain and calls another command in the cy.origin command', { pageLoadTimeout: 5000 }, (done) => {
+  it('redirects to an unexpected cross origin and calls another command in the cy.origin command', { pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://idp.com:3500\`\n`)
@@ -409,18 +409,18 @@ describe('errors', () => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
       expect(err.message).to.include(`The command was expected to run against origin: \`http://idp.com:3500\` but the application is at origin: \`http://localhost:3500\`.`)
-      //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+      //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
       done()
     })
 
-    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.visit('/fixtures/auth/index.html') // Establishes primary origin
     cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
     cy.origin('http://idp.com:3500', () => {
       cy.get('[data-cy="username"]').type('BJohnson')
       cy.get('[data-cy="login"]').click()
-      cy.get('[data-cy="cannot_find"]') // Timeout here on command stability achieved by primary domain, this command times out.
+      cy.get('[data-cy="cannot_find"]') // Timeout here on command stability achieved by primary origin, this command times out.
     })
 
     // Verify that the user has logged in on localhost
@@ -432,17 +432,17 @@ describe('errors', () => {
   it('fails with a normal timeout', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`[data-cy="cannot_find"]\`, but never found it`)
-      //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+      //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
       expect(err.message).not.to.include(`The command was expected to run against origin:`)
       done()
     })
 
-    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.visit('/fixtures/auth/index.html') // Establishes primary origin
     cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
     cy.origin('http://idp.com:3500', () => {
-      cy.get('[data-cy="cannot_find"]') // Timeout here on command stability achieved by primary domain, this command times out.
+      cy.get('[data-cy="cannot_find"]') // Timeout here on command stability achieved by primary origin, this command times out.
     })
   })
 
@@ -461,7 +461,7 @@ describe('errors', () => {
         done()
       })
 
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.window().then(() => {
       // Force remove the spec bridge
         window?.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
@@ -483,7 +483,7 @@ describe('errors', () => {
 
     // this test just needs to establish the foobar spec bridge.
     it('establishes foobar spec bridge', () => {
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-foobar"]').click() // Takes you to idp.com
       cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
@@ -497,7 +497,7 @@ describe('errors', () => {
     })
 
     // This test is the same as the first test but the foobar spec bridge has been established and we expect it to behave the same as the first test.
-    // The primary domain should ignore the load event from the foobar spec bridge and load should timeout in the idp cy.origin command..
+    // The primary origin should ignore the load event from the foobar spec bridge and load should timeout in the idp cy.origin command..
     it('times out in cy.origin with foobar spec bridge defined', { pageLoadTimeout: 5000 }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
@@ -510,7 +510,7 @@ describe('errors', () => {
         done()
       })
 
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
       cy.origin('http://idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')

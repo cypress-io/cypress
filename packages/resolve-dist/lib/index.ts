@@ -21,7 +21,7 @@ export const getRunnerInjectionContents = () => {
 }
 
 export const getRunnerCrossOriginInjectionContents = () => {
-  return getRunnerContents('injection_multi_domain.js')
+  return getRunnerContents('injection_cross_origin.js')
 }
 
 export const getPathToIndex = (pkg: RunnerPkg) => {

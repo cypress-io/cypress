@@ -11,7 +11,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e multi domain errors', () => {
+describe('e2e cy.origin errors', () => {
   systemTests.setup({
     servers: [{
       port: 4466,
@@ -24,7 +24,7 @@ describe('e2e multi domain errors', () => {
     },
   })
 
-  systemTests.it('captures the stack trace correctly for multi-domain errors to point users to their "cy.origin" callback', {
+  systemTests.it('captures the stack trace correctly for errors in cross origins to point users to their "cy.origin" callback', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'multi_domain_error_spec.ts',

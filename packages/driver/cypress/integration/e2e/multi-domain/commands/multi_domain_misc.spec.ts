@@ -1,4 +1,4 @@
-context('multi-domain misc', () => {
+context('cy.origin misc', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()
@@ -84,7 +84,7 @@ it('verifies number of cy commands', () => {
   }
 
   if (addedCommands.length) {
-    throw new Error(`The following command(s) have been added to Cypress: ${addedCommands.join(', ')}. Please add tests for the command(s) in multi-domain and add the command(s) to this test.`)
+    throw new Error(`The following command(s) have been added to Cypress: ${addedCommands.join(', ')}. Please add tests for the command(s) in cy.origin and add the command(s) to this test.`)
   }
 
   if (removedCommands.length) {

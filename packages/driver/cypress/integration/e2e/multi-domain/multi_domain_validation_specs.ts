@@ -1,4 +1,4 @@
-describe('multi-domain', () => {
+describe('cy.origin', () => {
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
@@ -255,7 +255,7 @@ describe('multi-domain', () => {
       cy.origin()
     })
 
-    it('errors if passed a non-string for the domain argument', (done) => {
+    it('errors if passed a non-string for the origin argument', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.origin()` requires the first argument to be either a url (`https://www.example.com/path`) or a domain name (`example.com`). Query parameters are not allowed. You passed: ``')
 

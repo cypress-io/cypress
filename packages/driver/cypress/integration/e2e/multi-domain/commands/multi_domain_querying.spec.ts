@@ -1,4 +1,4 @@
-context('multi-domain querying', () => {
+context('cy.origin querying', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()

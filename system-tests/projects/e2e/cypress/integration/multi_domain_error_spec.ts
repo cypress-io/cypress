@@ -1,7 +1,7 @@
-describe('multi-domain', () => {
+describe('cy.origin', () => {
   beforeEach(() => {
     cy.visit('/multi_domain.html')
-    cy.get('a[data-cy="multi_domain_secondary_link"]').click()
+    cy.get('a[data-cy="cross_origin_secondary_link"]').click()
   })
 
   it('tries to find an element that doesn\'t exist and fails', () => {

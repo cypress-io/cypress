@@ -21,10 +21,10 @@ const isAUTFrame = (win) => {
     // exist on parent, it must be the top frame, and `win` is the AUT
     return !$elements.getNativeProp(parent, 'frameElement')
   } catch (err) {
-    // if the AUT is cross-domain, accessing parent.frameElement will throw
+    // if the AUT is cross-origin, accessing parent.frameElement will throw
     // a cross-origin error, meaning this is the AUT
     // NOTE: this will need to be updated once we add support for
-    // cross-domain iframes
+    // cross-origin iframes
     return true
   }
 }

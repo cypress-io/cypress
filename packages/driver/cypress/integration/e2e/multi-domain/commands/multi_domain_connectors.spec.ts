@@ -1,4 +1,4 @@
-context('multi-domain connectors', () => {
+context('cy.origin connectors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()
