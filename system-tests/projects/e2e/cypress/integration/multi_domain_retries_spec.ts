@@ -1,7 +1,7 @@
-describe('multi-domain test retries', () => {
+describe('cy.origin test retries', () => {
   beforeEach(() => {
     cy.visit('/multi_domain.html')
-    cy.get('a[data-cy="multi_domain_secondary_link"]').click()
+    cy.get('a[data-cy="cross_origin_secondary_link"]').click()
   })
 
   it('appropriately retries test within "cy.origin" without propagating other errors errors', function () {

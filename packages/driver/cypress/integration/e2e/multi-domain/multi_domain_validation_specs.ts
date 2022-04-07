@@ -1,4 +1,4 @@
-describe('multi-domain', () => {
+describe('cy.origin', () => {
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
@@ -122,7 +122,7 @@ describe('multi-domain', () => {
     })
 
     it('finds the right spec bridge with a subdomain', () => {
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.window().then((win) => {
         win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
       })
@@ -138,12 +138,12 @@ describe('multi-domain', () => {
     })
 
     it('uses cy.origin twice', () => {
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
       cy.origin('http://idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
-      }) // Trailing edge wait, waiting to return to the primary domain
+      }) // Trailing edge wait, waiting to return to the primary origin
 
       // Verify that the user has logged in on /siteA
       cy.get('[data-cy="welcome"]')
@@ -159,7 +159,7 @@ describe('multi-domain', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
-      }) // Trailing edge wait, waiting to return to the primary domain
+      }) // Trailing edge wait, waiting to return to the primary origin
 
       // Verify that the user has logged in on /siteA
       cy.get('[data-cy="welcome"]')
@@ -168,7 +168,7 @@ describe('multi-domain', () => {
     })
 
     it('creates a spec bridge for https://idp.com:3502', () => {
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.origin('idp.com:3502', () => {
         cy.visit('https://www.idp.com:3502/fixtures/auth/index.html')
         cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
@@ -176,7 +176,7 @@ describe('multi-domain', () => {
     })
 
     it('creates a spec bridge for http://idp.com:3500', () => {
-      cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+      cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.origin('http://idp.com:3500', () => {
         cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
         cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
@@ -197,7 +197,7 @@ describe('multi-domain', () => {
       cy.origin()
     })
 
-    it('errors if passed a non-string for the domain argument', (done) => {
+    it('errors if passed a non-string for the origin argument', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.origin()` requires the first argument to be either an origin (\'https://app.example.com\') or a domain name (\'example.com\'). The origin or domain name must not contain a path, hash, or query parameters. You passed: ``')
 

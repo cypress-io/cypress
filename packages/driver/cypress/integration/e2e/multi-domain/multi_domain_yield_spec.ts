@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-describe('multi-domain yields', () => {
+describe('cy.origin yields', () => {
   let logs: any = []
 
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('multi-domain yields', () => {
     })
 
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   it('yields a value', () => {
@@ -19,7 +19,7 @@ describe('multi-domain yields', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
-    }).should('equal', 'From a secondary domain')
+    }).should('equal', 'From a secondary origin')
   })
 
   it('yields the cy value even if a return is present', () => {
@@ -33,7 +33,7 @@ describe('multi-domain yields', () => {
           resolve('text')
         }, 50)
       })
-    }).should('equal', 'From a secondary domain')
+    }).should('equal', 'From a secondary origin')
   })
 
   it('errors if a cy command is present and it returns a sync value', (done) => {
@@ -56,18 +56,18 @@ describe('multi-domain yields', () => {
 
   it('yields synchronously', () => {
     cy.origin('http://foobar.com:3500', () => {
-      return 'From a secondary domain'
-    }).should('equal', 'From a secondary domain')
+      return 'From a secondary origin'
+    }).should('equal', 'From a secondary origin')
   })
 
   it('yields asynchronously', () => {
     cy.origin('http://foobar.com:3500', () => {
       return new Promise((resolve: (val: string) => any, reject) => {
         setTimeout(() => {
-          resolve('From a secondary domain')
+          resolve('From a secondary origin')
         }, 50)
       })
-    }).should('equal', 'From a secondary domain')
+    }).should('equal', 'From a secondary origin')
   })
 
   it('succeeds if subject cannot be serialized and is not accessed synchronously', () => {
@@ -122,7 +122,7 @@ describe('multi-domain yields', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then((subject) => subject.text())
-    .should('equal', 'From a secondary domain')
+    .should('equal', 'From a secondary origin')
   })
 
   it('throws if an object contains a function', (done) => {

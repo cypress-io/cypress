@@ -1,4 +1,4 @@
-context('multi-domain shadow dom', () => {
+context('cy.origin shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="shadow-dom-link"]').click()

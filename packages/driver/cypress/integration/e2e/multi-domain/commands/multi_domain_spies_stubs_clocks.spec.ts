@@ -1,7 +1,7 @@
-context('multi-domain spies, stubs, and clock', () => {
+context('cy.origin spies, stubs, and clock', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   it('spy()', () => {

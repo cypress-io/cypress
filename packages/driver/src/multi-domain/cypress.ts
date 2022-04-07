@@ -9,7 +9,7 @@ import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import { create as createLog } from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
-import { handleDomainFn } from './domain_fn'
+import { handleOriginFn } from './domain_fn'
 import { handleLogs } from './events/logs'
 import { handleSocketEvents } from './events/socket'
 import { handleSpecWindowEvents } from './events/spec_window'
@@ -72,7 +72,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   Cypress.isCy = cy.isCy
 
-  handleDomainFn(Cypress, cy)
+  handleOriginFn(Cypress, cy)
   handleLogs(Cypress)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)

@@ -1,4 +1,4 @@
-context('multi-domain actions', () => {
+context('cy.origin actions', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
   })

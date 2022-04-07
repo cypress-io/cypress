@@ -1,7 +1,7 @@
-context('multi-domain navigation', () => {
+context('cy.origin navigation', () => {
   it('.go()', () => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
@@ -77,7 +77,7 @@ context('multi-domain navigation', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
@@ -85,18 +85,18 @@ context('multi-domain navigation', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
-    // TODO: we don't support nested domains yet...
-    it.skip('supports nesting a third domain', () => {
+    // TODO: we don't support nested cy.origin yet...
+    it.skip('supports nesting a third origin', () => {
       cy.visit('/fixtures/multi-domain.html')
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
 
         cy.origin('http://idp.com:3500', () => {
           cy.visit('http://www.idp.com:3500/fixtures/dom.html')
@@ -107,10 +107,10 @@ context('multi-domain navigation', () => {
     it('supports navigating to secondary through button and then visiting', () => {
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
 
         cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
       })
@@ -119,7 +119,7 @@ context('multi-domain navigation', () => {
     it('supports relative urls within secondary', () => {
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('/fixtures/dom.html')
@@ -130,7 +130,7 @@ context('multi-domain navigation', () => {
     it('supports hash change within secondary', () => {
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html#hashchange')
@@ -142,16 +142,16 @@ context('multi-domain navigation', () => {
     it('navigates back to primary', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
 
       cy.visit('/fixtures/multi-domain.html')
 
-      cy.get('a[data-cy="multi-domain-secondary-link"]').should('have.text', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').should('have.text', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
       cy.location('href').should('equal', 'http://localhost:3500/fixtures/multi-domain.html')
     })
 
-    it('errors when visiting a new domain within origin', (done) => {
+    it('errors when visiting a new origin within origin', (done) => {
       cy.on('fail', (e) => {
         expect(e.message).to.include('failed trying to load:\n\nhttp://www.idp.com:3500/fixtures/dom.html')
         expect(e.message).to.include('failed because you are attempting to visit a URL that is of a different origin')
@@ -163,10 +163,10 @@ context('multi-domain navigation', () => {
       })
 
       cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
-        // this call should error since we can't visit a cross-domain
+        // this call should error since we can't visit a cross-origin
         cy.visit('http://www.idp.com:3500/fixtures/dom.html')
       })
     })
@@ -206,26 +206,26 @@ context('multi-domain navigation', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
     it('succeeds when the secondary is already defined but the AUT is still on the primary', () => {
-      // setup the secondary to be on the secondary domain
+      // setup the secondary to be on the secondary origin
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
 
-      // update the AUT to be on the primary domain
+      // update the AUT to be on the primary origin
       cy.visit('/fixtures/multi-domain.html')
 
       // verify there aren't any issues when the AUT is on primary but the spec bridge is on secondary (cross-origin)
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
@@ -255,7 +255,7 @@ context('multi-domain navigation', () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
@@ -277,7 +277,7 @@ context('multi-domain navigation', () => {
         cy.get('body').should('have.text', 'basic auth worked')
       })
 
-      // attaches the auth options for the foobar domain even from another origin
+      // attaches the auth options for the foobar origin even from another origin
       cy.origin('http://www.idp.com:3500', () => {
         cy.visit('/fixtures/multi-domain.html')
 
@@ -292,7 +292,7 @@ context('multi-domain navigation', () => {
 
       cy.visit('/fixtures/multi-domain.html')
 
-      // attaches the auth options for the foobar domain from the top-level
+      // attaches the auth options for the foobar origin from the top-level
       cy.window().then((win) => {
         win.location.href = 'http://www.foobar.com:3500/basic_auth'
       })
@@ -328,7 +328,7 @@ context('multi-domain navigation', () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('/fixtures/multi-domain-secondary.html')
-        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
+        cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
@@ -351,7 +351,7 @@ context('multi-domain navigation', () => {
 
   it('supports navigating through changing the window.location.href', () => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
       cy.window().then((win) => {

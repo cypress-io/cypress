@@ -1,4 +1,4 @@
-exports['e2e multi domain errors / captures the stack trace correctly for multi-domain errors to point users to their "cy.origin" callback'] = `
+exports['e2e cy.origin errors / captures the stack trace correctly for errors in cross origins to point users to their "cy.origin" callback'] = `
 
 ====================================================================================================
 
@@ -17,14 +17,14 @@ exports['e2e multi domain errors / captures the stack trace correctly for multi-
   Running:  multi_domain_error_spec.ts                                                      (1 of 1)
 
 
-  multi-domain
+  cy.origin
     1) tries to find an element that doesn't exist and fails
 
 
   0 passing
   1 failing
 
-  1) multi-domain
+  1) cy.origin
        tries to find an element that doesn't exist and fails:
      AssertionError: Timed out retrying after 1000ms: Expected to find element: \`#doesnotexist\`, but never found it.
       [stack trace lines]
@@ -49,8 +49,8 @@ exports['e2e multi domain errors / captures the stack trace correctly for multi-
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_error_spec.ts/multi-domain -- trie     (1280x720)
-     s to find an element that doesn't exist and fails (failed).png                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_error_spec.ts/cy.origin -- tries t     (1280x720)
+     o find an element that doesn't exist and fails (failed).png                                    
 
 
   (Video)

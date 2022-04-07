@@ -1,19 +1,19 @@
-describe('multi-domain', () => {
+describe('cy.origin', () => {
   it('window:before:load event', () => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.on('window:before:load', (win: {testPrimaryDomainBeforeLoad: boolean}) => {
-      win.testPrimaryDomainBeforeLoad = true
+    cy.on('window:before:load', (win: {testPrimaryOriginBeforeLoad: boolean}) => {
+      win.testPrimaryOriginBeforeLoad = true
     })
 
-    cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.window().its('testPrimaryOriginBeforeLoad').should('be.true')
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     cy.origin('http://foobar.com:3500', () => {
       cy.on('window:before:load', (win: {testSecondaryWindowBeforeLoad: boolean}) => {
         win.testSecondaryWindowBeforeLoad = true
       })
 
       cy.window().its('testSecondaryWindowBeforeLoad').should('be.true')
-      cy.window().its('testPrimaryDomainBeforeLoad').should('be.undefined')
+      cy.window().its('testPrimaryOriginBeforeLoad').should('be.undefined')
       cy
       .get('[data-cy="window-before-load"]')
       .invoke('text')
@@ -22,14 +22,14 @@ describe('multi-domain', () => {
 
     cy.visit('/fixtures/multi-domain.html')
 
-    cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
+    cy.window().its('testPrimaryOriginBeforeLoad').should('be.true')
     cy.window().its('testSecondaryWindowBeforeLoad').should('be.undefined')
   })
 
   describe('post window load events', () => {
     beforeEach(() => {
       cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
     it('form:submitted', () => {

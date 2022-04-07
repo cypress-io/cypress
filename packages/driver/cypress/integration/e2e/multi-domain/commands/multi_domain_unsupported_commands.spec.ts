@@ -1,7 +1,7 @@
-context('multi-domain unsupported commands', () => {
+context('cy.origin unsupported commands', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   it('cy.route() method is deprecated', (done) => {

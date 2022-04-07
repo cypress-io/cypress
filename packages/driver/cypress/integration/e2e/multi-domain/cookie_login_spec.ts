@@ -1,4 +1,4 @@
-describe('multi-domain - cookie login', () => {
+describe('cy.origin - cookie login', () => {
   const verifyLoggedIn = (username) => {
     cy.get('h1')
     .invoke('text')

@@ -88,7 +88,7 @@ const crossOriginConfig: webpack.Configuration = {
   mode: 'development',
   ...getSimpleConfig(),
   entry: {
-    cypress_multi_domain_runner: [path.resolve(__dirname, 'src/multi-domain.js')],
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/multi-domain.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -114,7 +114,7 @@ const crossOriginInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
   entry: {
-    injection_multi_domain: [path.resolve(__dirname, 'injection/multi-domain.js')],
+    injection_cross_origin: [path.resolve(__dirname, 'injection/multi-domain.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

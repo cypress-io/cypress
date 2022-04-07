@@ -1,10 +1,10 @@
-context('multi-domain network requests', () => {
+context('cy.origin network requests', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="request-link"]').click()
   })
 
-  it('.request() to secondary domain', () => {
+  it('.request() to secondary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
       cy.request('http://www.foobar.com:3500/fixtures/example.json').should((response) => {
         expect(response.status).to.equal(200)
@@ -13,7 +13,7 @@ context('multi-domain network requests', () => {
     })
   })
 
-  it('.request() to secondary domain with relative path', () => {
+  it('.request() to secondary origin with relative path', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.request('/fixtures/example.json').should((response) => {
         expect(response.status).to.equal(200)
@@ -22,7 +22,7 @@ context('multi-domain network requests', () => {
     })
   })
 
-  it('.request() to primary domain', () => {
+  it('.request() to primary origin', () => {
     cy.origin('http://foobar.com:3500', () => {
       cy.request('http://localhost:3500/fixtures/example.json').should((response) => {
         expect(response.status).to.equal(200)
