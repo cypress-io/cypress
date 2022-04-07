@@ -7,7 +7,7 @@
   "scripts": {
     "type-check": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
-    "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
+    "test": "node ./scripts/run.js --spec='./test/multi_domain_retries_spec.ts'",
     "test:ci": "node ./scripts/run.js"
   },
   "devDependencies": {

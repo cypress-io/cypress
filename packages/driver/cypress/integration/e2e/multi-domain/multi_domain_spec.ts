@@ -1,5 +1,5 @@
-describe('multi-domain', () => {
-  it('passes viewportWidth/Height state to the secondary domain', () => {
+describe('cy.origin', () => {
+  it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 
     cy.viewport(320, 480).then(() => {
@@ -9,7 +9,7 @@ describe('multi-domain', () => {
     })
 
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', { args: expectedViewport }, (expectedViewport) => {
       const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
@@ -21,21 +21,21 @@ describe('multi-domain', () => {
   context('withBeforeEach', () => {
     beforeEach(() => {
       cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
-    it('runs commands in secondary domain', () => {
+    it('runs commands in secondary origin', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
-        .should('equal', 'From a secondary domain')
+        .should('equal', 'From a secondary origin')
       })
 
       cy.log('after cy.origin')
     })
 
-    it('passes runnable state to the secondary domain', () => {
+    it('passes runnable state to the secondary origin', () => {
       const runnable = cy.state('runnable')
       const expectedRunnable = {
         clearTimeout: null,
@@ -46,11 +46,11 @@ describe('multi-domain', () => {
         _currentRetry: runnable._currentRetry,
         _timeout: 4000,
         type: 'test',
-        title: 'passes runnable state to the secondary domain',
+        title: 'passes runnable state to the secondary origin',
         titlePath: [
-          'multi-domain',
+          'cy.origin',
           'withBeforeEach',
-          'passes runnable state to the secondary domain',
+          'passes runnable state to the secondary origin',
         ],
         parent: {
           id: runnable.parent.id,
@@ -100,7 +100,7 @@ describe('multi-domain', () => {
       cy.log('after cy.origin')
     })
 
-    it('sets up window.Cypress in secondary domain', () => {
+    it('sets up window.Cypress in secondary origin', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy
         .get('[data-cy="cypress-check"]')
@@ -153,11 +153,11 @@ describe('multi-domain', () => {
 
     describe('errors', () => {
     // TODO: Proper stack trace printing still needs to be addressed here
-      it('propagates secondary domain errors to the primary that occur within the test', (done) => {
+      it('propagates secondary origin errors to the primary that occur within the test', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('variable is not defined')
           expect(err.message).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
-          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
           done()
@@ -170,7 +170,7 @@ describe('multi-domain', () => {
         })
       })
 
-      it('propagates thrown errors in the secondary domain back to the primary w/ done', (done) => {
+      it('propagates thrown errors in the secondary origin back to the primary w/ done', (done) => {
         cy.on('fail', (e) => {
           expect(e.message).to.equal('oops')
           done()
@@ -181,7 +181,7 @@ describe('multi-domain', () => {
         })
       })
 
-      it('propagates thrown errors in the secondary domain back to the primary w/o done', () => {
+      it('propagates thrown errors in the secondary origin back to the primary w/o done', () => {
         return new Promise((resolve) => {
           cy.on('fail', (e) => {
             expect(e.message).to.equal('oops')
@@ -194,12 +194,12 @@ describe('multi-domain', () => {
         })
       })
 
-      it('receives command failures from the secondary domain', (done) => {
+      it('receives command failures from the secondary origin', (done) => {
         const timeout = 50
 
         cy.on('fail', (err) => {
           expect(err.message).to.include(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
-          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
           done()
@@ -212,10 +212,10 @@ describe('multi-domain', () => {
         })
       })
 
-      it('receives command failures from the secondary domain with the default timeout', { defaultCommandTimeout: 50 }, (done) => {
+      it('receives command failures from the secondary origin with the default timeout', { defaultCommandTimeout: 50 }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
-          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
           done()
@@ -229,7 +229,7 @@ describe('multi-domain', () => {
       it('has non serializable arguments', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include(`This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`)
-          //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+          //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
           done()

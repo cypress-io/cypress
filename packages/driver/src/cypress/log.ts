@@ -96,7 +96,7 @@ export const LogUtils = {
     .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
     .compact()
     .union([{ id: '0' }])
-    // id is a string in the form of 'log-domain-#', grab the number off the end.
+    // id is a string in the form of 'log-origin-#', grab the number off the end.
     .map(({ id }) => parseInt((id.match(/\d*$/) || ['0'])[0]))
     .max()
     .value()

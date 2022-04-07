@@ -1,8 +1,8 @@
-// FIXME: sync thrown errors inside of multi-domain cause cross origin errors in firefox when using experimentalSessionSupport
+// FIXME: sync thrown errors inside of cy.origin cause cross origin errors in firefox when using experimentalSessionSupport
 // This is likely due to cypress being re declared while on a cross origin iframe before the application navigates back.
 // To reproduce, just add "experimentalSessionSupport" = true into the describe block below
 
-describe('multi-domain - uncaught errors', () => {
+describe('cy.origin - uncaught errors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="errors-link"]').click()
@@ -29,9 +29,9 @@ describe('multi-domain - uncaught errors', () => {
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
       cy.on('fail', (err, runnable) => {
-        // TODO: we likely need to change the messaging around this error to make it clear to multi-domain users that
+        // TODO: we likely need to change the messaging around this error to make it clear to cy.origin users that
         // this behavior is configurable with 'uncaught:exception', but it MUST be declared inside the cy.origin callback
-        // and that 'uncaught:exception' will NOT be triggered outside that callback (inside the primary domain)
+        // and that 'uncaught:exception' will NOT be triggered outside that callback (inside the primary origin)
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('sync error')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
@@ -118,7 +118,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    it('fails the current test/command if async errors are thrown from the secondary domain AUT', (done) => {
+    it('fails the current test/command if async errors are thrown from the secondary origin AUT', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
@@ -146,7 +146,7 @@ describe('multi-domain - uncaught errors', () => {
       })
     })
 
-    it('passes the current test/command if async errors are thrown from the secondary domain AUT, but the cy.origin callback is finished running', () => {
+    it('passes the current test/command if async errors are thrown from the secondary origin AUT, but the cy.origin callback is finished running', () => {
       const uncaughtExceptionSpy = cy.spy()
       const failureSpy = cy.spy()
 

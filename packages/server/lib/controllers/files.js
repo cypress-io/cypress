@@ -59,7 +59,7 @@ module.exports = {
       title: `Cypress for ${domain}`,
     }
 
-    debug('multi-domain iframe with options %o', iframeOptions)
+    debug('cross origin iframe with options %o', iframeOptions)
 
     res.render(iframePath, iframeOptions)
   },

@@ -373,7 +373,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   fail (err, options: { async?: boolean } = {}) {
-    // if an onFail handler is provided, call this in is placed (currently used for multi-domain)
+    // if an onFail handler is provided, call this in it's place (currently used for cross-origin support)
     if (this.state('onFail')) {
       return this.state('onFail')(err)
     }
@@ -530,7 +530,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
-        // there is a cross-origin error and the multi-domain APIs are
+        // there is a cross-origin error and the cy.origin API is
         // not utilized
         try {
           this.Cypress.action('app:window:load', this.state('window'))
@@ -564,18 +564,17 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         // we failed setting the remote window props which
-        // means the page navigated to a different domain
+        // means the page navigated to a different origin
 
-        // With multi-domain this is an expected error that may or may not be bad, we will rely on the page load timeout to throw if we don't end up where we expect to be.
+        // With cross origin support this is an expected error that may or may not be bad, we will rely on the page load timeout to throw if we don't end up where we expect to be.
         if (this.config('experimentalLoginFlows') && err.name === 'SecurityError') {
-          // TODO: capture that this security error has happened to provide better error messages.
           return
         }
 
         let e = err
 
         // we failed setting the remote window props
-        // which means we're in a cross domain failure
+        // which means we're in a cross origin failure
         // check first to see if you have a callback function
         // defined and let the page load change the error
         const onpl = this.state('onPageLoadErr')

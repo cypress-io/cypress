@@ -1,18 +1,18 @@
 ['config', 'env'].forEach((fnName) => {
-  describe(`multi-domain - Cypress.${fnName}()`, () => {
+  describe(`cy.origin- Cypress.${fnName}()`, () => {
     const USED_KEYS = {
-      foo: 'multi-domain-foo',
-      bar: 'multi-domain-bar',
-      baz: 'multi-domain-baz',
-      qux: 'multi-domain-qux',
-      quux: 'multi-domain-quux',
-      unserializable: 'multi-domain-unserializable',
-      error: 'multi-domain-error',
+      foo: 'cy-origin-foo',
+      bar: 'cy-origin-bar',
+      baz: 'cy-origin-baz',
+      qux: 'cy-origin-qux',
+      quux: 'cy-origin-quux',
+      unserializable: 'cy-origin-unserializable',
+      error: 'cy-origin-error',
     }
 
     beforeEach(() => {
       cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
     afterEach(() => {
@@ -39,7 +39,7 @@
     }
 
     context('serializable', () => {
-      it(`syncs initial Cypress.${fnName}() from the primary domain to the secondary (synchronously)`, () => {
+      it(`syncs initial Cypress.${fnName}() from the primary origin to the secondary (synchronously)`, () => {
         Cypress[fnName](USED_KEYS.foo, 'bar')
         cy.origin('http://foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           const bar = Cypress[fnName](USED_KEYS.foo)

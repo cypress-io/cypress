@@ -5,7 +5,7 @@ import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/confi
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 
-interface RunDomainFnOptions {
+interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
   env: Cypress.ObjectLike
@@ -54,7 +54,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   return runnable
 }
 
-export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
+export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   const reset = (state) => {
     cy.reset({})
 
@@ -69,7 +69,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     // the viewport could've changed in the primary, so sync it up in the secondary
     Cypress.primaryOriginCommunicator.emit('sync:viewport', { viewportWidth: state.viewportWidth, viewportHeight: state.viewportHeight })
 
-    // Update the state with the necessary values from the primary domain
+    // Update the state with the necessary values from the primary origin
     cy.state(stateUpdates)
 
     // Set the state ctx to the runnable ctx to ensure they remain in sync
@@ -82,7 +82,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     cy.state('runnable').state = 'passed'
   }
 
-  Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunDomainFnOptions) => {
+  Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunOriginFnOptions) => {
     const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false

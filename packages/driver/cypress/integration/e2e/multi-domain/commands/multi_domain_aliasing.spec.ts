@@ -1,4 +1,4 @@
-context('multi-domain aliasing', () => {
+context('cy.origin aliasing', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()

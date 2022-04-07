@@ -15,7 +15,7 @@ export const handleErrorEvent = (cy: $Cy, frameType: 'spec' | 'app') => {
       $errUtils.logError(Cypress, handlerType, originalErr, handled)
 
       if (!handled) {
-        // if unhandled, fail the current command to fail the current test in the primary domain
+        // if unhandled, fail the current command to fail the current test in the primary origin
         // a current command may not exist if an error occurs in the spec bridge after the test is over
         const command = cy.state('current')
         const log = command?.getLastLog()

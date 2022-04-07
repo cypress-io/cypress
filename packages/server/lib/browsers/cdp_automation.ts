@@ -265,8 +265,8 @@ export class CdpAutomation {
 
         if (this.experimentalLoginFlows) {
           // localhost is considered a secure context (even when http:)
-          // and it's required for multi-domain when visiting a secondary
-          // domain so that all its cookies are sent. This may be a
+          // and it's required for cross origin support when visiting a secondary
+          // origin so that all its cookies are sent. This may be a
           // breaking change, so put it behind the flag for now. Need to
           // investigate further when we remove the experimental flag.
           return !(cookie.secure && url.startsWith('http:') && !isLocalhost)

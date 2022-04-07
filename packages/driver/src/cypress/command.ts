@@ -9,11 +9,11 @@ export class $Command {
   constructor (attrs: any = {}) {
     this.reset()
 
-    // if the command came from a secondary domain, it already has an id
+    // if the command came from a secondary origin, it already has an id
     if (!attrs.id) {
-      // the id prefix needs to be unique per domain, so there are not
-      // collisions when commands created in a secondary domain are passed
-      // to the primary domain for the command log, etc.
+      // the id prefix needs to be unique per origin, so there are not
+      // collisions when commands created in a secondary origin are passed
+      // to the primary origin for the command log, etc.
       attrs.id = _.uniqueId(`cmd-${window.location.origin}-`)
     }
 
