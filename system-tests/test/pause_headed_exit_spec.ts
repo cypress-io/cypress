@@ -35,7 +35,7 @@ describe('cy.pause() works with --headed and --no-exit', () => {
 
   systemTests.it('does not pause without --no-exit', {
     spec: 'no_pause_spec.js',
-    snapshot: true,
+    snapshot: false,
     headed: true,
     noExit: false,
     expectedExitCode: 0,
@@ -43,7 +43,7 @@ describe('cy.pause() works with --headed and --no-exit', () => {
 
   systemTests.it('does not pause without --headed and --no-exit', {
     spec: 'no_pause_spec.js',
-    snapshot: true,
+    snapshot: false,
     headed: false,
     noExit: false,
     expectedExitCode: 0,
