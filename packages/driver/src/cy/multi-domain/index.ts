@@ -231,6 +231,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
+              // Release the request if 'run:origin:fn' fails
+              Cypress.backend('ready:for:origin', { originPolicy: location.originPolicy })
+
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })
