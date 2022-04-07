@@ -160,7 +160,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   })
 
   return new Bluebird((resolve) => {
-    // when the cross-domain iframe for each domain is loaded
+    // when the cross-origin iframe for each origin is loaded
     // we can only communicate through postmessage
     onPostMessage = ((event) => {
       const data = event.data

@@ -1,4 +1,4 @@
-context('multi-domain screenshot', () => {
+context('cy.origin screenshot', () => {
   context('set viewport', () => {
     beforeEach(() => {
       this.serverResult = {
@@ -84,7 +84,7 @@ context('multi-domain screenshot', () => {
 
         cy.screenshot()
         .then(() => {
-          expect(automationStub.args[0][1].titles).to.deep.equal(['multi-domain screenshot', 'without setting viewport', 'supports multiple titles'])
+          expect(automationStub.args[0][1].titles).to.deep.equal(['cy.origin screenshot', 'without setting viewport', 'supports multiple titles'])
         })
       })
     })

@@ -1,7 +1,7 @@
-context('multi-domain local storage', () => {
+context('cy.origin local storage', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   it('.clearLocalStorage()', () => {

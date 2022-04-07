@@ -1,7 +1,7 @@
-describe('multi-domain Cypress API', () => {
+describe('cy.origin Cypress API', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
   context('Commands', () => {
@@ -45,28 +45,28 @@ describe('multi-domain Cypress API', () => {
       })
 
       cy.origin('http://foobar.com:3500', { args: defaults }, (primaryKeyboardDefaults) => {
-        const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({})
+        const crossOriginKeyboardDefaults = Cypress.Keyboard.defaults({})
 
-        expect(multiDomainKeyboardDefaults).to.not.deep.equal(primaryKeyboardDefaults)
+        expect(crossOriginKeyboardDefaults).to.not.deep.equal(primaryKeyboardDefaults)
       })
     })
 
     it('allows a user to configure defaults', () => {
       cy.origin('http://foobar.com:3500', () => {
-        const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({
+        const crossOriginKeyboardDefaults = Cypress.Keyboard.defaults({
           keystrokeDelay: 60,
         })
 
-        expect(multiDomainKeyboardDefaults).to.deep.include({
+        expect(crossOriginKeyboardDefaults).to.deep.include({
           keystrokeDelay: 60,
         })
       })
 
       // persists default configuration changes through spec bridge
       cy.origin('http://foobar.com:3500', () => {
-        const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({})
+        const crossOriginKeyboardDefaults = Cypress.Keyboard.defaults({})
 
-        expect(multiDomainKeyboardDefaults).to.deep.include({
+        expect(crossOriginKeyboardDefaults).to.deep.include({
           keystrokeDelay: 60,
         })
       })
@@ -83,9 +83,9 @@ describe('multi-domain Cypress API', () => {
       })
 
       cy.origin('http://foobar.com:3500', () => {
-        const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({})
+        const crossOriginScreenshotDefaults = Cypress.Screenshot.defaults({})
 
-        expect(multiDomainScreenshotDefaults).to.not.deep.include({
+        expect(crossOriginScreenshotDefaults).to.not.deep.include({
           blackout: ['foo'],
           overwrite: true,
           onBeforeScreenshot: () => undefined,
@@ -96,12 +96,12 @@ describe('multi-domain Cypress API', () => {
 
     it('allows a user to configure defaults', () => {
       cy.origin('http://foobar.com:3500', () => {
-        const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({
+        const crossOriginScreenshotDefaults = Cypress.Screenshot.defaults({
           blackout: ['foo'],
           overwrite: true,
         })
 
-        expect(multiDomainScreenshotDefaults).to.deep.include({
+        expect(crossOriginScreenshotDefaults).to.deep.include({
           blackout: ['foo'],
           overwrite: true,
         })
@@ -109,9 +109,9 @@ describe('multi-domain Cypress API', () => {
 
       // persists default configuration changes through spec bridge
       cy.origin('http://foobar.com:3500', () => {
-        const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({})
+        const crossOriginScreenshotDefaults = Cypress.Screenshot.defaults({})
 
-        expect(multiDomainScreenshotDefaults).to.deep.include({
+        expect(crossOriginScreenshotDefaults).to.deep.include({
           blackout: ['foo'],
           overwrite: true,
         })
@@ -188,7 +188,7 @@ describe('multi-domain Cypress API', () => {
         })
       })
 
-      // logs in the secondary domain skip the primary driver, going through
+      // logs in the secondary origin, skips the primary driver, going through
       // the runner to the reporter, so we have to break out of the AUT and
       // test the actual command log.
       // this is a bit convoluted since otherwise the test could falsely pass
@@ -206,7 +206,7 @@ describe('multi-domain Cypress API', () => {
   })
 
   context('not supported', () => {
-    it('throws an error when a user attempts to configure Cypress.Server.defaults() inside of multi-domain', (done) => {
+    it('throws an error when a user attempts to configure Cypress.Server.defaults() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
@@ -218,7 +218,7 @@ describe('multi-domain Cypress API', () => {
       })
     })
 
-    it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of multi-domain', (done) => {
+    it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is not supported in the `cy.origin()` callback. Consider using `cy.session()` (outside of the callback) instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session')

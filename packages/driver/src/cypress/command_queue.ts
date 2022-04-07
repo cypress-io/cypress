@@ -295,7 +295,7 @@ export class CommandQueue extends Queue<Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
-        // If we're in multi-domain we no longer have to wait for stability at the end of the command queue.
+        // If we're enabled experimentalLoginFlows we no longer have to wait for stability at the end of the command queue.
         if (Cypress.config('experimentalLoginFlows')) {
           Cypress.action('cy:command:queue:end')
 

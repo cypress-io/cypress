@@ -1,10 +1,10 @@
-context('multi-domain viewport', () => {
+context('cy.origin viewport', () => {
   it('syncs the viewport from the primary to secondary', () => {
     // change the viewport in the primary first
     cy.viewport(320, 480)
 
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
       const viewportChangedSpy = cy.spy()
@@ -26,7 +26,7 @@ context('multi-domain viewport', () => {
   context('with out pre-set viewport', () => {
     beforeEach(() => {
       cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
     context('.viewport()', () => {
@@ -148,7 +148,7 @@ context('multi-domain viewport', () => {
         })
       })
 
-      it('syncs the viewport across multiple domains', () => {
+      it('syncs the viewport across multiple origins', () => {
         cy.origin('http://foobar.com:3500', () => {
           cy.viewport(320, 480)
           cy.window().then((win) => {

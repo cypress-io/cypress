@@ -11,7 +11,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e multi domain retries', () => {
+describe('e2e cy.origin retries', () => {
   systemTests.setup({
     servers: [{
       port: 4466,
@@ -37,7 +37,7 @@ describe('e2e multi domain retries', () => {
     async onRun (exec) {
       const res = await exec()
 
-      // verify that retrying tests with multi domain doesn't cause serialization problems to spec bridges on test:before:run:async
+      // verify that retrying tests with cy.origin doesn't cause serialization problems to spec bridges on test:before:run:async
       expect(res.stdout).to.not.contain('TypeError')
       expect(res.stdout).to.not.contain('Cannot set property message of  which has only a getter')
 

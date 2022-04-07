@@ -827,7 +827,7 @@ namespace CypressKeyboardTests {
   })
 }
 
-namespace CypressMultiDomainTests {
+namespace CypressOriginTests {
   cy.origin('example.com', () => {})
   cy.origin('example.com', { args: {}}, (value: object) => {})
   cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})

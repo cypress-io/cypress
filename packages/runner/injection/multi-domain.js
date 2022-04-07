@@ -1,6 +1,6 @@
 /**
  * This is the entry point for the script that gets injected into
- * the AUT on a secondary domain. It gets bundled on its own and injected
+ * the AUT on a secondary origin. It gets bundled on its own and injected
  * into the <head> of the AUT by `packages/proxy`.
  *
  * If adding to this bundle, try to keep it light and free of
@@ -14,7 +14,7 @@ const findCypress = () => {
     const frame = window.parent.frames[index]
 
     try {
-      // If Cypress is defined and we haven't gotten a cross domain error we have found the correct bridge.
+      // If Cypress is defined and we haven't gotten a cross origin error we have found the correct bridge.
       if (frame.Cypress) {
         return frame.Cypress
       }
@@ -29,7 +29,7 @@ const findCypress = () => {
 
 const Cypress = findCypress()
 
-// the timers are wrapped in the injection code similar to the primary domain
+// the timers are wrapped in the injection code similar to the primary origin
 const timers = createTimers()
 
 Cypress.removeAllListeners('app:timers:reset')

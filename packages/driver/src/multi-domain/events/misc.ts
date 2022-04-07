@@ -14,13 +14,13 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
     cy.state(state)
   })
 
-  // Forward url:changed Message to the primary domain to enable changing the url displayed in the AUT
+  // Forward url:changed Message to the primary origin to enable changing the url displayed in the AUT
   // @ts-ignore
   Cypress.on('url:changed', (url) => {
     Cypress.specBridgeCommunicator.toPrimary('url:changed', { url })
   })
 
-  // Listen for any unload events in other domains, if any have unloaded we should also become unstable.
+  // Listen for any unload events in other origins, if any have unloaded we should also become unstable.
   Cypress.specBridgeCommunicator.on('before:unload', () => {
     cy.state('isStable', false)
   })

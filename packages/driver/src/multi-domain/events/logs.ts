@@ -12,7 +12,7 @@ export const handleLogs = (Cypress: Cypress.Cypress) => {
   const onLogChanged = (attrs) => {
     // TODO:
     // - add invocation stack if error:
-    //     let parsedError = correctStackForCrossDomainError(log.get('err'), this.userInvocationStack)
+    //     let parsedError = correctStackForCrossOriginError(log.get('err'), this.userInvocationStack)
     // - notify runner? maybe not
     //     this.runner.addLog(args[0], this.config('isInteractive'))
 

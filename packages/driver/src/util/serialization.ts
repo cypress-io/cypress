@@ -104,7 +104,7 @@ const convertObjectToSerializableLiteral = (obj): typeof obj => {
  */
 export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: any }): T | undefined => {
 // Even if native errors can be serialized through postMessage, many properties are omitted on structuredClone(), including prototypical hierarchy
-// because of this, we preprocess native errors to objects and postprocess them once they come back to the primary domain
+// because of this, we preprocess native errors to objects and postprocess them once they come back to the primary origin
 
   if (_.isArray(valueToSanitize)) {
     return _.map(valueToSanitize, preprocessForSerialization) as unknown as T

@@ -1,4 +1,4 @@
-exports['e2e multi domain retries / Appropriately displays test retry errors without other side effects'] = `
+exports['e2e cy.origin retries / Appropriately displays test retry errors without other side effects'] = `
 
 ====================================================================================================
 
@@ -17,7 +17,7 @@ exports['e2e multi domain retries / Appropriately displays test retry errors wit
   Running:  multi_domain_retries_spec.ts                                                    (1 of 1)
 
 
-  multi-domain test retries
+  cy.origin test retries
     (Attempt 1 of 3) appropriately retries test within "cy.origin" without propagating other errors errors
     (Attempt 2 of 3) appropriately retries test within "cy.origin" without propagating other errors errors
     1) appropriately retries test within "cy.origin" without propagating other errors errors
@@ -26,7 +26,7 @@ exports['e2e multi domain retries / Appropriately displays test retry errors wit
   0 passing
   1 failing
 
-  1) multi-domain test retries
+  1) cy.origin test retries
        appropriately retries test within "cy.origin" without propagating other errors errors:
      AssertionError: expected true to be false
       [stack trace lines]
@@ -51,15 +51,15 @@ exports['e2e multi domain retries / Appropriately displays test retry errors wit
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_retries_spec.ts/multi-domain test      (1280x720)
-     retries -- appropriately retries test within cy.origin without propagating other               
-      errors errors (failed).png                                                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_retries_spec.ts/multi-domain test      (1280x720)
-     retries -- appropriately retries test within cy.origin without propagating other               
-      errors errors (failed) (attempt 2).png                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_retries_spec.ts/multi-domain test      (1280x720)
-     retries -- appropriately retries test within cy.origin without propagating other               
-      errors errors (failed) (attempt 3).png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_retries_spec.ts/cy.origin test ret     (1280x720)
+     ries -- appropriately retries test within cy.origin without propagating other er               
+     rors errors (failed).png                                                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_retries_spec.ts/cy.origin test ret     (1280x720)
+     ries -- appropriately retries test within cy.origin without propagating other er               
+     rors errors (failed) (attempt 2).png                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_retries_spec.ts/cy.origin test ret     (1280x720)
+     ries -- appropriately retries test within cy.origin without propagating other er               
+     rors errors (failed) (attempt 3).png                                                           
 
 
   (Video)

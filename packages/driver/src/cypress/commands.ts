@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { allCommands } from '../cy/commands'
 import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
-import { addCommands as addMultiDomainCommands } from '../cy/multi-domain'
+import { addCommands as addCrossOriginCommands } from '../cy/multi-domain'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
@@ -10,7 +10,7 @@ const builtInCommands = [
   // @ts-ignore
   ..._.toArray(allCommands).map((c) => c.default || c),
   addNetstubbingCommand,
-  addMultiDomainCommands,
+  addCrossOriginCommands,
 ]
 
 const getTypeByPrevSubject = (prevSubject) => {
