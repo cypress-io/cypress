@@ -254,7 +254,7 @@ describe('Choose a Browser Page', () => {
       })
     })
 
-    it('subscribes to changes to browserStatus/currentBrowser through the browserStatusUpdated subscription', () => {
+    it('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()

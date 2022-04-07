@@ -4,9 +4,8 @@
     data-cy="external"
     :href="props.href"
     :use-default-hocus="props.useDefaultHocus"
-    role="link"
     @click.prevent="open"
-    @keypress.space.enter.prevent="open"
+    @keypress.enter.prevent="open"
   ><slot /></BaseLink>
 </template>
 

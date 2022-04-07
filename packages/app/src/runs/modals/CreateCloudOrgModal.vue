@@ -9,16 +9,15 @@
       <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
-      <div @click="startWaitingOrgToBeCreated()">
-        <ExternalLink
-          class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
-          :href="createOrgUrl"
-          :include-graphql-port="true"
-        >
-          <i-cy-office-building_x16 class="inline-block icon-dark-white" />
-          {{ t('runs.connect.modal.createOrg.button') }}
-        </ExternalLink>
-      </div>
+      <ExternalLink
+        class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
+        :href="createOrgUrl"
+        :include-graphql-port="true"
+        @click="startWaitingOrgToBeCreated()"
+      >
+        <i-cy-office-building_x16 class="inline-block icon-dark-white" />
+        {{ t('runs.connect.modal.createOrg.button') }}
+      </ExternalLink>
     </div>
     <template #footer>
       <div class="flex gap-16px">

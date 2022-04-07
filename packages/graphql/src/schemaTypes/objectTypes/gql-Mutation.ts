@@ -226,8 +226,8 @@ export const mutation = mutationType({
           description: 'ID of the browser that we want to set',
         })),
       },
-      resolve (_, args, ctx) {
-        ctx.actions.app.setActiveBrowserById(args.id)
+      async resolve (_, args, ctx) {
+        await ctx.actions.app.setActiveBrowserById(args.id)
 
         return ctx.lifecycleManager
       },
@@ -582,11 +582,7 @@ export const mutation = mutationType({
         projectId: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
-        } catch {
-          // ignore error as not useful for end user to see
-        }
+        await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
 
         // Wait for the project config to be reloaded
         await ctx.lifecycleManager.refreshLifecycle()

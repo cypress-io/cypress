@@ -355,6 +355,9 @@ enum CodeLanguageEnum {
 The currently opened Cypress project, represented by a cypress.config.{ts|js} file
 """
 type CurrentProject implements Node & ProjectLike {
+  """The currently selected browser for the project"""
+  activeBrowser: Browser
+
   """The current branch of the project"""
   branch: String
 
@@ -379,9 +382,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """Config File Absolute Path"""
   configFileAbsolutePath: String
-
-  """The currently selected browser for the application"""
-  currentBrowser: Browser
 
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
@@ -1121,9 +1121,6 @@ interface ProjectLike {
 
 """Preferences specific to a project"""
 type ProjectPreferences {
-  """The preferred browser to launch"""
-  browserPath: String
-
   """The preferred testing type to start in"""
   testingType: String
 }

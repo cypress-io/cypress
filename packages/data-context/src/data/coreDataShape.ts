@@ -56,8 +56,6 @@ export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
-  refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
   browserStatus: BrowserStatus
   relaunchBrowser: boolean
@@ -111,7 +109,7 @@ export interface ForceReconfigureProjectDataShape {
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
-  chosenBrowser: FoundBrowser | null
+  activeBrowser: FoundBrowser | null
   machineBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
@@ -158,10 +156,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
       browserStatus: 'closed',
       relaunchBrowser: false,
@@ -201,7 +197,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       },
     },
     warnings: [],
-    chosenBrowser: null,
+    activeBrowser: null,
     user: null,
     electron: {
       app: null,
