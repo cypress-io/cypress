@@ -43,10 +43,10 @@ interface BuildCypressAppOpts {
  * assuming an install default cache location and checking if final paths exceed 260 characters.
  */
 async function checkMaxPathLength () {
-  if (process.platform !== 'win32') log('#checkMaxPathLength (skipping since not on Windows)')
+  if (process.platform !== 'win32') return log('#checkMaxPathLength (skipping since not on Windows)')
 
   // This is the Cypress cache dir path on a vanilla Windows Server VM. We can treat this as the typical case.
-  const typicalWin32PathPrefixLength = 'C:\\Users\\Administrator\\AppData\\Local\\Cypress\\Cache\\'.length
+  const typicalWin32PathPrefixLength = 'C:\\Users\\Administrator\\AppData\\Local\\Cypress\\Cache\\10.0.0\\'.length
   const maxRelPathLength = 260 - typicalWin32PathPrefixLength
 
   log(`#checkMaxPathLength (max abs path length: ${maxRelPathLength})`)
