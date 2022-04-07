@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { isSerializableInCurrentBrowser, preprocessForSerialization } from '.'
+import { isSerializableInCurrentBrowser, preprocessForSerialization } from './index'
 import $dom from '../../dom'
 
 interface PreprocessedHTMLElement {
