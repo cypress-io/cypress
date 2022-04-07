@@ -86,6 +86,7 @@ export const e2eProjectDirs = [
   'non-proxied',
   'nuxtjs-vue2-configured',
   'nuxtjs-vue2-unconfigured',
+  'nuxtjs2',
   'odd-directory-name',
   'plugin-after-screenshot',
   'plugin-after-spec-deletes-video',
