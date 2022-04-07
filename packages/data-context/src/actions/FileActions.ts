@@ -45,28 +45,6 @@ export class FileActions {
     )
   }
 
-  async readFileInProject (relative: string) {
-    if (!this.ctx.currentProject) {
-      throw new Error(`Cannot check file in project exists without active project`)
-    }
-
-    return this.ctx.fs.readFileSync(path.join(this.ctx.currentProject, relative), 'utf-8')
-  }
-
-  async checkIfFileExists (relativePath: string) {
-    if (!this.ctx.currentProject) {
-      throw new Error(`Cannot check file in project exists without active project`)
-    }
-
-    const filePath = path.join(this.ctx.currentProject, relativePath)
-
-    try {
-      return await this.ctx.fs.stat(filePath)
-    } catch {
-      return null
-    }
-  }
-
   openFile (filePath: string, line: number = 1, column: number = 1) {
     assert(this.ctx.currentProject)
     const binary = this.ctx.coreData.localSettings.preferences.preferredEditorBinary

@@ -10,7 +10,7 @@ function startSetupFor (project: typeof e2eProjectDirs[number]) {
 
 function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
   cy.withCtx(async (ctx, o) => {
-    const configStats = await ctx.actions.file.checkIfFileExists(o.configFile)
+    const configStats = await ctx.file.checkIfFileExists(o.configFile)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
