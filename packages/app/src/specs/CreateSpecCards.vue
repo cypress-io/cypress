@@ -11,32 +11,23 @@
 </template>
 
 <script lang="ts" setup>
-import { generatorList } from './generators'
-import type { GeneratorId } from './generators'
-import { computed } from 'vue'
+import type { GeneratorId, SpecGenerator } from './generators'
 import type { CreateSpecCardsFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 
 const props = defineProps<{
+  generators: SpecGenerator[]
   gql: CreateSpecCardsFragment
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (eventName: 'select', id: GeneratorId): void
 }>()
-
-const generators = computed(() => generatorList.filter((g) => g.matches(props.gql.currentProject?.currentTestingType)))
-
-// if there is only one generator, jump to step 2
-if (generators.value.length === 1) {
-  emit('select', generators.value[0].id)
-}
 
 gql`
 fragment CreateSpecCards on Query {
   currentProject {
     id
-    currentTestingType
   }
 }
 `

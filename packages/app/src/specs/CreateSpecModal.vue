@@ -24,6 +24,7 @@
         :gql="props.gql.currentProject"
         :type="props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
+        :other-generators="filteredGenerators.length > 1"
         @restart="currentGeneratorId = undefined"
         @close="close"
       />
@@ -33,6 +34,7 @@
       >
         <CreateSpecCards
           :gql="props.gql"
+          :generators="filteredGenerators"
           @select="currentGeneratorId = $event"
         />
       </div>
@@ -41,7 +43,7 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators } from './generators'
+import { generators, getFilteredGeneratorList } from './generators'
 import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
@@ -114,6 +116,13 @@ const codeGenGlob = computed(() => {
 
   return props.gql.currentProject?.codeGenGlobs[generator.value.id]
 })
+
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
+
+// if there is only one generator, jump to step 2
+if (filteredGenerators.value.length === 1) {
+  currentGeneratorId.value = filteredGenerators.value[0].id
+}
 
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')

@@ -8,7 +8,7 @@
   <CreateSpecCards
     data-cy="create-spec-page-cards"
     :gql="props.gql"
-    allow-single-card
+    :generators="filteredGenerators"
     @select="selectSpecCard"
   />
 
@@ -41,6 +41,7 @@ import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
+import { getFilteredGeneratorList } from './generators'
 
 const { t } = useI18n()
 
@@ -57,6 +58,8 @@ fragment CreateSpecContent on Query {
 const props = defineProps<{
   gql: CreateSpecContentFragment
 }>()
+
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
 
 const emit = defineEmits<{
   (e: 'showCreateSpecModal', id: string): void
