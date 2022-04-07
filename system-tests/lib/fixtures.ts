@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import _path from 'path'
 import chokidar from 'chokidar'
 import tempDir from 'temp-dir'
+import type { ProjectFixtureDir } from './fixtureDirs'
 
 export const root = _path.join(__dirname, '..')
 
@@ -59,7 +60,7 @@ export function scaffold () {
  * Given a project name, copy the project's test files to the temp dir.
  * Returns the scaffolded directory
  */
-export async function scaffoldProject (project: string): Promise<string> {
+export async function scaffoldProject (project: ProjectFixtureDir): Promise<string> {
   const to = _path.join(cyTmpDir, project)
   const from = projectFixturePath(project)
 
@@ -106,13 +107,13 @@ export function remove () {
   safeRemove(cyTmpDir)
 }
 
-export function removeProject (name) {
+export function removeProject (name: ProjectFixtureDir) {
   safeRemove(projectPath(name))
 }
 
 // Removes node_modules that might have been leftover from an initial "yarn"
 // in the fixture dir
-export function clearFixtureNodeModules (name) {
+export function clearFixtureNodeModules (name: ProjectFixtureDir) {
   try {
     safeRemove(_path.join(projects, name, 'node_modules'))
   } catch {
@@ -122,11 +123,11 @@ export function clearFixtureNodeModules (name) {
 
 // returns the path to project fixture
 // in the cyTmpDir
-export function project (name) {
+export function project (name: ProjectFixtureDir) {
   return projectPath(name)
 }
 
-export function projectPath (name) {
+export function projectPath (name: ProjectFixtureDir) {
   return _path.join(cyTmpDir, name)
 }
 
@@ -134,11 +135,11 @@ export function get (fixture, encoding: BufferEncoding = 'utf8') {
   return fs.readFileSync(_path.join(serverRoot, 'test', 'support', 'fixtures', fixture), { encoding })
 }
 
-export function path (fixture) {
+export function path (fixture: ProjectFixtureDir) {
   return _path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
 }
 
-export function projectFixturePath (name) {
+export function projectFixturePath (name: ProjectFixtureDir) {
   return _path.join(projects, name)
 }
 

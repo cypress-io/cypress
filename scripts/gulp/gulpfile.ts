@@ -59,9 +59,10 @@ gulp.task(
   gulp.parallel(
     webpackRunner,
     gulp.series(
-      gulp.parallel(makePathMap, e2eTestScaffoldWatch),
+      makePathMap,
       gulp.parallel(
         viteClean,
+        e2eTestScaffoldWatch,
         'codegen',
       ),
 
