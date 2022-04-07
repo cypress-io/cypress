@@ -252,22 +252,27 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
-    const onSpecsChanged = debounce(async () => {
+    // When file system changes are detected, we retrieve any spec files matching
+    // the determined specPattern. This function is debounced to limit execution
+    // during sequential file operations.
+    const onProjectFileSystemChange = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       this.ctx.actions.project.setSpecs(specs)
     }, 200)
 
+    // We respond to all changes to the project's filesystem when
+    // files or directories are added and removed that are not explicitly
+    // ignored by config
     this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
       cwd: projectRoot,
+      // we explicitly ignore what we don't care about
+      ignored: [...excludeSpecPattern, ...additionalIgnore],
     })
 
-    this._specWatcher.on('add', onSpecsChanged)
-    this._specWatcher.on('change', onSpecsChanged)
-    this._specWatcher.on('unlink', onSpecsChanged)
-    this._specWatcher.on('addDir', onSpecsChanged)
-    this._specWatcher.on('unlinkDir', onSpecsChanged)
+    // the 'all' event includes: add, addDir, change, unlink, unlinkDir
+    this._specWatcher.on('all', onProjectFileSystemChange)
   }
 
   async defaultSpecFileName () {
