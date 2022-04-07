@@ -14,7 +14,7 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
-      'MaybeDelayForMultiDomain',
+      'MaybeDelayForCrossOrigin',
       'SetInjectionLevel',
       'OmitProblematicHeaders',
       'MaybePreventCaching',
@@ -130,14 +130,14 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('MaybeDelayForMultiDomain', function () {
-    const { MaybeDelayForMultiDomain } = ResponseMiddleware
+  describe('MaybeDelayForCrossOrigin', function () {
+    const { MaybeDelayForCrossOrigin } = ResponseMiddleware
     let ctx
 
     it('doesn\'t do anything when not html or rendered html', function () {
       prepareContext({})
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -152,7 +152,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -167,7 +167,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -190,7 +190,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      return testMiddleware([MaybeDelayForMultiDomain], ctx)
+      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -213,7 +213,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
 
@@ -238,7 +238,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
 
@@ -264,7 +264,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
 
@@ -290,7 +290,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
 
@@ -421,7 +421,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('injects "fullMultiDomain" when "experimentalLoginFlows" config flag is set to true for cross-domain html"', function () {
+    it('injects "fullCrossOrigin" when "experimentalLoginFlows" config flag is set to true for cross-origin html"', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://foobar.com',
@@ -442,11 +442,11 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([SetInjectionLevel], ctx)
       .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
       })
     })
 
-    it('injects "fullMultiDomain" when request is in origin stack for cross-domain html"', function () {
+    it('injects "fullCrossOrigin" when request is in origin stack for cross-origin html"', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://example.com',
@@ -467,7 +467,7 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([SetInjectionLevel], ctx)
       .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
       })
     })
 

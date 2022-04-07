@@ -165,7 +165,7 @@ describe('remote states', () => {
   context('#current', () => {
     it('returns the remote state for the current origin in the stack', function () {
       this.eventEmitter.emit('ready:for:origin', { originPolicy: 'https://google.com' })
-      this.remoteStates.set('https://staging.google.com/foo/bar', { isMultiDomain: true })
+      this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: true })
 
       const state = this.remoteStates.current()
 
@@ -185,10 +185,10 @@ describe('remote states', () => {
   })
 
   context('#set', () => {
-    it('sets primary state and origin when isMultiDomain is false', function () {
+    it('sets primary state and origin when isCrossOrigin is false', function () {
       expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
 
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isMultiDomain: false })
+      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: false })
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -206,10 +206,10 @@ describe('remote states', () => {
       expect(this.remoteStates.isPrimaryOrigin('https://staging.google.com')).to.be.true
     })
 
-    it('sets a secondary state when isMultiDomain is true', function () {
+    it('sets a secondary state when isCrossOrigin is true', function () {
       expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
 
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isMultiDomain: true })
+      const state = this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: true })
 
       this.remoteStates.addOrigin('https://staging.google.com')
 
@@ -414,7 +414,7 @@ describe('remote states', () => {
       // simulate a cy.origin by calling ready:for:origin followed by setting
       // the origin with specific auth options and finally calling cross:origin:finished
       this.eventEmitter.emit('ready:for:origin', { originPolicy: 'http://cypress.io' })
-      this.remoteStates.set('http://cypress.io', { auth: { username: 'u', password: 'p' }, isMultiDomain: true })
+      this.remoteStates.set('http://cypress.io', { auth: { username: 'u', password: 'p' }, isCrossOrigin: true })
       currentState = this.remoteStates.current()
       expect(currentState.origin).to.equal('http://cypress.io')
       expect(currentState.auth).to.deep.equal({ username: 'u', password: 'p' })

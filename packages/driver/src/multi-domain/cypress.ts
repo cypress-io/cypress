@@ -39,10 +39,10 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   Cypress.configure({
     ...cypressConfig,
     env,
-    // never turn on video for multi-domain when syncing the config. This is handled in the primary.
+    // never turn on video for a spec bridge when syncing the config. This is handled in the primary.
     video: false,
-    isMultiDomain: true,
-    // multi-domain cannot be used in component testing and is only valid for e2e.
+    isCrossOriginSpecBridge: true,
+    // cross origin spec bridges cannot be used in component testing and is only valid for e2e.
     // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
     testingType: 'e2e',
   })

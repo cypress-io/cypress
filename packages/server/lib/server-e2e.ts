@@ -313,7 +313,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                     details,
                     originalUrl,
                     response: incomingRes,
-                    isMultiDomain: options.isMultiDomain,
+                    isCrossOrigin: options.isCrossOrigin,
                   })
                 } else {
                   // TODO: move this logic to the driver too for
@@ -331,7 +331,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
-        this.remoteStates.set(previousRemoteState, { isMultiDomain: !previousRemoteStateIsPrimary })
+        this.remoteStates.set(previousRemoteState, { isCrossOrigin: !previousRemoteStateIsPrimary })
       }
 
       // if they're POSTing an object, querystringify their POST body

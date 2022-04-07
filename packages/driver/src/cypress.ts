@@ -107,7 +107,7 @@ class $Cypress {
   emitMap: any
   primaryOriginCommunicator: PrimaryOriginCommunicator
   specBridgeCommunicator: SpecBridgeCommunicator
-  isMultiDomain: boolean
+  isCrossOriginSpecBridge: boolean
 
   // attach to $Cypress to access
   // all of the constructors
@@ -156,7 +156,7 @@ class $Cypress {
     this.onSpecReady = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
-    this.isMultiDomain = false
+    this.isCrossOriginSpecBridge = false
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
@@ -189,8 +189,8 @@ class $Cypress {
     // slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
-    // true if this Cypress belongs to multi-domain
-    this.isMultiDomain = config.isMultiDomain || false
+    // true if this Cypress belongs to a cross origin spec bridge
+    this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
 
     // enable long stack traces when
     // we not are running headlessly
@@ -206,14 +206,14 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isMultiDomain')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (this.isMultiDomain ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
+      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
