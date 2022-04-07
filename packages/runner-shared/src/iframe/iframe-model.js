@@ -4,7 +4,7 @@ import { action } from 'mobx'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { studioRecorder } from '../studio'
 import { eventManager } from '../event-manager'
-import { postprocessLogLikeFromSerialization } from '@packages/driver/src/util/serialization/log'
+import { postprocessSnapshotFromSerialization } from '@packages/driver/src/util/serialization/log'
 
 export class IframeModel {
   constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, isAUTSameOrigin, removeSrc }) {
@@ -223,16 +223,10 @@ export class IframeModel {
     if (!this.isAUTSameOrigin()) {
       const Cypress = eventManager.getCypress()
 
-      if (!Cypress) {
-        throw 'do something here. maybe save an empty snapshot?'
-      }
-
       // go get the final cross origin snapshot. Do this optimistically while we render the selected snapshot
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
       Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
-        // TODO: should be an opportunity to refactor based on whats in serialization postprocess for snapshots
-        finalSnapshot.body = postprocessLogLikeFromSerialization(finalSnapshot.body)
-        const reifiedSnapshot = Cypress.cy.createSnapshot(finalSnapshot.name, null, finalSnapshot)
+        const reifiedSnapshot = postprocessSnapshotFromSerialization(finalSnapshot)
 
         this.originalState = {
           body: reifiedSnapshot.body,

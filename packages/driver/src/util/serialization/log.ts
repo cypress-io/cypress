@@ -282,10 +282,10 @@ export const postprocessLogLikeFromSerialization = (props) => {
 }
 
 /**
- * Preprocess snapshots to a serializable form before piping them over through postMessage().
+ * Preprocess a snapshot to a serializable form before piping them over through postMessage().
  * This method is also used by a spec bridge on request if a 'final state' snapshot is requested outside that of the primary domain
  *
- * @param snapshot a snapshot matching the same structure that is returned from cy.createSnapshot.
+ * @param {any} snapshot - a snapshot matching the same structure that is returned from cy.createSnapshot.
  * @returns a serializable form of a snapshot, including a serializable <body> with styles
  */
 export const preprocessSnapshotForSerialization = (snapshot) => {
@@ -301,6 +301,18 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
   preprocessedSnapshot.styles = cy.getStyles(snapshot)
 
   return preprocessedSnapshot
+}
+
+/**
+ * Postprocess a snapshot from the serializable from to an actual HTML body snapshot that exists in the primary document.
+ * @param {any} snapshot - a snapshot that has been preprocessed and sent through post message and needs to be reified in the primary.
+ * @returns the reified snapshot that exists in the primary document
+ */
+export const postprocessSnapshotFromSerialization = (snapshot) => {
+  snapshot.body = postprocessLogLikeFromSerialization(snapshot.body)
+
+  // @ts-ignore
+  return cy.createSnapshot(snapshot.name, null, snapshot)
 }
 
 /**
@@ -360,12 +372,7 @@ export const postprocessLogFromSerialization = (logAttrs) => {
 
   if (snapshots) {
     // @ts-ignore
-    snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => {
-      snapshot.body = postprocessLogLikeFromSerialization(snapshot.body)
-
-      // @ts-ignore
-      return cy.createSnapshot(snapshot.name, null, snapshot)
-    })
+    snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => postprocessSnapshotFromSerialization(snapshot))
   }
 
   const reified = postprocessLogLikeFromSerialization(logAttrsRest)
