@@ -30,7 +30,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -42,7 +42,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -54,7 +54,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -66,7 +66,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Create React App(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
@@ -78,7 +78,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('React.js(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
   })
@@ -90,7 +90,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
   })
@@ -102,7 +102,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Nuxt.js(detected)')
       cy.get('button').contains('Next Step').click()
-      cy.findByRole('button', { name: 'Skip' }).click()
+      cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
   })
