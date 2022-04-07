@@ -107,7 +107,7 @@ export const create = ($$, state) => {
       return {}
     }
 
-    // TODO: clean up. If cross origin process snapshot, styles are directly added into the CSS map
+    // If a cross origin process snapshot, styles are directly added into the CSS map. Simply return them.
     if (stylesOrStyleIds?.headStyles || stylesOrStyleIds.bodyStyles) {
       return stylesOrStyleIds
     }
@@ -241,7 +241,6 @@ export const create = ($$, state) => {
         body,
       }
 
-      // TODO: figure out styles
       if (headStyleIds && bodyStyleIds) {
         snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
       }
