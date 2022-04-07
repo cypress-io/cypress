@@ -22,7 +22,7 @@ export const FileParts = objectType({
     t.nonNull.string('relative', {
       description: 'Relative path to file (e.g. src/component/MySpec.test.tsx)',
       resolve (root, args, ctx) {
-        return path.relative(ctx.currentProject || '', root.absolute)
+        return path.relative(ctx.currentProject || '', root.absolute).replace(/\\/g, '/')
       },
     })
 

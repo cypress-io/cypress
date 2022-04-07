@@ -1,4 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { getPathForPlatform } from '../../src/paths'
 
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
@@ -89,7 +90,7 @@ describe('App: Index', () => {
             'waiting',
             'window',
           ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
-        ]
+        ].map(getPathForPlatform)
 
         it('scaffolds example files when card is clicked', () => {
           cy.get('@ScaffoldCard').click()
@@ -117,7 +118,7 @@ describe('App: Index', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/specs/runner?file=${spec}`).scrollIntoView().should('exist')
+            cy.get(`a[href="#/${spec}"`).scrollIntoView().should('exist')
           })
         })
 
@@ -157,24 +158,24 @@ describe('App: Index', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.js'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           cy.percySnapshot('Invalid spec error')
 
           // Create spec
-          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.cy.js')
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-          cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
           cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
 
@@ -246,24 +247,24 @@ describe('App: Index', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', 'cypress/e2e/filename.cy.ts')
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.ts'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           cy.percySnapshot('Invalid spec error')
 
           // Create spec
-          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.cy.ts')
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-          cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.ts').click()
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.ts')).click()
 
           cy.percySnapshot('Generator success')
 
@@ -370,24 +371,24 @@ describe('App: Index', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', 'src/filename.cy.js')
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/filename.cy.js'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           cy.percySnapshot('Invalid spec error')
 
           // Create spec
-          cy.get('@enterSpecInput').clear().type('src/MyTest.cy.js')
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/MyTest.cy.js'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-          cy.get('[data-cy="file-row"]').contains('src/MyTest.cy.js').click()
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/MyTest.cy.js')).click()
 
           cy.get('pre').should('contain', 'describe(\'MyTest.cy.js\'')
 
@@ -415,7 +416,7 @@ describe('App: Index', () => {
         cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
         .as('enterSpecInput')
 
-        cy.get('@enterSpecInput').clear().type('src/e2e/MyTest.spec.jsx')
+        cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/MyTest.spec.jsx'))
 
         cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
         cy.percySnapshot('Non-recommended spec pattern warning')
@@ -441,7 +442,7 @@ describe('App: Index', () => {
             const stats = await ctx.actions.file.checkIfFileExists(o.path)
 
             expect(stats?.isFile()).to.be.true
-          }, { path: 'cypress/e2e/1-getting-started/todo.cy.js' })
+          }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).should('be.visible')
         })
@@ -569,7 +570,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.successPage.header,
           }).as('SuccessDialog').within(() => {
-            cy.contains('src/App.cy.jsx').should('be.visible')
+            cy.contains(getPathForPlatform('src/App.cy.jsx')).should('be.visible')
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
@@ -725,7 +726,7 @@ describe('App: Index', () => {
 
         cy.get('[data-cy=file-list-row]').contains('App.jsx').click()
 
-        cy.get('input').invoke('val').should('eq', 'src/App.cy.jsx')
+        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/App.cy.jsx'))
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
 
         cy.contains(defaultMessages.components.button.back).click()
@@ -743,18 +744,18 @@ describe('App: Index', () => {
 
         cy.get('[data-cy=file-list-row]').contains('App.jsx').click()
 
-        cy.get('input').invoke('val').should('eq', 'src/App.cy.jsx')
+        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/App.cy.jsx'))
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
         cy.get('input').clear()
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
         cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-        cy.get('input').clear().type('src/specs-folder/MyTest.cy.jsx')
+        cy.get('input').clear().type(getPathForPlatform('src/specs-folder/MyTest.cy.jsx'))
         cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
         cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-        cy.get('[data-cy="file-row"]').contains('src/specs-folder/MyTest.cy.jsx').click()
+        cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/specs-folder/MyTest.cy.jsx')).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
@@ -800,7 +801,7 @@ describe('App: Index', () => {
         .clear().type(componentGlob, { parseSpecialCharSequences: false })
 
         cy.contains('Button.jsx').click()
-        cy.findByTestId('file-row').contains('src/stories/Button.cy.js').click()
+        cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.cy.js')).click()
         cy.percySnapshot('Component Generator Success')
 
         cy.withCtx(async (ctx, o) => {
@@ -809,7 +810,7 @@ describe('App: Index', () => {
           ).find((spec) => spec.relative === o.path)
 
           expect(spec).to.exist
-        }, { path: 'src/stories/Button.cy.jsx' })
+        }, { path: getPathForPlatform('src/stories/Button.cy.jsx') })
       })
     })
   })

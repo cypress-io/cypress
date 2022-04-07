@@ -1,5 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { snapshotAUTPanel } from './support/snapshot-aut-panel'
+import { getPathForPlatform } from '../../src/paths'
 
 describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   beforeEach(() => {
@@ -103,7 +104,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
-    cy.contains(badFilePath).should('be.visible')
+    cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
     cy.location()
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
@@ -130,7 +131,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(goodFilePath).should('be.visible')
+      cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
       cy.location()
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')

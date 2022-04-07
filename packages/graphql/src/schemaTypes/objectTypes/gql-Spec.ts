@@ -18,9 +18,6 @@ export const Spec = objectType({
 
     t.nonNull.string('relative', {
       description: 'Relative path to spec (e.g. src/component/MySpec.test.tsx)',
-      resolve: (root) => {
-        return root.relative.replace(/\\/g, '/')
-      },
     })
 
     t.nonNull.string('baseName', {
@@ -50,9 +47,5 @@ export const Spec = objectType({
         return ctx.git.gitInfo(source.absolute)
       },
     })
-  },
-  sourceType: {
-    module: '@packages/types',
-    export: 'FoundSpec',
   },
 })
