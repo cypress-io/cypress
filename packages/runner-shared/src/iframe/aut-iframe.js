@@ -104,7 +104,7 @@ export class AutIframe {
 
   visitBlank = ({ type } = { type: null }) => {
     return new Promise((resolve) => {
-      this.removeSrcAttributeFromAUTIframe()
+      this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
         switch (type) {
