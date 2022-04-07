@@ -267,7 +267,6 @@ export class ProjectDataSource {
     this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
       cwd: projectRoot,
-      // we explicitly ignore what we don't care about
       ignored: [...excludeSpecPattern, ...additionalIgnore],
     })
 
