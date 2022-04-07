@@ -43,7 +43,7 @@
         :placeholder="t('settingsPage.editor.customPathPlaceholder')"
       >
         <template #prefix>
-          <i-cy-terminal_x16
+          <i-cy-technology-command-line_x16
             class="text-md icon-dark-gray-500"
           />
         </template>
@@ -70,7 +70,7 @@ import Vim from '~icons/logos/vim'
 import Sublime from '~icons/logos/sublimetext-icon'
 import Computer from '~icons/mdi/computer'
 import Emacs from '~icons/logos/emacs'
-import CodeEditor from '~icons/cy/code-editor_x16.svg'
+import Terminal from '~icons/cy/terminal_x16.svg'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
@@ -87,10 +87,10 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'computer': Computer,
   'File Explorer': Computer,
   'File System': Computer,
-  'custom': CodeEditor,
+  'custom': Terminal,
 }
 
-const customEditor = { id: 'custom', icon: CodeEditor, name: 'Custom', binary: 'custom' }
+const customEditor = { id: 'custom', icon: Terminal, name: 'Custom', binary: 'custom' }
 
 const editorOptions = computed(() => {
   const editors = props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] })) || []

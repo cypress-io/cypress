@@ -19,7 +19,7 @@ describe('ChooseExternalEditorModal', () => {
 
     cy.contains(defaultMessages.globalPage.externalEditorPreferences)
     cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription1)
-    cy.contains('You can change this later in the Settings page.')
+    cy.contains(defaultMessages.globalPage.externalEditorPreferencesDescription2.replace('{0}', 'Settings'))
 
     cy.contains(defaultMessages.settingsPage.editor.noEditorSelectedPlaceholder)
     .should('be.visible')
