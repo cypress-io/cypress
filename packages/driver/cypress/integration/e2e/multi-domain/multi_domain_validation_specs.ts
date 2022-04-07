@@ -1,6 +1,6 @@
 describe('cy.origin', () => {
   describe('successes', () => {
-    it('succeeds on a localhost origin name', () => {
+    it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://localhost/__cypress/multi-domain-iframes`
