@@ -12,7 +12,7 @@ function fakeInstalledDeps () {
 function verifyFiles (relativePaths: string[]) {
   cy.withCtx(async (ctx, o) => {
     for (const relativePath of o.relativePaths) {
-      const stats = await ctx.actions.file.checkIfFileExists(relativePath)
+      const stats = await ctx.file.checkIfFileExists(relativePath)
 
       expect(stats).to.not.be.null.and.not.be.undefined
     }

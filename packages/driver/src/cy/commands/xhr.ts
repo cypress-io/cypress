@@ -201,7 +201,7 @@ const startXhrServer = (cy, state, config) => {
 
       Cypress.ProxyLogging.addXhrLog({ xhr, route, log, stack })
 
-      return log.snapshot('request')
+      return log?.snapshot('request')
     },
 
     onLoad: (xhr) => {
