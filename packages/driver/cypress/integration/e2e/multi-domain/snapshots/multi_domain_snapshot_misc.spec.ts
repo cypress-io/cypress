@@ -109,6 +109,13 @@ context('cross-origin snapshot misc', { experimentalSessionSupport: true }, () =
   it('.pause()', (done) => {
     cy.on('command:queue:end', () => {
       setTimeout(() => {
+        if (Cypress.config('isInteractive')) {
+          // if `isInteractive`, the .pause() will NOT show up in the command log in this case. Essentially a no-op.
+          done()
+
+          return
+        }
+
         const { consoleProps, crossOriginLog } = findCrossOriginLogs('pause', logs, 'foobar.com')
 
         expect(crossOriginLog).to.be.true
