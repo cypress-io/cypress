@@ -1129,7 +1129,9 @@ export default (Commands, Cypress, cy, state, config) => {
             const existingAutOrigin = $Location.create(win.location.href).origin
             const params = { remote, existing, previousUrlVisited: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true }
 
-            // TODO: need a better error message
+            // TODO: Need a better error message. We should mention using
+            // cy.origin in order to visit different origins.
+            // https://github.com/cypress-io/cypress/issues/20974
             return cannotVisitDifferentOrigin(params)
           }
 

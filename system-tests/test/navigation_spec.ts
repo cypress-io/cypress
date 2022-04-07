@@ -7,8 +7,6 @@ const onServer = function (app) {
   })
 }
 
-// FIXME: This partially solves https://github.com/cypress-io/cypress/issues/19632 but only when "experimentalLoginFlows" is false.
-// TODO: This will be further solved by https://github.com/cypress-io/cypress/issues/20428
 describe('e2e cross origin navigation', () => {
   systemTests.setup({
     servers: [{
@@ -22,7 +20,8 @@ describe('e2e cross origin navigation', () => {
     },
   })
 
-  // FIXME: add test that supports this for firefox
+  // TODO: convert to cypress-in-cypress test if possible
+  // https://github.com/cypress-io/cypress/issues/20973
   systemTests.it('captures cross origin failures when "experimentalLoginFlows" config value is falsy', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,

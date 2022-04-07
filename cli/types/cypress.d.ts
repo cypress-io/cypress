@@ -1908,9 +1908,6 @@ declare namespace Cypress {
      */
     origin(originOrDomain: string, fn: () => void): Chainable
 
-    // TODO: when we find other options to put into the 'data' argument of cy.origin, we may want to overload this type with
-    // a 'data' parameter that contains all data options, including args, and one that contains all data options, excluding args.
-    // This will provide better typings support for whatever args is set to as opposed to an optional undefined
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/origin

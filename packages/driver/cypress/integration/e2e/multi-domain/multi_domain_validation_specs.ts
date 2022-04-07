@@ -21,6 +21,7 @@ describe('cy.origin', () => {
     })
 
     // TODO: $Location does not support ipv6
+    // https://github.com/cypress-io/cypress/issues/20970
     it.skip('succeeds on an ipv6 address', () => {
       cy.origin('0000:0000:0000:0000:0000:0000:0000:0001', () => undefined)
       cy.then(() => {

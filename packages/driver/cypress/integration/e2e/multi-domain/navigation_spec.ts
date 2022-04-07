@@ -190,6 +190,7 @@ describe('navigation events', () => {
     })
 
     // TODO: this test should re revisited with the cypress in cypress tests available in 10.0
+    // https://github.com/cypress-io/cypress/issues/20973
     it.skip('the runner url updates appropriately', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.get('a[data-cy="cross-origin-page"]').click()
