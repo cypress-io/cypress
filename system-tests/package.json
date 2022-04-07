@@ -4,6 +4,7 @@
   "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
   "private": true,
   "main": "lib/fixtures.ts",
+  "browser": "lib/fixtureDirs.ts",
   "scripts": {
     "type-check": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
