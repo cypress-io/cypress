@@ -18,7 +18,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
             ...ctx.currentProject!,
             config: {},
             id: 'id',
-            storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             currentTestingType: 'component',
           }
@@ -59,7 +58,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
             config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             id: 'id',
-            storybook: null,
             currentTestingType: 'e2e',
           }
         },
