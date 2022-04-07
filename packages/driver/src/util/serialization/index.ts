@@ -1,8 +1,8 @@
 import _ from 'lodash'
-import $dom from '../dom'
+import $dom from '../../dom'
 import structuredClonePonyfill from 'core-js-pure/actual/structured-clone'
-import $stackUtils from '../cypress/stack_utils'
-import $errUtils from '../cypress/error_utils'
+import $stackUtils from '../../cypress/stack_utils'
+import $errUtils from '../../cypress/error_utils'
 
 export const UNSERIALIZABLE = '__cypress_unserializable_value'
 
