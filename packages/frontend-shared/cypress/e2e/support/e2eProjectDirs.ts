@@ -154,6 +154,8 @@ export const e2eProjectDirs = [
   'unify-plugin-errors',
   'various-file-types',
   'vite-ct',
+  'vite2.8.6-react',
+  'vite2.9.1-react',
   'vue3-vite-ts-configured',
   'vue3-vite-ts-custom-index-html',
   'vue3-vite-ts-unconfigured',

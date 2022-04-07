@@ -2,6 +2,7 @@
   // rendered within ../hooks/hooks.tsx
   .commands-container {
     font-family: $monospace;
+    background-color: $reporter-section-background;
     min-width: $reporter-contents-min-width;
     padding: 0;
 
@@ -11,6 +12,7 @@
   }
 
   .command {
+    background-color: $reporter-section-background;
     cursor: default;
     min-height: 20px;
   }
@@ -55,7 +57,6 @@
   }
 
   .command-wrapper {
-    background-color: $reporter-section-background;
     color: $gray-400;
     min-height: 20px;
 
