@@ -127,7 +127,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
   it('shows current browser and possible browsers', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (ctx) => {
-        ctx.currentBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
+        ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
       },
       render: (gqlVal) => {
         return renderWithGql(gqlVal)

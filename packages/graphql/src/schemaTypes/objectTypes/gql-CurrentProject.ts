@@ -41,11 +41,11 @@ export const CurrentProject = objectType({
       resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
-    t.field('currentBrowser', {
+    t.field('activeBrowser', {
       type: Browser,
-      description: 'The currently selected browser for the application',
+      description: 'The currently selected browser for the project',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.chosenBrowser
+        return ctx.coreData.activeBrowser
       },
     })
 
