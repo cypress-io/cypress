@@ -134,7 +134,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state: Cypress.State, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -151,7 +151,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -226,19 +226,19 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroups = state('logGroup') || []
+  const logGroupIds = state('logGroupIds') || []
 
-  if (logGroups.length) {
-    obj.group = _.last(logGroups)
-    obj.groupLevel = logGroups.length
+  if (logGroupIds.length) {
+    obj.group = _.last(logGroupIds)
+    obj.groupLevel = logGroupIds.length
   }
 
   if (obj.groupEnd) {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    state('logGroupIds', _.slice(logGroupIds, 0, -1))
   }
 
   if (obj.groupStart) {
-    state('logGroup', (logGroups).concat(obj.id))
+    state('logGroupIds', (logGroupIds).concat(obj.id))
   }
 
   return obj
@@ -246,7 +246,7 @@ const defaults = function (state, config, obj) {
 
 class Log {
   cy: any
-  state: any
+  state: Cypress.State
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any
@@ -398,10 +398,10 @@ class Log {
   }
 
   error (err) {
-    const logGroups = this.state('logGroup') || []
+    const logGroupIds = this.state('logGroupIds') || []
 
-    // current log was responsible to creating the log group
-    if (_.last(logGroups) === this.attributes.id) {
+    // current log was responsible to creating the current log group so end the current group
+    if (_.last(logGroupIds) === this.attributes.id) {
       this.endGroup()
     }
 
@@ -432,7 +432,7 @@ class Log {
   }
 
   endGroup () {
-    this.state('logGroup', _.slice(this.state('logGroup'), 0, -1))
+    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
   }
 
   getError (err) {

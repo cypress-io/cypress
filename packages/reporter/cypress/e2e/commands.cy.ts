@@ -523,7 +523,7 @@ describe('commands', () => {
       .find('.num-children')
       .should('have.text', '1')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', '1 logs currently hidden')
+      .get('.cy-tooltip').should('have.text', '1 log currently hidden')
       .percySnapshot()
     })
 
@@ -558,13 +558,22 @@ describe('commands', () => {
       .click()
 
       cy.get('.command-name-within')
+      .find('.command-expander')
+      .should('not.have.class', 'command-expander-is-open')
+      .closest('.command')
       .find('.num-children')
       .should('exist')
       .should('have.text', '1')
 
       cy.get('.command-name-within')
       .find('.command-expander')
-      .should('not.have.class', 'command-expander-is-open')
+      .should('have.class', 'command-expander-is-open')
+      .click()
+      .should('have.class', 'command-expander-is-open')
+
+      cy.get('.command-name-within')
+      .find('.num-children')
+      .should('not.exist')
     })
 
     it('displays with nested logs', () => {

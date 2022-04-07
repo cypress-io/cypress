@@ -959,7 +959,14 @@ commands:
           name: Build NPM package
           command: yarn build --scope cypress
       - run:
+          name: Copy Re-exported NPM Packages
+          command: node ./scripts/post-build.js
+          working_directory: cli
+      - run:
           command: ls -la types
+          working_directory: cli/build
+      - run:
+          command: ls -la vue mount-utils react
           working_directory: cli/build
       - unless:
           condition:

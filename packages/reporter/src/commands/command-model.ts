@@ -45,7 +45,7 @@ export default class Command extends Instrument {
   @observable number?: number
   @observable numElements: number
   @observable timeout?: number
-  @observable visible?: boolean = true
+  @observable visible?: boolean
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
   @observable hookId: string
@@ -65,7 +65,9 @@ export default class Command extends Instrument {
   }
 
   private countNestedCommands (children) {
-    if (children.length === 0) return 0
+    if (children.length === 0) {
+      return 0
+    }
 
     return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
   }
@@ -104,7 +106,13 @@ export default class Command extends Instrument {
   }
 
   @computed get hasChildren () {
-    return this.event ? this.numChildren > 1 : this.numChildren > 0
+    if (this.event) {
+      // if the command is an event log, we add one to the number of children count to include
+      // itself in the total number of same events that render when the group is closed
+      return this.numChildren > 1
+    }
+
+    return this.numChildren > 0
   }
 
   constructor (props: CommandProps) {
@@ -116,7 +124,9 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
-    this.visible = props.visible
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
+    this.visible = props.visible === undefined || props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
@@ -136,7 +146,9 @@ export default class Command extends Instrument {
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
-    this.visible = props.visible
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
+    this.visible = props.visible === undefined || props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
