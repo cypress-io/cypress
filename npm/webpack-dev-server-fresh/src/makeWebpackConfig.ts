@@ -42,6 +42,35 @@ const posixSeparator = '/'
 const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
 
 /**
+ * Removes and/or modifies certain plugins known to conflict
+ * when used with cypress/webpack-dev-server.
+ */
+function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
+  if (webpackConfig?.plugins) {
+    webpackConfig.plugins = webpackConfig.plugins.filter((plugin) => {
+      if (removeList.includes(plugin.constructor.name)) {
+        /* eslint-disable no-console */
+        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
+
+        return false
+      }
+
+      return true
+    })
+  }
+
+  if (typeof webpackConfig?.module?.unsafeCache === 'function') {
+    const originalCachePredicate = webpackConfig.module.unsafeCache
+
+    webpackConfig.module.unsafeCache = (module: any) => {
+      return originalCachePredicate(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
+    }
+  }
+
+  return webpackConfig
+}
+
+/**
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
  */
@@ -49,8 +78,8 @@ export function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
-  const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
+  const userWebpackConfig = modifyWebpackConfigForCypress(config.devServerConfig.webpackConfig as Partial<Configuration>)
+  const frameworkWebpackConfig = modifyWebpackConfigForCypress(config.frameworkConfig as Partial<Configuration>)
 
   const {
     cypressConfig: {
@@ -87,27 +116,6 @@ export function makeWebpackConfig (
         webpack,
       }),
     ],
-  }
-
-  if (userWebpackConfig?.plugins) {
-    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
-      if (removeList.includes(plugin.constructor.name)) {
-        /* eslint-disable no-console */
-        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
-
-        return false
-      }
-
-      return true
-    })
-  }
-
-  if (typeof userWebpackConfig?.module?.unsafeCache === 'function') {
-    const originalCachePredicate = userWebpackConfig.module.unsafeCache
-
-    userWebpackConfig.module.unsafeCache = (module: any) => {
-      return originalCachePredicate(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
-    }
   }
 
   const mergedConfig = merge(

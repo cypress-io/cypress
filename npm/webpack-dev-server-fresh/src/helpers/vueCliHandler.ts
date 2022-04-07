@@ -1,6 +1,5 @@
 import type { CreateFinalWebpackConfig } from '../createWebpackDevServer'
 import debugLib from 'debug'
-import type { WebpackPluginFunction } from 'webpack'
 
 type PresetHandler = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
 
@@ -16,12 +15,7 @@ export function vueCliHandler ({ devServerConfig }: PresetHandler) {
 
     debug('webpack config %o', webpackConfig)
 
-    return {
-      ...webpackConfig,
-      plugins: (webpackConfig.plugins || []).filter((x: WebpackPluginFunction) => {
-        return x.constructor.name !== 'HtmlPwaPlugin' && x.constructor.name !== 'HtmlWebpackPlugin'
-      }),
-    }
+    return webpackConfig
   } catch (e) {
     console.error(e) // eslint-disable-line no-console
     throw Error(`Error loading @vue/cli-service/webpack.config.js. Looked in ${devServerConfig.cypressConfig.projectRoot}`)
