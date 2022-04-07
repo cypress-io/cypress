@@ -3,12 +3,7 @@ fileName: <%= fileName %>
 ---
 
 describe('<%= fileName %>', () => {
-  <% if(codeGenType === 'e2e') { -%>
   it('should visit', () => {
     cy.visit('/') 
   })
-  <% } else { -%>
-  it('playground', () => {
-    // cy.mount()
-  })<% } %>
 })
