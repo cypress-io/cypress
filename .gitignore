@@ -95,6 +95,7 @@ system-tests/lib/fixtureDirs.ts
 /packages/launchpad/src/generated
 /packages/app/src/generated
 /packages/frontend-shared/src/generated
+/packages/frontend-shared/cypress/e2e/support/e2eProjectDirs.ts
 
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template
