@@ -77,7 +77,7 @@ describe('supportFileComponent', () => {
     declare global {
       namespace Cypress {
         interface Chainable {
-          mount(...): Cypress.Chainable<MountReturn>
+          mount: typeof mount
         }
       }
     }
@@ -158,7 +158,7 @@ describe('supportFileComponent', () => {
     declare global {
       namespace Cypress {
         interface Chainable {
-          mount(...): Cypress.Chainable<MountReturn>
+          mount: typeof mount
         }
       }
     }

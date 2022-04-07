@@ -70,7 +70,7 @@ export function supportFileComponent (language: CodeLanguage['type'], framework:
       declare global {
         namespace Cypress {
           interface Chainable {
-            mount(...): Cypress.Chainable<MountReturn>
+            mount: typeof mount
           }
         }
       }

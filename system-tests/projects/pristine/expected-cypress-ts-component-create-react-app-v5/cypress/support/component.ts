@@ -29,7 +29,7 @@ import type { MountReturn } from 'cypress/react'
 declare global {
   namespace Cypress {
     interface Chainable {
-      mount(...): Cypress.Chainable<MountReturn>
+      mount: typeof mount
     }
   }
 }
