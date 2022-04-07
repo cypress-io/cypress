@@ -2567,7 +2567,7 @@ windows-workflow: &windows-workflow
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
         requires:
-          - windows-build
+          - windows-create-build-artifacts
 
 workflows:
   linux:
