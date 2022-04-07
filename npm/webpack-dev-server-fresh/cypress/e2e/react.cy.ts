@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 /// <reference path="../support/e2e.ts" />
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { fixtureDirs } from '@tooling/system-tests'
 
-type ProjectDirs = typeof e2eProjectDirs
+type ProjectDirs = typeof fixtureDirs
 
 const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react']
 
@@ -17,7 +17,7 @@ for (const project of WEBPACK_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project)
+      cy.openProject(project, ['--config-file', 'cypress-webpack.config.ts'])
       cy.startAppServer('component')
     })
 

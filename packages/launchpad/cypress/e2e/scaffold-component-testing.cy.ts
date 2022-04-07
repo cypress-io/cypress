@@ -1,6 +1,6 @@
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
 
-function startSetupFor (project: typeof e2eProjectDirs[number]) {
+function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
