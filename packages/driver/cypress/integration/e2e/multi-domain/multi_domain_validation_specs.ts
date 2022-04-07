@@ -31,7 +31,7 @@ describe('cy.origin', () => {
       })
     })
 
-    it('succeeds on a unicode origin', () => {
+    it('succeeds on a unicode domain', () => {
       cy.origin('はじめよう.みんな', () => undefined)
       cy.then(() => {
         const expectedSrc = `https://xn--p8j9a0d9c9a.xn--q9jyb4c/__cypress/multi-domain-iframes`
