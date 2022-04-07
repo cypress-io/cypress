@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "vue": "^2.6.11"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "4.5.10",
+    "html-webpack-plugin": "~4.0.0",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "projectFixtureDirectory": "vue-cli"
+}

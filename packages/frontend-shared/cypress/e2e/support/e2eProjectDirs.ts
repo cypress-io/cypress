@@ -157,6 +157,8 @@ export const e2eProjectDirs = [
   'vue3-vite-ts-configured',
   'vue3-vite-ts-custom-index-html',
   'vue3-vite-ts-unconfigured',
+  'vuecli4-vue2',
+  'vuecli5-vue3',
   'vuecli5vue3-configured',
   'vuecli5vue3-unconfigured',
   'vueclivue2-configured',

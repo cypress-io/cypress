@@ -8,6 +8,7 @@ import { sourceRelativeWebpackModules } from './helpers/sourceRelativeWebpackMod
 import type { AddressInfo } from 'net'
 import debugLib from 'debug'
 import type { Server } from 'http'
+import { vueCliHandler } from './helpers/vueCliHandler'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:devServer')
 
@@ -20,7 +21,7 @@ export type WebpackDevServerConfig = {
   webpackConfig?: unknown // Derived from the user's webpack
 }
 
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react'] as const
+const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli'] as const
 
 /**
  * @internal
@@ -128,6 +129,10 @@ devServer.create = function (devServerConfig: WebpackDevServerConfig) {
       case 'react':
         break
       case 'nuxt':
+        break
+
+      case 'vue-cli':
+        frameworkConfig = vueCliHandler({ devServerConfig, sourceWebpackModulesResult })
         break
       default:
         throw new Error(`Unexpected framework ${devServerConfig.framework}, expected one of ${ALL_FRAMEWORKS.join(', ')}`)
