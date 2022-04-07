@@ -41,10 +41,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       cy.get(pageTitleSelector).should('contain.text', messages.page.defaultPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.component.description)
 
-      const text = defaultMessages.createSpec.component
-
-      cy.contains(text.importFromComponent.header).should('be.visible')
-      cy.contains(text.importFromComponent.description).should('be.visible')
       cy.percySnapshot()
     })
   })
