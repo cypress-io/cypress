@@ -2563,9 +2563,8 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
-
-    - test-kitchensink:
-        name: windows-test-kitchensink
+    - test-binary-against-kitchensink-chrome:
+        name: windows-test-binary-against-kitchensink-chrome
         executor: windows
         requires:
           - windows-build
