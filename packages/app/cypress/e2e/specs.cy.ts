@@ -331,6 +331,18 @@ describe('App: Index', () => {
         })
       })
 
+      it('opens config file in ide from specPattern text description', () => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
+
+        cy.get('[data-cy="no-specs-specPattern"]').click()
+
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
+      })
+
       it('opens config file in ide from footer button', () => {
         cy.withCtx((ctx, o) => {
           o.sinon.stub(ctx.actions.file, 'openFile')
