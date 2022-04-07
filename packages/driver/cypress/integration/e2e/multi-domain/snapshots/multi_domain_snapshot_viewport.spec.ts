@@ -29,7 +29,7 @@ context('multi-domain snapshot viewport', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.viewport(320, 480)
     })
   })

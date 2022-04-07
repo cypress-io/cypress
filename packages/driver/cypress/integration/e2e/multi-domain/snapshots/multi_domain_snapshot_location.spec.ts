@@ -27,7 +27,7 @@ context('multi-domain snapshot location', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.hash()
     })
   })
@@ -58,7 +58,7 @@ context('multi-domain snapshot location', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.location()
     })
   })
@@ -77,7 +77,7 @@ context('multi-domain snapshot location', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.url()
     })
   })

@@ -44,7 +44,7 @@ context('multi-domain snapshot screenshot', { experimentalSessionSupport: true }
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       // FIXME: viewports don't seems correct after taking screenshot when in snapshot mode
       cy.screenshot({ capture: 'fullPage' })
     })

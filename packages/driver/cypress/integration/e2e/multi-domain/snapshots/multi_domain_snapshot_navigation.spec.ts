@@ -31,7 +31,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
 
       cy.go('back')
@@ -57,7 +57,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.reload()
     })
   })
@@ -82,7 +82,7 @@ context('multi-domain navigation', { experimentalSessionSupport: true }, () => {
 
     cy.visit('/fixtures/multi-domain.html')
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 
       cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')

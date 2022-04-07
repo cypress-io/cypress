@@ -37,7 +37,7 @@ context('multi-domain snapshot cookies', { experimentalSessionSupport: true }, (
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.getCookies().should('be.empty')
       cy.setCookie('foo', 'bar')
       cy.getCookie('foo')
@@ -70,7 +70,7 @@ context('multi-domain snapshot cookies', { experimentalSessionSupport: true }, (
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.getCookies().should('be.empty')
 
       cy.setCookie('foo', 'bar')
@@ -98,7 +98,7 @@ context('multi-domain snapshot cookies', { experimentalSessionSupport: true }, (
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.getCookies().should('be.empty')
 
       cy.setCookie('foo', 'bar')
@@ -126,7 +126,7 @@ context('multi-domain snapshot cookies', { experimentalSessionSupport: true }, (
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.setCookie('foo', 'bar')
       cy.getCookie('foo').should('not.be.null')
       cy.clearCookie('foo')
@@ -163,7 +163,7 @@ context('multi-domain snapshot cookies', { experimentalSessionSupport: true }, (
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.setCookie('foo', 'bar')
       cy.setCookie('faz', 'baz')
 

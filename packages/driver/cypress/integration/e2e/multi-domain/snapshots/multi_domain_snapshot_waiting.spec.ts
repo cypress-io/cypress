@@ -28,7 +28,7 @@ context('multi-domain snapshot waiting', { experimentalSessionSupport: true }, (
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.wait(500)
     })
   })

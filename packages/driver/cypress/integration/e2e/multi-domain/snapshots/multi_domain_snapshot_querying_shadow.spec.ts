@@ -34,7 +34,7 @@ context('multi-domain snapshot shadow dom', { experimentalSessionSupport: true }
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#shadow-element-1').shadow()
     })
   })

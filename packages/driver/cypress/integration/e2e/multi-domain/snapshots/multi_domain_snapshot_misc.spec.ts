@@ -35,7 +35,7 @@ context('multi-domain snapshot misc', { experimentalSessionSupport: true }, () =
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.exec('echo foobar')
     })
   })
@@ -55,7 +55,7 @@ context('multi-domain snapshot misc', { experimentalSessionSupport: true }, () =
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').click().focused()
     })
   })
@@ -76,7 +76,7 @@ context('multi-domain snapshot misc', { experimentalSessionSupport: true }, () =
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const arr = ['foo', 'bar', 'baz']
 
       cy.wrap(arr).spread((foo, bar, baz) => {
@@ -101,7 +101,7 @@ context('multi-domain snapshot misc', { experimentalSessionSupport: true }, () =
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#button').debug()
     })
   })
@@ -119,7 +119,7 @@ context('multi-domain snapshot misc', { experimentalSessionSupport: true }, () =
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
         cy.once('paused', () => {
           Cypress.emit('resume:all')
@@ -150,7 +150,7 @@ context('multi-domain snapshot misc', { experimentalSessionSupport: true }, () =
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.task('return:arg', 'works')
     })
   })

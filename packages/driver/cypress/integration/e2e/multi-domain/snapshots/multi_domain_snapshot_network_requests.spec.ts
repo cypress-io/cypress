@@ -40,7 +40,7 @@ context('multi-domain snapshot network requests', { experimentalSessionSupport: 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.request('http://www.foobar.com:3500/fixtures/example.json')
     })
   })

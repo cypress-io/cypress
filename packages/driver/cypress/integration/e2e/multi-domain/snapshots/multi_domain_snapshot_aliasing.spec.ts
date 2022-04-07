@@ -37,7 +37,7 @@ context('multi-domain snapshot aliasing', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3250', () => {
+    cy.origin('http://foobar.com:3250', () => {
       cy.get('#button').as('buttonAlias')
     })
   })

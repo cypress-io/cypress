@@ -35,7 +35,7 @@ context('multi-domain snapshot spies, stubs, and clock', { experimentalSessionSu
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.spy(foo, 'bar')
@@ -58,7 +58,7 @@ context('multi-domain snapshot spies, stubs, and clock', { experimentalSessionSu
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.stub(foo, 'bar')
@@ -85,7 +85,7 @@ context('multi-domain snapshot spies, stubs, and clock', { experimentalSessionSu
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
       cy.clock(now)
@@ -111,7 +111,7 @@ context('multi-domain snapshot spies, stubs, and clock', { experimentalSessionSu
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
       cy.clock(now)

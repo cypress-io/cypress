@@ -2,9 +2,6 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 context('multi-domain snapshot assertions', { experimentalSessionSupport: true }, () => {
-  // Use a map here to remove any duplicate log:changed events for the same log.
-  // For these tests. we only care about the last log:change events pertaining to the log
-
   let logs: Map<string, any>
 
   beforeEach(() => {
@@ -40,7 +37,7 @@ context('multi-domain snapshot assertions', { experimentalSessionSupport: true }
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .should('not.be.checked').and('not.be.disabled')
     })

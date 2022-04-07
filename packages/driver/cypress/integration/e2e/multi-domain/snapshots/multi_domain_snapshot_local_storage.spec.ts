@@ -28,7 +28,7 @@ context('multi-domain snapshot local storage', { experimentalSessionSupport: tru
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.window().then((win) => {
         win.localStorage.setItem('foo', 'bar')
         expect(win.localStorage.getItem('foo')).to.equal('bar')

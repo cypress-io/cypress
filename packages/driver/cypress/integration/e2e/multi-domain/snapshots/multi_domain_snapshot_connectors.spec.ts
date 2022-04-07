@@ -46,7 +46,7 @@ context('multi-domain snapshot connectors', { experimentalSessionSupport: true }
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       // FIXME: snapshot of primary is showing for its
       cy.get('#by-id>input').its('length')
     })
@@ -71,7 +71,7 @@ context('multi-domain snapshot connectors', { experimentalSessionSupport: true }
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       // FIXME: snapshot of primary is showing for its
       cy.get('#button').invoke('text')
     })

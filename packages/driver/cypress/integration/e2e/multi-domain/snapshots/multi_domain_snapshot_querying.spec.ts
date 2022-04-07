@@ -33,7 +33,7 @@ context('multi-domain snapshot querying', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.contains('Nested Find')
     })
   })
@@ -53,7 +53,7 @@ context('multi-domain snapshot querying', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.get('#by-id').within(() => {
         cy.get('#input')
       })
@@ -74,7 +74,7 @@ context('multi-domain snapshot querying', { experimentalSessionSupport: true }, 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.root()
     })
   })

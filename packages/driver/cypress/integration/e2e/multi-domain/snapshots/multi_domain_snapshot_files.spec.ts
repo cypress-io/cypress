@@ -33,7 +33,7 @@ context('multi-domain snapshot files', { experimentalSessionSupport: true }, () 
       }, 250)
     })
 
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       cy.readFile('cypress/fixtures/example.json')
     })
   })
@@ -55,7 +55,7 @@ context('multi-domain snapshot files', { experimentalSessionSupport: true }, () 
     })
 
     // FIXME: this test hangs when the console is open.
-    cy.switchToDomain('http://foobar.com:3500', () => {
+    cy.origin('http://foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
       cy.stub(Cypress, 'backend').resolves({
