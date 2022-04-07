@@ -9,7 +9,7 @@ const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { createRoutes } = require(`../../lib/routes`)
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'
