@@ -189,7 +189,20 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   result.htmlWebpackPlugin.importPath = path.dirname(htmlWebpackPluginJsonPath)
   result.htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
   result.htmlWebpackPlugin.module = require(result.htmlWebpackPlugin.importPath)
-  result.htmlWebpackPlugin.majorVersion = getMajorVersion(result.htmlWebpackPlugin.packageJson, [4, 5])
+  try {
+    result.htmlWebpackPlugin.majorVersion = getMajorVersion(result.htmlWebpackPlugin.packageJson, [4, 5])
+  } catch (e) {
+    // html-webpack-plugin@4 works fine with webpack 4, in place of html-webpack-plugin@3.
+    // This combination of dependencies is commonly found in Vue CLI 4.x.
+    // In fact, the version of html-webpack-plugin is pegged to the version webpack.
+    // Vue CLI is technically incorrect.
+    // In this case, just use 4.x, which we ship as part of the binary.
+    if (result.webpack.majorVersion === 4 && (e as Error).message.includes('3.2')) {
+      result.htmlWebpackPlugin.majorVersion = 4
+    } else {
+      throw e
+    }
+  }
 
   return result
 }
