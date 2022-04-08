@@ -652,33 +652,6 @@ describe('App: Specs', () => {
 
         cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('not.exist')
       })
-
-      it('shows create first spec page with create from component option', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
-
-        cy.findByRole('dialog', { name: 'Enter the path for your new spec' })
-
-        cy.get('[data-cy=file-list-row]').contains('App.jsx').click()
-
-        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/App.cy.jsx'))
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
-        cy.get('input').clear()
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
-
-        cy.get('input').clear().type(getPathForPlatform('src/specs-folder/MyTest.cy.jsx'))
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-        cy.contains('h2', defaultMessages.createSpec.successPage.header)
-
-        cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/specs-folder/MyTest.cy.jsx')).click()
-
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
-          cy.findByRole('link', {
-            name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/MyTest.cy.jsx')}`)
-        })
-      })
     })
   })
 })
