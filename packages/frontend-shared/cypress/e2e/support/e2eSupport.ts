@@ -289,7 +289,9 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
-        if (!o.skipMockingPrompts) {
+        if (!o.skipMockingPrompts
+        // avoid re-stubbing already stubbed prompts in case we call startAppServer multiple times
+          && (ctx._apis.projectApi.getCurrentProjectSavedState as any).wrappedMethod === undefined) {
           // avoid unwanted prompt
           o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
             firstOpened: 1609459200000,
