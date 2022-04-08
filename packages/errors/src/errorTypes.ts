@@ -72,6 +72,11 @@ export interface SerializedError extends Omit<CypressError, 'messageMarkdown' | 
     column: number
     filePath: string
   } | null
+  esErrorLocation?: {
+    line: number
+    column: number
+    filePath: string
+  }
 }
 
 /**

@@ -10,7 +10,9 @@ const serializeError = (err) => {
     'details', 'isCypressErr', 'messageMarkdown',
     'originalError',
     // Location of the error when a TSError occurs (parse error from ts-node)
-    'tsErrorLocation')
+    'tsErrorLocation',
+    // Location of the error, cleaning up the esbuild stack trace
+    'esErrorLocation')
 
   if (obj.originalError) {
     obj.originalError = serializeError(obj.originalError)

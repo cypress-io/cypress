@@ -26,6 +26,8 @@ export class ErrorDataSource {
 
     // If we saw a TSError, we will extract the error location from the message
     const tsErrorLocation = source.cypressError.originalError?.tsErrorLocation
+    // If we saw a esErrorLocation, we will extract the error location from the message
+    const esErrorLocation = source.cypressError.originalError?.esErrorLocation
 
     let line: number | null | undefined
     let column: number | null | undefined
@@ -35,6 +37,10 @@ export class ErrorDataSource {
       line = tsErrorLocation.line
       column = tsErrorLocation.column
       absolute = path.join(this.ctx.currentProject, tsErrorLocation.filePath)
+    } else if (esErrorLocation) {
+      line = esErrorLocation.line
+      column = esErrorLocation.column
+      absolute = path.join(this.ctx.currentProject, esErrorLocation.filePath)
     } else {
       // Skip any stack trace lines which come from node:internal code
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
