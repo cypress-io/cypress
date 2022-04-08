@@ -526,7 +526,7 @@ describe('App: Specs', () => {
 
           // 'Create a new spec' dialog presents with options when user indicates they want to create
           // another spec.
-          cy.findByRole('dialog', { name: 'Create a new spec' }).should('be.visible')
+          cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
         })
 
         it('navigates to spec runner when selected', () => {

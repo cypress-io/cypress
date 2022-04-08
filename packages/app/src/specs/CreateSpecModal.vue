@@ -18,14 +18,14 @@
       <component
         :is="generator.entry"
         v-if="generator"
-        :key="generator.id"
+        :key="`${generator.id}-${iteration}`"
         v-model:title="title"
         :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
         :type="props.gql.currentProject?.currentTestingType"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
-        @restart="currentGeneratorId = undefined"
+        @restart="currentGeneratorId = undefined; iteration++"
         @close="close"
       />
       <div
@@ -66,6 +66,11 @@ const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
 
+// When restarting the process re-paint the whole dialog
+// on each restart we need to increment the iteration
+// to have a different key for the generator
+const iteration = ref(0)
+
 gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
@@ -90,7 +95,7 @@ const title = ref(t('createSpec.newSpecModalTitle'))
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
 
-  return null
+  return singleGenerator.value
 })
 
 const helpLink = computed(() => {
@@ -119,10 +124,7 @@ const codeGenGlob = computed(() => {
 
 const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
 
-// if there is only one generator, jump to step 2
-if (filteredGenerators.value.length === 1) {
-  currentGeneratorId.value = filteredGenerators.value[0].id
-}
+const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')
