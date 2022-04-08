@@ -1,7 +1,5 @@
 import { EventEmitter } from 'events'
-import { Editor } from '@packages/ui-components'
-import CommandModel from './../../src/command-log/command-model'
-// import CommandModel from './../../src/commands/command-model'
+import CommandModel from './../../src/commands/command-model'
 
 const { _ } = Cypress
 

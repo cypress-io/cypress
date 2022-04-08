@@ -3,7 +3,7 @@ import $ from 'jquery'
 import clone from 'clone'
 
 import { HIGHLIGHT_ATTR } from '../cy/snapshots'
-import * as $Events from './events'
+import { extend as extendEvents } from './events'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -13,7 +13,7 @@ import $errUtils from './error_utils'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group groupLevel message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -503,15 +503,15 @@ class Log {
     const { consoleProps } = this.attributes
 
     this.attributes.consoleProps = function (...args) {
+      const key = _this.get('event') ? 'Event' : 'Command'
 
       const consoleObj: Record<string, any> = {}
 
-        const group = _this.get('group')
-        if (group) {
-        consoleObj['Group'] = group.label
-      }
+      // const group = _this.get('group')
+      // if (group) {
+      //   consoleObj['Group'] = group.label
+      // }
 
-      const key = _this.get('event') ? 'Event' : 'Command'
       consoleObj[key] = _this.get('name')
 
       // merge in the other properties from consoleProps
