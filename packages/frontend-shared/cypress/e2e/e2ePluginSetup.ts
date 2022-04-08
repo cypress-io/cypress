@@ -2,7 +2,7 @@ import path from 'path'
 import execa from 'execa'
 
 import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
-import { e2eProjectDirs } from './support/e2eProjectDirs'
+import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
@@ -82,7 +82,7 @@ async function makeE2ETasks () {
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
-  const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
+  const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli')
@@ -323,7 +323,7 @@ async function makeE2ETasks () {
         sinon,
         pDefer,
         projectDir (projectName) {
-          if (!e2eProjectDirs.includes(projectName)) {
+          if (!fixtureDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)
           }
 

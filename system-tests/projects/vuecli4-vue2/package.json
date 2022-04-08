@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "vue": "^2.6.11"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "~4.5.17",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "projectFixtureDirectory": "vue-cli"
+}

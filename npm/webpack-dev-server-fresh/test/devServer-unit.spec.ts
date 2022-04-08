@@ -11,8 +11,10 @@ const cypressConfig = {
   indexHtmlFile: path.join(__dirname, 'component-index.html'),
 } as Cypress.PluginConfigOptions
 
-describe('devServer', () => {
-  it('creates a new devServer webpack4, webpackDevServer3', () => {
+describe('devServer', function () {
+  this.timeout(10 * 1000)
+
+  it('creates a new devServer webpack4, webpackDevServer3', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
         sourceRelativeWebpackModules: () => {
@@ -23,7 +25,7 @@ describe('devServer', () => {
         } },
     }) as typeof import('../src/devServer')
 
-    const result = devServer.create({
+    const result = await devServer.create({
       specs: [],
       cypressConfig,
       devServerEvents: new EventEmitter(),
@@ -33,7 +35,7 @@ describe('devServer', () => {
     expect(result.version).to.eq(3)
   })
 
-  it('creates a new devServer webpack4, webpackDevServer4', () => {
+  it('creates a new devServer webpack4, webpackDevServer4', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
         sourceRelativeWebpackModules: () => {
@@ -44,7 +46,7 @@ describe('devServer', () => {
         } },
     }) as typeof import('../src/devServer')
 
-    const result = devServer.create({
+    const result = await devServer.create({
       specs: [],
       cypressConfig,
       devServerEvents: new EventEmitter(),
@@ -54,7 +56,7 @@ describe('devServer', () => {
     expect(result.version).to.eq(4)
   })
 
-  it('creates a new devServer webpack5, webpackDevServer4', () => {
+  it('creates a new devServer webpack5, webpackDevServer4', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
         sourceRelativeWebpackModules: () => {
@@ -65,7 +67,7 @@ describe('devServer', () => {
         } },
     }) as typeof import('../src/devServer')
 
-    const result = devServer.create({
+    const result = await devServer.create({
       specs: [],
       cypressConfig,
       devServerEvents: new EventEmitter(),
