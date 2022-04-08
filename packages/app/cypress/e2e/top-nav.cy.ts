@@ -612,7 +612,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.clock(1609891200000)
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad')
-    cy.startAppServer('e2e', { skipMockingPrompts: true })
+    cy.startAppServer()
   })
 
   it('CI prompt auto-opens 4 days after first project opened', () => {
