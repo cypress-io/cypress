@@ -3,18 +3,39 @@ const debugLib = require('debug')
 const path = require('path')
 const tsnode = require('ts-node')
 const resolve = require('../../util/resolve')
+const semver = require('semver')
 
 const debug = debugLib('cypress:server:ts-node')
 
 const getTsNodeOptions = (tsPath, registeredFile) => {
+  const version = require(tsPath).version || '0.0.0'
+
+  /**
+   * NOTE: This circumvents a limitation of ts-node
+   *
+   * The "preserveValueImports" option was introduced in TypeScript 4.5.0
+   * https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#disabling-import-elision
+   *
+   * If we pass an unknown compiler option to ts-node,
+   * it ignores all options passed.
+   * If we want `module: "commonjs"` to always be used,
+   * we need to only set options that are supported in this version of TypeScript.
+   */
+  const compilerOptions = {
+    module: 'commonjs',
+    ...(semver.satisfies(version, '>=4.5.0')
+      // Only adding this option for TS >= 4.5.0
+      ? { preserveValueImports: false }
+      : {}
+    ),
+  }
+
   /**
    * @type {import('ts-node').RegisterOptions}
    */
   const opts = {
     compiler: process.env.TS_NODE_COMPILER || tsPath, // use the user's installed typescript
-    compilerOptions: {
-      module: 'CommonJS',
-    },
+    compilerOptions,
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
     dir: path.dirname(registeredFile),

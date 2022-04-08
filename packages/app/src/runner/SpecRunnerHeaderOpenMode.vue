@@ -5,18 +5,6 @@
     :style="{ width: `${props.width}px` }"
   >
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
-      <!--
-        TODO: Studio. Out of scope for GA.
-      <Button
-        data-cy="header-studio"
-        :disabled="isDisabled"
-        class="m-16px mr-12px"
-        variant="outline"
-        @click="togglePlayground"
-      >
-        <i-cy-action-record_x16 class="h-32px w-32px" />
-      </Button>
-      -->
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
@@ -89,7 +77,7 @@
         </template>
         <template #default>
           <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
-            <!-- TODO: This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
+            <!-- TODO: UNIFY-1316 - This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
             <p class="mb-16px">
               The
               <strong>viewport</strong> determines the width and height of your application.
@@ -165,41 +153,13 @@ fragment SpecRunnerHeader on CurrentProject {
   id
   currentTestingType
 
-  currentBrowser {
+  activeBrowser {
     id
     displayName
     majorVersion
   }
   config
   ...VerticalBrowserListItems
-}
-`
-
-gql`
-fragment SpecRunnerHeader_Browser on Browser {
-  id
-  name
-  displayName
-}
-`
-
-gql`
-mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
-  launchpadSetBrowser(id: $browserId) {
-    id
-    currentBrowser {
-      id
-      displayName
-      majorVersion
-    }
-    browsers {
-      id
-      isSelected
-    }
-  }
-  launchOpenProject(specPath: $specPath) {
-    id
-  }
 }
 `
 
@@ -235,7 +195,7 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const togglePlayground = () => _togglePlayground(autIframe)
 
 // Have to spread gql props since binding it to v-model causes error when testing
-const selectedBrowser = ref({ ...props.gql.currentBrowser })
+const selectedBrowser = ref({ ...props.gql.activeBrowser })
 
 const activeSpecPath = specStore.activeSpec?.absolute
 

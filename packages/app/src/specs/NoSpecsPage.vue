@@ -18,11 +18,20 @@
           scope="global"
           :keypath="descriptionKeyPath"
         >
-          <button
-            class="text-purple-500 hocus-link-default"
+          <OpenConfigFileInIDE
+            v-if="props.gql.currentProject.configFileAbsolutePath"
+            v-slot="{onClick}"
+            :gql="props.gql.currentProject"
           >
-            specPattern
-          </button>
+            <button
+              class="text-purple-500 hocus-link-default"
+              data-cy="no-specs-specPattern"
+              @click="onClick"
+            >
+              specPattern
+            </button>
+          </OpenConfigFileInIDE>
+          <span v-else>specPattern</span>
         </i18n-t>
       </p>
     </div>
@@ -46,6 +55,7 @@ import DefaultSpecPatternNoContent from './DefaultSpecPatternNoContent.vue'
 import { gql } from '@urql/vue'
 import type { NoSpecsPageFragment } from '../generated/graphql'
 import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
 fragment NoSpecsPage on Query {
@@ -56,6 +66,7 @@ fragment NoSpecsPage on Query {
     currentTestingType
     configFileAbsolutePath
     ...CustomPatternNoSpecContent
+    ...OpenConfigFileInIDE
   }
 }
 `

@@ -7,7 +7,6 @@ const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
 
 const errors = require(`../../lib/errors`)
-const config = require(`../../lib/config`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
@@ -15,7 +14,7 @@ const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const { fs } = require(`../../lib/util/fs`)
 
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
@@ -38,7 +37,7 @@ describe('lib/socket', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       this.cfg = cfg
     })
@@ -177,7 +176,7 @@ describe('lib/socket', () => {
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
             { name: '__cypress.foo', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
             { name: '__cypress.bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
-            { name: '__socket.io', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
+            { name: '__socket', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
           ])
 
           return this.client.emit('automation:request', 'get:cookies', { domain: 'localhost' }, (resp) => {
@@ -208,7 +207,7 @@ describe('lib/socket', () => {
           const cookies = [
             { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expiry: 123 },
             { domain: 'localhost', name: '__cypress.initial', value: true },
-            { domain: 'localhost', name: '__socket.io', value: '123abc' },
+            { domain: 'localhost', name: '__socket', value: '123abc' },
           ]
 
           return this.client.emit('automation:request', 'clear:cookies', cookies, (resp) => {
@@ -361,7 +360,7 @@ describe('lib/socket', () => {
           })
         })
 
-        it('does not return __cypress or __socket.io namespaced cookies', () => {})
+        it('does not return __cypress or __socket namespaced cookies', () => {})
 
         it('throws when onAutomationRequest rejects')
 

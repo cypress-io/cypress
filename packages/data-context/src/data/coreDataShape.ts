@@ -1,4 +1,4 @@
-import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
 import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
@@ -6,6 +6,7 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
+import type { LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
 
@@ -55,8 +56,6 @@ export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
-  refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
   browserStatus: BrowserStatus
   relaunchBrowser: boolean
@@ -72,9 +71,23 @@ export interface WizardDataShape {
   detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
 }
 
-export interface MigrationDataShape{
+export interface MigrationDataShape {
   // TODO: have the model of migration here
-  step: NexusGenEnums['MigrationStepEnum']
+  step: MigrationStep
+  legacyConfigForMigration?: LegacyCypressConfigJson | null
+  filteredSteps: MigrationStep[]
+  flags: {
+    hasCustomIntegrationFolder: boolean
+    hasCustomIntegrationTestFiles: boolean
+
+    hasCustomComponentFolder: boolean
+    hasCustomComponentTestFiles: boolean
+
+    hasCustomSupportFile: boolean
+    hasComponentTesting: boolean
+    hasE2ESpec: boolean
+    hasPluginsFile: boolean
+  }
 }
 
 export interface ElectronShape {
@@ -96,8 +109,8 @@ export interface ForceReconfigureProjectDataShape {
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
-  chosenBrowser: FoundBrowser | null
-  machineBrowsers: Promise<FoundBrowser[]> | FoundBrowser[] | null
+  activeBrowser: FoundBrowser | null
+  machineBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -115,7 +128,7 @@ export interface CoreDataShape {
   currentProject: string | null
   currentTestingType: TestingType | null
   wizard: WizardDataShape
-  migration: MigrationDataShape | null
+  migration: MigrationDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   authState: AuthStateShape
@@ -123,6 +136,7 @@ export interface CoreDataShape {
   warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
+  cancelActiveLogin: (() => void) | null
 }
 
 /**
@@ -142,10 +156,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
       browserStatus: 'closed',
       relaunchBrowser: false,
@@ -171,9 +183,21 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     migration: {
       step: 'renameAuto',
+      legacyConfigForMigration: null,
+      filteredSteps: [...MIGRATION_STEPS],
+      flags: {
+        hasCustomIntegrationFolder: false,
+        hasCustomIntegrationTestFiles: false,
+        hasCustomComponentFolder: false,
+        hasCustomComponentTestFiles: false,
+        hasCustomSupportFile: false,
+        hasComponentTesting: true,
+        hasE2ESpec: true,
+        hasPluginsFile: true,
+      },
     },
     warnings: [],
-    chosenBrowser: null,
+    activeBrowser: null,
     user: null,
     electron: {
       app: null,
@@ -182,5 +206,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     scaffoldedFiles: null,
     packageManager: 'npm',
     forceReconfigureProject: null,
+    cancelActiveLogin: null,
   }
 }

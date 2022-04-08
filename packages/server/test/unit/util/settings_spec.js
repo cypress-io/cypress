@@ -77,23 +77,6 @@ describe.skip('lib/util/settings', () => {
     })
   })
 
-  context('with configFile: false', () => {
-    beforeEach(function () {
-      this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
-
-      this.options = {
-        configFile: false,
-      }
-    })
-
-    it('.read returns empty object', function () {
-      return settings.read(this.projectRoot, { configFile: false })
-      .then((settings) => {
-        expect(settings).to.deep.equal({})
-      })
-    })
-  })
-
   context('with js files', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')

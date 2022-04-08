@@ -101,7 +101,7 @@ describe('<Select />', () => {
   })
 
   describe('#icons', () => {
-    // TODO: Fix this
+    // TODO: Enable with completion of UNIFY-1375
     it.skip('marks the selected item with a check by default', () => {
       mountSelect().then(openSelect)
       .then(selectFirstOption)

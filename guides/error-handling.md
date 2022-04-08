@@ -6,7 +6,34 @@ Clear, consistent, errors are one of the important parts of the Cypress experien
 
 All error related logic for the server should be added to `@packages/errors`. This logic has been separated out from the `@packages/server` to enable strict type checking & use in other packages we have added in the `10.0-release` branch.
 
-Summary of the Errors package:
+### Errors Development Workflow
+
+Adding and editing errors is best done with the help of the Error Comparison tool.
+
+Start off by launching the Error Comparison tool from `packages/errors` via `yarn comparison`. This will launch a mini-webapp at http://localhost:5555.
+
+The Error Comparison app has three pages: Ansi Compare, Ansi Base List, and Markdown.
+
+1. Ansi Compare - Used to compare and accept changes made during development
+2. Ansi Base List - Used to preview errors as they will be rendered to users in the Terminal.
+3. Markdown - Used to preview errors as they will be rendered to users within the App, Launchpad, and Reporter.
+
+#### Editing or Adding New Errors and Updating Snapshots
+
+<img src="./error-handling-accept-snapshot.png" width="1200" />
+
+1. Add (or update) errors in `packages/errors/src/errors.ts`
+2. Add test cases to `visualSnapshotErrors_spec.ts`
+3. Run `yarn test` in the `packages/errors` directory
+4. Run `yarn comparison` in the `packages/errors` directory
+5. Open http://localhost:5555/
+6. Search for the error you're working on by the error key. (e.g. `AUTOMATION_SERVER_DISCONNECTED`)
+7. Click "Looks Good" if it looks good.
+8. To make edits, re-run the `yarn test` command and do a full refresh of the webapp.
+9. Run `yarn test` after updating the snapshot to validate the changes were applied.
+10. Commit the files changed in `__snapshot-html__`
+
+### Technical Overview
 
 - `errors.ts`: A key/value mapping of known errors to functions returning "ErrorTemplates", described below, also includes/re-exports several helper utilities:
   - `get` / `getError`: builds & retrieves the error as a `CypressError`, should be the main way we retrieve errors throughout Cypress. Aliased as `errors.get` for existing use in the server package

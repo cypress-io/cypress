@@ -169,4 +169,59 @@ describe('e2e config', () => {
       snapshot: true,
     })
   })
+
+  it('throws an error if indexHtml is set on the root level', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-indexHtmlFile-config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if indexHtml is set on the e2e level', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-e2e-indexHtmlFile-config.js',
+      testingType: 'e2e',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if testFiles is set on the config file', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-testFiles-config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('setupNodeEvents modify specPattern for current testing type', async function () {
+    await Fixtures.scaffoldProject('e2e')
+
+    return systemTests.exec(this, {
+      project: 'e2e',
+      configFile: 'cypress-setupNodeEvents-modify-config.config.js',
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if componentFolder is set on the config file', async function () {
+    await Fixtures.scaffoldProject('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-componentFolder-config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
 })

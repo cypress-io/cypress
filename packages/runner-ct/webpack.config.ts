@@ -3,7 +3,7 @@ process.env.NO_LIVERELOAD = '1'
 import _ from 'lodash'
 import path from 'path'
 import type webpack from 'webpack'
-import { getCommonConfig, HtmlWebpackPlugin, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import * as cyIcons from '@packages/icons'
 
 const commonConfig = getCommonConfig()
@@ -80,10 +80,6 @@ const config: webpack.Configuration = {
 config.plugins = [
   // @ts-ignore
   ...config.plugins,
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, './static/index.html'),
-    inject: false,
-  }),
   new CopyWebpackPlugin([{
     from: cyIcons.getPathToFavicon('favicon.ico'),
   }]),

@@ -6,20 +6,12 @@
     :next-fn="confirmInstalled"
     class="max-w-640px relative"
     :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
+    :skip-fn="!canNavigateForward ? confirmInstalled : undefined"
   >
     <ManualInstall
       :gql="props.gql"
       :packages-installed="packagesInstalled"
     />
-    <Button
-      v-if="!canNavigateForward && !intervalQueryTrigger.isActive.value"
-      class="right-16px bottom-16px absolute"
-      size="lg"
-      variant="link"
-      @click="intervalQueryTrigger.resume()"
-    >
-      {{ t('setupPage.install.checkForUpdates') }}
-    </Button>
   </WizardLayout>
 </template>
 
@@ -35,8 +27,7 @@ import {
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useMutation, useQuery } from '@urql/vue'
-import { useIntervalFn, useTimeoutFn } from '@vueuse/core'
-import Button from '../../../frontend-shared/src/components/Button.vue'
+import { useIntervalFn } from '@vueuse/core'
 
 gql`
 mutation InstallDependencies_scaffoldFiles {
@@ -63,6 +54,7 @@ fragment Wizard_InstalledPackages_Data on Query {
   wizard {
     installedPackages
   }
+  ...InstallDependencies
 }
 `
 
@@ -73,7 +65,6 @@ query Wizard_InstalledPackages{
 
 const queryInstalled = useQuery({
   query: Wizard_InstalledPackagesDocument,
-  requestPolicy: 'network-only',
 })
 
 const packagesInstalled = ref<string[]>([])
@@ -82,8 +73,9 @@ const toInstall = computed(() => {
   return props.gql.wizard.packagesToInstall?.map((p) => p.package)
 })
 
+// TODO: UNIFY-1350 convert this to a subscription
 const intervalQueryTrigger = useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({})
+  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
 
   packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
     (pkg) => pkg,
@@ -96,10 +88,6 @@ const intervalQueryTrigger = useIntervalFn(async () => {
 }, 1000, {
   immediate: true,
 })
-
-useTimeoutFn(() => {
-  intervalQueryTrigger.pause()
-}, 180000)
 
 const canNavigateForward = ref(false)
 

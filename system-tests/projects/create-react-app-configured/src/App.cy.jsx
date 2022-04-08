@@ -5,4 +5,4 @@ import App from './App'
 it('works', () => {
   mount(<App />)
   cy.contains('Learn React')
-}) 
+})

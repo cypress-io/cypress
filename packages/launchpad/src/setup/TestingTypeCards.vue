@@ -21,8 +21,7 @@ fragment TestingTypeCards on Query {
 
 gql`
 mutation TestingTypeSelection($testingType: TestingTypeEnum!) {
-  setCurrentTestingType(testingType: $testingType) {
-    currentTestingType
+  setAndLoadCurrentTestingType(testingType: $testingType) {
     currentProject {
       id
       currentTestingType

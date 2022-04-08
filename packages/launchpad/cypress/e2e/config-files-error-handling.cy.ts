@@ -21,11 +21,13 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Please remove one of the two and try again')
+    cy.get('body').should('contain.text', 'Could not load a Cypress configuration file because there are multiple matches')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
@@ -61,6 +63,8 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
+    cy.findByRole('button', { name: 'Try again' }).click()
+
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
@@ -79,6 +83,8 @@ describe('Config files error handling', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('h1').should('contain', 'Choose a Browser')
   })
@@ -148,5 +154,36 @@ describe('Launchpad: Error System Tests', () => {
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
+  })
+})
+
+describe('setupNodeEvents', () => {
+  it('throws an error when in setupNodeEvents updating a config value that was removed in 10.X', () => {
+    cy.scaffoldProject('config-update-non-migrated-value')
+    cy.openProject('config-update-non-migrated-value')
+    cy.visitLaunchpad()
+    cy.findByText('E2E Testing').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+  })
+
+  it('throws an error when in setupNodeEvents updating a config value on a clone of config that was removed in 10.X', () => {
+    cy.scaffoldProject('config-update-non-migrated-value-clone')
+    cy.openProject('config-update-non-migrated-value-clone')
+    cy.visitLaunchpad()
+    cy.findByText('E2E Testing').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
+  })
+
+  it('throws an error when in setupNodeEvents updating an e2e config value that was removed in 10.X', () => {
+    cy.scaffoldProject('config-update-non-migrated-value-e2e')
+    cy.openProject('config-update-non-migrated-value-e2e')
+    cy.visitLaunchpad()
+    cy.findByText('E2E Testing').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
   })
 })

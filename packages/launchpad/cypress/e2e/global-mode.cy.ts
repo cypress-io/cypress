@@ -42,7 +42,7 @@ describe('Launchpad: Global Mode', () => {
       cy.scaffoldProject('todos')
       .then((projectPath) => {
         cy.withCtx(async (ctx, o) => {
-          ctx.actions.electron.showOpenDialog = o.sinon.stub().resolves(o.projectPath)
+          o.sinon.stub(ctx.actions.electron, 'showOpenDialog').resolves(o.projectPath)
         }, { projectPath })
       })
 
@@ -168,7 +168,7 @@ describe('Launchpad: Global Mode', () => {
         cy.get('[aria-label="Project Actions"]').click()
 
         cy.get('[data-cy="Open In IDE"]').click()
-        cy.contains('Select Preferred Editor')
+        cy.contains('External Editor Preferences')
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {

@@ -61,11 +61,6 @@
     "field": "clientCertificates"
   },
   {
-    "value": "src",
-    "from": "config",
-    "field": "componentFolder"
-  },
-  {
     "value": 4000,
     "from": "default",
     "field": "defaultCommandTimeout"
@@ -134,11 +129,6 @@
     "field": "includeShadowDom"
   },
   {
-    "value": "cypress/e2e/integration",
-    "from": "config",
-    "field": "integrationFolder"
-  },
-  {
     "value": true,
     "from": "default",
     "field": "modifyObstructiveCode"
@@ -157,11 +147,6 @@
     "value": 60000,
     "from": "default",
     "field": "pageLoadTimeout"
-  },
-  {
-    "value": "cypress/e2e/plugins/index.ts",
-    "from": "config",
-    "field": "pluginsFile"
   },
   {
     "value": null,
@@ -284,19 +269,14 @@
     "field": "watchForFileChanges"
   },
   {
-    "value": {
-      "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
-      "supportFile": "cypress/e2e/support/e2eSupport.ts",
-      "pluginsFile": "cypress/e2e/plugins/index.ts"
-    },
+    "field": "specPattern",
     "from": "config",
-    "field": "e2e"
+    "value": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
   },
   {
     "value": {
       "specPattern": "**/*.cy.{js,jsx,ts,tsx}",
       "supportFile": "cypress/component/support/index.ts",
-      "pluginsFile": "cypress/component/plugins/index.js",
       "devServerConfig": {
         "viteConfig": {
           "optimizeDeps": {

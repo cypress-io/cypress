@@ -21,7 +21,6 @@ describe('<CreateSpecModal />', () => {
               id: 'super-unique-id',
               __typename: 'CodeGenGlobs',
               component: '**.vue',
-              story: '**/*.stories.*',
             },
             storybook: null,
             currentTestingType: 'component',
@@ -36,6 +35,8 @@ describe('<CreateSpecModal />', () => {
               },
             },
             specs: [],
+            fileExtensionToUse: 'js',
+            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
           },
         }}
         show={show.value}
@@ -89,7 +90,6 @@ describe('playground', () => {
               id: 'super-unique-id',
               __typename: 'CodeGenGlobs',
               component: '**.vue',
-              story: '**/*.stories.*',
             },
             storybook: null,
             currentTestingType: 'component',
@@ -104,6 +104,8 @@ describe('playground', () => {
               },
             },
             specs: [],
+            fileExtensionToUse: 'js',
+            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
           },
         }}
         show={show.value}

@@ -1,11 +1,34 @@
+import type { SinonStub } from 'sinon'
+
 describe('Sidebar Navigation', () => {
+  context('as e2e testing type with localSettings', () => {
+    it('use saved state for nav size', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
+      })
+
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.startAppServer()
+      cy.visitApp()
+
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        expect($initialWidth).eq(100)
+      })
+    })
+  })
+
   context('as e2e testing type', () => {
     beforeEach(() => {
       cy.scaffoldProject('todos')
       cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
     })
 
     it('expands the left nav bar by default', () => {
@@ -123,7 +146,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('[data-cy="sidebar-header"]').within(() => {
@@ -152,21 +175,19 @@ describe('Sidebar Navigation', () => {
         cy.contains('Running')
       })
 
-      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
-      cy.withCtx((ctx) => {
-        ctx.actions.project.reconfigureProject = sinon.stub()
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
       })
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
-        expect(interception.request.body.variables.testingType).eq('component')
-      })
-
       cy.withCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('component')
+        expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
 
       cy.get('[aria-label="Close"]').click()
@@ -226,6 +247,58 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
+
+    it('resize nav sends the correct value on the mutation', () => {
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
+      })
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { clientX: 400 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+      })
+
+      cy.withCtx((ctx, o) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
+      })
+    })
+
+    // TODO: Remove skip when we fix cy.reload() in Cypress in Cypress - UNIFY-1346
+    it.skip('resize nav and persist the state after refresh', () => {
+      cy.contains('fixture.js').click()
+
+      cy.get('.toggle-specs-text').click()
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
+      })
+
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { clientX: 400 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+        cy.withCtx((ctx, o) => {
+          expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
+        })
+
+        cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($updatedWidth) => {
+          expect($updatedWidth).not.to.eq($initialWidth)
+
+          cy.reload()
+          cy.contains('fixture.js').click()
+
+          cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should(($refreshedWidth) => {
+            expect($refreshedWidth).eq($updatedWidth)
+          })
+        })
+      })
+    })
   })
 
   context('as component testing type', () => {
@@ -233,7 +306,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing')
       cy.startAppServer('component')
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.findByRole('dialog', {
@@ -253,17 +326,19 @@ describe('Sidebar Navigation', () => {
         name: 'Choose a testing type',
       }).should('be.visible')
 
-      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
-      cy.withCtx((ctx) => {
-        ctx.actions.project.reconfigureProject = sinon.stub()
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
       })
 
       cy.get('[data-cy-testingtype="e2e"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
-        expect(interception.request.body.variables.testingType).eq('e2e')
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
+        expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
     })
 

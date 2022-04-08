@@ -1,3 +1,4 @@
+import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
@@ -104,16 +105,22 @@ describe('Launchpad: Open Mode', () => {
 
       cy.get('[data-cy="choose-editor-modal"]').as('modal')
 
+      cy.get('@modal').contains('Cancel').click()
+      cy.get('@modal').should('not.exist')
+
+      cy.findByTestId('project-card')
+      cy.get('[aria-label="Project Actions"]').click()
+      cy.get('button').contains('Open In IDE').click()
+
       cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
       cy.get('@modal').contains('Choose your editor...').click()
       cy.get('@modal').contains('Well known editor').click()
-      cy.get('@modal').contains('Done').click()
+      cy.get('@modal').contains('Save Changes').click()
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
     })
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.actions.electron.showItemInFolder = o.sinon.stub()
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
 
@@ -128,8 +135,17 @@ describe('Launchpad: Open Mode', () => {
       cy.wait('@OpenInFinder')
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.electron.showItemInFolder).to.have.been.calledOnceWith('/some/project')
+        expect((ctx.actions.electron.showItemInFolder as SinonStub).lastCall.lastArg).to.eql('/some/project')
       })
     })
+  })
+
+  it('opens an e2e project without a supportFile', () => {
+    cy.scaffoldProject('no-support-file')
+    cy.openProject('no-support-file', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.contains('Error Loading Config')
+    cy.contains('Your project does not contain a default supportFile.')
+    cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })
 })

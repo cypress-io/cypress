@@ -9,7 +9,6 @@ const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const assert = require('assert')
-const { getCtx } = require('@packages/data-context')
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -664,7 +663,8 @@ const createAndOpenProject = async (options) => {
     project: _project,
     config: _config,
     projectId: _projectId,
-    configFile: getCtx().lifecycleManager.configFile,
+    // Lazy require'd here, so as to not execute until we're in the electron process
+    configFile: require('@packages/data-context').getCtx().lifecycleManager.configFile,
   }
 }
 
@@ -1554,7 +1554,7 @@ module.exports = {
         // but be defensive about it
         const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
 
-        let specPattern = specPatternFromCli || config[options.testingType].specPattern
+        let specPattern = specPatternFromCli || config.specPattern
 
         specPattern = relativeSpecPattern(projectRoot, specPattern)
 

@@ -4,6 +4,7 @@ import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
 import type { CypressWebpackDevServerConfig } from '.'
+import { normalizeError } from './plugin'
 
 export interface StartDevServer extends UserWebpackDevServerOptions, CypressWebpackDevServerConfig {
   /* this is the Cypress dev server configuration object */
@@ -16,12 +17,12 @@ export interface WebpackConfigurationWithDevServer extends webpack.Configuration
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, indexHtmlFile, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
 
-  const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
+  const { projectRoot, devServerPublicPathRoute, isTextTerminal, indexHtmlFile } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
@@ -40,9 +41,13 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtmlFile, 
 
   // When compiling in run mode
   // Stop the clock early, no need to run all the tests on a failed build
+
   if (isTextTerminal) {
     compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
       if (stats.hasErrors()) {
+        const errors = stats.compilation.errors
+
+        options.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
         exitProcess(1)
       }
     })

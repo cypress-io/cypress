@@ -48,6 +48,12 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 
       options.global.plugins.push(createI18n())
 
+      options.global.plugins.push({
+        install (app) {
+          app.use(urql, testUrqlClient(context, undefined, mutationResolvers))
+        },
+      })
+
       const context = makeClientTestContext()
 
       options.global.plugins.push({
@@ -144,7 +150,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     const definition = document.definitions[0]
 
     if (definition.kind === 'OperationDefinition' && definition.name) {
-      mutationResolvers[definition.name.value] = resolver
+      mutationResolvers.set(definition.name.value, resolver)
     } else {
       throw new Error('only use mutation documents in stubMutationResolver first argument')
     }

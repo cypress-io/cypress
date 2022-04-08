@@ -110,7 +110,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state, config, obj) {
+const defaults = function (state: Cypress.State, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
 
   // dont set any defaults if this
@@ -127,7 +127,7 @@ const defaults = function (state, config, obj) {
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
     // is why we normalize its type value
-    if (!parentOrChildRe.test(obj.type)) {
+    if (typeof obj.type === 'string' && !parentOrChildRe.test(obj.type)) {
       // does this command have a previously linked command
       // by chainer id
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
@@ -202,28 +202,26 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
-  // console.log('cmd', obj.name, 'in logGroup', logGroup)
+  const logGroupIds = state('logGroupIds') || []
 
-  if (logGroup) {
-    // obj.group = logGroup.name
-    // console.log(logGroup)
-    obj.group = logGroup
+  if (logGroupIds.length) {
+    obj.group = _.last(logGroupIds)
   }
 
   if (obj.groupEnd) {
-    state('logGroup', _.slice(state('logGroup'), 0, -1))
+    state('logGroupIds', _.slice(logGroupIds, 0, -1))
   }
 
   if (obj.groupStart) {
-    // console.log(obj.name)
-    // console.log(obj)
-    const group = { id: obj.id, label: `${obj.name} ${obj.message}` }
+//     // console.log(obj.name)
+//     // console.log(obj)
+//     const group = { id: obj.id, label: `${obj.name} ${obj.message}` }
 
-    obj.group = group
+//     obj.group = group
 
-    // state('logGroup', (state('logGroup') || []).concat(obj.id))
-    state('logGroup', (state('logGroup') || []).concat(group))
+//     // state('logGroup', (state('logGroup') || []).concat(obj.id))
+//     state('logGroup', (state('logGroup') || []).concat(group))
+    state('logGroupIds', (logGroupIds).concat(obj.id))
   }
 
   return obj
@@ -231,7 +229,7 @@ const defaults = function (state, config, obj) {
 
 class Log {
   cy: any
-  state: any
+  state: Cypress.State
   config: any
   fireChangeEvent: ((log) => (void | undefined))
   obj: any
@@ -242,7 +240,8 @@ class Log {
     this.cy = cy
     this.state = state
     this.config = config
-    this.fireChangeEvent = fireChangeEvent
+    // only fire the log:state:changed event as fast as every 4ms
+    this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
 
     extendEvents(this)
@@ -382,6 +381,13 @@ class Log {
   }
 
   error (err) {
+    const logGroupIds = this.state('logGroupIds') || []
+
+    // current log was responsible to creating the current log group so end the current group
+    if (_.last(logGroupIds) === this.attributes.id) {
+      this.endGroup()
+    }
+
     this.set({
       ended: true,
       error: err,
@@ -392,9 +398,13 @@ class Log {
   }
 
   end () {
-    // dont set back to passed
-    // if we've already ended
+    // dont set back to passed if we've already ended
     if (this.get('ended')) {
+      // we do need to trigger the change event since
+      // xhr onLoad and proxy-logging updateRequestWithResponse can sometimes
+      // happen in a different order and the log data in each is different
+      this.fireChangeEvent(this)
+
       return
     }
 
@@ -404,6 +414,10 @@ class Log {
     })
 
     return this
+  }
+
+  endGroup () {
+    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
   }
 
   getError (err) {
@@ -568,16 +582,8 @@ class LogManager {
     this.logs[id] = true
   }
 
-  // only fire the log:state:changed event
-  // as fast as every 4ms
   fireChangeEvent (log) {
-    const triggerStateChanged = () => {
-      return this.trigger(log, 'command:log:changed')
-    }
-
-    const debounceFn = _.debounce(triggerStateChanged, 4)
-
-    return debounceFn()
+    return this.trigger(log, 'command:log:changed')
   }
 
   createLogFn (cy, state, config) {

@@ -7,14 +7,14 @@ const http = require('http')
 const Promise = require('bluebird')
 const electron = require('electron')
 const commitInfo = require('@cypress/commit-info')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
-const v = require('@packages/config/lib/validation')
+const { validation: v } = require('@packages/config')
 
 const argsUtil = require(`../../lib/util/args`)
 const { fs } = require(`../../lib/util/fs`)
@@ -27,10 +27,8 @@ const runMode = require(`../../lib/modes/run`)
 const api = require(`../../lib/api`)
 const cwd = require(`../../lib/cwd`)
 const user = require(`../../lib/user`)
-const config = require(`../../lib/config`)
 const cache = require(`../../lib/cache`)
 const errors = require(`../../lib/errors`)
-const plugins = require(`../../lib/plugins`)
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerE2E } = require(`../../lib/server-e2e`)
@@ -127,7 +125,6 @@ describe('lib/cypress', () => {
     // force cypress to call directly into main without
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
-    sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
@@ -411,7 +408,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
+    it('runs project by limiting spec files via config.e2e.specPattern string glob pattern', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
@@ -419,37 +416,13 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
+    it('runs project by limiting spec files via config.e2e.specPattern as a JSON array of string glob patterns', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
         expect(browsers.connectToNewSpec).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
-      })
-    })
-
-    // NOTE: We no longer do this in the new flow
-    it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
-      .then((cfg) => {
-        return fs.statAsync(cfg.integrationFolder)
-        .then(() => {
-          throw new Error('integrationFolder should not exist!')
-        }).catch(() => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(cfg.integrationFolder)
-        }).then(() => {
-          return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
-          )
-        })
       })
     })
 
@@ -481,7 +454,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
-      return config.get(this.pristineWithConfigPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         return fs.rmdir(supportFolder, { recursive: true })
       }).then(() => {
@@ -504,7 +477,7 @@ describe('lib/cypress', () => {
     it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      config.get(this.idsPath)
+      ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -564,7 +537,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      return config.get(this.idsPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -921,8 +894,6 @@ describe('lib/cypress', () => {
       })
 
       it('can override values in plugins', function () {
-        plugins.init.restore()
-
         return cypress.start([
           `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=false',
           '--env=foo=foo,bar=bar',
@@ -964,7 +935,6 @@ describe('lib/cypress', () => {
 
     describe('plugins', () => {
       beforeEach(() => {
-        plugins.init.restore()
         browsers.open.restore()
 
         const ee = new EE()
@@ -1170,27 +1140,6 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      // NOTE: --config-file=false is not supported
-      it.skip('false does not require cypress.config.js to run', function () {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
-        .then(() => {
-          throw new Error('cypress.config.js should not exist')
-        }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([
-            `--run-project=${this.pristinePath}`,
-            '--no-run-mode',
-            '--config-file',
-            'false',
-          ]).then(() => {
-            // uses default specPattern which is cypress/integration/**/*
-            // exits with 1 since there are not specs for this pristine project.
-            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
-            this.expectExitWithErr('NO_SPECS_FOUND', 'Can\'t run because no spec files were found')
-            this.expectExitWith(1)
-          })
-        })
-      })
-
       // TODO: fix
       it.skip(`with a custom config file fails when it doesn't exist`, function () {
         this.filename = 'abcdefgh.test.js'
@@ -1700,7 +1649,7 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, ...rest } = json
 
         return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, excludeSpecPattern } })
       }).then(() => {

@@ -7,7 +7,7 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retry="reinitializeCypress"
+        :retry="resetErrorsAndLoadConfig"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
@@ -30,6 +30,7 @@
           <Spinner />
         </template>
         <template v-else-if="!currentProject?.currentTestingType">
+          <WarningList :gql="query.data.value" />
           <LaunchpadHeader
             :title="t('welcomePage.title')"
             description=""
@@ -73,12 +74,13 @@
 
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument } from './generated/graphql'
+import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
+import WarningList from './warning/WarningList.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -102,7 +104,6 @@ fragment MainLaunchpadQueryData on Query {
   baseError {
     ...BaseError
   }
-  currentTestingType
   currentProject {
     id
     isCTConfigured
@@ -115,6 +116,7 @@ fragment MainLaunchpadQueryData on Query {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
+  ...WarningList
 }
 `
 
@@ -125,16 +127,16 @@ query MainLaunchpadQuery {
 `
 
 gql`
-mutation Main_ReinitializeCypress {
-  reinitializeCypress {
+mutation Main_ResetErrorsAndLoadConfig {
+  resetErrorsAndLoadConfig {
     ...MainLaunchpadQueryData
   }
 }
 `
 
-const mutation = useMutation(Main_ReinitializeCypressDocument)
+const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
 
-const reinitializeCypress = () => {
+const resetErrorsAndLoadConfig = () => {
   if (!mutation.fetching.value) {
     mutation.executeMutation({})
   }
