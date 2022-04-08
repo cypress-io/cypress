@@ -78,8 +78,11 @@ export function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  const userWebpackConfig = modifyWebpackConfigForCypress(config.devServerConfig.webpackConfig as Partial<Configuration>)
-  const frameworkWebpackConfig = modifyWebpackConfigForCypress(config.frameworkConfig as Partial<Configuration>)
+  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
+  const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
+    merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
+  )
 
   const {
     cypressConfig: {
@@ -91,7 +94,7 @@ export function makeWebpackConfig (
     devServerEvents,
   } = config.devServerConfig
 
-  debug(`User passed in webpack config with values %o`, userWebpackConfig)
+  debug(`User passed in user and framework webpack config with values %o`, userAndFrameworkWebpackConfig)
   debug(`New webpack entries %o`, files)
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)
@@ -119,8 +122,7 @@ export function makeWebpackConfig (
   }
 
   const mergedConfig = merge(
-    userWebpackConfig ?? {},
-    frameworkWebpackConfig ?? {},
+    userAndFrameworkWebpackConfig,
     makeDefaultWebpackConfig(config),
     dynamicWebpackConfig,
   )
