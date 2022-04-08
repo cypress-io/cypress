@@ -8,6 +8,7 @@ import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
+import _ from 'lodash'
 
 const debug = Debug('cypress:data-context:GitDataSource')
 
@@ -31,8 +32,7 @@ dayjs.extend(relativeTime)
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
 const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
-const GIT_BRANCH_COMMAND = '--show-toplevel'
-const GIT_ROOT_DIR_COMMAND = '--abbrev-ref HEAD'
+const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 
 export interface GitInfo {
   author: string | null
@@ -41,7 +41,7 @@ export interface GitInfo {
   statusType: typeof gitStatusType[number]
 }
 
-export interface GitDataSourceOptions {
+export interface GitDataSourceConfig {
   projectRoot: string
   onBranchChange(branch: string | null): void
   /**
@@ -59,7 +59,8 @@ export interface GitDataSourceOptions {
  * of the Queries on any git data loading lazily
  */
 export class GitDataSource {
-  #git = simpleGit({ baseDir: this.options.projectRoot })
+  #git = simpleGit({ baseDir: this.config.projectRoot })
+  #gitError = false
   #destroyed = false
   #gitBaseDir?: string
   #gitBaseDirWatcher?: chokidar.FSWatcher
@@ -67,9 +68,9 @@ export class GitDataSource {
   #currentBranch: string | null = null
   #currentUser?: string
 
-  constructor (private options: GitDataSourceOptions) {
-    this.#loadCurrentGitUser().catch(options.onError)
-    this.#loadAndWatchCurrentBranch().catch(options.onError)
+  constructor (private config: GitDataSourceConfig) {
+    this.#loadCurrentGitUser().catch(config.onError)
+    this.#loadAndWatchCurrentBranch().catch(config.onError)
   }
 
   setSpecs (specs: string[]) {
@@ -77,7 +78,12 @@ export class GitDataSource {
       return
     }
 
-    this.#loadBulkGitInfo(specs).catch(this.options.onError)
+    // If we don't have a branch, it's likely b/c they
+    if (this.#gitError) {
+      this.#loadAndWatchCurrentBranch().catch(this.config.onError)
+    }
+
+    this.#loadBulkGitInfo(specs).catch(this.config.onError)
   }
 
   get gitBaseDir () {
@@ -102,6 +108,10 @@ export class GitDataSource {
   }
 
   async #loadAndWatchCurrentBranch () {
+    if (this.#destroyed) {
+      return
+    }
+
     try {
       const [gitBaseDir] = await Promise.all([
         this.#git.revparse(GIT_ROOT_DIR_COMMAND),
@@ -122,21 +132,18 @@ export class GitDataSource {
       // Fires when we switch branches
       this.#gitBaseDirWatcher.on('change', () => {
         this.#loadCurrentBranch().then(() => {
-          this.options.onBranchChange(this.#currentBranch)
+          this.config.onBranchChange(this.#currentBranch)
         })
       })
     } catch (e) {
+      this.#gitError = true
       debug(`Error loading & watching current branch %s`, e.message)
     }
   }
 
   async #loadCurrentBranch () {
-    try {
-      this.#currentBranch = await this.#git.revparse(GIT_BRANCH_COMMAND)
-    } catch (e) {
-      this.#currentBranch = null
-      debug(`Error current branch %s`, e.message)
-    }
+    this.#currentBranch = (await this.#git.branch()).current
+    this.config.onBranchChange(this.#currentBranch)
   }
 
   async #loadCurrentGitUser () {
@@ -161,22 +168,22 @@ export class GitDataSource {
     try {
       const [stdout, statusResult] = await Promise.all([
         os.platform() === 'win32'
-          ? this.getInfoWindows(absolutePaths)
-          : this.getInfoPosix(absolutePaths),
+          ? this.#getInfoWindows(absolutePaths)
+          : this.#getInfoPosix(absolutePaths),
         this.#git.status(),
       ])
 
       debug('stdout %s', stdout)
 
-      for (let i = 0; i < absolutePaths.length; i++) {
-        const file = absolutePaths[i]
+      const changed: string[] = []
 
-        if (!file) {
-          continue
-        }
+      for (const [i, file] of absolutePaths.entries()) {
+        const current = this.#gitMeta.get(file)
 
         // first check unstaged/untracked files
         const isUnstaged = statusResult.files.find((x) => file.endsWith(x.path))
+
+        let toSet: GitInfo | null = null
 
         // These are the status codes used by SimpleGit.
         // M -> modified
@@ -187,28 +194,37 @@ export class GitDataSource {
           const stat = fs.statSync(file)
           const ctime = dayjs(stat.ctime)
 
-          this.#gitMeta.set(file, {
+          toSet = {
             lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
             lastModifiedHumanReadable: ctime.fromNow(),
             author: this.#currentUser ?? '',
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
-          })
+          }
         } else {
           const data = stdout[i]
           const info = data?.match(GIT_LOG_REGEXP)
 
           if (file && info && info[1] && info[2] && info[3]) {
-            this.#gitMeta.set(file, {
+            toSet = {
               lastModifiedTimestamp: info[1],
               lastModifiedHumanReadable: info[2],
               author: info[3],
               statusType: 'unmodified',
-            })
+            }
           } else {
             debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
-            this.#gitMeta.set(file, null)
+            toSet = null
           }
         }
+
+        this.#gitMeta.set(file, toSet)
+        if (!_.isEqual(toSet, current)) {
+          changed.push(file)
+        }
+      }
+
+      if (!this.#destroyed) {
+        this.config.onGitInfoChange(changed)
       }
     } catch (e) {
       // does not have git installed,
@@ -218,7 +234,7 @@ export class GitDataSource {
     }
   }
 
-  private async getInfoPosix (absolutePaths: readonly string[]) {
+  async #getInfoPosix (absolutePaths: readonly string[]) {
     debug('getting git info for %o:', absolutePaths)
     const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
 
@@ -244,7 +260,7 @@ export class GitDataSource {
     return stdout
   }
 
-  private async getInfoWindows (absolutePaths: readonly string[]) {
+  async #getInfoWindows (absolutePaths: readonly string[]) {
     const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
     const result = await execa(cmd, { shell: true })

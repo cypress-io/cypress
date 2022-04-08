@@ -256,6 +256,7 @@ export class ProjectDataSource {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       this.ctx.actions.project.setSpecs(specs)
+      this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
     })
 
     this._specWatcher = chokidar.watch(specPattern, {
