@@ -289,7 +289,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
-        if (!options.skipMockingPrompts) {
+        if (!o.skipMockingPrompts) {
           // avoid unwanted prompt
           o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
             firstOpened: 1609459200000,
@@ -299,7 +299,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         }
 
         return ctx.appServerPort
-      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then((serverPort) => {
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined, ...options }).then((serverPort) => {
         log.set({ message: `port: ${serverPort}` })
         Cypress.env('e2e_serverPort', serverPort)
       })
