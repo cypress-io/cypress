@@ -264,10 +264,10 @@ describe('errors', () => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://localhost:3500\`\n`)
-      expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
-      expect(err.message).to.include(`A command that triggers cross origin navigation must be immediately followed by a \`cy.origin()\` command:`)
+      expect(err.message).to.include(`A cross-origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
+      expect(err.message).to.include(`A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:`)
       expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
-      expect(err.message).to.include(`If the cross origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer`)
+      expect(err.message).to.include(`If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -306,7 +306,7 @@ describe('errors', () => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://idp.com:3500\`\n`)
-      expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
+      expect(err.message).to.include(`A cross-origin request for \`http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=http%3A%2F%2Flocalhost%3A3500%2Ffixtures%2Fauth%2Findex.html\` was detected.`)
       expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -353,7 +353,7 @@ describe('errors', () => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://localhost:3500\`\n`)
-      expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
+      expect(err.message).to.include(`A cross-origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
       expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -380,7 +380,7 @@ describe('errors', () => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
       expect(err.message).to.include(`\n- \`http://idp.com:3500\`\n`)
-      expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
+      expect(err.message).to.include(`A cross-origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
       expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -453,7 +453,7 @@ describe('errors', () => {
       cy.on('fail', (err) => {
         expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
         expect(err.message).to.include(`\n- \`http://localhost:3500\`\n`)
-        expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
+        expect(err.message).to.include(`A cross-origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
         expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
 
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
@@ -502,7 +502,7 @@ describe('errors', () => {
       cy.on('fail', (err) => {
         expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load on origin(s):`)
         expect(err.message).to.include(`\n- \`http://localhost:3500\`\n`)
-        expect(err.message).to.include(`A cross origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
+        expect(err.message).to.include(`A cross-origin request for \`http://www.foobar.com:3500/fixtures/auth/index.html\` was detected.`)
         expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
 
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)

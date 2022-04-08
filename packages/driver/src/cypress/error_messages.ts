@@ -1000,7 +1000,7 @@ export default {
 
           A cross-origin request for \`${crossOriginUrl.href}\` was detected.
 
-          A command that triggers cross origin navigation must be immediately followed by a ${cmd('origin')} command:
+          A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
         
           \`cy.origin('${crossOriginUrl.originPolicy}', () => {\`
           \`  <commands targeting ${crossOriginUrl.origin} go here>\`
