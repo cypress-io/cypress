@@ -223,6 +223,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
+    name: 'numCommandsToShow',
+    defaultValue: null,
+    validation: validate.isNumber,
+    canUpdateDuringTestTime: true,
+  }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,

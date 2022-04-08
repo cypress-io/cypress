@@ -18,6 +18,7 @@ const createProps = ({ state } = {}) => ({
     browsers: [],
     integrationFolder: '',
     numTestsKeptInMemory: 1,
+    numCommandsToShow: null,
     projectName: '',
     viewportHeight: 800,
     viewportWidth: 500,

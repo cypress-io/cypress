@@ -55,8 +55,11 @@ export interface HookProps {
   showNumber: boolean
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
+const Hook = observer(({ model, showNumber }: HookProps) => {
+  const numCommandsToShow = parseInt(Cypress.config('numCommandsToShow'), 10)
+  const parsedNumCommandsToShow = isNaN(numCommandsToShow) ? undefined : numCommandsToShow;
+  const commandsToShow = parsedNumCommandsToShow ? model.commands.slice(numCommandsToShow * -1) : model.commands;
+  return <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
@@ -64,12 +67,12 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       isOpen={true}
     >
       <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+        {_.map(commandsToShow, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
         {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
   </li>
-))
+})
 
 export interface HooksModel {
   hooks: HookModel[]
