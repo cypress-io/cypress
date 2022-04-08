@@ -60,7 +60,7 @@ describe('navigation events', () => {
           cy.on('navigation:changed', onNavChanged)
         }
 
-        cy.get('a[data-cy="multi-origin-page"]').click()
+        cy.get('a[data-cy="cross-origin-page"]').click()
         .window().then((win) => {
           return new Promise<void>((resolve) => {
             onLoad(resolve)
