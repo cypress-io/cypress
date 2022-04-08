@@ -898,7 +898,7 @@ export default {
       return stripIndent`\
         The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autOrigin}\`.
 
-        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpected.`
+        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`
     },
   },
 
@@ -998,9 +998,9 @@ export default {
 
           - ${originPolicies.map((originPolicy) => `\`${originPolicy}\``).join('\n       -')}
 
-          A cross origin request for \`${crossOriginUrl.href}\` was detected.
+          A cross-origin request for \`${crossOriginUrl.href}\` was detected.
 
-          A command that triggers cross origin navigation must be immediately followed by a ${cmd('origin')} command:
+          A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
 
           \`\`\`
           cy.origin('${crossOriginUrl.originPolicy}', () => {
@@ -1008,7 +1008,7 @@ export default {
           })
           \`\`\`
 
-          If the cross origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
+          If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
 
           Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
