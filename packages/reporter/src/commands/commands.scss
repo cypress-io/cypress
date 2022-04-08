@@ -12,7 +12,11 @@
   }
 
   .command {
+<<<<<<< HEAD
     background-color: $reporter-section-background;
+=======
+    background-color: #eef1f4;
+>>>>>>> origin/develop
     cursor: default;
     min-height: 20px;
   }
@@ -44,6 +48,7 @@
     }
   }
 
+<<<<<<< HEAD
   // Child Styles
   .command-type-child {
     .command-method {
@@ -53,6 +58,26 @@
         margin-right: 2px;
         padding-left: 5px;
       }
+=======
+  .command-type-parent > span > .command-wrapper {
+    border-top: 1px solid #e3e3e3;
+
+    &:hover {
+      border-top: 1px solid #eef1f4;
+    }
+  }
+
+  .command-type-parent:first-child > span > .command-wrapper {
+    border-top: 0;
+  }
+
+  .command-type-child > span > div > div > .command-method {
+    &:before {
+      float: left;
+      content: "-";
+      margin-right: 2px;
+      padding-left: 5px;
+>>>>>>> origin/develop
     }
   }
 
@@ -455,6 +480,53 @@
     font-style: normal;
   }
 
+<<<<<<< HEAD
+=======
+  .command-has-num-elements .num-elements {
+    display: none;
+  }
+
+  .command-has-num-elements.no-elements .num-elements,
+  .command-has-num-elements.multiple-elements .num-elements {
+    display: inline;
+  }
+
+  .command-has-children > span > .command-wrapper:hover {
+    .command-expander {
+      color: #999;
+    }
+  }
+
+  .command-has-children.command-has-console-props
+    > span
+    > .command-wrapper:hover {
+    .command-parent-print-btn {
+      opacity: 1;
+      pointer-events: unset;
+
+      &:hover {
+        box-shadow: 0 0 3px #33333370;
+        background-color: #333333;
+      }
+    }
+  }
+
+  .command-has-children.command-has-console-props > span > .command-wrapper {
+    position: relative;
+    .command-parent-print-btn {
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      right: 0;
+      pointer-events: none;
+      transition: all 50ms;
+      background-color: #333333a0;
+      padding: 2px 4px;
+      color: white;
+    }
+  }
+
+>>>>>>> origin/develop
   .command-pin {
     display: none;
     flex-shrink: 0;

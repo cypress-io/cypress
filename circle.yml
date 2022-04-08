@@ -29,7 +29,11 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
+<<<<<<< HEAD
         - marktnoonan/merg-develop-2022-4-5
+=======
+        - unify-1449-beta-slug-length
+>>>>>>> origin/develop
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,8 +42,12 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+<<<<<<< HEAD
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ marktnoonan/merg-develop-2022-4-5, << pipeline.git.branch >> ]
+=======
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
+>>>>>>> origin/develop
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,8 +56,12 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+<<<<<<< HEAD
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ marktnoonan/merg-develop-2022-4-5, << pipeline.git.branch >> ]
+=======
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
+>>>>>>> origin/develop
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1734,7 +1746,11 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
+<<<<<<< HEAD
             if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "marktnoonan/merg-develop-2022-4-5" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+=======
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-beta-slug-length" ]]; then
+>>>>>>> origin/develop
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

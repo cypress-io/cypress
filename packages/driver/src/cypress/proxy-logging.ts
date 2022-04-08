@@ -392,11 +392,15 @@ export default class ProxyLogging {
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
+<<<<<<< HEAD
     // TODO: Figure out what is causing the race condition here
     //       Follow up on latest log regression fix to see if this is resolved.
     if (this.Cypress.log) {
       proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
     }
+=======
+    proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
+>>>>>>> origin/develop
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
 

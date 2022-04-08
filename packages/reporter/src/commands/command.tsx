@@ -27,6 +27,13 @@ const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const invisibleMessage = (model: CommandModel) => {
+<<<<<<< HEAD
+=======
+  if (model.visible) {
+    return ''
+  }
+
+>>>>>>> origin/develop
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
     'This element is not visible.'
@@ -254,7 +261,10 @@ class Command extends Component<Props> {
     }
 
     const commandName = model.name ? nameClassName(model.name) : ''
+<<<<<<< HEAD
     const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
+=======
+>>>>>>> origin/develop
     const isSystemEvent = model.type === 'system' && model.event
     const isSessionCommand = commandName === 'session'
     const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
@@ -264,8 +274,27 @@ class Command extends Component<Props> {
         className={cs(
           'command',
           `command-name-${commandName}`,
+<<<<<<< HEAD
           {
             'command-scaled': message && message.length > 100,
+=======
+          `command-state-${model.state}`,
+          `command-type-${model.type}`,
+          {
+            'command-is-studio': model.isStudio,
+            'command-is-event': !!model.event,
+            'command-is-invisible': !model.visible,
+            'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
+            'command-is-pinned': this._isPinned(),
+            'command-with-indicator': !!model.renderProps.indicator,
+            'command-scaled': message && message.length > 100,
+            'no-elements': !model.numElements,
+            'command-has-snapshot': model.hasSnapshot,
+            'command-has-console-props': model.hasConsoleProps,
+            'multiple-elements': model.numElements > 1,
+            'command-has-children': model.hasChildren,
+            'command-is-open': this._isOpen(),
+>>>>>>> origin/develop
           },
         )}
       >
@@ -292,7 +321,22 @@ class Command extends Component<Props> {
             onMouseLeave={() => this._snapshot(false)}
           >
             <div className='command-wrapper-text'>
+<<<<<<< HEAD
               <CommandColumn model={model} />
+=======
+              <span className='command-expander' >
+                <i className='fas' />
+              </span>
+              <span className='command-number'>
+                <i className='fas fa-spinner fa-spin' />
+                <span>{model.number || ''}</span>
+              </span>
+              {!model.hasChildren && (
+                <span className='command-pin'>
+                  <i className='fas fa-thumbtack' />
+                </span>
+              )}
+>>>>>>> origin/develop
               <span className='command-method'>
                 <span>
                   {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
@@ -305,6 +349,7 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
+<<<<<<< HEAD
                 {(model.visible != null && !model.visible) && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
@@ -325,6 +370,21 @@ class Command extends Component<Props> {
                       <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
                         {model.numChildren}
                       </span>
+=======
+                <i className='far fa-times-circle studio-command-remove' onClick={this._removeStudioCommand} />
+                <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+                  <i className='command-invisible far fa-eye-slash' />
+                </Tooltip>
+                <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                  <span className='num-elements'>{model.numElements}</span>
+                </Tooltip>
+                <span className='alias-container'>
+                  <Interceptions model={model} />
+                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
+                  {displayNumOfChildren && (
+                    <Tooltip placement='top' title={numberOfChildrenMessage(model.numChildren, model.event)} className='cy-tooltip'>
+                      <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
+>>>>>>> origin/develop
                     </Tooltip>
                   )}
                 </span>
