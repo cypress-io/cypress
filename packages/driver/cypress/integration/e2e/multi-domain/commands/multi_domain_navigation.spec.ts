@@ -113,17 +113,35 @@ context('cy.origin navigation', () => {
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
 
         cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
+        cy.location('href').should('equal', 'http://www.foobar.com:3500/fixtures/dom.html')
       })
     })
 
     it('supports relative urls within secondary', () => {
-      cy.visit('/fixtures/multi-domain.html')
-
-      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
-
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('/fixtures/dom.html')
         cy.location('href').should('equal', 'http://www.foobar.com:3500/fixtures/dom.html')
+      })
+    })
+
+    it('supports relative urls with path within secondary', () => {
+      cy.origin('http://www.foobar.com:3500/fixtures', () => {
+        cy.visit('/dom.html')
+        cy.location('href').should('equal', 'http://www.foobar.com:3500/fixtures/dom.html')
+      })
+    })
+
+    it('supports relative urls with hash within secondary', () => {
+      cy.origin('http://www.foobar.com:3500/#hash', () => {
+        cy.visit('/more-hash')
+        cy.location('href').should('equal', 'http://www.foobar.com:3500/#hash/more-hash')
+      })
+    })
+
+    it('supports relative urls with path and hash within secondary', () => {
+      cy.origin('http://www.foobar.com:3500/welcome/#hash', () => {
+        cy.visit('/more-hash')
+        cy.location('href').should('equal', 'http://www.foobar.com:3500/welcome/#hash/more-hash')
       })
     })
 
