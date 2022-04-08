@@ -3,6 +3,22 @@ describe('App: Spec List (E2E)', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('e2e')
+
+    cy.withCtx((ctx) => {
+      const yesterday = new Date()
+
+      yesterday.setDate(yesterday.getDate() - 1)
+
+      sinon.stub(ctx.git, 'gitInfo').callsFake(() => {
+        return Promise.resolve({
+          author: 'Test Author',
+          lastModifiedTimestamp: yesterday.toDateString(),
+          lastModifiedHumanReadable: yesterday.toDateString(),
+          statusType: 'unmodified',
+        })
+      })
+    })
+
     cy.visitApp()
   })
 
@@ -25,24 +41,27 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('3 Matches')
+    cy.get('button').contains('4 Matches')
 
     cy.get('input').type('content', { force: true })
 
-    cy.get('[data-cy="spec-item"]').should('have.length', 1)
+    cy.get('[data-cy="spec-item"]').should('have.length', 2)
     .should('contain', 'dom-content.spec.js')
 
-    cy.get('button').contains('1 of 3 Matches')
+    cy.get('button').contains('2 of 4 Matches')
 
     cy.get('input').clear().type('asdf', { force: true })
 
     cy.get('[data-cy="spec-item"]').should('have.length', 0)
 
-    cy.get('button').contains('0 of 3 Matches')
+    cy.get('button').contains('0 of 4 Matches')
   })
 
-  // TODO: find a test project that shows git statuses
-  it.skip('shows a git status for each spec', () => {})
+  it('shows a git status for each spec', () => {
+    cy.get('[data-cy="spec-list-file"]').each((row) => {
+      cy.wrap(row).contains('.git-info-row', 'Test Author')
+    })
+  })
 
   it('collapses or expands folders when clicked, hiding or revealing the specs within it', () => {
     cy.get('[data-cy="spec-item"]').should('contain', 'dom-content.spec.js')

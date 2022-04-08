@@ -4,6 +4,6 @@
 export * from './autoBindDebug'
 export * from './cached'
 export * from './config-file-updater'
-export * from './config-options'
 export * from './file'
+export * from './pluginHandlers'
 export * from './urqlCacheKeys'

@@ -83,7 +83,6 @@ const props = defineProps<{
   newProjectId: string
 }>()
 
-// TODO: make this projectId come form newCloudProject
 const projectIdCode = computed(() => `projectId: '${props.newProjectId}'`)
 
 const helpCode = computed(() => {

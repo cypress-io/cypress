@@ -51,7 +51,7 @@
     "listr2": "^3.8.3",
     "lodash": "^4.17.21",
     "log-symbols": "^4.0.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "ospath": "^1.2.2",
     "pretty-bytes": "^5.6.0",
     "proxy-from-env": "1.0.0",
@@ -101,8 +101,12 @@
     "bin",
     "lib",
     "index.js",
+    "index.mjs",
     "types/**/*.d.ts",
-    "types/net-stubbing.ts"
+    "types/net-stubbing.ts",
+    "mount-utils",
+    "vue",
+    "react"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -110,5 +114,26 @@
   "engines": {
     "node": ">=12.0.0"
   },
-  "types": "types"
+  "types": "types",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    },
+    "./vue": {
+      "import": "./vue/dist/cypress-vue.esm-bundler.js",
+      "require": "./vue/dist/cypress-vue.cjs.js"
+    },
+    "./package.json": {
+      "import": "./package.json",
+      "require": "./package.json"
+    },
+    "./react": {
+      "import": "./react/dist/cypress-react.esm-bundler.js",
+      "require": "./react/dist/cypress-react.cjs.js"
+    },
+    "./mount-utils": {
+      "require": "./mount-utils/dist/index.js"
+    }
+  }
 }

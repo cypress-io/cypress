@@ -69,9 +69,10 @@ fragment CreateSpecModal on Query {
   ...CreateSpecCards
   currentProject {
     id
+    fileExtensionToUse
+    defaultSpecFileName
     ...EmptyGenerator
     ...ComponentGeneratorStepOne_codeGenGlob
-    ...StoryGeneratorStepOne_codeGenGlob
   }
 }
 `
@@ -95,7 +96,13 @@ const helpLink = computed(() => {
   return ''
 })
 
-const specFileName = computed(() => getPathForPlatform('cypress/e2e/filename.cy.js'))
+const specFileName = computed(() => {
+  const extension = props.gql.currentProject?.fileExtensionToUse ?? 'js'
+
+  const fileName = props.gql.currentProject?.defaultSpecFileName ?? `cypress/e2e/filename.cy.${extension}`
+
+  return getPathForPlatform(fileName)
+})
 
 const codeGenGlob = computed(() => {
   if (!generator.value) {

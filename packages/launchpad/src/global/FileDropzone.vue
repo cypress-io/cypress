@@ -100,7 +100,8 @@ withDefaults(defineProps<{
 })
 
 onMounted(() => {
-  // TODO: remove this when vue3-file-selector supports setting this attribute
+  // vue3-file-selector does not support setting these attributes through props,
+  // so we add them directly after mounting.
   const fileRef = projectUpload.value?.querySelector('input[type=file]')
 
   fileRef?.setAttribute('webkitdirectory', 'webkitdirectory')

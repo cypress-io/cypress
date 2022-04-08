@@ -22,9 +22,6 @@ function createEntry (options) {
     input,
     external: [
       'vue',
-      '@vue/test-utils',
-      '@cypress/mount-utils',
-      '@cypress/webpack-dev-server',
     ],
     plugins: [
       resolve({ preferBuiltins: true }), commonjs(),
@@ -36,7 +33,6 @@ function createEntry (options) {
       format,
       globals: {
         vue: 'Vue',
-        '@vue/test-utils': 'VueTestUtils',
       },
       exports: 'auto',
     },

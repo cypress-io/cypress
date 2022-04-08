@@ -19,13 +19,13 @@ const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
-const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const resolve = require(`../../lib/util/resolve`)
 const { fs } = require(`../../lib/util/fs`)
 const CacheBuster = require(`../../lib/util/cache_buster`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
+const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 /**
  * @type {import('@packages/resolve-dist')}
  */
@@ -80,7 +80,7 @@ describe('Routes', () => {
   require('mocha-banner').register()
 
   beforeEach(async function () {
-    await Fixtures.scaffoldCommonNodeModules()
+    await scaffoldCommonNodeModules()
     ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -102,7 +102,7 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(obj.projectRoot)
+      ctx.lifecycleManager.setCurrentProject(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
@@ -150,48 +150,47 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('e2e'), testingType: 'e2e' })
-
           cfg.pluginsFile = false
 
-          return Promise.all([
+          return ctx.lifecycleManager.waitForInitializeSuccess()
+          .then(() => {
+            return Promise.all([
             // open our https server
-            httpsServer.start(8443),
+              httpsServer.start(8443),
 
-            // and open our cypress server
-            (this.server = new ServerE2E()),
+              // and open our cypress server
+              (this.server = new ServerE2E()),
 
-            this.server.open(cfg, {
-              SocketCtor: SocketE2E,
-              getSpec: () => spec,
-              getCurrentBrowser: () => null,
-              createRoutes,
-              testingType: 'e2e',
-              exit: false,
-            })
-            .spread(async (port) => {
-              const automationStub = {
-                use: () => { },
-              }
+              this.server.open(cfg, {
+                SocketCtor: SocketE2E,
+                getSpec: () => spec,
+                getCurrentBrowser: () => null,
+                createRoutes,
+                testingType: 'e2e',
+                exit: false,
+              })
+              .spread(async (port) => {
+                const automationStub = {
+                  use: () => { },
+                }
 
-              await this.server.startWebsockets(automationStub, config, {})
+                await this.server.startWebsockets(automationStub, config, {})
 
-              if (initialUrl) {
-                this.server._onDomainSet(initialUrl)
-              }
+                if (initialUrl) {
+                  this.server._onDomainSet(initialUrl)
+                }
 
-              this.srv = this.server.getHttpServer()
+                this.srv = this.server.getHttpServer()
 
-              this.session = session(this.srv)
+                this.session = session(this.srv)
 
-              this.proxy = `http://localhost:${port}`
-            }),
-
-            // pluginsModule.init(cfg, {
-            //   projectRoot: cfg.projectRoot,
-            //   testingType: 'e2e',
-            // }, ctx),
-          ])
+                this.proxy = `http://localhost:${port}`
+              }),
+            ])
+          })
+          .then(() => {
+            ctx.lifecycleManager.setAndLoadCurrentTestingType('e2e')
+          })
         }
 
         if (this.server) {
@@ -408,7 +407,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/spec-iframe/)
+        expect(res.body).to.match(/\.reporter/)
       })
     })
   })
@@ -449,7 +448,7 @@ describe('Routes', () => {
       let i = 0
 
       const interval = setInterval(() => {
-        if (ctx.lifecycleManager.eventsIpcResult.state === 'loaded') {
+        if (ctx.lifecycleManager.isReady) {
           clearInterval(interval)
           resolve()
         }
@@ -585,7 +584,7 @@ describe('Routes', () => {
         return this.setup({
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
-            integrationFolder: 'my-tests',
+            specPattern: 'my-tests/**/*',
             supportFile: 'helpers/includes.js',
           },
         })
@@ -791,9 +790,9 @@ describe('Routes', () => {
           return this.setup({
             projectRoot: Fixtures.projectPath('todos'),
             config: {
-              integrationFolder: 'tests',
-              fixturesFolder: 'tests/_fixtures',
+              specPattern: 'tests/**/*',
               supportFile: false,
+              fixturesFolder: 'tests/_fixtures',
             },
           })
         })
@@ -3100,7 +3099,7 @@ describe('Routes', () => {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             fileServerFolder: 'dev',
-            integrationFolder: 'my-tests',
+            specPattern: 'my-tests/**/*',
             supportFile: false,
           },
         })

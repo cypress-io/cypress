@@ -6,14 +6,33 @@
   </head>
 
   <body>
-    <button id="reset">clear log</button>
-    <button id="target-button-tag">button tag</button>
-    <input id="target-input-button" type="button" value="input button" />
-    <input id="target-input-image" type="image" value="input image" />
-    <input id="target-input-reset" type="reset" value="input reset" />
-    <input id="target-input-submit" type="submit" value="input submit" />
-    <input id="target-input-checkbox" type="checkbox" value="input checkbox" />
-    <input id="target-input-radio" type="radio" value="input radio" />
+    <div>
+      <button id="reset">clear log</button>
+    </div>
+    
+    <div>
+      <input id="input-text" type="text" />
+      <select id="focus-options">
+        <option value="clear">clear</option>
+        <option value="button-tag">button tag</option>
+        <option value="input-button">input button</option>
+        <option value="input-image">input image</option>
+        <option value="input-reset">input reset</option>
+        <option value="input-submit">input submit</option>
+        <option value="input-checkbox">input checkbox</option>
+        <option value="input-radio">input radio</option>
+      </select>
+    </div>
+
+    <div>
+      <button id="target-button-tag">button tag</button>
+      <input id="target-input-button" type="button" value="input button" />
+      <input id="target-input-image" type="image" value="input image" />
+      <input id="target-input-reset" type="reset" value="input reset" />
+      <input id="target-input-submit" type="submit" value="input submit" />
+      <input id="target-input-checkbox" type="checkbox" value="input checkbox" />
+      <input id="target-input-radio" type="radio" value="input radio" />
+    </div>
 
     <div id="log"></div>
 
@@ -70,6 +89,32 @@
           updateLog("keyup");
         });
       });
+
+      let handler = null
+      const focusOptions = document.getElementById("focus-options");
+
+      focusOptions.addEventListener('change', (event) => {
+        const val = event.target.value;
+        const target = document.getElementById('input-text');
+
+        if (handler) {
+          target.removeEventListener('keydown', handler);
+        }
+
+        if (val === 'clear') {
+          handler = null
+
+          return
+        }
+
+        handler = (e) => {
+          const focusEl = document.getElementById(`target-${val}`);
+
+          focusEl.focus()
+        }
+
+        target.addEventListener('keydown', handler);
+      })
     </script>
   </body>
 </html>

@@ -10,6 +10,7 @@ import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
+import { getError } from '@packages/errors'
 
 export interface ProjectApiShape {
   /**
@@ -34,6 +35,7 @@ export interface ProjectApiShape {
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
+  isListening: (url: string) => Promise<void>
 }
 
 type SetSpecsFoundBySpecPattern = {
@@ -64,6 +66,7 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
+      d.app.browserStatus = 'closed'
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
@@ -92,8 +95,8 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  setCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setCurrentTestingType(type)
+  setAndLoadCurrentTestingType (type: TestingType) {
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
   async setCurrentProject (projectRoot: string) {
@@ -179,7 +182,7 @@ export class ProjectActions {
     }
 
     if (args.open) {
-      await this.setCurrentProject(projectRoot)
+      this.setCurrentProject(projectRoot).catch(this.ctx.onError)
     }
   }
 
@@ -206,25 +209,21 @@ export class ProjectActions {
 
     testingType = testingType || this.ctx.coreData.currentTestingType
 
-    if (!testingType) {
-      return null
-    }
+    // It's strange to have no testingType here, but `launchProject` is called when switching testing types,
+    // so it needs to short-circuit and return here.
+    // TODO: Untangle this. https://cypress-io.atlassian.net/browse/UNIFY-1528
+    if (!testingType) return
+
+    this.ctx.coreData.currentTestingType = testingType
+
+    const browser = this.ctx.coreData.activeBrowser
+
+    if (!browser) throw new Error('Missing browser in launchProject')
 
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
       activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
-    }
-
-    // Ensure that we have loaded browsers to choose from
-    if (this.ctx.appData.refreshingBrowsers) {
-      await this.ctx.appData.refreshingBrowsers
-    }
-
-    const browser = this.ctx.coreData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
-
-    if (!browser) {
-      return null
     }
 
     // launchProject expects a spec when opening browser for url navigation.
@@ -235,8 +234,6 @@ export class ProjectActions {
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
-
-    this.ctx.coreData.currentTestingType = testingType
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
 
@@ -253,10 +250,6 @@ export class ProjectActions {
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
 
     return this.api.removeProjectFromCache(projectRoot)
-  }
-
-  syncProjects () {
-    //
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
@@ -304,6 +297,12 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
+
+    if (this.ctx.coreData.currentTestingType === 'component') {
+      this.api.getDevServer().updateSpecs(specs)
+    }
+
+    this.ctx.emitter.specsChange()
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -363,7 +362,7 @@ export class ProjectActions {
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
-    if ((codeGenType === 'component' || codeGenType === 'story') && !erroredCodegenCandidate) {
+    if ((codeGenType === 'component') && !erroredCodegenCandidate) {
       const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
       const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
 
@@ -407,21 +406,15 @@ export class ProjectActions {
     const cfg = await this.ctx.project.getConfig()
 
     if (cfg && this.ctx.currentProject) {
-      const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
+      const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
 
-      const { specs } = await this.setSpecsFoundBySpecPattern({
+      await this.setSpecsFoundBySpecPattern({
         path: this.ctx.currentProject,
         testingType,
-        specPattern: cfg[testingType]?.specPattern,
-        excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
-        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+        specPattern: cfg.specPattern,
+        excludeSpecPattern: cfg.excludeSpecPattern,
+        additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
-
-      if (specs) {
-        if (testingType === 'component') {
-          this.api.getDevServer().updateSpecs(specs)
-        }
-      }
     }
 
     return {
@@ -455,7 +448,7 @@ export class ProjectActions {
 
     this.ctx.actions.project.setSpecs(specs)
 
-    return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
+    this.ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
@@ -510,5 +503,21 @@ export class ProjectActions {
         description: 'Generated spec',
       }
     })
+  }
+
+  async pingBaseUrl () {
+    const baseUrl = (await this.ctx.project.getConfig())?.baseUrl
+
+    // Should never happen
+    if (!baseUrl) {
+      return
+    }
+
+    this.ctx.update((d) => {
+      d.warnings = d.warnings.filter((w) => w.cypressError.type !== 'CANNOT_CONNECT_BASE_URL_WARNING')
+    })
+
+    return this.api.isListening(baseUrl)
+    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
   }
 }

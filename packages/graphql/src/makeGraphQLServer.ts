@@ -1,5 +1,5 @@
 import express from 'express'
-import type { AddressInfo } from 'net'
+import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub } from '@packages/data-context'
 import pDefer from 'p-defer'
 import cors from 'cors'
@@ -11,6 +11,8 @@ import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import httpProxy from 'http-proxy'
 import debugLib from 'debug'
+import { Server as WebSocketServer } from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
 import { execute, parse } from 'graphql'
@@ -42,6 +44,29 @@ export async function makeGraphQLServer () {
       ctx.logTraceError(e)
       res.json({})
     })
+  })
+
+  app.get('/cloud-notification', (req, res) => {
+    const ctx = getCtx()
+
+    const operationName = req.query.operationName
+
+    if (!operationName || Array.isArray(operationName)) {
+      res.sendStatus(200)
+
+      return
+    }
+
+    switch (operationName) {
+      case 'orgCreated':
+        ctx.emitter.cloudViewerChange()
+        break
+
+      default:
+        break
+    }
+
+    res.sendStatus(200)
   })
 
   app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
@@ -95,9 +120,11 @@ export async function makeGraphQLServer () {
   serverDestroy(srv)
 
   gqlSocketServer = new SocketIOServer(srv, {
-    path: '/__gqlSocket',
+    path: '/__launchpad/socket',
     transports: ['websocket'],
   })
+
+  graphqlWS(srv, '/__launchpad/graphql-ws')
 
   gqlSocketServer.on('connection', (socket) => {
     socket.on('graphql:request', handleGraphQLSocketRequest)
@@ -139,6 +166,33 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
   } catch (e) {
     callback({ data: null, errors: [e] })
   }
+}
+
+/**
+ * Creates a new WSServer conforming to the GraphQL over Websocket protocol:
+ * https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
+ *
+ * @param httpServer The http server we are utilizing for the websocket
+ * @param targetRoute Route to target in the server upgrade event
+ * @returns Disposable Function to cleanup the created server resource
+ */
+export const graphqlWS = (httpServer: Server, targetRoute: string) => {
+  const graphqlWs = new WebSocketServer({ noServer: true })
+
+  httpServer.on('upgrade', (req, socket: Socket, head) => {
+    if (req.url.startsWith(targetRoute)) {
+      return graphqlWs.handleUpgrade(req, socket, head, (client) => {
+        graphqlWs.emit('connection', client, req)
+      })
+    }
+  })
+
+  useServer({
+    schema: graphqlSchema,
+    context: () => getCtx(),
+  }, graphqlWs)
+
+  return graphqlWs
 }
 
 export const graphQLHTTP = graphqlHTTP((req, res, params) => {

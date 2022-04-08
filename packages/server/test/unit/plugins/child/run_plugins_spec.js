@@ -8,7 +8,7 @@ const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
 const util = require(`../../../../lib/plugins/util`)
 const resolve = require(`../../../../lib/util/resolve`)
 const browserUtils = require(`../../../../lib/browsers/utils`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { RunPlugins } = require(`../../../../lib/plugins/child/run_plugins`)
 
 const colorCodeRe = /\[[0-9;]+m/gm
@@ -216,7 +216,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       })
     })
 
-    it('sends error if pluginsFile function rejects the promise', function (done) {
+    it('sends error if setupNodeEvents function rejects the promise', function (done) {
       const err = new Error('foo')
       const setupNodeEventsFn = sinon.stub().rejects(err)
 

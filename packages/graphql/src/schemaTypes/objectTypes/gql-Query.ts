@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
+import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'
@@ -35,7 +35,7 @@ export const Query = objectType({
     t.field('migration', {
       type: Migration,
       description: 'Metadata about the migration, null if we aren\'t showing it',
-      resolve: (root, args, ctx) => ctx.coreData.migration,
+      resolve: (root, args, ctx) => ctx.coreData.migration.legacyConfigForMigration ? ctx.coreData.migration : null,
     })
 
     t.nonNull.field('dev', {
@@ -92,12 +92,6 @@ export const Query = objectType({
       resolve: (source, args, ctx) => {
         return ctx.coreData.localSettings
       },
-    })
-
-    t.field('currentTestingType', {
-      description: 'The mode the interactive runner was launched in',
-      type: TestingTypeEnum,
-      resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.list.nonNull.field('scaffoldedFiles', {

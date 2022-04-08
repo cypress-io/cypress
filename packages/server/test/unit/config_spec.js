@@ -4,7 +4,7 @@ const _ = require('lodash')
 const debug = require('debug')('test')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { getCtx } = require('@packages/data-context')
 
 const config = require(`../../lib/config`)
@@ -58,23 +58,25 @@ describe('lib/config', () => {
 
   context('.get', () => {
     beforeEach(function () {
-      const ctx = getCtx()
+      this.ctx = getCtx()
 
       this.projectRoot = '/_test-output/path/to/project'
 
-      ctx.lifecycleManager.setCurrentTestingType('e2e')
-      sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
+      sinon.stub(this.ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
+
+      this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
+      this.ctx.lifecycleManager.setCurrentTestingType('e2e')
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
-        sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
+        sinon.stub(this.ctx.lifecycleManager._configManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
+        sinon.stub(this.ctx.lifecycleManager._configManager, 'reloadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
 
     it('sets projectRoot', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then((obj) => {
         expect(obj.projectRoot).to.eq(this.projectRoot)
 
@@ -85,7 +87,7 @@ describe('lib/config', () => {
     it('sets projectName', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then((obj) => {
         expect(obj.projectName).to.eq('project')
       })
@@ -97,7 +99,7 @@ describe('lib/config', () => {
 
       this.setup(settings, envSettings)
 
-      return config.get(this.projectRoot)
+      return this.ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         expect(settings).to.deep.equal({ foo: 'bar' })
         expect(envSettings).to.deep.equal({ baz: 'qux' })
@@ -110,21 +112,21 @@ describe('lib/config', () => {
       })
 
       it('can override default port', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.port).to.eq(8080)
         })
       })
 
       it('updates browserUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.browserUrl).to.eq('http://localhost:8080/__/')
         })
       })
 
       it('updates proxyUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return this.ctx.lifecycleManager.getFullInitialConfig({ port: 8080 })
         .then((obj) => {
           expect(obj.proxyUrl).to.eq('http://localhost:8080')
         })
@@ -134,11 +136,11 @@ describe('lib/config', () => {
     context('validation', () => {
       beforeEach(function () {
         this.expectValidationPasses = () => {
-          return config.get(this.projectRoot) // shouldn't throw
+          return this.ctx.lifecycleManager.getFullInitialConfig() // shouldn't throw
         }
 
         this.expectValidationFails = (errorMessage = 'validation error') => {
-          return config.get(this.projectRoot)
+          return this.ctx.lifecycleManager.getFullInitialConfig()
           .then(() => {
             throw new Error('should throw validation error')
           }).catch((err) => {
@@ -514,26 +516,6 @@ describe('lib/config', () => {
           this.setup({ pageLoadTimeout: 'foo' })
 
           return this.expectValidationFails('be a number')
-        })
-      })
-
-      context('pluginsFile', () => {
-        it('passes if a string', function () {
-          this.setup({ pluginsFile: 'cypress/plugins' })
-
-          return this.expectValidationPasses()
-        })
-
-        it('passes if false', function () {
-          this.setup({ pluginsFile: false })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a string or false', function () {
-          this.setup({ pluginsFile: 42 })
-
-          return this.expectValidationFails('be a string')
         })
       })
 
@@ -1441,6 +1423,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
     })
 
+    it('warns if experimentalStudio is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalStudio', true, {
+        experimentalStudio: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_STUDIO_REMOVED')
+    })
+
     // @see https://github.com/cypress-io/cypress/pull/9185
     it('warns if experimentalNetworkStubbing is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
@@ -1506,7 +1498,6 @@ describe('lib/config', () => {
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
-            pluginsFile: { value: 'cypress/plugins', from: 'default' },
             port: { value: 1234, from: 'cli' },
             projectId: { value: null, from: 'default' },
             redirectionLimit: { value: 20, from: 'default' },
@@ -1617,7 +1608,6 @@ describe('lib/config', () => {
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
-            pluginsFile: { value: 'cypress/plugins', from: 'default' },
             port: { value: 2020, from: 'config' },
             projectId: { value: 'projectId123', from: 'env' },
             redirectionLimit: { value: 20, from: 'default' },
@@ -1875,7 +1865,6 @@ describe('lib/config', () => {
 
       const cfg = {
         projectRoot: '/foo/bar',
-        pluginsFile: '/foo/bar/cypress/plugins/index.js',
         browsers: [browser],
         resolved: {
           browsers: {
@@ -2058,11 +2047,6 @@ describe('lib/config', () => {
   })
 
   context('.setSupportFileAndFolder', () => {
-    const mockSupportDefaults = {
-      supportFolder: false,
-      configFile: 'cypress.json',
-    }
-
     it('does nothing if supportFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -2082,7 +2066,7 @@ describe('lib/config', () => {
         supportFile: 'test/unit/config_spec.js',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2100,7 +2084,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support/e2e.js',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2118,7 +2102,7 @@ describe('lib/config', () => {
         supportFile: false,
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2133,11 +2117,17 @@ describe('lib/config', () => {
       const obj = config.setAbsolutePaths({
         projectRoot,
         supportFile: 'does/not/exist',
+        resolved: {
+          supportFile: {
+            value: 'does/not/exist',
+            from: 'default',
+          },
+        },
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .catch((err) => {
-        expect(stripAnsi(err.message)).to.include('Your supportFile is missing or invalid:')
+        expect(stripAnsi(err.message)).to.include('Your project does not contain a default supportFile')
       })
     })
 
@@ -2156,7 +2146,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support/index.ts',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         debug('result is', result)
 
@@ -2183,7 +2173,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support.ts',
       })
 
-      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
+      return config.setSupportFileAndFolder(obj)
       .then((result) => {
         debug('result is', result)
 
@@ -2218,7 +2208,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder', 'supportFile'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',
@@ -2284,6 +2274,26 @@ describe('lib/config', () => {
       expect(obj).to.deep.eq({
         nodeVersion: 'system',
         resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+  })
+
+  describe('relativeToProjectRoot', () => {
+    context('posix', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = '/root/projects'
+        const supportFile = '/root/projects/cypress/support/e2e.js'
+
+        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq('cypress/support/e2e.js')
+      })
+    })
+
+    context('windows', () => {
+      it('returns path of file relative to projectRoot', () => {
+        const projectRoot = `\\root\\projects`
+        const supportFile = `\\root\\projects\\cypress\\support\\e2e.js`
+
+        expect(config.relativeToProjectRoot(projectRoot, supportFile)).to.eq(`cypress\\support\\e2e.js`)
       })
     })
   })

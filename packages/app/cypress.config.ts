@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
+import { initGitRepoForTestProject } from './cypress/tasks/git'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -38,7 +39,6 @@ export default defineConfig({
   },
   'e2e': {
     baseUrl: 'http://localhost:5555',
-    pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
@@ -51,13 +51,17 @@ export default defineConfig({
       // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
+      on('task', {
+        initGitRepoForTestProject,
+      })
+
       return await e2ePluginSetup(on, config)
     },
   },
   // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
-  socketIoRoute: '/__app-socket.io',
-  socketIoCookie: '__app-socket.io',
+  socketIoRoute: '/__app-socket',
+  socketIoCookie: '__app-socket',
   devServerPublicPathRoute: '/__cypress-app/src',
 })

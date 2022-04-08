@@ -22,10 +22,6 @@ function unknownOption (flag, type = 'option') {
 }
 commander.Command.prototype.unknownOption = unknownOption
 
-const coerceFalseOrString = (arg) => {
-  return arg !== 'false' ? arg : false
-}
-
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
@@ -106,7 +102,7 @@ const descriptions = {
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   component: 'runs component tests',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.config.{ts|js}.',
-  configFile: 'path to script file where configuration values are set. defaults to "cypress.config.{ts|js}". pass "false" to disable.',
+  configFile: 'path to script file where configuration values are set. defaults to "cypress.config.{ts|js}".',
   detached: 'runs Cypress application in detached mode',
   dev: 'runs cypress in development and bypasses binary check',
   e2e: 'runs end to end tests',
@@ -315,10 +311,6 @@ const castCypressOptions = (opts) => {
     castOpts.port = coerceAnyStringToInt(opts.port)
   }
 
-  if (_.has(opts, 'configFile')) {
-    castOpts.configFile = coerceFalseOrString(opts.configFile)
-  }
-
   return castOpts
 }
 
@@ -502,6 +494,7 @@ module.exports = {
 
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 

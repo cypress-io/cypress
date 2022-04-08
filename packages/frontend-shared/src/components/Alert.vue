@@ -4,10 +4,11 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="overflow-hidden rounded-t rounded-b outline-none group"
+    :overflow="overflow"
+    class="rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
-      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
+      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse, 'overflow-hidden': overflow}]"
     :max-height="maxHeight"
   >
     <template #target="{ open }">
@@ -108,6 +109,7 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean
   iconClasses?: string
   maxHeight?: string
+  overflow?: boolean
 }>(), {
   title: undefined,
   modelValue: true,
@@ -117,6 +119,7 @@ const props = withDefaults(defineProps<{
   bodyClass: undefined,
   iconClasses: '',
   maxHeight: undefined,
+  overflow: true,
 })
 
 const title = computed(() => props.title ?? 'Alert')
@@ -137,7 +140,7 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     ring: 'hocus:(ring-info-200 border-info-300)',
   },
   warning: {
-    headerClass: 'text-warning-500 bg-warning-100',
+    headerClass: 'text-warning-600 bg-warning-100',
     suffixIconClass: 'icon-dark-warning-500',
     suffixButtonClass: 'text-warning-500',
     bodyClass: 'bg-warning-50',

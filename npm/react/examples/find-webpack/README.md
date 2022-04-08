@@ -27,13 +27,12 @@ Next, create a `cypress.json` with some basic configuration:
 ```json
 {
   "component": {
-    "testFiles": "**/*.test.{js,ts,jsx,tsx}",
-    "componentFolder": "src"
+    "specPattern": "src/**/*.test.{js,ts,jsx,tsx}"
   }
 }
 ```
 
-Here we are adding some Component Testing specific options, hence the `"component"` key. `"componentFolder"` is where all the components and tests are located, and `"testFiles"` is the pattern to search for test files.
+Here we are adding some Component Testing specific options, hence the `"component"` key. `"specPattern"` is the pattern to search for test files.
 
 The last thing we need to is tell Cypress to use `@cypress/webpack-dev-server` for component tests. Plugins are explained in detail in the [Cypress documentation](https://on.cypress.io/installing-plugins). By default plugins are loaded from `cypress/plugins/index.js`. Create that file and add:
 

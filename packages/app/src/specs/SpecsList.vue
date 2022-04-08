@@ -66,6 +66,8 @@
           v-for="row in list"
           :id="getIdIfDirectory(row)"
           :key="row.index"
+          :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
+          :data-cy-row="row.data.data?.relative"
         >
           <template #file>
             <RouterLink
@@ -99,7 +101,7 @@
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data.data?.gitInfo"
+              v-if="row.data.isLeaf && row.data.data?.gitInfo"
               :gql="row.data.data.gitInfo"
             />
           </template>
@@ -125,7 +127,7 @@ import { computed, ref, watch } from 'vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
-import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { FuzzyFoundSpec, SpecsComparator } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -186,7 +188,24 @@ const showSpecPatternModal = ref(false)
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
+const compareGitInfo: SpecsComparator<{ absolute: string, gitInfo: any }> = (curr, prev) => {
+  for (let i = 0; i < curr.length; i++) {
+    if (!prev[i]) {
+      return true
+    }
+
+    if (JSON.stringify(curr[i].gitInfo) !== JSON.stringify(prev[i].gitInfo)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+const cachedSpecs = useCachedSpecs(
+  computed(() => props.gql.currentProject?.specs ?? []),
+  compareGitInfo,
+)
 
 const search = ref('')
 const debouncedSearchString = useDebounce(search, 200)
@@ -205,7 +224,11 @@ const specs = computed(() => {
   return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
-const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))
+const collapsible = computed(() => {
+  return useCollapsibleTree(
+    buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true },
+  )
+})
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })

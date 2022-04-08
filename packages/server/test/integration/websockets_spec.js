@@ -11,7 +11,7 @@ const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { Automation } = require(`../../lib/automation`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 
@@ -33,7 +33,7 @@ describe('Web Sockets', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-    return config.get(this.idsPath, { port: cyPort })
+    return ctx.lifecycleManager.getFullInitialConfig({ port: cyPort })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })

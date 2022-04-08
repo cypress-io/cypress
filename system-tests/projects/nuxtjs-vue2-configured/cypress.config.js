@@ -9,8 +9,5 @@ module.exports = defineConfig({
 
       return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
     },
-    devServerConfig: {
-      indexHtmlFile: 'cypress/support/component-index.html'
-    },
   },
 })

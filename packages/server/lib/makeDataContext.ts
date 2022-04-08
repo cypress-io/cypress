@@ -1,7 +1,8 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
+import { isListening } from './util/ensure-url'
 
 import type {
   AllModeOptions,
@@ -25,7 +26,6 @@ import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
-import plugins from './plugins'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
 
@@ -55,14 +55,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     configApi: {
-      getServerPluginHandlers: plugins.getServerPluginHandlers,
       allowedConfig: configUtils.allowed,
       cypressVersion: pkg.version,
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
-      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
-      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,
@@ -77,21 +74,21 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       logIn (onMessage) {
         const windows = require('./gui/windows')
         const originalIsMainWindowFocused = windows.isMainWindowFocused()
-        const onLogin = async () => {
-          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.chosenBrowser)) {
+        const onLoginFlowComplete = async () => {
+          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.activeBrowser)) {
             windows.focusMainWindow()
           } else {
             await ctx.actions.browser.focusActiveBrowserWindow()
           }
         }
 
-        return auth.start(onMessage, 'launchpad', onLogin)
+        return auth.start(onMessage, 'launchpad', onLoginFlowComplete)
       },
       logOut () {
         return user.logOut()
       },
       resetAuthState () {
-        return ctx.actions.auth.resetAuthState()
+        auth.stopServer()
       },
     },
     projectApi: {
@@ -152,6 +149,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getDevServer () {
         return devServer
       },
+      isListening,
     },
     electronApi: {
       openExternal (url: string) {
