@@ -129,7 +129,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
         }
 
-        const _reject = (err, cleanupOptions = {}) => {
+        const _reject = (err, cleanupOptions: {readyForOriginFailed?: boolean} = {}) => {
           cleanup(cleanupOptions)
           log?.error(err)
           reject(err)
