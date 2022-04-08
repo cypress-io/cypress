@@ -37,6 +37,10 @@ const createApp = (port) => {
     return res.sendStatus(200)
   })
 
+  app.get('/', (req, res) => {
+    return res.send('<html><body>root page</body></html>')
+  })
+
   app.get('/timeout', (req, res) => {
     return Promise
     .delay(req.query.ms || 0)
