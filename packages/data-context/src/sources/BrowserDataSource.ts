@@ -1,15 +1,19 @@
 import type { FoundBrowser, BrowserStatus } from '@packages/types'
 import os from 'os'
-import { execSync } from 'child_process'
+import execa from 'execa'
+
 import type { DataContext } from '..'
 
 let isPowerShellAvailable = false
 
-try {
-  execSync(`[void] ''`, { shell: 'powershell' })
-  isPowerShellAvailable = true
-} catch {
-  // Powershell is unavailable
+// Only need to worry about checking for PowerShell in windows,
+// doing it asynchronously so to not block startup
+if (os.platform() === 'win32') {
+  execa(`[void] ''`, { shell: 'powershell' }).then(() => {
+    isPowerShellAvailable = true
+  }).catch(() => {
+    //
+  })
 }
 
 const platform = os.platform()
