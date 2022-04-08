@@ -231,7 +231,7 @@ describe('cy.origin Cypress API', () => {
 
     it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of multi-domain', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using it outside of the callback instead.')
+        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using them outside of the callback instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session-api')
         done()
       })
