@@ -551,7 +551,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession: Cypress.Commands.Sessions.SessionData = getActiveSession(id)
+      let existingSession: SessionData = getActiveSession(id)
 
       if (!setup) {
         if (!existingSession || !currentTestRegisteredSessions.has(id)) {
