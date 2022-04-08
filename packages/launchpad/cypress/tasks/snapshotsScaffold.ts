@@ -3,7 +3,7 @@ import globby from 'globby'
 import fs from 'fs-extra'
 import disparity from 'disparity'
 import dedent from 'dedent'
-import { cyTmpDir } from '@tooling/system-tests/lib/fixtures'
+import { cyTmpDir } from '@tooling/system-tests'
 
 const systemTestsDir = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects')
 
