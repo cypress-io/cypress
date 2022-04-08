@@ -111,7 +111,7 @@ describe('<OpenBrowserList />', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.browserStatus = 'open'
-        res.currentBrowser!.isFocusSupported = false
+        res.activeBrowser!.isFocusSupported = false
       },
       render: (gqlVal) => {
         return (
@@ -129,10 +129,15 @@ describe('<OpenBrowserList />', () => {
     cy.percySnapshot()
   })
 
-  it('hides action buttons when currentBrowser is null', () => {
+  it('throws when activeBrowser is null', (done) => {
+    cy.once('uncaught:exception', (err) => {
+      expect(err.message).to.include('Missing activeBrowser in selectedBrowserId')
+      done()
+    })
+
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
-        res.currentBrowser = null
+        res.activeBrowser = null
       },
       render: (gqlVal) => {
         return (
@@ -143,11 +148,5 @@ describe('<OpenBrowserList />', () => {
           </div>)
       },
     })
-
-    cy.get('button[data-cy="launch-button"]').should('not.exist')
-    cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
-    cy.contains('button', defaultMessages.openBrowser.close).should('not.exist')
-
-    cy.percySnapshot()
   })
 })

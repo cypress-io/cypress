@@ -1,13 +1,15 @@
 import path from 'path'
+import execa from 'execa'
+
 import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
-import { e2eProjectDirs } from './support/e2eProjectDirs'
+import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
-import fs from 'fs'
+import fs from 'fs-extra'
 import { buildSchema, execute, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
 
@@ -65,10 +67,12 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): Promise<void>
+  clearFixtureNodeModules (project: string): void
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
   projectPath (name): string
+  projectFixturePath(name): string
   get (fixture, encoding?: BufferEncoding): string
   path (fixture): string
 }
@@ -78,7 +82,7 @@ async function makeE2ETasks () {
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
-  const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
+  const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli')
@@ -103,21 +107,38 @@ async function makeE2ETasks () {
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
+  const cachedCwd = process.cwd()
+
   clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const launchpadPort = await makeGraphQLServer()
 
-  const __internal_scaffoldProject = async (projectName: string) => {
+  const __internal_scaffoldProject = async (projectName: string, isRetry = false): Promise<string> => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
       Fixtures.removeProject(projectName)
     }
+
+    Fixtures.clearFixtureNodeModules(projectName)
 
     await Fixtures.scaffoldProject(projectName)
 
     await scaffoldCommonNodeModules()
 
-    await scaffoldProjectNodeModules(projectName)
+    try {
+      await scaffoldProjectNodeModules(projectName)
+    } catch (e) {
+      if (isRetry) {
+        throw e
+      }
+
+      // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
+      // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
+      await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
+      await fs.remove(path.join(Fixtures.projectFixturePath(projectName), 'node_modules'))
+
+      return await __internal_scaffoldProject(projectName, true)
+    }
 
     scaffoldedProjects.add(projectName)
 
@@ -133,8 +154,19 @@ async function makeE2ETasks () {
     async __internal__before () {
       Fixtures.remove()
       scaffoldedProjects = new Set()
+      process.chdir(cachedCwd)
 
       return { launchpadPort }
+    },
+
+    /**
+     * Force a reset to the correct CWD after all tests have completed, just incase this
+     * was modified by any code under test.
+     */
+    __internal__after () {
+      process.chdir(cachedCwd)
+
+      return null
     },
 
     /**
@@ -291,7 +323,7 @@ async function makeE2ETasks () {
         sinon,
         pDefer,
         projectDir (projectName) {
-          if (!e2eProjectDirs.includes(projectName)) {
+          if (!fixtureDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)
           }
 

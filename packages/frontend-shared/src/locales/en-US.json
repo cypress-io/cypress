@@ -103,12 +103,6 @@
       }
     },
     "component": {
-      "importFromStory": {
-        "header": "Create from story",
-        "description": "We'll generate a spec file from the Storybook files that you've written for each component in this project.",
-        "notSetupDescription": "We cannot import any stories because we couldn't detect Storybook in this project.",
-        "chooseAStoryHeader": "Choose a story"
-      },
       "importFromComponent": {
         "header": "Create from component",
         "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
@@ -280,8 +274,12 @@
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
-    "done": "Done",
-    "selectPreferredEditor": "Select Preferred Editor",
+    "settings": "Settings",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "externalEditorPreferences": "External Editor Preferences",
+    "externalEditorPreferencesDescription1": "Select your preference for opening files on your system.",
+    "externalEditorPreferencesDescription2": "You can change this later in the {0} page.",
     "recentProjectsHeader": "Recent Projects",
     "searchPlaceholder": "Search projects",
     "addProjectButton": "Add Project",

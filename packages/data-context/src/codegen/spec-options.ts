@@ -4,7 +4,6 @@ import type { ParsedPath } from 'path'
 import { camelCase, capitalize } from 'lodash'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import type { CodeGenFramework } from '@packages/scaffold-config'
-import { CsfFile, readCsfOrMdx } from '@storybook/csf-tools'
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -38,10 +37,6 @@ export class SpecOptions {
   getCodeGenOptions () {
     if (this.options.codeGenType === 'component') {
       return this.getComponentCodeGenOptions()
-    }
-
-    if (this.options.codeGenType === 'story') {
-      return this.getStoryCodeGenOptions()
     }
 
     return this.getIntegrationCodeGenOptions()
@@ -120,80 +115,6 @@ export class SpecOptions {
 
       return '.js'
     }
-  }
-
-  private async getStoryCodeGenOptions () {
-    const frontendFramework = await this.getFrontendFramework()
-
-    if (!frontendFramework) {
-      throw new Error('Cannot generate a spec without a framework')
-    }
-
-    const defaultTitle = this.parsedPath.name.split('.')[0] || ''
-
-    const csf = await readCsfOrMdx(this.options.erroredCodegenCandidate ?? this.options.codeGenPath, {
-      defaultTitle,
-    }).then((res) => res.parse())
-
-    if ((!csf.meta.title && !csf.meta.component) || !csf.stories.length) {
-      throw new Error(`Failed parsing ${this.options.codeGenPath} as CSF`)
-    }
-
-    const frameworkOptions = this.getFrameworkStoryOptions(
-      frontendFramework.codeGenFramework,
-      csf,
-    )
-
-    const options = {
-      ...frameworkOptions,
-      title: csf.meta.component || csf.meta.title,
-    }
-
-    return options
-  }
-
-  private getFrameworkStoryOptions (framework: CodeGenFramework, csf: CsfFile) {
-    const storyPath = this.relativePath()
-    const removeSpaces = (val: string) => val.replace(/\s+/g, '')
-
-    const frameworkOptions = {
-      react: {
-        imports: [
-          'import React from "react"',
-          'import { mount } from "@cypress/react"',
-          'import { composeStories } from "@storybook/testing-react"',
-          `import * as stories from "${storyPath}"`,
-        ],
-        stories: csf.stories.map((story) => {
-          const component = removeSpaces(story.name)
-
-          return {
-            component,
-            mount: `mount(<${component} />)`,
-          }
-        }),
-        fileName: this.getFilename(this.parsedPath.ext),
-      },
-      vue: {
-        imports: [
-          'import { mount } from "@cypress/vue"',
-          'import { composeStories } from "@storybook/testing-vue3"',
-          `import * as stories from "${storyPath}"`,
-        ],
-        stories: csf.stories.map((story) => {
-          const component = removeSpaces(story.name)
-
-          return {
-            component,
-            mount: `mount(${component}())`,
-          }
-        }),
-        storyName: this.parsedPath.name,
-        fileName: this.getFilename(this.parsedPath.ext),
-      },
-    } as const
-
-    return frameworkOptions[framework]
   }
 
   private getFilename (ext: string) {
