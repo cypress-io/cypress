@@ -26,7 +26,7 @@ withDefaults(defineProps<{
 @import "floating-vue/dist/style.css";
 .no-arrow {
   .v-popper__arrow-container {
-    display: none;
+    @apply hidden;
   }
 }
 
