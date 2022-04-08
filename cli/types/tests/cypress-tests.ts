@@ -113,12 +113,12 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
-    subject // $ExpectType JQuerySelector
+    subject // $ExpectType JQueryWithSelector
     subject.selector // $ExpectType string
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
-    subject // $ExpectType JQuerySelector
+    subject // $ExpectType JQueryWithSelector
 		subject.selector // $ExpectType string
     arg // $ExpectType string
   })
@@ -128,7 +128,7 @@ namespace CypressCommandsTests {
     } else if (subject instanceof Document) {
       subject // $ExpectType Document
     } else {
-      subject // $ExpectType JQuerySelector
+      subject // $ExpectType JQueryWithSelector
 			subject.selector // $ExpectType string
     }
     arg // $ExpectType string
@@ -139,7 +139,7 @@ namespace CypressCommandsTests {
     } else if (subject instanceof Document) {
       subject // $ExpectType Document
     } else if (subject) {
-      subject // $ExpectType JQuerySelector
+      subject // $ExpectType JQueryWithSelector
     } else {
       subject // $ExpectType void
     }
@@ -162,7 +162,7 @@ namespace CypressCommandsTests {
     originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
   })
   Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
-    element // $ExpectType JQuerySelector
+    element // $ExpectType JQueryWithSelector
     text // $ExpectType string
 
     if (options && options.sensitive) {
