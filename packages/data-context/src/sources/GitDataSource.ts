@@ -66,7 +66,7 @@ export interface GitDataSourceConfig {
  */
 export class GitDataSource {
   #specs?: string[]
-  #git = simpleGit({ baseDir: this.config.projectRoot })
+  #git: ReturnType<typeof simpleGit>
   #gitErrored = false
   #destroyed = false
   #gitBaseDir?: string
@@ -79,6 +79,15 @@ export class GitDataSource {
   constructor (private config: GitDataSourceConfig) {
     if (!config.isRunMode) {
       this.#refreshAllGitData()
+    }
+
+    // Simple Git will error if the projectRoot does not exist.
+    // This should never happen outside of testing code simulating
+    // incorrect scenarios
+    try {
+      this.#git = simpleGit({ baseDir: this.config.projectRoot })
+    } catch {
+      this.#git = simpleGit()
     }
   }
 
