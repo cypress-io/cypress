@@ -1,7 +1,6 @@
 import { $Command } from '../cypress/command'
-import $errUtils from '../cypress/error_utils'
 
-export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGroup.ApiCallback) => {
+export default (Cypress, userOptions: Cypress.LogGroup.Config) => {
   const cy = Cypress.cy
 
   const shouldEmitLog = userOptions.log === undefined ? true : userOptions.log
@@ -14,10 +13,6 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
   }
 
   const log = Cypress.log(options)
-
-  if (!_.isFunction(fn)) {
-    $errUtils.throwErrByPath('group.missing_fn', { onFail: log })
-  }
 
   // An internal command is inserted to create a divider between
   // commands inside group() callback and commands chained to it.
@@ -38,5 +33,5 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
 
   cy.queue.insert(restoreCmdIndex, endLogGroupCmd.set('fn', forwardYieldedSubject))
 
-  return fn(log)
+  return log
 }

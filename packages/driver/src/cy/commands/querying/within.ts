@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import { $Command } from '../../../cypress/command'
 import $errUtils from '../../../cypress/error_utils'
+import logGroup from '../../logGroup'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: ['element', 'document'] }, {
@@ -17,7 +18,7 @@ export default (Commands, Cypress, cy, state) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log({
+        options._log = logGroup(Cypress, {
           $el: subject,
           message: '',
           timeout: options.timeout,
@@ -75,7 +76,7 @@ export default (Commands, Cypress, cy, state) => {
         // withinSubject.  If two 'within' commands reference the
         // exact same 'next' command, then this prevents accidentally
         // resetting withinSubject more than once.  If they point
-        // to differnet 'next's then its okay
+        // to different 'next's then its okay
         if (next !== state('nextWithinSubject')) {
           state('withinSubject', prevWithinSubject || null)
           state('nextWithinSubject', next)
