@@ -1,26 +1,27 @@
-import { subscriptionType } from 'nexus'
+import { list, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
+import { Spec } from './gql-Spec'
 
 export const Subscription = subscriptionType({
   definition (t) {
     t.field('authChange', {
       type: Query,
       description: 'Triggered when the auth state changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('authChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('authChange'),
       resolve: (source, args, ctx) => ({}),
     })
 
     t.field('devChange', {
       type: DevState,
       description: 'Issued for internal development changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('devChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('devChange'),
       resolve: (source, args, ctx) => ctx.coreData.dev,
     })
 
     t.field('cloudViewerChange', {
       type: Query,
       description: '',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('cloudViewerChange'),
       resolve: (source, args, ctx) => {
         return {
           requestPolicy: 'network-only',
@@ -31,15 +32,26 @@ export const Subscription = subscriptionType({
     t.field('browserStatusChange', {
       type: CurrentProject,
       description: 'Status of the currently opened browser',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('browserStatusChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('browserStatusChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
     t.field('specsChange', {
       type: CurrentProject,
       description: 'Issued when the watched specs for the project changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('specsChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('specsChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
+
+    t.field('gitInfoChange', {
+      type: list(Spec),
+      description: 'When the git info has refreshed for some or all of the specs, we fire this event with the specs updated',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('gitInfoChange', false),
+      resolve: (absolutePaths: string[], args, ctx) => {
+        const pathsToSend = new Set(absolutePaths)
+
+        return ctx.project.specs.filter((s) => pathsToSend.has(s.absolute))
+      },
     })
 
     t.field('branchChange', {

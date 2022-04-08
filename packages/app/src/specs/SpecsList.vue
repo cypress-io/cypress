@@ -122,9 +122,9 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
+import { Specs_SpecsListFragment, SpecListRowFragment, SpecsList_GitInfoUpdatedDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 import type { FuzzyFoundSpec, SpecsComparator } from '@packages/frontend-shared/src/utils/spec-utils'
@@ -142,6 +142,18 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const { t } = useI18n()
+
+gql`
+subscription SpecsList_GitInfoUpdated {
+  gitInfoChange {
+    id
+    absolute
+    gitInfo {
+      ...SpecListRow
+    }
+  }
+}
+`
 
 gql`
 fragment SpecsList on Spec {
@@ -175,6 +187,8 @@ fragment Specs_SpecsList on Query {
   }
 }
 `
+
+useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment
