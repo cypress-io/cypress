@@ -13,13 +13,13 @@ export class Validator {
     this.onFailure = onFailure
   }
 
-  validate ({ callbackFn, options, originOrDomain }) {
-    if (!isString(originOrDomain)) {
+  validate ({ callbackFn, options, urlOrDomain }) {
+    if (!isString(urlOrDomain)) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('origin.invalid_origin_argument', {
+      $errUtils.throwErrByPath('origin.invalid_url_argument', {
         onFail: this.log,
-        args: { arg: $utils.stringify(originOrDomain) },
+        args: { arg: $utils.stringify(urlOrDomain) },
       })
     }
 
@@ -58,14 +58,14 @@ export class Validator {
     }
   }
 
-  validateLocation (location, originOrDomain) {
-    // we don't support query params, hashes, or paths (except for '/')
-    if (location.search.length > 0 || location.pathname.length > 1 || location.hash.length > 0) {
+  validateLocation (location, urlOrDomain) {
+    // we don't support query params
+    if (location.search.length > 0) {
       this.onFailure()
 
-      $errUtils.throwErrByPath('origin.invalid_origin_argument', {
+      $errUtils.throwErrByPath('origin.invalid_url_argument', {
         onFail: this.log,
-        args: { arg: $utils.stringify(originOrDomain) },
+        args: { arg: $utils.stringify(urlOrDomain) },
       })
     }
   }
