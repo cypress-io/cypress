@@ -21,6 +21,14 @@ describe('GitDataSource', () => {
     e2eFolder = path.join(projectPath, 'cypress', 'e2e')
     const allSpecs = fs.readdirSync(e2eFolder)
 
+    if (process.env.CI) {
+      // need to set a user on CI
+      await Promise.all([
+        git.addConfig('user.name', 'Test User', true, 'global'),
+        git.addConfig('user.email', 'test-user@example.com', true, 'global'),
+      ])
+    }
+
     await git.init()
     await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
     await git.commit('add all specs')
@@ -43,14 +51,6 @@ describe('GitDataSource', () => {
       onGitInfoChange,
       onError,
     })
-
-    if (process.env.CI) {
-      // need to set a user on CI
-      await Promise.all([
-        git.addConfig('user.name', 'Test User', true),
-        git.addConfig('user.email', 'test-user@example.com', true),
-      ])
-    }
 
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)

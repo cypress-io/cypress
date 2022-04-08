@@ -48,6 +48,7 @@ export const Subscription = subscriptionType({
       description: 'When the git info has refreshed for some or all of the specs, we fire this event with the specs updated',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('gitInfoChange'),
       resolve: (absolutePaths: string[] | undefined, args, ctx) => {
+        // Send back the git info for all specs on subscribe
         if (absolutePaths === undefined) {
           return ctx.project.specs
         }
