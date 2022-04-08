@@ -14,7 +14,7 @@ const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const { fs } = require(`../../lib/util/fs`)
 
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)

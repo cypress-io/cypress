@@ -187,7 +187,7 @@ export class ProjectLifecycleManager {
   }
 
   async checkIfLegacyConfigFileExist () {
-    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.legacyConfigFile)
+    const legacyConfigFileExist = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
 
     return Boolean(legacyConfigFileExist)
   }
@@ -252,9 +252,7 @@ export class ProjectLifecycleManager {
           }
         }
 
-        if (this.ctx.coreData.cliBrowser) {
-          await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
-        }
+        await this.setInitialActiveBrowser()
 
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
@@ -270,6 +268,43 @@ export class ProjectLifecycleManager {
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
     })
+  }
+
+  /**
+   * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
+   *  1. The value of `--browser` passed via CLI.
+   *  2. The last browser selected in `open` mode (by name and channel) for this project.
+   *  3. The first browser found.
+   */
+  async setInitialActiveBrowser () {
+    if (this.ctx.coreData.cliBrowser) {
+      await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
+
+      // only finish if `cliBrowser` was successfully set - we must have an activeBrowser once this function resolves
+      if (this.ctx.coreData.activeBrowser) return
+    }
+
+    // lastBrowser is cached per-project.
+    const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
+    const browsers = await this.ctx.browser.machineBrowsers()
+
+    if (!browsers[0]) throw new Error('No browsers available in setInitialActiveBrowser, cannot set initial active browser')
+
+    this.ctx.coreData.activeBrowser = (prefs?.lastBrowser && browsers.find((b) => {
+      return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
+    })) || browsers[0]
+  }
+
+  private async setActiveBrowserByNameOrPath (nameOrPath: string) {
+    try {
+      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath)
+
+      this.ctx.coreData.activeBrowser = browser
+    } catch (e) {
+      const error = e as CypressError
+
+      this.ctx.onWarning(error)
+    }
   }
 
   async refreshLifecycle () {
@@ -310,21 +345,6 @@ export class ProjectLifecycleManager {
     assert(this._configManager, 'Cannot initialize config without a config manager')
 
     return this._configManager.initializeConfig()
-  }
-
-  private async setActiveBrowser (cliBrowser: string) {
-    // When we're starting up, if we've chosen a browser to run with, check if it exists
-    this.ctx.coreData.cliBrowser = null
-
-    try {
-      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(cliBrowser)
-
-      this.ctx.coreData.chosenBrowser = browser ?? null
-    } catch (e) {
-      const error = e as CypressError
-
-      this.ctx.onWarning(error)
-    }
   }
 
   /**

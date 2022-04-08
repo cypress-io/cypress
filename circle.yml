@@ -949,7 +949,14 @@ commands:
           name: Build NPM package
           command: yarn build --scope cypress
       - run:
+          name: Copy Re-exported NPM Packages
+          command: node ./scripts/post-build.js
+          working_directory: cli
+      - run:
           command: ls -la types
+          working_directory: cli/build
+      - run:
+          command: ls -la vue mount-utils react
           working_directory: cli/build
       - unless:
           condition:
@@ -1099,7 +1106,8 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
-            run-webpack-dev-server-fresh-integration-tests
+            run-webpack-dev-server-fresh-integration-tests,
+            run-vite-dev-server-fresh-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1455,6 +1463,28 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs      
+
+  run-vite-dev-server-fresh-integration-tests:
+    <<: *defaults
+    # parallelism: 3 TODO: Add parallelism once we have more specs
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group vite-dev-server-fresh
+          working_directory: npm/vite-dev-server-fresh
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs            
 
   ui-components-integration-tests:
     <<: *defaults
@@ -2257,6 +2287,10 @@ linux-workflow: &linux-workflow
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
+    - run-vite-dev-server-fresh-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install          
     - run-app-component-tests-chrome:
         context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
