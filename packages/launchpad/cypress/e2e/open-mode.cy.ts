@@ -105,10 +105,17 @@ describe('Launchpad: Open Mode', () => {
 
       cy.get('[data-cy="choose-editor-modal"]').as('modal')
 
+      cy.get('@modal').contains('Cancel').click()
+      cy.get('@modal').should('not.exist')
+
+      cy.findByTestId('project-card')
+      cy.get('[aria-label="Project Actions"]').click()
+      cy.get('button').contains('Open In IDE').click()
+
       cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
       cy.get('@modal').contains('Choose your editor...').click()
       cy.get('@modal').contains('Well known editor').click()
-      cy.get('@modal').contains('Done').click()
+      cy.get('@modal').contains('Save Changes').click()
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
     })
 

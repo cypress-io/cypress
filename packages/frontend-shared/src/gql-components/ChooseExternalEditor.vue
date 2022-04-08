@@ -13,11 +13,12 @@
         <Icon
           v-if="value"
           :icon="icons[value.id]"
-          class="text-md"
+          class="text-md text-gray-500"
+          icon-class="icon-dark-gray-500"
         />
         <i-cy-terminal_x16
           v-else
-          class="text-md text-gray-600"
+          class="text-md icon-dark-gray-500"
         />
       </template>
       <template #item-prefix="{ value }">
@@ -31,19 +32,19 @@
 
   <div
     v-if="editorToUse === 'custom'"
-    class="flex py-2 items-center"
+    class="flex py-16px pb-4px items-center"
   >
     <div class="w-400px">
       <Input
         id="customPath"
         v-model="customBinary"
         data-cy="custom-editor"
-        input-classes="text-sm"
+        input-classes="text-sm text-gray-500"
         :placeholder="t('settingsPage.editor.customPathPlaceholder')"
       >
         <template #prefix>
           <i-cy-technology-command-line_x16
-            class="text-gray-500"
+            class="text-md icon-dark-gray-500"
           />
         </template>
       </Input>

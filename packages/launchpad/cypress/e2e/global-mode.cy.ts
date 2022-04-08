@@ -168,7 +168,7 @@ describe('Launchpad: Global Mode', () => {
         cy.get('[aria-label="Project Actions"]').click()
 
         cy.get('[data-cy="Open In IDE"]').click()
-        cy.contains('Select Preferred Editor')
+        cy.contains('External Editor Preferences')
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
