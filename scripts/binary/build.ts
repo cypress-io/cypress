@@ -46,14 +46,14 @@ async function checkMaxPathLength () {
   if (process.platform !== 'win32') return log('#checkMaxPathLength (skipping since not on Windows)')
 
   // This is the Cypress cache dir path on a vanilla Windows Server VM. We can treat this as the typical case.
-  const typicalWin32PathPrefixLength = 'C:\\Users\\Administrator\\AppData\\Local\\Cypress\\Cache\\10.0.0\\'.length
+  const typicalWin32PathPrefixLength = 'C:\\Users\\Administrator\\AppData\\Local\\Cypress\\Cache\\10.0.0\\resources\\app\\'.length
   const maxRelPathLength = 260 - typicalWin32PathPrefixLength
 
   log(`#checkMaxPathLength (max abs path length: ${maxRelPathLength})`)
 
-  const distDir = meta.distDir()
-  const allRelPaths = (await globAsync('**/*', { cwd: distDir, absolute: true }))
-  .map((p) => p.slice(distDir.length))
+  const buildDir = meta.buildDir()
+  const allRelPaths = (await globAsync('**/*', { cwd: buildDir, absolute: true }))
+  .map((p) => p.slice(buildDir.length))
 
   if (!allRelPaths.length) throw new Error('No binary paths found in checkMaxPathLength')
 
@@ -218,8 +218,6 @@ require('./packages/server')\
   log('#removeDevElectronApp')
   fs.removeSync(meta.distDir('packages', 'electron', 'dist'))
 
-  await checkMaxPathLength()
-
   // electronPackAndSign
   log('#electronPackAndSign')
   // See the internal wiki document "Signing Test Runner on MacOS"
@@ -259,6 +257,8 @@ require('./packages/server')\
       throw e
     }
   }
+
+  await checkMaxPathLength()
 
   // lsDistFolder
   console.log('in build folder %s', meta.buildDir())
