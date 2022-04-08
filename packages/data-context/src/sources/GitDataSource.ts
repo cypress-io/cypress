@@ -225,6 +225,8 @@ export class GitDataSource {
 
       const changed: string[] = []
 
+      // Go through each file, updating our gitInfo cache and detecting which
+      // entries have changed, to notify the UI
       for (const [i, file] of absolutePaths.entries()) {
         debug(`checking %s`, file)
         const current = this.#gitMeta.get(file)
