@@ -51,7 +51,7 @@ function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js
   cy.contains('Migrate the configuration for me').click()
 
   cy.withCtx(async (ctx, o) => {
-    const configStats = await ctx.actions.file.checkIfFileExists(o.migratedConfigFile)
+    const configStats = await ctx.file.checkIfFileExists(o.migratedConfigFile)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
@@ -83,7 +83,7 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
 
   cy.withCtx(async (ctx, { lang }) => {
     expect(
-      await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', `e2e.${lang}`)), 'support file not renamed',
+      await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'support', `e2e.${lang}`)), 'support file not renamed',
     ).not.to.be.null
   }, { lang })
 }
@@ -149,7 +149,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       ]
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -193,7 +193,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         ]
 
         for (const spec of specs) {
-          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+          const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
           expect(stats).to.not.be.null
         }
@@ -205,7 +205,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       finishMigrationAndContinue()
 
       cy.withCtx(async (ctx) => {
-        const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+        const integrationFolderStats = await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
 
         expect(integrationFolderStats).to.be.null
       })
@@ -256,7 +256,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         ]
 
         for (const spec of specs) {
-          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+          const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
           expect(stats).to.not.be.null
         }
@@ -300,7 +300,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       ]
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -312,7 +312,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     finishMigrationAndContinue()
 
     cy.withCtx(async (ctx) => {
-      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+      const integrationFolderStats = await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
 
       expect(integrationFolderStats).to.be.null
     })
@@ -351,7 +351,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       ]
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -363,7 +363,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     finishMigrationAndContinue()
 
     cy.withCtx(async (ctx) => {
-      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+      const integrationFolderStats = await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
 
       expect(integrationFolderStats).to.be.null
     })
@@ -397,7 +397,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       const specs = ['src/basic.cy.js']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -445,7 +445,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       const specs = ['cypress/e2e/basic.test.js']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -492,7 +492,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       }
@@ -530,7 +530,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       const specs = ['cypress/e2e/foo.cy.coffee']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       }
@@ -568,7 +568,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       const specs = ['cypress/e2e/foo.cy.cjsx']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       }
@@ -764,7 +764,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.wait(100)
     cy.withCtx((ctx) => {
       ['cypress/e2e/foo.cy.js'].forEach(async (spec) => {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       })
@@ -785,7 +785,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       ]
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -834,7 +834,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       ]
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
       }
@@ -843,7 +843,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     migrateAndVerifyConfig()
 
     cy.withCtx(async (ctx) => {
-      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+      const integrationFolderStats = await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
 
       expect(integrationFolderStats).to.be.null
     })
@@ -882,7 +882,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         ]
 
         for (const spec of specs) {
-          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+          const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
           expect(stats).to.not.be.null
         }
@@ -930,7 +930,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         ]
 
         for (const spec of specs) {
-          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+          const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
           expect(stats).to.not.be.null
         }
@@ -1038,11 +1038,11 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
     cy.findByText('Migrate the configuration for me').click()
 
     cy.withCtx(async (ctx) => {
-      const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
+      const configStats = await ctx.file.checkIfFileExists('cypress.config.js')
 
       expect(configStats).to.not.be.null.and.not.be.undefined
 
-      const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.json')
+      const oldConfigStats = await ctx.file.checkIfFileExists('cypress.json')
 
       expect(oldConfigStats).to.be.null
 
@@ -1129,7 +1129,7 @@ describe('Migrate custom config files', () => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       }
@@ -1181,7 +1181,7 @@ describe('Migrate custom config files', () => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       }
@@ -1233,7 +1233,7 @@ describe('Migrate custom config files', () => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       }
