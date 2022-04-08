@@ -12,18 +12,10 @@ interface CodeGenOptions {
 
 export class SpecOptions {
   private parsedPath: ParsedPath;
-  private projectRoot: string;
-  private parsedErroredCodegenCandidate?: ParsedPath
 
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
     assert(this.ctx.currentProject)
     this.parsedPath = this.ctx.path.parse(options.codeGenPath)
-    if (options.erroredCodegenCandidate) {
-      this.parsedErroredCodegenCandidate = this.ctx.path.parse(options.erroredCodegenCandidate)
-    }
-
-    // Should always be defined
-    this.projectRoot = this.ctx.currentProject
   }
 
   async getCodeGenOptions () {
@@ -34,16 +26,18 @@ export class SpecOptions {
   }
 
   private async getFilename () {
-    const { dir, name, ext } = this.parsedPath
+    const { dir, base, ext } = this.parsedPath
+    const cyWithExt = this.options.specFileExtension + ext
+    const name = base.slice(0, -cyWithExt.length)
 
-    let fileToTry = this.ctx.path.join(dir, `${name}${ext}`)
+    let fileToTry = this.ctx.path.join(dir, `${name}${cyWithExt}`)
 
     let i = 0
 
     while (await this.fileExists(fileToTry)) {
       fileToTry = this.ctx.path.join(
         dir,
-        `${name}-copy-${++i}${ext}`,
+        `${name}-copy-${++i}${cyWithExt}`,
       )
     }
 

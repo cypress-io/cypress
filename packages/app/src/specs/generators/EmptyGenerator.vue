@@ -54,6 +54,7 @@
         >
           {{ t('createSpec.createSpec') }}
         </Button>
+
         <Button
           v-if="props.otherGenerators"
           size="lg"
