@@ -26,12 +26,12 @@ export const historyNavigationTriggeredHashChange = (state): boolean => {
   }
 
   const urls = state('urls')
+  const urlPosition = state('urlPosition')
 
-  if (_.isEmpty(urls)) {
+  if (_.isEmpty(urls) || urlPosition === undefined) {
     return false
   }
 
-  const urlPosition = state('urlPosition')
   const currentUrl = $Location.create(urls[urlPosition])
 
   const nextPosition = urlPosition + delta
