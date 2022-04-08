@@ -252,6 +252,7 @@ export default (Commands, Cypress, cy, state) => {
     })
     .then((responses) => {
       // return the array of xhr responses
+
       const ret = responses
 
       if (log) {
