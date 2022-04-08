@@ -35,6 +35,16 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
        causes domain navigation:
      CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
 
+In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:
+
+\`cy.visit('http://localhost:4545/')\`
+\`<other commands targeting http://localhost:4545 go here>\`
+
+\`cy.origin('http://localhost:5656', () => {\`
+\`  cy.visit('http://localhost:5656/')\`
+\`  <other commands targeting http://localhost:5656 go here>\`
+\`})\`
+
 The new URL is considered a different origin because the following parts of the URL are different:
 
   > port
@@ -48,8 +58,6 @@ The previous URL you visited was:
 You're attempting to visit this URL:
 
   > 'http://localhost:5656'
-
-You may need to restructure some of your test code to avoid this problem.
 
 https://on.cypress.io/cannot-visit-different-origin-domain
       [stack trace lines]
@@ -58,6 +66,16 @@ https://on.cypress.io/cannot-visit-different-origin-domain
        "before each" hook for "never gets here":
      CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
 
+In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:
+
+\`cy.visit('http://localhost:4545/')\`
+\`<other commands targeting http://localhost:4545 go here>\`
+
+\`cy.origin('http://localhost:5656', () => {\`
+\`  cy.visit('http://localhost:5656/')\`
+\`  <other commands targeting http://localhost:5656 go here>\`
+\`})\`
+
 The new URL is considered a different origin because the following parts of the URL are different:
 
   > port
@@ -71,8 +89,6 @@ The previous URL you visited was:
 You're attempting to visit this URL:
 
   > 'http://localhost:5656'
-
-You may need to restructure some of your test code to avoid this problem.
 
 https://on.cypress.io/cannot-visit-different-origin-domain
 
