@@ -155,6 +155,16 @@ describe('Launchpad: Error System Tests', () => {
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
   })
+
+  it('shows correct stack trace when config with ts-module error', () => {
+    cy.scaffoldProject('config-with-ts-module-error')
+    cy.openProject('config-with-ts-module-error')
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:5:9')
+  })
 })
 
 describe('setupNodeEvents', () => {
