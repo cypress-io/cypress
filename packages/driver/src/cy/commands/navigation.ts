@@ -110,8 +110,12 @@ const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log,
     args: {
       differences: differences.join(', '),
       previousUrl: previousUrlVisited,
-      attemptedUrl: remote.origin,
+      attemptedUrl: remote,
       isCrossOriginSpecBridge,
+      experimentalLoginFlows: Cypress.config('experimentalLoginFlows'),
+    },
+    errProps: {
+      isCrossOrigin: true,
     },
   }
 
@@ -1219,9 +1223,9 @@ export default (Commands, Cypress, cy, state, config) => {
             return
           }
 
-          // if it came from the user's onBeforeLoad or onLoad callback, it's
+          // if the err came from the user's onBeforeLoad/onLoad callback or is cross-origin, it's
           // not a network failure, and we should throw the original error
-          if (err.isCallbackError) {
+          if (err.isCallbackError || err.isCrossOrigin) {
             delete err.isCallbackError
             throw err
           }

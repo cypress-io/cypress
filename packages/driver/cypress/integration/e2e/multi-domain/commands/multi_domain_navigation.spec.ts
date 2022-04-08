@@ -1,3 +1,5 @@
+const { stripIndent } = require('common-tags')
+
 context('cy.origin navigation', () => {
   it('.go()', () => {
     cy.visit('/fixtures/multi-domain.html')
@@ -153,11 +155,20 @@ context('cy.origin navigation', () => {
 
     it('errors when visiting a new origin within origin', (done) => {
       cy.on('fail', (e) => {
-        expect(e.message).to.include('failed trying to load:\n\nhttp://www.idp.com:3500/fixtures/dom.html')
-        expect(e.message).to.include('failed because you are attempting to visit a URL that is of a different origin')
-        expect(e.message).to.include('You may only `cy.visit()` same-origin URLs within `cy.origin()`.')
-        expect(e.message).to.include('The previous URL you visited was:\n\n  > \'http://www.foobar.com:3500\'')
-        expect(e.message).to.include('You\'re attempting to visit this URL:\n\n  > \'http://www.idp.com:3500\'')
+        expect(e.message).to.equal(stripIndent`\
+          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
+          You likely forgot to use \`cy.origin()\`:\n
+          \`cy.origin('http://idp.com:3500', () => {\`
+          \`  cy.visit('http://www.idp.com:3500/fixtures/dom.html')\`
+          \`  <other commands targeting http://www.idp.com:3500 go here>\`
+          \`})\`\n
+          The new URL is considered a different origin because the following parts of the URL are different:\n
+            > superdomain\n
+          You may only \`cy.visit()\` same-origin URLs within \`cy.origin()\`.\n
+          The previous URL you visited was:\n
+            > 'http://www.foobar.com:3500'\n
+          You're attempting to visit this URL:\n
+            > 'http://www.idp.com:3500'`)
 
         done()
       })
@@ -169,6 +180,33 @@ context('cy.origin navigation', () => {
         // this call should error since we can't visit a cross-origin
         cy.visit('http://www.idp.com:3500/fixtures/dom.html')
       })
+    })
+
+    // @ts-ignore
+    it('informs user to use cy.origin with experimental flag off', { experimentalLoginFlows: false }, (done) => {
+      cy.on('fail', (e) => {
+        expect(e.message).to.equal(stripIndent`\
+          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
+          In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:\n
+          \`cy.origin('http://foobar.com:3500', () => {\`
+          \`  cy.visit('http://www.foobar.com:3500/fixtures/dom.html')\`
+          \`  <other commands targeting http://www.foobar.com:3500 go here>\`
+          \`})\`\n
+          The new URL is considered a different origin because the following parts of the URL are different:\n
+            > superdomain\n
+          You may only \`cy.visit()\` same-origin URLs within a single test.\n
+          The previous URL you visited was:\n
+            > 'http://localhost:3500'\n
+          You're attempting to visit this URL:\n
+            > 'http://www.foobar.com:3500'`)
+
+        done()
+      })
+
+      cy.visit('/fixtures/multi-domain.html')
+
+      // this call should error since we can't visit a cross-origin
+      cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
     })
 
     it('supports the query string option', () => {
