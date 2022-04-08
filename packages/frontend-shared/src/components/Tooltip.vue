@@ -31,10 +31,10 @@ withDefaults(defineProps<{
     border-color: #2e3247;
   }
 
-  &[data-popper-placement="bottom"] {
+  &[data-popper-placement="top"] {
     .v-popper__wrapper {
       transform: scaleY(0);
-      @apply origin-top transition-transform;
+      @apply origin-bottom transition-transform;
     }
 
     &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
@@ -46,6 +46,28 @@ withDefaults(defineProps<{
     .v-popper__wrapper {
       transform: scaleX(0);
       @apply origin-left transition-transform;
+    }
+
+    &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
+      transform: scaleX(1);
+    }
+  }
+
+  &[data-popper-placement="bottom"] {
+    .v-popper__wrapper {
+      transform: scaleY(0);
+      @apply origin-top transition-transform;
+    }
+
+    &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
+      transform: scaleY(1);
+    }
+  }
+
+  &[data-popper-placement="left"] {
+    .v-popper__wrapper {
+      transform: scaleX(0);
+      @apply origin-right transition-transform;
     }
 
     &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
