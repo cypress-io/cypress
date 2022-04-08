@@ -177,7 +177,9 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
     // we shouldn't be concerned with using our own copy if they've shipped w/ an earlier version
     result.htmlWebpackPlugin.majorVersion = getMajorVersion(result.htmlWebpackPlugin.packageJson, [4, 5])
   } catch (e) {
-    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
+    const err = e as Error & {code?: string}
+
+    if (err.code !== 'MODULE_NOT_FOUND' && !err.message.includes('Unexpected major version')) {
       throw e
     }
 
