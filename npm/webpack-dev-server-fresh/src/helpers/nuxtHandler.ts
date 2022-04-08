@@ -21,6 +21,6 @@ export async function nuxtHandler ({ devServerConfig }: PresetHandler): Promise<
     return webpackConfig
   } catch (e) {
     console.error(e) // eslint-disable-line no-console
-    throw Error(`Error loading nuxt. Looked in ${devServerConfig.cypressConfig.projectRoot}`)
+    throw Error(`Error loading nuxt. Looked in ${require.resolve.paths(devServerConfig.cypressConfig.projectRoot)}`)
   }
 }

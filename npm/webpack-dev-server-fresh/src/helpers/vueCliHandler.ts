@@ -19,6 +19,6 @@ export function vueCliHandler ({ devServerConfig }: PresetHandler): Configuratio
     return webpackConfig
   } catch (e) {
     console.error(e) // eslint-disable-line no-console
-    throw Error(`Error loading @vue/cli-service/webpack.config.js. Looked in ${devServerConfig.cypressConfig.projectRoot}`)
+    throw Error(`Error loading @vue/cli-service/webpack.config.js. Looked in ${require.resolve.paths(devServerConfig.cypressConfig.projectRoot)}`)
   }
 }
