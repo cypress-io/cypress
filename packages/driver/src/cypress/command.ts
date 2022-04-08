@@ -75,14 +75,14 @@ export class $Command {
     return this.attributes
   }
 
-  _removeNonPrimitives (args) {
+  _removeNonPrimitives (args: Array<any> = []) {
     // if the obj has options and
     // log is false, set it to true
     for (let i = args.length - 1; i >= 0; i--) {
       const arg = args[i]
 
       if (_.isObject(arg)) {
-        // filter out any properties which arent primitives
+        // filter out any properties which aren't primitives
         // to prevent accidental mutations
         const opts = _.omitBy(arg, _.isObject)
 
