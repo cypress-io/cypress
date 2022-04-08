@@ -2,7 +2,7 @@
   <Tooltip
     placement="right"
     :disabled="isNavBarExpanded"
-    :distance="24"
+    :distance="8"
   >
     <div
       :class="active

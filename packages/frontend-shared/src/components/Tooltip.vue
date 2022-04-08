@@ -30,15 +30,28 @@ withDefaults(defineProps<{
     // NOTE: we can't use @apply to here because having !important breaks things
     border-color: #2e3247;
   }
-}
 
-.v-popper__wrapper {
-  transform: scaleY(0);
-  @apply origin-top transition-transform;
-}
+  &[data-popper-placement="bottom"] {
+    .v-popper__wrapper {
+      transform: scaleY(0);
+      @apply origin-top transition-transform;
+    }
 
-.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
-  transform: scaleY(1);
+    &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
+      transform: scaleY(1);
+    }
+  }
+
+  &[data-popper-placement="right"] {
+    .v-popper__wrapper {
+      transform: scaleX(0);
+      @apply origin-left transition-transform;
+    }
+
+    &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
+      transform: scaleX(1);
+    }
+  }
 }
 
 </style>
