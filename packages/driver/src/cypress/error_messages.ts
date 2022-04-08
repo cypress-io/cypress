@@ -1001,7 +1001,7 @@ export default {
           A cross-origin request for \`${crossOriginUrl.href}\` was detected.
 
           A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
-        
+
           \`cy.origin('${crossOriginUrl.originPolicy}', () => {\`
           \`  <commands targeting ${crossOriginUrl.origin} go here>\`
           \`})\`
@@ -1231,6 +1231,10 @@ export default {
       session: {
         message: `${cmd('session')} use is not supported in the ${cmd('origin')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20721',
+      },
+      Cypress_session: {
+        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using them outside of the callback instead.`,
+        docsUrl: 'https://on.cypress.io/session-api',
       },
     },
   },
@@ -2097,7 +2101,7 @@ export default {
           ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
           ${args.experimentalLoginFlows ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use ${cmd('origin')}:` }
-          
+
           ${args.isCrossOriginSpecBridge ?
           `\`cy.origin('${args.previousUrl.originPolicy}', () => {\`
           \`  cy.visit('${args.previousUrl}')\`
@@ -2106,7 +2110,7 @@ export default {
           `\`cy.visit('${args.previousUrl}')\`
           \`<other commands targeting ${args.previousUrl.origin} go here>\``
           }
-          
+
           \`cy.origin('${args.attemptedUrl.originPolicy}', () => {\`
           \`  cy.visit('${args.attemptedUrl}')\`
           \`  <other commands targeting ${args.attemptedUrl.origin} go here>\`

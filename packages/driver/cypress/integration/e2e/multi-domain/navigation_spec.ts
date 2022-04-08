@@ -47,18 +47,28 @@ describe('navigation events', () => {
       })
     })
 
-    // TODO: this test should work but there seems to be a problem where the command queue ends prematurely
-    it.skip('navigates forward and back using history', () => {
+    it('navigates forward and back using history', () => {
       cy.origin('http://foobar.com:3500', () => {
+        const onLoad = (cb) => {
+          const onNavChanged = (event) => {
+            if (event === 'page navigation event (\'load\')') {
+              cy.off('navigation:changed', onNavChanged)
+              cb()
+            }
+          }
+
+          cy.on('navigation:changed', onNavChanged)
+        }
+
         cy.get('a[data-cy="cross-origin-page"]').click()
         .window().then((win) => {
-          return new Promise((resolve) => {
-            cy.once('navigation:changed', resolve)
+          return new Promise<void>((resolve) => {
+            onLoad(resolve)
 
             win.history.back()
           }).then(() => {
-            return new Promise((resolve) => {
-              cy.once('navigation:changed', resolve)
+            return new Promise<void>((resolve) => {
+              onLoad(resolve)
 
               win.history.forward()
             })
