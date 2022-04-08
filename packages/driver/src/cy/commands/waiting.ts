@@ -251,9 +251,8 @@ export default (Commands, Cypress, cy, state) => {
       return waitForXhr(str, _.omit(options, 'error'))
     })
     .then((responses) => {
-      // if we only asked to wait for one alias
-      // then return that, else return the array of xhr responses
-      const ret = responses.length === 1 ? responses[0] : responses
+      // return the array of xhr responses
+      const ret = responses
 
       if (log) {
         log.set('consoleProps', () => {
