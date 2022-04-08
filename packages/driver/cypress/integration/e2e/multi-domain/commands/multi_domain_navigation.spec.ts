@@ -158,6 +158,10 @@ context('cy.origin navigation', () => {
         expect(e.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
+          \`cy.origin('http://foobar.com:3500', () => {\`
+          \`  cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')\`
+          \`  <other commands targeting http://www.foobar.com:3500 go here>\`
+          \`})\`\n
           \`cy.origin('http://idp.com:3500', () => {\`
           \`  cy.visit('http://www.idp.com:3500/fixtures/dom.html')\`
           \`  <other commands targeting http://www.idp.com:3500 go here>\`
@@ -188,6 +192,8 @@ context('cy.origin navigation', () => {
         expect(e.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:\n
+          \`cy.visit('http://localhost:3500/fixtures/multi-domain.html')\`
+          \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://foobar.com:3500', () => {\`
           \`  cy.visit('http://www.foobar.com:3500/fixtures/dom.html')\`
           \`  <other commands targeting http://www.foobar.com:3500 go here>\`

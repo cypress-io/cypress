@@ -2095,6 +2095,15 @@ export default {
 
           ${args.experimentalLoginFlows ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use ${cmd('origin')}:` }
           
+          ${args.isCrossOriginSpecBridge ?
+          `\`cy.origin('${args.previousUrl.originPolicy}', () => {\`
+          \`  cy.visit('${args.previousUrl}')\`
+          \`  <other commands targeting ${args.previousUrl.origin} go here>\`
+          \`})\`` :
+          `\`cy.visit('${args.previousUrl}')\`
+          \`<other commands targeting ${args.previousUrl.origin} go here>\``
+          }
+          
           \`cy.origin('${args.attemptedUrl.originPolicy}', () => {\`
           \`  cy.visit('${args.attemptedUrl}')\`
           \`  <other commands targeting ${args.attemptedUrl.origin} go here>\`
@@ -2108,7 +2117,7 @@ export default {
 
           The previous URL you visited was:
 
-            > '${args.previousUrl}'
+            > '${args.previousUrl.origin}'
 
           You're attempting to visit this URL:
 

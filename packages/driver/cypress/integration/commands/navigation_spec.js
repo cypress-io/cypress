@@ -1413,6 +1413,8 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
+          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
+          \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://localhost:3501', () => {\`
           \`  cy.visit('http://localhost:3501/fixtures/generic.html')\`
           \`  <other commands targeting http://localhost:3501 go here>\`
@@ -1433,7 +1435,6 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
-
         cy.visit('http://localhost:3501/fixtures/generic.html')
       })
 
@@ -1444,6 +1445,8 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
+          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
+          \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('https://localhost:3500', () => {\`
           \`  cy.visit('https://localhost:3500/fixtures/generic.html')\`
           \`  <other commands targeting https://localhost:3500 go here>\`
@@ -1474,6 +1477,8 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
+          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
+          \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://google.com:3500', () => {\`
           \`  cy.visit('http://google.com:3500/fixtures/generic.html')\`
           \`  <other commands targeting http://google.com:3500 go here>\`
@@ -1504,6 +1509,8 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
+          \`cy.visit('http://127.0.0.1:3500/fixtures/generic.html')\`
+          \`<other commands targeting http://127.0.0.1:3500 go here>\`\n
           \`cy.origin('http://126.0.0.1:3500', () => {\`
           \`  cy.visit('http://126.0.0.1:3500/fixtures/generic.html')\`
           \`  <other commands targeting http://126.0.0.1:3500 go here>\`
