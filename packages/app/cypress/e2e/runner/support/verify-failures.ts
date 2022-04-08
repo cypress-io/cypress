@@ -17,7 +17,7 @@ const verifyIdeOpen = ({ fileName, action, hasPreferredIde, ideLine, ideColumn }
   } else {
     action()
 
-    cy.contains(defaultMessages.globalPage.selectPreferredEditor).should('be.visible')
+    cy.contains(defaultMessages.globalPage.externalEditorPreferences).should('be.visible')
     cy.findByRole('button', { name: defaultMessages.actions.close }).click()
   }
 }
