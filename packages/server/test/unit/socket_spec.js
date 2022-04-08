@@ -482,7 +482,7 @@ describe('lib/socket', () => {
         sinon.stub(this.options, 'onRequest').rejects(err)
 
         return this.client.emit('backend:request', 'http:request', 'foo', (resp) => {
-          expect(resp.error).to.deep.eq(errors.clone(err))
+          expect(resp.error).to.deep.eq(errors.cloneErr(err))
 
           return done()
         })
@@ -548,6 +548,30 @@ describe('lib/socket', () => {
           expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 })
 
           return done()
+        })
+      })
+    })
+
+    context('#isRunnerSocketConnected', function () {
+      it('returns false when runner is not connected', function () {
+        expect(this.socket.isRunnerSocketConnected()).to.eq(false)
+      })
+
+      context('runner connected', () => {
+        beforeEach(function (done) {
+          this.socketClient.on('automation:client:connected', () => {
+            this.socketClient.on('runner:connected', () => {
+              return done()
+            })
+
+            this.client.emit('runner:connected')
+          })
+
+          return this.client.emit('automation:client:connected')
+        })
+
+        it('returns true when runner is connected', function () {
+          expect(this.socket.isRunnerSocketConnected()).to.eq(true)
         })
       })
     })

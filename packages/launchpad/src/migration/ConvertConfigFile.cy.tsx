@@ -17,7 +17,7 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
       },
     })
 
-    cy.findByText('component/specPattern').should('be.visible')
+    cy.findByText('component.specPattern').should('be.visible')
     cy.findByText('componentFolder').should('be.visible')
   })
 
@@ -35,7 +35,7 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
       },
     })
 
-    cy.findByText('component/specPattern').should('be.visible')
+    cy.findByText('component.specPattern').should('be.visible')
     cy.findByText('testFiles').should('be.visible')
   })
 
@@ -53,7 +53,7 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
       },
     })
 
-    cy.findByText('e2e/specPattern').should('be.visible')
+    cy.findByText('e2e.specPattern').should('be.visible')
     cy.findByText('integrationFolder').should('be.visible')
   })
 
@@ -71,7 +71,7 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
       },
     })
 
-    cy.findByText('e2e/specPattern').should('be.visible')
+    cy.findByText('e2e.specPattern').should('be.visible')
     cy.findByText('testFiles').should('be.visible')
   })
 
@@ -90,10 +90,10 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
       },
     })
 
-    cy.findByText('e2e/specPattern').should('be.visible')
-    cy.findByText('component/specPattern').should('be.visible')
-    cy.contains('li', 'testFiles').should('contain', 'e2e/specPattern')
-    cy.contains('li', 'componentFolder').should('contain', 'component/specPattern')
+    cy.findByText('e2e.specPattern').should('be.visible')
+    cy.findByText('component.specPattern').should('be.visible')
+    cy.contains('li', 'testFiles').should('contain', 'e2e.specPattern')
+    cy.contains('li', 'componentFolder').should('contain', 'component.specPattern')
   })
 
   it('renders expected content with title', () => {

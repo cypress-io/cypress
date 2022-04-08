@@ -3,10 +3,12 @@
  * NOTICE: For Syntax Highlighting, please use the ShikiHighlight component.
  * We could eventually use Shiki as a Markdown plugin, but I don't want to get into it right now.
  */
-import { computed, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { computed, unref } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'
+import type { MaybeRef } from '@vueuse/core'
 import { useExternalLink } from '../gql-components/useExternalLink'
 import { mapValues, isArray, flatten } from 'lodash'
 
@@ -37,9 +39,9 @@ const defaultClasses = {
   h4: ['font-medium', 'text-1xl', 'mb-3'],
   h5: ['font-medium', 'text-sm', 'mb-3'],
   h6: ['font-medium', 'text-xs', 'mb-3'],
-  p: ['my-3 first:mt-0 text-sm'],
-  pre: ['rounded p-3'],
-  code: [`font-medium rounded text-sm px-4px py-2px`],
+  p: ['my-3 first:mt-0 text-sm mb-4'],
+  pre: ['rounded p-3 bg-white mb-2'],
+  code: [`font-medium rounded text-sm px-4px py-2px bg-red-100`],
   a: ['text-blue-500', 'hover:underline text-sm'],
   ul: ['list-disc pl-6 my-3 text-sm'],
   ol: ['list-decimal pl-6 my-3 text-sm'],
@@ -80,7 +82,7 @@ const buildClasses = (options) => {
   return _classes
 }
 
-export const useMarkdown = (target: Ref<HTMLElement>, text: string, options: UseMarkdownOptions = {}) => {
+export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
   options.openExternal = options.openExternal || true
 
   const classes = buildClasses(options)
@@ -111,6 +113,6 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: string, options: Use
   }
 
   return {
-    markdown: computed(() => md.render(text, { sanitize: true })),
+    markdown: computed(() => md.render(unref(text), { sanitize: true })),
   }
 }

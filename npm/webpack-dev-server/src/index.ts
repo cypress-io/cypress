@@ -20,6 +20,7 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
 
   return new Promise<ResolvedDevServerConfig>(async (resolve, reject) => {
     if (webpackDevServerFacts.isV3()) {
+      // @ts-ignore
       const server: Server = webpackDevServer.listen(0, '127.0.0.1', () => {
         // FIXME: handle address returning a string
         const port = (server.address() as AddressInfo).port
@@ -61,6 +62,8 @@ export interface CypressWebpackDevServerConfig{
   /* support passing a path to the user's webpack config */
   webpackConfig?: WebpackConfigurationWithDevServer
   /* base html template to render in AUT */
+  indexHtmlFile?: string
+  /** @deprecated base html template to render in AUT */
   template?: string
 }
 
@@ -68,6 +71,6 @@ export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devS
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig: devServerConfig?.webpackConfig,
-    template: devServerConfig?.template,
+    indexHtmlFile: devServerConfig?.indexHtmlFile || devServerConfig?.template,
   })
 }

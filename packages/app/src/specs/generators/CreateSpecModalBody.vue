@@ -1,7 +1,7 @@
 <template>
   <StandardModalBody
     variant="bare"
-    class="w-640px h-444px overflow-scroll"
+    class="rounded h-444px w-640px overflow-auto"
   >
     <slot />
   </StandardModalBody>

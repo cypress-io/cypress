@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import StatusIndicator, { StatusIndicatorType } from './StatusIndicator.vue'
+import type { StatusIndicatorType } from './StatusIndicator.vue'
+import StatusIndicator from './StatusIndicator.vue'
 
 const types = {
   success: `Sweet`,
@@ -10,7 +11,7 @@ const types = {
 
 const renderStatusIndicator = (text: string, status: StatusIndicatorType) => {
   return (
-    <span class="inline text-center">
+    <span class="text-center inline">
       {status}
       <StatusIndicator
         class="inline"
@@ -26,8 +27,8 @@ describe('<StatusIndicator />', () => {
   it('renders all states', () => {
     cy.mount(() => (
       <div class="p-12">
-        <h1 class="text-2xl pb-4">Status Indicators</h1>
-        <div class="inline-flex gap-4">
+        <h1 class="pb-4 text-2xl">Status Indicators</h1>
+        <div class="gap-4 inline-flex">
           {Object.entries(types).map(([type, text]) => renderStatusIndicator(text, type as StatusIndicatorType))}
         </div>
       </div>

@@ -15,6 +15,7 @@
   "env": {
     "cypress/globals": true
   },
+  "rules": {},
   "overrides": [
     {
       "files": "**/*.vue",

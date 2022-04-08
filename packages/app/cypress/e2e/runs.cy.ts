@@ -1,5 +1,6 @@
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
@@ -50,7 +51,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('if logged in and connected', { viewportWidth: 1200 }, () => {
       cy.loginUser()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
 
       cy.get('[href="#/runs"]').click()
@@ -161,17 +162,15 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
-
-      cy.visitApp()
-
-      cy.get('[href="#/runs"]').click()
     })
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
+      cy.visitApp('/runs')
       cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
     })
 
     it('clicking on the call to action should call the mutation', () => {
+      cy.__incorrectlyVisitAppWithIntercept('/runs')
       cy.intercept('mutation-RunsErrorRenderer_RequestAccess').as('RequestAccess')
       cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
       cy.wait('@RequestAccess').then((interception: Interception) => {
@@ -263,9 +262,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
-    it('displays a copy button', { browser: 'electron' }, () => {
-      cy.withCtx(async (ctx) => {
+    it('displays a copy button', () => {
+      cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
+        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
       })
 
       cy.loginUser()
@@ -285,6 +285,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+      })
     })
   })
 
@@ -321,7 +324,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('@firstRun').get('[data-cy="run-card-author"]').contains('John Appleseed')
       cy.get('@firstRun').get('[data-cy="run-card-avatar')
       cy.get('@firstRun').get('[data-cy="run-card-branch"]').contains('main')
-      cy.get('@firstRun').contains(`3:17`)
+
+      // the exact timestamp string will depend on the user's browser's locale settings
+      const localeTimeString = (new Date('2022-02-02T08:17:00.005Z')).toLocaleTimeString()
+
+      cy.get('@firstRun').contains(localeTimeString)
       cy.get('@firstRun').contains('span', 'skipped')
       cy.get('@firstRun').get('span').contains('pending')
       cy.get('@firstRun').get('span').contains('passed')
@@ -330,7 +337,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens the run page if a run is clicked', () => {
       cy.loginUser()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.get('[href="#/runs"]').click()
       cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
       cy.get('[data-cy^="runCard-"]').first().click()

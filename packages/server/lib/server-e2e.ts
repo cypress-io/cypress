@@ -7,7 +7,7 @@ import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
-import errors from './errors'
+import * as errors from './errors'
 import fileServer from './file_server'
 import { OpenServerOptions, ServerBase } from './server-base'
 import type { SocketE2E } from './socket-e2e'
@@ -107,7 +107,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               .catch((e) => {
                 debug(e)
 
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL', baseUrl))
+                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
               })
             }
 

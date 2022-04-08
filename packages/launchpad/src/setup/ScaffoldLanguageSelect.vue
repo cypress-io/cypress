@@ -15,7 +15,7 @@
         <SelectLanguage
           :name="t('setupPage.projectSetup.configFileLanguageLabel')"
           :options="languages || []"
-          :value="props.gql.wizard.language?.id ?? 'js'"
+          :value="props.gql.wizard.language?.type ?? 'js'"
           @select="val => onLanguageSelect(val)"
         />
       </div>
@@ -25,10 +25,15 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import { CodeLanguageEnum, EnvironmentSetup_ClearTestingTypeDocument, ScaffoldLanguageSelectFragment, ScaffoldLanguageSelect_ScaffoldTestingTypeDocument, ScaffoldLanguageSelect_WizardUpdateDocument } from '../generated/graphql'
+import type { CodeLanguageEnum, ScaffoldLanguageSelectFragment } from '../generated/graphql'
+import {
+  EnvironmentSetup_ClearTestingTypeDocument,
+  ScaffoldLanguageSelect_ScaffoldTestingTypeDocument,
+  ScaffoldLanguageSelect_WizardUpdateDocument,
+} from '../generated/graphql'
 import WarningList from '../warning/WarningList.vue'
 import { computed } from 'vue'
-import type { FrontendFramework, Bundler } from '@packages/types/src/constants'
+import type { FrontendFramework, Bundler } from '@packages/scaffold-config'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import SelectLanguage from './SelectLanguage.vue'
@@ -36,7 +41,7 @@ import { useMutation } from '@urql/vue'
 import WizardLayout from './WizardLayout.vue'
 
 export interface WizardSetupData {
-  bundler: Bundler['type'] | null
+  bundler: Bundler | null
   framework: FrontendFramework['type'] | null
   codeLanguage: CodeLanguageEnum
 }
@@ -112,8 +117,8 @@ fragment ScaffoldLanguageSelect on Query {
   }
 }`
 
-const title = computed(() => t(`setupWizard.selectFramework.title`))
-const description = computed(() => t(`setupWizard.selectFramework.description`))
+const title = computed(() => t(`e2eProjectSetup.title`))
+const description = computed(() => t(`e2eProjectSetup.description`))
 
 const languages = computed(() => props.gql.wizard.allLanguages ?? [])
 

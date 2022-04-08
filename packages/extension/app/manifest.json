@@ -8,6 +8,7 @@
   },
   "permissions": [
     "cookies",
+    "browsingData",
     "downloads",
     "tabs",
     "http://*/*",

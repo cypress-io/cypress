@@ -60,6 +60,7 @@
       "./vite-env",
       "@intlify/vite-plugin-vue-i18n/client",
       "@testing-library/cypress",
+      "cypress-real-events", 
       "cypress"
     ],
     "allowSyntheticDefaultImports": true,

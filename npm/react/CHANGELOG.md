@@ -1,3 +1,17 @@
+# [@cypress/react-v5.12.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.2...@cypress/react-v5.12.3) (2022-02-10)
+
+
+### Bug Fixes
+
+* set correct default when using react-scripts plugin ([#20141](https://github.com/cypress-io/cypress/issues/20141)) ([9b967e0](https://github.com/cypress-io/cypress/commit/9b967e06f5df1e8ae2c5b13d5c7f7170b069f5bc))
+
+# [@cypress/react-v5.12.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.1...@cypress/react-v5.12.2) (2022-02-08)
+
+
+### Bug Fixes
+
+* remove nullish coalescing in js files to support node 12 ([#20094](https://github.com/cypress-io/cypress/issues/20094)) ([dd11945](https://github.com/cypress-io/cypress/commit/dd11945f5330c14e1540133187415f341794d6f6))
+
 # [@cypress/react-v5.12.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.0...@cypress/react-v5.12.1) (2022-01-10)
 
 

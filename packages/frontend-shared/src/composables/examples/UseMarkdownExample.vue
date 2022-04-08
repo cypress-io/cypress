@@ -6,11 +6,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useMarkdown, UseMarkdownOptions } from '../useMarkdown'
+import type { UseMarkdownOptions } from '../useMarkdown'
+import { useMarkdown } from '../useMarkdown'
 import { ref } from 'vue'
 
 const props = defineProps<{
-  text: string,
+  text: string
   options: UseMarkdownOptions
 }>()
 

@@ -1,46 +1,37 @@
 <template>
-  <SnapshotButtonGroup data-cy="snapshot-highlight-controls">
-    <button
-      data-cy="unpin-snapshot"
-      class="border-r-1"
-      @click="unpin"
-    >
-      <i className="fas fa-times" />
-    </button>
-    <button
-      data-cy="toggle-snapshot-highlights"
-      :title="`${snapshotStore.snapshot?.showingHighlights ? 'Hide' : 'Show'} highlights`"
-      @click="toggleHighlights"
-    >
-      <i className="far fa-object-group" />
-    </button>
-  </SnapshotButtonGroup>
+  <div class="rounded flex font-medium bg-gray-900 py-2px px-12px text-gray-200 text-14px leading-20px gap-8px items-center">
+    <label
+      class="hidden"
+      for="toggle-highlights"
+    >{{ t('runner.snapshot.toggleHighlights') }}</label>
+    <Switch
+      name="toggle-highlights"
+      :value="toggleHighlights"
+      size="sm"
+      @update="toggleHighlights = !toggleHighlights"
+    />
+    {{ t('runner.snapshot.highlightsLabel') }}
+  </div>
 </template>
 
 <script lang="ts" setup>
-import type { AutIframe } from '../runner/aut-iframe'
-import type { EventManager } from '../runner/event-manager'
-import { useSnapshotStore } from './snapshot-store'
-import SnapshotButtonGroup from './SnapshotButtonGroup.vue'
+import { watch, ref } from 'vue'
+import Switch from '@cy/components/Switch.vue'
+import { useI18n } from '@cy/i18n'
 
-const props = defineProps<{
-  eventManager: EventManager
-  getAutIframe: () => AutIframe
+const { t } = useI18n()
+
+const props = withDefaults(defineProps<{
+  value?: boolean
+}>(), { value: false })
+
+const emits = defineEmits<{
+  (e: 'update:value', value: boolean): void
 }>()
 
-const snapshotStore = useSnapshotStore()
+const toggleHighlights = ref(props.value)
 
-const unpin = () => {
-  props.eventManager.snapshotUnpinned()
-}
-
-const toggleHighlights = () => {
-  snapshotStore.toggleHighlights(props.getAutIframe())
-}
+watch(toggleHighlights, (val) => {
+  emits('update:value', val)
+})
 </script>
-
-<style scoped lang="scss">
-button {
-  @apply w-12 hover:bg-gray-50;
-}
-</style>

@@ -1,11 +1,17 @@
-import { makeClientTestContext, ClientTestContext } from './clientTestContext'
+import type { ClientTestContext } from './clientTestContext'
+import { makeClientTestContext } from './clientTestContext'
 import '@testing-library/cypress/add-commands'
 import type { MountingOptions } from '@vue/test-utils'
-import { mount, CyMountOptions } from '@cypress/vue'
-import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
-import { print, FragmentDefinitionNode } from 'graphql'
+import type { CyMountOptions } from '@cypress/vue'
+import { mount } from '@cypress/vue'
+import urql, { useQuery } from '@urql/vue'
+import type { TypedDocumentNode } from '@urql/vue'
+import type { FragmentDefinitionNode } from 'graphql'
+import { print } from 'graphql'
 import { testUrqlClient } from './clientTestUrqlClient'
-import { Component, computed, watch, defineComponent, h, toRaw } from 'vue'
+import type { MutationResolverCallback as MutationResolver, ResultType } from './clientTestUrqlClient'
+import type { Component } from 'vue'
+import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
 import { createI18n } from '@cy/i18n'
 
@@ -28,10 +34,13 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
     // @ts-ignore todo: figure out the correct types
-    <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
-      options.global.stubs.transition = false
+      if (!Array.isArray(options.global.stubs)) {
+        options.global.stubs.transition = false
+      }
+
       options.global.plugins = options.global.plugins || []
       each(plugins, (pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
@@ -65,7 +74,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           createI18n(),
           {
             install (app) {
-              app.use(urql, testUrqlClient(context, options.onResult))
+              app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers))
             },
           },
         ],
@@ -126,20 +135,48 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     }), mountingOptions).then(() => context)
   }
 
+  const mutationResolvers: Map<string, MutationResolver<any>> = new Map()
+
+  function stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (
+    document: T,
+    resolver: MutationResolver<T>,
+  ) {
+    const definition = document.definitions[0]
+
+    if (definition.kind === 'OperationDefinition' && definition.name) {
+      mutationResolvers[definition.name.value] = resolver
+    } else {
+      throw new Error('only use mutation documents in stubMutationResolver first argument')
+    }
+  }
+
   Cypress.Commands.add('mountFragment', mountFragment)
+
+  Cypress.Commands.add('stubMutationResolver', stubMutationResolver)
 
   Cypress.Commands.add('mountFragmentList', (source, options) => {
     // @ts-expect-error - todo: tim fix
     return mountFragment(source, options, true)
   })
-}
 
-type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
+  beforeEach(() => {
+    // clean all resolvers after each test
+    mutationResolvers.clear()
+  })
+}
 
 type MountFragmentConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
-  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
+  /**
+   * When we are mounting a GraphQL Fragment, we can use `onResult`
+   * to intercept the result and modify the contents on the fragment
+   * before rendering the component
+   */
   onResult?: (result: ResultType<T>, ctx: ClientTestContext) => ResultType<T> | void
+  /**
+   * Render is passed the result of the "frag" and mounts the component under test
+   */
+  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
   expectError?: boolean
 } & CyMountOptions<unknown>
 
@@ -167,6 +204,16 @@ declare global {
       mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
         fragment: T,
         config: MountFragmentConfig<T>
+      ): Cypress.Chainable<ClientTestContext>
+
+      /**
+       * mock a mutation resolver when needed to spy on it or modify the result
+       * @param document
+       * @param resolver
+       */
+      stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+        document: T,
+        resolver: MutationResolver<T>
       ): Cypress.Chainable<ClientTestContext>
       /**
        * Mount helper for a component with a GraphQL fragment, as a list

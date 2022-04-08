@@ -1,17 +1,18 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="fixed inset-0 z-10 overflow-y-auto"
-    @close="clickOutside && closeModal()"
+    class="inset-0 z-10 fixed overflow-y-auto"
+    @close="closeModal()"
   >
-    <div class="flex items-center justify-center min-h-screen">
+    <div class="flex min-h-screen items-center justify-center">
       <slot
         name="overlay"
         :classes="'fixed inset-0'"
       >
-        <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
+        <DialogOverlay class="bg-gray-800 opacity-90 fixed sm:inset-0" />
       </slot>
       <div
+        data-cy="standard-modal"
         class="bg-white rounded mx-auto ring-[#9095AD40] ring-4 relative"
         :class="props.class || ''"
       >
@@ -27,7 +28,7 @@
 
         <DialogDescription
           v-if="$slots.description"
-          class="font-normal text-gray-700 p-24px"
+          class="font-normal p-24px text-gray-700"
         >
           <slot name="description" />
         </DialogDescription>
@@ -57,6 +58,8 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
+import { defaultMessages } from '@cy/i18n'
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
@@ -65,14 +68,12 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean
   helpLink?: string
   helpText?: string
-  clickOutside?: boolean
   variant?: 'bare'
   title?: string
   class?: string | string[] | Record<string, any>
 }>(), {
-  clickOutside: true,
   modelValue: false,
-  helpText: 'Need help',
+  helpText: `${defaultMessages.links.needHelp}`,
   helpLink: 'https://on.cypress.io',
   class: undefined,
   variant: undefined,

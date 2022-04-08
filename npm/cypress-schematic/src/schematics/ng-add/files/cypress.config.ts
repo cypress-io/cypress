@@ -1,5 +1,7 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  'baseUrl': '<%= baseUrl%>',
+  e2e: {
+    'baseUrl': '<%= baseUrl%>',
+  },
 })

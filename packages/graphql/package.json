@@ -25,8 +25,10 @@
     "getenv": "1.0.0",
     "graphql": "^15.5.1",
     "graphql-scalars": "^1.10.0",
+    "graphql-ws": "^5.5.5",
     "nexus": "^1.2.0-next.15",
-    "server-destroy": "^1.0.1"
+    "server-destroy": "^1.0.1",
+    "ws": "^8.5.0"
   },
   "devDependencies": {
     "@packages/data-context": "0.0.0-development",

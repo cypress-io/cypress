@@ -22,6 +22,7 @@
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
+        :description="t('setupPage.projectSetup.bundlerLabelDescription')"
         selector-type="bundler"
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"
@@ -42,12 +43,12 @@ import WizardLayout from './WizardLayout.vue'
 import SelectFwOrBundler from './SelectFwOrBundler.vue'
 import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
+import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
 import {
-  WizardUpdateInput,
-  EnvironmentSetupFragment,
   EnvironmentSetup_ClearTestingTypeDocument,
   EnvironmentSetup_WizardUpdateDocument,
 } from '../generated/graphql'
+
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import { useMutation } from '@urql/vue'
@@ -59,16 +60,19 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isSelected
+    isDetected
   }
   framework {
     type
     id
     name
     isSelected
+    isDetected
     supportedBundlers {
       id
       type
       name
+      isDetected
     }
     category
   }
@@ -76,6 +80,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     isSelected
+    isDetected
     type
     category
   }
@@ -83,6 +88,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
+    isDetected
   }
   language {
     id
@@ -100,7 +106,7 @@ fragment EnvironmentSetup on Wizard {
 
 const props = defineProps<{
   gql: EnvironmentSetupFragment
-  nextFn: () => void,
+  nextFn: () => void
 }>()
 
 const { t } = useI18n()

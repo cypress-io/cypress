@@ -28,20 +28,6 @@ export const verify = (ctx, options) => {
   const fileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column}`)
 
   it(`✓ VERIFY`, function () {
-    const runnerWs = window.top.ws
-
-    cy.stub(window.top.ws, 'emit').callThrough().withArgs('get:user:editor')
-    .yields({
-      preferredOpener: {
-        id: 'foo-editor',
-        name: 'Foo',
-        binary: 'foo-editor',
-        isOther: false,
-      },
-    })
-
-    window.top.ws.emit.callThrough().withArgs('open:file')
-
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
     .contains(`FAIL - ${getTitle(ctx)}`)
@@ -70,12 +56,6 @@ export const verify = (ctx, options) => {
       .should('not.include.text', '__stackReplacementMarker')
 
       cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative)
-      .click()
-      .should(() => {
-        expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
-          file: openInIdePath.absolute,
-        })
-      })
 
       cy
       .get('.test-err-code-frame .runnable-err-file-path')
@@ -85,14 +65,7 @@ export const verify = (ctx, options) => {
       // code frames will show `fail(this,()=>` as the 1st line
       cy.get('.test-err-code-frame pre span').should('include.text', 'fail(this,()=>')
 
-      cy.contains('.test-err-code-frame .runnable-err-file-path span', openInIdePath.relative)
-      .click()
-      .should(() => {
-        expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
-        expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
-          file: openInIdePath.absolute,
-        })
-      })
+      cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
     })
   })
 }

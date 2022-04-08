@@ -1,9 +1,10 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import { FRONTEND_FRAMEWORKS, CODE_LANGUAGES } from '../../../types/src/constants'
+import { CODE_LANGUAGES } from '../../../types/src/constants'
+import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 
-describe('<EnvironmentSetup />', () => {
-  it('default component', { viewportWidth: 800 }, () => {
+describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
+  it('default component', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       render: (gqlVal) => (
         <div class="m-10">
@@ -28,6 +29,10 @@ describe('<EnvironmentSetup />', () => {
         return 'react-logo'
       }
 
+      if (frameworkName.includes('Nuxt')) {
+        return 'nuxtjs-logo'
+      }
+
       if (frameworkName.includes('Vue')) {
         return 'vue-logo'
       }
@@ -47,5 +52,49 @@ describe('<EnvironmentSetup />', () => {
 
     cy.findByRole('button', { name: 'Next Step' })
     .should('have.disabled')
+  })
+
+  it('renders the detected flag', () => {
+    cy.mountFragment(EnvironmentSetupFragmentDoc, {
+      onResult: (res) => {
+        res.frameworks[0].isDetected = true
+      },
+      render: (gqlVal) => (
+        <div class="m-10">
+          <EnvironmentSetup
+            gql={gqlVal}
+            nextFn={cy.stub()}
+          />
+        </div>
+      ),
+    })
+
+    cy.findByRole('button', {
+      name: 'Front-end Framework Pick a framework',
+      expanded: false,
+    }).click()
+
+    cy.findByRole('option', { name: 'Create React App (v4) (detected)' }).should('be.visible')
+  })
+
+  it('shows the description of bundler as Dev Server', () => {
+    cy.mountFragment(EnvironmentSetupFragmentDoc, {
+      onResult: (res) => {
+        res.framework = {
+          ...res.frameworks[3],
+          supportedBundlers: res.allBundlers,
+        }
+      },
+      render: (gqlVal) => (
+        <div class="m-10">
+          <EnvironmentSetup
+            gql={gqlVal}
+            nextFn={cy.stub()}
+          />
+        </div>
+      ),
+    })
+
+    cy.findByLabelText('Bundler(Dev Server)').should('be.visible')
   })
 })

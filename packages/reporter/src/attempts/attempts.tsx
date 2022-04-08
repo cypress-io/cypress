@@ -55,6 +55,23 @@ const StudioError = () => (
 //     </div>
 //   </div>
 // )
+// function renderAttemptContent (model: AttemptModel) {
+//   // performance optimization - don't render contents if not open
+//   return (
+//     <div className={`attempt-${model.id + 1}`}>
+//       <Sessions model={model.sessions} />
+//       <Agents model={model} />
+//       <Routes model={model} />
+//       <div ref='commands' className='runnable-commands-region'>
+//         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
+//       </div>
+//       <div className='attempt-error-region'>
+//         <TestError model={model} />
+//         <StudioError />
+//       </div>
+//     </div>
+//   )
+// }
 
 interface AttemptProps {
   model: AttemptModel
@@ -118,6 +135,12 @@ const Attempts = observer(({ appState, test, scrollIntoView }: AttemptsProps) =>
   return (
     <ul className={cs('attempts', { 'has-multiple-attempts': test.hasMultipleAttempts })}>
       {test.attempts.map((attempt) => (
+// const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
+//   return (<ul className={cs('attempts', {
+//     'has-multiple-attempts': test.hasMultipleAttempts,
+//   })}>
+//     {test.attempts.map((attempt) => {
+//       return (
         <Attempt
           appState={appState}
           key={attempt.id}

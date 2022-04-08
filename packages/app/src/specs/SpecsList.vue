@@ -1,9 +1,26 @@
 <template>
   <div class="p-24px spec-container">
+    <Alert
+      v-if="isAlertOpen"
+      v-model="isAlertOpen"
+      status="error"
+      :title="t('specPage.noSpecErrorTitle')"
+      class="mb-16px"
+      :icon="WarningIcon"
+      dismissible
+    >
+      <p class="mb-24px">
+        {{ t('specPage.noSpecErrorIntro') }} <InlineCodeFragment variant="error">
+          {{ route.params.unrunnable }}
+        </InlineCodeFragment>
+      </p>
+      <p>{{ t('specPage.noSpecErrorExplainer') }}</p>
+    </Alert>
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
+      :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
       @show-spec-pattern-modal="showSpecPatternModal = true"
     />
@@ -13,73 +30,84 @@
       :gql="props.gql.currentProject"
       @close="showSpecPatternModal = false"
     />
-
-    <template
+    <div
       v-if="specs.length"
+      class="mb-4 grid grid-cols-2 children:font-medium children:text-gray-800 "
     >
       <div
-        class="grid grid-cols-2 children:font-medium children:text-gray-800"
+        class="flex items-center justify-between"
+        data-cy="specs-testing-type-header"
       >
-        <div
-          class="flex items-center justify-between"
-          data-cy="specs-testing-type-header"
-        >
-          {{ props.gql.currentProject?.currentTestingType === 'component' ?
-            t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
-        </div>
-        <div class="flex items-center justify-between">
-          <div>{{ t('specPage.gitStatusHeader') }}</div>
-        </div>
+        {{ props.gql.currentProject?.currentTestingType === 'component' ?
+          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
+      <div class="flex items-center justify-between">
+        <div>{{ t('specPage.gitStatusHeader') }}</div>
+      </div>
+    </div>
+    <!--
+      The markup around the virtualized list is pretty delicate. We might be tempted to
+      combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
+      into a single v-if on a `<template>` that would wrap both, but we are deliberately using
+      `hidden` here to ensure that the `.spec-list-container` element stays in the DOM when
+      the empty state is shown, fixing a bug that meant recovering from the empty state with the
+      "Clear Search" button didn't work as expected.
+    -->
+    <div
+      class="pb-32px spec-list-container"
+      :class="specs.length ? 'grid': 'hidden'"
+      v-bind="containerProps"
+    >
       <div
-        class="grid pb-32px spec-list-container"
-        v-bind="containerProps"
+        v-bind="wrapperProps"
+        class="divide-y-1 children:h-40px"
       >
-        <div
-          v-bind="wrapperProps"
-          class="divide-y-1 children:h-40px"
+        <SpecsListRowItem
+          v-for="row in list"
+          :id="getIdIfDirectory(row)"
+          :key="row.index"
         >
-          <SpecsListRowItem
-            v-for="row in list"
-            :key="row.index"
-          >
-            <template #file>
-              <RouterLink
-                v-if="row.data.isLeaf && row.data"
-                :key="row.data.data?.absolute"
-                :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
-              >
-                <SpecItem
-                  :file-name="row.data.data?.fileName || row.data.name"
-                  :extension="row.data.data?.specFileExtension || ''"
-                  :indexes="row.data.data?.fileIndexes"
-                  :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
-                />
-              </RouterLink>
-
-              <RowDirectory
-                v-else
-                :name="row.data.name"
-                :expanded="treeSpecList[row.index].expanded.value"
-                :depth="row.data.depth - 2"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
-                :indexes="getDirIndexes(row.data)"
-                @click="row.data.toggle"
+          <template #file>
+            <RouterLink
+              v-if="row.data.isLeaf && row.data"
+              :key="row.data.data?.absolute"
+              class="focus:outline-transparent"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              data-cy="spec-item-link"
+              @click.meta.prevent="handleCtrlClick"
+              @click.ctrl.prevent="handleCtrlClick"
+            >
+              <SpecItem
+                :file-name="row.data.data?.fileName || row.data.name"
+                :extension="row.data.data?.specFileExtension || ''"
+                :indexes="row.data.data?.fileIndexes"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
               />
-            </template>
+            </RouterLink>
 
-            <template #git-info>
-              <SpecListGitInfo
-                v-if="row.data.data?.gitInfo"
-                :gql="row.data.data.gitInfo"
-              />
-            </template>
-          </SpecsListRowItem>
-        </div>
+            <RowDirectory
+              v-else
+              :name="row.data.name"
+              :expanded="treeSpecList[row.index].expanded.value"
+              :depth="row.data.depth - 2"
+              :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
+              :indexes="getDirIndexes(row.data)"
+              :aria-controls="getIdIfDirectory(row)"
+              @click="row.data.toggle"
+            />
+          </template>
+
+          <template #git-info>
+            <SpecListGitInfo
+              v-if="row.data.data?.gitInfo"
+              :gql="row.data.data.gitInfo"
+            />
+          </template>
+        </SpecsListRowItem>
       </div>
-    </template>
+    </div>
     <NoResults
-      v-else
+      v-show="!specs.length"
       :search="search"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
@@ -96,14 +124,21 @@ import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
+import { useDebounce } from '@vueuse/core'
+import Alert from '../../../frontend-shared/src/components/Alert.vue'
+import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
+import WarningIcon from '~icons/cy/warning_x16.svg'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const { t } = useI18n()
 
 gql`
@@ -149,22 +184,25 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
+const isAlertOpen = ref(!!route.params?.unrunnable)
+
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
+
 const search = ref('')
+const debouncedSearchString = useDebounce(search, 200)
 
 function handleClear () {
   search.value = ''
 }
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
-
 const specs = computed(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
-  if (!search.value) {
+  if (!debouncedSearchString.value) {
     return specs
   }
 
-  return fuzzySortSpecs(specs, search.value)
+  return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))
@@ -175,6 +213,20 @@ const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpec
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
 watch(() => treeSpecList.value, () => scrollTo(0))
+
+function handleCtrlClick () {
+  // noop intended to reduce the chances of opening tests multiple tabs
+  // which is not a supported state in Cypress
+}
+
+function getIdIfDirectory (row) {
+  if (row.data.isLeaf && row.data) {
+    return undefined
+  }
+
+  return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
+}
+
 </script>
 
 <style scoped>
@@ -185,8 +237,8 @@ watch(() => treeSpecList.value, () => scrollTo(0))
   height: calc(100vh - 64px);
 }
 
-/** List header is 72px */
+/** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
-  height: calc(100% - 72px)
+  height: calc(100% - 112px)
 }
 </style>

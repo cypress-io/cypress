@@ -2,7 +2,7 @@
   <button
     v-if="!props.href && !props.to"
     style="width: fit-content"
-    class="flex items-center leading-tight border rounded outline-none gap-8px"
+    class="border rounded flex outline-none leading-tight gap-8px items-center"
     :class="classes"
     :disabled="disabled"
   >
@@ -39,12 +39,9 @@
   <component
     :is="linkVersion"
     v-else
-    :href="props.disabled ? null : props.href"
-    :to="props.disabled ? null : props.to"
-    :role="props.disabled ? 'link' : null"
-    :aria-disabled="props.disabled ? 'disabled' : null "
+    v-bind="linkProps"
     style="width: fit-content"
-    class="flex items-center border rounded outline-none select-none gap-8px"
+    class="border rounded flex outline-none gap-8px items-center select-none"
     :class="classes"
   >
     <ButtonInternals>
@@ -78,24 +75,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import ButtonInternals from './ButtonInternals.vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
 import BaseLink from '../components/BaseLink.vue'
-
-export default defineComponent({
-  inheritAttrs: true,
-})
-</script>
-
-<script lang="ts" setup>
-
-// eslint-disable-next-line no-duplicate-imports
-import { computed, useAttrs } from 'vue'
-import { RouterLink } from 'vue-router'
-
-// eslint-disable-next-line no-duplicate-imports
-import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
   primary: 'border-indigo-500 bg-indigo-500 text-white hocus-default',
@@ -107,8 +89,6 @@ const VariantClassesTable = {
   secondary: 'bg-jade-500 text-white hocus-secondary',
 } as const
 
-export type ButtonVariants = keyof(typeof VariantClassesTable)
-
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px h-24px',
   md: 'px-12px py-8px text-14px h-32px',
@@ -116,7 +96,18 @@ const SizeClassesTable = {
   'lg-wide': 'px-32px py-8px',
 } as const
 
+export type ButtonVariants = keyof(typeof VariantClassesTable)
+
 export type ButtonSizes = keyof(typeof SizeClassesTable)
+
+export const inheritAttrs = true
+
+</script>
+
+<script lang="ts" setup>
+import { computed, useAttrs } from 'vue'
+import { RouterLink } from 'vue-router'
+import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
@@ -153,5 +144,21 @@ const linkVersion = computed(() => {
   }
 
   return RouterLink
+})
+
+const linkProps = computed(() => {
+  if (props.disabled) {
+    return {
+      role: 'link',
+      ariaDisabled: 'disabled',
+      href: null,
+    }
+  }
+
+  if (props.to) return { to: props.to }
+
+  if (props.href) return { href: props.href }
+
+  return {}
 })
 </script>

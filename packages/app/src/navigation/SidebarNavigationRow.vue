@@ -14,7 +14,8 @@
       group
       focus-visible:outline-none
       before:(rounded-r-md h-40px mr-4px text-transparent transform origin-left w-4px duration-300 content-open-square) hover:before:scale-x-100 "
-    :disabled="mainStore.navBarExpanded"
+    :disabled="isNavBarExpanded"
+    :data-selected="active"
   >
     <component
       :is="
@@ -37,17 +38,16 @@
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import { useMainStore } from '../store'
 import SidebarTooltip from './SidebarTooltip.vue'
 
 withDefaults(defineProps <{
-  icon: FunctionalComponent<SVGAttributes, {}>,
-  name: string,
+  icon: FunctionalComponent<SVGAttributes, {}>
+  name: string
   // Currently active row (generally the current route)
   active?: boolean
-  }>(), {
+  isNavBarExpanded: boolean
+}>(), {
   active: false,
 })
 
-const mainStore = useMainStore()
 </script>

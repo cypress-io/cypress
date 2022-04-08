@@ -1,37 +1,37 @@
 <template>
-  <div class="w-full cursor-default px-24px mb-24px">
-    <h3 class="text-gray-900 mb-12px text-18px">
+  <div class="cursor-default w-full px-24px">
+    <h3 class="mb-12px text-gray-900 text-18px">
       {{ title }}
     </h3>
 
-    <ul class="text-gray-600 mb-10px">
-      <li class="relative mb-4px ml-12px">
+    <ul class="mb-10px text-gray-600">
+      <li class="mb-4px ml-12px relative">
         <div
-          class="absolute block border w-6px h-6px bg-jade-300 -left-11px top-9px rounded-10px border-jade-400"
+          class="border bg-jade-300 border-jade-400 rounded-10px h-6px top-9px -left-11px w-6px absolute block"
         />
         {{ listItems[0] }}
         <InlineCodeFragment class="text-14px">
           {{ codeFragment }}
         </InlineCodeFragment>
       </li>
-      <li class="relative mb-4px ml-12px">
+      <li class="mb-4px ml-12px relative">
         <div
-          class="absolute block border w-6px h-6px bg-jade-300 -left-11px top-9px rounded-10px border-jade-400"
+          class="border bg-jade-300 border-jade-400 rounded-10px h-6px top-9px -left-11px w-6px absolute block"
         />
         {{ listItems[1] }}
       </li>
-      <li class="relative mb-4px ml-12px">
+      <li class="mb-4px ml-12px relative">
         <div
-          class="absolute block border w-6px h-6px bg-jade-300 -left-11px top-9px rounded-10px border-jade-400"
+          class="border bg-jade-300 border-jade-400 rounded-10px h-6px top-9px -left-11px w-6px absolute block"
         />
         {{ listItems[2] }}
       </li>
     </ul>
-    <h3 class="text-gray-900 mb-8px">
+    <h3 class="mb-8px text-gray-900">
       Code Example
     </h3>
     <ShikiHighlight
-      class="border-1 rounded border-gray-100"
+      class="rounded border-1 border-gray-100"
       :code="localCode"
       lang="javascript"
       line-numbers
@@ -45,10 +45,10 @@ import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 
 const props = withDefaults(defineProps<{
-    title: string
-    code: string
-    listItems: string[]
-    codeFragment: string
+  title: string
+  code: string
+  listItems: string[]
+  codeFragment: string
 }>(), {
   code: '',
 })

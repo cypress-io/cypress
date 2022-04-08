@@ -1,13 +1,13 @@
 import { ref } from 'vue'
-import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import SelectFwOrBundler, { Option } from './SelectFwOrBundler.vue'
 
-const manyOptions = [
+const manyOptions: Readonly<Option[]> = [
   {
     name: 'Vue.js',
     id: 'vue',
     isSelected: false,
-    type: 'vue',
-    category: 'vue',
+    type: 'vue2',
+    isDetected: true,
   },
   {
     name: 'React.js',
@@ -15,7 +15,6 @@ const manyOptions = [
     id: 'react',
     isSelected: false,
     type: 'react',
-    category: 'react',
   },
 ] as const
 
@@ -41,6 +40,18 @@ describe('<SelectFwOrBundler />', () => {
     cy.contains('Front-end Framework').should('exist')
   })
 
+  it('shows detected flag', () => {
+    cy.mount(() => (<SelectFwOrBundler
+      label="Front-end Framework"
+      selectorType="framework"
+      options={manyOptions}
+      value="react"
+    />))
+
+    cy.contains('React.js').click()
+    cy.contains('li', 'Vue.js').contains('(detected)').should('be.visible')
+  })
+
   it('shows a placeholder when no value is specified', () => {
     cy.mount(() => (
       <SelectFwOrBundler
@@ -52,7 +63,7 @@ describe('<SelectFwOrBundler />', () => {
             name: 'VueJs',
             id: 'vue',
             isSelected: false,
-            type: 'vuecli',
+            type: 'vuecli4vue3',
           },
         ]}
       />
@@ -94,7 +105,7 @@ describe('<SelectFwOrBundler />', () => {
     cy.mount(() => (
       <div>
         <div>click out</div>
-        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue" />
+        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue2" />
       </div>
     ))
 

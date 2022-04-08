@@ -1,83 +1,129 @@
 <template>
   <div
     id="selector-playground"
-    class="bg-white flex items-center"
+    class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
   >
     <button
-      :class="{ 'bg-blue-100': selectorPlaygroundStore.isEnabled }"
-      class="rounded-md h-full px-8px"
+      class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center hover:default-ring"
+      :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
       data-cy="playground-toggle"
       @click="toggleEnabled"
     >
-      <Icon
-        :icon="IconCursorDefaultOutline"
-        height="18px"
-        width="18px"
-      />
+      <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
     </button>
-
     <div
-      class="flex h-full flex-1 mx-2 items-center"
+      class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
     >
-      <Select
-        :options="methods"
-        item-value="display"
-        data-cy="playground-method"
-        :model-value="{
-          value: selectorPlaygroundStore.method,
-          display: `cy.${selectorPlaygroundStore.method}`
-        }"
-        class="w-120px"
-        @update:model-value="({ value }) => selectorPlaygroundStore.setMethod(value)"
-      />
-
-      <span class="mx-5px">('</span>
-      <input
-        ref="copyText"
-        v-model="selector"
-        class="border rounded-md border-gray-500 flex-1 py-8px px-1 pl-4 text-blue-500"
-        data-cy="playground-selector"
-      >
-      ')
+      <Menu #="{ open }">
+        <MenuButton
+          :aria-label="t('runner.selectorPlayground.selectorMethodsLabel')"
+          class="border border-r-transparent rounded-l-md flex h-full outline-none border-gray-200 text-white w-40px items-center justify-center hocus-default"
+          @click.stop
+        >
+          <i-cy-chevron-down-small_x16
+            class="transition transition-color duration-300"
+            :class="open ? 'icon-dark-indigo-500' : 'icon-dark-gray-500'"
+          />
+        </MenuButton>
+        <MenuItems
+          class="rounded flex flex-col outline-transparent bg-gray-900 text-white top-34px z-40 absolute overflow-scroll"
+        >
+          <MenuItem
+            v-for="method in methods"
+            :key="method.display"
+            #="{ active }"
+          >
+            <button
+              :class="{ 'bg-gray-700': active }"
+              class="border-b border-b-gray-800 text-left py-8px px-16px"
+              @click="selectorPlaygroundStore.setMethod(method.value)"
+            >
+              {{ method.display }}
+            </button>
+          </MenuItem>
+        </MenuItems>
+      </Menu>
+      <code class="h-full flex-1 relative">
+        <span
+          ref="ghostLeft"
+          class="flex pl-12px inset-y-0 text-gray-600 absolute items-center pointer-events-none"
+          data-cy="selected-playground-method"
+        >
+          <span class="text-gray-800">cy</span>.<span class="text-purple-500">{{ selectorPlaygroundStore.method }}</span>(‘
+        </span>
+        <span
+          ref="ghostRight"
+          class="font-medium left-[-9999px] absolute inline-block"
+        >{{ selector.replace(/\s/g, '&nbsp;') }}</span>
+        <span
+          class="flex inset-y-0 text-gray-600 absolute items-center pointer-events-none"
+          :style="{left: inputRightOffset + 'px'}"
+        >‘)</span>
+        <input
+          ref="copyText"
+          v-model="selector"
+          data-cy="playground-selector"
+          :style="{paddingLeft: inputLeftOffset + 'px', paddingRight: matcherWidth + 32 + 24 + 'px'}"
+          class="border rounded-r-md font-medium h-full outline-none border-gray-200 w-full text-indigo-500 hocus-default overflow-ellipsis"
+          :class="{'hocus-default': selectorPlaygroundStore.isValid, 'hocus-error': !selectorPlaygroundStore.isValid}"
+        >
+        <div
+          ref="match"
+          class="border-l flex font-sans border-l-gray-200 my-6px px-16px inset-y-0 right-0 text-gray-600 absolute items-center"
+          data-cy="playground-num-elements"
+        >
+          <template v-if="!selectorPlaygroundStore.isValid">
+            <span class="text-error-400">{{ t('runner.selectorPlayground.invalidSelector') }}</span>
+          </template>
+          <template v-else>
+            {{ t('runner.selectorPlayground.matches', selectorPlaygroundStore.numElements) }}
+          </template>
+        </div>
+      </code>
     </div>
 
-    <div
-      data-cy="playground-num-elements"
-      class="rounded-md flex h-full bg-gray-400 mx-1 text-white px-3 items-center"
-    >
-      {{ selectorPlaygroundStore.numElements }}
+    <div class="flex gap-12px">
+      <SelectorPlaygroundTooltip>
+        <Button
+          size="md"
+          variant="outline"
+          data-cy="playground-copy"
+          class="override-border"
+          @click="copyToClipboard"
+        >
+          <i-cy-copy-clipboard_x16 class="icon-dark-gray-500" />
+        </Button>
+        <template #popper>
+          <div
+            class="whitespace-nowrap"
+            data-cy="playground-copy-tooltip"
+          >
+            {{ t('runner.selectorPlayground.copyTooltip') }}
+          </div>
+        </template>
+      </SelectorPlaygroundTooltip>
+
+      <SelectorPlaygroundTooltip>
+        <Button
+          size="md"
+          variant="outline"
+          data-cy="playground-print"
+          class="override-border"
+          @click="printSelected"
+        >
+          <i-cy-technology-terminal_x16 class="icon-dark-gray-600" />
+        </Button>
+        <template #popper>
+          <div
+            class="whitespace-nowrap"
+            data-cy="playground-print-tooltip"
+          >
+            {{ t('runner.selectorPlayground.printTooltip') }}
+          </div>
+        </template>
+      </SelectorPlaygroundTooltip>
     </div>
-
-    <div class="border rounded-md flex h-full divide-x-1 divide-gray-500 border-1 border-gray-500 mr-10px items-center">
-      <button
-        data-cy="playground-copy"
-        class="h-full px-8px"
-        @click="copySelector"
-      >
-        <Icon :icon="IconCopy" />
-      </button>
-
-      <button
-        data-cy="playground-print"
-        class="h-full px-8px"
-        @click="printSelected"
-      >
-        <Icon :icon="IconConsoleLine" />
-      </button>
-    </div>
-
-    <a
-      class="flex text-blue-500 items-center"
-      href="https://on.cypress.io/selector-playground"
-      target="_blank"
-      rel="noreferrer"
-    >
-      <span class="mr-5px">
-        <Icon :icon="IconHelpCircle" />
-      </span>
-      Learn more
-    </a>
   </div>
 </template>
 
@@ -86,13 +132,14 @@ import { computed, ref, watch } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
-import IconCopy from '~icons/mdi/content-copy'
-import Icon from '@packages/frontend-shared/src/components/Icon.vue'
-import IconCursorDefaultOutline from '~icons/mdi/cursor-default-outline'
-import IconHelpCircle from '~icons/mdi/help-circle'
-import SelectorPlaygroundSelectMethod from './SelectorPlaygroundSelectMethod.vue'
-import Select from '@packages/frontend-shared/src/components/Select.vue'
-import IconConsoleLine from '~icons/mdi/console-line'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { useElementSize } from '@vueuse/core'
+import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
+import { useI18n } from 'vue-i18n'
+import { useClipboard } from '@cy/gql-components/useClipboard'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   eventManager: EventManager
@@ -107,9 +154,11 @@ const methods = [
     display: 'cy.contains',
     value: 'contains',
   },
-]
+] as const
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
+const match = ref<HTMLDivElement>()
+const { width: matcherWidth } = useElementSize(match)
 
 const copyText = ref<HTMLInputElement>()
 
@@ -136,6 +185,23 @@ const selector = computed({
   },
 })
 
+const inputSize = useElementSize(copyText)
+
+// spooky
+const ghostLeft = ref<HTMLSpanElement>()
+const { width: ghostLeftWidth } = useElementSize(ghostLeft)
+const inputLeftOffset = computed(() => ghostLeftWidth.value + 12)
+
+const ghostRight = ref<HTMLSpanElement>()
+const { width: ghostRightWidth } = useElementSize(ghostRight)
+const inputRightOffset = computed(() => {
+  const leftOffset = inputLeftOffset.value
+  const combined = leftOffset + ghostRightWidth.value
+  const max = inputSize.width.value + leftOffset
+
+  return combined <= max ? combined : max
+})
+
 function setShowingHighlight () {
   selectorPlaygroundStore.setShowingHighlight(true)
   props.getAutIframe().toggleSelectorHighlight(true)
@@ -153,24 +219,23 @@ function printSelected () {
   props.getAutIframe().printSelectorElementsToConsole()
 }
 
-function copySelector () {
-  try {
-    copyText.value?.select()
-    const successful = document.execCommand('copy')
-
-    if (successful) {
-      // Copied!
-    } else {
-      // Oops, unable to copy
-    }
-  } catch (e) {
-    // Oops, unable to copy
-  }
+const { copy } = useClipboard({ copiedDuring: 2000 })
+const copyToClipboard = () => {
+  copy(selector.value)
 }
 </script>
 
 <style scoped lang="scss">
 #selector-playground {
   height: 40px;
+}
+button.override-border {
+  @apply border-gray-200
+}
+button.override-border:hover {
+  @apply border-indigo-300
+}
+button.override-border:focus {
+  @apply border-indigo-300
 }
 </style>

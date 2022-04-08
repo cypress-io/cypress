@@ -47,4 +47,14 @@ describe('<ButtonBar />', () => {
       expect(altFunction).to.have.been.calledOnce
     })
   })
+
+  it('changes the main button variant', () => {
+    const altFunction = cy.spy()
+
+    cy.mount(() => (
+      <ButtonBar next="Waiting for you" back={backLabel} nextFn={nextFn} backFn={backFn} altFn={altFunction} mainVariant='pending'/>
+    ))
+
+    cy.contains('button', 'Waiting for you').find('svg').should('be.visible')
+  })
 })

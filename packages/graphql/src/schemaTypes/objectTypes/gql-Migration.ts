@@ -131,7 +131,7 @@ export const MigrationRegexp = objectType({
     })
 
     t.nonNull.string('beforeComponent', {
-      description: 'regexp to identiey existing specs in component',
+      description: 'regexp to identify existing specs in component',
     })
 
     t.nonNull.string('afterComponent', {
@@ -170,6 +170,11 @@ export const Migration = objectType({
       description: 'List of files needing manual conversion',
       type: ManualMigration,
       resolve: async (source, args, ctx) => {
+        // avoid starting the watcher when not on this step
+        if (ctx.migration.step !== 'renameManual') {
+          return null
+        }
+
         const status = await ctx.migration.getComponentTestingMigrationStatus()
 
         if (!status) {
@@ -191,6 +196,20 @@ export const Migration = objectType({
       type: MigrationFile,
       resolve: (source, args, ctx) => {
         return ctx.migration.supportFilesForMigrationGuide()
+      },
+    })
+
+    t.nonNull.string('configFileNameBefore', {
+      description: 'the name of the config file to be migrated',
+      resolve: (source, args, ctx) => {
+        return ctx.lifecycleManager.legacyConfigFile
+      },
+    })
+
+    t.nonNull.string('configFileNameAfter', {
+      description: 'the name of the config file after the migration',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.configFileNameAfterMigration
       },
     })
 
@@ -251,6 +270,13 @@ export const Migration = objectType({
       description: 'whether component testing is set up in the migrated config or not',
       resolve: (source, args, ctx) => {
         return ctx.migration.hasComponentTesting
+      },
+    })
+
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
       },
     })
   },

@@ -995,6 +995,38 @@ describe('e2e record', () => {
       })
     })
 
+    describe('create run 412', () => {
+      setupStubbedServer(createRoutes({
+        postRun: {
+          reqSchema: 'postRunRequest@2.0.0', // force this to throw a schema error
+          onReqBody (body) {
+            _.extend(body, {
+              ci: null,
+              commit: null,
+              ciBuildId: null,
+              platform: null,
+            })
+          },
+        },
+      }))
+
+      it('errors and exits when request schema is invalid', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: 'record_pass*',
+          configFile: 'cypress-with-project-id.config.js',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.be.empty
+        })
+      })
+    })
+
     describe('create run unknown 422', () => {
       setupStubbedServer(createRoutes({
         postRun: {

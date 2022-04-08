@@ -764,6 +764,15 @@ export default function (Commands, Cypress, cy) {
         errorLog.error(err)
         errorLog.set({
           state: 'warn',
+        // })
+
+        // _log.set({
+        //   renderProps: () => {
+        //     return {
+        //       indicator: 'bad',
+        //       message: `(recreated) ${_log.get().message}`,
+        //     }
+        //   },
         })
 
         hadValidationError = true

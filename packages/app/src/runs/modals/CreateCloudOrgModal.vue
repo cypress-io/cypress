@@ -2,6 +2,7 @@
   <StandardModal
     model-value
     :title="t('runs.connect.modal.title')"
+    help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
     <div class="border border-dashed rounded border-gray-100 text-center p-24px w-592px">
@@ -60,7 +61,8 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { CheckCloudOrganizationsDocument, CreateCloudOrgModalFragment } from '../../generated/graphql'
+import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
+import { CheckCloudOrganizationsDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -90,12 +92,12 @@ query CheckCloudOrganizations {
         id
       }
     }
-  } 
+  }
 }
 `
 
 const props = defineProps<{
-  gql: CreateCloudOrgModalFragment,
+  gql: CreateCloudOrgModalFragment
 }>()
 
 const query = useQuery({

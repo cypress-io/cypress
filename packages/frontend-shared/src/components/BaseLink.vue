@@ -7,18 +7,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  inheritAttrs: true,
-})
+export const inheritAttrs = true
 </script>
 
 <script setup lang="ts">
-/* eslint-disable no-duplicate-imports */
-
 import { computed, useAttrs } from 'vue'
-
 import type { AnchorHTMLAttributes } from 'vue'
 
 const attrs = useAttrs() as AnchorHTMLAttributes
@@ -31,10 +24,11 @@ const classes = computed(() => {
 })
 
 const props = withDefaults(defineProps<{
-  href: string,
+  href?: string
   useDefaultHocus?: boolean
 }>(), {
   useDefaultHocus: true,
+  href: '',
 })
 
 </script>

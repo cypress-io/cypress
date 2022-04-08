@@ -1,0 +1,8 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <clipPath id="insideCircleOnly">
+      <circle cx="12" cy="12" r="12"/>
+    </clipPath>
+  </defs>
+  <circle cx="12" cy="12" r="12" fill="#F3F4FA" stroke="#D0D2E0" stroke-width="2" stroke-dasharray="4.3 2" clip-path="url(#insideCircleOnly)" class="icon-dark-stroke icon-light-fill"/>
+</svg>

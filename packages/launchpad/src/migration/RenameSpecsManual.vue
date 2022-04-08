@@ -15,6 +15,16 @@
       <MigrationListItem>
         <i18n-t
           scope="global"
+          keypath="migration.renameManual.addedSpecPattern"
+        >
+          <CodeTag class="text-jade-500">
+            specPattern
+          </CodeTag>
+        </i18n-t>
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
           keypath="migration.renameManual.cannotAuto"
         >
           <CodeTag class="text-jade-500">
@@ -38,9 +48,11 @@
           :class="{'border-t': index > 0}"
         >
           <template v-if="file.moved">
-            <span>✅</span>
+            <i-cy-status-pass-duotone_x24
+              class="h-16px w-16px"
+            />
             <span
-              class="text-gray-400 line-through"
+              class="text-gray-600 line-through pl-8px"
               data-cy="moved"
             >
               {{ file.relative }}
@@ -61,12 +73,14 @@
 </template>
 
 <script lang="ts" setup>
+import { onUnmounted } from 'vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import { useI18n } from '@cy/i18n'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationListItem from './fragments/MigrationListItem.vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
+import { RenameSpecsManual_CloseWatcherDocument } from '../generated/graphql'
 import type { RenameSpecsManualFragment } from '../generated/graphql'
 
 gql`
@@ -82,9 +96,21 @@ fragment RenameSpecsManual on Migration {
   }
 }`
 
+gql`
+mutation RenameSpecsManual_CloseWatcher {
+  migrateCloseManualRenameWatcher
+}
+`
+
 const props = defineProps<{
   gql: RenameSpecsManualFragment
 }>()
+
+const closeWatcherMutation = useMutation(RenameSpecsManual_CloseWatcherDocument)
+
+onUnmounted(() => {
+  closeWatcherMutation.executeMutation({})
+})
 
 const { t } = useI18n()
 </script>

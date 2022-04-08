@@ -7,7 +7,6 @@ const Promise = require('bluebird')
 const { shell } = require('electron')
 const url = require('url')
 
-const errors = require('../errors')
 const machineId = require('../util/machine_id')
 const random = require('../util/random')
 const user = require('../user')
@@ -83,7 +82,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmCode) => {
 
         res.redirect(303, fullLoginUrl)
 
-        sendMessage('info', 'AUTH_BROWSER_LAUNCHED')
+        sendMessage('AUTH_BROWSER_LAUNCHED')
       })
     })
 
@@ -155,7 +154,7 @@ const stopServer = () => {
 const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
-      sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
+      sendMessage('AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
     }
   }
 
@@ -189,15 +188,13 @@ const _internal = {
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = (onMessage, utmCode, onLogin) => {
-  function sendMessage (type, name, arg1) {
+  function sendMessage (name, message) {
     onMessage({
-      type,
       name,
-      message: errors.getMsgByType(name, arg1),
+      message,
       browserOpened: authRedirectReached,
     })
   }
-
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
@@ -219,6 +216,9 @@ const start = (onMessage, utmCode, onLogin) => {
     return Promise.fromCallback((cb) => {
       authCallback = cb
     })
+  })
+  .catch((err: Error) => {
+    sendMessage('AUTH_ERROR_DURING_LOGIN', err.message)
   })
   .finally(() => {
     _internal.stopServer()

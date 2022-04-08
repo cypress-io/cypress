@@ -1,5 +1,6 @@
 import os from 'os'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
+import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
 import { debounce, isEqual } from 'lodash'
@@ -118,8 +119,8 @@ export class ProjectDataSource {
     return path.basename(projectRoot)
   }
 
-  getConfig () {
-    return this.ctx.lifecycleManager.loadedFullConfig
+  async getConfig () {
+    return await this.ctx.lifecycleManager.getFullInitialConfig()
   }
 
   getCurrentProjectSavedState () {
@@ -134,21 +135,21 @@ export class ProjectDataSource {
     this._specs = specs
   }
 
+  setRelaunchBrowser (relaunchBrowser: boolean) {
+    this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
+  }
+
   async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
     specPattern?: string[]
-    ignoreSpecPattern?: string[]
+    excludeSpecPattern?: string[]
   }> {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
-    const config = this.getConfig()
-
-    if (!config) {
-      throw Error(`Config for ${projectRoot} was not loaded`)
-    }
+    const config = await this.getConfig()
 
     return {
       specPattern: toArray(config[testingType]?.specPattern),
-      ignoreSpecPattern: toArray(config[testingType]?.ignoreSpecPattern),
+      excludeSpecPattern: toArray(config[testingType]?.excludeSpecPattern),
     }
   }
 
@@ -156,14 +157,14 @@ export class ProjectDataSource {
     projectRoot: string,
     testingType: Cypress.TestingType,
     specPattern: string[],
-    ignoreSpecPattern: string[],
+    excludeSpecPattern: string[],
     globToRemove: string[],
   ): Promise<FoundSpec[]> {
     const specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
       specPattern, {
         absolute: true,
-        ignore: [...ignoreSpecPattern, ...globToRemove],
+        ignore: [...excludeSpecPattern, ...globToRemove],
       },
     )
 
@@ -181,7 +182,7 @@ export class ProjectDataSource {
     projectRoot: string,
     testingType: Cypress.TestingType,
     specPattern: string[],
-    ignoreSpecPattern: string[],
+    excludeSpecPattern: string[],
     additionalIgnore: string[],
   ) {
     this.stopSpecWatcher()
@@ -193,7 +194,7 @@ export class ProjectDataSource {
     }
 
     const onSpecsChanged = debounce(async () => {
-      const specs = await this.findSpecs(projectRoot, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
+      const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       this.setSpecs(specs)
 
@@ -216,9 +217,9 @@ export class ProjectDataSource {
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], ignoreSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
 
-    for (const pattern of ignoreSpecPattern) {
+    for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
         return false
       }
@@ -257,7 +258,7 @@ export class ProjectDataSource {
 
   private guessFramework (projectRoot: string) {
     const guess = FRONTEND_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = (framework.deps as readonly string[]).reduce(
+      const lookingForDeps = framework.detectors.map((x) => x.dependency).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
         {},
       )
@@ -339,9 +340,5 @@ export class ProjectDataSource {
     }
 
     return isEqual(specPattern, [component])
-  }
-
-  setIsBrowserOpen (isBrowserOpen: boolean) {
-    this.ctx.coreData.app.isBrowserOpen = isBrowserOpen
   }
 }

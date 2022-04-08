@@ -1,26 +1,29 @@
 <template>
   <StandardModal
     class="transition-all transition duration-200"
-    :click-outside="false"
     variant="bare"
     :title="t('testingType.modalTitle')"
+    help-link="https://on.cypress.io/choosing-testing-type"
     :model-value="show"
     data-cy="switch-modal"
     @update:model-value="emits('close')"
   >
     <TestingTypePicker
       :gql="props.gql"
-      @pick="reconfigure"
+      :is-app="true"
+      @pick="handleTestingType"
     />
   </StandardModal>
 </template>
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
-import { SwitchTestingType_ReconfigureProjectDocument, SwitchTestingTypeModalFragment } from '../generated/graphql'
+import { SwitchTestingTypeAndRelaunchDocument } from '../generated/graphql'
+import type { SwitchTestingTypeModalFragment } from '../generated/graphql'
 import StandardModal from '@cy/components/StandardModal.vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
 import { useI18n } from '@cy/i18n'
+import type { TestingTypeEnum } from '@packages/frontend-shared/src/generated/graphql'
 
 const { t } = useI18n()
 
@@ -31,11 +34,8 @@ fragment SwitchTestingTypeModal on Query {
 `
 
 gql`
-mutation SwitchTestingType_ReconfigureProject($testingType: TestingTypeEnum!) {
-  setCurrentTestingType(testingType: $testingType) {
-    currentTestingType
-  }
-  reconfigureProject
+mutation SwitchTestingTypeAndRelaunch($testingType: TestingTypeEnum!) {
+  switchTestingTypeAndRelaunch(testingType: $testingType)
 }
 `
 
@@ -48,9 +48,15 @@ const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
 
-const openElectron = useMutation(SwitchTestingType_ReconfigureProjectDocument)
+const switchAndRelaunch = useMutation(SwitchTestingTypeAndRelaunchDocument)
 
-function reconfigure (testingType: 'component' | 'e2e') {
-  openElectron.executeMutation({ testingType })
+function handleTestingType (testingType: TestingTypeEnum, currentTestingType: TestingTypeEnum) {
+  if (testingType === currentTestingType) {
+    emits('close')
+
+    return
+  }
+
+  switchAndRelaunch.executeMutation({ testingType })
 }
 </script>

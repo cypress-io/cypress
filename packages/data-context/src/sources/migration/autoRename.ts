@@ -1,16 +1,17 @@
-import { FilePart, formatMigrationFile, OldCypressConfig } from '../../util'
 import globby from 'globby'
-import {
-  getComponentFolder,
-  getComponentTestFiles,
-  getIntegrationFolder,
-  getIntegrationTestFiles,
-  isDefaultTestFiles,
-} from '.'
-import { regexps } from './regexps'
-import type { MigrationFile } from '../MigrationDataSource'
-import path from 'path'
 import type { TestingType } from '@packages/types'
+import {
+  FilePart,
+  formatMigrationFile,
+  getComponentFolder,
+  getComponentTestFilesGlobs,
+  getIntegrationFolder,
+  getIntegrationTestFilesGlobs,
+  isDefaultTestFiles,
+  OldCypressConfig,
+  regexps,
+} from '.'
+import type { MigrationFile } from '../MigrationDataSource'
 
 export interface MigrationSpec {
   relative: string
@@ -25,7 +26,7 @@ interface GetSpecs {
 }
 
 export function substitute (part: FilePart): FilePart {
-  // nothing to substitite, just a regular
+  // nothing to substitute, just a regular
   // part of the file
   if (!('group' in part)) {
     return part
@@ -37,12 +38,12 @@ export function substitute (part: FilePart): FilePart {
   }
 
   // basic.spec.js -> basic.cy.js
-  if (part.group === 'extension') {
+  if (part.group === 'preExtension') {
     return { ...part, text: '.cy.' }
   }
 
   // support/index.js -> support/e2e.js
-  if (part.group === 'name' && part.text === 'index') {
+  if (part.group === 'supportFileName' && part.text === 'index') {
     return { ...part, text: 'e2e' }
   }
 
@@ -71,66 +72,64 @@ export function applyMigrationTransform (
     regexp = new RegExp(regexps.component.before.customFolderDefaultTestFiles)
   } else {
     // custom folder AND test files pattern
-    // should be impossble, we should not calling this function in the first place.
+    // should be impossible, we should not call this function in the first place.
     throw Error(`Cannot use applyMigrationTransform on a project with a custom folder and custom testFiles.`)
   }
 
-  const partsBefore = formatMigrationFile(spec.relative, regexp)
-  const partsAfter = partsBefore.map(substitute)
+  const partsBeforeMigration = formatMigrationFile(spec.relative, regexp)
+  const partsAfterMigration = partsBeforeMigration.map((part) => {
+    // avoid re-renaming files with the right preExtension
+    // it would make a myFile.cy.cy.js file
+    if (part.highlight
+      && part.group === 'preExtension'
+      && /\.cy\.([j|t]s[x]?|coffee)$/.test(spec.relative)) {
+      return part
+    }
+
+    return substitute(part)
+  })
 
   return {
     testingType: spec.testingType,
     before: {
       relative: spec.relative,
-      parts: partsBefore,
+      parts: partsBeforeMigration,
     },
     after: {
-      relative: partsAfter.map((x) => x.text).join(''),
-      parts: partsAfter,
+      relative: partsAfterMigration.map((x) => x.text).join(''),
+      parts: partsAfterMigration,
     },
   }
 }
 
 export async function getSpecs (projectRoot: string, config: OldCypressConfig): Promise<GetSpecs> {
   const integrationFolder = getIntegrationFolder(config)
-  const integrationTestFiles = getIntegrationTestFiles(config)
+  const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
   const componentFolder = getComponentFolder(config)
-  const componentTestFiles = getComponentTestFiles(config)
+  const componentTestFiles = getComponentTestFilesGlobs(config)
 
-  let integrationSpecs: MigrationSpec[]
-  let componentSpecs: MigrationSpec[]
+  let integrationSpecs: MigrationSpec[] = []
+  let componentSpecs: MigrationSpec[] = []
 
-  if (integrationFolder === false) {
+  const globs = integrationFolder === false
+    ? []
+    : integrationFolder === 'cypress/integration'
+      ? ['**/*.{js,ts,jsx,tsx,coffee}'].map((glob) => `${integrationFolder}/${glob}`)
+      : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
+
+  let specs = integrationFolder === false
+    ? []
+    : (await globby(globs, { onlyFiles: true, cwd: projectRoot }))
+
+  const fullyCustom = integrationFolder !== 'cypress/integration' && !isDefaultTestFiles(config, 'integration')
+
+  // we cannot do a migration if either integrationFolder is false,
+  // or if both the integrationFolder and testFiles are custom.
+  if (integrationFolder === false || fullyCustom) {
     integrationSpecs = []
-  } else if (
-    // don't care about the testFiles pattern, just get
-    // everything in the default integration folder
-    integrationFolder === 'cypress/integration' &&
-    !isDefaultTestFiles(config, 'integration')
-  ) {
-    integrationSpecs = (await globby(integrationFolder, {
-      onlyFiles: true,
-      cwd: projectRoot,
-    })).map((relative) => {
-      return {
-        relative,
-        usesDefaultFolder: true,
-        usesDefaultTestFiles: false,
-        testingType: 'e2e',
-      }
-    })
   } else {
-    // don't care about the testFiles pattern, just get
-    // everything in the default integration folder
-    const globs = integrationTestFiles.map((glob) => {
-      return path.join(integrationFolder, glob)
-    })
-
-    integrationSpecs = (await globby(globs, {
-      onlyFiles: true,
-      cwd: projectRoot,
-    })).map((relative) => {
+    integrationSpecs = specs.map((relative) => {
       return {
         relative,
         usesDefaultFolder: integrationFolder === 'cypress/integration',
@@ -140,11 +139,11 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
     })
   }
 
-  if (componentFolder === false) {
+  if (componentFolder === false || !isDefaultTestFiles(config, 'component')) {
     componentSpecs = []
   } else {
     const globs = componentTestFiles.map((glob) => {
-      return path.join(componentFolder, glob)
+      return `${componentFolder}/${glob}`
     })
 
     componentSpecs = (await globby(globs, { onlyFiles: true, cwd: projectRoot })).map((relative) => {

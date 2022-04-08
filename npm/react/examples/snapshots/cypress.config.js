@@ -3,16 +3,16 @@ module.exports = {
   'fixturesFolder': false,
   'viewportWidth': 500,
   'viewportHeight': 500,
-  'ignoreSpecPattern': [
-    '**/__snapshots__/*',
-    '**/__image_snapshots__/*',
-  ],
   'env': {
     'cypress-plugin-snapshots': {
       'prettier': true,
     },
   },
   'component': {
+    'excludeSpecPattern': [
+      '**/__snapshots__/*',
+      '**/__image_snapshots__/*',
+    ],
     setupNodeEvents (on, config) {
       // load file devServer that comes with this plugin
       // https://github.com/bahmutov/cypress-react-unit-test#install

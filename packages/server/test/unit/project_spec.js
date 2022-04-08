@@ -210,7 +210,7 @@ describe.skip('lib/project-base', () => {
             family: 'some-other-family',
             name: 'some-other-name',
             warning: `\
-Your project has set the configuration option: \`chromeWebSecurity: false\`
+Your project has set the configuration option: chromeWebSecurity to false
 
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,
@@ -624,5 +624,23 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(err.code).to.eq('EPERM')
       })
     })
+  })
+})
+
+describe('lib/project-base #isRunnerSocketConnected', () => {
+  it('calls through to socket method', () => {
+    const isRunnerSocketConnected = sinon.stub().returns(true)
+
+    this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('todos'), testingType: 'e2e' })
+    this.project._server = {
+      socket: {
+        isRunnerSocketConnected,
+      },
+    }
+
+    const result = this.project.isRunnerSocketConnected()
+
+    expect(result).to.eq(true)
+    expect(isRunnerSocketConnected).to.have.been.calledOnce
   })
 })

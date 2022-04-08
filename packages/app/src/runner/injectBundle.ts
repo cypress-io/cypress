@@ -1,15 +1,11 @@
-export async function injectBundle (namespace: string) {
-  const src = `/${namespace}/runner/cypress_runner.js`
+import pDefer from 'p-defer'
 
-  const alreadyInjected = document.querySelector(`script[src="${src}"]`)
+export const dfd = pDefer()
 
-  if (alreadyInjected) {
-    return
-  }
-
+export function injectBundle (namespace: string) {
   const script = document.createElement('script')
 
-  script.src = src
+  script.src = `/${namespace}/runner/cypress_runner.js`
   script.type = 'text/javascript'
 
   const link = document.createElement('link')
@@ -17,10 +13,10 @@ export async function injectBundle (namespace: string) {
   link.rel = 'stylesheet'
   link.href = `/${namespace}/runner/cypress_runner.css`
 
+  script.onload = () => {
+    dfd.resolve()
+  }
+
   document.head.appendChild(script)
   document.head.appendChild(link)
-
-  return new Promise<void>((resolve) => {
-    script.onload = () => resolve()
-  })
 }

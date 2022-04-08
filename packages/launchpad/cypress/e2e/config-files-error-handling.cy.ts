@@ -1,6 +1,9 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-// TODO: add when we land the lifecycle management
+const expectStackToBe = (mode: 'open' | 'closed') => {
+  cy.get(`[data-cy="stack-open-${mode === 'open' ? 'true' : 'false'}"]`)
+}
+
 describe('Config files error handling', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
@@ -18,13 +21,13 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Something went wrong')
+    cy.get('body').should('contain.text', 'Please remove one of the two and try again')
+    expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.get('body')
-    .should('not.contain.text', 'Something went wrong')
+    cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
   it('shows the upgrade screen if there is a legacy config file', () => {
@@ -52,43 +55,98 @@ describe('Config files error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body').should('contain.text', 'Cypress no longer supports')
+    expectStackToBe('closed')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
-    cy.get('body').should('not.contain.text', 'Cypress no longer supports')
+    cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
   it('handles deprecated config fields', () => {
     cy.openProject('pristine')
-
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true, e2e: {} }')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, experimentalComponentTesting: true } }')
     })
 
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body').should('contain.text', 'Something went wrong')
-    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
-    cy.findByText('Error Loading Config')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'was removed in Cypress version')
+    expectStackToBe('closed')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
+    })
+
+    cy.get('h1').should('contain', 'Choose a Browser')
+  })
+})
+
+describe('Launchpad: Error System Tests', () => {
+  it('Handles an error thrown from the root of the config file', () => {
+    cy.scaffoldProject('plugins-root-sync-error')
+    cy.openProject('plugins-root-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error')
+    expectStackToBe('open')
   })
 
-  it('handles deprecated fields on root config', () => {
-    cy.openProject('pristine')
+  it('Handles an error thrown asynchronously in the root of the config', () => {
+    cy.scaffoldProject('plugins-root-async-error')
+    cy.openProject('plugins-root-async-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('not.exist') // No title set on unhandled error
+    expectStackToBe('open')
+  })
 
+  it('Handles an synchronously in setupNodeEvents', () => {
+    cy.scaffoldProject('plugins-function-sync-error')
+    cy.openProject('plugins-function-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    expectStackToBe('open')
+  })
+
+  it('Handles an error thrown while validating config', () => {
+    cy.scaffoldProject('config-with-invalid-browser')
+    cy.openProject('config-with-invalid-browser', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    expectStackToBe('closed')
+  })
+
+  it('Handles an error thrown from the tasks', () => {
+    cy.scaffoldProject('plugins-function-sync-error')
+    cy.openProject('plugins-function-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    expectStackToBe('open')
+  })
+
+  it('Handles a TS syntax error when loading the config', () => {
+    cy.scaffoldProject('config-with-ts-syntax-error')
+    cy.openProject('config-with-ts-syntax-error')
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts', e2e: {} }`)
+      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.openProject('pristine')
+    cy.findByRole('button', { name: 'Try again' }).click()
 
+    cy.get('h1').should('contain', 'Welcome to Cypress')
+  })
+
+  it('shows correct user file instead of node file', () => {
+    cy.scaffoldProject('config-with-import-error')
+    cy.openProject('config-with-import-error')
     cy.visitLaunchpad()
-    cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body').should('contain.text', 'Something went wrong')
-    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
-    cy.findByText('Error Loading Config')
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
   })
 })

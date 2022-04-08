@@ -17,17 +17,48 @@ describe('<OpenBrowserList />', () => {
       onResult: (result) => {
         result.currentBrowser = null
       },
-      render: (gqlVal) => <div class="border-current border-1 resize overflow-auto"><OpenBrowserList gql={gqlVal} isBrowserOpen={false} isBrowserOpening={false}/></div>,
+      render: (gqlVal) =>
+        (<div class="border-current border-1 resize overflow-auto">
+          <OpenBrowserList gql={gqlVal}/>
+        </div>),
     })
 
     longBrowsersList.forEach((browser) => {
       cy.contains('label', browser.displayName).should('be.visible')
     })
 
+    // Firefox early version should be disabled
+    cy.get('[data-cy-browser="firefox"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[data-cy-browser="firefox"] [data-cy="unsupported-browser-tooltip-trigger"]').should('exist')
+    cy.get('[data-cy-browser="electron"] [data-cy="unsupported-browser-tooltip-trigger"]').should('not.exist')
+
+    // Renders a default logo if we don't provide one
+    cy.get('[data-cy-browser="fake"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[data-cy-browser="fake"] img').should('have.attr', 'src').should('include', 'generic-browser')
+
     // If no default value, should choose electron
     cy.get('[data-cy-browser="electron"]').should('have.attr', 'aria-checked', 'true')
     cy.get('[data-cy="launch-button"]').contains(defaultMessages.openBrowser.startE2E.replace('{browser}', 'Electron'))
-    cy.get('[data-cy="launch-button"]').get('[data-cy="e2e-testing-icon"]')
+    cy.get('[data-cy="launch-button"]').get('[data-cy="icon-testing-type-e2e"]')
+
+    cy.percySnapshot()
+  })
+
+  it('displays a tooltip for an unsupported browser', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (result) => {
+        result.currentBrowser = null
+      },
+      render: (gqlVal) =>
+        (<div class="border-current border-1 resize overflow-auto">
+          <div class="h-40" />
+          <OpenBrowserList gql={gqlVal}/>
+        </div>),
+    })
+
+    cy.get('[data-cy-browser="firefox"]:nth(2) [data-cy="unsupported-browser-tooltip"]')
+    .trigger('mouseenter')
+    .contains('Cypress does not support running Firefox Developer Edition version 69.')
 
     cy.percySnapshot()
   })
@@ -38,9 +69,7 @@ describe('<OpenBrowserList />', () => {
         <div class="border-current border-1 resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
-            isBrowserOpen={false}
-            isBrowserOpening={false}
-            onNavigated-back={cy.stub().as('navigatedBack')}/>
+            onNavigatedBack={cy.stub().as('navigatedBack')}/>
         </div>),
     })
 
@@ -50,12 +79,13 @@ describe('<OpenBrowserList />', () => {
 
   it('shows browser is opening', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (res) => {
+        res.browserStatus = 'opening'
+      },
       render: (gqlVal) => (
         <div class="border-current border-1 resize overflow-auto">
           <OpenBrowserList
-            gql={gqlVal}
-            isBrowserOpen={false}
-            isBrowserOpening={true}/>
+            gql={gqlVal} />
         </div>),
     })
 
@@ -68,13 +98,14 @@ describe('<OpenBrowserList />', () => {
 
   it('shows browser is open', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (res) => {
+        res.browserStatus = 'open'
+      },
       render: (gqlVal) => (
         <div class="border-current border-1 resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
-            isBrowserOpen={true}
-            isBrowserOpening={false}
-            onClose-browser={cy.stub().as('closeBrowser')}/>
+            onCloseBrowser={cy.stub().as('closeBrowser')}/>
         </div>),
     })
 
@@ -89,16 +120,15 @@ describe('<OpenBrowserList />', () => {
 
   it('hides focus button when unsupported', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
-      onResult: (result) => {
-        result.currentBrowser = longBrowsersList.find((browser) => !browser.isFocusSupported) || null
+      onResult: (res) => {
+        res.browserStatus = 'open'
+        res.currentBrowser = longBrowsersList.find((browser) => !browser.isFocusSupported) || null
       },
       render: (gqlVal) => (
         <div class="border-current border-1 resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
-            isBrowserOpen={true}
-            isBrowserOpening={false}
-            onClose-browser={cy.stub().as('closeBrowser')}/>
+            onCloseBrowser={cy.stub().as('closeBrowser')}/>
         </div>),
     })
 

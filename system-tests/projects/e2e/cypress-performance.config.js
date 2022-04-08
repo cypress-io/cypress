@@ -1,7 +1,7 @@
 module.exports = {
-  baseUrl: 'http://localhost:3434',
   video: false,
   'e2e': {
+    baseUrl: 'http://localhost:3434',
     setupNodeEvents: require('./cypress/plugins'),
   },
 }

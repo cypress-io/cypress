@@ -1,3 +1,10 @@
+# [@cypress/vue-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.0...@cypress/vue-v3.1.1) (2022-02-10)
+
+
+### Bug Fixes
+
+* create a dummy commit to trigger release ([97e6c14](https://github.com/cypress-io/cypress/commit/97e6c14b91661658b856038da8a0f5fa4319b19b))
+
 # [@cypress/vue-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.5...@cypress/vue-v3.1.0) (2021-12-16)
 
 

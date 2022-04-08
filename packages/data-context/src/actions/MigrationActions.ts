@@ -1,13 +1,14 @@
 import path from 'path'
-import fs from 'fs-extra'
+import assert from 'assert'
 import type { DataContext } from '..'
 import {
+  cleanUpIntegrationFolder,
+  formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
   SpecToMove,
   supportFilesForMigration,
-} from '../util'
-import type { TestingType } from '@packages/types'
+} from '../sources'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
@@ -15,17 +16,35 @@ export class MigrationActions {
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
 
-    await this.ctx.actions.file.writeFileInProject('cypress.config.js', config).catch((error) => {
+    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.migration.configFileNameAfterMigration)
+
+    await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
       throw error
     })
 
-    await this.ctx.actions.file.removeFileInProject('cypress.json').catch((error) => {
+    await this.ctx.actions.file.removeFileInProject(this.ctx.lifecycleManager.legacyConfigFile).catch((error) => {
       throw error
     })
+
+    // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
+    // with the new file, instead of the deleted one which is not supported anymore
+    this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
   }
 
   initialize () {
     return this.ctx.migration.initialize()
+  }
+
+  async renameSpecsFolder () {
+    if (!this.ctx.currentProject) {
+      throw Error('Need to set currentProject before you can rename specs folder')
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+    const from = path.join(projectRoot, 'cypress', 'integration')
+    const to = path.join(projectRoot, 'cypress', 'e2e')
+
+    await this.ctx.fs.move(from, to)
   }
 
   async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
@@ -48,7 +67,8 @@ export class MigrationActions {
 
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
 
-    moveSpecFiles(projectRoot, specsToMove)
+    await moveSpecFiles(projectRoot, specsToMove)
+    await cleanUpIntegrationFolder(this.ctx.currentProject)
   }
 
   async renameSupportFile () {
@@ -65,18 +85,16 @@ export class MigrationActions {
       throw new NonStandardMigrationError('support')
     }
 
-    fs.renameSync(
+    this.ctx.fs.renameSync(
       path.join(this.ctx.currentProject, beforeRelative),
       path.join(this.ctx.currentProject, afterRelative),
     )
   }
 
-  async startWizardReconfiguration (type?: TestingType) {
+  async finishReconfigurationWizard () {
     this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
-    if (type) {
-      this.ctx.lifecycleManager.setCurrentTestingType(type)
-    }
+    await this.ctx.lifecycleManager.reloadConfig()
   }
 
   async nextStep () {
@@ -96,7 +114,42 @@ export class MigrationActions {
         this.ctx.migration.setStep(nextStep)
       }
     } else {
-      await this.startWizardReconfiguration()
+      await this.finishReconfigurationWizard()
+    }
+  }
+
+  async closeManualRenameWatcher () {
+    await this.ctx.migration.closeManualRenameWatcher()
+  }
+
+  async assertSuccessfulConfigMigration (migratedConfigFile: string = 'cypress.config.js') {
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(migratedConfigFile))
+
+    const configExtension = path.extname(migratedConfigFile)
+    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config${configExtension}`))
+
+    if (actual !== expected) {
+      throw Error(`Expected ${actual} to equal ${expected}`)
+    }
+  }
+
+  async assertSuccessfulConfigScaffold (configFile: `cypress.config.${'js'|'ts'}`) {
+    assert(this.ctx.currentProject)
+
+    // we assert the generated configuration file against one from a project that has
+    // been verified to run correctly.
+    // each project has an `unconfigured` and `configured` variant in `system-tests/projects`
+    // for example vueclivue2-configured and vueclivue2-unconfigured.
+    // after setting the project up with the launchpad, the two projects should contain the same files.
+
+    const configuredProject = this.ctx.project.projectTitle(this.ctx.currentProject).replace('unconfigured', 'configured')
+    const expectedProjectConfig = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', configuredProject, configFile)
+
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))
+    const expected = formatConfig(await this.ctx.fs.readFile(expectedProjectConfig, 'utf8'))
+
+    if (actual !== expected) {
+      throw Error(`Expected ${actual} to equal ${expected}`)
     }
   }
 }

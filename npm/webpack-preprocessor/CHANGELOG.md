@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.11.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.11.0...@cypress/webpack-preprocessor-v5.11.1) (2022-02-08)
+
+
+### Bug Fixes
+
+* detect newly added specs in dev-server compilation ([#17950](https://github.com/cypress-io/cypress/issues/17950)) ([f9ce67c](https://github.com/cypress-io/cypress/commit/f9ce67cfb6fed74a3549e7aff7ce0a5b217d9a13))
+
 # [@cypress/webpack-preprocessor-v5.11.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.10.0...@cypress/webpack-preprocessor-v5.11.0) (2021-12-16)
 
 

@@ -1,7 +1,7 @@
 import { useWindowSize } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
-import { useAutStore } from '../store'
+import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { runnerConstants } from './runner-constants'
 
@@ -33,8 +33,10 @@ export const useRunnerStyle = ({
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
   const containerWidth = computed(() => {
+    const { isSpecsListOpen } = useRunnerUiStore()
+
     const miscBorders = 4
-    let nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders
+    let nonAutWidth = reporterWidth.value + (isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
     if (window.__CYPRESS_MODE__ !== 'run') {
       nonAutWidth += collapsedNavBarWidth
@@ -56,17 +58,25 @@ export const useRunnerStyle = ({
   const screenshotStore = useScreenshotStore()
   const autStore = useAutStore()
 
-  const viewportStyle = computed(() => {
-    let scale: number = 1
+  const scale = computed(() => {
+    let scale = 1
 
     if (!screenshotStore.isScreenshotting) {
       scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
     }
 
+    return scale
+  })
+
+  const viewportStyle = computed(() => {
     return `
       width: ${autStore.viewportDimensions.width}px;
       height: ${autStore.viewportDimensions.height}px;
-      transform: scale(${scale});`
+      transform: scale(${scale.value});`
+  })
+
+  watchEffect(() => {
+    autStore.setScale(scale.value)
   })
 
   return {

@@ -10,7 +10,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
-    cy.percySnapshot()
+    cy.percySnapshot('before browsers open')
 
     cy.get('[data-cy="top-nav-active-browser"]')
     .should('be.visible')
@@ -18,8 +18,21 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Edge Canary')
     .should('be.visible')
+    .closest('[data-cy="top-nav-browser-list-item"]')
+    .within(() => {
+      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      .should('not.exist')
+    })
 
-    cy.percySnapshot()
+    cy.contains('Version unsupported')
+    .should('be.visible')
+    .closest('[data-cy="top-nav-browser-list-item"]')
+    .within(() => {
+      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      .should('exist')
+    })
+
+    cy.percySnapshot('after browsers open')
   }),
 
   it('renders without browser menu by default and other items work', () => {
@@ -114,6 +127,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   it('shows hint and modal to upgrade to latest version of cypress', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
+        if (result.currentProject) {
+          result.currentProject.packageManager = 'yarn'
+        }
+
         result.versions = {
           __typename: 'VersionData',
           current: {
@@ -138,17 +155,18 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('v8.6.0 • Upgrade').should('be.visible')
-    cy.percySnapshot()
+    cy.percySnapshot('before upgrade click')
     cy.contains('v8.6.0 • Upgrade').click()
     cy.get('[data-cy="latest-version"]').contains('8.7.0')
     cy.get('[data-cy="current-version"]').contains('8.6.0')
     cy.get('[data-cy="update-hint"]').should('be.visible')
-    cy.percySnapshot()
+    cy.percySnapshot('after upgrade click')
     cy.contains('button', 'Update to').click()
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
     cy.contains('test-project').should('be.visible')
-    cy.percySnapshot()
+    cy.contains('code', 'yarn add -D cypress').should('be.visible')
+    cy.percySnapshot('after upgrade modal open')
 
     cy.get('body').type('{esc}') // dismiss modal with keyboard
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
@@ -192,7 +210,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
-        result.isAuthBrowserOpened = true
+        result.authState.browserOpened = true
         result.cloudViewer = cloudViewer
         result.cloudViewer.__typename = 'CloudUser'
       },
@@ -340,10 +358,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
           cy.contains('Docs').click()
           cy.contains('Run tests faster').click()
-          cy.percySnapshot()
         })
 
         it('opens on menu item click', () => {
+          cy.percySnapshot()
           cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('be.visible')
           cy.contains('Getting Started').should('not.exist')
         })

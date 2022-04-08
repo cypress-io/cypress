@@ -1,0 +1,32 @@
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Select event counter</title>
+</head>
+<label>Choose an ice cream flavor:
+  <select class='ice-cream' name='ice-cream'>
+    <option value=''>Select One …</option>
+    <option value='chocolate' selected>Chocolate</option>
+    <option value='sardine'>Sardine</option>
+    <option value='vanilla'>Vanilla</option>
+  </select>
+</label>
+
+<div id='change-result'></div>
+<div id='input-result'></div>
+
+<script>
+  const selectElement = document.querySelector('.ice-cream');
+  let numOfTimesOnChangeFired = 0;
+  selectElement.addEventListener('change', (event) => {
+    const result = document.querySelector('#change-result');
+    result.textContent = `Number of times onChange event fired: ${++numOfTimesOnChangeFired}`;
+  });
+
+  let numOfTimesInputFired = 0;
+  selectElement.addEventListener('input', (event) => {
+    const result = document.querySelector('#input-result');
+    result.textContent = `Number of times input event fired: ${++numOfTimesInputFired}`;
+  });
+</script>
+</html>

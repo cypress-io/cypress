@@ -18,7 +18,6 @@ Thanks for taking the time to contribute! :smile:
 
 ## Table of Contents
 
-- [CI Status](#ci-status)
 - [Code of Conduct](#code-of-conduct)
 - [Opening Issues](#opening-issues)
 - [Triaging Issues](#triaging-issues)
@@ -41,20 +40,6 @@ Thanks for taking the time to contribute! :smile:
   - [Code Review Checklist](#Code-Review-Checklist)
   - [Code Review of Dependency Updates](#Code-Review-of-Dependency-Updates)
 - [Deployment](#deployment)
-
-## CI status
-
-| Build status                                                                                                                                                                                                        | Description                                                                                |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------- |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions)     | [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions)     |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-ci-environments.svg?style=svg&circle-token=66a4d36c3966cbe476f13e7dfbe3af0693db3fb9)](https://circleci.com/gh/cypress-io/cypress-test-ci-environments) | [cypress-test-ci-environments](https://github.com/cypress-io/cypress-test-ci-environments) |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-module-api.svg?style=svg&circle-token=317f79ae796e0ffd6cc7dd90859c0f67e5a306e7)](https://circleci.com/gh/cypress-io/cypress-test-module-api)           | [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api)           |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-nested-projects.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-nested-projects)                                                       | [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects) |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-on.svg?style=svg&circle-token=51ba85f5720654ee58212f45f6b9afc56d55d52a)](https://circleci.com/gh/cypress-io/cypress-on)                                     | [cypress-on](https://github.com/cypress-io/cypress-on)                                     |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions)     | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)     |
-| [![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper)                       | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)                       |
-| [![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/)                                                                                              | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)               |
-| [![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress)                                                                        | Windows CI                                                                                 |
 
 ## Code of Conduct
 

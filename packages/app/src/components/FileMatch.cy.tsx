@@ -50,11 +50,11 @@ describe('<FileMatch />', { viewportWidth: 600, viewportHeight: 300 }, () => {
     describe('expanding/collapsing', () => {
       it('can be expanded and collapsed by the extension button', () => {
         cy.get(extensionInputSelector).should('not.exist')
-        cy.percySnapshot()
+        cy.percySnapshot('before expand')
         cy.get(fileMatchButtonSelector).click()
         .get(extensionInputSelector).should('be.visible')
 
-        cy.percySnapshot()
+        cy.percySnapshot('after expand')
         cy.get(fileMatchButtonSelector).click()
         .get(extensionInputSelector).should('not.exist')
       })

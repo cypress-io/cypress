@@ -34,9 +34,10 @@
 </template>
 
 <script lang="ts" setup>
-import { FunctionalComponent, SVGAttributes, useSlots } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { useSlots } from 'vue'
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   description?: string
   icon?: FunctionalComponent<SVGAttributes>
   gray?: boolean
@@ -49,6 +50,4 @@ const props = withDefaults(defineProps<{
 })
 
 const slots = useSlots()
-
-const gray = true
 </script>

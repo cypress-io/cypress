@@ -7,7 +7,7 @@ const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
 const Events = require(`../../../lib/gui/events`)
 const Windows = require(`../../../lib/gui/windows`)
-const interactiveMode = require(`../../../lib/modes/interactive-e2e`)
+const interactiveMode = require(`../../../lib/modes/interactive`)
 
 describe('gui/interactive', () => {
   context('.isMac', () => {
@@ -101,21 +101,21 @@ describe('gui/interactive', () => {
         sinon.stub(menu, 'set')
       })
 
-      it('calls menu.set withDevTools: true when in dev env', () => {
+      it('calls menu.set withInternalDevTools: true when in dev env', () => {
         const env = process.env['CYPRESS_INTERNAL_ENV']
 
         process.env['CYPRESS_INTERNAL_ENV'] = 'development'
         interactiveMode.getWindowArgs({}).onFocus()
-        expect(menu.set.lastCall.args[0].withDevTools).to.be.true
+        expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.true
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
 
-      it('calls menu.set withDevTools: false when not in dev env', () => {
+      it('calls menu.set withInternalDevTools: false when not in dev env', () => {
         const env = process.env['CYPRESS_INTERNAL_ENV']
 
         process.env['CYPRESS_INTERNAL_ENV'] = 'production'
         interactiveMode.getWindowArgs({}).onFocus()
-        expect(menu.set.lastCall.args[0].withDevTools).to.be.false
+        expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.false
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
     })
@@ -155,24 +155,24 @@ describe('gui/interactive', () => {
       })
     })
 
-    it('calls menu.set withDevTools: true when in dev env', () => {
+    it('calls menu.set withInternalDevTools: true when in dev env', () => {
       const env = process.env['CYPRESS_INTERNAL_ENV']
 
       process.env['CYPRESS_INTERNAL_ENV'] = 'development'
 
       return interactiveMode.ready({}).then(() => {
-        expect(menu.set.lastCall.args[0].withDevTools).to.be.true
+        expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.true
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
     })
 
-    it('calls menu.set withDevTools: false when not in dev env', () => {
+    it('calls menu.set withInternalDevTools: false when not in dev env', () => {
       const env = process.env['CYPRESS_INTERNAL_ENV']
 
       process.env['CYPRESS_INTERNAL_ENV'] = 'production'
 
       return interactiveMode.ready({}).then(() => {
-        expect(menu.set.lastCall.args[0].withDevTools).to.be.false
+        expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.false
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
     })

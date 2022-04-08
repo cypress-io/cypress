@@ -46,7 +46,8 @@ import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenDirectoryInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
+import type { GlobalPageFragment, GlobalProjectCardFragment } from '../generated/graphql'
+import { GlobalPage_AddProjectDocument, GlobalPage_OpenDirectoryInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 
 gql`
@@ -117,11 +118,15 @@ function handleRemoveProject (path: string) {
 }
 
 const props = defineProps<{
-  gql: GlobalPageFragment,
+  gql: GlobalPageFragment
 }>()
 
+function matchedGlobalProjects (project: typeof props.gql.projects[number]): project is GlobalProjectCardFragment {
+  return project.__typename === 'GlobalProject' && project.title.toLowerCase().includes(match.value.toLowerCase())
+}
+
 const filteredProjects = computed(() => {
-  return (props.gql.projects as GlobalProjectCardFragment[]).filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return (props.gql.projects || []).filter(matchedGlobalProjects)
 })
 
 const match = ref('')

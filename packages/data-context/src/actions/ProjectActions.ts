@@ -18,7 +18,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
@@ -36,6 +36,19 @@ export interface ProjectApiShape {
   }
 }
 
+type SetSpecsFoundBySpecPattern = {
+  path: string
+  testingType: Cypress.TestingType
+  specPattern?: Cypress.Config['specPattern']
+  excludeSpecPattern?: Cypress.Config['excludeSpecPattern']
+  additionalIgnorePattern?: string | string[]
+}
+
+type SetForceReconfigureProjectByTestingType = {
+  forceReconfigureProject: boolean
+  testingType?: TestingType
+}
+
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
 
@@ -47,6 +60,8 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.currentProject = null
       d.currentTestingType = null
+      d.forceReconfigureProject = null
+      d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
     })
@@ -122,6 +137,12 @@ export class ProjectActions {
       return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
+      }).finally(async () => {
+        // When switching testing type, the project should be relaunched in the previously selected browser
+        if (this.ctx.coreData.app.relaunchBrowser) {
+          this.ctx.project.setRelaunchBrowser(false)
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+        }
       })
     } catch (e) {
       // TODO(tim): remove / replace with ctx.log.error
@@ -217,7 +238,9 @@ export class ProjectActions {
 
     this.ctx.coreData.currentTestingType = testingType
 
-    return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+
+    return
   }
 
   removeProject (projectRoot: string) {
@@ -277,20 +300,6 @@ export class ProjectActions {
 
   setPromptShown (slug: string) {
     this.api.setPromptShown(slug)
-  }
-
-  async createComponentIndexHtml (template: string) {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot create index.html without currentProject.`)
-    }
-
-    if (this.ctx.lifecycleManager.isTestingTypeConfigured('component')) {
-      const indexHtmlPath = path.resolve(project, 'cypress/component/support/index.html')
-
-      await this.ctx.fs.outputFile(indexHtmlPath, template)
-    }
   }
 
   setSpecs (specs: FoundSpec[]) {
@@ -395,22 +404,20 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    const cfg = this.ctx.project.getConfig()
+    const cfg = await this.ctx.project.getConfig()
 
-    if (cfg) {
-      const toArray = (v: string | string[] | undefined) => Array.isArray(v) ? v : v ? [v] : undefined
-
+    if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
-      const specPattern = toArray(cfg[testingType]?.specPattern)
-      const ignoreSpecPattern = toArray(cfg[testingType]?.ignoreSpecPattern) ?? []
-      const additionalIgnore = toArray(testingType === 'component' ? cfg?.e2e?.specPattern : undefined) ?? []
+      const { specs } = await this.setSpecsFoundBySpecPattern({
+        path: this.ctx.currentProject,
+        testingType,
+        specPattern: cfg[testingType]?.specPattern,
+        excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
+        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+      })
 
-      if (this.ctx.currentProject && specPattern) {
-        const specs = await this.ctx.project.findSpecs(this.ctx.currentProject, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
-
-        this.ctx.project.setSpecs(specs)
-
+      if (specs) {
         if (testingType === 'component') {
           this.api.getDevServer().updateSpecs(specs)
         }
@@ -424,10 +431,52 @@ export class ProjectActions {
     }
   }
 
+  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+    specPattern = toArray(specPattern)
+
+    excludeSpecPattern = toArray(excludeSpecPattern) || []
+
+    // exclude all specs matching e2e if in component testing
+    additionalIgnorePattern = toArray(additionalIgnorePattern) || []
+
+    if (!specPattern) {
+      throw Error('could not find pattern to load specs')
+    }
+
+    const specs = await this.ctx.project.findSpecs(
+      path,
+      testingType,
+      specPattern,
+      excludeSpecPattern,
+      additionalIgnorePattern,
+    )
+
+    this.ctx.actions.project.setSpecs(specs)
+
+    return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
+  }
+
+  setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
+    const testingTypeToReconfigure = testingType ?? this.ctx.coreData.currentTestingType
+
+    if (!testingTypeToReconfigure) {
+      return
+    }
+
+    this.ctx.update((coreData) => {
+      coreData.forceReconfigureProject = {
+        ...coreData.forceReconfigureProject,
+        [testingTypeToReconfigure]: forceReconfigureProject,
+      }
+    })
+  }
+
   async reconfigureProject () {
-    // Initialize active project close first the current project
-    await this.initializeActiveProject()
+    await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
+    await this.ctx.actions.wizard.initialize()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }

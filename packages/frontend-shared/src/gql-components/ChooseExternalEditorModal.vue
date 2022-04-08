@@ -18,7 +18,7 @@
       />
       <div
         v-else
-        class="h-full flex items-center justify-center"
+        class="flex h-full items-center justify-center"
       >
         <i-cy-loading_x16 class="animate-spin icon-dark-white icon-light-gray-400" />
       </div>
@@ -45,10 +45,8 @@ import { useMutation } from '@urql/vue'
 import ChooseExternalEditor from './ChooseExternalEditor.vue'
 import StandardModal from '../components/StandardModal.vue'
 import Button from '../components/Button.vue'
-import {
-  ChooseExternalEditorModalFragment,
-  ChooseExternalEditorModal_SetPreferredEditorBinaryDocument,
-} from '../generated/graphql'
+import type { ChooseExternalEditorModalFragment } from '../generated/graphql'
+import { ChooseExternalEditorModal_SetPreferredEditorBinaryDocument } from '../generated/graphql'
 
 const { t } = useI18n()
 

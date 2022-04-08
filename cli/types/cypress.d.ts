@@ -198,7 +198,7 @@ declare namespace Cypress {
   /**
    * The configuration for Cypress.
    */
-  type Config = ResolvedConfigOptions & RuntimeConfigOptions
+  type Config = ResolvedConfigOptions & RuntimeConfigOptions & RuntimeServerConfigOptions
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -2625,14 +2625,14 @@ declare namespace Cypress {
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
      * @default "*.hot-update.js"
-     * @deprecated use `ignoreSpecPattern` instead
+     * @deprecated use `excludeSpecPattern` instead
      */
     ignoreTestFiles: string | string[]
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
      * @default "*.hot-update.js"
      */
-    ignoreSpecPattern: string | string[]
+    excludeSpecPattern: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
@@ -2898,7 +2898,7 @@ declare namespace Cypress {
      */
     clientCertificates: ClientCertificate[]
 
-     /**
+    /**
      * Handle Cypress plugins
      */
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
@@ -2907,17 +2907,17 @@ declare namespace Cypress {
   /**
    * Options appended to config object on runtime.
    */
-  interface RuntimeConfigOptions {
+  interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
+    /**
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
+     */
+    configFile: string | false
     /**
      * CPU architecture, from Node `os.arch()`
      *
      * @see https://nodejs.org/api/os.html#os_os_arch
      */
     arch: string
-    /**
-     * The browser Cypress is running on.
-     */
-    browser: Browser
     /**
      * Available browsers found on your system.
      */
@@ -2947,20 +2947,30 @@ declare namespace Cypress {
     version: string
 
     // Internal or Unlisted at server/lib/config_options
+    namespace: string
+    projectRoot: string
+    devServerPublicPathRoute: string
+  }
+
+  /**
+   * Optional options added before the server starts
+   */
+  interface RuntimeServerConfigOptions {
+    /**
+     * The browser Cypress is running on.
+     */
+    browser: Browser
+    // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
     browserUrl: string
     clientRoute: string
-    configFile: string
     cypressEnv: string
-    devServerPublicPathRoute: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
-    namespace: string
     parentTestsFolder: string
     parentTestsFolderDisplay: string
     projectName: string
-    projectRoot: string
     proxyUrl: string
     remote: RemoteState
     report: boolean
@@ -2985,10 +2995,10 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
-  type DevServerFn<ComponentDevServerOpts = any> = (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+  type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
-    devServer: Promise<{ devServer: DevServerFn<ComponentDevServerOpts>}> | { devServer: DevServerFn<ComponentDevServerOpts> } | DevServerFn<ComponentDevServerOpts>
-    devServerConfig?: ComponentDevServerOpts | Promise<ComponentDevServerOpts>
+    devServer: DevServerFn<ComponentDevServerOpts>
+    devServerConfig?: ComponentDevServerOpts
   }
 
   /**
@@ -2997,11 +3007,7 @@ declare namespace Cypress {
    */
   type ConfigOptions<ComponentDevServerOpts = any> = Partial<ResolvedConfigOptions<ComponentDevServerOpts>>
 
-  interface PluginConfigOptions extends ResolvedConfigOptions {
-    /**
-    * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
-    */
-    configFile: string | false
+  interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**
     * Absolute path to the root of the project
     */

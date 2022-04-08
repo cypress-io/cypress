@@ -5,6 +5,7 @@ import debugFn from 'debug'
 import * as path from 'path'
 import { CypressCTWebpackContext } from './plugin'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
+import type { LoaderContext } from 'webpack'
 
 /**
  * @param {ComponentSpec} file spec to create import string from.
@@ -24,7 +25,7 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
 }
 
 /**
- * Creates a object maping a spec file to an object mapping
+ * Creates a object mapping a spec file to an object mapping
  * the spec name to the result of `makeImport`.
  *
  * @returns {Record<string, ReturnType<makeImport>}
@@ -49,7 +50,11 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 }
 
 // Runs the tests inside the iframe
-export default function loader (this: CypressCTWebpackContext) {
+export default function loader (this: CypressCTWebpackContext & LoaderContext<void>) {
+  // In Webpack 5, a spec added after the dev-server is created won't
+  // be included in the compilation. Disabling the caching of this loader ensures
+  // we regenerate our specs and include any new ones in the compilation.
+  this.cacheable(false)
   const { files, projectRoot, supportFile } = this._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined

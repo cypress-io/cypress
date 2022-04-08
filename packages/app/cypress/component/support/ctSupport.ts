@@ -1,9 +1,5 @@
 import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
-import { logger } from '@packages/runner-shared/src/logger'
-import { blankContents } from '@packages/runner-shared/src/blank-contents'
-import _ from 'lodash'
-import { visitFailure } from '@packages/runner-shared/src/visit-failure'
 import type { Socket } from '@packages/socket/lib/browser'
 
 class StudioRecorderMock {}
@@ -42,14 +38,10 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
   return new AutIframe(
     'Test Project',
     eventManager,
-    _,
     null, // CypressJQuery, shouldn't be using driver in component tests anyway
-    logger,
     // dom - imports driver which causes problems
     // so just stubbing it out for now
     mockDom,
-    visitFailure,
     eventManager.studioRecorder,
-    blankContents,
   )
 }

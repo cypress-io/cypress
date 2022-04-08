@@ -33,7 +33,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     currentTestingType: 'e2e',
     projectId: `${globalProject.title}-id`,
     specs: [
-      ...randomComponents(200, 'Spec').map((c) => {
+      ...randomComponents(50, 'Spec').map((c) => {
         return {
           ...c,
           id: c.absolute,
@@ -51,7 +51,9 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     currentBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
-    isBrowserOpen: false,
+    browserStatus: 'closed',
+    packageManager: 'yarn',
+    configFileAbsolutePath: '/path/to/cypress.config.js',
     ...currentProject,
   }
 }

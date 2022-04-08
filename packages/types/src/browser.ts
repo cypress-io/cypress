@@ -173,3 +173,7 @@ export const browsers: Browser[] = [
     minSupportedVersion: MIN_EDGE_VERSION,
   },
 ]
+
+export const BROWSER_STATUS = ['closed', 'opening', 'open'] as const
+
+export type BrowserStatus = typeof BROWSER_STATUS[number]

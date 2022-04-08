@@ -1,7 +1,8 @@
 <template>
-  <div
-    class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center"
+  <button
+    class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-transparent"
     :data-cy="`row-directory-depth-${depth}`"
+    :aria-expanded="expanded"
   >
     <i-cy-chevron-down-small_x16
       class="
@@ -20,7 +21,8 @@
       class="font-medium text-gray-600"
       highlight-classes="text-gray-1000"
     />
-  </div>
+    <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
+  </button>
 </template>
 
 <script lang="ts" setup>

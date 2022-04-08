@@ -10,6 +10,7 @@ export default defineConfig({
     runMode: 2,
     openMode: 0,
   },
+  videoCompression: false, // turn off video compression for CI
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
@@ -26,6 +27,7 @@ export default defineConfig({
         include: [
           '@headlessui/vue',
           'vue3-file-selector',
+          'p-defer',
           'just-my-luck',
           'combine-properties',
           'faker',

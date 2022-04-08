@@ -22,6 +22,11 @@ export const WizardFrontendFramework = objectType({
       resolve: (source, args, ctx) => ctx.wizardData.chosenFramework === source.type,
     })
 
+    t.nonNull.boolean('isDetected', {
+      description: 'Whether this is the detected framework',
+      resolve: (source, args, ctx) => ctx.wizardData.detectedFramework === source.type,
+    })
+
     t.nonNull.string('name', {
       description: 'The name of the framework',
     })
@@ -30,12 +35,13 @@ export const WizardFrontendFramework = objectType({
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',
       resolve: (source, args, ctx) => {
-        return ctx.wizardData.allBundlers.filter((b) => source.supportedBundlers.some((x) => x === b.type))
+        return [...source.supportedBundlers]
       },
     })
   },
+
   sourceType: {
-    module: '@packages/types',
+    module: '@packages/scaffold-config',
     export: 'FrontendFramework',
   },
 })

@@ -1,6 +1,10 @@
-import type { DebouncedFunc } from 'lodash'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
-import type JQuery from 'jquery'
+import { blankContents } from './blank-contents'
+import { visitFailure } from './visit-failure'
+import { logger } from './logger'
+import _ from 'lodash'
+/* eslint-disable no-duplicate-imports */
+import type { DebouncedFunc } from 'lodash'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -8,26 +12,16 @@ type $CypressJQuery = any
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
-  logger: any
   _highlightedEl?: Element
 
   constructor (
     private projectName: string,
     private eventManager: any,
-    private _: any,
     private $: $CypressJQuery,
-    logger: any,
     private dom: any,
-    private visitFailure: (props: any) => string,
     private studioRecorder: any,
-    private blankContents: {
-      initial: () => string
-      session: () => string
-      sessionLifecycle: () => string
-    },
   ) {
-    this.logger = logger
-    this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
+    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create (): JQuery<HTMLIFrameElement> {
@@ -42,19 +36,19 @@ export class AutIframe {
   }
 
   showInitialBlankContents () {
-    this._showContents(this.blankContents.initial())
+    this._showContents(blankContents.initial())
   }
 
   showSessionBlankContents () {
-    this._showContents(this.blankContents.session())
+    this._showContents(blankContents.session())
   }
 
   showSessionLifecycleBlankContents () {
-    this._showContents(this.blankContents.sessionLifecycle())
+    this._showContents(blankContents.sessionLifecycle())
   }
 
   showVisitFailure = (props) => {
-    this._showContents(this.visitFailure(props))
+    this._showContents(visitFailure(props))
   }
 
   _showContents (contents) {
@@ -141,17 +135,17 @@ export class AutIframe {
 
     // remove all attributes
     if ($html[0]) {
-      oldAttrs = this._.map($html[0].attributes, (attr) => {
+      oldAttrs = _.map($html[0].attributes, (attr) => {
         return attr.name
       })
     }
 
-    this._.each(oldAttrs, (attr) => {
+    _.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)
     })
 
     // set the ones specified
-    this._.each(htmlAttrs, (value, key) => {
+    _.each(htmlAttrs, (value, key) => {
       $html.attr(key, value)
     })
   }
@@ -160,7 +154,7 @@ export class AutIframe {
     const $head = this._contents()?.find('head')
     const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
-    this._.each(styles, (style, index) => {
+    _.each(styles, (style, index) => {
       if (style.href) {
         // make a best effort at not disturbing <link> stylesheets
         // if possible by checking to see if the existing head has a
@@ -209,7 +203,7 @@ export class AutIframe {
   }
 
   _insertBodyStyles ($body, styles: Record<string, any> = {}) {
-    this._.each(styles, (style) => {
+    _.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
   }
@@ -405,7 +399,7 @@ export class AutIframe {
   }
 
   printSelectorElementsToConsole () {
-    this.logger.clearLog()
+    logger.clearLog()
 
     const Cypress = this.eventManager.getCypress()
 
@@ -415,13 +409,13 @@ export class AutIframe {
     const command = `cy.${selectorPlaygroundStore.method}('${selectorPlaygroundStore.selector}')`
 
     if (!$el) {
-      return this.logger.logFormatted({
+      return logger.logFormatted({
         Command: command,
         Yielded: 'Nothing',
       })
     }
 
-    this.logger.logFormatted({
+    logger.logFormatted({
       Command: command,
       Elements: $el.length,
       Yielded: Cypress.dom.getElements($el),
@@ -435,7 +429,7 @@ export class AutIframe {
         this.dom.addCssAnimationDisabler(this._body())
       }
 
-      this._.each(config.blackout, (selector) => {
+      _.each(config.blackout, (selector) => {
         this.dom.addBlackout(this._body(), selector)
       })
     } catch (err) {

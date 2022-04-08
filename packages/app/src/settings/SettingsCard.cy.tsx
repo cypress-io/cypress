@@ -23,11 +23,11 @@ describe('<SettingsCard />', () => {
     cy.get(contentSelector).should('not.exist')
     cy.findByText(title).click()
     cy.get(contentSelector).should('be.visible')
-    cy.percySnapshot()
+    cy.percySnapshot('expanded state')
     cy.findByText(title).click()
     .get(contentSelector).should('not.exist')
 
-    cy.percySnapshot()
+    cy.percySnapshot('collapsed state')
 
     // expected aria and keyboard behavior with space and enter keys:
     cy.get(collapsibleSelector).should('be.focused')

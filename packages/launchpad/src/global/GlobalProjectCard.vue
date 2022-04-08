@@ -35,6 +35,7 @@
     <Menu #="{ open }">
       <MenuButton
         aria-label="Project Actions"
+        tabindex="-1"
         class="flex h-32px text-white w-32px items-center
       justify-center focus:outline-transparent focus:text-gray-300"
         @click.stop
@@ -47,7 +48,7 @@
       <MenuItems
         data-cy="project-card-menu-items"
         class="rounded flex flex-col outline-transparent bg-gray-900 text-white
-      right-0 right-18px -bottom-104px z-40 absolute overflow-scroll"
+      right-0 right-18px -bottom-104px z-40 absolute"
       >
         <MenuItem
           v-for="item in menuItems"
@@ -70,7 +71,8 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { GlobalProjectCardFragment, GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
+import type { GlobalProjectCardFragment } from '../generated/graphql'
+import { GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
 

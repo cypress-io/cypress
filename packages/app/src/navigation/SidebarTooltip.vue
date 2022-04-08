@@ -17,16 +17,16 @@
       >
         <div
           v-if="scaleUp"
-          class="bg-gray-900 text-gray-50 rounded
-                  absolute left-64px h-40px
-                  w-176px px-16px mx-12px
-                  flex items-center justify-center
-                  leading-24px text-size-16px
+          class="rounded flex bg-gray-900
+                  h-40px mx-12px
+                  px-16px left-64px text-gray-50
+                  text-size-16px leading-24px absolute
+                  items-center
                   content
-                  before:block before:absolute before:right-full before:top-1/2 before:-mt-8px
-                  before:border-solid before:border-transparent
-                  before:border-width-8px before:border-transparent before:border-r-gray-900 before:border-l-0
-                  need-content"
+                  need-content before:border-solid before:border-transparent before:border-width-9px before:border-r-gray-900
+                  before:border-l-0 before:-mt-9px
+                  before:top-1/2 before:right-[99%] before:block before:absolute
+                  "
           :class="popperClass"
           :style="`top: ${tooltipTop}px`"
           role="tooltip"
@@ -42,9 +42,9 @@
 import { ref, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
-  disabled?:boolean,
-  popperTopOffset?:number,
-  popperClass?:string,
+  disabled?: boolean
+  popperTopOffset?: number
+  popperClass?: string
 }>(), {
   disabled: false,
   popperTopOffset: 0,

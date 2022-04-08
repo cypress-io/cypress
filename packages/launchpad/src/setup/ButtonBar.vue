@@ -5,8 +5,18 @@
         v-if="nextFn"
         size="lg"
         :disabled="!canNavigateForward"
+        :variant="mainVariant"
         @click="nextFn"
       >
+        <template
+          v-if="mainVariant === 'pending'"
+          #prefix
+        >
+          <i-cy-loading_x16
+            v-if="mainVariant === 'pending'"
+            class="animate-spin icon-dark-white icon-light-gray-400"
+          />
+        </template>
         {{ next }}
       </Button>
       <Button
@@ -42,6 +52,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import type { ButtonVariants } from '@cy/components/Button.vue'
 import Button from '@cy/components/Button.vue'
 import Switch from '@cy/components/Switch.vue'
 
@@ -53,6 +64,7 @@ const props = withDefaults(defineProps<{
   alt?: string
   altFn?: (value: boolean) => void
   canNavigateForward?: boolean
+  mainVariant?: ButtonVariants
 }>(), {
   alt: undefined,
   altFn: undefined,
@@ -60,6 +72,7 @@ const props = withDefaults(defineProps<{
   back: undefined,
   backFn: undefined,
   nextFn: undefined,
+  mainVariant: 'primary',
 })
 
 const altValue = ref(false)

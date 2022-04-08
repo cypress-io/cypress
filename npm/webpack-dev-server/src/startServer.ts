@@ -3,17 +3,11 @@ import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
+import type { CypressWebpackDevServerConfig } from '.'
 
-export interface StartDevServer extends UserWebpackDevServerOptions {
+export interface StartDevServer extends UserWebpackDevServerOptions, CypressWebpackDevServerConfig {
   /* this is the Cypress dev server configuration object */
   options: Cypress.DevServerConfig
-  /* Base webpack config object used for loading component testing */
-  webpackConfig?: WebpackConfigurationWithDevServer
-  /* base html template to render in AUT */
-  template?: string
-  /* base html template to render in AUT */
-  indexHtml?: string
-
 }
 
 export interface WebpackConfigurationWithDevServer extends webpack.Configuration {
@@ -22,7 +16,7 @@ export interface WebpackConfigurationWithDevServer extends webpack.Configuration
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, indexHtml, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, indexHtmlFile, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
@@ -31,7 +25,7 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
-    indexHtml,
+    indexHtmlFile,
     projectRoot,
     devServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
@@ -86,7 +80,7 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
       hot: false,
     }
 
-    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
+    // @ts-ignore Webpack types are clashing between Webpack and WebpackDevServer
     return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 

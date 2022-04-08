@@ -3,7 +3,7 @@
     :title="t('setupWizard.configFiles.title')"
     :description="t('setupWizard.configFiles.description')"
   />
-  <div class="py-8 mx-auto max-w-220">
+  <div class="mx-auto max-w-220 py-8">
     <FileRow
       v-for="file in files"
       :key="file.file.id"
@@ -32,12 +32,9 @@ import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import FileRow from '../components/code/FileRow.vue'
 import LaunchpadHeader from './LaunchpadHeader.vue'
-import { ScaffoldedFilesFragment, ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
+import type { ScaffoldedFilesFragment } from '../generated/graphql'
+import { ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
-
-const emit = defineEmits<{
-  (event: 'completeSetup')
-}>()
 
 const { t } = useI18n()
 
@@ -48,6 +45,7 @@ mutation ScaffoldedFiles_completeSetup {
       id
       isLoadingConfigFile
       isLoadingNodeEvents
+      isCTConfigured
     }
     scaffoldedFiles {
       status
@@ -81,7 +79,7 @@ const needsChanges = computed(() => props.gql.scaffoldedFiles?.some((f) => f.sta
 
 const mutation = useMutation(ScaffoldedFiles_CompleteSetupDocument)
 
-const completeSetup = () => {
-  mutation.executeMutation({})
+const completeSetup = async () => {
+  await mutation.executeMutation({})
 }
 </script>

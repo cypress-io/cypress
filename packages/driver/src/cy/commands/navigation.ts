@@ -5,9 +5,9 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { LogUtils } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
-import type { RunState } from '../../cypress/runner'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
@@ -1007,6 +1007,21 @@ export default (Commands, Cypress, cy, state, config) => {
           }
 
           // collect state since we're changing domains
+          // // tell our backend we're changing domains
+          // // TODO: add in other things we want to preserve
+          // // state for like scrollTop
+          // let s: Record<string, any> = {
+          //   currentId: id,
+          //   tests: Cypress.runner.getTestsState(),
+          //   startTime: Cypress.runner.getStartTime(),
+          //   emissions: Cypress.runner.getEmissions(),
+          // }
+
+          // s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
+          // s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
+          // s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
+          // s.numLogs = LogUtils.countLogsByTests(s.tests)
+
           return Cypress.action('cy:collect:run:state')
           .then(() => {
             // and now we must change the url to be the new

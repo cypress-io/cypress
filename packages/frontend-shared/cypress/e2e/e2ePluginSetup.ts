@@ -1,5 +1,5 @@
 import path from 'path'
-import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
@@ -14,6 +14,8 @@ import { Response } from 'cross-fetch'
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
+
+const pkg = require('@packages/root')
 
 interface InternalOpenProjectArgs {
   argv: string[]
@@ -111,7 +113,7 @@ async function makeE2ETasks () {
       Fixtures.removeProject(projectName)
     }
 
-    Fixtures.scaffoldProject(projectName)
+    await Fixtures.scaffoldProject(projectName)
 
     await Fixtures.scaffoldCommonNodeModules()
 
@@ -141,51 +143,71 @@ async function makeE2ETasks () {
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
-      await ctx.resetForTest()
+      await ctx.reinitializeCypress()
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
 
       const fetchApi = ctx.util.fetch
 
+      // Stub all of the things that we can't actually execute (electron/os operations),
+      // so we can verify they were called
+      sinon.stub(ctx.actions.electron, 'openExternal')
+      sinon.stub(ctx.actions.electron, 'showItemInFolder')
+
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
-          if (!String(url).endsWith('/test-runner-graphql')) {
-            return fetchApi(url, init)
-          }
+          if (String(url).endsWith('/test-runner-graphql')) {
+            const { query, variables } = JSON.parse(String(init?.body))
+            const document = parse(query)
+            const operationName = getOperationName(document)
 
-          const { query, variables } = JSON.parse(String(init?.body))
-          const document = parse(query)
-          const operationName = getOperationName(document)
+            let result = await execute({
+              operationName,
+              document,
+              variableValues: variables,
+              schema: cloudSchema,
+              rootValue: CloudRunQuery,
+              contextValue: {
+                __server__: ctx,
+              },
+            })
 
-          let result = await execute({
-            operationName,
-            document,
-            variableValues: variables,
-            schema: cloudSchema,
-            rootValue: CloudRunQuery,
-            contextValue: {
-              __server__: ctx,
-            },
-          })
+            if (remoteGraphQLIntercept) {
+              try {
+                result = await remoteGraphQLIntercept({
+                  operationName,
+                  variables,
+                  document,
+                  query,
+                  result,
+                })
+              } catch (e) {
+                const err = e as Error
 
-          if (remoteGraphQLIntercept) {
-            try {
-              result = await remoteGraphQLIntercept({
-                operationName,
-                variables,
-                document,
-                query,
-                result,
-              })
-            } catch (e) {
-              const err = e as Error
-
-              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+              }
             }
+
+            return new Response(JSON.stringify(result), { status: 200 })
           }
 
-          return new Response(JSON.stringify(result), { status: 200 })
+          if (String(url) === 'https://download.cypress.io/desktop.json') {
+            return new Response(JSON.stringify({
+              name: 'Cypress',
+              version: pkg.version,
+            }), { status: 200 })
+          }
+
+          if (String(url) === 'https://registry.npmjs.org/cypress') {
+            return new Response(JSON.stringify({
+              'time': {
+                [pkg.version]: '2022-02-10T01:07:37.369Z',
+              },
+            }), { status: 200 })
+          }
+
+          return fetchApi(url, init)
         }
       })
 
@@ -217,7 +239,7 @@ async function makeE2ETasks () {
       const modeOptions = argUtils.toObject(processedArgv)
 
       // Reset the state of the context
-      await ctx.resetForTest(modeOptions)
+      await ctx.reinitializeCypress(modeOptions)
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()
@@ -241,7 +263,7 @@ async function makeE2ETasks () {
       const modeOptions = argUtils.toObject(processedArgv)
 
       // Reset the state of the context
-      await ctx.resetForTest(modeOptions)
+      await ctx.reinitializeCypress(modeOptions)
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()
@@ -251,7 +273,7 @@ async function makeE2ETasks () {
         e2eServerPort: ctx.appServerPort,
       }
     },
-    async __internal_withCtx (obj: WithCtxObj) {
+    async __internal_withCtx (obj: WithCtxObj): Promise<CyTaskResult<any>> {
       const options: WithCtxInjected = {
         ...obj.options,
         testState,
@@ -267,12 +289,35 @@ async function makeE2ETasks () {
           return Fixtures.projectPath(projectName)
         },
       }
+      let i = 0
+      let lastErr: Error | undefined
+      const retries = obj.options.retry ? obj.options.retryCount ?? 5 : 0
 
-      const val = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `
-        return (${obj.fn})(ctx, options, chai, expect, sinon)
-      `).call(undefined, ctx, options, chai, expect, sinon))
+      while (i++ <= retries) {
+        try {
+          const value = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `
+            return (${obj.fn})(ctx, options, chai, expect, sinon)
+          `).call(undefined, ctx, options, chai, expect, sinon))
 
-      return val || null
+          return { value }
+        } catch (e: any) {
+          if (i <= retries) {
+            await ctx.util.delayMs(obj.options.retryDelay ?? 1000)
+          }
+
+          lastErr = e
+        }
+      }
+
+      lastErr = lastErr || new Error('Error in withCtx')
+
+      return {
+        error: {
+          stack: lastErr.stack,
+          message: lastErr.message,
+          name: lastErr.name,
+        },
+      }
     },
   }
 }

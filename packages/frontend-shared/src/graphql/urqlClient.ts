@@ -1,24 +1,26 @@
+import type { Exchange, Client } from '@urql/core'
 import {
-  Client,
   createClient,
   dedupExchange,
   errorExchange,
   fetchExchange,
-  Exchange,
   ssrExchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
+import type { Socket } from '@packages/socket/lib/browser'
 import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+
 import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { decodeBase64Unicode } from '../utils/decodeBase64'
-import type { SpecFile, AutomationElementId } from '@packages/types'
+import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
+import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
 
 const toast = useToast()
 
@@ -28,9 +30,18 @@ export function makeCacheExchange (schema: any = urqlSchema) {
 
 declare global {
   interface Window {
-    __CYPRESS_INITIAL_DATA__: string
+    ws?: Socket
+    /**
+     * We can set this in onBeforeLoad in Cypress tests, allowing us
+     * to use cy.intercept in tests that we need it
+     */
+    __CYPRESS_GQL_NO_SOCKET__?: string
+    __CYPRESS_INITIAL_DATA__: object
+    __CYPRESS_INITIAL_DATA_ENCODED__: string
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
+    __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
+    __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId
@@ -44,8 +55,8 @@ export async function preloadLaunchpadData () {
   try {
     const resp = await fetch('/__launchpad/preload')
 
-    window.__CYPRESS_INITIAL_DATA__ = JSON.parse(decodeBase64Unicode(await resp.json()))
-  } catch {
+    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
+  } catch (e) {
     //
   }
 }
@@ -67,13 +78,13 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const exchanges: Exchange[] = [dedupExchange]
 
+  const io = window.ws ?? getPubSubSource(config)
+
   // GraphQL and urql are not used in app + run mode, so we don't add the
   // pub sub exchange.
   if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
     // If we're in the launchpad, we connect to the known GraphQL Socket port,
     // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
-    //
-    const io = getPubSubSource(config)
 
     exchanges.push(pubSubExchange(io))
   }
@@ -108,12 +119,11 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     ssrExchange({
       isClient: true,
       // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
-      initialState: (window.__CYPRESS_INITIAL_DATA__ ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA__)) : {}),
+      initialState: (window.__CYPRESS_INITIAL_DATA_ENCODED__
+        ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA_ENCODED__))
+        : window.__CYPRESS_INITIAL_DATA__) || {},
     }),
     namedRouteExchange,
-    // TODO(tim): add this when we want to use the socket as the GraphQL
-    // transport layer for all operations
-    // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
   )
 
@@ -125,8 +135,13 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   return createClient({
     url,
-    requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-and-network',
+    requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
     exchanges,
+
+    // Rather than authoring a custom exchange, let's just polyfill the "fetch"
+    // exchange to adapt to a similar interface. This way it'll be simple to
+    // swap in-and-out during integration tests.
+    fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
   })
 }
 
@@ -154,12 +169,3 @@ function getPubSubSource (config: PubSubConfig) {
     transports: ['websocket'],
   })
 }
-
-// TODO(tim): add this when we want to use the socket as the GraphQL
-// transport layer for all operations
-// const socketExchange = (io: Socket): Exchange => {
-//   return (input) => {
-//     return (ops$) => {
-//     }
-//   }
-// }

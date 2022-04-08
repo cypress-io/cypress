@@ -2,11 +2,10 @@
 
 /**
  * This is the seam between the new "unified app", built with
- * Vite and Vue, and the existing code, including:
+ * Vite and Vue.
+ * It consumes some older code, including:
  * - driver
  * - reporter
- * - event manager
- * - anything in runner-shared, such as AutIframe, etc.
  * which are built with React and bundle with webpack.
  *
  * The entry point for the webpack bundle is `runner-ct/main.tsx`.
@@ -16,7 +15,7 @@
  */
 import { watchEffect } from 'vue'
 import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
-import { injectBundle } from './injectBundle'
+import { dfd } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
@@ -26,10 +25,11 @@ import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
+import { useSnapshotStore } from './snapshot-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket (socketIoRoute) {
+export function createWebsocket (socketIoRoute: string) {
   const socketConfig = {
     path: socketIoRoute,
     transports: ['websocket'],
@@ -45,6 +45,10 @@ export function createWebsocket (socketIoRoute) {
 }
 
 export function initializeEventManager (UnifiedRunner: any) {
+  if (!window.ws) {
+    throw Error('Need window.ws to exist before initializing event manager')
+  }
+
   _eventManager = new EventManager(
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
@@ -62,6 +66,8 @@ export function getEventManager () {
 
   return _eventManager
 }
+
+window.getEventManager = getEventManager
 
 let _autIframeModel: AutIframe
 
@@ -134,13 +140,9 @@ function setupRunner (namespace: AutomationElementId) {
   _autIframeModel = new AutIframe(
     'Test Project',
     getEventManager(),
-    window.UnifiedRunner._,
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.logger,
     window.UnifiedRunner.dom,
-    window.UnifiedRunner.visitFailure,
     getEventManager().studioRecorder,
-    window.UnifiedRunner.blankContents,
   )
 
   createIframeModel()
@@ -162,6 +164,8 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * or re-running the current spec.
  */
 function teardownSpec () {
+  useSnapshotStore().$reset()
+
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
@@ -302,11 +306,11 @@ function runSpecE2E (spec: SpecFile) {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
+  await dfd.promise
+
   isTorndown = false
 
   const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
-
-  await injectBundle(config.namespace)
 
   if (isTorndown) {
     return

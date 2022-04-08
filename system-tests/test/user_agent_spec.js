@@ -22,7 +22,9 @@ describe('e2e user agent', () => {
     },
     settings: {
       userAgent: 'foo bar baz agent',
-      baseUrl: 'http://localhost:4545',
+      e2e: {
+        baseUrl: 'http://localhost:4545',
+      },
     },
   })
 

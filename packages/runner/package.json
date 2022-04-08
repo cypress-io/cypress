@@ -17,23 +17,22 @@
     "watch": "webpack --watch --progress"
   },
   "dependencies": {
-    "fs-extra": "8.1.0"
+    "fs-extra": "9.1.0"
   },
   "devDependencies": {
     "@cypress/design-system": "0.0.0-development",
-    "@cypress/icons": "0.7.0",
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",
-    "@fortawesome/fontawesome-free": "5.12.1",
+    "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/driver": "0.0.0-development",
+    "@packages/icons": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
-    "ansi-to-html": "0.6.14",
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "chai": "4.2.0",

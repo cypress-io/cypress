@@ -1,4 +1,5 @@
-import { ComputedRef, computed, Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
+import { computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 export type RawNode <T> = {

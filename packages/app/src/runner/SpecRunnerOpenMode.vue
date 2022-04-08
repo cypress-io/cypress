@@ -8,6 +8,7 @@
       :max-total-width="windowWidth"
       :initial-panel1-width="specListWidth"
       :initial-panel2-width="reporterWidth"
+      :min-panel3-width="340"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -19,7 +20,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full bg-gray-1000 border-r-1 border-gray-900"
+          class="h-full bg-gray-1000 border-gray-900 border-r-1 force-dark"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -41,20 +42,18 @@
           <div
             v-once
             :id="REPORTER_ID"
-            class="w-full"
+            class="w-full force-dark"
           />
         </HideDuringScreenshot>
       </template>
-      <template
-        #panel3="{width}"
-      >
-        <HideDuringScreenshotOrRunMode class="bg-white p-16px">
-          <SpecRunnerHeader
+      <template #panel3="{width}">
+        <HideDuringScreenshotOrRunMode class="bg-white">
+          <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width - 32"
+            :width="width"
           />
         </HideDuringScreenshotOrRunMode>
 
@@ -97,7 +96,7 @@ import { getAutIframeModel, getEventManager } from '.'
 import { useAutStore, useRunnerUiStore } from '../store'
 import type { FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
-import SpecRunnerHeader from './SpecRunnerHeader.vue'
+import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
@@ -105,14 +104,12 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { SpecRunnerOpenMode_OpenFileInIdeDocument } from '../generated/graphql'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
 import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
-import AutomationDisconnected from './automation/AutomationDisconnected.vue'
-import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
@@ -121,6 +118,7 @@ gql`
 fragment SpecRunner_Preferences on Query {
   localSettings {
     preferences {
+      isSideNavigationOpen
       isSpecsListOpen
       autoScrollingEnabled
       reporterWidth
@@ -143,7 +141,7 @@ fragment SpecRunner on Query {
 `
 
 gql`
-mutation OpenFileInIDE ($input: FileDetailsInput!) {
+mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
   openFileInIDE (input: $input)
 }
 `
@@ -184,7 +182,6 @@ onMounted(() => {
   initializeRunnerLifecycleEvents()
 })
 
-// Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 preferences.update('reporterWidth', reporterWidth.value)
@@ -192,7 +189,7 @@ preferences.update('specListWidth', specListWidth.value)
 
 let fileToOpen: FileDetails
 
-const openFileInIDE = useMutation(OpenFileInIdeDocument)
+const openFileInIDE = useMutation(SpecRunnerOpenMode_OpenFileInIdeDocument)
 
 function openFile () {
   runnerUiStore.setShowChooseExternalEditorModal(false)
@@ -204,7 +201,7 @@ function openFile () {
 
   openFileInIDE.executeMutation({
     input: {
-      absolute: fileToOpen.absoluteFile,
+      filePath: fileToOpen.absoluteFile,
       line: fileToOpen.line,
       column: fileToOpen.column,
     },

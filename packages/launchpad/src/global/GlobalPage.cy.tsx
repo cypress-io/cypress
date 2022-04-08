@@ -1,6 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
-import { GlobalPageFragment, GlobalPageFragmentDoc } from '../generated/graphql-test'
+import type { GlobalPageFragment } from '../generated/graphql-test'
+import { GlobalPageFragmentDoc } from '../generated/graphql-test'
 
 const searchLabel = defaultMessages.globalPage.searchPlaceholder
 const emptyMessages = defaultMessages.globalPage.empty

@@ -1,9 +1,10 @@
 <template>
   <StandardModal
-    class="transition duration-200 transition-all w-680px"
+    class="transition transition-all w-680px duration-200"
     variant="bare"
     :title="title"
     :model-value="show"
+    help-link=""
     @update:model-value="emits('close')"
   >
     <div class="p-24px text-gray-700">
@@ -38,13 +39,12 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
-  installCommand?: string
+  installCommand: string
   installedVersion: string
   latestVersion: string
   projectName?: string
   show: boolean
 }>(), {
-  installCommand: 'npm install --save-dev ',
   projectName: '', // in global mode, project won't be populated so an empty string is fine
 })
 

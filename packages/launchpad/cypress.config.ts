@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
+import { devServer } from '@cypress/vite-dev-server'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -14,24 +15,16 @@ export default defineConfig({
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
+    videoCompression: false, // turn off video compression for CI
   },
   'component': {
     'supportFile': 'cypress/component/support/index.ts',
-    devServer (cypressConfig, devServerConfig) {
-      const { startDevServer } = require('@cypress/vite-dev-server')
-
-      return startDevServer({
-        options: cypressConfig,
-        ...devServerConfig,
-      })
-    },
+    devServer,
     devServerConfig: {
-      viteConfig: {
-        optimizeDeps: {
-          include: [
-            '@packages/ui-components/cypress/support/customPercyCommand',
-          ],
-        },
+      optimizeDeps: {
+        include: [
+          '@packages/ui-components/cypress/support/customPercyCommand',
+        ],
       },
     },
   },

@@ -11,6 +11,30 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('copyTextToClipboard', {
+      type: 'Boolean',
+      description: 'add the passed text to the local clipboard',
+      args: {
+        text: nonNull(stringArg()),
+      },
+      resolve: (_, { text }, ctx) => {
+        ctx.electronApi.copyTextToClipboard(text)
+
+        return true
+      },
+    })
+
+    t.field('reinitializeCypress', {
+      type: Query,
+      description: 'Re-initializes Cypress from the initial CLI options',
+      resolve: async (_, args, ctx) => {
+        await ctx.reinitializeCypress(ctx.modeOptions)
+        await ctx.initializeMode()
+
+        return {}
+      },
+    })
+
     t.field('devRelaunch', {
       type: 'Boolean',
       description: 'Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts',
@@ -99,7 +123,7 @@ export const mutation = mutationType({
     t.field('completeSetup', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.actions.wizard.completeSetup()
+        await ctx.actions.wizard.completeSetup()
 
         return {}
       },
@@ -130,8 +154,14 @@ export const mutation = mutationType({
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
         ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        // if necessary init the wizard for configuration
+        if (ctx.coreData.currentTestingType
+          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          await ctx.actions.wizard.initialize()
+        }
 
         return {}
       },
@@ -212,7 +242,8 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
-      description: 'Auth with Cypress Cloud',
+      slowLogThreshold: false,
+      description: 'Auth with Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
@@ -225,7 +256,7 @@ export const mutation = mutationType({
 
     t.field('logout', {
       type: Query,
-      description: 'Log out of Cypress Cloud',
+      description: 'Log out of Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
 
@@ -238,16 +269,13 @@ export const mutation = mutationType({
 
     t.field('launchOpenProject', {
       type: CurrentProject,
+      slowLogThreshold: false,
       description: 'Launches project from open_project global singleton',
       args: {
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
-        } catch (e) {
-          ctx.coreData.baseError = e as Error
-        }
+        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
 
         return ctx.lifecycleManager
       },
@@ -299,18 +327,7 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.setCurrentProject(args.path)
-          ctx.coreData.baseError = null
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Cypress Configuration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
+        await ctx.actions.project.setCurrentProject(args.path)
 
         return {}
       },
@@ -324,6 +341,16 @@ export const mutation = mutationType({
       },
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
+
+        return ctx.appData
+      },
+    })
+
+    t.nonNull.field('resetAuthState', {
+      type: Query,
+      description: 'Reset the Auth State',
+      resolve (_, args, ctx) {
+        ctx.actions.auth.resetAuthState()
 
         return ctx.appData
       },
@@ -350,6 +377,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetLatestVersionTelemetry', {
+      type: 'Boolean',
+      description: 'Resets the latest version call to capture additional telemetry for the current user',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.versions.resetLatestVersionTelemetry()
+
+        return true
+      },
+    })
+
     t.nonNull.field('focusActiveBrowserWindow', {
       type: 'Boolean',
       description: 'Sets focus to the active browser window',
@@ -364,6 +401,7 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: async (_, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true })
         await ctx.actions.project.reconfigureProject()
 
         return true
@@ -424,7 +462,7 @@ export const mutation = mutationType({
       },
       resolve: (_, args, ctx) => {
         ctx.actions.file.openFile(
-          args.input.absolute,
+          args.input.filePath,
           args.input.line || 1,
           args.input.column || 1,
         )
@@ -457,19 +495,20 @@ export const mutation = mutationType({
       },
       resolve: async (_, { skip, before, after }, ctx) => {
         if (!skip && before && after) {
-          try {
-            await ctx.actions.migration.renameSpecFiles(before, after)
-          } catch (error) {
-            const e = error as Error
-
-            ctx.coreData.baseError = {
-              title: 'Spec Files Migration Error',
-              message: e.message,
-              stack: e.stack,
-            }
-          }
+          await ctx.actions.migration.renameSpecFiles(before, after)
         }
 
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSpecsFolder', {
+      description: 'When the user decides to skip specs rename',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.renameSpecsFolder()
         await ctx.actions.migration.nextStep()
 
         return {}
@@ -483,6 +522,16 @@ export const mutation = mutationType({
         await ctx.actions.migration.nextStep()
 
         return {}
+      },
+    })
+
+    t.field('migrateCloseManualRenameWatcher', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.closeManualRenameWatcher()
+
+        return true
       },
     })
 
@@ -500,17 +549,7 @@ export const mutation = mutationType({
       description: 'While migrating to 10+ launch renaming of support file',
       type: Query,
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.migration.renameSupportFile()
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Support File Migration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
+        await ctx.actions.migration.renameSupportFile()
         await ctx.actions.migration.nextStep()
 
         return {}
@@ -520,19 +559,9 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
+      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.migration.createConfigFile()
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Config File Migration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
-
+        await ctx.actions.migration.createConfigFile()
         await ctx.actions.migration.nextStep()
 
         return {}
@@ -576,6 +605,48 @@ export const mutation = mutationType({
         await ctx.actions.browser.closeBrowser()
 
         return true
+      },
+    })
+
+    t.field('switchTestingTypeAndRelaunch', {
+      description: 'Switch Testing type and relaunch browser',
+      type: 'Boolean',
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.project.setRelaunchBrowser(true)
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.reconfigureProject()
+
+        return true
+      },
+    })
+
+    t.field('setTestingTypeAndReconfigureProject', {
+      description: 'Set the selected testing type, and reconfigure the project',
+      type: Query,
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+        isApp: nonNull(booleanArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        if (args.isApp) {
+          await ctx.actions.project.reconfigureProject()
+        }
+
+        return true
+      },
+    })
+
+    t.field('dismissWarning', {
+      type: Query,
+      description: `Dismisses a warning displayed by the frontend`,
+      resolve: (source) => {
+        return {}
       },
     })
   },

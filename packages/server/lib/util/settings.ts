@@ -1,10 +1,10 @@
+import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
-import errors from '../errors'
 import { fs } from '../util/fs'
-import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
 import { getCtx } from '@packages/data-context'
+import * as errors from '../errors'
 
 const debug = Debug('cypress:server:settings')
 

@@ -1,4 +1,4 @@
-declare namespace legacyDevServer {
+declare namespace CypressCracoDevServer {
   interface CypressCracoDevServerConfig {
     /**
      * The object exported of your craco.config.js file
@@ -9,7 +9,7 @@ declare namespace legacyDevServer {
      * Path to an index.html file that will serve as the template in
      * which your components will be rendered.
      */
-    indexHtml?: string
+    indexHtmlFile?: string
   }
 
   /**
@@ -27,6 +27,6 @@ declare namespace legacyDevServer {
  * @param config comes from the argument of the `pluginsFile` function
  * @param cracoConfig the object exported of your craco.config.js file
  */
-declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, cracoConfig: any): void
+declare function CypressCracoDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, cracoConfig: any): void
 
-export = legacyDevServer;
+export = CypressCracoDevServer;

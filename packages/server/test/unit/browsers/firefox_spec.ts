@@ -3,10 +3,11 @@ require('../../spec_helper')
 import 'chai-as-promised'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
-import Foxdriver from '@benmalka/foxdriver'
 import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
+import stripAnsi from 'strip-ansi'
+import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 
@@ -99,9 +100,34 @@ describe('lib/browsers/firefox', () => {
     stubFoxdriver()
   })
 
+  context('#connectToNewSpec', () => {
+    beforeEach(function () {
+      this.browser = { name: 'firefox', channel: 'stable' }
+      this.automation = {
+        use: sinon.stub().returns({}),
+      }
+
+      this.options = {
+        onError: () => {},
+      }
+    })
+
+    it('calls connectToNewSpec in firefoxUtil', function () {
+      sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
+
+      firefox.connectToNewSpec(this.browser, 50505, this.options, this.automation)
+
+      expect(firefoxUtil.connectToNewSpec).to.be.called
+    })
+  })
+
   context('#open', () => {
     beforeEach(function () {
       this.browser = { name: 'firefox', channel: 'stable' }
+      this.automation = {
+        use: sinon.stub().returns({}),
+      }
+
       this.options = {
         proxyUrl: 'http://proxy-url',
         socketIoRoute: 'socket/io/route',
@@ -131,7 +157,7 @@ describe('lib/browsers/firefox', () => {
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(plugins.execute).to.be.called
       })
     })
@@ -139,7 +165,7 @@ describe('lib/browsers/firefox', () => {
     it('does not execute before:browser:launch if not registered', function () {
       plugins.has.returns(false)
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(plugins.execute).not.to.be.called
       })
     })
@@ -148,7 +174,7 @@ describe('lib/browsers/firefox', () => {
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.type', 1)
       })
     })
@@ -159,7 +185,7 @@ describe('lib/browsers/firefox', () => {
         preferences: [],
       })
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.type', 1)
       })
     })
@@ -170,7 +196,7 @@ describe('lib/browsers/firefox', () => {
         preferences: { 'foo': 'bar' },
       })
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('foo', 'bar')
       })
     })
@@ -181,7 +207,7 @@ describe('lib/browsers/firefox', () => {
         extensions: ['/path/to/user/ext'],
       })
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
 
         expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
@@ -194,7 +220,7 @@ describe('lib/browsers/firefox', () => {
         extensions: 'not-an-array',
       })
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
 
         expect(marionetteDriver.send).not.calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
@@ -204,13 +230,13 @@ describe('lib/browsers/firefox', () => {
     it('sets user-agent preference if specified', function () {
       this.options.userAgent = 'User Agent'
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('general.useragent.override', 'User Agent')
       })
     })
 
     it('writes extension', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(utils.writeExtension).to.be.calledWith(this.options.browser, this.options.isTextTerminal, this.options.proxyUrl, this.options.socketIoRoute)
       })
     })
@@ -248,14 +274,14 @@ describe('lib/browsers/firefox', () => {
         }, mockfs.getMockRoot())
       }
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(getFile(`${process.env.HOME }/.config/Cypress/cy/test/browsers/firefox-stable/interactive/CypressExtension/background.js`).getMode()).to.be.equals(0o644)
       })
     })
 
     // TODO: pick open port for debugger
     it.skip('finds remote port for firefox debugger', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         // expect(firefoxUtil.findRemotePort).to.be.called
       })
     })
@@ -263,7 +289,7 @@ describe('lib/browsers/firefox', () => {
     it('sets proxy-related preferences if specified', function () {
       this.options.proxyServer = 'http://proxy-server:1234'
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.http', 'proxy-server')
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.ssl', 'proxy-server')
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.http_port', 1234)
@@ -274,7 +300,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('does not set proxy-related preferences if not specified', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.setPreference).not.to.be.calledWith('network.proxy.http', 'proxy-server')
         expect(FirefoxProfile.prototype.setPreference).not.to.be.calledWith('network.proxy.https', 'proxy-server')
         expect(FirefoxProfile.prototype.setPreference).not.to.be.calledWith('network.proxy.http_port', 1234)
@@ -285,14 +311,14 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('updates the preferences', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.updatePreferences).to.be.called
       })
     })
 
     it('launches with the url and args', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', [
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', undefined, [
           '-marionette',
           '-new-instance',
           '-foreground',
@@ -305,7 +331,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('resolves the browser instance', function () {
-      return firefox.open(this.browser, 'http://', this.options).then((result) => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then((result) => {
         expect(result).to.equal(this.browserInstance)
       })
     })
@@ -318,7 +344,7 @@ describe('lib/browsers/firefox', () => {
         },
       })
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
@@ -328,7 +354,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('creates xulstore.json if not exist', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
@@ -337,7 +363,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('creates chrome/userChrome.css if not exist', function () {
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/chrome/userChrome.css')).ok
       })
     })
@@ -351,7 +377,7 @@ describe('lib/browsers/firefox', () => {
 
       this.options.isTextTerminal = false
 
-      return firefox.open(this.browser, 'http://', this.options).then(() => {
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'CypressCache': {},
@@ -364,7 +390,7 @@ describe('lib/browsers/firefox', () => {
 
       protocol._connectAsync.rejects()
 
-      await expect(firefox.open(this.browser, 'http://', this.options)).to.be.rejectedWith()
+      await expect(firefox.open(this.browser, 'http://', this.options, this.automation)).to.be.rejectedWith()
       .then((wrapperErr) => {
         expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
         expect(wrapperErr.message).to.include(err.message)
@@ -373,7 +399,7 @@ describe('lib/browsers/firefox', () => {
 
     context('returns BrowserInstance', function () {
       it('from browsers.launch', async function () {
-        const instance = await firefox.open(this.browser, 'http://', this.options)
+        const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         expect(instance).to.eq(this.browserInstance)
       })
@@ -381,7 +407,7 @@ describe('lib/browsers/firefox', () => {
       // @see https://github.com/cypress-io/cypress/issues/6392
       it('detached on Windows', async function () {
         sinon.stub(os, 'platform').returns('win32')
-        const instance = await firefox.open(this.browser, 'http://', this.options)
+        const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         expect(instance).to.not.eq(this.browserInstance)
         expect(instance.pid).to.eq(this.browserInstance.pid)
@@ -417,7 +443,11 @@ describe('lib/browsers/firefox', () => {
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette Socket:\n\nError: foo error')
+        .to.be.rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.include(`An unexpected error was received from Marionette: Socket`)
+          expect(err.details).to.include('Error: foo error')
+          expect(err.originalError.message).to.eq('foo error')
+        })
       })
 
       it('rejects on errors from marionette commands', async () => {
@@ -426,14 +456,20 @@ describe('lib/browsers/firefox', () => {
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette commands:\n\nError: foo error')
+        .to.be.rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: commands')
+          expect(err.details).to.include('Error: foo error')
+        })
       })
 
       it('rejects on errors during initial Marionette connection', async () => {
         marionetteDriver.connect.rejects(new Error('not connectable'))
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette connection:\n\nError: not connectable')
+        .to.be.rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
+          expect(err.details).to.include('Error: not connectable')
+        })
       })
     })
 

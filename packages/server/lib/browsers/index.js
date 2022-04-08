@@ -94,6 +94,8 @@ module.exports = {
 
   close: kill,
 
+  formatBrowsersToOptions: utils.formatBrowsersToOptions,
+
   _setInstance (_instance) {
     // for testing
     instance = _instance
@@ -114,14 +116,29 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  connectToExisting (browser, options = {}, automation) {
+  async connectToExisting (browser, options = {}, automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
     if (!browserLauncher) {
       utils.throwBrowserNotFound(browser.name, options.browsers)
     }
 
-    return browserLauncher.connectToExisting(browser, options, automation)
+    await browserLauncher.connectToExisting(browser, options, automation)
+
+    return this.getBrowserInstance()
+  },
+
+  async connectToNewSpec (browser, options = {}, automation) {
+    const browserLauncher = getBrowserLauncher(browser)
+
+    if (!browserLauncher) {
+      utils.throwBrowserNotFound(browser.name, options.browsers)
+    }
+
+    // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
+    await browserLauncher.connectToNewSpec(browser, options, automation)
+
+    return this.getBrowserInstance()
   },
 
   open (browser, options = {}, automation, ctx) {
@@ -149,8 +166,6 @@ module.exports = {
       return browserLauncher.open(browser, url, options, automation)
       .then((i) => {
         debug('browser opened')
-        ctx.project.setIsBrowserOpen(true)
-        ctx.emitter.toLaunchpad()
         // TODO: bind to process.exit here
         // or move this functionality into cypress-core-launder
 
@@ -162,8 +177,7 @@ module.exports = {
         // so that there is a default for each browser but
         // enable the browser to configure the interface
         instance.once('exit', () => {
-          ctx.project.setIsBrowserOpen(false)
-          ctx.emitter.toLaunchpad()
+          ctx.browser.setBrowserStatus('closed')
           options.onBrowserClose()
           instance = null
         })

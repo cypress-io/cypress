@@ -3,31 +3,28 @@ import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
-import { createHmac } from 'crypto'
-
-import browsers from './browsers'
 import pkg from '@packages/root'
-// import { allowed } from '@packages/config'
+import { Automation } from './automation'
+import browsers from './browsers'
+import * as config from './config'
+import * as errors from './errors'
+import devServer from './plugins/dev-server'
+import preprocessor from './plugins/preprocessor'
+import runEvents from './plugins/run_events'
+import { checkSupportFile } from './project_utils'
+import Reporter from './reporter'
+import * as savedState from './saved_state'
 import { ServerCt } from './server-ct'
+import { ServerE2E } from './server-e2e'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
-import { Automation } from './automation'
-import * as config from './config'
-import cwd from './cwd'
-import errors from './errors'
-import Reporter from './reporter'
-import runEvents from './plugins/run_events'
-import * as savedState from './saved_state'
-import { ServerE2E } from './server-e2e'
-import system from './util/system'
 import { ensureProp } from './util/class-helpers'
 
 import { fs } from './util/fs'
-import preprocessor from './plugins/preprocessor'
-import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec, TestingType, ReceivedCypressOptions } from '@packages/types'
-import devServer from './plugins/dev-server'
+import system from './util/system'
+import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, TestingType } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
+import { createHmac } from 'crypto'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -43,7 +40,7 @@ export interface Cfg extends ReceivedCypressOptions {
   component: Partial<Cfg>
 }
 
-const localCwd = cwd()
+const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
 
@@ -373,16 +370,12 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err: any) {
+    } catch (error: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
-      // only include the message if this is the standard MODULE_NOT_FOUND
-      // else include the whole stack
-      const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
-
-      errors.throw('INVALID_REPORTER_NAME', {
+      errors.throwErr('INVALID_REPORTER_NAME', {
         paths,
-        error: errorMsg,
+        error,
         name: reporter,
       })
     }
@@ -472,6 +465,18 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   changeToUrl (url) {
     this.server.changeToUrl(url)
+  }
+
+  async closeBrowserTabs () {
+    return this.server.socket.closeBrowserTabs()
+  }
+
+  async resetBrowserState () {
+    return this.server.socket.resetBrowserState()
+  }
+
+  isRunnerSocketConnected () {
+    return this.server.socket.isRunnerSocketConnected()
   }
 
   async sendFocusBrowserMessage () {

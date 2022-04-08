@@ -8,7 +8,7 @@ describe('<SpecPatterns />', () => {
     })
 
     cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
-    cy.get('[data-cy="file-match-indicator"]').contains('200 Matches')
+    cy.get('[data-cy="file-match-indicator"]').contains('50 Matches')
 
     cy.percySnapshot()
   })

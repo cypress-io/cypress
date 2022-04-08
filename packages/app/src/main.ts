@@ -7,6 +7,7 @@ import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
+import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
@@ -25,6 +26,11 @@ const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Co
 const ws = createWebsocket(config.socketIoRoute)
 
 window.ws = ws
+
+// This injects the Cypress driver and Reporter, which are bundled with Webpack.
+// No need to wait for it to finish - it's resolved async with a deferred promise,
+// So it'll be ready when we need to run a spec. If not, we will wait for it.
+injectBundle(config.namespace)
 
 app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,

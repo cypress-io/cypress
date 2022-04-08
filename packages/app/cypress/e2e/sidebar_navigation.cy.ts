@@ -5,7 +5,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
     })
 
     it('expands the left nav bar by default', () => {
@@ -14,15 +14,16 @@ describe('Sidebar Navigation', () => {
     })
 
     it('highlights indicator on hover showing you can click to expand', () => {
-      cy.findByLabelText('toggle navigation', {
-        selector: 'button',
-      }).should('not.have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
+      const navIndicatorSelector = '[data-testid=sidebar-nav-indicator]'
+      const navExpansionToggleSelector = '[aria-label="toggle navigation"]'
 
-      cy.findByLabelText('toggle navigation', {
-        selector: 'button',
-      }).realHover().should('have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
-
-      cy.percySnapshot()
+      cy.get(navIndicatorSelector)
+      .should('not.be.visible')
+      .get(navExpansionToggleSelector)
+      .realHover()
+      .get(navIndicatorSelector)
+      .should('be.visible')
+      .percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
@@ -36,6 +37,26 @@ describe('Sidebar Navigation', () => {
 
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
       cy.get('@title').should('not.be.visible')
+      cy.percySnapshot()
+    })
+
+    it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findAllByText('todos').eq(1).as('title')
+      cy.get('@title').should('be.visible')
+
+      cy.findByLabelText('toggle navigation', {
+        selector: 'button',
+      }).click()
+
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.get('@title').should('not.be.visible')
+
+      cy.reload()
+
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.findAllByText('todos').should('not.be.visible')
+
       cy.percySnapshot()
     })
 
@@ -68,20 +89,20 @@ describe('Sidebar Navigation', () => {
 
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
-      cy.get('[data-cy="sidebar-header"').realHover()
+      cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'todos')
       cy.percySnapshot()
       cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-      cy.get('[data-e2e-href="/runs"]').realHover()
+      cy.get('[data-e2e-href="/runs"]').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'Runs')
       cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
 
-      cy.get('[data-e2e-href="/specs"]').realHover()
+      cy.get('[data-e2e-href="/specs"]').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'Specs')
       cy.get('[data-e2e-href="/specs"]').trigger('mouseout')
 
-      cy.get('[data-e2e-href="/settings"]').realHover()
+      cy.get('[data-e2e-href="/settings"]').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'Settings')
       cy.get('[data-e2e-href="/settings"]').trigger('mouseout')
     })
@@ -102,20 +123,36 @@ describe('Sidebar Navigation', () => {
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('[data-cy="sidebar-header"]').within(() => {
         cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
         cy.findByText('todos').should('be.visible')
-      }).click()
+      }).as('switchTestingType').click()
 
-      cy.findByText('Choose a testing type').should('be.visible')
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Configured')
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype=e2e]').within(() => {
+        cy.contains('Running')
       })
 
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
         ctx.actions.project.reconfigureProject = sinon.stub()
       })
@@ -124,8 +161,12 @@ describe('Sidebar Navigation', () => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingType').then((interception) => {
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('component')
+      })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
       })
 
       cy.get('[aria-label="Close"]').click()
@@ -192,14 +233,27 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing')
       cy.startAppServer('component')
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
-      cy.get('[data-cy="sidebar-header"]').within(() => cy.get('[data-cy="testing-type-component"]')).click()
+      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
       cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Configured')
-      })
+        cy.contains('Running')
+      }).click()
 
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
         ctx.actions.project.reconfigureProject = sinon.stub()
       })
@@ -208,8 +262,43 @@ describe('Sidebar Navigation', () => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingType').then((interception) => {
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('e2e')
+      })
+    })
+
+    it('shows dropdown to reconfigure project when clicking switch testing type', () => {
+      cy.scaffoldProject('pristine-with-ct-testing')
+      cy.openProject('pristine-with-ct-testing')
+      cy.startAppServer('component')
+      cy.visitApp()
+
+      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype=component]').within(() => {
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype="e2e"]').within(() => {
+        cy.contains('Not Configured')
+      })
+
+      cy.get('[data-cy-testingtype="component"]').within(() => {
+        cy.get('[data-cy=status-badge-menu]').click()
+        cy.get('[data-cy="Choose a Browser"]').should('not.exist')
+        cy.get('[data-cy="Reconfigure"]').should('exist')
       })
     })
   })

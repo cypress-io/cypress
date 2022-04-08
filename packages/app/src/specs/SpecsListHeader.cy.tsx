@@ -59,24 +59,60 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .click()
     .get('@show-spec-pattern-modal')
     .should('have.been.called')
+
+    cy.percySnapshot()
   })
 
-  it('shows the result count correctly', () => {
-    const mountWithResultCount = (count = 0) => {
+  it('shows the count correctly when not searching', () => {
+    const mountWithSpecCount = (count = 0) => {
       cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
         modelValue={''}
-        resultCount={count}
+        specCount={count}
       /></div>))
     }
 
-    mountWithResultCount(0)
-    cy.contains(`0 ${ defaultMessages.specPage.matchPlural}`)
+    mountWithSpecCount(0)
+    cy.contains('No Matches')
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
-    mountWithResultCount(1)
-    cy.contains(`1 ${ defaultMessages.specPage.matchSingular}`).should('be.visible')
-    mountWithResultCount(100)
-    cy.contains(`100 ${ defaultMessages.specPage.matchPlural}`).should('be.visible')
+    cy.percySnapshot('No Matches')
+
+    mountWithSpecCount(1)
+    cy.contains('1 Match').should('be.visible')
+
+    cy.percySnapshot('Singular Match')
+
+    mountWithSpecCount(100)
+    cy.contains('100 Matches').should('be.visible')
+
+    cy.percySnapshot('Plural Match')
+  })
+
+  it('shows the count correctly while searching', () => {
+    const mountWithCounts = (resultCount = 0, specCount = 0) => {
+      cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+        modelValue={'foo'}
+        resultCount={resultCount}
+        specCount={specCount}
+      /></div>))
+    }
+
+    mountWithCounts(0, 0)
+    cy.contains('No Matches')
+
+    mountWithCounts(0, 22)
+    cy.contains('0 of 22 Matches')
+
+    mountWithCounts(0, 1)
+    cy.contains('0 of 1 Match').should('be.visible')
+
+    mountWithCounts(1, 1)
+    cy.contains('1 of 1 Match').should('be.visible')
+
+    mountWithCounts(5, 22)
+    cy.contains('5 of 22 Matches').should('be.visible')
+
+    cy.percySnapshot()
   })
 })

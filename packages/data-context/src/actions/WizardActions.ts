@@ -1,16 +1,19 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework } from '@packages/types'
+import { CodeLanguage, CODE_LANGUAGES } from '@packages/types'
+import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
-import fs from 'fs'
 import path from 'path'
+import fs from 'fs-extra'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
 
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
   chosenFramework: FrontendFramework
-  chosenBundler: Bundler
 }
 
 export class WizardActions {
@@ -26,17 +29,33 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: NexusGenEnums['FrontendFrameworkEnum'] | null) {
+  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null): void {
+    const next = FRONTEND_FRAMEWORKS.find((x) => x.type === framework)
+
     this.ctx.coreData.wizard.chosenFramework = framework
 
-    if (framework !== 'react' && framework !== 'vue') {
-      return this.setBundler('webpack')
+    if (next?.supportedBundlers?.length === 1) {
+      this.setBundler(next?.supportedBundlers?.[0].type)
+
+      return
     }
 
-    return this.setBundler(null)
+    const { chosenBundler } = this.ctx.coreData.wizard
+
+    // if the previous bundler was incompatible with the
+    // new framework that was selected, we need to reset it
+    const doesNotSupportChosenBundler = (chosenBundler && !new Set(
+      this.ctx.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+    ).has(chosenBundler)) ?? false
+
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+
+    if (doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
+      this.setBundler(null)
+    }
   }
 
-  setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
+  setBundler (bundler: Bundler | null) {
     this.ctx.coreData.wizard.chosenBundler = bundler
 
     return this.data
@@ -48,7 +67,13 @@ export class WizardActions {
     return this.data
   }
 
-  completeSetup () {
+  async completeSetup () {
+    debug('completeSetup')
+    // wait for the config to be initialized if it is not yet
+    // before returning. This should not penalize users but
+    // allow for tests, too fast for this last step to pass.
+    // NOTE: if the config is already initialized, this will be instant
+    await this.ctx.lifecycleManager.initializeConfig()
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
@@ -63,6 +88,56 @@ export class WizardActions {
     return this.data
   }
 
+  async initialize () {
+    if (!this.ctx.currentProject) {
+      return
+    }
+
+    this.ctx.update((coreData) => {
+      coreData.wizard.detectedFramework = null
+      coreData.wizard.detectedBundler = null
+      coreData.wizard.detectedLanguage = null
+    })
+
+    await this.detectLanguage()
+    debug('detectedLanguage %s', this.data.detectedLanguage)
+    this.data.chosenLanguage = this.data.detectedLanguage || 'js'
+
+    try {
+      const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
+
+      debug('detected %o', detected)
+
+      if (detected) {
+        this.ctx.update((coreData) => {
+          coreData.wizard.detectedFramework = detected.framework?.type ?? null
+          coreData.wizard.chosenFramework = detected.framework?.type ?? null
+
+          if (!detected.framework?.supportedBundlers[0]) {
+            return
+          }
+
+          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0].type
+          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0].type
+        })
+      }
+    } catch {
+      // Could not detect anything - no problem, no need to do anything.
+    }
+  }
+
+  private async detectLanguage () {
+    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+
+    if (
+      hasTypescript ||
+      (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
+      this.ctx.wizardData.detectedLanguage = 'ts'
+    } else {
+      this.ctx.wizardData.detectedLanguage = 'js'
+    }
+  }
+
   /**
    * Scaffolds the testing type, by creating the necessary files & assigning to
    */
@@ -71,17 +146,19 @@ export class WizardActions {
 
     assert(currentTestingType)
     assert(chosenLanguage)
-    assert(!this.ctx.lifecycleManager.isTestingTypeConfigured(currentTestingType), `Cannot call this if the testing type (${currentTestingType}) has not been configured`)
+
     switch (currentTestingType) {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
         return chosenLanguage
       }
@@ -94,6 +171,7 @@ export class WizardActions {
     const scaffolded = await Promise.all([
       this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
+      this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
 
@@ -101,6 +179,7 @@ export class WizardActions {
   }
 
   private async scaffoldComponent () {
+    debug('scaffoldComponent')
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
@@ -109,27 +188,28 @@ export class WizardActions {
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
+      this.scaffoldSupport('commands', chosenLanguage.type),
       this.getComponentIndexHtml({
-        chosenBundler,
         chosenFramework,
         chosenLanguage,
       }),
     ])
   }
 
-  private async scaffoldSupport (fileName: 'e2e' | 'component', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
-    await this.scaffoldFile(supportFile, dedent`
-      // TODO: source the example support file
-    `, 'Scaffold default support file')
+
+    const fileContent = fileName === 'commands' ? this.commandsFileBody(language) : this.supportFileBody(fileName, language)
+
+    await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 
     return {
       status: 'valid',
-      description: 'Added a support file, for extending the Cypress api',
+      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress api`,
       file: {
         absolute: supportFile,
       },
@@ -144,69 +224,50 @@ export class WizardActions {
 
       assert(chosenFramework && chosenLanguage && chosenBundler)
 
-      return this.wizardGetConfigCodeComponent({
-        chosenLanguage,
-        chosenFramework,
-        chosenBundler,
-      })
+      return chosenFramework.config[chosenLanguage.type](chosenBundler.type)
     }
 
     return this.wizardGetConfigCodeE2E(language)
   }
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
-      this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+    debug('scaffoldConfig')
 
-      const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+    if (this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
+      const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+      const foundLanguage = ext === '.ts' ? 'ts' : 'js'
+      const configCode = this.configCode(testingType, foundLanguage)
 
-      return this.scaffoldFile(
-        this.ctx.lifecycleManager.configFilePath,
-        configCode,
-        'Created a new config file',
-      )
+      return {
+        status: 'changes',
+        description: 'Merge this code with your existing config file',
+        file: {
+          absolute: this.ctx.lifecycleManager.configFilePath,
+          contents: configCode,
+        },
+      }
     }
 
-    const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+    const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
 
-    const configCode = this.configCode(testingType, ext === '.ts' ? 'ts' : 'js')
+    // only do this if config file doesn't exist
+    this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
 
-    return {
-      status: 'changes',
-      description: 'Merge this code with your existing config file',
-      file: {
-        absolute: this.ctx.lifecycleManager.configFilePath,
-        contents: configCode,
-      },
-    }
+    return this.scaffoldFile(
+      this.ctx.lifecycleManager.configFilePath,
+      configCode,
+      'Created a new config file',
+    )
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
-    const fixturesDir = path.dirname(exampleScaffoldPath)
 
-    try {
-      await this.ctx.fs.stat(fixturesDir)
+    await this.ensureDir('fixtures')
 
-      return {
-        status: 'skipped',
-        file: {
-          absolute: exampleScaffoldPath,
-        },
-        description: 'Fixtures directory already exists, skipping',
-      }
-    } catch (e) {
-      await this.ensureDir('fixtures')
-      await this.ctx.fs.writeFile(exampleScaffoldPath, `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`)
-
-      return {
-        status: 'valid',
-        description: 'Added an example fixtures file/folder',
-        file: {
-          absolute: exampleScaffoldPath,
-        },
-      }
-    }
+    return this.scaffoldFile(exampleScaffoldPath,
+      `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
+      'Added an example fixtures file/folder')
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
@@ -218,26 +279,6 @@ export class WizardActions {
     codeBlocks.push(`  ${E2E_SCAFFOLD_BODY.replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push('})\n')
-
-    return codeBlocks.join('\n')
-  }
-
-  private wizardGetConfigCodeComponent (opts: WizardGetCodeComponent): string {
-    const codeBlocks: string[] = []
-    const { chosenBundler, chosenFramework, chosenLanguage } = opts
-
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
-    codeBlocks.push('')
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
-
-    codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
-      lang: chosenLanguage.type,
-      requirePath: chosenBundler.package,
-      configOptionsString: '{}',
-    }).replace(/\n/g, '\n  ')}`)
-
-    codeBlocks.push(`})\n`)
 
     return codeBlocks.join('\n')
   }
@@ -272,8 +313,10 @@ export class WizardActions {
       bodyModifier,
     })
 
+    const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
+
     return this.scaffoldFile(
-      path.join(this.projectRoot, 'cypress', 'component', 'index.html'),
+      componentIndexHtmlPath,
       template,
       'The HTML used as the wrapper for all component tests',
     )
@@ -299,18 +342,11 @@ export class WizardActions {
   }
 
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (fs.existsSync(filePath)) {
-      return {
-        status: 'skipped',
-        description: 'File already exists',
-        file: {
-          absolute: filePath,
-        },
-      }
-    }
-
     try {
-      await this.ctx.fs.writeFile(filePath, contents)
+      debug('scaffoldFile: start %s', filePath)
+      debug('scaffoldFile: with content', contents)
+      await this.ctx.fs.writeFile(filePath, contents, { flag: 'wx' })
+      debug('scaffoldFile: done %s', filePath)
 
       return {
         status: 'valid',
@@ -320,6 +356,16 @@ export class WizardActions {
         },
       }
     } catch (e: any) {
+      if (e.code === 'EEXIST') {
+        return {
+          status: 'skipped',
+          description: 'File already exists',
+          file: {
+            absolute: filePath,
+          },
+        }
+      }
+
       return {
         status: 'error',
         description: e.message || 'Error writing file',
@@ -334,7 +380,78 @@ export class WizardActions {
   private ensureDir (type: 'component' | 'e2e' | 'fixtures') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
+
+  private supportFileBody (fileName: 'e2e' | 'component', language: CodeLanguageEnum) {
+    return dedent`
+      // ***********************************************************
+      // This example support/${fileName}.${language} is processed and
+      // loaded automatically before your test files.
+      //
+      // This is a great place to put global configuration and
+      // behavior that modifies Cypress.
+      //
+      // You can change the location of this file or turn off
+      // automatically serving support files with the
+      // 'supportFile' configuration option.
+      //
+      // You can read more here:
+      // https://on.cypress.io/configuration
+      // ***********************************************************
+  
+      // Import commands.js using ES2015 syntax:
+      import './commands'
+  
+      // Alternatively you can use CommonJS syntax:
+      // require('./commands')
+    `
+  }
+
+  private commandsFileBody (language: CodeLanguageEnum) {
+    return dedent`
+      ${language === 'ts' ? '/// <reference types="cypress" />' : ''}
+      // ***********************************************
+      // This example commands.${language} shows you how to
+      // create various custom commands and overwrite
+      // existing commands.
+      //
+      // For more comprehensive examples of custom
+      // commands please read more here:
+      // https://on.cypress.io/custom-commands
+      // ***********************************************
+      //
+      //
+      // -- This is a parent command --
+      // Cypress.Commands.add('login', (email, password) => { ... })
+      //
+      //
+      // -- This is a child command --
+      // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
+      //
+      //
+      // -- This is a dual command --
+      // Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
+      //
+      //
+      // -- This will overwrite an existing command --
+      // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+      ${language === 'ts' ? COMMAND_TYPES : ''}
+    `
+  }
 }
+
+const COMMAND_TYPES = dedent`
+//
+// declare global {
+//   namespace Cypress {
+//     interface Chainable {
+//       login(email: string, password: string): Chainable<void>
+//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
+//     }
+//   }
+// }
+`
 
 const E2E_SCAFFOLD_BODY = dedent`
   e2e: {
@@ -343,22 +460,6 @@ const E2E_SCAFFOLD_BODY = dedent`
     },
   },
 `
-
-interface ComponentScaffoldOpts {
-  lang: CodeLanguageEnum
-  requirePath: string
-  configOptionsString: string
-  specPattern?: string
-}
-
-const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  return dedent`
-    component: {
-      devServer: import('${opts.requirePath}'),
-      devServerConfig: ${opts.configOptionsString}
-    },
-  `
-}
 
 const FIXTURE_DATA = {
   'name': 'Using fixtures to represent data',

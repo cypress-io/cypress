@@ -1,17 +1,21 @@
 import Bluebird from 'bluebird'
-import { create } from '../../../lib/browsers/cri-client'
 import EventEmitter from 'events'
+import { create } from '../../../lib/browsers/cri-client'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
+const HOST = '127.0.0.1'
+const PORT = 50505
 
 describe('lib/browsers/cri-client', function () {
   let criClient: {
     create: typeof create
   }
   let send: sinon.SinonStub
-  let criImport: sinon.SinonStub
+  let criImport: sinon.SinonStub & {
+    New: sinon.SinonStub
+  }
   let onError: sinon.SinonStub
   let getClient: () => ReturnType<typeof create>
 
@@ -31,6 +35,8 @@ describe('lib/browsers/cri-client', function () {
       close: sinon.stub(),
       _notifier: new EventEmitter(),
     })
+
+    criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
     criClient = proxyquire('../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,
@@ -84,41 +90,6 @@ describe('lib/browsers/cri-client', function () {
             expect(send).to.be.calledTwice
           })
         })
-      })
-    })
-
-    context('#ensureMinimumProtocolVersion', function () {
-      function withProtocolVersion (actual, test) {
-        if (actual) {
-          send.withArgs('Browser.getVersion')
-          .resolves({ protocolVersion: actual })
-        }
-
-        return getClient()
-        .then((client) => {
-          return client.ensureMinimumProtocolVersion(test)
-        })
-      }
-
-      it('resolves if protocolVersion = current', function () {
-        return expect(withProtocolVersion('1.3', '1.3')).to.be.fulfilled
-      })
-
-      it('resolves if protocolVersion > current', function () {
-        return expect(withProtocolVersion('1.4', '1.3')).to.be.fulfilled
-      })
-
-      it('rejects if Browser.getVersion not supported yet', function () {
-        send.withArgs('Browser.getVersion')
-        .rejects()
-
-        return expect(withProtocolVersion(null, '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has an older version.')
-      })
-
-      it('rejects if protocolVersion < current', function () {
-        return expect(withProtocolVersion('1.2', '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has v1.2.')
       })
     })
   })

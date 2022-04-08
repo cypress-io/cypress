@@ -9,24 +9,24 @@
       </div>
       <div
         v-else
-        class="flex items-center"
+        class="flex items-center children:font-medium children:leading-24px"
       >
         <img
           class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
         >
         <a
-          :class="props.gql?.currentProject ? 'text-indigo-500' :
+          class="font-medium mr-2px"
+          :class="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'text-indigo-500 hocus-link-default' :
             'text-gray-700'"
-          :href="props.gql?.currentProject ? 'global-mode' : undefined"
+          :href="props.gql?.currentProject && !props.gql?.projectRootFromCI ? 'global-mode' : undefined"
           @click.prevent="clearCurrentProject"
         >
-          Projects
+          {{ t('topNav.global.projects') }}
         </a>
-        <!-- TODO: Replace with a cy icon -->
-        <i-oi-chevron-right
+        <i-cy-chevron-right_x16
           v-if="props.gql?.currentProject"
-          class="h-8px text-gray-300"
+          class="h-16px mr-2px min-w-16px icon-dark-gray-200"
         />
         <span class="text-body-gray-700">{{ props.gql?.currentProject?.title }}</span>
       </div>
@@ -92,7 +92,7 @@
             <i-cy-profile_x16
               class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
-            <span class="font-semibold whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
+            <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
       </div>
@@ -107,7 +107,8 @@
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
 import { ref, computed } from 'vue'
-import { GlobalPageHeader_ClearCurrentProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import { GlobalPageHeader_ClearCurrentProjectDocument } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
@@ -135,6 +136,7 @@ fragment HeaderBar_HeaderBarContent on Query {
     config
     savedState
   }
+  projectRootFromCI
   ...TopNav
   ...Auth
 }
@@ -156,15 +158,15 @@ const openLogin = () => {
 }
 
 const clearCurrentProject = () => {
-  if (props.gql.currentProject) {
+  if (props.gql.currentProject && !props.gql.projectRootFromCI) {
     clearCurrentProjectMutation.executeMutation({})
   }
 }
 
 const props = defineProps<{
-  gql: HeaderBar_HeaderBarContentFragment,
-  showBrowsers?: boolean,
-  pageName?: string,
+  gql: HeaderBar_HeaderBarContentFragment
+  showBrowsers?: boolean
+  pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
 
@@ -193,7 +195,7 @@ const isShowablePromptInSavedState = computed(() => {
   return false
 })
 
-function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: number }) {
+function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interval?: number }) {
   // we want the component using the header to control if the prompt shows at all
   if (props.allowAutomaticPromptOpen !== true) {
     return false
@@ -201,7 +203,7 @@ function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interva
 
   const now = Date.now()
   const timeSinceOpened = now - savedState.value?.firstOpened
-  const allPromptShownTimes:number[] = Object.values(savedState.value?.promptsShown ?? {})
+  const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {

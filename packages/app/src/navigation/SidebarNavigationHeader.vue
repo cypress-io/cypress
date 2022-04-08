@@ -2,7 +2,7 @@
   <SidebarTooltip
     v-if="testingType"
     class="border-b cursor-pointer flex border-gray-900 flex-shrink-0 h-64px pl-20px transition-all duration-300 items-center hover:bg-gray-900"
-    :disabled="mainStore.navBarExpanded"
+    :disabled="isNavBarExpanded"
     :popper-top-offset="4"
     popper-class="h-56px"
     data-cy="sidebar-header"
@@ -46,7 +46,6 @@
 import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { SidebarNavigationHeaderFragment } from '../generated/graphql'
-import { useMainStore } from '../store'
 import SidebarTooltip from './SidebarTooltip.vue'
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e-solid-simple'
@@ -71,6 +70,7 @@ const showModal = ref(false)
 
 const props = defineProps<{
   gql: SidebarNavigationHeaderFragment
+  isNavBarExpanded: boolean
 }>()
 
 const TESTING_TYPE_MAP = {
@@ -87,7 +87,5 @@ const TESTING_TYPE_MAP = {
 const testingType = computed(() => {
   return props.gql.currentProject?.currentTestingType ? TESTING_TYPE_MAP[props.gql.currentProject.currentTestingType] : null
 })
-
-const mainStore = useMainStore()
 
 </script>

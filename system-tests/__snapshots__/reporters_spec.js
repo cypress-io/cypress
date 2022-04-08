@@ -1,14 +1,14 @@
 exports['e2e reporters reports error if cannot load reporter 1'] = `
-Could not load reporter by name: module-does-not-exist
+Error loading the reporter: module-does-not-exist
 
 We searched for the reporter in these paths:
 
-- /foo/bar/.projects/e2e/module-does-not-exist
-- /foo/bar/.projects/e2e/node_modules/module-does-not-exist
+ - /foo/bar/.projects/e2e/module-does-not-exist
+ - /foo/bar/.projects/e2e/node_modules/module-does-not-exist
 
-The error we received was:
+Learn more at https://on.cypress.io/reporters
 
-Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
+Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.js
 - lib/project-base.ts
@@ -16,8 +16,8 @@ Require stack:
 - lib/cypress.js
 - index.js
 - 
+      [stack trace lines]
 
-Learn more at https://on.cypress.io/reporters
 
 `
 
@@ -662,19 +662,18 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 `
 
 exports['e2e reporters reports error when thrown from reporter 1'] = `
-Could not load reporter by name: reporters/throws.js
+Error loading the reporter: reporters/throws.js
 
 We searched for the reporter in these paths:
 
-- /foo/bar/.projects/e2e/reporters/throws.js
-- /foo/bar/.projects/e2e/node_modules/reporters/throws.js
+ - /foo/bar/.projects/e2e/reporters/throws.js
+ - /foo/bar/.projects/e2e/node_modules/reporters/throws.js
 
-The error we received was:
+Learn more at https://on.cypress.io/reporters
 
 Error: this reporter threw an error
       [stack trace lines]
 
-Learn more at https://on.cypress.io/reporters
 
 `
 

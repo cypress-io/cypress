@@ -3,6 +3,7 @@ import path from 'path'
 // @ts-ignore - no types available
 import launchEditor from 'launch-editor'
 import type { DataContext } from '..'
+import assert from 'assert'
 
 export class FileActions {
   constructor (private ctx: DataContext) {}
@@ -44,6 +45,14 @@ export class FileActions {
     )
   }
 
+  async readFileInProject (relative: string) {
+    if (!this.ctx.currentProject) {
+      throw new Error(`Cannot check file in project exists without active project`)
+    }
+
+    return this.ctx.fs.readFileSync(path.join(this.ctx.currentProject, relative), 'utf-8')
+  }
+
   async checkIfFileExists (relativePath: string) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot check file in project exists without active project`)
@@ -58,8 +67,11 @@ export class FileActions {
     }
   }
 
-  openFile (absolute: string, line: number = 1, column: number = 1) {
+  openFile (filePath: string, line: number = 1, column: number = 1) {
+    assert(this.ctx.currentProject)
     const binary = this.ctx.coreData.localSettings.preferences.preferredEditorBinary
+
+    const absolute = path.resolve(this.ctx.currentProject, filePath)
 
     if (!binary || !absolute) {
       this.ctx.debug('cannot open file without binary')
@@ -69,7 +81,7 @@ export class FileActions {
 
     if (binary === 'computer') {
       try {
-        this.ctx.electronApi.showItemInFolder(absolute)
+        this.ctx.actions.electron.showItemInFolder(absolute)
       } catch (err) {
         this.ctx.debug('error opening file: %s', (err as Error).stack)
       }

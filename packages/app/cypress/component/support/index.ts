@@ -21,9 +21,10 @@ import '../../../src/main.scss'
 import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
-import { Pinia, setActivePinia } from 'pinia'
+import { setActivePinia } from 'pinia'
+import type { Pinia } from 'pinia'
 import 'cypress-real-events/support'
-import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 
 let pinia: Pinia
 
@@ -35,3 +36,5 @@ beforeEach(() => {
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })
 
 installCustomPercyCommand()
+
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))

@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from './dist'
 
 export default defineConfig({
   'pluginsFile': 'cypress/plugins.js',
@@ -6,15 +7,11 @@ export default defineConfig({
   'fixturesFolder': false,
   'component': {
     'supportFile': 'cypress/support.js',
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const path = require('path')
-      const { startDevServer } = require('./dist')
 
-      return startDevServer({
-        options: cypressConfig,
-        viteConfig: {
-          configFile: path.resolve(__dirname, 'vite.config.ts'),
-        },
+      return devServer(cypressDevServerConfig, {
+        configFile: path.resolve(__dirname, 'vite.config.ts'),
       })
     },
   },

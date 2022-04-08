@@ -45,6 +45,16 @@ body {
   }
 }
 
+// Dark scrollbars, anything with dark:
+.force-dark {
+  color-scheme: dark;
+}
+
+// Light scrollbars, anything with light:
+.force-light {
+  color-scheme: light;
+}
+
 /**
  * Common theming
  * -------------------------

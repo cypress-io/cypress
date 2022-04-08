@@ -19,7 +19,6 @@ import user from './user'
 import * as config from './config'
 import { openProject } from './open_project'
 import cache from './cache'
-import errors from './errors'
 import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
@@ -52,13 +51,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
       },
       async focusActiveBrowserWindow () {
-        return openProject.projectBase?.sendFocusBrowserMessage()
+        return openProject.sendFocusBrowserMessage()
       },
-    },
-    errorApi: {
-      error: errors.get,
-      message: errors.getMsgByType,
-      warning: errors.warning,
     },
     configApi: {
       getServerPluginHandlers: plugins.getServerPluginHandlers,
@@ -68,6 +62,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
       validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
+      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,
@@ -94,6 +89,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       logOut () {
         return user.logOut()
+      },
+      resetAuthState () {
+        return ctx.actions.auth.resetAuthState()
       },
     },
     projectApi: {
@@ -169,6 +167,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
         return electron.dialog.showSaveDialog(window, props)
+      },
+      copyTextToClipboard (text: string) {
+        electron.clipboard.writeText(text)
       },
     },
     localSettingsApi: {

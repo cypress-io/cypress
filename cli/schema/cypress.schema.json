@@ -15,7 +15,7 @@
           "description": "Any values to be set as environment variables. See https://on.cypress.io/environment-variables",
           "body": {}
         },
-        "ignoreSpecPattern": {
+        "excludeSpecPattern": {
           "type": [
             "string",
             "array"

@@ -32,7 +32,7 @@
         "channel": "stable",
         "displayName": "Firefox",
         "version": "95.0.2",
-        "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
+        "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
         "minSupportedVersion": 86,
         "majorVersion": 95
       },
@@ -106,11 +106,6 @@
   {
     "value": false,
     "from": "default",
-    "field": "experimentalStudio"
-  },
-  {
-    "value": false,
-    "from": "default",
     "field": "experimentalSessionSupport"
   },
   {
@@ -131,7 +126,7 @@
   {
     "value": "*.hot-update.js",
     "from": "default",
-    "field": "ignoreSpecPattern"
+    "field": "excludeSpecPattern"
   },
   {
     "value": false,

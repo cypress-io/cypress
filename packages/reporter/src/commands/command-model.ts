@@ -9,7 +9,7 @@ const LONG_RUNNING_THRESHOLD = 1000
 
 export interface RenderProps {
   message?: string
-  indicator?: string
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
   interceptions?: Array<{
     command: 'intercept' | 'route'
     alias?: string
@@ -47,7 +47,6 @@ export default class Command extends Instrument {
   @observable visible?: boolean = true
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
-  @observable isChild = false
   @observable hookId: string
   @observable isStudio: boolean
   @observable showError?: boolean = false
@@ -65,7 +64,7 @@ export default class Command extends Instrument {
 
   @computed get numChildren () {
     // and one to include self so it's the total number of same events
-    return this.children.length + 1
+    return this.event ? this.children.length + 1 : this.children.length
   }
 
   @computed get isOpen () {
@@ -88,7 +87,7 @@ export default class Command extends Instrument {
   }
 
   @computed get hasChildren () {
-    return this.numChildren > 1
+    return this.event ? this.numChildren > 1 : this.numChildren > 0
   }
 
   constructor (props: CommandProps) {
@@ -100,14 +99,14 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
-    this.visible = props.visible
+    this.visible = props.visible !== undefined ? props.visible : true
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
-    this.showError = props.showError
+    this.showError = !!props.showError
     this.group = props.group
-    this.hasSnapshot = props.hasSnapshot
-    this.hasConsoleProps = props.hasConsoleProps
+    this.hasSnapshot = !!props.hasSnapshot
+    this.hasConsoleProps = !!props.hasConsoleProps
 
     this._checkLongRunning()
   }
@@ -142,7 +141,6 @@ export default class Command extends Instrument {
   }
 
   addChild (command: Command) {
-    command.isChild = true
     command.setGroup(this.id)
     this.children.push(command)
   }

@@ -45,12 +45,12 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 const props = defineProps<{
-  variant?: string,
+  variant?: string
   forceOpenState?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'clearForceOpen'): void,
+  (e: 'clearForceOpen'): void
 }>()
 
 </script>

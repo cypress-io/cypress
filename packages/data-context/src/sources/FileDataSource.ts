@@ -31,7 +31,9 @@ export class FileDataSource {
   }
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
-    const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
+    const globs = ([] as string[]).concat(glob)
+
+    const ignoreGlob = (globOptions?.ignore ?? []).concat('**/node_modules/**')
 
     if (process.platform === 'win32') {
       // globby can't work with backwards slashes
@@ -46,7 +48,7 @@ export class FileDataSource {
     }
 
     try {
-      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions })
+      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
 
       return files
     } catch (e) {

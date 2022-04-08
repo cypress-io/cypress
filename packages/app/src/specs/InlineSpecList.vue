@@ -28,7 +28,9 @@ import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import { FuzzyFoundSpec, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import { useDebounce } from '@vueuse/core'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -64,15 +66,17 @@ const props = defineProps<{
 }>()
 
 const showModal = ref(false)
+
 const search = ref('')
+const debouncedSearchString = useDebounce(search, 200)
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
-  if (!search.value) return specs
+  if (!debouncedSearchString.value) return specs
 
-  return fuzzySortSpecs(specs, search.value)
+  return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
 </script>

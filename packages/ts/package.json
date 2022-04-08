@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "debug": "^4.3.2",
-    "tslib": "2.3.0"
+    "tslib": "2.3.1"
   },
   "devDependencies": {
     "rimraf": "3.0.2",

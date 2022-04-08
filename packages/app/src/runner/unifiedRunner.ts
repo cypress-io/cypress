@@ -1,4 +1,5 @@
-import { onMounted, ref, watch, onBeforeUnmount, readonly, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
 import { useRoute } from 'vue-router'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
@@ -25,6 +26,24 @@ export function useUnifiedRunner () {
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+      watch(() => specs.value, () => {
+        const fileParam = route.query.file
+
+        if (!fileParam) {
+          // no file param, we are not showing a file
+          // so no action needed when specs list updates
+          return
+        }
+
+        const activeSpecInSpecsList = specs.value.find((x) => x.relative === fileParam)
+
+        if (!activeSpecInSpecsList) {
+          // the specs list no longer contains the spec being shown
+          // so set active state to null and let the UI handle it
+          specStore.setActiveSpec(null)
+        }
+      })
 
       return watch(() => route.query.file, (queryParam) => {
         const spec = specs.value.find((x) => x.relative === queryParam)

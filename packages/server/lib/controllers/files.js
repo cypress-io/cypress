@@ -79,8 +79,8 @@ module.exports = {
         // component.specPattern: src/components/**/*.cy.ts
         // in this case, we want to remove anything that matches
         // - the component.specPattern
-        // - the e2e.ignoreSpecPattern
-        return ctx.project.findSpecs(config.projectRoot, 'e2e', e2ePatterns.specPattern, e2ePatterns.ignoreSpecPattern, componentPatterns.specPattern)
+        // - the e2e.excludeSpecPattern
+        return ctx.project.findSpecs(config.projectRoot, 'e2e', e2ePatterns.specPattern, e2ePatterns.excludeSpecPattern, componentPatterns.specPattern)
         .then((specs) => {
           debug('found __all specs %o', specs)
 

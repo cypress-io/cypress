@@ -4,11 +4,11 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="rounded-t rounded-b outline-none overflow-hidden group"
+    class="overflow-hidden rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
-    height="300"
+    :max-height="maxHeight"
   >
     <template #target="{ open }">
       <div
@@ -29,6 +29,14 @@
           class="rounded min-w-200px p-16px"
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"
         >
+          <template
+            v-if="$slots.title"
+            #title
+          >
+            <slot
+              name="title"
+            />
+          </template>
           <template
             v-if="$slots.prefixIcon"
             #prefixIcon="slotProps"
@@ -65,7 +73,7 @@
 export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success'
 
 export type AlertClasses = {
-  headerClass: string,
+  headerClass: string
   suffixIconClass: string
   suffixButtonClass: string
   bodyClass: string
@@ -76,7 +84,8 @@ export type AlertClasses = {
 <script lang="ts" setup>
 import AlertHeader from './AlertHeader.vue'
 import DeleteIcon from '~icons/cy/delete_x16.svg'
-import { computed, useSlots, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { computed, useSlots } from 'vue'
 import ChevronDown from '~icons/cy/chevron-down-small_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Collapsible from './Collapsible.vue'
@@ -91,13 +100,14 @@ defineEmits<{
 const props = withDefaults(defineProps<{
   title?: string
   status?: AlertStatus
-  icon?: FunctionalComponent<SVGAttributes, {}>,
-  headerClass?: string,
-  bodyClass?: string,
-  dismissible?: boolean,
-  collapsible?: boolean,
-  modelValue?: boolean,
+  icon?: FunctionalComponent<SVGAttributes, {}>
+  headerClass?: string
+  bodyClass?: string
+  dismissible?: boolean
+  collapsible?: boolean
+  modelValue?: boolean
   iconClasses?: string
+  maxHeight?: string
 }>(), {
   title: undefined,
   modelValue: true,
@@ -106,6 +116,7 @@ const props = withDefaults(defineProps<{
   headerClass: undefined,
   bodyClass: undefined,
   iconClasses: '',
+  maxHeight: undefined,
 })
 
 const title = computed(() => props.title ?? 'Alert')

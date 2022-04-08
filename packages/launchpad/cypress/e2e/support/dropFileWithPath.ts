@@ -1,5 +1,3 @@
-import path from 'path'
-
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -8,11 +6,13 @@ declare global {
   }
 }
 
-const dropFileWithPath = (subject, filePath) => {
+// Here we export the function with no intention to import it
+// This only tells the typescript type checker that this definitely is a module
+// This way, we are allowed to use the global namespace declaration
+export const dropFileWithPath = (subject, filePath) => {
   const attachedFile = new File([new Blob()], 'cypress.config.ts')
-  const fullPath = path.resolve(filePath)
 
-  Object.defineProperty(attachedFile, 'path', { value: fullPath })
+  Object.defineProperty(attachedFile, 'path', { value: filePath })
 
   const dataTransfer = new DataTransfer()
 
