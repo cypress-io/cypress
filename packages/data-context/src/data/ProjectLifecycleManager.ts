@@ -95,6 +95,10 @@ export class ProjectLifecycleManager {
     return autoBindDebug(this)
   }
 
+  get git () {
+    return this.ctx.coreData.currentProjectGitInfo
+  }
+
   private onProcessExit = () => {
     this.resetInternalState()
   }
@@ -373,6 +377,18 @@ export class ProjectLifecycleManager {
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
+      s.currentProjectGitInfo?.destroy()
+      s.currentProjectGitInfo = new GitDataSource({
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+      })
+
       s.packageManager = packageManagerUsed
     })
 

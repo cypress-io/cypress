@@ -41,5 +41,12 @@ export const Subscription = subscriptionType({
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('specsChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
+
+    t.field('branchChange', {
+      type: CurrentProject,
+      description: 'Issued when the current branch of a project changes',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('branchChange'),
+      resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
   },
 })

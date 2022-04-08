@@ -14,6 +14,20 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when we have logged in / logged out of the application
+   */
+  branchChange () {
+    this._emit('branchChange')
+  }
+
+  /**
+   * Emitted when the git info for a given spec changes
+   */
+  gitInfoChange (specPath: string[]) {
+    this._emit('gitInfoChange', specPath)
+  }
+
+  /**
    * Emitted when we have modified part of the backend and want to show
    * a notification to possibly restart the app
    */

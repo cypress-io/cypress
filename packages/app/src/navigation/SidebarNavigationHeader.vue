@@ -66,6 +66,15 @@ fragment SidebarNavigationHeader on Query {
 }
 `
 
+gql`
+subscription SidebarNavigationHeaderBranchChange {
+  branchChange {
+    id
+    branch
+  }
+}
+`
+
 const showModal = ref(false)
 
 const props = defineProps<{

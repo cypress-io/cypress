@@ -3,14 +3,26 @@ import path from 'path'
 import os from 'os'
 import simpleGit from 'simple-git'
 import fs from 'fs-extra'
+import sinon from 'sinon'
+
 import { createTestDataContext, scaffoldMigrationProject } from '../helper'
+import { GitDataSource } from '../../../src/sources/GitDataSource'
 
 describe('GitDataSource', () => {
   it(`gets correct status for files on ${os.platform()}`, async () => {
     const ctx = createTestDataContext()
     const projectPath = await scaffoldMigrationProject('e2e')
+    const onBranchChange = sinon.stub()
+    const onGitInfoChange = sinon.stub()
+    const onError = sinon.stub()
 
     ctx.coreData.currentProject = projectPath
+    const gitInfo = ctx.coreData.currentProjectGitInfo = new GitDataSource({
+      projectRoot: projectPath,
+      onBranchChange,
+      onGitInfoChange,
+      onError,
+    })
 
     const e2eFolder = path.join(projectPath, 'cypress', 'e2e')
     const allSpecs = fs.readdirSync(e2eFolder)
@@ -41,9 +53,9 @@ describe('GitDataSource', () => {
     process.chdir(projectPath)
 
     const [created, unmodified, modified] = await Promise.all([
-      ctx.git.gitInfo(fooSpec),
-      ctx.git.gitInfo(aRecordSpec),
-      ctx.git.gitInfo(xhrSpec),
+      gitInfo.gitInfoFor(fooSpec),
+      gitInfo.gitInfoFor(aRecordSpec),
+      gitInfo.gitInfoFor(xhrSpec),
     ])
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)

@@ -6,8 +6,8 @@ import path from 'path'
 import fs from 'fs-extra'
 import os from 'os'
 import Debug from 'debug'
-import type { DataContext } from '..'
 import type { gitStatusType } from '@packages/types'
+import chokidar from 'chokidar'
 
 const debug = Debug('cypress:data-context:GitDataSource')
 
@@ -31,7 +31,8 @@ dayjs.extend(relativeTime)
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
 const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
-const GIT_BRANCH_COMMAND = 'git rev-parse --abbrev-ref HEAD'
+const GIT_BRANCH_COMMAND = '--show-toplevel'
+const GIT_ROOT_DIR_COMMAND = '--abbrev-ref HEAD'
 
 export interface GitInfo {
   author: string | null
@@ -40,46 +41,130 @@ export interface GitInfo {
   statusType: typeof gitStatusType[number]
 }
 
-export class GitDataSource {
-  constructor (private ctx: DataContext) {}
+export interface GitDataSourceOptions {
+  projectRoot: string
+  onBranchChange(branch: string | null): void
+  /**
+   * Called when we've updated the gitInfo for a given spec
+   */
+  onGitInfoChange(specPath: string[]): void
+  onError(err: any): void
+}
 
-  get #git () {
-    return simpleGit()
+/**
+ * This acts as the manager for all "git" related state for a
+ * given project. It caches the git state internally in the class,
+ * and manages the watchers & emitting when things are changed. This way,
+ * we are loading the git info ahead of time, and not blocking the execution
+ * of the Queries on any git data loading lazily
+ */
+export class GitDataSource {
+  #git = simpleGit({ baseDir: this.options.projectRoot })
+  #destroyed = false
+  #gitBaseDir?: string
+  #gitBaseDirWatcher?: chokidar.FSWatcher
+  #gitMeta = new Map<string, GitInfo | null>()
+  #currentBranch: string | null = null
+  #currentUser?: string
+
+  constructor (private options: GitDataSourceOptions) {
+    this.#loadCurrentGitUser().catch(options.onError)
+    this.#loadAndWatchCurrentBranch().catch(options.onError)
   }
 
-  async getCurrentGitUser () {
+  setSpecs (specs: string[]) {
+    if (this.#destroyed) {
+      return
+    }
+
+    this.#loadBulkGitInfo(specs).catch(this.options.onError)
+  }
+
+  get gitBaseDir () {
+    return this.#gitBaseDir
+  }
+
+  get currentBranch () {
+    return this.#currentBranch
+  }
+
+  get currentUser () {
+    return this.#currentUser ?? null
+  }
+
+  destroy () {
+    this.#destroyWatcher(this.#gitBaseDirWatcher)
+  }
+
+  #destroyWatcher (watcher?: chokidar.FSWatcher) {
+    // Can't do anything actionable with these errors
+    watcher?.close().catch((e) => {})
+  }
+
+  async #loadAndWatchCurrentBranch () {
+    try {
+      const [gitBaseDir] = await Promise.all([
+        this.#git.revparse(GIT_ROOT_DIR_COMMAND),
+        this.#loadCurrentBranch(),
+      ])
+
+      this.#gitBaseDir = gitBaseDir
+
+      if (this.#destroyed) {
+        return
+      }
+
+      this.#gitBaseDirWatcher = chokidar.watch(path.join(gitBaseDir, '.git', 'HEAD'), {
+        ignoreInitial: true,
+        ignorePermissionErrors: true,
+      })
+
+      // Fires when we switch branches
+      this.#gitBaseDirWatcher.on('change', () => {
+        this.#loadCurrentBranch().then(() => {
+          this.options.onBranchChange(this.#currentBranch)
+        })
+      })
+    } catch (e) {
+      debug(`Error loading & watching current branch %s`, e.message)
+    }
+  }
+
+  async #loadCurrentBranch () {
+    try {
+      this.#currentBranch = await this.#git.revparse(GIT_BRANCH_COMMAND)
+    } catch (e) {
+      this.#currentBranch = null
+      debug(`Error current branch %s`, e.message)
+    }
+  }
+
+  async #loadCurrentGitUser () {
     try {
       return (await this.#git.getConfig('user.name')).value
     } catch (e) {
-      debug(`Failed to get current git user`, (e as Error).message)
+      debug(`Failed to get current git user`, e.message)
 
       return ''
     }
   }
 
-  gitInfo (path: string): Promise<GitInfo | null> {
-    return this.gitInfoLoader.load(path)
+  gitInfoFor (path: string): GitInfo | null {
+    return this.#gitMeta.get(path) ?? null
   }
 
-  private gitInfoLoader = this.ctx.loader<string, GitInfo | null>((paths) => {
-    return this.bulkGitInfo(paths)
-  })
-
-  private async bulkGitInfo (absolutePaths: readonly string[]) {
+  async #loadBulkGitInfo (absolutePaths: readonly string[]) {
     if (absolutePaths.length === 0) {
-      return []
+      return
     }
 
     try {
-      const stdout = await (
+      const [stdout, statusResult] = await Promise.all([
         os.platform() === 'win32'
           ? this.getInfoWindows(absolutePaths)
-          : this.getInfoPosix(absolutePaths)
-      )
-
-      const unstaged = await this.#git.status()
-
-      const output: Array<GitInfo | null> = []
+          : this.getInfoPosix(absolutePaths),
+        this.#git.status(),
+      ])
 
       debug('stdout %s', stdout)
 
@@ -91,7 +176,7 @@ export class GitDataSource {
         }
 
         // first check unstaged/untracked files
-        const isUnstaged = unstaged.files.find((x) => file.endsWith(x.path))
+        const isUnstaged = statusResult.files.find((x) => file.endsWith(x.path))
 
         // These are the status codes used by SimpleGit.
         // M -> modified
@@ -102,10 +187,10 @@ export class GitDataSource {
           const stat = fs.statSync(file)
           const ctime = dayjs(stat.ctime)
 
-          output.push({
+          this.#gitMeta.set(file, {
             lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
             lastModifiedHumanReadable: ctime.fromNow(),
-            author: await this.getCurrentGitUser(),
+            author: this.#currentUser ?? '',
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
           })
         } else {
@@ -113,7 +198,7 @@ export class GitDataSource {
           const info = data?.match(GIT_LOG_REGEXP)
 
           if (file && info && info[1] && info[2] && info[3]) {
-            output.push({
+            this.#gitMeta.set(file, {
               lastModifiedTimestamp: info[1],
               lastModifiedHumanReadable: info[2],
               author: info[3],
@@ -121,20 +206,15 @@ export class GitDataSource {
             })
           } else {
             debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
-            output.push(null)
+            this.#gitMeta.set(file, null)
           }
         }
       }
-
-      return output
     } catch (e) {
-      debug('Error getting git info: %s', e)
-
       // does not have git installed,
       // file is not under source control
       // ... etc ...
-      // just return an empty map
-      return new Array(absolutePaths.length).fill(null)
+      debug('Error getting git info: %s', e)
     }
   }
 
@@ -182,21 +262,5 @@ export class GitDataSource {
     }
 
     return stdout
-  }
-
-  public async getBranch (absolutePath: string) {
-    try {
-      const { stdout, exitCode = 0 } = await execa(GIT_BRANCH_COMMAND, { shell: true, cwd: absolutePath })
-
-      debug('executing command `%s`:', GIT_BRANCH_COMMAND)
-      debug('stdout for git branch', stdout)
-      debug('exitCode for git branch', exitCode)
-
-      return exitCode === 0 ? stdout.trim() : null
-    } catch (e) {
-      debug('Error getting git branch: %s', (e as Error).message)
-
-      return null
-    }
   }
 }
