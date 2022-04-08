@@ -379,6 +379,7 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
       s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
         projectRoot,
         onError: this.ctx.onError,
         onBranchChange: () => {

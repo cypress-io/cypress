@@ -37,6 +37,7 @@ describe('GitDataSource', () => {
     const onError = sinon.stub()
 
     gitInfo = new GitDataSource({
+      isRunMode: false,
       projectRoot: projectPath,
       onBranchChange,
       onGitInfoChange,
@@ -102,6 +103,7 @@ describe('GitDataSource', () => {
     stub.onFirstCall().callsFake(dfd.resolve)
 
     gitInfo = new GitDataSource({
+      isRunMode: false,
       projectRoot: projectPath,
       onBranchChange: stub,
       onGitInfoChange: sinon.stub(),

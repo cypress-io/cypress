@@ -33,6 +33,7 @@ dayjs.extend(relativeTime)
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
 const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
+const SIXTY_SECONDS = 60 * 1000
 
 export interface GitInfo {
   author: string | null
@@ -42,6 +43,11 @@ export interface GitInfo {
 }
 
 export interface GitDataSourceConfig {
+  /**
+   * In run mode, we currently don't need the git info, so we explicitly
+   * check and skip if we know we don't
+   */
+  isRunMode: boolean
   projectRoot: string
   onBranchChange(branch: string | null): void
   /**
@@ -59,18 +65,39 @@ export interface GitDataSourceConfig {
  * of the Queries on any git data loading lazily
  */
 export class GitDataSource {
+  #specs?: string[]
   #git = simpleGit({ baseDir: this.config.projectRoot })
-  #gitError = false
+  #gitErrored = false
   #destroyed = false
   #gitBaseDir?: string
   #gitBaseDirWatcher?: chokidar.FSWatcher
   #gitMeta = new Map<string, GitInfo | null>()
   #currentBranch: string | null = null
   #currentUser?: string
+  #intervalTimer?: NodeJS.Timeout
 
   constructor (private config: GitDataSourceConfig) {
-    this.#loadCurrentGitUser().catch(config.onError)
-    this.#loadAndWatchCurrentBranch().catch(config.onError)
+    if (!config.isRunMode) {
+      this.#refreshAllGitData()
+    }
+  }
+
+  #refreshAllGitData () {
+    const toAwait = [
+      this.#loadCurrentGitUser(),
+      this.#loadAndWatchCurrentBranch(),
+    ]
+
+    if (this.#specs) {
+      toAwait.push(this.#loadBulkGitInfo(this.#specs))
+    }
+
+    Promise.all(toAwait).then(() => {
+      this.#intervalTimer = setTimeout(() => {
+        debug('Refreshing git data')
+        this.#refreshAllGitData()
+      }, SIXTY_SECONDS)
+    }).catch(this.config.onError)
   }
 
   setSpecs (specs: string[]) {
@@ -78,8 +105,9 @@ export class GitDataSource {
       return
     }
 
-    // If we don't have a branch, it's likely b/c they
-    if (this.#gitError) {
+    // If we don't have a branch, it's likely b/c they don't have git setup.
+    // Let's re-check and see if they have initialized a git repo by now
+    if (this.#gitErrored) {
       this.#loadAndWatchCurrentBranch().catch(this.config.onError)
     }
 
@@ -99,6 +127,11 @@ export class GitDataSource {
   }
 
   destroy () {
+    this.#destroyed = true
+    if (this.#intervalTimer) {
+      clearTimeout(this.#intervalTimer)
+    }
+
     this.#destroyWatcher(this.#gitBaseDirWatcher)
   }
 
@@ -133,10 +166,14 @@ export class GitDataSource {
       this.#gitBaseDirWatcher.on('change', () => {
         this.#loadCurrentBranch().then(() => {
           this.config.onBranchChange(this.#currentBranch)
+        }).catch((e) => {
+          debug('Errored loading branch info on git change %s', e.message)
+          this.#currentBranch = null
+          this.#gitErrored = true
         })
       })
     } catch (e) {
-      this.#gitError = true
+      this.#gitErrored = true
       debug(`Error loading & watching current branch %s`, e.message)
     }
   }
