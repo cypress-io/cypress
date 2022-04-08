@@ -110,9 +110,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       cy.state('currentActiveOriginPolicy', originPolicy)
 
       return new Bluebird((resolve, reject, onCancel) => {
-        const cleanup = () => {
+        const cleanup = ({ readyForOriginFailed }: {readyForOriginFailed?: boolean} = {}): void => {
           cy.state('currentActiveOriginPolicy', undefined)
-          Cypress.backend('cross:origin:finished', location.originPolicy)
+          if (!readyForOriginFailed) {
+            Cypress.backend('cross:origin:finished', location.originPolicy)
+          }
+
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
         }
@@ -126,8 +129,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
         }
 
-        const _reject = (err) => {
-          cleanup()
+        const _reject = (err, cleanupOptions: {readyForOriginFailed?: boolean} = {}) => {
+          cleanup(cleanupOptions)
           log?.error(err)
           reject(err)
         }
@@ -231,6 +234,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
+              // Release the request if 'run:origin:fn' fails
+              Cypress.backend('ready:for:origin', { failed: true })
+
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })
@@ -241,7 +247,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}
 
-              _reject(wrappedErr)
+              _reject(wrappedErr, { readyForOriginFailed: true })
             }
           }
         })
