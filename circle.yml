@@ -1911,7 +1911,6 @@ jobs:
 
   test-binary-against-recipes-chrome:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
@@ -1919,7 +1918,6 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
