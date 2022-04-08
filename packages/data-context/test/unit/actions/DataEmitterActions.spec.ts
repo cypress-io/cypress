@@ -13,7 +13,7 @@ describe('DataEmitterActions', () => {
 
     it('properly iterates through events', async () => {
       const actions = new DataEmitterActions(ctx)
-      const subscription = actions.subscribeToAndExecute('specsChange')
+      const subscription = actions.subscribeTo('specsChange')
 
       let items = 0
       let completed = false
@@ -49,7 +49,7 @@ describe('DataEmitterActions', () => {
 
     it('handles iterating through events if an event is emitted before the iteration', async () => {
       const actions = new DataEmitterActions(ctx)
-      const subscription = actions.subscribeToAndExecute('specsChange')
+      const subscription = actions.subscribeTo('specsChange')
 
       let items = 0
       let completed = false
@@ -80,7 +80,7 @@ describe('DataEmitterActions', () => {
 
     it('handles stopping the loop if return is called before the iteration', async () => {
       const actions = new DataEmitterActions(ctx)
-      const subscription = actions.subscribeToAndExecute('specsChange')
+      const subscription = actions.subscribeTo('specsChange')
 
       let items = 0
       let completed = false

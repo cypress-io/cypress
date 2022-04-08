@@ -7,21 +7,21 @@ export const Subscription = subscriptionType({
     t.field('authChange', {
       type: Query,
       description: 'Triggered when the auth state changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('authChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('authChange'),
       resolve: (source, args, ctx) => ({}),
     })
 
     t.field('devChange', {
       type: DevState,
       description: 'Issued for internal development changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('devChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('devChange'),
       resolve: (source, args, ctx) => ctx.coreData.dev,
     })
 
     t.field('cloudViewerChange', {
       type: Query,
       description: '',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('cloudViewerChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
       resolve: (source, args, ctx) => {
         return {
           requestPolicy: 'network-only',
@@ -32,14 +32,14 @@ export const Subscription = subscriptionType({
     t.field('browserStatusChange', {
       type: CurrentProject,
       description: 'Status of the currently opened browser',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('browserStatusChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('browserStatusChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
     t.field('specsChange', {
       type: CurrentProject,
       description: 'Issued when the watched specs for the project changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeToAndExecute('specsChange'),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('specsChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 

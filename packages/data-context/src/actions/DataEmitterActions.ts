@@ -84,10 +84,6 @@ export class DataEmitterActions extends DataEmitterEvents {
     this.ctx.coreData.servers.gqlSocketServer?.emit('data-context-push', ...args)
   }
 
-  subscribeToAndExecute (evt: keyof DataEmitterEvents) {
-    return this.subscribeTo(evt, true)
-  }
-
   /**
    * GraphQL Subscriptions use the AsyncIterator protocol for notifying
    * of updates which trigger re-execution on the client.
@@ -100,7 +96,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = false): AsyncGenerator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncGenerator<any> {
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
     let pending: any[] = []
