@@ -218,7 +218,7 @@ function openProject (projectName: ProjectFixtureDir, argv: string[] = []) {
   })
 }
 
-function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
+function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMockingPrompts: boolean } = { skipMockingPrompts: false }) {
   const { name, family } = Cypress.browser
 
   if (family !== 'chromium' || name === 'electron') {
@@ -288,6 +288,15 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
         await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
+
+        if (!options.skipMockingPrompts) {
+          // avoid unwanted prompt
+          o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+            firstOpened: 1609459200000,
+            lastOpened: 1609459200000,
+            promptsShown: { ci1: 1609459200000 },
+          })
+        }
 
         return ctx.appServerPort
       }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then((serverPort) => {
