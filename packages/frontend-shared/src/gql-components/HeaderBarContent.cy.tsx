@@ -20,7 +20,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('not.exist')
     })
 
@@ -28,7 +28,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('exist')
     })
 
