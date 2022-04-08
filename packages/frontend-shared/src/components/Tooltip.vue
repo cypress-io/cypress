@@ -1,5 +1,7 @@
 <template>
-  <Tooltip>
+  <Tooltip
+    :popper-class="{'no-arrow': hideArrow}"
+  >
     <slot />
     <template #popper>
       <slot name="popper" />
@@ -12,14 +14,21 @@ import { Tooltip } from 'floating-vue'
 
 withDefaults(defineProps<{
   color?: string
+  hideArrow?: boolean
 }>(), {
   color: 'dark',
+  hideArrow: false,
 })
 
 </script>
 
 <style lang="scss">
 @import "floating-vue/dist/style.css";
+.no-arrow {
+  .v-popper__arrow-container {
+    display: none;
+  }
+}
 
 .v-popper__popper.v-popper--theme-tooltip {
   .v-popper__inner {
