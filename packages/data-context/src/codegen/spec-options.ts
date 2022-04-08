@@ -30,6 +30,9 @@ export class SpecOptions {
     const cyWithExt = this.options.specFileExtension + ext
     const name = base.slice(0, -cyWithExt.length)
 
+    // At this point, for a filePath of `/foo/bar/baz.cy.js`
+    // - name = `baz`
+    // - cyWithExt = `.cy.js`
     let fileToTry = this.ctx.path.join(dir, `${name}${cyWithExt}`)
 
     let i = 0
