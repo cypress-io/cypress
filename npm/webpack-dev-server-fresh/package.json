@@ -18,6 +18,7 @@
     "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
+    "globby": "^11.0.1",
     "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
     "speed-measure-webpack-plugin": "1.4.2",

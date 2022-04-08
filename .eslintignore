@@ -71,6 +71,9 @@ npm/cypress-schematic/src/**/*.js
 packages/data-context/test/unit/codegen/files
 
 # community templates we test against, no need to lint
+system-tests/projects/cra-4/**/*
+system-tests/projects/cra-5/**/*
+system-tests/projects/cra-ejected/**/*
 system-tests/projects/create-react-app-configured/**/*
 system-tests/projects/create-react-app-unconfigured/**/*
 system-tests/projects/create-react-app-custom-index-html
