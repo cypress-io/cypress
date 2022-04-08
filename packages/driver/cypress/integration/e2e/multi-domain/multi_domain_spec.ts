@@ -152,7 +152,9 @@ describe('cy.origin', () => {
     })
 
     describe('errors', () => {
-    // TODO: Proper stack trace printing still needs to be addressed here
+      // TODO: Proper stack trace printing still needs to be addressed here
+      // with a cy-in-cy test
+      // https://github.com/cypress-io/cypress/issues/20973
       it('propagates secondary origin errors to the primary that occur within the test', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('variable is not defined')

@@ -77,8 +77,10 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   const setRunnableStateToPassed = () => {
-    // TODO: We're telling the runnable that it has passed to avoid a timeout on the last (empty) command. Normally this would be set inherently by running (runnable.run) the test.
-    // Set this to passed regardless of the state of the test, the runnable isn't responsible for reporting success.
+    // HACK: We're telling the runnable that it has passed to avoid a timeout
+    // on the last (empty) command. Normally this would be set inherently by
+    // running runnable.run() the test. Set this to passed regardless of the
+    // state of the test, the runnable isn't responsible for reporting success.
     cy.state('runnable').state = 'passed'
   }
 
