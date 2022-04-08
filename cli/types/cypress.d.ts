@@ -2341,7 +2341,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
   }
 
   interface Failable {
@@ -5712,6 +5712,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
+    /** additional information to include in the log */
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean

@@ -100,6 +100,7 @@ class $Cypress {
   isCy: any
   log: any
   isBrowser: any
+  browserMajorVersion: any
   emit: any
   emitThen: any
   emitMap: any
