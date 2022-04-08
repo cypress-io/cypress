@@ -267,6 +267,7 @@ export const getSimpleConfig = () => ({
       // packages/driver/src/cypress/source_map_utils.js when creating
       // the cross origin bundle. for now, this is necessary so the build
       // doesn't fail
+      // https://github.com/cypress-io/cypress/issues/19888
       {
         test: /\.wasm$/,
         type: 'javascript/auto',

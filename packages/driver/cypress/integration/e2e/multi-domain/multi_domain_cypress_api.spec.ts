@@ -1,3 +1,5 @@
+const { assertLogLength } = require('../../../support/utils')
+
 describe('cy.origin Cypress API', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
@@ -189,28 +191,24 @@ describe('cy.origin Cypress API', () => {
       })
     })
 
-    // FIXME: convert to cypress-in-cypress tests once possible
     it('log()', () => {
+      const logs: Cypress.Log[] = []
+
+      cy.on('log:added', (attrs, log: Cypress.Log) => {
+        logs.push(log)
+      })
+
       cy.origin('http://foobar.com:3500', () => {
         Cypress.log({
+          name: 'log',
           message: 'test log',
         })
       })
-
-      // logs in the secondary origin, skips the primary driver, going through
-      // the runner to the reporter, so we have to break out of the AUT and
-      // test the actual command log.
-      // this is a bit convoluted since otherwise the test could falsely pass
-      // by finding its own log if we simply did `.contains('test log')`
-      cy.wrap(Cypress.$(window.top!.document.body))
-      .find('.reporter')
-      .contains('.runnable-title', 'log()')
-      .closest('.runnable')
-      .find('.runnable-commands-region .hook-item')
-      .eq(1)
-      .contains('.command-number', '2')
-      .closest('.command-wrapper-text')
-      .contains('test log')
+      .then(() => {
+        assertLogLength(logs, 3)
+        expect(logs[1].get('name')).to.equal('log')
+        expect(logs[1].get('message')).to.equal('test log')
+      })
     })
   })
 

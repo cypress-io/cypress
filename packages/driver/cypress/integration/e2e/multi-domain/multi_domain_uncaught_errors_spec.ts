@@ -1,7 +1,3 @@
-// FIXME: sync thrown errors inside of cy.origin cause cross origin errors in firefox when using experimentalSessionSupport
-// This is likely due to cypress being re declared while on a cross origin iframe before the application navigates back.
-// To reproduce, just add "experimentalSessionSupport" = true into the describe block below
-
 describe('cy.origin - uncaught errors', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
@@ -32,6 +28,7 @@ describe('cy.origin - uncaught errors', () => {
         // TODO: we likely need to change the messaging around this error to make it clear to cy.origin users that
         // this behavior is configurable with 'uncaught:exception', but it MUST be declared inside the cy.origin callback
         // and that 'uncaught:exception' will NOT be triggered outside that callback (inside the primary origin)
+        // https://github.com/cypress-io/cypress/issues/20969
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('sync error')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
