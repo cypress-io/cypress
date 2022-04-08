@@ -566,7 +566,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // we failed setting the remote window props which
         // means the page navigated to a different origin
 
-        // With cross origin support this is an expected error that may or may not be bad, we will rely on the page load timeout to throw if we don't end up where we expect to be.
+        // With cross-origin support, this is an expected error that may or may
+        // not be bad, we will rely on the page load timeout to throw if we
+        // don't end up where we expect to be.
         if (this.config('experimentalLoginFlows') && err.name === 'SecurityError') {
           return
         }

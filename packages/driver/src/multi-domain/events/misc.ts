@@ -9,7 +9,6 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
     Cypress.specBridgeCommunicator.toPrimary('viewport:changed', viewport)
   })
 
-  // TODO: Should state syncing be built into cy.state instead of being explicitly called?
   Cypress.specBridgeCommunicator.on('sync:state', (state) => {
     cy.state(state)
   })
