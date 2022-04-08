@@ -12,11 +12,7 @@
   }
 
   .command {
-<<<<<<< HEAD
     background-color: $reporter-section-background;
-=======
-    background-color: #eef1f4;
->>>>>>> origin/develop
     cursor: default;
     min-height: 20px;
   }
@@ -48,17 +44,7 @@
     }
   }
 
-<<<<<<< HEAD
   // Child Styles
-  .command-type-child {
-    .command-method {
-      &:before {
-        float: left;
-        content: "-";
-        margin-right: 2px;
-        padding-left: 5px;
-      }
-=======
   .command-type-parent > span > .command-wrapper {
     border-top: 1px solid #e3e3e3;
 
@@ -77,7 +63,6 @@
       content: "-";
       margin-right: 2px;
       padding-left: 5px;
->>>>>>> origin/develop
     }
   }
 
@@ -480,8 +465,6 @@
     font-style: normal;
   }
 
-<<<<<<< HEAD
-=======
   .command-has-num-elements .num-elements {
     display: none;
   }
@@ -526,7 +509,6 @@
     }
   }
 
->>>>>>> origin/develop
   .command-pin {
     display: none;
     flex-shrink: 0;
