@@ -1677,11 +1677,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-<<<<<<< HEAD
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-ci-artifact-uploads" ]]; then
-=======
             if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "marktnoonan/backmerge-develop-3-8-22" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
->>>>>>> 10.0-release
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2224,13 +2220,9 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
-<<<<<<< HEAD
-    - desktop-gui-integration-tests-7x:
-=======
     - run-app-integration-tests-chrome:
         context: test-runner:launchpad-tests
         percy: true
->>>>>>> 10.0-release
         requires:
           - build
     - run-app-component-tests-chrome:

@@ -3,109 +3,17 @@ import $ from 'jquery'
 import clone from 'clone'
 
 import { HIGHLIGHT_ATTR } from '../cy/snapshots'
-import { extend as extendEvents } from './events'
+import * as $Events from './events'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
-
-// interface Log {
-//   name: string
-//   defaultValue: any
-//   validation: Function
-//   isInternal?: boolean
-//   /**
-//    * Can be mutated with Cypress.config() or test-specific configuration overrides
-//    */
-//   canUpdateDuringTestTime?: boolean
-// }
-
-// Missing ConsoleProps definition / expectations. Hidden in code.
-
-interface SharedLogAttributes {
-  id: string
-  url?: boolean
-}
-
-interface SnapshotProps {
-  // id: string
-  snapshots: any
-  $el: Function
-  // url?: boolean
-  coords?: boolean
-  highlightAttr?: boolean
-  scrollBy?: boolean
-  viewportWidth?: boolean
-  viewportHeight?: boolean
-}
-
-interface DisplayProps {
-  // id: string
-  alias: any
-  aliasType: Function
-  callCount?: boolean
-  displayName?: boolean
-  end?: boolean
-  err?: boolean
-  event?: boolean
-  functionName?: boolean
-  hookId?: boolean
-  instrument?: boolean
-  isStubbed?: boolean
-  group?: boolean
-  message?: boolean
-  method?: boolean
-  name?: boolean
-  numElements?: boolean
-  showError?: boolean
-  numResponses?: boolean
-  referencesAlias?: boolean
-  renderProps?: boolean
-  state?: boolean
-  testId?: boolean
-  timeout?: boolean
-  type?: boolean
-  // url?: boolean
-  visible?: boolean
-  wallClockStartedAt?: boolean
-  testCurrentRetry?: boolean
-}
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = [
-  'id',
-  'alias',
-  'aliasType',
-  'callCount',
-  'displayName',
-  'end',
-  'err',
-  'event',
-  'functionName',
-  'hookId',
-  'instrument',
-  'isStubbed',
-  'group',
-  'message',
-  'method',
-  'name',
-  'numElements',
-  'showError',
-  'numResponses',
-  'referencesAlias',
-  'renderProps',
-  'state',
-  'testId',
-  'timeout',
-  'type',
-  'url',
-  'visible',
-  'wallClockStartedAt',
-  'testCurrentRetry',
-]
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group groupLevel message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0

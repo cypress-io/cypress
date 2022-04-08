@@ -1,4 +1,4 @@
-const { create } = require('@packages/driver/src/cypress/log')
+const $Log = require('@packages/driver/src/cypress/log').default
 
 describe('src/cypress/log', function () {
   context('#snapshot', function () {
@@ -11,7 +11,7 @@ describe('src/cypress/log', function () {
       this.config = cy.stub()
       this.config.withArgs('isInteractive').returns(true)
       this.config.withArgs('numTestsKeptInMemory').returns(50)
-      this.log = create(Cypress, this.cy, this.state, this.config)
+      this.log = $Log.create(Cypress, this.cy, this.state, this.config)
     })
 
     it('creates a snapshot and returns the log', function () {

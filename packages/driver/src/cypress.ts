@@ -17,7 +17,7 @@ import $dom from './dom'
 import $Downloads from './cypress/downloads'
 import $errorMessages from './cypress/error_messages'
 import $errUtils from './cypress/error_utils'
-import { create as createLogFn, LogUtils } from './cypress/log'
+import $Log from './cypress/log'
 import $LocalStorage from './cypress/local_storage'
 import $Mocha from './cypress/mocha'
 import { create as createMouse } from './cy/mouse'
@@ -115,7 +115,7 @@ class $Cypress {
   errorMessages = $errorMessages
   Keyboard = $Keyboard
   Location = $Location
-  Log = LogUtils
+  Log = $Log
   LocalStorage = $LocalStorage
   Mocha = $Mocha
   resolveWindowReference = resolvers.resolveWindowReference
@@ -323,7 +323,7 @@ class $Cypress {
     this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
     this.isCy = this.cy.isCy
-    this.log = createLogFn(this, this.cy, this.state, this.config)
+    this.log = $Log.create(this, this.cy, this.state, this.config)
     this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy, this.state)
     this.downloads = $Downloads.create(this)

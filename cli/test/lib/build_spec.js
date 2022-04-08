@@ -22,7 +22,7 @@ const normalizePackageJson = (o) => {
   }
 }
 
-describe.only('package.json build', () => {
+describe('package.json build', () => {
   beforeEach(function () {
     // stub package.json in CLI
     // with a few test props
