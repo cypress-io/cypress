@@ -59,9 +59,10 @@ const Hook = observer(({ model, showNumber }: HookProps) => {
   // If a user specified `numCommandsToShow` in the cypress config
   // then only show the last `numCommandsToShow` in the command log
   // This would primarily be done as a performance optimization
-  const numCommandsToShow = parseInt(Cypress.config('numCommandsToShow'), 10)
-  const commandsToShow = numCommandsToShow ? model.commands.slice(numCommandsToShow * -1) : model.commands;
-  return <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
+  const numCommandsToShow = Cypress.config('numCommandsToShow')
+  const commandsToShow = numCommandsToShow ? model.commands.slice(numCommandsToShow * -1) : model.commands
+
+  return (<li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
@@ -73,7 +74,7 @@ const Hook = observer(({ model, showNumber }: HookProps) => {
         {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
-  </li>
+  </li>)
 })
 
 export interface HooksModel {
