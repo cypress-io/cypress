@@ -173,6 +173,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
       paths: [searchRoot],
     })
 
+    result.htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
     // Check that they're not using v3 of html-webpack-plugin. Since we should be the only consumer of it,
     // we shouldn't be concerned with using our own copy if they've shipped w/ an earlier version
     result.htmlWebpackPlugin.majorVersion = getMajorVersion(result.htmlWebpackPlugin.packageJson, [4, 5])
