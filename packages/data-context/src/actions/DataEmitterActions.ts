@@ -123,7 +123,7 @@ export class DataEmitterActions extends DataEmitterEvents {
         if (!hasSentInitial && sendInitial) {
           hasSentInitial = true
 
-          return { done: false, value: {} }
+          return { done: false, value: undefined }
         }
 
         if (pending.length === 0) {

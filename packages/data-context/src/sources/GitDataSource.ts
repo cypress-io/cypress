@@ -73,14 +73,10 @@ export class GitDataSource {
   #gitBaseDirWatcher?: chokidar.FSWatcher
   #gitMeta = new Map<string, GitInfo | null>()
   #currentBranch: string | null = null
-  #currentUser?: string
+  #currentUser: string | null = null
   #intervalTimer?: NodeJS.Timeout
 
   constructor (private config: GitDataSourceConfig) {
-    if (!config.isRunMode) {
-      this.#refreshAllGitData()
-    }
-
     // Simple Git will error if the projectRoot does not exist.
     // This should never happen outside of testing code simulating
     // incorrect scenarios
@@ -88,6 +84,10 @@ export class GitDataSource {
       this.#git = simpleGit({ baseDir: this.config.projectRoot })
     } catch {
       this.#git = simpleGit()
+    }
+
+    if (!config.isRunMode) {
+      this.#refreshAllGitData()
     }
   }
 
@@ -189,16 +189,18 @@ export class GitDataSource {
 
   async #loadCurrentBranch () {
     this.#currentBranch = (await this.#git.branch()).current
+    debug(`On current branch %s`, this.#currentBranch)
     this.config.onBranchChange(this.#currentBranch)
   }
 
   async #loadCurrentGitUser () {
     try {
-      return (await this.#git.getConfig('user.name')).value
+      this.#currentUser = (await this.#git.getConfig('user.name')).value
+      debug(`Found git user %s`, this.#currentUser)
     } catch (e) {
       debug(`Failed to get current git user`, e.message)
 
-      return ''
+      this.#currentUser = null
     }
   }
 
@@ -224,6 +226,7 @@ export class GitDataSource {
       const changed: string[] = []
 
       for (const [i, file] of absolutePaths.entries()) {
+        debug(`checking %s`, file)
         const current = this.#gitMeta.get(file)
 
         // first check unstaged/untracked files
@@ -265,6 +268,7 @@ export class GitDataSource {
 
         this.#gitMeta.set(file, toSet)
         if (!_.isEqual(toSet, current)) {
+          debug(`updated %s %o`, file, toSet)
           changed.push(file)
         }
       }
