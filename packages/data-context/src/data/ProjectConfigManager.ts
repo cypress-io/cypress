@@ -332,7 +332,7 @@ export class ProjectConfigManager {
     return w
   }
 
-  private validateConfigRoot (config: Cypress.ConfigOptions) {
+  private validateConfigRoot (config: Cypress.ConfigOptions, testingType: TestingType) {
     return validateNoBreakingConfigRoot(
       config,
       (type, obj) => {
@@ -341,6 +341,7 @@ export class ProjectConfigManager {
       (type, obj) => {
         throw getError(type, obj)
       },
+      testingType,
     )
   }
 
@@ -359,7 +360,7 @@ export class ProjectConfigManager {
 
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
-    this.validateConfigRoot(configFileContents)
+    this.validateConfigRoot(configFileContents, this._testingType)
 
     const testingTypeOverrides = configFileContents[this._testingType] ?? {}
     const optionsOverrides = options.config?.[this._testingType] ?? {}

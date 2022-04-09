@@ -52,7 +52,7 @@ type ErrorHandler = (
   options: BreakingErrResult
 ) => void
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
@@ -73,7 +73,7 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
           newName,
           value,
           configFile: cfg.configFile,
-          testingType: cfg.testingType,
+          testingType,
         })
       }
 
@@ -82,7 +82,7 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
         newName,
         value,
         configFile: cfg.configFile,
-        testingType: cfg.testingType,
+        testingType,
       })
     }
   })
@@ -145,12 +145,12 @@ export const validate = (cfg: any, onErr: (property: string) => void) => {
   })
 }
 
-export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
-  return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr)
+export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType: TestingType) => {
+  return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr, testingType)
 }
 
-export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
-  return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
+export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType: TestingType) => {
+  return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr, testingType)
 }
 
 export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
@@ -160,7 +160,7 @@ export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHand
 export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof typeof testingTypeBreakingOptions, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   const options = testingTypeBreakingOptions[testingType]
 
-  return validateNoBreakingOptions(options, cfg, onWarning, onErr)
+  return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
 export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {

@@ -195,9 +195,15 @@ export function mergeDefaults (
 
   debug('validate that there is no breaking config options before setupNodeEvents')
 
+  const { testingType } = options
+
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw errors.get(err, ...args)
-  })
+  }, testingType)
+
+  configUtils.validateNoBreakingConfig(config[testingType], errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `${testingType}.${options.name}` })
+  }, testingType)
 
   // We need to remove the nested propertied by testing type because it has been
   // flattened/compacted based on the current testing type that is selected
@@ -261,17 +267,18 @@ export function updateWithPluginValues (cfg, overrides) {
 
   debug('validate that there is no breaking config options added by setupNodeEvents')
 
+  const { testingType } = cfg
+
   configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
     throw errors.get(err, options)
-  })
+  }, testingType)
 
-  configUtils.validateNoBreakingConfig(overrides.e2e, errors.warning, (err, options) => {
-    throw errors.get(err, { ...options, name: `e2e.${options.name}` })
-  })
-
-  configUtils.validateNoBreakingConfig(overrides.component, errors.warning, (err, options) => {
-    throw errors.get(err, { ...options, name: `component.${options.name}` })
-  })
+  configUtils.validateNoBreakingConfig(overrides[testingType], errors.warning, (err, options) => {
+    throw errors.get(err, {
+      ...options,
+      name: `${testingType}.${options.name}`,
+    })
+  }, testingType)
 
   const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
     value: cfg.browsers,

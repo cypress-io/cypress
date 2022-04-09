@@ -1414,15 +1414,22 @@ export const AllCypressErrors = {
       ? errPartial`${fmt.highlightSecondary(`${errShape.testingType}.${newName}`)}`
       : errPartial`${fmt.highlightSecondary(`e2e.${newName}`)} or ${fmt.highlightSecondary(`component.${newName}`)}`
 
-    const code = errPartial`
-    {
-      e2e: {
-        specPattern: '...',
-      },
-      component: {
-        specPattern: '...',
-      },
-    }`
+    const code = errShape.testingType
+      ? errPartial`
+        {
+          ${fmt.off(errShape.testingType)}: {
+            specPattern: '...',
+          },
+        }`
+      : errPartial`
+        {
+          e2e: {
+            specPattern: '...',
+          },
+          component: {
+            specPattern: '...',
+          },
+        }`
 
     return errTemplate`\
       The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
