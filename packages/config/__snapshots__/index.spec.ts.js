@@ -80,7 +80,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "browsers": [],
   "clientRoute": "/__/",
   "configFile": "cypress.config.js",
-  "cypressBinaryRoot": "/Users/ledouxb/Dev/cypress",
+  "cypressBinaryRoot": "/root/cypress",
   "devServerPublicPathRoute": "/__cypress/src",
   "hosts": null,
   "isInteractive": true,
