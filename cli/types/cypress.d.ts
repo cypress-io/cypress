@@ -2633,7 +2633,7 @@ declare namespace Cypress {
      */
     numTestsKeptInMemory: number
     /**
-     * The number of tests to show in the command log. Reduce this number if you are experiencing slowness with long running tests
+     * The number of commands to show in the command log. Reduce this number if you are experiencing slowness with long running tests
      * @default null
      */
     numCommandsToShow: number
