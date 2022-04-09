@@ -33,7 +33,7 @@
         "numCommandsToShow": {
           "type": "number",
           "default": null,
-          "description": "The number of tests to show in the command log. Reduce this number if you are experiencing slowness with long running tests"
+          "description": "The number of commands to show in the command log. Reduce this number if you are experiencing slowness with long running tests"
         },
         "port": {
           "type": "number",
