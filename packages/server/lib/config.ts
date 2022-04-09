@@ -3,7 +3,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
+import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, TestingType } from '@packages/types'
 import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
@@ -12,7 +12,7 @@ import keys from './util/keys'
 import origin from './util/origin'
 import pathHelpers from './util/path_helpers'
 
-import type { ConfigValidationFailureInfo } from '@packages/errors'
+import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
 
 import { getCtx } from './makeDataContext'
 
@@ -246,7 +246,7 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
   })
 }
 
-export function updateWithPluginValues (cfg, overrides) {
+export function updateWithPluginValues (cfg, overrides, testingType: TestingType) {
   if (!overrides) {
     overrides = {}
   }
@@ -267,17 +267,21 @@ export function updateWithPluginValues (cfg, overrides) {
 
   debug('validate that there is no breaking config options added by setupNodeEvents')
 
-  const { testingType } = cfg
+  function makeSetupError (cyError: CypressError) {
+    cyError.name = `Error running ${testingType}.setupNodeEvents()`
+
+    return cyError
+  }
 
   configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
-    throw errors.get(err, options)
+    throw makeSetupError(errors.get(err, options))
   }, testingType)
 
   configUtils.validateNoBreakingConfig(overrides[testingType], errors.warning, (err, options) => {
-    throw errors.get(err, {
+    throw makeSetupError(errors.get(err, {
       ...options,
       name: `${testingType}.${options.name}`,
-    })
+    }))
   }, testingType)
 
   const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
