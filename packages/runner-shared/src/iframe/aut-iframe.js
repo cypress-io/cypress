@@ -7,6 +7,7 @@ import { eventManager } from '../event-manager'
 import { dom } from '../dom'
 import { logger } from '../logger'
 import { studioRecorder } from '../studio'
+import { getShadowElementFromPoint } from '@packages/driver/src/dom/elements/shadow'
 
 const $ = $Cypress.$
 
@@ -291,7 +292,7 @@ export class AutIframe {
       const $highlight = $el
 
       $highlight.css('display', 'none')
-      el = this._document().elementFromPoint(e.clientX, e.clientY)
+      el = getShadowElementFromPoint(this._document().elementFromPoint(e.clientX, e.clientY), e.clientX, e.clientY)
       $el = $(el)
       $highlight.css('display', 'block')
     }
