@@ -1264,7 +1264,9 @@ type Subscription {
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
-  """"""
+  """
+  Triggered when there is a change to the info associated with the cloud project (org added, project added)
+  """
   cloudViewerChange: Query
 
   """Issued for internal development changes"""

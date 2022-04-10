@@ -6,6 +6,7 @@ export {
 
 export type {
   DataContextConfig,
+  GraphQLRequestInfo,
 } from './DataContext'
 
 export type {

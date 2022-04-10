@@ -67,7 +67,7 @@ export class CloudDataSource {
       return { data: null }
     }
 
-    const requestPolicy = config.requestPolicy ?? 'cache-and-network'
+    const requestPolicy = config.requestPolicy ?? 'cache-first'
 
     const isQuery = config.operationType !== 'mutation'
 

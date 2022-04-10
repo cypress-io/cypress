@@ -1,19 +1,29 @@
 import { pipe, tap } from 'wonka'
 import type { Exchange, Operation, OperationResult } from '@urql/core'
 import type { Socket } from '@packages/socket/lib/browser'
+import type { DefinitionNode, DocumentNode, OperationDefinitionNode } from 'graphql'
 
 export const pubSubExchange = (io: Socket): Exchange => {
   return ({ client, forward }) => {
     const watchedOperations = new Map<number, Operation>()
     const observedOperations = new Map<number, number>()
 
-    io.on('data-context-push', (...args) => {
+    io.on('graphql-refresh', (refreshOnly?: {operation: string, field: string, variables: any}) => {
       watchedOperations.forEach((op) => {
-        client.reexecuteOperation(
-          client.createRequestOperation('query', op, {
-            requestPolicy: 'cache-and-network',
-          }),
-        )
+        if (!refreshOnly || refreshOnly.operation === getPrimaryOperation(op.query)?.name?.value) {
+          client.reexecuteOperation(
+            client.createRequestOperation('query', op, {
+              requestPolicy: 'cache-and-network',
+              fetchOptions: {
+                headers: {
+                  'x-cypress-graphql-refetch': refreshOnly
+                    ? `${refreshOnly.operation}.${refreshOnly.field}`
+                    : 'true',
+                },
+              },
+            }),
+          )
+        }
       })
     })
 
@@ -39,4 +49,12 @@ export const pubSubExchange = (io: Socket): Exchange => {
       return pipe(forward(pipe(ops$, tap(processIncomingOperation))), tap(processResultOperation))
     }
   }
+}
+
+function getPrimaryOperation (query: DocumentNode): OperationDefinitionNode | undefined {
+  return query.definitions.find(isOperationDefinitionNode)
+}
+
+function isOperationDefinitionNode (node: DefinitionNode): node is OperationDefinitionNode {
+  return node.kind === 'OperationDefinition'
 }
