@@ -1,6 +1,7 @@
 <template>
   <div
     id="spec-runner-header"
+    ref="AUTHeaderEl"
     class="min-h-64px text-14px"
     :style="{ width: `${props.width}px` }"
   >
@@ -128,13 +129,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAutStore, useSpecStore } from '../store'
 import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import { useElementSize } from '@vueuse/core'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
@@ -179,6 +181,14 @@ const props = defineProps<{
 }>()
 
 const showAlert = ref(false)
+
+const AUTHeaderEl = ref<HTMLDivElement>()
+
+const { height } = useElementSize(AUTHeaderEl)
+
+watch(height, () => {
+  autStore.setSpecRunnerHeaderHeight(height.value)
+})
 
 watchEffect(() => {
   showAlert.value = route.params.shouldShowTroubleRenderingAlert === 'true'

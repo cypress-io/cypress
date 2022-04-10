@@ -45,17 +45,14 @@ export const useRunnerStyle = ({
     return windowWidth.value - nonAutWidth
   })
 
-  const containerHeight = computed(() => {
-    const autHeaderHeight = 70
-
-    const nonAutHeight = autHeaderHeight + (autMargin * 2)
-
-    return windowHeight.value - nonAutHeight
-  })
-
   const screenshotStore = useScreenshotStore()
   const autStore = useAutStore()
 
+  const containerHeight = computed(() => {
+    const nonAutHeight = autStore.specRunnerHeaderHeight + (autMargin * 2)
+
+    return windowHeight.value - nonAutHeight
+  })
   const scale = computed(() => {
     let scale = 1
 
@@ -70,7 +67,8 @@ export const useRunnerStyle = ({
     return `
       width: ${autStore.viewportDimensions.width}px;
       height: ${autStore.viewportDimensions.height}px;
-      transform: scale(${scale.value});`
+      transform: scale(${scale.value});
+      margin-left: ${(containerWidth.value / 2) - (autStore.viewportDimensions.width / 2) }px`
   })
 
   watchEffect(() => {

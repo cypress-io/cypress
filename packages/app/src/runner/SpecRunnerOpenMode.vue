@@ -75,7 +75,7 @@
           <div
             v-show="!autStore.scriptError"
             :id="RUNNER_ID"
-            class="origin-top-left viewport"
+            class="origin-top viewport"
             :style="viewportStyle"
           />
         </RemoveClassesDuringScreenshotting>
