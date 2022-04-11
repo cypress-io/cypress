@@ -42,7 +42,7 @@
         >
           <router-link
             class="outline-none"
-            :to="{ name: 'SpecRunner', query: { file: result.file.relative }, params: { shouldShowTroubleRenderingAlert: true } }
+            :to="{ name: 'SpecRunner', query: { file: result.file.relative?.replace(/\\/g, '/') }, params: { shouldShowTroubleRenderingAlert: true } }
             "
           >
             <Button
