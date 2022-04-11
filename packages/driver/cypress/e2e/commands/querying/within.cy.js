@@ -48,23 +48,6 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it('can be chained off an alias', () => {
-      const form = cy.$$('#by-name')
-
-      cy.get('#by-name').as('nameForm')
-      .within(() => {})
-      .then(($form) => {
-        expect($form.get(0)).to.eq(form.get(0))
-      })
-
-      cy.get('#by-name').as('nameForm')
-      .within(() => {
-        cy.get('input').should('be.visible')
-      })
-
-      cy.get('@nameForm').should('be.visible')
-    })
-
     it('can call child commands after within on the same subject', () => {
       const input = cy.$$('#by-name input:first')
 
@@ -214,20 +197,6 @@ describe('src/cy/commands/querying/within', () => {
           expect(lastLog.get('snapshots').length).to.eq(1)
 
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
-        })
-      })
-
-      it('provides additional information in console prop', () => {
-        cy.get('div').within(() => {})
-        .then(function () {
-          const { lastLog } = this
-
-          const consoleProps = lastLog.get('consoleProps')()
-
-          expect(consoleProps).to.be.an('object')
-          expect(consoleProps.Command).to.eq('within')
-          expect(consoleProps.Yielded).to.not.be.null
-          expect(consoleProps.Yielded).to.have.length(55)
         })
       })
     })

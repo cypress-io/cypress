@@ -66,14 +66,6 @@
     &:hover {
       background-color: $gray-900;
 
-      // .command-pin + .command-number {
-      //   display: none;
-      // }
-  
-      // .command-pin {
-      //   display: block;
-      // }
-
       .command-expander > path {
         stroke: $gray-700;
       }
@@ -187,8 +179,6 @@
   }
 
   .command-info {
-    // display: flex;
-    // flex-wrap: wrap;
     padding-top: 2px;
     padding-bottom: 2px;
     margin-left: 0;
@@ -197,10 +187,7 @@
 
     .command-aliases,
     .command-message {
-      // display: inline;
       overflow: hidden;
-      // display: flex;
-      // flex-grow: 2;
 
       .fa-circle {
         padding: 4px;
@@ -227,8 +214,6 @@
   }
 
   .command-message-text {
-    // display: block;
-    // flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -440,10 +425,7 @@
     font-size: 12px;
     white-space: initial;
     word-wrap: inherit;
-    // line-break: anywhere;
     width: 100%;
-    // line-height: 1.5;
-    // display: -webkit-box;
     -webkit-line-clamp: 50;
     -webkit-box-orient: vertical;
   }

@@ -78,10 +78,7 @@ export const LogUtils = {
   },
 
   getConsoleProps: (attrs) => {
-    return {
-      ...!!attrs.group && { group: attrs.group },
-      ...attrs.consoleProps,
-    }
+    return attrs.consoleProps
   },
 
   getSnapshotProps: (attrs) => {
