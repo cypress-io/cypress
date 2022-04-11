@@ -14,7 +14,7 @@ abstract class DataEmitterEvents {
   }
 
   /**
-   * Emitted when we have logged in / logged out of the application
+   * Emitted when the checked out git branch changes
    */
   branchChange () {
     this._emit('branchChange')
