@@ -5,6 +5,11 @@ describe('cy.pause() in run mode', () => {
 
   systemTests.it('pauses with --headed and --no-exit', {
     spec: 'pause_spec.js',
+    config: {
+      env: {
+        'SHOULD_PAUSE': true,
+      },
+    },
     snapshot: true,
     headed: true,
     noExit: true,
@@ -19,7 +24,12 @@ describe('cy.pause() in run mode', () => {
   })
 
   systemTests.it('does not pause if headless', {
-    spec: 'no_pause_spec.js',
+    spec: 'pause_spec.js',
+    config: {
+      env: {
+        'SHOULD_PAUSE': false,
+      },
+    },
     snapshot: true,
     headed: false,
     noExit: true,
@@ -34,16 +44,26 @@ describe('cy.pause() in run mode', () => {
   })
 
   systemTests.it('does not pause without --no-exit', {
-    spec: 'no_pause_spec.js',
-    snapshot: false,
+    spec: 'pause_spec.js',
+    config: {
+      env: {
+        'SHOULD_PAUSE': false,
+      },
+    },
+    snapshot: true,
     headed: true,
     noExit: false,
     expectedExitCode: 0,
   })
 
   systemTests.it('does not pause without --headed and --no-exit', {
-    spec: 'no_pause_spec.js',
-    snapshot: false,
+    spec: 'pause_spec.js',
+    config: {
+      env: {
+        'SHOULD_PAUSE': false,
+      },
+    },
+    snapshot: true,
     headed: false,
     noExit: false,
     expectedExitCode: 0,

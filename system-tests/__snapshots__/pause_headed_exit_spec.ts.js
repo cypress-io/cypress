@@ -1,4 +1,4 @@
-exports['cy.pause() works with --headed and --no-exit / pauses with --headed and --no-exit'] = `
+exports['cy.pause() in run mode / pauses with --headed and --no-exit'] = `
 
 ====================================================================================================
 
@@ -27,7 +27,7 @@ not exiting due to options.exit being false
 
 `
 
-exports['cy.pause() works with --headed and --no-exit / does not pause if headless'] = `
+exports['cy.pause() in run mode / does not pause if headless'] = `
 
 ====================================================================================================
 
@@ -56,7 +56,7 @@ not exiting due to options.exit being false
 
 `
 
-exports['cy.pause() works with --headed and --no-exit / does not pause without --no-exit'] = `
+exports['cy.pause() in run mode / does not pause without --no-exit'] = `
 
 ====================================================================================================
 
@@ -65,14 +65,14 @@ exports['cy.pause() works with --headed and --no-exit / does not pause without -
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (no_pause_spec.js)                                                         │
-  │ Searched:   cypress/integration/no_pause_spec.js                                               │
+  │ Specs:      1 found (pause_spec.js)                                                            │
+  │ Searched:   cypress/integration/pause_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  no_pause_spec.js                                                                (1 of 1)
+  Running:  pause_spec.js                                                                   (1 of 1)
 
 
   cy.pause()
@@ -80,13 +80,6 @@ exports['cy.pause() works with --headed and --no-exit / does not pause without -
 
 
   1 passing
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
   (Results)
@@ -98,10 +91,16 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     no_pause_spec.js                                                                 │
+  │ Spec Ran:     pause_spec.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause_spec.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -111,14 +110,14 @@ TimeoutError: operation timed out
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  no_pause_spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  pause_spec.js                            XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
 
-exports['cy.pause() works with --headed and --no-exit / does not pause without --headed and --no-exit'] = `
+exports['cy.pause() in run mode / does not pause without --headed and --no-exit'] = `
 
 ====================================================================================================
 
@@ -127,14 +126,14 @@ exports['cy.pause() works with --headed and --no-exit / does not pause without -
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (no_pause_spec.js)                                                         │
-  │ Searched:   cypress/integration/no_pause_spec.js                                               │
+  │ Specs:      1 found (pause_spec.js)                                                            │
+  │ Searched:   cypress/integration/pause_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  no_pause_spec.js                                                                (1 of 1)
+  Running:  pause_spec.js                                                                   (1 of 1)
 
 
   cy.pause()
@@ -142,13 +141,6 @@ exports['cy.pause() works with --headed and --no-exit / does not pause without -
 
 
   1 passing
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
   (Results)
@@ -160,10 +152,16 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     no_pause_spec.js                                                                 │
+  │ Spec Ran:     pause_spec.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause_spec.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -173,7 +171,7 @@ TimeoutError: operation timed out
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  no_pause_spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  pause_spec.js                            XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

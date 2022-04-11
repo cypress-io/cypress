@@ -17,10 +17,14 @@ describe('cy.pause()', () => {
     })
 
     cy.pause().wrap({}).should('deep.eq', {}).then(function () {
-      expect(didPause).to.be.true
+      if (Cypress.env('SHOULD_PAUSE')) {
+        expect(didPause).to.be.true
 
-      // should no longer have onPaused
-      expect(cy.state('onPaused')).to.be.null
+        // should no longer have onPaused
+        expect(cy.state('onPaused')).to.be.null
+      } else {
+        expect(didPause).to.be.false
+      }
     })
   })
 })
