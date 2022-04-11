@@ -149,6 +149,7 @@ describe('findSpecs', () => {
 
   beforeEach(async () => {
     ctx = createTestDataContext('run')
+    await ctx.fs.ensureDir(temporary)
     await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(temporary, element), '')))
   })
 
