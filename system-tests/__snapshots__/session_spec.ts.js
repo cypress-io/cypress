@@ -5,10 +5,11 @@ exports['e2e sessions / session tests'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (session_spec.js)                                                          │
-  │ Searched:   cypress/integration/session_spec.js                                                │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (session_spec.js)                                                        │
+  │ Searched:     cypress/integration/session_spec.js                                              │
+  │ Experiments:  experimentalLoginFlows=true                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -165,11 +166,12 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (session_persist_spec_1.js, session_persist_spec_2.js)                     │
-  │ Searched:   cypress/integration/session_persist_spec_1.js, cypress/integration/session_persist │
-  │             _spec_2.js                                                                         │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        2 found (session_persist_spec_1.js, session_persist_spec_2.js)                   │
+  │ Searched:     cypress/integration/session_persist_spec_1.js, cypress/integration/session_persi │
+  │               st_spec_2.js                                                                     │
+  │ Experiments:  experimentalLoginFlows=true                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
