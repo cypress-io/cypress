@@ -56,11 +56,20 @@
         </Button>
 
         <Button
+          v-if="props.otherGenerators"
           size="lg"
           variant="outline"
           @click="emits('restart')"
         >
           {{ t('components.button.back') }}
+        </Button>
+        <Button
+          v-else
+          size="lg"
+          variant="outline"
+          @click="emits('close')"
+        >
+          {{ t('components.button.cancel') }}
         </Button>
       </StandardModalFooter>
     </template>
@@ -74,8 +83,17 @@
       >
         <router-link
           class="outline-none"
-          :to="{ path: '/specs/runner', query: { file: result.file.relative?.replace(/\\/g, '/') } }
-          "
+          :to="{
+            name: 'SpecRunner',
+            query: {
+              file: result.file.relative?.replace(/\\/g, '/')
+            },
+            params: props.type === 'component'
+              ? {
+                shouldShowTroubleRenderingAlert: true
+              }
+              : undefined
+          }"
         >
           <Button
             size="lg"
@@ -121,6 +139,8 @@ const props = defineProps<{
   type: 'e2e' | 'component'
   specFileName: string
   erroredCodegenCandidate?: string
+  /** is there any other generator available when clicking "Back" */
+  otherGenerators: boolean
 }>()
 
 const { t } = useI18n()

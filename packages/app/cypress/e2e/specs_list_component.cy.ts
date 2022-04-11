@@ -31,8 +31,7 @@ describe('App: Spec List (Component)', () => {
   it('opens the "Create a new spec" modal after clicking the "New Specs" button', () => {
     cy.get('[data-cy="standard-modal"]').should('not.exist')
     cy.get('[data-cy="new-spec-button"]').click()
-    cy.get('[data-cy="standard-modal"]').get('h2').contains('Create a new spec')
-    cy.get('button').contains('Create from component').should('be.visible')
+    cy.get('[data-cy="standard-modal"]').get('h2').contains('Enter the path for your new spec')
     cy.get('button').get('[aria-label="Close"]').click()
     cy.get('[data-cy="standard-modal"]').should('not.exist')
   })
