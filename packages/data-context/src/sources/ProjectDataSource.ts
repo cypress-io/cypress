@@ -20,7 +20,6 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
-import { STORIES_GLOB } from '.'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -253,20 +252,31 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
-    const onSpecsChanged = debounce(async () => {
+    // When file system changes are detected, we retrieve any spec files matching
+    // the determined specPattern. This function is debounced to limit execution
+    // during sequential file operations.
+    const onProjectFileSystemChange = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
-      this.ctx.actions.project.setSpecs(specs)
-    })
+      if (isEqual(this.specs, specs)) {
+        // If no differences are found, we do not need to emit events
+        return
+      }
 
-    this._specWatcher = chokidar.watch(specPattern, {
+      this.ctx.actions.project.setSpecs(specs)
+    }, 250)
+
+    // We respond to all changes to the project's filesystem when
+    // files or directories are added and removed that are not explicitly
+    // ignored by config
+    this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
       cwd: projectRoot,
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnore],
     })
 
-    this._specWatcher.on('add', onSpecsChanged)
-    this._specWatcher.on('change', onSpecsChanged)
-    this._specWatcher.on('unlink', onSpecsChanged)
+    // the 'all' event includes: add, addDir, change, unlink, unlinkDir
+    this._specWatcher.on('all', onProjectFileSystemChange)
   }
 
   async defaultSpecFileName () {
@@ -373,7 +383,6 @@ export class ProjectDataSource {
 
     return {
       component: framework?.glob ?? looseComponentGlob,
-      story: STORIES_GLOB,
     }
   }
 

@@ -139,7 +139,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
-          href: 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0',
+          href: 'https://on.cypress.io/changelog#10-0-0',
         })
       })
     })
@@ -174,14 +174,14 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('top-nav-version-list').contains('v10.0.0 • Upgrade').click()
 
         cy.findByTestId('update-hint').within(() => {
-          cy.validateExternalLink({ name: '10.1.0', href: 'https://github.com/cypress-io/cypress/releases/tag/v10.1.0' })
+          cy.validateExternalLink({ name: '10.1.0', href: 'https://on.cypress.io/changelog#10-1-0' })
           cy.findByText('Latest').should('be.visible')
         })
 
         cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' })
 
         cy.findByTestId('current-hint').within(() => {
-          cy.validateExternalLink({ name: '10.0.0', href: 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0' })
+          cy.validateExternalLink({ name: '10.0.0', href: 'https://on.cypress.io/changelog#10-0-0' })
           cy.findByText('Installed').should('be.visible')
         })
 
@@ -239,7 +239,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: `v${pkg.version}`,
-          href: `https://github.com/cypress-io/cypress/releases/tag/v${pkg.version}`,
+          href: `https://on.cypress.io/changelog#${pkg.version.replaceAll('.', '-')}`,
         })
       })
     })
@@ -612,7 +612,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.clock(1609891200000)
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad')
-    cy.startAppServer()
+    cy.startAppServer('e2e', { skipMockingPrompts: true })
   })
 
   it('CI prompt auto-opens 4 days after first project opened', () => {

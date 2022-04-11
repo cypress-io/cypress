@@ -324,10 +324,10 @@ export class MigrationActions {
   }
 
   async assertSuccessfulConfigMigration (migratedConfigFile: string = 'cypress.config.js') {
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(migratedConfigFile))
+    const actual = formatConfig(await this.ctx.file.readFileInProject(migratedConfigFile))
 
     const configExtension = path.extname(migratedConfigFile)
-    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config${configExtension}`))
+    const expected = formatConfig(await this.ctx.file.readFileInProject(`expected-cypress.config${configExtension}`))
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)
@@ -346,7 +346,7 @@ export class MigrationActions {
     const configuredProject = this.ctx.project.projectTitle(this.ctx.currentProject).replace('unconfigured', 'configured')
     const expectedProjectConfig = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', configuredProject, configFile)
 
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))
+    const actual = formatConfig(await this.ctx.file.readFileInProject(configFile))
     const expected = formatConfig(await this.ctx.fs.readFile(expectedProjectConfig, 'utf8'))
 
     if (actual !== expected) {

@@ -12,12 +12,12 @@
   },
   "dependencies": {
     "debug": "^4.3.2",
-    "tslib": "2.3.1"
+    "ts-node": "^10.2.1",
+    "tslib": "2.3.1",
+    "typescript-cached-transpile": "^0.0.6"
   },
   "devDependencies": {
-    "rimraf": "3.0.2",
-    "ts-node": "^10.2.1",
-    "typescript-cached-transpile": "^0.0.6"
+    "rimraf": "3.0.2"
   },
   "files": [
     "register.js",
