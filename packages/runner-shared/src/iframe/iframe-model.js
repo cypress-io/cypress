@@ -4,7 +4,6 @@ import { action } from 'mobx'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { studioRecorder } from '../studio'
 import { eventManager } from '../event-manager'
-import { postprocessSnapshotFromSerialization } from '@packages/driver/src/util/serialization/log'
 
 export class IframeModel {
   constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, isAUTSameOrigin, removeSrc }) {
@@ -226,12 +225,10 @@ export class IframeModel {
       // go get the final cross origin snapshot. Do this optimistically while we render the selected snapshot
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
       Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
-        const reifiedSnapshot = postprocessSnapshotFromSerialization(finalSnapshot)
-
         this.originalState = {
-          body: reifiedSnapshot.body,
-          htmlAttrs: reifiedSnapshot.htmlAttrs,
-          snapshot: reifiedSnapshot,
+          body: finalSnapshot.body,
+          htmlAttrs: finalSnapshot.htmlAttrs,
+          snapshot: finalSnapshot,
           url: this.state.url,
           // TODO: use same attr for both runner and runner-ct states.
           // these refer to the same thing - the viewport dimensions.

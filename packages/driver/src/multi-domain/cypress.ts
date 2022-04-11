@@ -20,7 +20,6 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { preprocessSnapshotForSerialization } from '../util/serialization/log'
 import $Mocha from '../cypress/mocha'
 import * as cors from '@packages/network/lib/cors'
 
@@ -42,7 +41,7 @@ const createCypress = () => {
       // @ts-ignore
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
-      Cypress.specBridgeCommunicator.toPrimary('final:snapshot:generated', preprocessSnapshotForSerialization(finalSnapshot))
+      Cypress.specBridgeCommunicator.toPrimary('final:snapshot:generated', finalSnapshot)
     }
   })
 
