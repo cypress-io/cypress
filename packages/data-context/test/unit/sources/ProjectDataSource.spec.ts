@@ -1,4 +1,6 @@
 import chai from 'chai'
+import os from 'os'
+
 import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getDefaultSpecFileName } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
@@ -10,6 +12,7 @@ import { FoundSpec, TestingType } from '@packages/types'
 import { DataContext } from '../../../src'
 import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
 import { InjectedConfigApi } from '../../../src/data'
+import { createTestDataContext } from '../helper'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -129,7 +132,7 @@ describe('transformSpec', () => {
 })
 
 describe('findSpecs', () => {
-  const temporary = 'tmp'
+  const temporary = path.join(os.tmpdir(), 'findSpecs')
 
   const fixture = [
     'node_modules/test/App.spec.js',
@@ -145,19 +148,7 @@ describe('findSpecs', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
-    ctx = new DataContext({
-      schema: graphqlSchema,
-      mode: 'run',
-      modeOptions: {},
-      appApi: {} as AppApiShape,
-      localSettingsApi: {} as LocalSettingsApiShape,
-      authApi: {} as AuthApiShape,
-      configApi: {} as InjectedConfigApi,
-      projectApi: {} as ProjectApiShape,
-      electronApi: {} as ElectronApiShape,
-      browserApi: {} as BrowserApiShape,
-    })
-
+    ctx = createTestDataContext('run')
     await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(temporary, element), '')))
   })
 

@@ -12,7 +12,7 @@ if (os.platform() === 'win32') {
   execa(`[void] ''`, { shell: 'powershell' }).then(() => {
     isPowerShellAvailable = true
   }).catch(() => {
-    //
+    // Powershell is unavailable
   })
 }
 
