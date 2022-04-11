@@ -43,7 +43,7 @@ export const getContainerEl = () => {
   const els = document.querySelector(ROOT_SELECTOR)
 
   if (els) {
-    return els[0]
+    return els
   }
 
   throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
