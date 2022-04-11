@@ -98,7 +98,13 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="spec-item"]').first().click()
       // Let runner stabilize
       cy.get('#unified-reporter').should('be.visible')
+
+      // we will move the right-hand handle of the Reporter
+      // to these positions from the left of the screen
       const dragPositions = [1000, 1090, 900, 600]
+
+      // based on viewport sizes for CT and e2e tests in the `cypress-in-cypress`
+      // projects, we expect certain scale % values to be shown
       const testingTypeExpectedScales = {
         component: ['93%', '75%'],
         e2e: ['46%', '37%', '56%', '85%'],
@@ -106,6 +112,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         e2eShortViewport: '46%',
       }
 
+      // resize the reporter using each of the dragPositions and take Percy snapshots
       dragPositions.forEach((position, index) => {
         dragHandleToClientX('panel2', position)
         const expectedScale = testingTypeExpectedScales[testingType][index]
@@ -119,8 +126,15 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.percySnapshot(`panel 2 at ${ position } px`)
       })
 
+      // now check vertical scaling with viewport resize, and take some snapshots too
+
+      // this viewport should be tall enough to not scale even the e2e test
       cy.viewport(1500, 1300)
+
+      // but we have to also collapse the Specs List to remove any reason to scale horizontally
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs').click()
+
+      // check that no message about scale % is shown
       cy.contains('%)').should('not.exist')
       cy.percySnapshot('tall viewport')
 
