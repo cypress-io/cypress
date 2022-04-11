@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - use-contexts
+        - unify-1449-beta-slug-length
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ use-contexts, << pipeline.git.branch >> ]
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ use-contexts, << pipeline.git.branch >> ]
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1634,7 +1634,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "use-contexts" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-beta-slug-length" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1911,7 +1911,6 @@ jobs:
 
   test-binary-against-recipes-chrome:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
@@ -1919,7 +1918,6 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
