@@ -162,6 +162,8 @@ export default function (Commands, Cypress, cy, state, config) {
 
     const win = state('window')
 
+    const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
+
     const getDefaultButtons = (form) => {
       return form.find('input, button').filter((__, el) => {
         const $el = $dom.wrap(el)
@@ -231,11 +233,11 @@ export default function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        // In Firefox, submit event is automatically fired
+        // In Firefox up to v97, submit event is automatically fired
         // when we send {Enter} KeyboardEvent to the input fields.
         // Because of that, we don't have to click the submit buttons.
         // Otherwise, we trigger submit events twice.
-        if (!Cypress.isBrowser('firefox')) {
+        if (!isFirefoxBefore98) {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
@@ -274,7 +276,6 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
-      const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
 
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
