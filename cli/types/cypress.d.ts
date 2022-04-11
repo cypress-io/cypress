@@ -10,7 +10,7 @@ declare namespace Cypress {
   type PrevSubject = keyof PrevSubjectMap
   type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
-	interface JQueryWithSelector<TElement = HTMLElement> extends JQuery<TElement> {
+  interface JQueryWithSelector<TElement = HTMLElement> extends JQuery<TElement> {
     selector?: string | null
   }
   interface PrevSubjectMap<O = unknown> {
