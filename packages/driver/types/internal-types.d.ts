@@ -1,6 +1,6 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
-/// <reference path="./cy/commands/session.d.ts" />
+/// <reference path="./cy/commands/sessions.d.ts" />
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
