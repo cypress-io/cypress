@@ -75,10 +75,12 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const cwd = path.join(projectRoot, pluginFile)
 
+    const { CYPRESS_INTERNAL_E2E_TESTING_SELF, ...env } = process.env
+
     const childOptions: ForkOptions = {
       stdio: 'inherit',
       cwd: path.dirname(cwd),
-      env: process.env,
+      env,
     }
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
@@ -322,10 +324,10 @@ export class MigrationActions {
   }
 
   async assertSuccessfulConfigMigration (migratedConfigFile: string = 'cypress.config.js') {
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(migratedConfigFile))
+    const actual = formatConfig(await this.ctx.file.readFileInProject(migratedConfigFile))
 
     const configExtension = path.extname(migratedConfigFile)
-    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config${configExtension}`))
+    const expected = formatConfig(await this.ctx.file.readFileInProject(`expected-cypress.config${configExtension}`))
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)

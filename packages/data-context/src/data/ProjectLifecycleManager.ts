@@ -185,7 +185,7 @@ export class ProjectLifecycleManager {
   }
 
   async checkIfLegacyConfigFileExist () {
-    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.legacyConfigFile)
+    const legacyConfigFileExist = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
 
     return Boolean(legacyConfigFileExist)
   }

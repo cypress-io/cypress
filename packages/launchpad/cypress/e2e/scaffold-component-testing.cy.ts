@@ -1,6 +1,6 @@
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
 
-function startSetupFor (project: typeof e2eProjectDirs[number]) {
+function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
@@ -12,7 +12,7 @@ function startSetupFor (project: typeof e2eProjectDirs[number]) {
 // https://github.com/cypress-io/cypress/pull/20818 is merged
 function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
   cy.withCtx(async (ctx, o) => {
-    const configStats = await ctx.actions.file.checkIfFileExists(o.configFile)
+    const configStats = await ctx.file.checkIfFileExists(o.configFile)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
   }, { configFile })

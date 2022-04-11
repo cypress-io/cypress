@@ -50,7 +50,7 @@ function getDisplayUrl (url: string) {
   return url
 }
 
-function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
+function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
   let alias = last ? last.interception.request.alias || last.route.alias : undefined
 
@@ -64,7 +64,7 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
   }
 }
 
-function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
+function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   function getStatus (): string | undefined {
     const { stubbed, reqModified, resModified } = req.flags
 
@@ -393,8 +393,9 @@ export default class ProxyLogging {
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
     // TODO: Figure out what is causing the race condition here
+    //       Follow up on latest log regression fix to see if this is resolved.
     if (this.Cypress.log) {
-      proxyRequest.log = this.Cypress.log(logConfig).snapshot('request')
+      proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
     }
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
