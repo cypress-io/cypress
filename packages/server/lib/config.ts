@@ -197,12 +197,18 @@ export function mergeDefaults (
 
   const { testingType } = options
 
+  function makeConfigError (cyError: CypressError) {
+    cyError.name = `Obsolete option used in config object`
+
+    return cyError
+  }
+
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
-    throw errors.get(err, ...args)
+    throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 
   configUtils.validateNoBreakingConfig(config[testingType], errors.warning, (err, options) => {
-    throw errors.get(err, { ...options, name: `${testingType}.${options.name}` })
+    throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
   }, testingType)
 
   // We need to remove the nested propertied by testing type because it has been
