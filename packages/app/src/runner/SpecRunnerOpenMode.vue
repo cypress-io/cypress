@@ -160,14 +160,6 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
-
-const {
-  viewportStyle,
-  windowWidth,
-  reporterWidth,
-  specListWidth,
-} = useRunnerStyle()
-
 const {
   handlePanelWidthUpdated,
   handleResizeEnd,
@@ -179,19 +171,30 @@ const {
   cleanupRunner,
 } = useEventManager()
 
+const specsListWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
+})
+
+const reporterWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
+})
+
+// we must update pr before calling userRunnerStyle, to make sure that values from GQL
+// will be available to
+
+preferences.update('reporterWidth', reporterWidthPreferences.value)
+preferences.update('specListWidth', specsListWidthPreferences.value)
+
+const {
+  viewportStyle,
+  windowWidth,
+} = useRunnerStyle()
+
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
 
 onMounted(() => {
   initializeRunnerLifecycleEvents()
-})
-
-const specsListWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.specListWidth ?? specListWidth.value
-})
-
-const reporterWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.reporterWidth ?? reporterWidth.value
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
@@ -219,7 +222,6 @@ function openFile () {
     },
   })
 }
-
 onMounted(() => {
   const eventManager = getEventManager()
 
