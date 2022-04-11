@@ -1,5 +1,5 @@
 if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
-  require('@packages/ts/register')
+  require('@packages/ts/registerDir')(__dirname)
 }
 
 module.exports = require('./src')
