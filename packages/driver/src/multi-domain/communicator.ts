@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import { preprocessConfig, preprocessEnv } from '../util/config'
 import { preprocessForSerialization, reifySerializedError } from '../util/serialization'
 import { $Location } from '../cypress/location'
-import { preprocessLogForSerialization, postprocessLogFromSerialization, preprocessSnapshotForSerialization, postprocessSnapshotFromSerialization } from '../util/serialization/log'
+import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSnapshotForSerialization, reifySnapshotFromSerialization } from '../util/serialization/log'
 
 const debug = debugFn('cypress:driver:multi-origin')
 
@@ -47,12 +47,12 @@ export class PrimaryOriginCommunicator extends EventEmitter {
 
       // reify any logs coming back from the spec bridges to serialize snapshot/consoleProp DOM elements as well as select functions.
       if (LOG_EVENTS.includes(data?.event)) {
-        data.data = postprocessLogFromSerialization(data.data as any)
+        data.data = reifyLogFromSerialization(data.data as any)
       }
 
       // reify the final snapshot coming back from the secondary domain if requested by the runner.
       if (FINAL_SNAPSHOT_EVENT === data?.event) {
-        data.data = postprocessSnapshotFromSerialization(data.data as any)
+        data.data = reifySnapshotFromSerialization(data.data as any)
       }
 
       if (data?.data?.err) {

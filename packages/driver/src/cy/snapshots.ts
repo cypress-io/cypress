@@ -107,7 +107,7 @@ export const create = ($$, state) => {
       return {}
     }
 
-    // If a cross origin process snapshot, styles are directly added into the CSS map. Simply return them.
+    // If a cross origin processed snapshot, styles are directly added into the CSS map. Simply return them.
     if (stylesOrStyleIds?.headStyles || stylesOrStyleIds.bodyStyles) {
       return stylesOrStyleIds
     }

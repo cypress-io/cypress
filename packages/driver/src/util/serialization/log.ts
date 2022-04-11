@@ -25,7 +25,7 @@ interface PreprocessedFunction {
  * @param {HTMLElement} props - an HTMLElement
  * @returns {PreprocessedHTMLElement} a preprocessed element that can be fed through postMessage() that can be reified in the primary.
  */
-const preProcessDomElement = (props: HTMLElement) => {
+const preprocessDomElement = (props: HTMLElement) => {
   // hydrate values in HTML copy so when serialized they show up correctly in snapshot. This is important for input boxes with typing and other 'value' attributes
   props.querySelectorAll('input').forEach((input: HTMLInputElement) => {
     input.setAttribute('value', input.value)
@@ -166,7 +166,7 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
       }
 
       // otherwise, preprocess the element to an object with pertinent DOM properties
-      const serializableDOM = preProcessDomElement(props)
+      const serializableDOM = preprocessDomElement(props)
 
       return serializableDOM
     }
@@ -203,12 +203,12 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
  * This is logLike because there is a need outside of logs, such as in the iframe-model in the runner.
  * to serialize DOM elements, such as the final snapshot upon request.
  *
- * NOTE: this function recursively calls itself to postprocess a log
+ * NOTE: this function recursively calls itself to reify a log
  *
  * @param {any} props a generic variable that represents a value that has been preprocessed and sent through postMessage() and needs to be reified.
  * @returns {any} the reified version of the generic.
  */
-export const postprocessLogLikeFromSerialization = (props) => {
+export const reifyLogLikeFromSerialization = (props) => {
   try {
     if (props?.serializationKey === 'dom') {
       props.html = function () {
@@ -237,7 +237,7 @@ export const postprocessLogLikeFromSerialization = (props) => {
     }
 
     if (props?.serializationKey === 'function') {
-      const reifiedFunctionData = postprocessLogLikeFromSerialization(props.value)
+      const reifiedFunctionData = reifyLogLikeFromSerialization(props.value)
 
       return () => reifiedFunctionData
     }
@@ -246,7 +246,7 @@ export const postprocessLogLikeFromSerialization = (props) => {
       let postProcessed = {}
 
       _.forIn(props, (value, key) => {
-        const val = postprocessLogLikeFromSerialization(value)
+        const val = reifyLogLikeFromSerialization(value)
 
         if (val?.serializationKey === 'dom') {
           postProcessed = {
@@ -257,7 +257,7 @@ export const postprocessLogLikeFromSerialization = (props) => {
             },
           }
         } else {
-          postProcessed[key] = postprocessLogLikeFromSerialization(value)
+          postProcessed[key] = reifyLogLikeFromSerialization(value)
         }
       })
 
@@ -308,8 +308,8 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
  * @param {any} snapshot - a snapshot that has been preprocessed and sent through post message and needs to be reified in the primary.
  * @returns the reified snapshot that exists in the primary document
  */
-export const postprocessSnapshotFromSerialization = (snapshot) => {
-  snapshot.body = postprocessLogLikeFromSerialization(snapshot.body)
+export const reifySnapshotFromSerialization = (snapshot) => {
+  snapshot.body = reifyLogLikeFromSerialization(snapshot.body)
 
   // @ts-ignore
   return cy.createSnapshot(snapshot.name, null, snapshot)
@@ -367,15 +367,15 @@ export const preprocessLogForSerialization = (logAttrs) => {
  * @param logAttrs serialized/preprocessed log attributes passed to the primary domain from a spec bridge
  * @returns a reified version of what a log is supposed to look like in Cypress
  */
-export const postprocessLogFromSerialization = (logAttrs) => {
+export const reifyLogFromSerialization = (logAttrs) => {
   let { snapshots, ... logAttrsRest } = logAttrs
 
   if (snapshots) {
     // @ts-ignore
-    snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => postprocessSnapshotFromSerialization(snapshot))
+    snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => reifySnapshotFromSerialization(snapshot))
   }
 
-  const reified = postprocessLogLikeFromSerialization(logAttrsRest)
+  const reified = reifyLogLikeFromSerialization(logAttrsRest)
 
   if (reified.$el && reified.$el.length) {
     // make sure $els are jQuery Arrays to keep was is expected in the log

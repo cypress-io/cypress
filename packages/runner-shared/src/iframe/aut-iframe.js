@@ -129,7 +129,7 @@ export class AutIframe {
         this.restoreDom(snapshot)
       })
 
-      // the iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. this should only be done ONCE
+      // The iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. NOTE: This should only be done ONCE.
       this.removeSrcAttributeFromAUTIframe()
 
       return
