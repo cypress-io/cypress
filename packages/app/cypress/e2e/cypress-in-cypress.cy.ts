@@ -94,10 +94,23 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     })
 
     it(`scales the AUT correctly in ${testingType}`, () => {
-      startAtSpecsPage(testingType)
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.findBrowsers()
+      cy.openProject('cypress-in-cypress')
+      cy.withCtx((ctx) => {
+        ctx.coreData.localSettings.preferences.reporterWidth = 800
+      })
+
+      cy.startAppServer(testingType)
+      cy.visitApp()
+
       cy.get('[data-cy="spec-item"]').first().click()
       // Let runner stabilize
       cy.get('#unified-reporter').should('be.visible')
+
+      // validate that the width we set in `withCtx` above is the starting point
+      cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
+      cy.percySnapshot('initial state')
 
       // we will move the right-hand handle of the Reporter
       // to these positions from the left of the screen
