@@ -106,7 +106,9 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
   }
 
   kill () {
-    throw new Error('.kill not implemented for DockerProcess.')
+    log('.kill not implemented for DockerProcess.')
+
+    return false
   }
 }
 
