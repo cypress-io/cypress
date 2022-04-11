@@ -1,6 +1,6 @@
-import * as Fixtures from '@tooling/system-tests/lib/fixtures'
+import * as Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { fixtureDirs } from '@tooling/system-tests'
 import { expect } from 'chai'
 import path from 'path'
 import fs from 'fs'
@@ -8,7 +8,7 @@ import fs from 'fs'
 import { restoreLoadHook, sourceRelativeWebpackModules } from '../src/helpers/sourceRelativeWebpackModules'
 import { WebpackDevServerConfig } from '../src/devServer'
 
-type ProjectDirs = typeof e2eProjectDirs
+type ProjectDirs = typeof fixtureDirs
 
 const CY_ROOT = path.join(__dirname, '..', '..', '..')
 

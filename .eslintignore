@@ -29,6 +29,7 @@ system-tests/test/support/projects/e2e/cypress/
 system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
 system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 system-tests/projects/config-with-ts-syntax-error/**
+system-tests/projects/config-with-ts-module-error/**
 
 
 **/test/fixtures
@@ -36,6 +37,11 @@ system-tests/projects/config-with-ts-syntax-error/**
 
 # cli/types is linted by tslint/dtslint
 cli/types
+
+# cli/react, cli/vue, and cli/mount-utils are all copied from dist'd builds
+cli/react
+cli/vue
+cli/mount-utils
 
 # packages/example is not linted (think about changing this)
 packages/example

@@ -16,7 +16,7 @@ import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { LegacyCypressConfigJson } from '../sources'
+import { GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
@@ -93,6 +93,10 @@ export class ProjectLifecycleManager {
     process.on('exit', this.onProcessExit)
 
     return autoBindDebug(this)
+  }
+
+  get git () {
+    return this.ctx.coreData.currentProjectGitInfo
   }
 
   private onProcessExit = () => {
@@ -187,7 +191,7 @@ export class ProjectLifecycleManager {
   }
 
   async checkIfLegacyConfigFileExist () {
-    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.legacyConfigFile)
+    const legacyConfigFileExist = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
 
     return Boolean(legacyConfigFileExist)
   }
@@ -252,9 +256,7 @@ export class ProjectLifecycleManager {
           }
         }
 
-        if (this.ctx.coreData.cliBrowser) {
-          await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
-        }
+        await this.setInitialActiveBrowser()
 
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
@@ -270,6 +272,43 @@ export class ProjectLifecycleManager {
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
     })
+  }
+
+  /**
+   * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
+   *  1. The value of `--browser` passed via CLI.
+   *  2. The last browser selected in `open` mode (by name and channel) for this project.
+   *  3. The first browser found.
+   */
+  async setInitialActiveBrowser () {
+    if (this.ctx.coreData.cliBrowser) {
+      await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
+
+      // only finish if `cliBrowser` was successfully set - we must have an activeBrowser once this function resolves
+      if (this.ctx.coreData.activeBrowser) return
+    }
+
+    // lastBrowser is cached per-project.
+    const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
+    const browsers = await this.ctx.browser.machineBrowsers()
+
+    if (!browsers[0]) throw new Error('No browsers available in setInitialActiveBrowser, cannot set initial active browser')
+
+    this.ctx.coreData.activeBrowser = (prefs?.lastBrowser && browsers.find((b) => {
+      return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
+    })) || browsers[0]
+  }
+
+  private async setActiveBrowserByNameOrPath (nameOrPath: string) {
+    try {
+      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath)
+
+      this.ctx.coreData.activeBrowser = browser
+    } catch (e) {
+      const error = e as CypressError
+
+      this.ctx.onWarning(error)
+    }
   }
 
   async refreshLifecycle () {
@@ -312,21 +351,6 @@ export class ProjectLifecycleManager {
     return this._configManager.initializeConfig()
   }
 
-  private async setActiveBrowser (cliBrowser: string) {
-    // When we're starting up, if we've chosen a browser to run with, check if it exists
-    this.ctx.coreData.cliBrowser = null
-
-    try {
-      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(cliBrowser)
-
-      this.ctx.coreData.chosenBrowser = browser ?? null
-    } catch (e) {
-      const error = e as CypressError
-
-      this.ctx.onWarning(error)
-    }
-  }
-
   /**
    * When we set the current project, we need to cleanup the
    * previous project that might have existed. We use this as the
@@ -353,6 +377,19 @@ export class ProjectLifecycleManager {
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
+      s.currentProjectGitInfo?.destroy()
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+      })
+
       s.packageManager = packageManagerUsed
     })
 
@@ -459,6 +496,12 @@ export class ProjectLifecycleManager {
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
       this._configManager.loadTestingType()
     }
+  }
+
+  loadTestingType () {
+    assert(this._configManager, 'Cannot load a testing type without a config manager')
+
+    this._configManager.loadTestingType()
   }
 
   scaffoldFilesIfNecessary () {

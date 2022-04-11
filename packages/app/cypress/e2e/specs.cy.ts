@@ -1,6 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from '../../src/paths'
-import { getRunnerHref } from './support/get-runner-href'
 
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
@@ -91,7 +91,9 @@ describe('App: Index', () => {
             'waiting',
             'window',
           ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
-        ].map(getPathForPlatform)
+        ]
+
+        const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
         it('scaffolds example files when card is clicked', () => {
           cy.get('@ScaffoldCard').click()
@@ -107,9 +109,9 @@ describe('App: Index', () => {
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {
-              return options.expectedScaffoldPaths.includes(path)
-            })).to.have.lengthOf(options.expectedScaffoldPaths.length)
-          }, { expectedScaffoldPaths })
+              return options.expectedScaffoldPathsForPlatform.includes(path)
+            })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
+          }, { expectedScaffoldPathsForPlatform })
 
           cy.percySnapshot()
 
@@ -119,7 +121,7 @@ describe('App: Index', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/${getRunnerHref(spec)}"`).scrollIntoView().should('exist')
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
           })
         })
 
@@ -331,6 +333,18 @@ describe('App: Index', () => {
         })
       })
 
+      it('opens config file in ide from specPattern text description', () => {
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.file, 'openFile')
+        })
+
+        cy.get('[data-cy="no-specs-specPattern"]').click()
+
+        cy.withCtx((ctx, o) => {
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+        })
+      })
+
       it('opens config file in ide from footer button', () => {
         cy.withCtx((ctx, o) => {
           o.sinon.stub(ctx.actions.file, 'openFile')
@@ -440,7 +454,7 @@ describe('App: Index', () => {
           cy.get('[data-cy="create-spec-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/writing-and-organizing-tests')
 
           cy.withCtx(async (ctx, o) => {
-            const stats = await ctx.actions.file.checkIfFileExists(o.path)
+            const stats = await ctx.file.checkIfFileExists(o.path)
 
             expect(stats?.isFile()).to.be.true
           }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
@@ -455,177 +469,6 @@ describe('App: Index', () => {
     viewportHeight: 768,
     viewportWidth: 1024,
   }, () => {
-    context('project with storybook', () => {
-      beforeEach(() => {
-        cy.scaffoldProject('no-specs')
-        cy.openProject('no-specs')
-        cy.startAppServer('component')
-        cy.visitApp()
-
-        // With no specs present, the page renders two cards, one for creating from found components,
-        // another for creating from found stories.
-        cy.findAllByTestId('card').eq(0).as('ComponentCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.component.importFromComponent.header,
-          }).should('be.visible')
-          .and('not.be.disabled')
-
-          cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
-          .should('be.visible')
-        })
-
-        cy.findAllByTestId('card').eq(1).as('StoryCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.component.importFromStory.header,
-          }).should('be.visible')
-          .and('not.be.disabled')
-
-          cy.contains(defaultMessages.createSpec.component.importFromStory.description)
-          .should('be.visible')
-        })
-      })
-
-      it('shows create first spec page with create from component and create from story options', () => {
-        cy.findByRole('heading', {
-          level: 1,
-          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-        }).should('be.visible')
-
-        cy.findByTestId('create-spec-page-description')
-        .should('be.visible')
-        .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
-
-        cy.get('@ComponentCard').should('be.visible')
-        cy.get('@StoryCard').should('be.visible')
-
-        cy.findByTestId('no-specs-message')
-        .should('be.visible')
-        .and('contain', defaultMessages.createSpec.noSpecsMessage)
-
-        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
-        .should('be.visible')
-        .and('not.be.disabled')
-        .click()
-
-        cy.findByRole('dialog', {
-          name: defaultMessages.components.specPatternModal.title,
-        }).should('be.visible').within(() => {
-          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io/test-type-options' })
-          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
-          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
-          cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
-        })
-
-        cy.get('@CloseDialogButton').click()
-        cy.findByRole('dialog').should('not.exist')
-      })
-
-      context('create from story', () => {
-        beforeEach(() => {
-          cy.get('@StoryCard').click()
-
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.component.importFromStory.header,
-          }).as('CreateFromStoryDialog')
-
-          cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
-        })
-
-        it('shows story dialog that can be dismissed with Close (x) button press', () => {
-          cy.get('@DialogCloseButton').click()
-          cy.findByRole('dialog').should('not.exist')
-        })
-
-        it('shows input for file extension filter', () => {
-          cy.get('@CreateFromStoryDialog').within(() => {
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-            cy.percySnapshot('Create from story generator')
-            cy.findByRole('button', { name: '*.stories.*' }).click()
-            cy.percySnapshot('File list search dropdown')
-            cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
-            .as('ExtensionInput')
-            .clear()
-            .type('foobar')
-
-            cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
-            cy.percySnapshot('No Results')
-
-            cy.findByTestId('no-results-clear').click()
-
-            cy.get('@ExtensionInput').should('have.value', '*.stories.*')
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-          })
-        })
-
-        it('shows input for file name filter', () => {
-          cy.get('@CreateFromStoryDialog').within(() => {
-            cy.findByLabelText('file-name-input').as('FileNameInput')
-            .should('have.value', '')
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-
-            cy.get('@FileNameInput')
-            .type('foobar')
-
-            cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
-
-            cy.findByTestId('no-results-clear').click()
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-
-            cy.get('@FileNameInput')
-            .type('Button.stories.jsx')
-
-            cy.findByTestId('file-match-indicator').should('contain', '1 of 1 Matches')
-            cy.percySnapshot()
-          })
-        })
-
-        it('shows success modal when spec is created from story', () => {
-          cy.get('@CreateFromStoryDialog').within(() => {
-            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
-
-            // TODO: assert visibility of secondary text on hover/focus when
-            // item is made keyboard accessible
-            // https://cypress-io.atlassian.net/browse/UNIFY-864
-            // cy.get('@NewSpecFile).focus()
-            // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
-
-            cy.get('@NewSpecFile').click()
-          })
-
-          cy.percySnapshot()
-
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.successPage.header,
-          }).as('SuccessDialog').within(() => {
-            cy.findByRole('button', { name: 'Close' }).should('be.visible')
-            cy.contains(getPathForPlatform('src/stories/Button.stories.cy.jsx')).should('be.visible')
-
-            cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/${getRunnerHref('src/stories/Button.stories.cy.jsx')}`)
-
-            cy.findByRole('button', { name: 'Create another spec' }).click()
-          })
-
-          // 'Create a new spec' dialog presents with options when user indicates they want to create
-          // another spec.
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.newSpecModalTitle,
-          }).within(() => {
-            cy.findAllByTestId('card').eq(0)
-
-            // the storybook card remains enabled here
-            cy.contains('button', defaultMessages.createSpec.component.importFromStory.header)
-            .should('not.be.disabled')
-          })
-        })
-      })
-    })
-
     context('project without storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-no-storybook')
@@ -646,17 +489,6 @@ describe('App: Index', () => {
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
           .should('be.visible')
         })
-
-        cy.findAllByTestId('card').eq(1).as('StoryCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.component.importFromStory.header,
-          }).should('be.visible')
-          .and('be.disabled')
-
-          cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription)
-          .should('be.visible')
-        })
       })
 
       it('shows create first spec page with create from component option', () => {
@@ -669,7 +501,6 @@ describe('App: Index', () => {
         .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
 
         cy.get('@ComponentCard').should('be.visible')
-        cy.get('@StoryCard').should('be.visible')
 
         cy.findByTestId('no-specs-message').should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
@@ -758,7 +589,7 @@ describe('App: Index', () => {
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`)
+            .should('have.attr', 'href', `#/specs/runner?file=src/App.cy.jsx`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -767,10 +598,6 @@ describe('App: Index', () => {
           // another spec.
           cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
             cy.findAllByTestId('card').eq(0)
-
-            // the storybook card remains disabled here
-            cy.contains('button', defaultMessages.createSpec.component.importFromStory.header)
-            .should('be.disabled')
           })
         })
 
@@ -783,12 +610,12 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`).click()
+            }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx').click()
           })
 
           cy.get('#main-pane').should('be.visible')
 
-          cy.location().its('href').should('contain', `#/${getRunnerHref('src/App.cy.jsx')}`)
+          cy.location().its('href').should('contain', '#/specs/runner?file=src/App.cy.jsx')
         })
 
         it('displays alert with docs link on new spec', () => {
@@ -800,7 +627,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`).click()
+            }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx').click()
           })
 
           cy.contains('Review the docs')
@@ -901,9 +728,6 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description)
-
-          cy.findAllByTestId('card').eq(1)
-          .and('contain', defaultMessages.createSpec.component.importFromStory.description)
         })
       })
 
@@ -951,37 +775,7 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/MyTest.cy.jsx')}`)
-        })
-      })
-
-      it('shows create first spec page with create from story option', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
-
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
-          cy.findAllByTestId('card').eq(1)
-          .and('contain', defaultMessages.createSpec.component.importFromStory.description).click()
-        })
-
-        cy.get('[data-cy=file-list-row]').first().click()
-
-        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/stories/Button.stories.cy.jsx'))
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
-        cy.get('input').clear()
-        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
-
-        cy.get('input').clear().type(getPathForPlatform('src/specs-folder/Button.stories.cy.jsx'))
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-        cy.contains('h2', defaultMessages.createSpec.successPage.header)
-
-        cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/specs-folder/Button.stories.cy.jsx')).click()
-
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
-          cy.findByRole('link', {
-            name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/Button.stories.cy.jsx')}`)
+          }).should('have.attr', 'href', '#/specs/runner?file=src/specs-folder/MyTest.cy.jsx')
         })
       })
     })
@@ -1033,29 +827,146 @@ describe('App: Index', () => {
           expect(spec).to.exist
         }, { path: getPathForPlatform('src/stories/Button.cy.jsx') })
       })
+    })
+  })
 
-      it('should generate spec from story', () => {
-        cy.findByTestId('new-spec-button').click()
+  describe('Spec Watcher', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('no-specs')
+      cy.openProject('no-specs')
+      cy.startAppServer('e2e')
+      cy.visitApp()
 
-        cy.contains('Create from story').click()
-        const storyGlob = '*.stories.*'
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
 
-        cy.findByTestId('file-match-button').contains(storyGlob)
-        cy.percySnapshot('Story Generator')
-        checkCodeGenCandidates(['Button.stories.jsx'])
+    it('updates spec list when files are added to/removed from areas matching specPattern', () => {
+      cy.withCtx(async (ctx) => {
+        // Directory is added to root so it does not match specPattern
+        await ctx.actions.file.writeFileInProject('test-1.cy.js', 'it()')
+      })
 
-        cy.contains('Button.stories.jsx').click()
-        cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.stories.cy.js')).click()
-        cy.contains('composeStories')
-        cy.contains('ExampleWithLongName')
-        cy.percySnapshot('Story Generator Success')
+      // No Specs Found page renders, as the added dir does not match the specPattern
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
 
-        cy.withCtx(async (ctx, o) => {
-          const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], []))
-          .find((spec) => spec.relative === o.path)
+      cy.withCtx(async (ctx) => {
+        // Directory contents are moved into cypress/e2e dir
+        await ctx.actions.file.moveFileInProject('test-1.cy.js', 'cypress/e2e/test-1.cy.js')
+      })
 
-          expect(spec).to.exist
-        }, { path: getPathForPlatform('src/stories/Button.stories.cy.jsx') })
+      // Specs list should now show, with the spec from the moved dir now matching the specPattern
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Writing more specs to directory
+        await ctx.actions.file.writeFileInProject('cypress/e2e/test-2.cy.js', 'it()')
+        await ctx.actions.file.writeFileInProject('cypress/e2e/test-3.cy.js', 'it()')
+      })
+
+      // Specs list should show all added specs
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-2.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-3.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Files are moved back to root, where they no will no longer match specPattern
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-1.cy.js', 'test-1.cy.js')
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-2.cy.js', 'test-2.cy.js')
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-3.cy.js', 'test-3.cy.js')
+      })
+
+      // No Specs Found page now renders, as all previously matching specs were moved
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('updates spec list when directories are added to/removed from areas matching specPattern', () => {
+      cy.withCtx(async (ctx) => {
+        // Directory is added to root so it does not match specPattern
+        await ctx.actions.file.writeFileInProject('testDir/test-1.cy.js', 'it()')
+      })
+
+      // No Specs Found page renders, as the added dir does not match the specPattern
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        // Directory contents are moved into cypress/e2e dir
+        await ctx.actions.file.moveFileInProject('testDir', 'cypress/e2e/testDir')
+      })
+
+      // Specs list should now show, with the spec from the moved dir now matching the specPattern
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Writing more specs to directory
+        await ctx.actions.file.writeFileInProject('cypress/e2e/testDir/test-2.cy.js', 'it()')
+        await ctx.actions.file.writeFileInProject('cypress/e2e/testDir/test-3.cy.js', 'it()')
+      })
+
+      // Specs list should show all added specs
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-2.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-3.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Directory is moved back to root, where it no will no longer match specPattern
+        await ctx.actions.file.moveFileInProject('cypress/e2e/testDir', 'testDir')
+      })
+
+      // No Specs Found page now renders, as all previously matching specs were moved
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('debounces spec updates if many additions occur', () => {
+      const specs = [...Array(20)].map((v, index) => {
+        return `test-${index}.cy.js`
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.actions.project, 'setSpecs')
+        for (const spec of o.specs) {
+          await ctx.actions.file.writeFileInProject(`cypress/e2e/${spec}`, 'it()')
+        }
+      }, { specs })
+
+      cy.contains('20 Matches')
+
+      cy.withRetryableCtx((ctx, o) => {
+        // setSpecs is debounced, the number of calls should be less than the number of files removed
+        // in such rapid succession.
+        expect((ctx.actions.project.setSpecs as SinonStub).callCount).to.be.lessThan(20)
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        (ctx.actions.project.setSpecs as SinonStub).resetHistory()
+        for (const spec of o.specs) {
+          await ctx.actions.file.removeFileInProject(`cypress/e2e/${spec}`)
+        }
+      }, { specs })
+
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withRetryableCtx((ctx) => {
+        // setSpecs is debounced, the number of calls should be less than the number of files removed
+        // in such rapid succession.
+        expect((ctx.actions.project.setSpecs as SinonStub).callCount).to.be.lessThan(20)
       })
     })
   })

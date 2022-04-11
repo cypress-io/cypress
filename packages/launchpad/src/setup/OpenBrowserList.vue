@@ -110,7 +110,7 @@
               {{ browserText.running }}
             </Button>
             <Button
-              v-if="props.gql.currentBrowser?.isFocusSupported"
+              v-if="props.gql.activeBrowser?.isFocusSupported"
               size="lg"
               type="button"
               variant="outline"
@@ -140,7 +140,7 @@
         size="sm"
         variant="text"
         :prefix-icon="ArrowRightIcon"
-        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in -translate-y-1px duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-2px"
+        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:-translate-x-2px"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
@@ -181,7 +181,7 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 gql`
 fragment OpenBrowserList on CurrentProject {
   id
-  currentBrowser {
+  activeBrowser {
     id
     isFocusSupported
   }
@@ -202,7 +202,7 @@ subscription OpenBrowserList_browserStatusChange {
   browserStatusChange {
     id
     browserStatus
-    currentBrowser {
+    activeBrowser {
       id
       isFocusSupported
     }
@@ -237,9 +237,10 @@ const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
   get: () => {
-    // NOTE: The currentBrowser is set to the first detected browser
-    // found during project initialization. It should always be defined.
-    return props.gql.currentBrowser?.id
+    // NOTE: The activeBrowser is set during project initialization. It should always be defined.
+    if (!props.gql.activeBrowser) throw new Error('Missing activeBrowser in selectedBrowserId')
+
+    return props.gql.activeBrowser.id
   },
   set (browserId) {
     if (browserId) {

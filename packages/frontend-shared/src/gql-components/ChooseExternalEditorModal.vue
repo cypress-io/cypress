@@ -2,20 +2,44 @@
   <StandardModal
     :model-value="props.open"
     variant="bare"
-    help-link=""
+    help-link="https://on.cypress.io/file-opener-preference"
+    :help-text="t('links.needHelp')"
     data-cy="choose-editor-modal"
     @update:model-value="close"
   >
     <template #title>
-      {{ t("globalPage.selectPreferredEditor") }}
+      {{ t("globalPage.externalEditorPreferences") }}
     </template>
 
     <div class="m-24px">
-      <ChooseExternalEditor
+      <div>
+        <p class="font-normal text-sm text-gray-600 select-none">
+          <slot name="description">
+            <span>{{ t("globalPage.externalEditorPreferencesDescription1") }}</span>
+          </slot>
+        </p>
+        <p class="font-normal text-sm text-gray-600 select-none">
+          <slot name="description">
+            <i18n-t
+              scope="global"
+              keypath="globalPage.externalEditorPreferencesDescription2"
+            >
+              <strong>{{ t("globalPage.settings") }}</strong>
+            </i18n-t>
+          </slot>
+        </p>
+      </div>
+
+      <div
         v-if="props.gql.localSettings"
-        :gql="props.gql"
-        @chose-editor="val => preferredEditor = val"
-      />
+        class="mt-16px"
+      >
+        <ChooseExternalEditor
+          :gql="props.gql"
+          @chose-editor="val => preferredEditor = val ?? ''"
+        />
+      </div>
+
       <div
         v-else
         class="flex h-full items-center justify-center"
@@ -25,12 +49,19 @@
     </div>
 
     <template #footer>
-      <div class="flex justify-end">
+      <div class="flex space-x-4">
         <Button
           :disabled="!preferredEditor?.length"
           @click="selectEditor"
         >
-          {{ t("globalPage.done") }}
+          {{ t("globalPage.saveChanges") }}
+        </Button>
+
+        <Button
+          variant="outline"
+          @click="close"
+        >
+          {{ t("globalPage.cancel") }}
         </Button>
       </div>
     </template>

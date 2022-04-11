@@ -42,11 +42,11 @@ export const CurrentProject = objectType({
       resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
-    t.field('currentBrowser', {
+    t.field('activeBrowser', {
       type: Browser,
-      description: 'The currently selected browser for the application',
+      description: 'The currently selected browser for the project',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.chosenBrowser
+        return ctx.coreData.activeBrowser
       },
     })
 
@@ -204,9 +204,7 @@ export const CurrentProject = objectType({
     t.string('branch', {
       description: 'The current branch of the project',
       resolve: async (source, args, ctx) => {
-        const branchName = await ctx.git.getBranch(source.projectRoot)
-
-        return branchName
+        return source.git?.currentBranch ?? null
       },
     })
 

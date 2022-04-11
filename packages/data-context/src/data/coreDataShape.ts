@@ -6,7 +6,7 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { LegacyCypressConfigJson } from '../sources'
+import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
 
@@ -56,8 +56,6 @@ export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
-  refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
   browserStatus: BrowserStatus
   relaunchBrowser: boolean
@@ -111,7 +109,7 @@ export interface ForceReconfigureProjectDataShape {
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
-  chosenBrowser: FoundBrowser | null
+  activeBrowser: FoundBrowser | null
   machineBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
@@ -128,6 +126,7 @@ export interface CoreDataShape {
   localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: string | null
+  currentProjectGitInfo: GitDataSource | null
   currentTestingType: TestingType | null
   wizard: WizardDataShape
   migration: MigrationDataShape
@@ -158,10 +157,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
       browserStatus: 'closed',
       relaunchBrowser: false,
@@ -175,6 +172,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
+    currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
       chosenBundler: null,
@@ -201,7 +199,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       },
     },
     warnings: [],
-    chosenBrowser: null,
+    activeBrowser: null,
     user: null,
     electron: {
       app: null,

@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "find-up": "6.3.0"
+  },
+  "type": "module"
+}

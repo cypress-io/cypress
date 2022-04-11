@@ -6,7 +6,7 @@ const mockedEnv = require('mocked-env')
 const { omit } = require('lodash')
 const cp = require('child_process')
 const { getCtx } = require('../../../lib/makeDataContext')
-const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
+const FixturesHelper = require('@tooling/system-tests')
 
 const plugins = require('../../../lib/plugins')
 const util = require('../../../lib/plugins/util')
