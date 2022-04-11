@@ -39,7 +39,6 @@ function scaffoldAndOpenE2EProject (
   cy.contains('Next').click()
   cy.contains('We added the following files to your project.')
   cy.contains('Continue').click()
-  cy.contains('Choose a Browser')
 }
 
 function scaffoldAndOpenCTProject (
@@ -71,7 +70,6 @@ function scaffoldAndOpenCTProject (
   cy.contains('Skip').click()
   cy.contains('We added the following files to your project.')
   cy.contains('Continue').click()
-  cy.contains('Choose a Browser')
 }
 
 function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string) {
