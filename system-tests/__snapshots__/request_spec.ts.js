@@ -227,6 +227,7 @@ Method: GET
 URL: http://localhost:2294/statusCode?code=503
 Headers: {
   "Connection": "keep-alive",
+  "host": "localhost:2294",
   "user-agent": "foo",
   "accept": "*/*",
   "accept-encoding": "gzip, deflate"
@@ -345,6 +346,7 @@ Method: GET
 URL: http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong
 Headers: {
   "Connection": "keep-alive",
+  "host": "localhost:2294",
   "user-agent": "foo",
   "accept": "*/*",
   "accept-encoding": "gzip, deflate"
