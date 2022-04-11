@@ -9,13 +9,13 @@ describe('App: Spec List (E2E)', () => {
 
       yesterday.setDate(yesterday.getDate() - 1)
 
-      sinon.stub(ctx.git, 'gitInfo').callsFake(() => {
-        return Promise.resolve({
+      sinon.stub(ctx.lifecycleManager.git!, 'gitInfoFor').callsFake(() => {
+        return {
           author: 'Test Author',
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
           statusType: 'unmodified',
-        })
+        }
       })
     })
 
