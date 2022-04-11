@@ -374,6 +374,21 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (headers, automationRequest, options) {
+    // RFC7230 5.4 specifies that:
+    // A client MUST send a Host header field in all HTTP/1.1 request messages.
+    // @see https://datatracker.ietf.org/doc/html/rfc7230#section-5.4
+    //
+    // If Host header field is not defined in options.headers object,
+    // we define it here.
+
+    if (!options.headers) {
+      options.headers = {}
+    }
+
+    let url = new URL(options.url)
+
+    options.headers['host'] = url.host
+
     // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }

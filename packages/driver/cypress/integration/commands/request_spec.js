@@ -1387,4 +1387,16 @@ describe('src/cy/commands/request', () => {
       })
     })
   })
+
+  context('#request tests without Cypress.backend() stub', () => {
+    it('host field is added to the headers', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('"host": "localhost:3500"')
+
+        done()
+      })
+
+      cy.request('/')
+    })
+  })
 })
