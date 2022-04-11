@@ -280,11 +280,11 @@ class Command extends Component<Props> {
           className={
             cs(
               'command-wrapper',
-              `command-type-${model.type}`,
               `command-state-${model.state}`,
+              `command-type-${model.type}`,
               {
-                'command-is-pinned': this._isPinned(),
                 'command-is-event': !!model.event,
+                'command-is-pinned': this._isPinned(),
                 'command-has-console-props': model.hasConsoleProps,
                 'command-has-snapshot': model.hasSnapshot,
               },
