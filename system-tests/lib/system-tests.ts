@@ -269,7 +269,7 @@ export type SpawnerResult = {
   stderr: stream.Readable
   on(event: 'error', cb: (err: Error) => void): void
   on(event: 'exit', cb: (exitCode: number) => void): void
-  kill?: ChildProcess['kill']
+  kill: ChildProcess['kill']
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {

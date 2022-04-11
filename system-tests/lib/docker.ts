@@ -104,6 +104,10 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
       },
     )
   }
+
+  kill () {
+    throw new Error('.kill not implemented for DockerProcess.')
+  }
 }
 
 const checkBuiltBinary = async () => {
