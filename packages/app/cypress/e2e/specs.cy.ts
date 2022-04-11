@@ -1,6 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from '../../src/paths'
-import { getRunnerHref } from './support/get-runner-href'
 
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
@@ -91,7 +91,9 @@ describe('App: Index', () => {
             'waiting',
             'window',
           ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
-        ].map(getPathForPlatform)
+        ]
+
+        const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
         it('scaffolds example files when card is clicked', () => {
           cy.get('@ScaffoldCard').click()
@@ -107,9 +109,9 @@ describe('App: Index', () => {
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {
-              return options.expectedScaffoldPaths.includes(path)
-            })).to.have.lengthOf(options.expectedScaffoldPaths.length)
-          }, { expectedScaffoldPaths })
+              return options.expectedScaffoldPathsForPlatform.includes(path)
+            })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
+          }, { expectedScaffoldPathsForPlatform })
 
           cy.percySnapshot()
 
@@ -119,7 +121,7 @@ describe('App: Index', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/${getRunnerHref(spec)}"`).scrollIntoView().should('exist')
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
           })
         })
 
@@ -452,7 +454,7 @@ describe('App: Index', () => {
           cy.get('[data-cy="create-spec-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/writing-and-organizing-tests')
 
           cy.withCtx(async (ctx, o) => {
-            const stats = await ctx.actions.file.checkIfFileExists(o.path)
+            const stats = await ctx.file.checkIfFileExists(o.path)
 
             expect(stats?.isFile()).to.be.true
           }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
@@ -587,7 +589,7 @@ describe('App: Index', () => {
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`)
+            .should('have.attr', 'href', `#/specs/runner?file=src/App.cy.jsx`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -608,12 +610,12 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`).click()
+            }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx').click()
           })
 
           cy.get('#main-pane').should('be.visible')
 
-          cy.location().its('href').should('contain', `#/${getRunnerHref('src/App.cy.jsx')}`)
+          cy.location().its('href').should('contain', '#/specs/runner?file=src/App.cy.jsx')
         })
 
         it('displays alert with docs link on new spec', () => {
@@ -625,7 +627,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/${getRunnerHref('src/App.cy.jsx')}`).click()
+            }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx').click()
           })
 
           cy.contains('Review the docs')
@@ -773,7 +775,7 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/${getRunnerHref('src/specs-folder/MyTest.cy.jsx')}`)
+          }).should('have.attr', 'href', '#/specs/runner?file=src/specs-folder/MyTest.cy.jsx')
         })
       })
     })
@@ -824,6 +826,147 @@ describe('App: Index', () => {
 
           expect(spec).to.exist
         }, { path: getPathForPlatform('src/stories/Button.cy.jsx') })
+      })
+    })
+  })
+
+  describe('Spec Watcher', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('no-specs')
+      cy.openProject('no-specs')
+      cy.startAppServer('e2e')
+      cy.visitApp()
+
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('updates spec list when files are added to/removed from areas matching specPattern', () => {
+      cy.withCtx(async (ctx) => {
+        // Directory is added to root so it does not match specPattern
+        await ctx.actions.file.writeFileInProject('test-1.cy.js', 'it()')
+      })
+
+      // No Specs Found page renders, as the added dir does not match the specPattern
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        // Directory contents are moved into cypress/e2e dir
+        await ctx.actions.file.moveFileInProject('test-1.cy.js', 'cypress/e2e/test-1.cy.js')
+      })
+
+      // Specs list should now show, with the spec from the moved dir now matching the specPattern
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Writing more specs to directory
+        await ctx.actions.file.writeFileInProject('cypress/e2e/test-2.cy.js', 'it()')
+        await ctx.actions.file.writeFileInProject('cypress/e2e/test-3.cy.js', 'it()')
+      })
+
+      // Specs list should show all added specs
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-2.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-3.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Files are moved back to root, where they no will no longer match specPattern
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-1.cy.js', 'test-1.cy.js')
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-2.cy.js', 'test-2.cy.js')
+        await ctx.actions.file.moveFileInProject('cypress/e2e/test-3.cy.js', 'test-3.cy.js')
+      })
+
+      // No Specs Found page now renders, as all previously matching specs were moved
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('updates spec list when directories are added to/removed from areas matching specPattern', () => {
+      cy.withCtx(async (ctx) => {
+        // Directory is added to root so it does not match specPattern
+        await ctx.actions.file.writeFileInProject('testDir/test-1.cy.js', 'it()')
+      })
+
+      // No Specs Found page renders, as the added dir does not match the specPattern
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        // Directory contents are moved into cypress/e2e dir
+        await ctx.actions.file.moveFileInProject('testDir', 'cypress/e2e/testDir')
+      })
+
+      // Specs list should now show, with the spec from the moved dir now matching the specPattern
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Writing more specs to directory
+        await ctx.actions.file.writeFileInProject('cypress/e2e/testDir/test-2.cy.js', 'it()')
+        await ctx.actions.file.writeFileInProject('cypress/e2e/testDir/test-3.cy.js', 'it()')
+      })
+
+      // Specs list should show all added specs
+      cy.contains('[data-cy="spec-item"]', 'test-1.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-2.cy.js')
+      cy.contains('[data-cy="spec-item"]', 'test-3.cy.js')
+
+      cy.withCtx(async (ctx) => {
+        // Directory is moved back to root, where it no will no longer match specPattern
+        await ctx.actions.file.moveFileInProject('cypress/e2e/testDir', 'testDir')
+      })
+
+      // No Specs Found page now renders, as all previously matching specs were moved
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+    })
+
+    it('debounces spec updates if many additions occur', () => {
+      const specs = [...Array(20)].map((v, index) => {
+        return `test-${index}.cy.js`
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.actions.project, 'setSpecs')
+        for (const spec of o.specs) {
+          await ctx.actions.file.writeFileInProject(`cypress/e2e/${spec}`, 'it()')
+        }
+      }, { specs })
+
+      cy.contains('20 Matches')
+
+      cy.withRetryableCtx((ctx, o) => {
+        // setSpecs is debounced, the number of calls should be less than the number of files removed
+        // in such rapid succession.
+        expect((ctx.actions.project.setSpecs as SinonStub).callCount).to.be.lessThan(20)
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        (ctx.actions.project.setSpecs as SinonStub).resetHistory()
+        for (const spec of o.specs) {
+          await ctx.actions.file.removeFileInProject(`cypress/e2e/${spec}`)
+        }
+      }, { specs })
+
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.withRetryableCtx((ctx) => {
+        // setSpecs is debounced, the number of calls should be less than the number of files removed
+        // in such rapid succession.
+        expect((ctx.actions.project.setSpecs as SinonStub).callCount).to.be.lessThan(20)
       })
     })
   })

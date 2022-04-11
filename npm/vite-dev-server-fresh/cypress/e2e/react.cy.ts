@@ -39,7 +39,7 @@ for (const project of VITE_REACT) {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReact.jsx`,
         `import React from 'react';
-        ${await ctx.actions.file.readFileInProject('src/MissingReact.jsx')}`)
+        ${await ctx.file.readFileInProject('src/MissingReact.jsx')}`)
       })
 
       cy.get('.passed > .num').should('contain', 1)
@@ -51,7 +51,7 @@ for (const project of VITE_REACT) {
       cy.get('.failed > .num').should('contain', 1)
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
-          await ctx.actions.file.readFileInProject('src/App.cy.jsx'))
+          await ctx.file.readFileInProject('src/App.cy.jsx'))
       })
 
       cy.get('.passed > .num').should('contain', 1)

@@ -1,5 +1,3 @@
-import { getRunnerHref } from '../../support/get-runner-href'
-
 export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) => {
   passCount = passCount || '--'
   failCount = failCount || '--'
@@ -57,8 +55,7 @@ export function loadSpec (options: LoadSpecOptions) {
     })
   }, { hasPreferredIde })
 
-  // Need to normalize the spec path for windows usage
-  cy.visitApp(getRunnerHref(`cypress/e2e/${filePath}`))
+  cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
 
   if (setup) {
     setup()

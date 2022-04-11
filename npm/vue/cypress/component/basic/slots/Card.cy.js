@@ -5,6 +5,7 @@
 
 /// <reference types="cypress" />
 
+import { h } from 'vue'
 import Card from './Card.vue'
 import { mount } from '@cypress/vue'
 
@@ -15,10 +16,18 @@ describe('Card', () => {
   })
 
   it('renders slots', () => {
+    // TODO: use HTML syntax (not render function with `h`)
+    // when it's working.
+    // Blocked by upstream bug in Test Utils: https://github.com/vuejs/test-utils/issues/1166
+    // mount(Card, {
+    //   slots: {
+    //     header: `<h1>HEADER</h1>`
+    //   },
+    // })
     mount(Card, {
       slots: {
-        header: '<h1>HEADER</h1>',
-        footer: '<div>FOOTER</div>',
+        header: () => h('h1', 'HEADER'),
+        footer: () => h('div', 'FOOTER'),
       },
     })
 
@@ -29,7 +38,7 @@ describe('Card', () => {
   it('renders scopedSlots', () => {
     mount(Card, {
       slots: {
-        default: '<template #default="props"><p>Yay! {{props.content}}</p></template>',
+        default: ({ content }) => h('div', {}, h('p', `Yay! ${content}`)),
       },
     })
 

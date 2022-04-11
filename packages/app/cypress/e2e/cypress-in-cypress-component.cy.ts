@@ -82,7 +82,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'src/DoesNotExist.spec.js'
 
-    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
+    cy.visitApp(`/specs/runner?file=${badFilePath}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
@@ -101,7 +101,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     const goodFilePath = 'src/TestComponent.spec.jsx'
 
-    cy.visitApp(`/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
+    cy.visitApp(`/specs/runner?file=${goodFilePath}`)
 
     cy.contains('renders the test component').should('be.visible')
 

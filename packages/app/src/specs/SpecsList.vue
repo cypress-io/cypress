@@ -74,7 +74,7 @@
               v-if="row.data.isLeaf && row.data"
               :key="row.data.data?.absolute"
               class="focus:outline-transparent"
-              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
               data-cy="spec-item-link"
               @click.meta.prevent="handleCtrlClick"
               @click.ctrl.prevent="handleCtrlClick"
