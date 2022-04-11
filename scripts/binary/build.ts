@@ -6,6 +6,8 @@ import del from 'del'
 import chalk from 'chalk'
 import electron from '@packages/electron'
 import la from 'lazy-ass'
+import { promisify } from 'util'
+import glob from 'glob'
 
 import * as packages from './util/packages'
 import * as meta from './meta'
@@ -16,6 +18,8 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
+
+const globAsync = promisify(glob)
 
 const CY_ROOT_DIR = path.join(__dirname, '..', '..')
 
@@ -31,6 +35,38 @@ interface BuildCypressAppOpts {
   version: string
   skipSigning?: boolean
   keepBuild?: boolean
+}
+
+/**
+ * Windows has a max path length of 260 characters. To avoid running over this when unzipping the
+ * built binary, this function attempts to guard against excessively-long paths in the binary by
+ * assuming an install default cache location and checking if final paths exceed 260 characters.
+ */
+async function checkMaxPathLength () {
+  if (process.platform !== 'win32') return log('#checkMaxPathLength (skipping since not on Windows)')
+
+  // This is the Cypress cache dir path on a vanilla Windows Server VM. We can treat this as the typical case.
+  const typicalWin32PathPrefixLength = 'C:\\Users\\Administrator\\AppData\\Local\\Cypress\\Cache\\10.0.0\\resources\\app\\'.length
+  const maxRelPathLength = 260 - typicalWin32PathPrefixLength
+
+  log(`#checkMaxPathLength (max abs path length: ${maxRelPathLength})`)
+
+  const buildDir = meta.buildDir()
+  const allRelPaths = (await globAsync('**/*', { cwd: buildDir, absolute: true }))
+  .map((p) => p.slice(buildDir.length))
+
+  if (!allRelPaths.length) throw new Error('No binary paths found in checkMaxPathLength')
+
+  const violations = allRelPaths.filter((p) => p.length > maxRelPathLength)
+
+  if (violations.length) {
+    throw new Error([
+      `${violations.length} paths in the built binary were too long for Windows. Either hoist these files or remove them from the build.`,
+      ...violations.map((v) => ` - ${v}`),
+    ].join('\n'))
+  }
+
+  log(`All paths are short enough (${allRelPaths.length} checked)`)
 }
 
 // For debugging the flow without rebuilding each time
@@ -221,6 +257,8 @@ require('./packages/server')\
       throw e
     }
   }
+
+  await checkMaxPathLength()
 
   // lsDistFolder
   console.log('in build folder %s', meta.buildDir())
