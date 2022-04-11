@@ -32,7 +32,7 @@
           >
             <i-cy-circle-bg-question-mark_x16
               data-cy="unsupported-browser-tooltip-trigger"
-              class="mt-4px mr-8px top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
+              class="mt-8px mr-8px top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
               alt="unsupported browser"
             />
             <template #popper>
