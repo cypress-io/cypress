@@ -76,10 +76,6 @@ export const useAutStore = defineStore({
       this.isLoadingUrl = false
     },
     setScriptError (err: ScriptError) {
-      if (typeof err === 'string') {
-        err = { type: 'error', error: err }
-      }
-
       this.scriptError = err
     },
     setScale (scale) {

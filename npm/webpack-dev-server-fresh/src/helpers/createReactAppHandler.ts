@@ -2,7 +2,6 @@ import type { CreateFinalWebpackConfig } from '../createWebpackDevServer'
 import debugLib from 'debug'
 import type { Configuration, ResolvePluginInstance, RuleSetRule } from 'webpack'
 import path from 'path'
-import * as globby from 'globby'
 
 type PresetHandlerOptions = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
 
@@ -53,31 +52,13 @@ function loadWebpackConfig ({ devServerConfig }: PresetHandlerOptions): Configur
     debug('Found react-scripts webpack config at %s', webpackConfigPath)
   } catch (err) {
     // Might be an ejected cra app, search for common webpack configs
-    const possibleConfigs = globby.sync('**/webpack.config*.js', {
-      onlyFiles: true,
-      cwd: devServerConfig.cypressConfig.projectRoot,
-      absolute: true,
-      ignore: ['**/node_modules/**'],
-      gitignore: true,
-    })
+    const ejectedWebpackConfigPath = path.join(devServerConfig.cypressConfig.projectRoot, 'config', 'webpack.config.js')
 
-    debug('Found possible webpack configs %s', possibleConfigs.join(', '))
-
-    if (possibleConfigs.length === 0) {
-      throw new Error(`Could not find a Webpack config (assuming ejected create-react-app). Please provide a webpackConfig in your Cypress config as a "devServer" option.`)
+    try {
+      webpackConfigPath = require.resolve(ejectedWebpackConfigPath)
+    } catch (err) {
+      throw new Error(`Failed to find webpack at ${ejectedWebpackConfigPath}. We looked in this location as we could not find the "react-scripts" dependency and are assuming an ejected create-react-app.`)
     }
-
-    webpackConfigPath = possibleConfigs.sort((a: string, b: string) => {
-      if (!a.includes('dev') && !a.includes('prod')) return -1
-
-      if (!b.includes('dev') && !b.includes('prod')) return 1
-
-      if (a.includes('dev')) return -1
-
-      if (b.includes('dev')) return 1
-
-      return 0
-    })[0]
   }
 
   try {
