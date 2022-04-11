@@ -249,6 +249,10 @@ describe('App: Settings', () => {
             binary: '/usr/bin/well-known',
             name: 'Well known editor',
           },
+          {
+            id: 'null-binary-editor',
+            name: 'Null binary editor',
+          },
         ]
 
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
@@ -303,6 +307,23 @@ describe('App: Settings', () => {
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('computer')
       })
+
+      cy.get('[data-cy="custom-editor"]').should('not.exist')
+    })
+
+    it('handles null binary field in editor', () => {
+      cy.contains('Choose your editor...').click()
+      cy.contains('Null binary editor').click()
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('{"preferredEditorBinary":null')
+      })
+
+      // navigate away and come back
+      // preferred editor selected from dropdown should have been persisted
+      cy.visitApp()
+      cy.get('[href="#/settings"]').click()
+      cy.wait(200)
+      cy.get('[data-cy="Device Settings"]').click()
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
