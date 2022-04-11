@@ -30,11 +30,21 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     ),
   }
 
+  let compiler = tsPath
+
+  if (process.env.TS_NODE_COMPILER) {
+    try {
+      compiler = require.resolve(process.env.TS_NODE_COMPILER, { paths: [path.dirname(registeredFile)] })
+    } catch {
+      // ts-node compiler not installed in project directory
+    }
+  }
+
   /**
    * @type {import('ts-node').RegisterOptions}
    */
   const opts = {
-    compiler: process.env.TS_NODE_COMPILER || tsPath, // use the user's installed typescript
+    compiler, // use the user's installed typescript
     compilerOptions,
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
