@@ -44,7 +44,7 @@ import { Url } from 'url'
   }
 
   interface OutgoingMessage {
-    destroy(error?: Error): void
+    destroy(error?: Error): this 
   }
 
   export const CRLF: string
