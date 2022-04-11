@@ -1258,6 +1258,9 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
+  """Issued when the current branch of a project changes"""
+  branchChange: CurrentProject
+
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
 
@@ -1266,6 +1269,11 @@ type Subscription {
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """
+  When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
+  """
+  gitInfoChange: [Spec]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

@@ -48,13 +48,14 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import type { SidebarNavigationHeaderFragment } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e-solid-simple'
 import IconComponent from '~icons/cy/testing-type-component-solid_x64'
 import { useI18n } from '@cy/i18n'
+import { SidebarNavigationHeaderBranchChangeDocument } from '../generated/graphql-test'
 
 const { t } = useI18n()
 
@@ -69,6 +70,17 @@ fragment SidebarNavigationHeader on Query {
   }
 }
 `
+
+gql`
+subscription SidebarNavigationHeaderBranchChange {
+  branchChange {
+    id
+    branch
+  }
+}
+`
+
+useSubscription({ query: SidebarNavigationHeaderBranchChangeDocument })
 
 const showModal = ref(false)
 
