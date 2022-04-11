@@ -78,7 +78,7 @@ describe('Config files error handling', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'was removed in Cypress version')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalComponentTesting')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
@@ -185,5 +185,36 @@ describe('setupNodeEvents', () => {
     cy.findByText('E2E Testing').click()
     cy.get('h1').should('contain', 'Error Loading Config')
     cy.percySnapshot()
+  })
+
+  it('handles deprecated config fields in setupNodeEvents', () => {
+    cy.openProject('pristine')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js',
+`module.exports = { 
+  e2e: { 
+    supportFile: false, 
+    setupNodeEvents(on, config){
+      config.testFiles = '**/*.spec.js'
+      return config
+    }
+  }
+}`)
+    })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'testFiles')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'setupNodeEvents')
+    expectStackToBe('closed')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 })
