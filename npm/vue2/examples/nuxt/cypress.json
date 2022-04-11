@@ -1,0 +1,7 @@
+{
+  "video": false,
+  "fixturesFolder": false,
+  "supportFile": false,
+  "testFiles": "**/*spec.ts",
+  "componentFolder": "components"
+}
