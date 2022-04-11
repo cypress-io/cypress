@@ -218,7 +218,7 @@ function openProject (projectName: ProjectFixtureDir, argv: string[] = []) {
   })
 }
 
-function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
+function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMockingPrompts: boolean } = { skipMockingPrompts: false }) {
   const { name, family } = Cypress.browser
 
   if (family !== 'chromium' || name === 'electron') {
@@ -289,8 +289,19 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
         await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
+        if (!o.skipMockingPrompts
+        // avoid re-stubbing already stubbed prompts in case we call startAppServer multiple times
+          && (ctx._apis.projectApi.getCurrentProjectSavedState as any).wrappedMethod === undefined) {
+          // avoid unwanted prompt
+          o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+            firstOpened: 1609459200000,
+            lastOpened: 1609459200000,
+            promptsShown: { ci1: 1609459200000 },
+          })
+        }
+
         return ctx.appServerPort
-      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then((serverPort) => {
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined, ...options }).then((serverPort) => {
         log.set({ message: `port: ${serverPort}` })
         Cypress.env('e2e_serverPort', serverPort)
       })
