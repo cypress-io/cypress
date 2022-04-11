@@ -4,15 +4,19 @@ import execa from 'execa'
 
 import type { DataContext } from '..'
 
-let isPowerShellAvailable = false
+let isPowerShellAvailable: undefined | boolean
+let powerShellPromise: Promise<void> | undefined
 
 // Only need to worry about checking for PowerShell in windows,
 // doing it asynchronously so to not block startup
 if (os.platform() === 'win32') {
-  execa(`[void] ''`, { shell: 'powershell' }).then(() => {
+  powerShellPromise = execa(`[void] ''`, { shell: 'powershell' }).then(() => {
     isPowerShellAvailable = true
   }).catch(() => {
     // Powershell is unavailable
+    isPowerShellAvailable = false
+  }).finally(() => {
+    powerShellPromise = undefined
   })
 }
 
@@ -65,14 +69,18 @@ export class BrowserDataSource {
     return this.idForBrowser(this.ctx.coreData.activeBrowser) === this.idForBrowser(obj)
   }
 
-  isFocusSupported (obj: FoundBrowser) {
-    if (platform === 'darwin' || obj.family !== 'firefox') {
+  async isFocusSupported (obj: FoundBrowser) {
+    if (obj.family !== 'firefox') {
       return true
     }
 
     // Only allow focusing if PowerShell is available on Windows, since that's what we use to do it
-    if (obj.family === 'firefox' && platform === 'win32') {
-      return isPowerShellAvailable
+    if (platform === 'win32') {
+      if (powerShellPromise) {
+        await powerShellPromise
+      }
+
+      return isPowerShellAvailable ?? false
     }
 
     return false
