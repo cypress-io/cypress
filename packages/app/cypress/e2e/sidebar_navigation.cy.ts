@@ -113,20 +113,20 @@ describe('Sidebar Navigation', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
       cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'todos')
+      cy.contains('.v-popper--some-open--tooltip', 'todos')
       cy.percySnapshot()
       cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
       cy.get('[data-e2e-href="/runs"]').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'Runs')
+      cy.contains('.v-popper--some-open--tooltip', 'Runs')
       cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
 
       cy.get('[data-e2e-href="/specs"]').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'Specs')
+      cy.contains('.v-popper--some-open--tooltip', 'Specs')
       cy.get('[data-e2e-href="/specs"]').trigger('mouseout')
 
       cy.get('[data-e2e-href="/settings"]').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'Settings')
+      cy.contains('.v-popper--some-open--tooltip', 'Settings')
       cy.get('[data-e2e-href="/settings"]').trigger('mouseout')
     })
 

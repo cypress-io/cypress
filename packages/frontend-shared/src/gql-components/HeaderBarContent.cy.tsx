@@ -200,6 +200,30 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('develop').should('be.visible')
   })
 
+  it('truncates the branch name if it is long', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        if (!result.currentProject) {
+          return
+        }
+
+        result.currentProject.branch = 'application-program/hard-drive-parse'
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
+
+    cy.percySnapshot()
+
+    cy.get('.truncate').realHover()
+    cy.get('.v-popper__popper--shown').contains('application-program/hard-drive-parse')
+  })
+
   it('the login modal reaches "opening browser" status', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,

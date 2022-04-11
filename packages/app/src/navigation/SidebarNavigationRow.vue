@@ -5,6 +5,7 @@
     :distance="8"
   >
     <div
+      v-bind="$attrs"
       :class="active
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
         : 'before:(scale-x-0 transition-transform bg-gray-300)'"
