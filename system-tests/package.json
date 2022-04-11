@@ -3,7 +3,8 @@
   "version": "0.0.0-development",
   "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
   "private": true,
-  "main": "index.js",
+  "main": "lib/fixtures.ts",
+  "browser": "lib/fixtureDirs.ts",
   "scripts": {
     "type-check": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
@@ -82,6 +83,7 @@
     "webpack": "^4.44.2",
     "ws": "5.2.3"
   },
+  "types": "lib/fixtures.ts",
   "license": "ISC",
   "author": "",
   "keywords": []

@@ -14,6 +14,20 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when the checked out git branch changes
+   */
+  branchChange () {
+    this._emit('branchChange')
+  }
+
+  /**
+   * Emitted when the git info for a given spec changes
+   */
+  gitInfoChange (specPath: string[]) {
+    this._emit('gitInfoChange', specPath)
+  }
+
+  /**
    * Emitted when we have modified part of the backend and want to show
    * a notification to possibly restart the app
    */
@@ -109,7 +123,7 @@ export class DataEmitterActions extends DataEmitterEvents {
         if (!hasSentInitial && sendInitial) {
           hasSentInitial = true
 
-          return { done: false, value: {} }
+          return { done: false, value: undefined }
         }
 
         if (pending.length === 0) {

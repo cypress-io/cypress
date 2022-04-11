@@ -1,11 +1,11 @@
 import { expect } from 'chai'
-import { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
 import { detect } from '../../src'
-import Fixtures from '@tooling/system-tests/lib/fixtures'
+import Fixtures from '@tooling/system-tests'
 import path from 'path'
 import fs from 'fs-extra'
 
-export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
+export async function scaffoldMigrationProject (project: ProjectFixtureDir) {
   Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)

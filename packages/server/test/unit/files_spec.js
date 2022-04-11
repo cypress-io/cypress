@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const files = require('../../lib/files')
-const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
+const FixturesHelper = require('@tooling/system-tests')
 const { getCtx } = require('../../lib/makeDataContext')
 
 let ctx
