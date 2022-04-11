@@ -1,7 +1,8 @@
 // The type declarations for Cypress Log Group & the corresponding configuration permutations
 declare namespace Cypress {
   declare namespace Commands {
-    declare namespace Sessions {
+    declare namespace Session {
+      type ActiveSessions = Record<string, SessionData>
       type SessionSetup = (log: Cypress.Log) => Chainable<S>
       type SessionValidation = (log: Cypress.Log) => Chainable<S>
       
@@ -11,9 +12,9 @@ declare namespace Cypress {
       }
 
       interface SessionData {
-        id: string | Array<string>
-        cookies: Array<Cypress.Cookie>
-        localStorage: Array<LocalStorage>
+        id: string
+        cookies?: Array<Cypress.Cookie> | null
+        localStorage?: Array<LocalStorage> | null
         setup: () => void
         hydrated: boolean
         validate?: Cypress.SessionOptions['validate']

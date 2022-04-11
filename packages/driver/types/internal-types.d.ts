@@ -50,6 +50,7 @@ declare namespace Cypress {
 
   // Extend Cypress.state properties here
   interface State {
+    (k: 'activeSessions', v?: Cypress.Commands.Sessions.ActiveSessions):  ActiveSessionsSessionData | undefined
     (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
     (k: 'routes', v?: RouteMap): RouteMap
     (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]

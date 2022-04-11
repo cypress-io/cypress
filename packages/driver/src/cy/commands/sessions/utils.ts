@@ -3,16 +3,9 @@ import $ from 'jquery'
 import { $Location } from '../../../cypress/location'
 import Bluebird from 'bluebird'
 
-/**
- * rules for clearing session data:
- *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
- *  - if user relaunches the browser or launches a new spec, session data SHOULD be cleared
- *  - session data SHOULD be cleared between specs in run mode
- *
- * therefore session data should be cleared with spec browser launch
- */
+type SessionData = Cypress.Commands.Session.SessionData
 
-const getSessionDetails = (sessState: Cypress.Commands.Sessions.SessionData) => {
+const getSessionDetails = (sessState: SessionData) => {
   return {
     id: sessState.id,
     data: _.merge(
@@ -21,7 +14,7 @@ const getSessionDetails = (sessState: Cypress.Commands.Sessions.SessionData) => 
     ) }
 }
 
-const getSessionDetailsForTable = (sessState: Cypress.Commands.Sessions.SessionData) => {
+const getSessionDetailsForTable = (sessState: SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
     ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
@@ -113,7 +106,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (sessState: Cypress.Commands.Sessions.SessionData) => {
+const getConsoleProps = (sessState: SessionData) => {
   const sessionDetails = getSessionDetailsForTable(sessState)
 
   const tables = _.flatMap(sessionDetails, (val, domain) => {

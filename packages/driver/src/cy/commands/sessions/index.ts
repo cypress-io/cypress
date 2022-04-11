@@ -13,6 +13,8 @@ import {
 } from './utils'
 const currentTestRegisteredSessions = new Map()
 
+type ActiveSessions = Cypress.Commands.Session.ActiveSessions
+type SessionData = Cypress.Commands.Session.SessionData
 /**
  * rules for clearing session data:
  *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
@@ -25,7 +27,7 @@ const currentTestRegisteredSessions = new Map()
 export default function (Commands, Cypress, cy) {
   const { Promise } = Cypress
 
-  const setActiveSession = (obj) => {
+  const setActiveSession = (obj: ActiveSessions) => {
     const currentSessions = cy.state('activeSessions') || {}
 
     const newSessions = { ...currentSessions, ...obj }
@@ -33,7 +35,7 @@ export default function (Commands, Cypress, cy) {
     cy.state('activeSessions', newSessions)
   }
 
-  const getActiveSession = (id) => {
+  const getActiveSession = (id: string): SessionData => {
     const currentSessions = cy.state('activeSessions') || {}
 
     return currentSessions[id]
@@ -112,8 +114,8 @@ export default function (Commands, Cypress, cy) {
   }
 
   const sessions = {
-    defineSession (options = {} as any) {
-      const sess_state = {
+    defineSession (options = {} as any): SessionData {
+      const sess_state: SessionData = {
         id: options.id,
         cookies: null,
         localStorage: null,
@@ -368,7 +370,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession = getActiveSession(id)
+      let existingSession: SessionData = getActiveSession(id)
 
       if (!setup) {
         if (!existingSession || !currentTestRegisteredSessions.has(id)) {
@@ -394,7 +396,7 @@ export default function (Commands, Cypress, cy) {
 
       const _log = Cypress.log({
         name: 'session',
-        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
         snapshot: false,
       })
@@ -402,7 +404,7 @@ export default function (Commands, Cypress, cy) {
       const dataLog = Cypress.log({
         name: 'session',
         sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
       })
 
       function runSetup (existingSession) {
