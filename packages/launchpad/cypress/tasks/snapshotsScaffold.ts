@@ -40,9 +40,9 @@ async function snapshotScaffoldedFiles (expectedScaffoldDir: string, filesToDiff
 function compareScaffoldedFiles (filesToDiff: FileToDiff[]): SnapshotScaffoldTestResult {
   for (const { actual, expected } of filesToDiff) {
     try {
-      const read = (f: string) => fs.readFileSync(f, 'utf-8')
-      const actualContent = read(actual).trim()
-      const expectedContent = read(expected).trim()
+      const read = (f: string) => fs.readFileSync(f, 'utf-8').trim().replaceAll('\r\n', '\n')
+      const actualContent = read(actual)
+      const expectedContent = read(expected)
       const diff = disparity.unifiedNoColor(actualContent, expectedContent, {})
 
       if (diff !== '') {
@@ -116,7 +116,9 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
   }, [])
 
   const actualRelativeFiles = files.map((file) => {
-    return file.replace(cyTmpDir, '').slice(projectName.length + 2)
+    const cyTmpDirPosix = joinPosix(cyTmpDir)
+
+    return file.slice(cyTmpDirPosix.length + projectName.length + 2)
   })
 
   const filesToDiff = actualRelativeFiles.map<FileToDiff>((file) => {
