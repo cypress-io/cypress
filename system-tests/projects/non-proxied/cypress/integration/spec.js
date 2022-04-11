@@ -9,7 +9,7 @@ context('non proxied e2e', () => {
 
       cy.readFile(pngPath, 'base64')
       .then((actual) => {
-        cy.fixture('cy-non-proxied.png')
+        cy.fixture('cy-non-proxied-new.png')
         .then((expected) => {
           expect(actual, 'screenshots did not match byte-for-byte').to.eq(expected)
         })
