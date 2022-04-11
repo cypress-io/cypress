@@ -14,7 +14,7 @@
       v-else
       :max-total-width="windowWidth"
       :initial-panel1-width="0"
-      :initial-panel2-width="reporterWidth"
+      :initial-panel2-width="runnerUiStore.reporterWidth"
       :show-panel1="false"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -105,7 +105,6 @@ const runnerUiStore = useRunnerUiStore()
 const {
   viewportStyle,
   windowWidth,
-  reporterWidth,
 } = useRunnerStyle()
 
 const {
