@@ -203,12 +203,12 @@ export function mergeDefaults (
     return cyError
   }
 
-  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
-    throw makeConfigError(errors.get(err, ...args))
-  }, testingType)
-
   configUtils.validateNoBreakingConfig(config[testingType], errors.warning, (err, options) => {
     throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
+  }, testingType)
+
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
+    throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 
   // We need to remove the nested propertied by testing type because it has been
