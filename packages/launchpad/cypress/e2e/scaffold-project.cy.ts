@@ -39,7 +39,6 @@ function scaffoldAndOpenE2EProject (
   cy.contains('Next').click()
   cy.contains('We added the following files to your project.')
   cy.contains('Continue').click()
-  cy.contains('Choose a Browser')
 }
 
 function scaffoldAndOpenCTProject (
@@ -70,7 +69,6 @@ function scaffoldAndOpenCTProject (
   cy.contains('Skip').click()
   cy.contains('We added the following files to your project.')
   cy.contains('Continue').click()
-  cy.contains('Choose a Browser')
 }
 
 function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string) {
@@ -94,7 +92,7 @@ function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cy
   })
 }
 
-describe('scaffolding new projects', () => {
+describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
   it('scaffolds E2E for a JS project', () => {
     scaffoldAndOpenE2EProject('pristine', 'js')
     assertScaffoldedFilesAreCorrect('js', 'e2e')
