@@ -316,10 +316,10 @@ export class CommandQueue extends Queue<Command> {
       // store the previous timeout
       const prevTimeout = this.timeout()
 
-      // if (!cy.state('isStable')) {
-      //   // console.log('tried to clear timeout in command queue')
-      //   cy.clearTimeout()
-      // }
+      if (!cy.state('isStable')) {
+        // console.log('tried to clear timeout in command queue')
+        cy.clearTimeout()
+      }
 
       // store the current runnable
       const runnable = this.state('runnable')
