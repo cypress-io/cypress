@@ -20,6 +20,7 @@
     "rimraf": "3.0.2"
   },
   "files": [
-    "register.js"
+    "register.js",
+    "registerDir.js"
   ]
 }
