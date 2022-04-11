@@ -1,7 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from '../../src/paths'
-import { getRunnerHref } from './support/get-runner-href'
 
 describe('App: Specs', () => {
   describe('Testing Type: E2E', () => {
@@ -92,7 +91,9 @@ describe('App: Specs', () => {
             'waiting',
             'window',
           ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
-        ].map(getPathForPlatform)
+        ]
+
+        const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
 
         it('scaffolds example files when card is clicked', () => {
           cy.get('@ScaffoldCard').click()
@@ -108,9 +109,9 @@ describe('App: Specs', () => {
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {
-              return options.expectedScaffoldPaths.includes(path)
-            })).to.have.lengthOf(options.expectedScaffoldPaths.length)
-          }, { expectedScaffoldPaths })
+              return options.expectedScaffoldPathsForPlatform.includes(path)
+            })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
+          }, { expectedScaffoldPathsForPlatform })
 
           cy.percySnapshot()
 
@@ -120,7 +121,7 @@ describe('App: Specs', () => {
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
-            cy.get(`a[href="#/${getRunnerHref(spec)}"`).scrollIntoView().should('exist')
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
           })
         })
 
@@ -520,7 +521,7 @@ describe('App: Specs', () => {
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/${getRunnerHref('cypress/my-empty-spec.cy.js')}`)
+            .should('have.attr', 'href', `#/specs/runner?file=cypress/my-empty-spec.cy.js`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -540,12 +541,12 @@ describe('App: Specs', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/${getRunnerHref('cypress/my-empty-spec.cy.js')}`).click()
+            }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
           })
 
           cy.get('#main-pane').should('be.visible')
 
-          cy.location().its('href').should('contain', `#/${getRunnerHref('cypress/my-empty-spec.cy.js')}`)
+          cy.location().its('href').should('contain', '#/specs/runner?file=cypress/my-empty-spec.cy.js')
         })
 
         it('displays alert with docs link on new spec', () => {
@@ -558,7 +559,7 @@ describe('App: Specs', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/${getRunnerHref('cypress/my-empty-spec.cy.js')}`).click()
+            }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
           })
 
           cy.contains('Review the docs')

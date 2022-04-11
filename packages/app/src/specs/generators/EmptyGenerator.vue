@@ -86,7 +86,7 @@
           :to="{
             name: 'SpecRunner',
             query: {
-              file: result.file.relative
+              file: result.file.relative?.replace(/\\/g, '/')
             },
             params: props.type === 'component'
               ? {

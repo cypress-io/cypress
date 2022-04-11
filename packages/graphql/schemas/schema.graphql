@@ -466,7 +466,7 @@ type DevState {
 """Represents an editor on the local machine"""
 type Editor {
   """Binary that opens the editor"""
-  binary: String!
+  binary: String
   id: String!
 
   """name of editor"""
