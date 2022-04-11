@@ -29,6 +29,7 @@ system-tests/test/support/projects/e2e/cypress/
 system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
 system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 system-tests/projects/config-with-ts-syntax-error/**
+system-tests/projects/config-with-ts-module-error/**
 
 
 **/test/fixtures
