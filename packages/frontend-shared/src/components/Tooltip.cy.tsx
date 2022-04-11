@@ -10,6 +10,7 @@ describe('<Tooltip />', () => {
     cy.mount(() => {
       return (
         <div class="p-4 w-100px">
+          {/* @ts-ignore */}
           <Tooltip v-slots={slotContents} placement="right" />
         </div>
       )
