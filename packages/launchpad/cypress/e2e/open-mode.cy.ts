@@ -19,35 +19,6 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  // the code to be tested isnt live yet
-  it('sorts the project list by most-recently opened', () => {
-    const projects = ['e2e', 'todos', 'launchpad', 'pristine']
-    const openedProjects = ['todos', 'launchpad', 'pristine', 'e2e']
-
-    // add all four projects
-    cy.wrap(projects)
-    .each(cy.addProject)
-    .withCtx((ctx) => ctx.actions.project.clearCurrentProject())
-    .visitLaunchpad()
-    .get(`[data-cy=project-card]`).should('have.length', projects.length)
-
-    // assert initial order of projects
-    cy.wrap(projects).each((project, i) => {
-      cy.get(`[data-cy=project-card]:nth-child(${i + 1})`).contains(project)
-    })
-
-    // open projects
-    cy.wrap(openedProjects)
-    .each((project) => cy.openProject(project))
-    .withCtx((ctx) => ctx.actions.project.clearCurrentProject())
-    .visitLaunchpad()
-
-    // assert new order of projects
-    cy.wrap(openedProjects).each((openedProject, i) => {
-      cy.get(`[data-cy=project-card]:nth-child(${i + 1})`).contains(openedProject)
-    })
-  })
-
   it('goes directly to e2e tests when launched with --e2e', () => {
     cy.scaffoldProject('todos')
     cy.openProject('todos', ['--e2e'])
