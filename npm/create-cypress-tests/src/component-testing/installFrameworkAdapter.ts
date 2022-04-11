@@ -11,12 +11,6 @@ async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue@2' |
     'vue@3': () => scanFSForAvailableDependency(cwd, { vue: '3.x' }),
   }
 
-  const frameworkDependencies = {
-    react: '@cypress/react',
-    'vue@2': '@cypress/vue2',
-    'vue@3': '@cypress/vue',
-  }
-
   const guesses = Object.keys(frameworks).filter((framework) => {
     return frameworks[framework as keyof typeof frameworks]()
   }) as Array<'react' | 'vue@2' | 'vue@3'>
@@ -52,6 +46,12 @@ async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue@2' |
 
 type InstallAdapterOptions = {
   useYarn: boolean
+}
+
+const frameworkDependencies = {
+  react: '@cypress/react',
+  'vue@2': '@cypress/vue2',
+  'vue@3': '@cypress/vue',
 }
 
 export async function installFrameworkAdapter (cwd: string, options: InstallAdapterOptions) {
