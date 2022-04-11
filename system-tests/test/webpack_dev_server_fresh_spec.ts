@@ -9,6 +9,7 @@ describe('@cypress/webpack-dev-server-fresh', function () {
       testingType: 'component',
       browser: 'chrome',
       spec: null,
+      configFile: 'cypress-webpack.config.ts',
       expectedExitCode: 2,
     })
 
@@ -17,6 +18,7 @@ describe('@cypress/webpack-dev-server-fresh', function () {
       testingType: 'component',
       browser: 'chrome',
       spec: null,
+      configFile: 'cypress-webpack.config.ts',
       expectedExitCode: 2,
     })
 
@@ -25,6 +27,7 @@ describe('@cypress/webpack-dev-server-fresh', function () {
       testingType: 'component',
       browser: 'chrome',
       spec: null,
+      configFile: 'cypress-webpack.config.ts',
       expectedExitCode: 2,
     })
 
@@ -33,6 +36,7 @@ describe('@cypress/webpack-dev-server-fresh', function () {
       testingType: 'component',
       browser: 'chrome',
       spec: null,
+      configFile: 'cypress-webpack.config.ts',
       expectedExitCode: 2,
     })
   })
