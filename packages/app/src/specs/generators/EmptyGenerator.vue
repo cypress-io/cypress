@@ -74,7 +74,7 @@
       >
         <router-link
           class="outline-none"
-          :to="{ path: '/specs/runner', query: { file: result.file.relative } }
+          :to="{ path: '/specs/runner', query: { file: result.file.relative?.replace(/\\/g, '/') } }
           "
         >
           <Button

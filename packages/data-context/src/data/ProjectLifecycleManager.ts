@@ -16,7 +16,7 @@ import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { LegacyCypressConfigJson } from '../sources'
+import { GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
@@ -93,6 +93,10 @@ export class ProjectLifecycleManager {
     process.on('exit', this.onProcessExit)
 
     return autoBindDebug(this)
+  }
+
+  get git () {
+    return this.ctx.coreData.currentProjectGitInfo
   }
 
   private onProcessExit = () => {
@@ -373,6 +377,19 @@ export class ProjectLifecycleManager {
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
+      s.currentProjectGitInfo?.destroy()
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+      })
+
       s.packageManager = packageManagerUsed
     })
 
