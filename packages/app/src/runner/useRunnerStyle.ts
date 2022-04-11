@@ -3,7 +3,6 @@ import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
 import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { runnerConstants } from './runner-constants'
 
 export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
 
@@ -15,26 +14,16 @@ const collapsedNavBarWidth = 64
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
 
-interface UseRunnerUI {
-  initialSpecsListWidth: number
-  initialReporterWidth: number
-}
-
-export const useRunnerStyle = ({
-  initialReporterWidth,
-  initialSpecsListWidth,
-}: UseRunnerUI = {
-  initialReporterWidth: runnerConstants.defaultReporterWidth,
-  initialSpecsListWidth: runnerConstants.defaultSpecListWidth,
-}) => {
-  reporterWidth.value = initialReporterWidth
-  specListWidth.value = initialSpecsListWidth
-
+export const useRunnerStyle = () => {
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
-  const containerWidth = computed(() => {
-    const { isSpecsListOpen } = useRunnerUiStore()
+  // using the runner store for initial values, it will take care of setting defaults if needed
+  const { isSpecsListOpen, reporterWidth: uiStoreReporterWidth, specListWidth: uiStoreSpecListWidth } = useRunnerUiStore()
 
+  reporterWidth.value = uiStoreReporterWidth
+  specListWidth.value = uiStoreSpecListWidth
+
+  const containerWidth = computed(() => {
     const miscBorders = 4
     let nonAutWidth = reporterWidth.value + (isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
@@ -77,10 +66,6 @@ export const useRunnerStyle = ({
 
   return {
     viewportStyle,
-    reporterWidth,
-    specListWidth,
-    containerHeight,
-    containerWidth,
     windowWidth: computed(() => {
       if (window.__CYPRESS_MODE__ === 'run') {
         return windowWidth.value
