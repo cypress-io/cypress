@@ -36,14 +36,14 @@ exports['cy.pause() in run mode / does not pause if headless'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (no_pause_spec.js)                                                         │
-  │ Searched:   cypress/integration/no_pause_spec.js                                               │
+  │ Specs:      1 found (pause_spec.js)                                                            │
+  │ Searched:   cypress/integration/pause_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  no_pause_spec.js                                                                (1 of 1)
+  Running:  pause_spec.js                                                                   (1 of 1)
 
 
   cy.pause()
