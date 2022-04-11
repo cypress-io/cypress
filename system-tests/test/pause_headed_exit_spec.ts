@@ -1,6 +1,6 @@
 import systemTests from '../lib/system-tests'
 
-describe('cy.pause() works with --headed and --no-exit', () => {
+describe('cy.pause() in run mode', () => {
   systemTests.setup()
 
   systemTests.it('pauses with --headed and --no-exit', {
