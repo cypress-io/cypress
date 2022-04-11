@@ -110,6 +110,7 @@
       },
       "importEmptySpec": {
         "header": "Create a new spec",
+        "description": "We'll generate an empty spec file to start testing components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }
