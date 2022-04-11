@@ -82,7 +82,7 @@ import type { VerticalBrowserListItemsFragment } from '../../generated/graphql'
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import Tooltip from '../../components/Tooltip.vue'
 import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 const { t } = useI18n()
