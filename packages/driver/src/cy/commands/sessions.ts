@@ -7,8 +7,8 @@ import $stackUtils from '../../cypress/stack_utils'
 import Bluebird from 'bluebird'
 const currentTestRegisteredSessions = new Map()
 
-type ActiveSessions = Cypress.Commands.Sessions.ActiveSessions
-type SessionData = Cypress.Commands.Sessions.SessionData
+type ActiveSessions = Cypress.Commands.Session.ActiveSessions
+type SessionData = Cypress.Commands.Session.SessionData
 /**
  * rules for clearing session data:
  *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
