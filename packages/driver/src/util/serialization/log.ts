@@ -67,7 +67,7 @@ const preprocessDomElement = (props: HTMLElement) => {
  * @param {PreprocessedHTMLElement} props - a preprocessed element that was fed through postMessage() that need to be reified in the primary.
  * @returns {HTMLElement} a reified element that can be used in a snapshot body or consoleProps.
  */
-const postProcessDomElement = (props: any) => {
+const reifyDomElement = (props: any) => {
   const reifiedEl = document.createElement(props.tagName)
 
   if (props.value) {
@@ -230,7 +230,7 @@ export const reifyLogLikeFromSerialization = (props) => {
         }
 
         // if the element couldn't be found, return a synthetic copy that doesn't actually exist on the page
-        return postProcessDomElement(props)
+        return reifyDomElement(props)
       }
 
       return props
@@ -243,28 +243,28 @@ export const reifyLogLikeFromSerialization = (props) => {
     }
 
     if (_.isObject(props)) {
-      let postProcessed = {}
+      let reifiedObjectOrArray = {}
 
       _.forIn(props, (value, key) => {
         const val = reifyLogLikeFromSerialization(value)
 
         if (val?.serializationKey === 'dom') {
-          postProcessed = {
-            ...postProcessed,
+          reifiedObjectOrArray = {
+            ...reifiedObjectOrArray,
             get [key] () {
               // only calculate the requested $el from console props AFTER the snapshot has been rendered into the AUT
               return val.html()
             },
           }
         } else {
-          postProcessed[key] = reifyLogLikeFromSerialization(value)
+          reifiedObjectOrArray[key] = reifyLogLikeFromSerialization(value)
         }
       })
 
       // NOTE: transforms arrays into objects to have defined getters for DOM elements, and proxy back to that object via an ES6 Proxy
       if (_.isArray(props)) {
         // if an array, map the array to or special getter object
-        return new Proxy(postProcessed, {
+        return new Proxy(reifiedObjectOrArray, {
           get (target, name) {
             return target[name] || props[name]
           },
@@ -272,7 +272,7 @@ export const reifyLogLikeFromSerialization = (props) => {
       }
 
       // otherwise, just returned the object with our special getter
-      return postProcessed
+      return reifiedObjectOrArray
     }
 
     return props
@@ -304,7 +304,7 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
 }
 
 /**
- * Postprocess a snapshot from the serializable from to an actual HTML body snapshot that exists in the primary document.
+ * Reifies a snapshot from the serializable from to an actual HTML body snapshot that exists in the primary document.
  * @param {any} snapshot - a snapshot that has been preprocessed and sent through post message and needs to be reified in the primary.
  * @returns the reified snapshot that exists in the primary document
  */
