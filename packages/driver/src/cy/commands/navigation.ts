@@ -7,13 +7,13 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { LogUtils } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
-import { $Location } from '../../cypress/location'
+import { $Location, LocationObject } from '../../cypress/location'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousUrlVisited: string | undefined
+let previousUrlVisited: LocationObject | undefined
 let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
@@ -110,8 +110,12 @@ const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log,
     args: {
       differences: differences.join(', '),
       previousUrl: previousUrlVisited,
-      attemptedUrl: remote.origin,
+      attemptedUrl: remote,
       isCrossOriginSpecBridge,
+      experimentalLoginFlows: Cypress.config('experimentalLoginFlows'),
+    },
+    errProps: {
+      isCrossOrigin: true,
     },
   }
 
@@ -1112,7 +1116,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // then go ahead and change the iframe's src
           // and we're good to go
           if (remote.originPolicy === existing.originPolicy) {
-            previousUrlVisited = remote.origin
+            previousUrlVisited = remote
 
             url = $Location.fullyQualifyUrl(url)
 
@@ -1126,10 +1130,9 @@ export default (Commands, Cypress, cy, state, config) => {
           // we need to throw an error since the user tried to visit a new
           // origin which isn't allowed within a cy.origin block
           if (Cypress.isCrossOriginSpecBridge && win) {
-            const existingAutOrigin = $Location.create(win.location.href).origin
+            const existingAutOrigin = $Location.create(win.location.href)
             const params = { remote, existing, previousUrlVisited: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true }
 
-            // TODO: need a better error message
             return cannotVisitDifferentOrigin(params)
           }
 
@@ -1219,9 +1222,9 @@ export default (Commands, Cypress, cy, state, config) => {
             return
           }
 
-          // if it came from the user's onBeforeLoad or onLoad callback, it's
+          // if the err came from the user's onBeforeLoad/onLoad callback or is cross-origin, it's
           // not a network failure, and we should throw the original error
-          if (err.isCallbackError) {
+          if (err.isCallbackError || err.isCrossOrigin) {
             delete err.isCallbackError
             throw err
           }

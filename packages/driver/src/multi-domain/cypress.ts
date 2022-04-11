@@ -119,6 +119,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   }
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
+  // https://github.com/cypress-io/cypress/issues/20972
   bindToListeners(autWindow, {
     onError: handleErrorEvent(cy, 'app'),
     onHistoryNav () {},
@@ -164,8 +165,6 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
 
       return Cypress.action('app:window:unload', e)
     },
-    // TODO: this currently only works on hashchange, but needs work
-    // for other navigation events
     onNavigation (...args) {
       return Cypress.action('app:navigation:changed', ...args)
     },
