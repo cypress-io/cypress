@@ -94,7 +94,7 @@ function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cy
   })
 }
 
-describe('scaffolding new projects', () => {
+describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
   it('scaffolds E2E for a JS project', () => {
     scaffoldAndOpenE2EProject('pristine', 'js')
     assertScaffoldedFilesAreCorrect('js', 'e2e')
