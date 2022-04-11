@@ -215,7 +215,7 @@ function run (ipc, file, projectRoot) {
         const tsErrorRegex = /\n(.*?)\((\d+),(\d+)\):/g
         const failurePath = tsErrorRegex.exec(cleanMessage)
 
-        err.tsErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
+        err.compilerErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
         err.originalMessage = err.message
         err.message = cleanMessage
       } else if (Array.isArray(err.errors)) {
@@ -224,7 +224,7 @@ function run (ipc, file, projectRoot) {
         const firstError = err.errors.filter((e) => Boolean(e.location))[0]
 
         if (firstError && firstError.location.file) {
-          err.esErrorLocation = { filePath: firstError.location.file, line: Number(firstError.location.line), column: Number(firstError.location.column) }
+          err.compilerErrorLocation = { filePath: firstError.location.file, line: Number(firstError.location.line), column: Number(firstError.location.column) }
         }
       }
 
