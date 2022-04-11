@@ -10,18 +10,14 @@ describe('cy.pause()', () => {
 
         // resume the rest of the commands so this
         // test ends
-        Cypress.emit('run:end')
         Cypress.emit('resume:all')
       })
 
       Cypress.emit('resume:next')
-      Cypress.emit('run:end')
     })
 
     cy.pause().wrap({}).should('deep.eq', {}).then(function () {
       expect(didPause).to.be.false
     })
-
-    Cypress.emit('run:end')
   })
 })
