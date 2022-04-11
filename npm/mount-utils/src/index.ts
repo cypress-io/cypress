@@ -39,11 +39,11 @@ export interface StyleOptions {
 
 export const ROOT_SELECTOR = '[data-cy-root]'
 
-export const getContainerEl = () => {
+export const getContainerEl = (): HTMLElement => {
   const els = document.querySelector(ROOT_SELECTOR)
 
   if (els) {
-    return els
+    return els as HTMLElement
   }
 
   throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
