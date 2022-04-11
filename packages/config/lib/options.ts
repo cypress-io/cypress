@@ -141,11 +141,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
-    name: 'exit',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
