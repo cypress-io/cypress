@@ -1,7 +1,7 @@
 {
-  "name": "@cypress/vue",
+  "name": "@cypress/vue2",
   "version": "0.0.0-development",
-  "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
+  "description": "Browser-based Component Testing for Vue.js@2 with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
     "typecheck": "tsc --noEmit",
