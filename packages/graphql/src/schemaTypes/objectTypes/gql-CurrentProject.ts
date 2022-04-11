@@ -204,9 +204,7 @@ export const CurrentProject = objectType({
     t.string('branch', {
       description: 'The current branch of the project',
       resolve: async (source, args, ctx) => {
-        const branchName = await ctx.git.getBranch(source.projectRoot)
-
-        return branchName
+        return source.git?.currentBranch ?? null
       },
     })
 

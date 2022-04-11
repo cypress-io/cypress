@@ -16,7 +16,6 @@ import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
-  GitDataSource,
   FileDataSource,
   ProjectDataSource,
   WizardDataSource,
@@ -132,11 +131,6 @@ export class DataContext {
   @cached
   get file () {
     return new FileDataSource(this)
-  }
-
-  @cached
-  get git () {
-    return new GitDataSource(this)
   }
 
   @cached
