@@ -420,11 +420,12 @@ export class DataContext {
       this.actions.dev.watchForRelaunch()
     }
 
-    this.actions.auth.getUser()
+    // We want to fetch the user immediately, but we don't need to block the UI on this
+    this.actions.auth.getUser().catch(() => {
+      // This error is handled internally by getUser, and isn't actionable here
+    })
 
     const toAwait: Promise<any>[] = [
-      // load the cached user & validate the token on start
-      // and grab the user device settings
       this.actions.localSettings.refreshLocalSettings(),
     ]
 
