@@ -69,7 +69,7 @@ npm/cypress-schematic/src/**/*.js
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
 
-# Eslint is configured for vue@3, so vue@2 files give it conniptions
+# The global eslint configuration is not set up to parse vue@2 files
 /npm/vue2/**/*.vue
 
 packages/data-context/test/unit/codegen/files

@@ -1,5 +1,5 @@
 import ButtonCounter from './ButtonCounter.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 /* eslint-env mocha */
 describe('ButtonCounter', () => {

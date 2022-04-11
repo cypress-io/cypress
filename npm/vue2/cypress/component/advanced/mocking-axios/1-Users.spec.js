@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import Users from './1-Users.vue'
 // we can load list of mock users straight from JSON file
 import mockUsers from './user.list.json'

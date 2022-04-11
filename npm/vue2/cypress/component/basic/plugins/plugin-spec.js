@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { MyPlugin } from './MyPlugin'
 import { MyPluginWithOptions } from './MyPluginWithOptions'
-import { mount, mountCallback } from '@cypress/vue'
+import { mount, mountCallback } from '@cypress/vue2'
 
 const EmptyComponent = { template: '<div></div>' }
 

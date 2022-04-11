@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 import { reverse } from './reverse'
 
 describe('Global filters', () => {

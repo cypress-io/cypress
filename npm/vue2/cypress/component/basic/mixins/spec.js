@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount, mountCallback } from '@cypress/vue'
+import { mount, mountCallback } from '@cypress/vue2'
 
 describe('Mixins', () => {
   const template = '<div>mixin test</div>'

@@ -1,5 +1,5 @@
 import Hello from './Hello.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 /* eslint-env mocha */
 describe('Hello.vue', () => {

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 
 describe('Single render function component', () => {
   // the component definition

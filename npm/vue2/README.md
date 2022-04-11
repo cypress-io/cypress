@@ -69,7 +69,7 @@ And write a test
 
 ```js
 import Hello from '../../components/Hello.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Hello.vue', () => {
   beforeEach(mountCallback(Hello))
@@ -84,7 +84,7 @@ describe('Hello.vue', () => {
 
 ```js
 // components/HelloWorld.spec.js
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import { HelloWorld } from './HelloWorld.vue'
 describe('HelloWorld component', () => {
   it('works', () => {
@@ -158,7 +158,7 @@ Let's test it in [Cypress.io][cypress.io] (for the current version see
 [cypress/integration/spec.js](cypress/integration/spec.js)).
 
 ```js
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Declarative rendering', () => {
   // Vue code from https://vuejs.org/v2/guide/#Declarative-Rendering
@@ -224,7 +224,7 @@ var app4 = new Vue({
 Let's test it. Simple.
 
 ```js
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Declarative rendering', () => {
   // List example from https://vuejs.org/v2/guide/#Declarative-Rendering
@@ -289,7 +289,7 @@ var app5 = new Vue({
 We can write the test the same way
 
 ```js
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Handling User Input', () => {
   // Example from https://vuejs.org/v2/guide/#Handling-User-Input
@@ -364,7 +364,7 @@ to have multiple components? No problem!
 
 ```js
 import Hello from '../../components/Hello.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 describe('Several components', () => {
   const template = `
     <div>
@@ -424,7 +424,7 @@ Simple - let us spy on the event, [spying and stubbing is built into Cypress](ht
 
 ```js
 import ButtonCounter from '../../components/ButtonCounter.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('ButtonCounter', () => {
   beforeEach(mountCallback(ButtonCounter))
@@ -518,7 +518,7 @@ Code coverage | ✅ | ✅
 
 ```js
 // components/HelloWorld.spec.js
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import { HelloWorld } from './HelloWorld.vue'
 describe('HelloWorld component', () => {
   it('works', () => {

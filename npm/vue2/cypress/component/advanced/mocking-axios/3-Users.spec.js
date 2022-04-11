@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import Users from './3-Users.vue'
 // test file can import the entire AxiosApi module
 import * as AxiosApi from './AxiosApi'

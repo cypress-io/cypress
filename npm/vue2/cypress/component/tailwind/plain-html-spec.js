@@ -1,4 +1,4 @@
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 
 // example comes from https://tailwindcss.com/components/cards/#horizontal
 const html = `

@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import Hello from './Hello.vue'
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import * as GreetingModule from './greeting'
 
 describe('Mocking ES6 imports', () => {

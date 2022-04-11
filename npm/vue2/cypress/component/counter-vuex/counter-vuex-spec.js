@@ -3,7 +3,7 @@
 import Counter from './Counter.vue'
 import store from './store'
 import Vuex from 'vuex'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 /* eslint-env mocha */
 describe('Vuex Counter', () => {

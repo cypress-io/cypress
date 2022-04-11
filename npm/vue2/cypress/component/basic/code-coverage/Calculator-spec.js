@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import Calculator from './Calculator.vue'
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 
 describe('Calculator', () => {
   it('adds two numbers', () => {

@@ -297,7 +297,7 @@ const injectStyles = (options: StyleOptions) => {
  * @param {object} component imported from Vue file
  * @example
  *  import Greeting from './Greeting.vue'
- *  import { mount } from '@cypress/vue'
+ *  import { mount } from '@cypress/vue2'
  *  it('works', () => {
  *    // pass props, additional extensions, etc
  *    mount(Greeting, { ... })
@@ -382,7 +382,7 @@ export const mount = (
 /**
  * Helper function for mounting a component quickly in test hooks.
  * @example
- *  import {mountCallback} from '@cypress/vue'
+ *  import {mountCallback} from '@cypress/vue2'
  *  beforeEach(mountVue(component, options))
  */
 export const mountCallback = (

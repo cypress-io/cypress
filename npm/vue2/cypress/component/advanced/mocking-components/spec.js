@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import ParentComponent from './Parent.vue'
 
 describe('Mocking components', () => {

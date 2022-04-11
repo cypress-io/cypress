@@ -1,4 +1,4 @@
-import { mount, mountCallback } from '@cypress/vue'
+import { mount, mountCallback } from '@cypress/vue2'
 import RedBox from './RedBox.vue'
 
 const tailwindCdnLink = 'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css'

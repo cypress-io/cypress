@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 
 import Form from './Form.vue'
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 
 describe('Form', () => {
   const getByLabelText = (text) => {

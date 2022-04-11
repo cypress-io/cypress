@@ -1,7 +1,7 @@
 import PizzaShop from './PizzaShop'
 import router from './PizzaShop/router'
 import VueRouter from 'vue-router'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Vue Router - Pizza Shop', () => {
   // configure component

@@ -1,4 +1,4 @@
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 
 /* eslint-env mocha */
 describe('document.body', () => {

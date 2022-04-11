@@ -1,6 +1,6 @@
 /// <reference path="../../../../dist/index.d.ts" />
 import Message from './Message.vue'
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 
 // test example from
 // https://github.com/alexjoverm/vue-testing-series/blob/lesson-1/test/Message.test.js
