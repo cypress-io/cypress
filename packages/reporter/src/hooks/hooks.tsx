@@ -31,6 +31,33 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
   </FileOpener>
 )
 
+const HookShowAllCommands = ({
+  numCommandsToShow,
+  setNumCommandsToShow,
+}: {
+  numCommandsToShow?: number
+  setNumCommandsToShow: (prevVal?: number) => void
+}) => {
+  const isShowingAllCommands = typeof numCommandsToShow === 'undefined'
+
+  return (
+    <span
+      className="hook-show-all-commands"
+      onClick={() => {
+        if (isShowingAllCommands) {
+          setNumCommandsToShow(DEFAULT_COMMANDS_TO_SHOW)
+        } else {
+          setNumCommandsToShow(undefined)
+        }
+      }}
+    >
+      {typeof numCommandsToShow === 'undefined'
+        ? `Show Last ${DEFAULT_COMMANDS_TO_SHOW} Commands`
+        : 'Show All Commands'}
+    </span>
+  )
+}
+
 const StudioNoCommands = () => (
   <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>
     <span>
@@ -55,21 +82,46 @@ export interface HookProps {
   showNumber: boolean
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
-    <Collapsible
-      header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
-      headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-      isOpen={true}
-    >
-      <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-        {model.showStudioPrompt && <StudioNoCommands />}
-      </ul>
-    </Collapsible>
-  </li>
-))
+const DEFAULT_COMMANDS_TO_SHOW = 50
+
+const Hook = observer(({ model, showNumber }: HookProps) => {
+  // When `numCommandsToShow` is undefined, it implies that we should show everything
+  const [numCommandsToShow, setNumCommandsToShow] = React.useState<
+    number | undefined
+  >(DEFAULT_COMMANDS_TO_SHOW)
+  const commandsToShow =
+    typeof numCommandsToShow === 'undefined'
+      ? model.commands
+      : model.commands.slice(numCommandsToShow * -1)
+
+  return (
+    <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })} >
+      <Collapsible
+        header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
+        headerClass='hook-header'
+        headerExtras={
+          <>
+            {commandsToShow.length >= DEFAULT_COMMANDS_TO_SHOW && (
+              <HookShowAllCommands
+                numCommandsToShow={numCommandsToShow}
+                setNumCommandsToShow={setNumCommandsToShow}
+              />
+            )}
+            {model.invocationDetails && (
+              <HookOpenInIDE invocationDetails={model.invocationDetails} />
+            )}
+          </>
+        }
+        isOpen={true}
+      >
+        <ul className='commands-container'>
+          {_.map(commandsToShow, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+          {model.showStudioPrompt && <StudioNoCommands />}
+        </ul>
+      </Collapsible>
+    </li>
+  )
+})
 
 export interface HooksModel {
   hooks: HookModel[]

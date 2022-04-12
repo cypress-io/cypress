@@ -21,6 +21,7 @@
           color: #6a6b6c;
         }
 
+        .hook-show-all-commands,
         .hook-open-in-ide {
           display: block;
         }
@@ -49,7 +50,9 @@
         display: none;
       }
 
+      .hook-show-all-commands,
       .hook-open-in-ide {
+        cursor: pointer;
         align-items: center;
         color: #6a6b6c;
         display: none;
