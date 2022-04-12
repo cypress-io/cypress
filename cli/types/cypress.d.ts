@@ -2991,7 +2991,7 @@ declare namespace Cypress {
     webpackConfig?: PickConfigOpt<'webpackConfig'>
   } | {
     bundler: 'vite'
-    framework: 'react'
+    framework: 'react' | 'vue'
     viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
   }
 
