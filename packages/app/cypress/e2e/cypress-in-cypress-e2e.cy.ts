@@ -168,7 +168,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('#unified-runner').should('have.css', 'height', '333px')
   })
 
-  it('fails if spec with failed test is running while switching specs', () => {
+  it('stops correctly running spec while switching specs', () => {
     cy.visitApp()
     cy.contains('withFailure.spec').click()
     cy.contains('switch spec')

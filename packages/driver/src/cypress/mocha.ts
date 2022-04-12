@@ -399,6 +399,8 @@ const patchSuiteAddSuite = (specWindow, config) => {
 const patchRunnableResetTimeout = () => {
   Runnable.prototype.resetTimeout = function () {
     const runnable = this
+    // @ts-ignore Cypress.runner is not defined
+    const currentRunner = Cypress.runner
 
     const ms = this.timeout() || 1e9
 
@@ -410,15 +412,12 @@ const patchRunnableResetTimeout = () => {
         return 'mocha.async_timed_out'
       }
 
-      // TODO: improve this error message. It's not that
-      // a command necessarily timed out - in fact this is
-      // a mocha timeout, and a command likely *didn't*
-      // time out correctly, so we received this message instead.
       return 'mocha.timed_out'
     }
 
     this.timer = setTimeout(() => {
-      if (runnable.state === 'passed') {
+      // @ts-ignore Cypress.runner is not defined
+      if (runnable.state === 'passed' || Cypress.runner !== currentRunner || Cypress.state('canceled')) {
         // this timeout can be reached at the same time that a
         // user does an asynchronous `done`, so double-check
         // that the test has not already passed before timing out
