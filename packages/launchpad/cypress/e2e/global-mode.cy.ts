@@ -62,8 +62,8 @@ describe('Launchpad: Global Mode', () => {
   })
 
   describe('when projects have been added', () => {
-    const setupAndValidateProjectsList = (projectList) => {
-      cy.openGlobalMode()
+    const setupAndValidateProjectsList = (projectList, globalModeOptions?: string[] | undefined) => {
+      cy.openGlobalMode(globalModeOptions)
       projectList.forEach((projectName) => {
         cy.addProject(projectName)
       })
@@ -92,6 +92,14 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos']
 
       setupAndValidateProjectsList(projectList)
+      cy.get('[data-cy="project-card"]').click()
+      cy.get('[data-cy="project-card"]').should('not.exist')
+    })
+
+    it('takes the user to the next step when clicking on a project card when passing testing type on the command line', () => {
+      const projectList = ['todos']
+
+      setupAndValidateProjectsList(projectList, ['--e2e'])
       cy.get('[data-cy="project-card"]').click()
       cy.get('[data-cy="project-card"]').should('not.exist')
     })
