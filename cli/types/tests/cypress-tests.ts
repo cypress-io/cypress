@@ -119,7 +119,7 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
     subject // $ExpectType JQueryWithSelector<HTMLElement>
-		subject.selector // $ExpectType string | null | undefined
+    subject.selector // $ExpectType string | null | undefined
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
