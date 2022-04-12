@@ -77,11 +77,16 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const log = logGroup(Cypress, {
+      let log
+
+      logGroup(Cypress, {
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
-      }, (log) => log)
+        // @ts-ignore TODO: revisit once log-grouping has more implementations
+      }, (_log) => {
+        log = _log
+      })
 
       const validator = new Validator({
         log,

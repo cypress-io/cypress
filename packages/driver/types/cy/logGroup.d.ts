@@ -1,7 +1,7 @@
 // The type declarations for Cypress Log Group & the corresponding configuration permutations
 declare namespace Cypress {
   declare namespace LogGroup {
-    type ApiCallback = (log: Cypress.Log) => Cypress.Log | void
+    type ApiCallback = (log: Cypress.Log) => Chainable<S>
     type LogGroup = (cypress: Cypress.Cypress, options: Partial<LogGroupConfig>, callback: LogGroupCallback) => Chainable<S>
 
     interface Config {

@@ -38,7 +38,5 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
 
   cy.queue.insert(restoreCmdIndex, endLogGroupCmd.set('fn', forwardYieldedSubject))
 
-  fn(log)
-
-  return log
+  return fn(log)
 }
