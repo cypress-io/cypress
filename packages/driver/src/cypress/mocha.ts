@@ -412,12 +412,12 @@ const patchRunnableResetTimeout = () => {
         return 'mocha.async_timed_out'
       }
 
-      return 'mocha.timed_out'
+      return 'miscellaneous.test_stopped'
     }
 
     this.timer = setTimeout(() => {
       // @ts-ignore Cypress.runner is not defined
-      if (runnable.state === 'passed' || Cypress.runner !== currentRunner || Cypress.state('canceled')) {
+      if (runnable.state === 'passed' || Cypress.runner !== currentRunner) {
         // this timeout can be reached at the same time that a
         // user does an asynchronous `done`, so double-check
         // that the test has not already passed before timing out
