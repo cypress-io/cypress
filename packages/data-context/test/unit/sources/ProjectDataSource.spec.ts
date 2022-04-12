@@ -439,7 +439,6 @@ describe('startSpecWatcher', () => {
     await handleFsChange()
 
     expect(ctx.project.findSpecs).to.have.been.calledWith(...watchOptions)
-    expect(ctx.actions.project.setSpecs).not.to.have.been.called
 
     // Update internal specs state so that a change will be detected on next FS event
     const updatedSpecs = [...mockFoundSpecs, { name: 'test-4.cy.js' }] as FoundSpec[]
