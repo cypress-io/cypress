@@ -213,7 +213,7 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
 export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrentDOM = true) => {
   try {
     if (props?.serializationKey === 'dom') {
-      props.html = function () {
+      props.reifyElement = function () {
         let reifiedElement
 
         // If the element needs to be matched against the currently rendered DOM. This is useful when analyzing consoleProps or $el in a log
@@ -256,8 +256,9 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrent
           reifiedObjectOrArray = {
             ...reifiedObjectOrArray,
             get [key] () {
-              // only calculate the requested $el from console props AFTER the snapshot has been rendered into the AUT
-              return val.html()
+              // dynamically calculate the element (snapshot or otherwise).
+              // This is important for consoleProp/$el based properties on the log because it calculates the requested element AFTER the snapshot has been rendered into the AUT.
+              return val.reifyElement()
             },
           }
         } else {
@@ -265,9 +266,9 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrent
         }
       })
 
-      // NOTE: transforms arrays into objects to have defined getters for DOM elements, and proxy back to that object via an ES6 Proxy
+      // NOTE: transforms arrays into objects to have defined getters for DOM elements, and proxy back to that object via an ES6 Proxy.
       if (_.isArray(props)) {
-        // if an array, map the array to or special getter object
+        // if an array, map the array to our special getter object.
         return new Proxy(reifiedObjectOrArray, {
           get (target, name) {
             return target[name] || props[name]
