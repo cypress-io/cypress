@@ -146,8 +146,9 @@ export class WizardActions {
   async scaffoldTestingType () {
     const { currentTestingType, wizard: { chosenLanguage } } = this.ctx.coreData
 
-    assert(currentTestingType)
-    assert(chosenLanguage)
+    if (!currentTestingType || !chosenLanguage) {
+      return
+    }
 
     switch (currentTestingType) {
       case 'e2e': {
@@ -155,14 +156,20 @@ export class WizardActions {
         this.ctx.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
-        return chosenLanguage
+        break
       }
       case 'component': {
+        const { chosenBundler, chosenFramework } = this.ctx.wizard
+
+        if (!chosenBundler || !chosenFramework) {
+          return
+        }
+
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
-        return chosenLanguage
+        break
       }
       default:
         throw new Error('Unreachable')

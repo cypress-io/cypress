@@ -25,14 +25,20 @@ const NPM_CYPRESS_REGISTRY = 'https://registry.npmjs.org/cypress'
 export class VersionsDataSource {
   private _initialLaunch: boolean
   private _currentTestingType: TestingType | null
-  private _latestVersion: Promise<string>
-  private _npmMetadata: Promise<Record<string, string>>
 
   constructor (private ctx: DataContext) {
     this._initialLaunch = true
     this._currentTestingType = this.ctx.coreData.currentTestingType
-    this._latestVersion = this.getLatestVersion()
-    this._npmMetadata = this.getVersionMetadata()
+    this.#ensureData()
+  }
+
+  #ensureData () {
+    this.ctx.update((d) => {
+      d.versionData.latestVersion ??= this.getLatestVersion().catch((e) => undefined)
+      d.versionData.npmMetadata ??= this.getVersionMetadata().catch((e) => undefined)
+    })
+
+    return this.ctx.coreData.versionData
   }
 
   /**
@@ -51,12 +57,16 @@ export class VersionsDataSource {
    * }
    */
   async versionData (): Promise<VersionData> {
-    const [latestVersion, npmMetadata] = await Promise.all([this._latestVersion, this._npmMetadata])
+    const versionData = this.#ensureData()
+    const [latestVersion = pkg.version, npmMetadata] = await Promise.all([
+      versionData.latestVersion,
+      versionData.npmMetadata,
+    ])
 
     const latestVersionMetadata: Version = {
       id: latestVersion,
       version: latestVersion,
-      released: npmMetadata[latestVersion] ?? new Date().toISOString(),
+      released: npmMetadata?.[latestVersion] ?? new Date().toISOString(),
     }
 
     return {
@@ -64,7 +74,7 @@ export class VersionsDataSource {
       current: {
         id: pkg.version,
         version: pkg.version,
-        released: npmMetadata[pkg.version] ?? new Date().toISOString(),
+        released: npmMetadata?.[pkg.version] ?? new Date().toISOString(),
       },
     }
   }
@@ -73,7 +83,9 @@ export class VersionsDataSource {
     if (this.ctx.coreData.currentTestingType !== this._currentTestingType) {
       debug('resetting latest version telemetry call due to a different testing type')
       this._currentTestingType = this.ctx.coreData.currentTestingType
-      this._latestVersion = this.getLatestVersion()
+      this.ctx.update((d) => {
+        d.versionData.latestVersion = this.getLatestVersion()
+      })
     }
   }
 

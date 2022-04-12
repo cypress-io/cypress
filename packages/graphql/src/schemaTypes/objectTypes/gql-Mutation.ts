@@ -350,7 +350,7 @@ export const mutation = mutationType({
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
 
-        return ctx.appData
+        return {}
       },
     })
 
@@ -631,7 +631,7 @@ export const mutation = mutationType({
           await ctx.actions.project.reconfigureProject()
         }
 
-        return true
+        return {}
       },
     })
 

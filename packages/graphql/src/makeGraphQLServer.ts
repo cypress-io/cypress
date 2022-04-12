@@ -48,7 +48,7 @@ export async function makeGraphQLServer () {
 
     switch (operationName) {
       case 'orgCreated':
-        ctx.emitter.cloudViewerChange()
+        ctx.emitter.cloudViewerChange({ requestPolicy: 'cache-and-network' })
         break
 
       default:

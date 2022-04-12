@@ -1,6 +1,17 @@
 import { DocumentNode, print } from 'graphql'
 
 import type { DataContext } from '@packages/data-context'
+import type { RequestPolicy } from '@urql/core'
+
+export interface RemoteExecutionRoot {
+  requestPolicy?: RequestPolicy
+  /**
+   * If we set the requestPolicy to cache-and-network, this is
+   * the callback fired in the event where the remote data is different
+   * than what we had in the cache.
+   */
+  onCacheUpdate?: () => void
+}
 
 /**
  * Takes a "document" and executes it against the GraphQL schema
@@ -22,6 +33,7 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
     variables,
     query: print(document),
     requestPolicy: rootValue?.requestPolicy,
+
   })
 
   context.debug('executorResult %o', executorResult)

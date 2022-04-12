@@ -1,3 +1,4 @@
+import type { RequestPolicy } from '@urql/core'
 import { list, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
@@ -21,10 +22,13 @@ export const Subscription = subscriptionType({
     t.field('cloudViewerChange', {
       type: Query,
       description: 'Triggered when there is a change to the info associated with the cloud project (org added, project added)',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
-      resolve: (source, args, ctx) => {
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange', false),
+      resolve: (source: { requestPolicy: RequestPolicy }, args, ctx) => {
         return {
-          requestPolicy: 'cache-and-network',
+          onCacheUpdate: () => {
+            ctx.emitter.cloudViewerChange({ requestPolicy: 'cache-only' })
+          },
+          ...source,
         }
       },
     })
