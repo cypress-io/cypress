@@ -44,7 +44,7 @@ export const Spec = objectType({
       type: GitInfo,
       description: 'Git information about the spec file',
       resolve: async (source, args, ctx) => {
-        return ctx.git.gitInfo(source.absolute)
+        return ctx.lifecycleManager.git?.gitInfoFor(source.absolute) ?? null
       },
     })
   },

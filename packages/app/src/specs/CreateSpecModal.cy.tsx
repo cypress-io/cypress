@@ -1,12 +1,9 @@
 import CreateSpecModal from './CreateSpecModal.vue'
 import { ref } from 'vue'
-import { defaultMessages } from '@cy/i18n'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
 const modalSelector = '[data-cy=create-spec-modal]'
-
-const messages = defaultMessages.createSpec.component.importFromComponent
 
 describe('<CreateSpecModal />', () => {
   beforeEach(() => {
@@ -22,18 +19,20 @@ describe('<CreateSpecModal />', () => {
               __typename: 'CodeGenGlobs',
               component: '**.vue',
             },
-            storybook: null,
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: {
-              e2e: {
+            config: [{
+              field: 'e2e',
+              value: {
                 specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
               },
-              component: {
+            }, {
+              field: 'component',
+              value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            },
+            }],
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/filename.cy.js',
@@ -67,12 +66,6 @@ describe('<CreateSpecModal />', () => {
       .should('not.exist')
     })
   })
-
-  describe('generator', () => {
-    it('renders the generator', () => {
-      cy.contains(messages.header).should('be.visible')
-    })
-  })
 })
 
 describe('playground', () => {
@@ -91,18 +84,20 @@ describe('playground', () => {
               __typename: 'CodeGenGlobs',
               component: '**.vue',
             },
-            storybook: null,
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: {
-              e2e: {
+            config: [{
+              field: 'e2e',
+              value: {
                 specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
               },
-              component: {
+            }, {
+              field: 'component',
+              value: {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
-            },
+            }],
             specs: [],
             fileExtensionToUse: 'js',
             defaultSpecFileName: 'cypress/e2e/filename.cy.js',
