@@ -444,6 +444,20 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  windows-install-chrome:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - run:
+          # TODO: How can we have preinstalled browsers on CircleCI?
+          name: 'Install Chrome on Windows'
+          command: |
+            # install with `--ignore-checksums` to avoid checksum error
+            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+
   run-new-ui-tests:
     parameters:
       package:
@@ -467,13 +481,8 @@ commands:
         default: ''
     steps:
       - restore_cached_workspace
-      - run:
-          # TODO: How can we have preinstalled browsers on CircleCI?
-          name: 'Install Chrome on Windows'
-          command: |
-            # install with `--ignore-checksums` to avoid checksum error
-            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
@@ -828,6 +837,8 @@ commands:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
           command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
       - when:
           condition: <<parameters.folder>>
           steps:
