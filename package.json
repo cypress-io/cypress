@@ -67,7 +67,7 @@
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "type-check": "yarn lerna exec yarn type-check --scope @tooling/system-tests && node scripts/type_check",
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
-    "watch": "yarn gulp dev:watch",
+    "watch": "yarn gulp watch",
     "prepare": "husky install"
   },
   "dependencies": {
