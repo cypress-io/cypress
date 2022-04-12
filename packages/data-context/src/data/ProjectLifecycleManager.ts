@@ -332,6 +332,10 @@ export class ProjectLifecycleManager {
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
+    if (!this._configManager) {
+      return false
+    }
+
     if (this._configManager?.isLoadingConfigFile) {
       try {
         await this.initializeConfig()
