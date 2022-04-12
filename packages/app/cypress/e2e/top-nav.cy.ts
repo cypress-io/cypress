@@ -6,11 +6,13 @@ const pkg = require('@packages/root')
 
 const loginText = defaultMessages.topNav.login
 
+beforeEach(() => {
+  cy.clock(Date.UTC(2021, 9, 30), ['Date'])
+})
+
 describe('App Top Nav Workflows', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
-
-    cy.clock(Date.UTC(2021, 9, 30), ['Date'])
   })
 
   describe('Page Name', () => {
@@ -627,6 +629,8 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.contains('E2E Specs')
+    cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
 
@@ -642,6 +646,8 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.contains('E2E Specs')
+    cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })
 })
