@@ -520,6 +520,7 @@ export class ProjectLifecycleManager {
       this._configManager = undefined
     }
 
+    this.ctx.coreData.currentProjectGitInfo?.destroy()
     this.ctx.project.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
