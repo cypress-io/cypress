@@ -24,8 +24,14 @@ declare namespace Cypress {
   interface CommandFn<T extends keyof ChainableMethods> {
     (this: Mocha.Context, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
+  interface CommandFns {
+    [name: string]: (this: Mocha.Context, ...args: any) => any
+  }
   interface CommandFnWithSubject<T extends keyof ChainableMethods, S> {
     (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnsWithSubject<S> {
+    [name: string]: (this: Mocha.Context, prevSubject: S, ...args: any) => any
   }
   interface CommandOriginalFn<T extends keyof ChainableMethods> extends CallableFunction {
     (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
@@ -462,6 +468,14 @@ declare namespace Cypress {
       ): void
       add<T extends keyof Chainable, S extends PrevSubject>(
           name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
+      ): void
+      addAll<T extends keyof Chainable>(fns: CommandFns): void
+      addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
+      addAll<T extends keyof Chainable, S extends PrevSubject>(
+          options: CommandOptions & { prevSubject: true | S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+      ): void
+      addAll<T extends keyof Chainable, S extends PrevSubject>(
+          options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
       ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
