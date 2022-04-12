@@ -22,7 +22,7 @@ describe('e2e cross origin navigation', () => {
 
   // TODO: convert to cypress-in-cypress test if possible
   // https://github.com/cypress-io/cypress/issues/20973
-  systemTests.it('captures cross origin failures when "experimentalLoginFlows" config value is falsy', {
+  systemTests.it('captures cross origin failures when "experimentalSessionAndOrigin" config value is falsy', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'navigation_cross_origin_errors.ts',
@@ -30,7 +30,7 @@ describe('e2e cross origin navigation', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      experimentalLoginFlows: false,
+      experimentalSessionAndOrigin: false,
     },
     async onRun (exec) {
       const res = await exec()

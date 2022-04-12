@@ -153,7 +153,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalLoginFlows',
+    name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,

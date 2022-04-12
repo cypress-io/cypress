@@ -1,6 +1,6 @@
 const helpers = require('../support/helpers')
 
-const { runIsolatedCypress } = helpers.createCypress({ config: { experimentalLoginFlows: true } })
+const { runIsolatedCypress } = helpers.createCypress({ config: { experimentalSessionAndOrigin: true } })
 
 describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeight: 660 }, () => {
   it('empty session with no data', () => {

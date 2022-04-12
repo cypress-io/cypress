@@ -148,7 +148,7 @@ export class OpenProject {
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
-      experimentalLoginFlows: cfg.experimentalLoginFlows,
+      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
     })
 
     // if we don't have the isHeaded property
