@@ -101,20 +101,20 @@ export const create = ($$, state) => {
   }
 
   const getStyles = (snapshot) => {
-    const stylesOrStyleIds = snapshotsMap.get(snapshot)
+    const { ids, styles } = snapshotsMap.get(snapshot) || {}
 
-    if (!stylesOrStyleIds) {
+    if (!ids && !styles) {
       return {}
     }
 
     // If a cross origin processed snapshot, styles are directly added into the CSS map. Simply return them.
-    if (stylesOrStyleIds?.headStyles || stylesOrStyleIds.bodyStyles) {
-      return stylesOrStyleIds
+    if (styles?.headStyles || styles?.bodyStyles) {
+      return styles
     }
 
     return {
-      headStyles: snapshotsCss.getStylesByIds(stylesOrStyleIds.headStyleIds),
-      bodyStyles: snapshotsCss.getStylesByIds(stylesOrStyleIds.bodyStyleIds),
+      headStyles: snapshotsCss.getStylesByIds(ids?.headStyleIds),
+      bodyStyles: snapshotsCss.getStylesByIds(ids?.bodyStyleIds),
     }
   }
 
@@ -133,7 +133,12 @@ export const create = ($$, state) => {
       },
     }
 
-    snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+    snapshotsMap.set(snapshot, {
+      ids: {
+        headStyleIds,
+        bodyStyleIds,
+      },
+    })
 
     return snapshot
   }
@@ -260,10 +265,20 @@ export const create = ($$, state) => {
       } = styleAttrs
 
       if (headStyleIds && bodyStyleIds) {
-        snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+        snapshotsMap.set(snapshot, {
+          ids: {
+            headStyleIds,
+            bodyStyleIds,
+          },
+        })
       } else if (headStyles && bodyStyles) {
         // The Snapshot is being reified from cross origin. Get inline styles of reified snapshot.
-        snapshotsMap.set(snapshot, { headStyles, bodyStyles })
+        snapshotsMap.set(snapshot, {
+          styles: {
+            headStyles,
+            bodyStyles,
+          },
+        })
       }
 
       return snapshot
