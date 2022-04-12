@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@cypress/vue": "file:../../../npm/vue",
-    "@cypress/webpack-dev-server": "^1.0.0",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
     "@vue/cli-service": "~4.5.15",
     "@vue/compiler-sfc": "^3.0.0"
   },

@@ -54,13 +54,11 @@
 "@cypress/vue@file:../../../npm/vue":
   version "0.0.0-development"
   dependencies:
-    "@cypress/mount-utils" "file:../../../../../Library/Caches/Yarn/v6/npm-@cypress-vue-0.0.0-development-c90cab6d-f98f-4d14-b062-8f9fb02e50ff-1649724404066/node_modules/@cypress/mount-utils"
+    "@cypress/mount-utils" "file:../../../../../Library/Caches/Yarn/v6/npm-@cypress-vue-0.0.0-development-8c9c0e57-9270-41e9-951b-52b1896441dc-1649787077920/node_modules/@cypress/mount-utils"
     "@vue/test-utils" "2.0.0-rc.19"
 
-"@cypress/webpack-dev-server@1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-dev-server/-/webpack-dev-server-1.8.1.tgz#5e37e15082b84a1e681198acd4a8473c10c95d9f"
-  integrity sha512-gE+VIcRH/vmIQdzSRAz/xCkzcOxZKL4hK2IMWGqRG34Vm51HROXm4mgOkXdCmXacEoO16cWJawZTqSVVsSTH3w==
+"@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":
+  version "0.0.0-development"
   dependencies:
     debug "^4.3.2"
     semver "^7.3.4"

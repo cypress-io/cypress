@@ -19,6 +19,6 @@
   },
   "devDependencies": {
     "@cypress/vue": "2.2.4",
-    "@cypress/webpack-dev-server": "1.8.1"
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server"
   }
 }

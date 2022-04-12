@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@cypress/react": "^5.0.0",
-    "@cypress/webpack-dev-server": "^1.8.1",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
     "axe-core": "4.4.1",
     "cypress-axe": "0.14.0",
     "html-webpack-plugin": "^4.0.0",
