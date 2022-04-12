@@ -5,24 +5,26 @@ import fs from 'fs-extra'
 async function teardownGit (projectPath: string) {
   const gitDir = path.join(projectPath, '.git')
 
-  if (!await fs.stat(gitDir)) {
-    return
+  try {
+    if (await fs.stat(gitDir)) {
+      return fs.remove(gitDir)
+    }
+  } catch (e) {
+    // git not initialized - no need to do anything
   }
-
-  return fs.remove(gitDir)
 }
 
 export async function initGitRepoForTestProject (projectPath: string) {
   /**
-   * There's a potential race condition the task executes
-   * before the domain is updated in cypress-in-cypress e2e tests,
-   * and we end up in an incorrect state where the test project
-   * is not in a pristine, deterministic state.
-   *
-   * For this reason we check if the git repo
-   * exists, and if it does, remove it and re-create it,
-   * to ensure the test runs on a pristine project.
-   */
+    * There's a potential race condition the task executes
+  * before the domain is updated in cypress-in-cypress e2e tests,
+  * and we end up in an incorrect state where the test project
+  * is not in a pristine, deterministic state.
+    *
+    * For this reason we check if the git repo
+  * exists, and if it does, remove it and re-create it,
+    * to ensure the test runs on a pristine project.
+    */
   await teardownGit(projectPath)
 
   const git = simpleGit({ baseDir: projectPath })
