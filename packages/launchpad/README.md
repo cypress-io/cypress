@@ -48,7 +48,7 @@ This starts Vite in watch mode. It also starts the GraphQL Server. You can acces
 
 ![graphql](../graphql/gql.png)
 
-If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run`, you might need to reopen your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
+If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run, you might need to reopen your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
 
 ## Testing
 
