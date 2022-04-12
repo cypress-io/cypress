@@ -4,15 +4,8 @@
       display: none;
     }
 
-    &.has-multiple-attempts .attempt-item > .collapsible {
-
-      .collapsible-header-wrapper {
-        display: flex;
-      }
-
-      .collapsible-content {
-        padding-left: 10px;
-      }
+    &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header-wrapper {
+      display: flex;
     }
   }
 
