@@ -581,24 +581,24 @@ commands:
       - restore_cached_binary
       - run:
           name: "Cloning test project and checking out release branch: <<parameters.repo>>"
-          working_directory: ~/
+          working_directory: /tmp/<<parameters.repo>>
           command: |
-            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
             # install some deps for get-next-version
             npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
-            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+            NEXT_VERSION=$(node ~/cypress/scripts/get-next-version.js)
 
-            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
+            git checkout $NEXT_VERSION || true
       - when:
-            condition: <<parameters.pull_request_id>>
-            steps:
-              - run:
-                  name: Check out PR <<parameters.pull_request_id>>
-                  working_directory: /tmp/<<parameters.repo>>
-                  command: |
-                    git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
-                    git checkout pr-<<parameters.pull_request_id>>
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
 
   test-binary-against-rwa:
     description: |
