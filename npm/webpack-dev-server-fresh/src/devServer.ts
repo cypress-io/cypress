@@ -1,13 +1,16 @@
 /// <reference types="cypress" />
 
 import type WebpackDevServer from 'webpack-dev-server'
-import type { Compiler } from 'webpack'
+import type { Compiler, Configuration } from 'webpack'
 
 import { createWebpackDevServer } from './createWebpackDevServer'
 import { sourceRelativeWebpackModules } from './helpers/sourceRelativeWebpackModules'
 import type { AddressInfo } from 'net'
 import debugLib from 'debug'
 import type { Server } from 'http'
+import { vueCliHandler } from './helpers/vueCliHandler'
+import { nuxtHandler } from './helpers/nuxtHandler'
+import { createReactAppHandler } from './helpers/createReactAppHandler'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:devServer')
 
@@ -20,7 +23,7 @@ export type WebpackDevServerConfig = {
   webpackConfig?: unknown // Derived from the user's webpack
 }
 
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react'] as const
+const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli'] as const
 
 /**
  * @internal
@@ -48,8 +51,8 @@ const normalizeError = (error: Error | string) => {
  * @param config
  */
 export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
-  return new Promise((resolve, reject) => {
-    const result = devServer.create(devServerConfig) as DevServerCreateResult
+  return new Promise(async (resolve, reject) => {
+    const result = await devServer.create(devServerConfig) as DevServerCreateResult
 
     // When compiling in run mode
     // Stop the clock early, no need to run all the tests on a failed build
@@ -109,25 +112,30 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
 }
 
 /**
- * Syncronously create the webpack server instance, without starting.
+ * Synchronously create the webpack server instance, without starting.
  * Useful for testing
  *
  * @internal
  */
-devServer.create = function (devServerConfig: WebpackDevServerConfig) {
+devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
   const sourceWebpackModulesResult = sourceRelativeWebpackModules(devServerConfig)
 
-  let frameworkConfig: object | undefined
+  let frameworkConfig: Configuration | undefined
 
   // If we have a framework specified, source the associated config
   if (typeof devServerConfig.framework === 'string') {
     switch (devServerConfig.framework) {
       case 'create-react-app':
-        // frameworkConfig = createReactApp()
+        frameworkConfig = createReactAppHandler({ devServerConfig, sourceWebpackModulesResult })
         break
       case 'react':
         break
       case 'nuxt':
+        frameworkConfig = await nuxtHandler({ devServerConfig, sourceWebpackModulesResult })
+        break
+
+      case 'vue-cli':
+        frameworkConfig = vueCliHandler({ devServerConfig, sourceWebpackModulesResult })
         break
       default:
         throw new Error(`Unexpected framework ${devServerConfig.framework}, expected one of ${ALL_FRAMEWORKS.join(', ')}`)

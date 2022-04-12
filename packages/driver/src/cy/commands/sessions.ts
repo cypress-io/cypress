@@ -9,9 +9,9 @@ const currentTestRegisteredSessions = new Map()
 
 /**
  * rules for clearing session data:
- * if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
- * if user relaunches the browser or launches a new spec, session data SHOULD be cleared
- * session data SHOULD be cleared between specs in run mode
+ *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
+ *  - if user relaunches the browser or launches a new spec, session data SHOULD be cleared
+ *  - session data SHOULD be cleared between specs in run mode
  *
  * therefore session data should be cleared with spec browser launch
  */
@@ -109,7 +109,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
     specWindow.removeEventListener('message', onPostMessage)
     $iframeContainer.remove()
   })
-  .catch((err) => {
+  .catch(() => {
     Cypress.log({
       name: 'warning',
       message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
@@ -118,30 +118,38 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
 }
 
 const getConsoleProps = (sessState) => {
-  const ret = {
-    id: sessState.id,
-    table: _.compact(_.flatMap(getSessionDetailsForTable(sessState), (val, domain) => {
-      return [() => {
-        return {
-          name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
-          data: val.cookies,
-        }
-      },
-      val.localStorage && (() => {
-        return {
-          name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
-          data: _.map(val.localStorage.value, (value, key) => {
-            return {
-              key, value,
-            }
-          }),
-        }
-      })]
-    }))
-    ,
-  }
+  const sessionDetails = getSessionDetailsForTable(sessState)
 
-  return ret
+  const tables = _.flatMap(sessionDetails, (val, domain) => {
+    const cookiesTable = () => {
+      return {
+        name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
+        data: val.cookies,
+      }
+    }
+
+    const localStorageTable = () => {
+      return {
+        name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
+        data: _.map(val.localStorage.value, (value, key) => {
+          return {
+            key,
+            value,
+          }
+        }),
+      }
+    }
+
+    return [
+      val.cookies && cookiesTable,
+      val.localStorage && localStorageTable,
+    ]
+  })
+
+  return {
+    id: sessState.id,
+    table: _.compact(tables),
+  }
 }
 
 const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
@@ -211,6 +219,7 @@ export default function (Commands, Cypress, cy) {
 
     return currentSessions[id]
   }
+
   const clearActiveSessions = () => {
     const curSessions = cy.state('activeSessions') || {}
 
@@ -284,7 +293,6 @@ export default function (Commands, Cypress, cy) {
   }
 
   const sessions = {
-
     defineSession (options = {} as any) {
       const sess_state = {
         id: options.id,
@@ -495,7 +503,6 @@ export default function (Commands, Cypress, cy) {
         return
       })
     },
-
   }
 
   Cypress.on('run:start', () => {
@@ -515,7 +522,7 @@ export default function (Commands, Cypress, cy) {
       // backup session command so we can set it as codeFrame location for errors later on
       const sessionCommand = cy.state('current')
 
-      // stringfy deterministically if we were given an object
+      // stringify deterministically if we were given an object
       id = typeof id === 'string' ? id : stringifyStable(id)
 
       if (options) {
@@ -523,12 +530,12 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.wrongArgOptions')
         }
 
-        const validopts = {
+        const validOpts = {
           'validate': 'function',
         }
 
         Object.keys(options).forEach((key) => {
-          const expectedType = validopts[key]
+          const expectedType = validOpts[key]
 
           if (!expectedType) {
             $errUtils.throwErrByPath('sessions.session.wrongArgOptionUnexpected', { args: { key } })

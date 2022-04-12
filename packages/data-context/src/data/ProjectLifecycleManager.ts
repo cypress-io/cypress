@@ -16,7 +16,7 @@ import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { LegacyCypressConfigJson } from '../sources'
+import { GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
@@ -93,6 +93,10 @@ export class ProjectLifecycleManager {
     process.on('exit', this.onProcessExit)
 
     return autoBindDebug(this)
+  }
+
+  get git () {
+    return this.ctx.coreData.currentProjectGitInfo
   }
 
   private onProcessExit = () => {
@@ -187,7 +191,7 @@ export class ProjectLifecycleManager {
   }
 
   async checkIfLegacyConfigFileExist () {
-    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.legacyConfigFile)
+    const legacyConfigFileExist = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
 
     return Boolean(legacyConfigFileExist)
   }
@@ -328,6 +332,10 @@ export class ProjectLifecycleManager {
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
+    if (!this._configManager) {
+      return false
+    }
+
     if (this._configManager?.isLoadingConfigFile) {
       try {
         await this.initializeConfig()
@@ -373,6 +381,19 @@ export class ProjectLifecycleManager {
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
+      s.currentProjectGitInfo?.destroy()
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+      })
+
       s.packageManager = packageManagerUsed
     })
 
@@ -499,6 +520,7 @@ export class ProjectLifecycleManager {
       this._configManager = undefined
     }
 
+    this.ctx.coreData.currentProjectGitInfo?.destroy()
     this.ctx.project.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined

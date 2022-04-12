@@ -10,7 +10,7 @@ export const Editor = objectType({
       description: 'name of editor',
     })
 
-    t.nonNull.string('binary', {
+    t.string('binary', {
       description: 'Binary that opens the editor',
     })
   },
