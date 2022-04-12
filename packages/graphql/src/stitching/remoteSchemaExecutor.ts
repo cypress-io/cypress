@@ -5,12 +5,6 @@ import type { RequestPolicy } from '@urql/core'
 
 export interface RemoteExecutionRoot {
   requestPolicy?: RequestPolicy
-  /**
-   * If we set the requestPolicy to cache-and-network, this is
-   * the callback fired in the event where the remote data is different
-   * than what we had in the cache.
-   */
-  onCacheUpdate?: () => void
 }
 
 /**
@@ -27,13 +21,14 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
     return { data: null }
   }
 
+  const requestPolicy: RequestPolicy | undefined = rootValue?.requestPolicy ?? null
+
   const executorResult = await context.cloud.executeRemoteGraphQL({
     operationType,
     document,
     variables,
     query: print(document),
-    requestPolicy: rootValue?.requestPolicy,
-
+    requestPolicy,
   })
 
   context.debug('executorResult %o', executorResult)

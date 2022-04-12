@@ -1,4 +1,3 @@
-import type { RequestPolicy } from '@urql/core'
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 
@@ -39,8 +38,8 @@ abstract class DataEmitterEvents {
   /**
    * Emitted when we have a notification from the cloud to refresh the data
    */
-  cloudViewerChange (toEmit: { requestPolicy: RequestPolicy }) {
-    this._emit('cloudViewerChange', toEmit)
+  cloudViewerChange () {
+    this._emit('cloudViewerChange')
   }
 
   /**

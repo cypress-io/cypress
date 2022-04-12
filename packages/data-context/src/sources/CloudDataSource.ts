@@ -116,14 +116,8 @@ export class CloudDataSource {
               this.ctx.coreData.dashboardGraphQLError = null
             }
 
-            if (config.onCacheUpdate) {
-              config.onCacheUpdate()
-            } else {
-              // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
-              // since we know we're up-to-date
-              this.ctx.emitter.toApp()
-              this.ctx.emitter.toLaunchpad()
-            }
+            this.ctx.emitter.toApp()
+            this.ctx.emitter.toLaunchpad()
           }
 
           if (!res.stale) {
