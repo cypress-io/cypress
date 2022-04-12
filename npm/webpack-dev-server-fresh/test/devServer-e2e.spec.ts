@@ -6,6 +6,7 @@ import http from 'http'
 import fs from 'fs'
 
 import { devServer } from '..'
+import { restoreLoadHook } from '../src/helpers/sourceRelativeWebpackModules'
 
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
@@ -56,6 +57,15 @@ const cypressConfig = {
 } as any as Cypress.PluginConfigOptions
 
 describe('#devServer', () => {
+  beforeEach(() => {
+    delete require.cache
+    restoreLoadHook()
+  })
+
+  after(() => {
+    restoreLoadHook()
+  })
+
   it('serves specs via a webpack dev server', async () => {
     const { port, close } = await devServer({
       cypressConfig,

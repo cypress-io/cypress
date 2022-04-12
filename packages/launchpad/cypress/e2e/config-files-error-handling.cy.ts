@@ -56,7 +56,8 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Cypress no longer supports')
+    cy.contains('p', 'There is both a cypress.config.js and a cypress.json file at the location below:')
+    cy.contains('body', 'Cypress no longer supports cypress.json')
     expectStackToBe('closed')
 
     cy.withCtx(async (ctx) => {
