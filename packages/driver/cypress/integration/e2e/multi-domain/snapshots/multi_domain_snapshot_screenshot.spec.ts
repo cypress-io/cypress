@@ -11,7 +11,7 @@ context('cross-origin snapshot screenshot', { experimentalSessionSupport: true }
       logs.set(attrs.id, log)
     })
 
-    cy.viewport(600, 200)
+    //  cy.viewport(600, 200)
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="screenshots-link"]').click()
   })
@@ -27,7 +27,7 @@ context('cross-origin snapshot screenshot', { experimentalSessionSupport: true }
 
         expect(consoleProps).to.have.property('blackout')
         expect(consoleProps).to.have.property('capture').that.equals('fullPage')
-        expect(consoleProps).to.have.property('dimensions').that.equals('600px x 480px')
+        expect(consoleProps).to.have.property('dimensions').that.is.a('string')
         expect(consoleProps).to.have.property('disableTimersAndAnimations').that.is.a('boolean')
         expect(consoleProps).to.have.property('duration').that.is.a('string')
         expect(consoleProps).to.have.property('multipart').that.is.a('boolean')
