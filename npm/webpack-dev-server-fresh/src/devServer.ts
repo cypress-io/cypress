@@ -10,6 +10,7 @@ import debugLib from 'debug'
 import type { Server } from 'http'
 import { vueCliHandler } from './helpers/vueCliHandler'
 import { nuxtHandler } from './helpers/nuxtHandler'
+import { createReactAppHandler } from './helpers/createReactAppHandler'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:devServer')
 
@@ -111,7 +112,7 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
 }
 
 /**
- * Syncronously create the webpack server instance, without starting.
+ * Synchronously create the webpack server instance, without starting.
  * Useful for testing
  *
  * @internal
@@ -125,7 +126,7 @@ devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
   if (typeof devServerConfig.framework === 'string') {
     switch (devServerConfig.framework) {
       case 'create-react-app':
-        // frameworkConfig = createReactApp()
+        frameworkConfig = createReactAppHandler({ devServerConfig, sourceWebpackModulesResult })
         break
       case 'react':
         break
