@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const is = require('check-more-types')
 const cp = require('child_process')
 const os = require('os')
+const path = require('path')
 const yauzl = require('yauzl')
 const debug = require('debug')('cypress:cli:unzip')
 const extract = require('extract-zip')
@@ -195,6 +196,26 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
   })
 }
 
+async function isWindowsMaxFilePathError (err) {
+  if (!(os.platform === 'win32' && err.code === 'ENOENT' && err.syscall === 'realpath')) return false
+
+  // an ENOENT on realpath on Windows is usually due to the max path length restriction.
+  // do a test write to confirm if they have this restriction.
+  const tmp = os.tmpdir()
+  let longPath = path.join(tmp, `cy-long-filename-test-`)
+
+  longPath += 'a'.repeat(Math.max(270 - longPath.length, 0))
+
+  try {
+    await fs.writeFile(longPath, 'this is a test to see if this system supports extra-long filenames')
+  } catch (err) {
+    // if an ENOENT error occurred, we are hitting the max path length
+    return err.code === 'ENOENT'
+  }
+
+  return false
+}
+
 const start = async ({ zipFilePath, installDir, progress }) => {
   la(is.unemptyString(installDir), 'missing installDir')
   if (!progress) {
@@ -214,7 +235,11 @@ const start = async ({ zipFilePath, installDir, progress }) => {
 
     await unzip({ zipFilePath, installDir, progress })
   } catch (err) {
-    await throwFormErrorText(errors.failedUnzip)(err)
+    const errorTemplate = (await isWindowsMaxFilePathError(err)) ?
+      errors.failedUnzipWindowsMaxFilePath
+      : errors.failedUnzip
+
+    await throwFormErrorText(errorTemplate)(err)
   }
 }
 
