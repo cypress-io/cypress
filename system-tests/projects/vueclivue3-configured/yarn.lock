@@ -28,18 +28,14 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.17.3.tgz#b07702b982990bf6fdc1da5049a23fece4c5c3d0"
   integrity sha512-7yJPvPV+ESz2IUTPbOL+YkIGyCqOyNIzdguKQuJGnH7bg1WTIifuM21YqokFt/THWh1AkCRn9IgoykTRCBVpzA==
 
-"@cypress/mount-utils@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@cypress/mount-utils/-/mount-utils-1.0.2.tgz#afbc4f8c350b7cd86edc5ad0db0cbe1e0181edc8"
-  integrity sha512-Fn3fdTiyayHoy8Ol0RSu4MlBH2maQ2ZEXeEVKl/zHHXEQpld5HX3vdNLhK5YLij8cLynA4DxOT/nO9iEnIiOXw==
+"@cypress/mount-utils@file:../../../npm/mount-utils":
+  version "0.0.0-development"
 
-"@cypress/vue@^3.0.0":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@cypress/vue/-/vue-3.1.1.tgz#0e6b4a1cb972d2f271ba05209c55e9101a96d0a4"
-  integrity sha512-wD1vunuPFPLC8FZtgwdq+mcSEOs27qquuJJdGcY8aAN0y38rqYuuaj+N4UxKoAjhkSwthaOeZehjBtvDvv9C6w==
+"@cypress/vue@file:../../../npm/vue":
+  version "0.0.0-development"
   dependencies:
-    "@cypress/mount-utils" "1.0.2"
-    "@vue/test-utils" "^2.0.0-rc.10"
+    "@cypress/mount-utils" "file:../../../../../Library/Caches/Yarn/v6/npm-@cypress-vue-0.0.0-development-e790c708-4a8b-4cdc-8fe1-cbfe14d2db79-1649724988925/node_modules/@cypress/mount-utils"
+    "@vue/test-utils" "2.0.0-rc.19"
 
 "@cypress/webpack-dev-server@^1.0.0":
   version "1.8.1"
@@ -487,10 +483,10 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.31.tgz#c90de7126d833dcd3a4c7534d534be2fb41faa4e"
   integrity sha512-ymN2pj6zEjiKJZbrf98UM2pfDd6F2H7ksKw7NDt/ZZ1fh5Ei39X5tABugtT03ZRlWd9imccoK0hE8hpjpU7irQ==
 
-"@vue/test-utils@^2.0.0-rc.10":
-  version "2.0.0-rc.17"
-  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.0.0-rc.17.tgz#e6dcf5b5bd3ae23595bdb154b9b578ebcdffd698"
-  integrity sha512-7LHZKsFRV/HqDoMVY+cJamFzgHgsrmQFalROHC5FMWrzPzd+utG5e11krj1tVsnxYufGA2ABShX4nlcHXED+zQ==
+"@vue/test-utils@2.0.0-rc.19":
+  version "2.0.0-rc.19"
+  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.0.0-rc.19.tgz#cd10480b695027481981085c3f705081495a7ca0"
+  integrity sha512-vQ/34z9NH/pqJzl9YTWtTq/vrx5JzLbMojcBB0qydeb7FtGqxp11nLYCgVso+pa8ZOSn2j+OQfjc5aBnb32uzw==
 
 "@vue/web-component-wrapper@^1.2.0":
   version "1.3.0"
