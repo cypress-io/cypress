@@ -38,8 +38,7 @@ context('cross-origin snapshot files', { experimentalSessionSupport: true }, () 
     })
   })
 
-  // FIXME: this test hangs and needs investigation
-  it.skip('.writeFile()', (done) => {
+  it('.writeFile()', (done) => {
     cy.on('command:queue:end', () => {
       setTimeout(() => {
         const { crossOriginLog, consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
@@ -54,7 +53,6 @@ context('cross-origin snapshot files', { experimentalSessionSupport: true }, () 
       }, 250)
     })
 
-    // FIXME: this test hangs when the console is open.
     cy.origin('http://foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
