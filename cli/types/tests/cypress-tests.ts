@@ -129,7 +129,7 @@ namespace CypressCommandsTests {
       subject // $ExpectType Document
     } else {
       subject // $ExpectType JQueryWithSelector<HTMLElement>
-			subject.selector // $ExpectType string | null | undefined
+      subject.selector // $ExpectType string | null | undefined
     }
     arg // $ExpectType string
   })
