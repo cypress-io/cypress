@@ -51,7 +51,7 @@ export const Query = objectType({
     })
 
     t.field('versions', {
-      remote: true,
+      deferIfNotLoaded: true,
       type: VersionData,
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {

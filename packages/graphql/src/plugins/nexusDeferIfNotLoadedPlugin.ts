@@ -8,17 +8,17 @@ const NO_RESULT = {}
 // cloudUrqlClient in CloudDataSource
 const RACE_MAX_EXECUTION_MS = 2
 const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
-const debug = debugLib('cypress:graphql:nexusCloudRequestPlugin')
+const debug = debugLib('cypress:graphql:nexusDeferIfNotLoadedPlugin')
 
 /**
  * This plugin taps into each of the requests and checks for the existence
  * of a "Cloud" prefixed type. When we see these, we know that we're dealing
- * with a remote API. We can also specify `remote: true` on the Nexus definition
+ * with a remote API. We can also specify `deferIfNotLoaded: true` on the Nexus definition
  * to indicate that this is a remote request, such as resolving the "versions" field
  */
-export const nexusCloudRequestPlugin = plugin({
-  name: 'nexusCloudRequestPlugin',
-  fieldDefTypes: 'remote?: true',
+export const nexusDeferIfNotLoadedPlugin = plugin({
+  name: 'nexusDeferIfNotLoadedPlugin',
+  fieldDefTypes: 'deferIfNotLoaded?: true',
   onCreateFieldResolver (def) {
     const { name: parentTypeName } = def.parentTypeConfig
 
@@ -29,13 +29,13 @@ export const nexusCloudRequestPlugin = plugin({
       return
     }
 
-    // Specified w/ remote: true on the field definition
-    const isMarkedAsRemote = Boolean(def.fieldConfig.extensions?.nexus?.config.remote)
+    // Specified w/ deferIfNotLoaded: true on the field definition
+    const shouldDeferIfNotLoaded = Boolean(def.fieldConfig.extensions?.nexus?.config.deferIfNotLoaded)
 
     // Fields where type: 'Cloud*', e.g. 'cloudViewer' which is type: 'CloudUser'
     const isEligibleCloudField = getNamedType(def.fieldConfig.type).name.startsWith('Cloud')
 
-    if (!isEligibleCloudField && !isMarkedAsRemote) {
+    if (!isEligibleCloudField && !shouldDeferIfNotLoaded) {
       return
     }
 
@@ -43,10 +43,10 @@ export const nexusCloudRequestPlugin = plugin({
 
     // We should never allow a non-null query type, this is an error should be caught at development time
     if (isNonNullType(def.fieldConfig.type)) {
-      throw new Error(`Cannot add nexusCloudRequestPlugin to non-nullable field ${qualifiedField}`)
+      throw new Error(`Cannot add nexusDeferIfNotLoadedPlugin to non-nullable field ${qualifiedField}`)
     }
 
-    debug(`Adding nexusCloudRequestPlugin for %s`, qualifiedField)
+    debug(`Adding nexusDeferIfNotLoadedPlugin for %s`, qualifiedField)
 
     return async (source, args, ctx: DataContext, info, next) => {
       // Don't need to race Mutations / Subscriptions, which can return types containing these fields
