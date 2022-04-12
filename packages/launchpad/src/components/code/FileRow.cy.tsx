@@ -23,7 +23,7 @@ const changesRequiredDescription = messages.changesRequiredDescription.replace('
 describe('FileRow', () => {
   it('renders each status', () => {
     cy.mount(() => (
-      <div class="p-5 w-full">
+      <div class="w-full p-5">
         <FileRow
           status="valid"
           content={content}
@@ -35,6 +35,7 @@ describe('FileRow', () => {
           status="changes"
           content={content}
           filePath="cypress/integration/command.js"
+          absoluteFilePath="/absolute/cypress/integration/command.js"
           description={description}
           fileExtension=".js"
         />
@@ -67,7 +68,7 @@ describe('FileRow', () => {
 
   it('opens on click', () => {
     cy.mount(() => (
-      <div class="p-5 w-full">
+      <div class="w-full p-5">
         <FileRow
           status="valid"
           content={content}
@@ -79,6 +80,7 @@ describe('FileRow', () => {
           status="changes"
           content={content}
           filePath="cypress/integration/command.js"
+          absoluteFilePath="/absolute/cypress/integration/command.js"
           description={description}
           fileExtension=".js"
         />
@@ -101,11 +103,12 @@ describe('FileRow', () => {
     const lorem = faker.lorem.paragraphs(3)
 
     cy.mount(() => (
-      <div class="p-5 w-full">
+      <div class="w-full p-5">
         <FileRow
           status="changes"
           content={content}
           filePath="cypress/integration/command.js"
+          absoluteFilePath="/absolute/cypress/integration/command.js"
           description={lorem}
           fileExtension=".js"
         />

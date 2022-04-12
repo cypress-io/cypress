@@ -10,6 +10,7 @@
       :content="file.file.contents"
       :status="file.status"
       :file-path="file.file.relative"
+      :absolute-file-path="file.file.absolute"
       :file-extension="file.file.fileExtension"
       :description="file.description || undefined"
     />

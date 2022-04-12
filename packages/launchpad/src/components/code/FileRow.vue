@@ -30,7 +30,7 @@
       </ListRowHeader>
     </template>
     <div
-      v-if="status === 'changes'"
+      v-if="status === 'changes' && absoluteFilePath"
       class="border-b flex bg-warning-100 border-b-gray-100 p-3 top-0 text-warning-600 z-1 sticky items-center"
     >
       <p class="flex-grow text-left ml-1">
@@ -39,7 +39,17 @@
           scope="global"
           keypath="setupPage.configFile.changesRequiredDescription"
         >
-          <span class="rounded bg-warning-200 px-1 text-warning-600 inline-block">{{ filePath }}</span>
+          <OpenFileInIDE
+            v-slot="{onClick}"
+            :file-path="absoluteFilePath"
+          >
+            <a
+              class="rounded cursor-pointer bg-warning-200 px-1 text-warning-600 inline-block"
+              @click="onClick"
+            >
+              {{ filePath }}
+            </a>
+          </OpenFileInIDE>
         </i18n-t>
       </p>
       <Button
@@ -53,8 +63,6 @@
       :lang="language"
       :code="content"
       line-numbers
-      copy-on-click
-      copy-button
     />
   </Collapsible>
 </template>
@@ -81,6 +89,7 @@ import Button from '@cy/components/Button.vue'
 import Badge from '@cy/components/Badge.vue'
 import { useI18n } from '@cy/i18n'
 import ShikiHighlight, { langsSupported } from '@cy/components/ShikiHighlight.vue'
+import OpenFileInIDE from '@cy/gql-components/OpenFileInIDE.vue'
 import type { CyLangType } from '@cy/components/ShikiHighlight.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
@@ -94,6 +103,7 @@ const { t } = useI18n()
 const props = defineProps<{
   status: FileRowStatus
   filePath: string
+  absoluteFilePath?: string
   content: string
   description?: string
   fileExtension: string
