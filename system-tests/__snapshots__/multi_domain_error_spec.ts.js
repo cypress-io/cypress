@@ -5,10 +5,11 @@ exports['e2e cy.origin errors / captures the stack trace correctly for errors in
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (multi_domain_error_spec.ts)                                               │
-  │ Searched:   cypress/integration/multi_domain_error_spec.ts                                     │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (multi_domain_error_spec.ts)                                             │
+  │ Searched:     cypress/integration/multi_domain_error_spec.ts                                   │
+  │ Experiments:  experimentalLoginFlows=true                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
