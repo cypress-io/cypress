@@ -43,7 +43,7 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
+  async launch (browser, spec: Cypress.Spec, options: LaunchOpts = {
     onError: () => undefined,
   }) {
     this._ctx = getCtx()

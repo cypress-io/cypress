@@ -29,5 +29,17 @@ describe('Spec List - Git Status', () => {
     cy.get('[data-cy-row="cypress/e2e/dom-container.spec.js"]')
     .contains('Modified')
     .get('[data-cy="git-status-unmodified"]')
+
+    cy.withCtx((ctx) => {
+      ctx.fs.writeFileSync(
+        ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'dom-container.spec.js'),
+        '// modifying the spec.',
+      )
+    })
+
+    // should update via GraphQL subscription, now the status is modified.
+    cy.get('[data-cy-row="cypress/e2e/dom-container.spec.js"]')
+    .contains('Modified')
+    .get('[data-cy="git-status-modified"]')
   })
 })

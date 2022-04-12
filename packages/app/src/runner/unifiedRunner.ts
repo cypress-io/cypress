@@ -5,7 +5,6 @@ import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { SpecFile } from '@packages/types/src'
-import { getPathForPlatform } from '../paths'
 
 const initialized = ref(false)
 
@@ -29,7 +28,7 @@ export function useUnifiedRunner () {
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
       watch(() => specs.value, (newVal) => {
-        const fileParam = getPathForPlatform(route.query.file as string)
+        const fileParam = route.query.file as string
 
         if (!fileParam) {
           // no file param, we are not showing a file
@@ -37,7 +36,9 @@ export function useUnifiedRunner () {
           return
         }
 
-        const activeSpecInSpecsList = newVal.find((x) => x.relative === fileParam)
+        const activeSpecInSpecsList = newVal.find((x) => {
+          return x.relative === fileParam
+        })
 
         if (!activeSpecInSpecsList) {
           // the specs list no longer contains the spec being shown
@@ -46,8 +47,10 @@ export function useUnifiedRunner () {
         }
       })
 
-      return watch(() => getPathForPlatform(route.query.file as string), (queryParam) => {
-        const spec = specs.value.find((x) => x.relative === queryParam)
+      return watch(() => route.query.file, (queryParam) => {
+        const spec = specs.value.find((x) => {
+          return x.relative === queryParam
+        })
 
         if (selectorPlaygroundStore.show) {
           const autIframe = getAutIframeModel()

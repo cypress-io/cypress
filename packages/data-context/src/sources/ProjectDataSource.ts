@@ -99,7 +99,7 @@ export function transformSpec ({
     relativeToCommonRoot,
     specType: testingType === 'component' ? 'component' : 'integration',
     name,
-    relative,
+    relative: toPosix(relative),
     absolute,
   }
 }
@@ -257,11 +257,6 @@ export class ProjectDataSource {
     // during sequential file operations.
     const onProjectFileSystemChange = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
-
-      if (isEqual(this.specs, specs)) {
-        // If no differences are found, we do not need to emit events
-        return
-      }
 
       this.ctx.actions.project.setSpecs(specs)
     }, 250)

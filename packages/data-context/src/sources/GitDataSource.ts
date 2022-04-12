@@ -35,6 +35,10 @@ const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
+function normalize (file: string) {
+  return file.replace(/\\/g, '/') // normalize \ to /
+}
+
 export interface GitInfo {
   author: string | null
   lastModifiedTimestamp: string | null
@@ -146,7 +150,7 @@ export class GitDataSource {
 
   #destroyWatcher (watcher?: chokidar.FSWatcher) {
     // Can't do anything actionable with these errors
-    watcher?.close().catch((e) => {})
+    watcher?.close().catch((e) => { })
   }
 
   async #loadAndWatchCurrentBranch () {
@@ -232,7 +236,11 @@ export class GitDataSource {
         const current = this.#gitMeta.get(file)
 
         // first check unstaged/untracked files
-        const isUnstaged = statusResult.files.find((x) => file.endsWith(x.path))
+        const isUnstaged = statusResult.files.find((x) => {
+          const f = normalize(file)
+
+          return f.endsWith(x.path)
+        })
 
         let toSet: GitInfo | null = null
 
@@ -315,20 +323,26 @@ export class GitDataSource {
   async #getInfoWindows (absolutePaths: readonly string[]) {
     const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
-    const result = await execa(cmd, { shell: true })
+    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot }) // cwd: 'C:\\Users\\lachl\\AppData\\Local\\Temp\\cy-projects\\cypress-in-cypress' })
 
-    const split = result.stdout
-    .split('\r\n') // windows uses CRLF for carriage returns
-    .filter((str) => !str.includes('git log')) // windows stdout contains [cmd,output]. So we remove the code containing the executed command, `git log`
+    fs.writeFileSync('output', result.stdout)
+    const stdout = normalize(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 
     // windows returns a leading carriage return, remove it
-    const [, ...stdout] = split
+    let output: string[] = []
 
-    if (stdout.length !== absolutePaths.length) {
-      debug('stdout', stdout)
-      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
+    for (const p of absolutePaths) {
+      const idx = stdout.findIndex((entry) => entry.includes(p))
+      const text = stdout[idx + 1] ?? ''
+
+      output.push(text)
     }
 
-    return stdout
+    if (output.length !== absolutePaths.length) {
+      debug('stdout', output)
+      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${output.length}`)
+    }
+
+    return output
   }
 }
