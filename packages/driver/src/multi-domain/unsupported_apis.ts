@@ -28,4 +28,10 @@ export const handleUnsupportedAPIs = (Cypress: Cypress.Cypress, cy: $Cy) => {
   cy.intercept = () => $errUtils.throwErrByPath('origin.unsupported.intercept')
   // @ts-ignore
   cy.session = () => $errUtils.throwErrByPath('origin.unsupported.session')
+  // @ts-ignore
+  Cypress.session = new Proxy(Cypress.session, {
+    get: () => $errUtils.throwErrByPath('origin.unsupported.Cypress_session'),
+    // @ts-ignore
+    set: () => $errUtils.throwErrByPath('origin.unsupported.Cypress_session'),
+  })
 }
