@@ -1,7 +1,8 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900 border-l-1"
+    class="flex border-gray-900"
+    :class="screenshotStore.isScreenshotting ? '' : 'border-l-1'"
   >
     <AutomationElement />
     <AutomationDisconnected
@@ -57,7 +58,8 @@
           <div
             v-show="!autStore.scriptError"
             :id="RUNNER_ID"
-            class="origin-top-left viewport"
+            class="viewport"
+            :class="screenshotStore.isScreenshotting ? 'origin-top-left' : 'origin-top'"
             :style="viewportStyle"
           />
         </RemoveClassesDuringScreenshotting>

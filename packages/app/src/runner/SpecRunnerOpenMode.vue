@@ -1,7 +1,8 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900 border-l-1"
+    class="flex border-gray-900"
+    :class="screenshotStore.isScreenshotting ? '' : 'border-l-1'"
   >
     <AutomationElement />
     <AutomationDisconnected
