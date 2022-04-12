@@ -585,9 +585,11 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
+            cd ~/cypress
             # install some deps for get-next-version
             npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
-            NEXT_VERSION=$(node ~/cypress/scripts/get-next-version.js)
+            NEXT_VERSION=$(node ./scripts/get-next-version.js)
+            cd -
 
             git checkout $NEXT_VERSION || true
       - when:
