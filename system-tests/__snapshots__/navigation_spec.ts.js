@@ -9,7 +9,7 @@ exports['e2e cross origin navigation / captures cross origin failures when "expe
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (navigation_cross_origin_errors.ts)                                      │
   │ Searched:     cypress/integration/navigation_cross_origin_errors.ts                            │
-  │ Experiments:  experimentalSessionAndOrigin=false                                                     │
+  │ Experiments:  experimentalSessionAndOrigin=false                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -69,8 +69,8 @@ https://on.cypress.io/cross-origin-violation
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/navigation_cross_origin_errors.ts/navigation cr     (1280x720)
-     oss origin errors -- displays cross origin failures when experimentalSessionAndOrigin                
-     is turned off (failed).png                                                                     
+     oss origin errors -- displays cross origin failures when experimentalSessionAndO
+     rigin is turned off (failed).png                                                                     
 
 
   (Video)
