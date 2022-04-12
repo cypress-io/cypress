@@ -50,6 +50,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ unify-1449-check-path-length-in-build, << pipeline.git.branch >> ]
+    - equal: [ 'lmiller1990/windows-ci-ep-2-return-of-the-flake', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
