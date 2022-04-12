@@ -6,6 +6,7 @@ import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../util/config'
 import { $Location } from '../../cypress/location'
 import { LogUtils } from '../../cypress/log'
+import logGroup from '../logGroup'
 
 const reHttp = /^https?:\/\//
 
@@ -76,12 +77,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const log = Cypress.log({
+      const log = logGroup(Cypress, {
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
-        end: true,
-      })
+      }, (log) => log)
 
       const validator = new Validator({
         log,
