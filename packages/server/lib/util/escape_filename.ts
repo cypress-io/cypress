@@ -10,5 +10,4 @@ export function escapeFilenameInUrl (url: string) {
   .replace(ampersandRe, '%26') // &
   .replace(questionRe, '%3F') // ? -> it's only valid in Linux
   .replace(plusRe, '%2B') // + https://github.com/cypress-io/cypress/issues/5909
-  .replace(/\\/g, '/') // normalize \ to /
 }
