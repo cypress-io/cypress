@@ -20,6 +20,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
+    cy.contains('E2E Specs')
   })
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
