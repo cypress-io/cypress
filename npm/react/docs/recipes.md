@@ -50,7 +50,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example in the folder [examples/nextjs](https://github.com/cypress-io/cypress/tree/develop/npm/react/https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/nextjs).
+See example in the folder [examples/nextjs](https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/nextjs).
 
 ### Your Webpack config
 
