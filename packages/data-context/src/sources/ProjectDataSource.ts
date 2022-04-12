@@ -99,7 +99,7 @@ export function transformSpec ({
     relativeToCommonRoot,
     specType: testingType === 'component' ? 'component' : 'integration',
     name,
-    relative: toPosix(relative),
+    relative,
     absolute,
   }
 }
