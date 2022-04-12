@@ -7,6 +7,8 @@ import $stackUtils from '../../cypress/stack_utils'
 import Bluebird from 'bluebird'
 const currentTestRegisteredSessions = new Map()
 
+type ActiveSessions = Cypress.Commands.Session.ActiveSessions
+type SessionData = Cypress.Commands.Session.SessionData
 /**
  * rules for clearing session data:
  *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
@@ -16,7 +18,7 @@ const currentTestRegisteredSessions = new Map()
  * therefore session data should be cleared with spec browser launch
  */
 
-const getSessionDetails = (sessState) => {
+const getSessionDetails = (sessState: SessionData) => {
   return {
     id: sessState.id,
     data: _.merge(
@@ -25,14 +27,14 @@ const getSessionDetails = (sessState) => {
     ) }
 }
 
-const getSessionDetailsForTable = (sessState) => {
+const getSessionDetailsForTable = (sessState: SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
     ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
   )
 }
 
-const isSecureContext = (url) => url.startsWith('https:')
+const isSecureContext = (url: string) => url.startsWith('https:')
 
 const getCurrentOriginStorage = () => {
   // localStorage.length property is not always accurate, we must stringify to check for entries
@@ -117,7 +119,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (sessState) => {
+const getConsoleProps = (sessState: SessionData) => {
   const sessionDetails = getSessionDetailsForTable(sessState)
 
   const tables = _.flatMap(sessionDetails, (val, domain) => {
@@ -206,7 +208,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 export default function (Commands, Cypress, cy) {
   const { Promise } = Cypress
 
-  const setActiveSession = (obj) => {
+  const setActiveSession = (obj: ActiveSessions) => {
     const currentSessions = cy.state('activeSessions') || {}
 
     const newSessions = { ...currentSessions, ...obj }
@@ -214,7 +216,7 @@ export default function (Commands, Cypress, cy) {
     cy.state('activeSessions', newSessions)
   }
 
-  const getActiveSession = (id) => {
+  const getActiveSession = (id: string): SessionData => {
     const currentSessions = cy.state('activeSessions') || {}
 
     return currentSessions[id]
@@ -293,8 +295,8 @@ export default function (Commands, Cypress, cy) {
   }
 
   const sessions = {
-    defineSession (options = {} as any) {
-      const sess_state = {
+    defineSession (options = {} as any): SessionData {
+      const sess_state: SessionData = {
         id: options.id,
         cookies: null,
         localStorage: null,
@@ -549,7 +551,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession = getActiveSession(id)
+      let existingSession: SessionData = getActiveSession(id)
 
       if (!setup) {
         if (!existingSession || !currentTestRegisteredSessions.has(id)) {
@@ -575,7 +577,7 @@ export default function (Commands, Cypress, cy) {
 
       const _log = Cypress.log({
         name: 'session',
-        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
         snapshot: false,
       })
@@ -583,7 +585,7 @@ export default function (Commands, Cypress, cy) {
       const dataLog = Cypress.log({
         name: 'session',
         sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
       })
 
       function runSetup (existingSession) {
