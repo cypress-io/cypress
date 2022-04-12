@@ -41,7 +41,7 @@ describe('slow network: launchpad', () => {
   it('shows the versions after they resolve', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
-    cy.contains('E2E Testing')
+    cy.contains('Log In')
     cy.withCtx(async (ctx, o) => {
       o.testState.pendingFetches.map((f) => f.resolve())
     })
