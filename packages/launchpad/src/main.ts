@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { HeaderBar_HeaderBarQueryDocument } from './generated/graphql'
 import './main.scss'
 import 'virtual:windi.css'
 import urql from '@urql/vue'
@@ -19,13 +20,20 @@ app.use(Toast, {
 
 app.use(createI18n())
 
-// Make sure highlighter is initialized before
-// we show any code to avoid jank at rendering
-Promise.all([
-  makeUrqlClient({ target: 'launchpad' }),
-  initHighlighter(),
-]).then(([launchpadClient]) => {
+// Make sure highlighter is initialized immediately at app
+// start, so it's available when we render code blocks
+initHighlighter()
+
+makeUrqlClient({ target: 'launchpad' }).then((launchpadClient) => {
   app.use(urql, launchpadClient)
 
-  app.mount('#app')
+  // Loading the Header Bar Query document prior to mounting leads to a better experience
+  // when doing things like taking snapshots of the DOM during testing, and it
+  // shouldn't be any different to the user
+  launchpadClient
+  .query(HeaderBar_HeaderBarQueryDocument)
+  .toPromise()
+  .then(() => {
+    app.mount('#app')
+  })
 })
