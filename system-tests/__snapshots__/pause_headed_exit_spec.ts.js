@@ -7,14 +7,14 @@ exports['cy.pause() in run mode / pauses with --headed and --no-exit'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (pause_spec.js)                                                            │
-  │ Searched:   cypress/e2e/pause_spec.js                                                          │
+  │ Specs:      1 found (pause.cy.js)                                                            │
+  │ Searched:   cypress/e2e/pause.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  pause_spec.js                                                                   (1 of 1)
+  Running:  pause.cy.js                                                                   (1 of 1)
 
 
   cy.pause()
@@ -35,14 +35,14 @@ exports['cy.pause() in run mode / pauses with --headed and --no-exit'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     pause_spec.js                                                                    │
+  │ Spec Ran:     pause.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause_spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause.cy.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -52,7 +52,7 @@ exports['cy.pause() in run mode / pauses with --headed and --no-exit'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  pause_spec.js                            XX:XX        1        1        -        -        - │
+  │ ✔  pause.cy.js                            XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -68,14 +68,14 @@ exports['cy.pause() in run mode / does not pause if headless'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (pause_spec.js)                                                            │
-  │ Searched:   cypress/e2e/pause_spec.js                                                          │
+  │ Specs:      1 found (pause.cy.js)                                                            │
+  │ Searched:   cypress/e2e/pause.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  pause_spec.js                                                                   (1 of 1)
+  Running:  pause.cy.js                                                                   (1 of 1)
 
 
   cy.pause()
@@ -96,14 +96,14 @@ exports['cy.pause() in run mode / does not pause if headless'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     pause_spec.js                                                                    │
+  │ Spec Ran:     pause.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause_spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause.cy.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -113,7 +113,7 @@ exports['cy.pause() in run mode / does not pause if headless'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  pause_spec.js                            XX:XX        1        1        -        -        - │
+  │ ✔  pause.cy.js                            XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -129,14 +129,14 @@ exports['cy.pause() in run mode / does not pause without --no-exit'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (pause_spec.js)                                                            │
-  │ Searched:   cypress/e2e/pause_spec.js                                                          │
+  │ Specs:      1 found (pause.cy.js)                                                            │
+  │ Searched:   cypress/e2e/pause.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  pause_spec.js                                                                   (1 of 1)
+  Running:  pause.cy.js                                                                   (1 of 1)
 
 
   cy.pause()
@@ -157,14 +157,14 @@ exports['cy.pause() in run mode / does not pause without --no-exit'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     pause_spec.js                                                                    │
+  │ Spec Ran:     pause.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause_spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause.cy.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -174,7 +174,7 @@ exports['cy.pause() in run mode / does not pause without --no-exit'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  pause_spec.js                            XX:XX        1        1        -        -        - │
+  │ ✔  pause.cy.js                            XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -190,14 +190,14 @@ exports['cy.pause() in run mode / does not pause without --headed and --no-exit'
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (pause_spec.js)                                                            │
-  │ Searched:   cypress/e2e/pause_spec.js                                                          │
+  │ Specs:      1 found (pause.cy.js)                                                            │
+  │ Searched:   cypress/e2e/pause.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  pause_spec.js                                                                   (1 of 1)
+  Running:  pause.cy.js                                                                   (1 of 1)
 
 
   cy.pause()
@@ -218,14 +218,14 @@ exports['cy.pause() in run mode / does not pause without --headed and --no-exit'
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     pause_spec.js                                                                    │
+  │ Spec Ran:     pause.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause_spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/pause.cy.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -235,7 +235,7 @@ exports['cy.pause() in run mode / does not pause without --headed and --no-exit'
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  pause_spec.js                            XX:XX        1        1        -        -        - │
+  │ ✔  pause.cy.js                            XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
