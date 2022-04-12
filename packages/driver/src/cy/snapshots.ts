@@ -210,12 +210,13 @@ export const create = ($$, state) => {
   const reifySnapshotBody = (preprocessedSnapshot) => {
     const $body = preprocessedSnapshot.body.get()
     const $htmlAttrs = preprocessedSnapshot.htmlAttrs
+    const { headStyles, bodyStyles } = preprocessedSnapshot.styles
 
     return {
       $body,
       $htmlAttrs,
-      headStyleIds: null,
-      bodyStyleIds: null,
+      headStyles,
+      bodyStyles,
     }
   }
 
@@ -223,7 +224,12 @@ export const create = ($$, state) => {
     Cypress.action('cy:snapshot', name)
 
     try {
-      const { $body, $htmlAttrs, headStyleIds, bodyStyleIds } = !preprocessedSnapshot ? createSnapshotBody($elToHighlight) : reifySnapshotBody(preprocessedSnapshot)
+      const {
+        $body,
+        $htmlAttrs,
+        ...styleAttrs
+      } = !preprocessedSnapshot ? createSnapshotBody($elToHighlight) : reifySnapshotBody(preprocessedSnapshot)
+
       let attachedBody
       const body = {
         get: () => {
@@ -241,17 +247,23 @@ export const create = ($$, state) => {
         body,
       }
 
+      const {
+        headStyleIds,
+        bodyStyleIds,
+        headStyles,
+        bodyStyles,
+      }: {
+        headStyleIds?: string[]
+        bodyStyleIds?: string[]
+        headStyles?: string[]
+        bodyStyles?: string[]
+      } = styleAttrs
+
       if (headStyleIds && bodyStyleIds) {
         snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
-      }
-
-      if (preprocessedSnapshot) {
-        // snapshot is being reified from cross origin. get inline styles of reified snapshot
-        const { headStyles, bodyStyles } = preprocessedSnapshot.styles
-
+      } else if (headStyles && bodyStyles) {
+        // The Snapshot is being reified from cross origin. Get inline styles of reified snapshot.
         snapshotsMap.set(snapshot, { headStyles, bodyStyles })
-      } else {
-        snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
       }
 
       return snapshot
