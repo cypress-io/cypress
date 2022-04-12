@@ -205,28 +205,32 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
  *
  * NOTE: this function recursively calls itself to reify a log
  *
- * @param {any} props a generic variable that represents a value that has been preprocessed and sent through postMessage() and needs to be reified.
+ * @param {any} props - a generic variable that represents a value that has been preprocessed and sent through postMessage() and needs to be reified.
+ * @param {boolean} matchElementsAgainstCurrentDOM - Whether or not the element should be reconstructed lazily
+ * against the currently rendered DOM (usually against a rendered snapshot) or should be completely recreated from scratch (common with snapshots as they will replace the DOM)
  * @returns {any} the reified version of the generic.
  */
-export const reifyLogLikeFromSerialization = (props) => {
+export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrentDOM = true) => {
   try {
     if (props?.serializationKey === 'dom') {
       props.html = function () {
         let reifiedElement
 
-        // if snapshots exists, this element needs to be matched against the rendered snapshot on the page LAZILY.
-        // a bit of a hack, but we attach the snapshot to the page and then LAZILY select the element
+        // If the element needs to be matched against the currently rendered DOM. This is useful when analyzing consoleProps or $el in a log
+        // where elements need to be evaluated LAZILY after the snapshot is attached to the page.
+        // this option is set to false when reifying snapshots, since they will be replacing the current DOM when the user interacts with said snapshot.
+        if (matchElementsAgainstCurrentDOM) {
+          const attributes = Object.keys(props.attributes).map((attribute) => {
+            return `[${attribute}="${props.attributes[attribute]}"]`
+          }).join('')
 
-        const attributes = Object.keys(props.attributes).map((attribute) => {
-          return `[${attribute}="${props.attributes[attribute]}"]`
-        }).join('')
+          const selector = `${props.tagName}${attributes}`
 
-        const selector = `${props.tagName}${attributes}`
+          reifiedElement = Cypress.$(selector)
 
-        reifiedElement = Cypress.$(selector)
-
-        if (reifiedElement.length) {
-          return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+          if (reifiedElement.length) {
+            return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+          }
         }
 
         // if the element couldn't be found, return a synthetic copy that doesn't actually exist on the page
@@ -237,7 +241,7 @@ export const reifyLogLikeFromSerialization = (props) => {
     }
 
     if (props?.serializationKey === 'function') {
-      const reifiedFunctionData = reifyLogLikeFromSerialization(props.value)
+      const reifiedFunctionData = reifyLogLikeFromSerialization(props.value, matchElementsAgainstCurrentDOM)
 
       return () => reifiedFunctionData
     }
@@ -246,7 +250,7 @@ export const reifyLogLikeFromSerialization = (props) => {
       let reifiedObjectOrArray = {}
 
       _.forIn(props, (value, key) => {
-        const val = reifyLogLikeFromSerialization(value)
+        const val = reifyLogLikeFromSerialization(value, matchElementsAgainstCurrentDOM)
 
         if (val?.serializationKey === 'dom') {
           reifiedObjectOrArray = {
@@ -257,7 +261,7 @@ export const reifyLogLikeFromSerialization = (props) => {
             },
           }
         } else {
-          reifiedObjectOrArray[key] = reifyLogLikeFromSerialization(value)
+          reifiedObjectOrArray[key] = reifyLogLikeFromSerialization(value, matchElementsAgainstCurrentDOM)
         }
       })
 
@@ -309,7 +313,7 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
  * @returns the reified snapshot that exists in the primary document
  */
 export const reifySnapshotFromSerialization = (snapshot) => {
-  snapshot.body = reifyLogLikeFromSerialization(snapshot.body)
+  snapshot.body = reifyLogLikeFromSerialization(snapshot.body, false)
 
   // @ts-ignore
   return cy.createSnapshot(snapshot.name, null, snapshot)
