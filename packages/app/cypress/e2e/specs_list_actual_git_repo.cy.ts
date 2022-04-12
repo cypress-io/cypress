@@ -29,17 +29,17 @@ describe('Spec List - Git Status', () => {
     cy.get('[data-cy-row="dom-container.spec.js"]')
     .contains('Modified')
     .get('[data-cy="git-status-unmodified"]')
-  })
 
-  cy.withCtx((ctx) => {
-    ctx.fs.writeFileSync(
-      ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'dom-container.spec.js'),
-      '// modifying the spec.',
-    )
-  })
+    cy.withCtx((ctx) => {
+      ctx.fs.writeFileSync(
+        ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'dom-container.spec.js'),
+        '// modifying the spec.',
+      )
+    })
 
-  // should update via GraphQL subscription, now the status is modified.
-  cy.get('[data-cy-row="dom-container.spec.js"]')
-  .contains('Modified')
-  .get('[data-cy="git-status-modified"]')
+    // should update via GraphQL subscription, now the status is modified.
+    cy.get('[data-cy-row="dom-container.spec.js"]')
+    .contains('Modified')
+    .get('[data-cy="git-status-modified"]')
+  })
 })
