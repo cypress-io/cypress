@@ -332,6 +332,10 @@ export class ProjectLifecycleManager {
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
+    if (!this._configManager) {
+      return false
+    }
+
     if (this._configManager?.isLoadingConfigFile) {
       try {
         await this.initializeConfig()
@@ -516,6 +520,7 @@ export class ProjectLifecycleManager {
       this._configManager = undefined
     }
 
+    this.ctx.coreData.currentProjectGitInfo?.destroy()
     this.ctx.project.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
