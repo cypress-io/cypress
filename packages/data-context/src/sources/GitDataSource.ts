@@ -150,7 +150,7 @@ export class GitDataSource {
 
   #destroyWatcher (watcher?: chokidar.FSWatcher) {
     // Can't do anything actionable with these errors
-    watcher?.close().catch((e) => { })
+    watcher?.close().catch((e) => {})
   }
 
   async #loadAndWatchCurrentBranch () {
@@ -323,7 +323,7 @@ export class GitDataSource {
   async #getInfoWindows (absolutePaths: readonly string[]) {
     const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
-    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot }) // cwd: 'C:\\Users\\lachl\\AppData\\Local\\Temp\\cy-projects\\cypress-in-cypress' })
+    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
 
     fs.writeFileSync('output', result.stdout)
     const stdout = normalize(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
