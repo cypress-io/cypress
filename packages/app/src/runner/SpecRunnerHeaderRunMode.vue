@@ -1,6 +1,7 @@
 <template>
   <div
     id="spec-runner-header"
+    ref="AUTHeaderEl"
     class="min-h-64px px-16px text-14px"
     :style="{ width: `${props.width}px` }"
   >
