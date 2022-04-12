@@ -53,11 +53,18 @@ export const useRunnerStyle = () => {
   })
 
   const viewportStyle = computed(() => {
-    return `
-      width: ${autStore.viewportDimensions.width}px;
-      height: ${autStore.viewportDimensions.height}px;
-      transform: scale(${scale.value});
+    let style = `
+    width: ${autStore.viewportDimensions.width}px;
+    height: ${autStore.viewportDimensions.height}px;
+    transform: scale(${scale.value});
+    `
+
+    if (!screenshotStore.isScreenshotting) {
+      style += `
       margin-left: ${(containerWidth.value / 2) - (autStore.viewportDimensions.width / 2) }px`
+    }
+
+    return style
   })
 
   watchEffect(() => {
