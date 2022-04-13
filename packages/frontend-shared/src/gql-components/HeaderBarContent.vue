@@ -42,7 +42,7 @@
             #login-title
           >
             <UserAvatar
-              :email="userData?.email"
+              :email="userData.email ?? null"
               class="h-24px w-24px"
               data-cy="user-avatar-title"
             />
@@ -58,7 +58,7 @@
             >
               <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
-                  :email="userData?.email"
+                  :email="userData?.email ?? null"
                   class="h-48px mr-16px w-48px"
                   data-cy="user-avatar-panel"
                 />
