@@ -1120,10 +1120,8 @@
     find-webpack "2.2.1"
     find-yarn-workspace-root "2.0.0"
 
-"@cypress/webpack-dev-server@^1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-dev-server/-/webpack-dev-server-1.8.1.tgz#5e37e15082b84a1e681198acd4a8473c10c95d9f"
-  integrity sha512-gE+VIcRH/vmIQdzSRAz/xCkzcOxZKL4hK2IMWGqRG34Vm51HROXm4mgOkXdCmXacEoO16cWJawZTqSVVsSTH3w==
+"@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":
+  version "0.0.0-development"
   dependencies:
     debug "^4.3.2"
     semver "^7.3.4"

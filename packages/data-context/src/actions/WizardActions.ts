@@ -338,7 +338,7 @@ export class WizardActions {
         </head>
         <body>
           ${opts.bodyModifier}
-          <div id="__cy_root"></div>
+          <div data-cy-root></div>
         </body>
       </html>`
   }
