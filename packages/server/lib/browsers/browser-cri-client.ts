@@ -69,6 +69,7 @@ export class BrowserCriClient {
         const { targetInfos: targets } = await browserClient.send('Target.getTargets')
 
         if (targets.length === 0) {
+          await browserCriClient.close()
           throw new Error('Could not find any targets in browser')
         }
 
