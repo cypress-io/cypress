@@ -100,7 +100,8 @@ describe('cy.origin - uncaught errors', () => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
         expect(err.message).to.include('The following error originated from your test code, not from Cypress.')
-
+        // ensure error doesn't get wrapped twice
+        expect(err.message).not.to.include('> The following error originated')
         done()
       })
 
@@ -125,6 +126,8 @@ describe('cy.origin - uncaught errors', () => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('async error')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+        // ensure error doesn't get wrapped twice
+        expect(err.message).not.to.include('> The following error originated')
         expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
 
@@ -165,7 +168,8 @@ describe('cy.origin - uncaught errors', () => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
         expect(err.message).to.include('The following error originated from your test code, not from Cypress.')
-
+        // ensure error doesn't get wrapped twice
+        expect(err.message).not.to.include('> The following error originated')
         done()
       })
 

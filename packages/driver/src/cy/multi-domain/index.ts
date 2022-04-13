@@ -192,13 +192,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // to stack up listeners on it after it's originally bound
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
-            if (err?.name === 'CypressError') {
-              // This is a Cypress error thrown from the secondary origin after the command queue has finished, do not wrap it as a spec or app error.
-              cy.fail(err, { async: true })
-            } else {
-              // @ts-ignore
-              Cypress.runner.onSpecError('error')({ error: err })
-            }
+            cy.fail(err, { async: true })
           })
         }
 
