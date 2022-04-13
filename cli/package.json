@@ -126,8 +126,8 @@
       "require": "./vue/dist/cypress-vue.cjs.js"
     },
     "./vue2": {
-      "import": "./vue2/dist/cypress-vue.esm-bundler.js",
-      "require": "./vue2/dist/cypress-vue.cjs.js"
+      "import": "./vue2/dist/cypress-vue2.esm-bundler.js",
+      "require": "./vue2/dist/cypress-vue2.cjs.js"
     },
     "./package.json": {
       "import": "./package.json",
