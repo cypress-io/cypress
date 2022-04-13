@@ -956,7 +956,7 @@ commands:
           command: ls -la types
           working_directory: cli/build
       - run:
-          command: ls -la vue mount-utils react
+          command: ls -la vue vue2 mount-utils react
           working_directory: cli/build
       - unless:
           condition:

@@ -23,7 +23,7 @@ shell.set('-e') // any error is fatal
 fs.ensureDirSync(join(__dirname, '..', 'types'))
 
 includeTypes.forEach((folder) => {
-  const source = resolvePkg(`@types/${folder}`, { cwd: join(__dirname, '..', '..') })
+  const source = resolvePkg(`@types/${folder}`, { cwd: __dirname })
 
   fs.copySync(source, join(__dirname, '..', 'types', folder))
 })
