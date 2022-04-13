@@ -265,11 +265,26 @@ export class WizardActions {
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
 
-    await this.ensureDir('fixtures')
+    try {
+      const fixturesPath = path.join(this.projectRoot, 'cypress/fixtures')
 
-    return this.scaffoldFile(exampleScaffoldPath,
-      `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
-      'Added an example fixtures file/folder')
+      await this.ctx.fs.stat(fixturesPath)
+
+      return {
+        status: 'skipped',
+        description: 'Fixtures folder already exists',
+        file: {
+          absolute: exampleScaffoldPath,
+          contents: '// Skipped',
+        },
+      }
+    } catch {
+      await this.ensureDir('fixtures')
+
+      return this.scaffoldFile(exampleScaffoldPath,
+        `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
+        'Added an example fixtures file/folder')
+    }
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {

@@ -79,13 +79,14 @@ interface SnapshotCypressDirectoryOptions {
   language: 'js' | 'ts'
   testingType: Cypress.TestingType
   ctFramework?: string
+  customDirectory?: string
 }
 
 function removeHyphensAndBrackets (str: string) {
   return str.toLowerCase().replaceAll(' ', '-').replaceAll('(', '').replaceAll(')', '')
 }
 
-export async function snapshotCypressDirectory ({ currentProject, language, testingType, ctFramework }: SnapshotCypressDirectoryOptions): Promise<SnapshotScaffoldTestResult> {
+export async function snapshotCypressDirectory ({ currentProject, language, testingType, ctFramework, customDirectory }: SnapshotCypressDirectoryOptions): Promise<SnapshotScaffoldTestResult> {
   if (!currentProject.startsWith(cyTmpDir)) {
     throw Error(dedent`
       snapshotCypressDirectory is designed to be used with system-tests infrastructure.
@@ -96,7 +97,6 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
   }
 
   const projectDir = currentProject.replace(cyTmpDir, systemTestsDir)
-  const projectName = projectDir.replace(systemTestsDir, '').slice(1)
 
   let expectedScaffoldDir = path.join(projectDir, `expected-cypress-${language}-${testingType}`)
 
@@ -104,24 +104,28 @@ export async function snapshotCypressDirectory ({ currentProject, language, test
     expectedScaffoldDir += `-${removeHyphensAndBrackets(ctFramework)}`
   }
 
+  if (customDirectory) {
+    expectedScaffoldDir += `-${customDirectory}`
+  }
+
   const joinPosix = (...s: string[]) => path.join(...s).split(path.sep).join(path.posix.sep)
 
   const files = (
     await Promise.all([
-      globby(joinPosix(currentProject, 'cypress'), { onlyFiles: true }),
-      globby(joinPosix(currentProject, 'cypress.config.*'), { onlyFiles: true }),
+      globby(joinPosix(expectedScaffoldDir, 'cypress'), { onlyFiles: true }),
+      globby(joinPosix(expectedScaffoldDir, 'cypress.config.*'), { onlyFiles: true }),
     ])
   ).reduce((acc, curr) => {
     return [acc, curr].flat(2)
   }, [])
 
-  const actualRelativeFiles = files.map((file) => {
-    const cyTmpDirPosix = joinPosix(cyTmpDir)
+  const expectedRelativeFiles = files.map((file) => {
+    const cyTmpDirPosix = joinPosix(expectedScaffoldDir)
 
-    return file.slice(cyTmpDirPosix.length + projectName.length + 2)
+    return file.replace(cyTmpDirPosix, '').slice(1)
   })
 
-  const filesToDiff = actualRelativeFiles.map<FileToDiff>((file) => {
+  const filesToDiff = expectedRelativeFiles.map<FileToDiff>((file) => {
     return {
       actual: joinPosix(path.join(currentProject, file)),
       expected: joinPosix(path.join(expectedScaffoldDir, file)),
