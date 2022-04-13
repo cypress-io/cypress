@@ -279,6 +279,31 @@ describe('commands', () => {
 
     indicators.forEach((indicator) => {
       cy.contains(`${indicator} indicator`).closest('.command').find('.command-message .fa-circle')
+      .should('have.class', 'far')
+      .should('have.class', `command-message-indicator-${indicator}`)
+    })
+
+    cy.percySnapshot()
+  })
+
+  it('shows message indicator when specified and request went to origin', () => {
+    const indicators = ['successful', 'pending', 'aborted', 'bad']
+
+    indicators.forEach((indicator) => {
+      addCommand(runner, {
+        name: 'xhr',
+        event: true,
+        renderProps: {
+          indicator,
+          wentToOrigin: true,
+          message: `${indicator} indicator`,
+        },
+      })
+    })
+
+    indicators.forEach((indicator) => {
+      cy.contains(`${indicator} indicator`).closest('.command').find('.command-message .fa-circle')
+      .should('have.class', 'fas')
       .should('have.class', `command-message-indicator-${indicator}`)
     })
 
@@ -398,7 +423,7 @@ describe('commands', () => {
   })
 
   context('event duplicates', () => {
-    it('collapses consecutive duplicate events into group', () => {
+    it('collapses consecutive duplicate events into a single log', () => {
       cy.get('.command-name-xhr').should('have.length', 3)
     })
 
