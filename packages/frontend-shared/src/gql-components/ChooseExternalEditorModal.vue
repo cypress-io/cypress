@@ -36,7 +36,7 @@
       >
         <ChooseExternalEditor
           :gql="props.gql"
-          @chose-editor="val => preferredEditor = val"
+          @chose-editor="val => preferredEditor = val ?? ''"
         />
       </div>
 

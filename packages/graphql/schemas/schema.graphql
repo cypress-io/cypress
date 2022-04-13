@@ -434,7 +434,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
-  storybook: Storybook
   title: String!
 }
 
@@ -467,7 +466,7 @@ type DevState {
 """Represents an editor on the local machine"""
 type Editor {
   """Binary that opens the editor"""
-  binary: String!
+  binary: String
   id: String!
 
   """name of editor"""
@@ -1237,18 +1236,12 @@ enum SpecType {
   integration
 }
 
-"""Storybook"""
-type Storybook implements Node {
-  """Relay style Node ID field for the Storybook field"""
-  id: ID!
-
-  """Folder containing storybook configuration files"""
-  storybookRoot: String!
-}
-
 type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
+
+  """Issued when the current branch of a project changes"""
+  branchChange: CurrentProject
 
   """Status of the currently opened browser"""
   browserStatusChange: CurrentProject
@@ -1258,6 +1251,11 @@ type Subscription {
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """
+  When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
+  """
+  gitInfoChange: [Spec]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

@@ -173,13 +173,9 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: dedent`
-            import { mount } from "@cypress/react"
-            import Button from "./Button"
-            
-            describe('<Button />', () => {
-              it('renders', () => {
-                // see: https://on.cypress.io/component-testing
-                mount(<Button />)
+            describe('Button.tsx', () => {
+              it('playground', () => {
+                // cy.mount()
               })
             })`,
         },

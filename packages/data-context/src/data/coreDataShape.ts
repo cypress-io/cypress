@@ -6,7 +6,7 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { LegacyCypressConfigJson } from '../sources'
+import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
 
@@ -126,6 +126,7 @@ export interface CoreDataShape {
   localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: string | null
+  currentProjectGitInfo: GitDataSource | null
   currentTestingType: TestingType | null
   wizard: WizardDataShape
   migration: MigrationDataShape
@@ -171,6 +172,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
+    currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
       chosenBundler: null,
