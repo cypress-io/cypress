@@ -142,7 +142,10 @@ export function mergeDefaults (
 
   // As we normalize the config based on the selected testing type, we need
   // to do the same with the default values to resolve those correctly
-  defaultsForRuntime = { ...defaultsForRuntime, ...defaultsForRuntime[options.testingType] }
+  defaultsForRuntime = {
+    ...defaultsForRuntime,
+    ...defaultsForRuntime[options.testingType],
+  }
 
   _.defaultsDeep(config, defaultsForRuntime)
 
@@ -152,7 +155,11 @@ export function mergeDefaults (
     additionalIgnorePattern = config.e2e.specPattern
   }
 
-  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+  config = {
+    ...config,
+    ...config[options.testingType],
+    additionalIgnorePattern,
+  }
 
   // split out our own app wide env from user env variables
   // and delete envFile
