@@ -10,7 +10,7 @@ import {
 import {
   injectStylesBeforeElement,
   StyleOptions,
-  ROOT_ID,
+  getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
 
@@ -287,9 +287,7 @@ function registerAutoDestroy ($destroy: () => void) {
 enableAutoDestroy(registerAutoDestroy)
 
 const injectStyles = (options: StyleOptions) => {
-  const el = document.getElementById(ROOT_ID)
-
-  return injectStylesBeforeElement(options, document, el)
+  return injectStylesBeforeElement(options, document, getContainerEl())
 }
 
 /**
@@ -356,7 +354,7 @@ export const mount = (
     // @ts-ignore
     const document: Document = cy.state('document')
 
-    let el = document.getElementById(ROOT_ID)
+    let el = getContainerEl()
 
     const componentNode = document.createElement('div')
 

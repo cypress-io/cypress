@@ -37,7 +37,7 @@ module.exports = (on, config) => {
 - Responds to every query with the prefix `__cypress/src/` (base path should be this prefix).
 - Responds to `__cypress/src/index.html` with an html page.
     This page
-    - will contain an element `<div id="__cy_root"></div>` to attach the mounted components to.
+    - will contain an element `<div data-cy-root></div>` to attach the mounted components to.
     - will load support files
     - will load the current spec from the url
     - will start the test when both files are done loading
