@@ -2,6 +2,7 @@ import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
+import replace from '@rollup/plugin-replace'
 
 import pkg from './package.json'
 
@@ -29,6 +30,14 @@ function createEntry (options) {
       resolve({ preferBuiltins: true }),
       commonjs(),
       json(),
+      /**
+       * Vue 2 core tries to load require.resolve(`./package.json`) in the browser for the
+       * sole purpose of throwing an error about Vue Loader.
+       * Just truncate this for now for simplicity.
+       */
+      replace({
+        'vueVersion && vueVersion !== packageVersion': JSON.stringify(false),
+      }),
     ],
     output: {
       banner,
