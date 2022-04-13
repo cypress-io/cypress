@@ -2,10 +2,9 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const PROJECTS: ProjectFixtureDir[] = ['nuxtjs2']
+const PROJECTS: ProjectFixtureDir[] = ['nuxtjs2', 'vuecli4-vue2']
 
 // Add to this list to focus on a particular permutation
-// TODO: run vuecli4-vue2 tests once cypress/vue-2 is bundled
 const ONLY_PROJECTS: ProjectFixtureDir[] = []
 
 for (const project of PROJECTS) {
