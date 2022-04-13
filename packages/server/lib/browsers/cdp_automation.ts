@@ -180,18 +180,18 @@ export interface CdpOptions {
   sendDebuggerCommandFn: SendDebuggerCommand
   onFn: OnFn
   automation: Automation
-  experimentalLoginFlows: boolean
+  experimentalSessionAndOrigin: boolean
 }
 
 export class CdpAutomation {
   sendDebuggerCommandFn: SendDebuggerCommand
   automation: Automation
-  experimentalLoginFlows: boolean
+  experimentalSessionAndOrigin: boolean
 
   constructor (options: CdpOptions) {
     this.sendDebuggerCommandFn = options.sendDebuggerCommandFn
     this.automation = options.automation
-    this.experimentalLoginFlows = options.experimentalLoginFlows
+    this.experimentalSessionAndOrigin = options.experimentalSessionAndOrigin
 
     options.onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     options.onFn('Network.responseReceived', this.onResponseReceived)
@@ -263,7 +263,7 @@ export class CdpAutomation {
         // be sent with a request. This standardizes it by filtering out ones
         // that are secure but not on a secure context
 
-        if (this.experimentalLoginFlows) {
+        if (this.experimentalSessionAndOrigin) {
           // localhost is considered a secure context (even when http:)
           // and it's required for cross origin support when visiting a secondary
           // origin so that all its cookies are sent. This may be a

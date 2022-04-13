@@ -60,7 +60,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       // origin run, so it can't have its own timeout
       cy.clearTimeout()
 
-      if (!config('experimentalLoginFlows')) {
+      if (!config('experimentalSessionAndOrigin')) {
         $errUtils.throwErrByPath('origin.experiment_not_enabled')
       }
 

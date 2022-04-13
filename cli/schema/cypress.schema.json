@@ -253,10 +253,10 @@
           "default": false,
           "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode."
         },
-        "experimentalLoginFlows": {
+        "experimentalSessionAndOrigin": {
           "type": "boolean",
           "default": false,
-          "description": "Enables cross-origin login flows, including the `cy.origin` and `cy.session` commands."
+          "description": "Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands."
         },
         "experimentalSourceRewriting": {
           "type": "boolean",

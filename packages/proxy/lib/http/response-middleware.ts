@@ -237,7 +237,7 @@ const MaybeDelayForCrossOrigin: ResponseMiddleware = function () {
   const isAUTFrame = this.req.isAUTFrame
 
   // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
-  if (this.config.experimentalLoginFlows && isCrossOrigin && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+  if (this.config.experimentalSessionAndOrigin && isCrossOrigin && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-origin, delay until ready:for:origin event')
 
     this.serverBus.once('ready:for:origin', ({ failed }) => {
@@ -281,7 +281,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalLoginFlows && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalSessionAndOrigin && isSecondaryOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -457,7 +457,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
 
   if (cookies) {
     const needsCrossOriginHandling = (
-      this.config.experimentalLoginFlows
+      this.config.experimentalSessionAndOrigin
       && determineIfNeedsCrossOriginHandling(this)
     )
     const browser = this.getCurrentBrowser() || { family: null }

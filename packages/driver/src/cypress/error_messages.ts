@@ -1137,7 +1137,7 @@ export default {
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
     experiment_not_enabled: {
-      message: `${cmd('origin')} requires enabling the experimentalLoginFlows flag`,
+      message: `${cmd('origin')} requires enabling the experimentalSessionAndOrigin flag`,
     },
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
@@ -1641,13 +1641,13 @@ export default {
       if (experimentalSessionSupport) {
         return {
           message: stripIndent`
-          ${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.`,
+          ${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.`,
           docsUrl: 'https://on.cypress.io/migration-guide',
         }
       }
 
       return {
-        message: `${cmd('session')} requires enabling the \`experimentalLoginFlows\` flag`,
+        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag`,
         docsUrl: 'https://on.cypress.io/session',
       }
     },
@@ -2100,7 +2100,7 @@ export default {
         message: stripIndent`\
           ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-          ${args.experimentalLoginFlows ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use ${cmd('origin')}:` }
+          ${args.experimentalSessionAndOrigin ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:` }
 
           ${args.isCrossOriginSpecBridge ?
           `\`cy.origin('${args.previousUrl.originPolicy}', () => {\`
