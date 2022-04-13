@@ -69,12 +69,6 @@ import SettingsIcon from '~icons/cy/settings_x16.svg'
 const { t } = useI18n()
 
 gql`
-mutation SettingsContainer_ReconfigureProject {
-  reconfigureProject
-}
-`
-
-gql`
 fragment SettingsContainer on Query {
   ...TestingPreferences
   currentProject {
