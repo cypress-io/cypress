@@ -221,17 +221,17 @@ describe('commands', () => {
 
   it('displays the number for parent and child', () => {
     cy.contains('http://localhost:3000')
-    .closest('.command-message')
+    .closest('.command-pin-target')
     .siblings('.command-number-column')
     .should('have.text', '1')
 
-    cy.contains('#exists').closest('.command-message').siblings('.command-number-column')
+    cy.contains('#exists').closest('.command-pin-target').siblings('.command-number-column')
     .should('have.text', '2')
 
-    cy.contains('#doesnt-exist').closest('.command-message').siblings('.command-number-column')
+    cy.contains('#doesnt-exist').closest('.command-pin-target').siblings('.command-number-column')
     .should('have.text', '3')
 
-    cy.contains('.some-els').closest('.command-message').siblings('.command-number-column')
+    cy.contains('.some-els').closest('.command-pin-target').siblings('.command-number-column')
     .should('have.text', '4')
   })
 
@@ -239,7 +239,7 @@ describe('commands', () => {
     cy.contains('GET ---').closest('.command-wrapper')
     .should('have.class', 'command-is-event')
 
-    cy.contains('GET ---').closest('.command-message').siblings('.command-number-column')
+    cy.contains('GET ---').closest('.command-pin-target').siblings('.command-number-column')
     .should('have.text', '')
 
     cy.contains('GET ---').closest('.command-message').siblings('.command-method')
@@ -567,7 +567,7 @@ describe('commands', () => {
 
       cy.get('.command-name-within')
       .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
+      .should('not.have.class', 'command-expander-is-open')
       .click()
       .should('have.class', 'command-expander-is-open')
 

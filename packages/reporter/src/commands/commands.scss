@@ -151,15 +151,13 @@
       border-radius: 0 10px 10px 0;
       padding: 2px 5px;
     }
-
-    .command-progress {
-      height: 2px;
-    }
   }
 
   .command-number-column {
+    color: #5a5f7a;
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
+    max-height: 20px; // because some numbers are empty
     padding-top: 4px;
     text-align: right;
     width: 24px;
@@ -255,10 +253,6 @@
       padding-top: 2px;
       padding-bottom: 2px;
 
-      .command-pin {
-        display: none;
-      }
-
       .fa-circle {
         line-height: 18px;
         display: inline-block;
@@ -268,8 +262,12 @@
         }
       }
     }
+  }
 
-    .command-progress > span {
+  .command-progress {
+    height: 2px;
+
+    span {
       animation-fill-mode: forwards;
       animation-iteration-count: 1;
       animation-name: progress-bar;
@@ -471,17 +469,18 @@
   }
 
   .command-pin {
-    display: none;
-    flex-shrink: 0;
+    color: $pinned;
     font-size: 12px;
     line-height: 1;
+    margin-top: -1px;
     margin-left: 10px;
     outline: none;
     text-align: right;
     width: 15px;
+    max-height: 20px;
 
     .icon-light {
-      fill: $gray-800;
+      fill: $purple-700;
     }
   }
 
@@ -527,19 +526,6 @@
     &:hover {
       background: $indigo-900;
       border-left: 2px solid $pinned;
-    }
-
-    .command-pin {
-      color: $pinned;
-      display: block;
-  
-      .icon-light {
-        fill: $purple-700;
-      }
-    }
-
-    .command-pin + .command-number {
-      display: none
     }
   }
 

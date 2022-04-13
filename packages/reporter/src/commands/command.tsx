@@ -47,16 +47,26 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
-const NavColumn = observer(({ model, toggleColumnPin }) => (
+/**
+ * NavColumns Rules:
+ *   > Command Number Column
+ *      - When the command is executing, it is pending and renders the pending icon
+ *      - When the command is finished, it displays the command number
+ *        - Commands will render a command number, where Events and System logs do not
+ *      - When the command is finished and the user has pinned the log, it displays the pin icon
+ *
+ *   > Expander Column
+ *      - When the log is a group log and it has children logs, it will display the chevron icon
+ */
+const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
   <>
     <div className='command-number-column' onClick={toggleColumnPin}>
-      {<PinIcon className='command-pin' />}
       {model._isPending() && <RunningIcon className='fa-spin' />}
-      {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
+      {(!model._isPending() && isPinned) && <PinIcon className='command-pin' />}
+      {(!model._isPending() && !isPinned) && model.number}
     </div>
     <div className='command-expander-column' onClick={() => model.toggleOpen()}>
-      {/* if event occurred multiple types, no need render expand/collapse toggle & the children because the details are the same. */}
-      {!model.event && model.hasChildren && <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />}
+      {model.hasChildren && <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />}
     </div>
   </>
 ))
@@ -91,22 +101,32 @@ interface AliasesReferencesProps {
   aliasesWithDuplicates: Array<Alias> | null
 }
 
-const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => (
-  <span className='command-aliases'>
-    {_.map(([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject)), (aliasObj) => (
-      <span className='command-alias-container' key={aliasObj.name + aliasObj.cardinal}>
-        <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-      </span>
-    ))}
-  </span>
-))
+const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => {
+  const aliases = ([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject))
+
+  if (!aliases.length) {
+    return null
+  }
+
+  return (
+    <span className='command-aliases'>
+      {aliases.map((aliasObj) => (
+        <span className='command-alias-container' key={aliasObj.name + aliasObj.cardinal}>
+          <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+        </span>
+      ))}
+    </span>
+  )
+})
 
 interface InterceptionsProps {
   model: CommandModel
 }
 
 const Interceptions = observer(({ model }: InterceptionsProps) => {
-  if (!model.renderProps.interceptions?.length) return null
+  if (!model.renderProps.interceptions?.length) {
+    return null
+  }
 
   function getTitle () {
     return (
@@ -187,10 +207,10 @@ const Message = observer(({ model }: MessageProps) => (
         }
       />
     )}
-    <span
+    {!!model.displayMessage && <span
       className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
-    />
+      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+    />}
   </span>
 ))
 
@@ -200,12 +220,16 @@ interface ProgressProps {
 
 const Progress = observer(({ model }: ProgressProps) => {
   if (!model.timeout || !model.wallClockStartedAt) {
-    return <div className='command-progress'><span /></div>
+    return null
   }
 
   const timeElapsed = Date.now() - new Date(model.wallClockStartedAt).getTime()
   const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
   const percentageRemaining = timeRemaining / model.timeout || 0
+
+  if (timeRemaining === 0) {
+    return null
+  }
 
   // we add a key to the span to ensure a rerender and restart of the animation on change
   return (
@@ -244,6 +268,7 @@ class Command extends Component<Props> {
     }
 
     if (model.showError) {
+      // this error is rendered if an error occurs in session validation executed by cy.session
       return <TestError model={model} onPrintToConsole={this._toggleColumnPin}/>
     }
 
@@ -255,10 +280,10 @@ class Command extends Component<Props> {
 
     let groupPlaceholder: Array<JSX.Element> = []
 
-    const cmdGroupClass = `command-group-id-${model.group}`
+    const cmdGroupClass = model.group ? `command-group-id-${model.group}` : ''
 
     if (model.groupLevel !== undefined) {
-      // cap the group nesting to 6 levels keep the log text legible
+      // cap the group nesting to 5 levels to keep the log text legible
       const level = model.groupLevel < 6 ? model.groupLevel : 5
 
       for (let i = 1; i < level; i++) {
@@ -291,7 +316,7 @@ class Command extends Component<Props> {
             )
           }
         >
-          <NavColumn model={model} toggleColumnPin={this._toggleColumnPin} />
+          <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
           <FlashOnClick
             message='Printed output to your console'
             onClick={this._toggleColumnPin}
@@ -340,10 +365,10 @@ class Command extends Component<Props> {
                   )}
                 </span>
               </span>
-              <Progress model={model} />
             </div>
           </FlashOnClick>
         </div>
+        <Progress model={model} />
         {(model.hasChildren && model.isOpen) && this._children()}
       </li>
     )
@@ -354,7 +379,7 @@ class Command extends Component<Props> {
 
     return (
       <ul className='command-child-container'>
-        {_.map(model.children, (child) => (
+        {model.children.map((child) => (
           <Command
             key={child.id}
             model={child}
@@ -374,10 +399,6 @@ class Command extends Component<Props> {
   }
 
   _shouldShowClickMessage = () => {
-    if (this.props.model.hasChildren) {
-      return false
-    }
-
     return !this.props.appState.isRunning && !!this.props.model.hasConsoleProps
   }
 
