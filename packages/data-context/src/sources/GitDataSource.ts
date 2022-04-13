@@ -35,8 +35,8 @@ const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
-function normalize (file: string) {
-  return file.replace(/\\/g, '/') // normalize \ to /
+function ensurePosixPathSeparators (text: string) {
+  return text.replace(/\\/g, '/') // normalize \ to /
 }
 export interface GitInfo {
   author: string | null
