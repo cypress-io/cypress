@@ -322,8 +322,7 @@ export class GitDataSource {
 
     const stdout = normalize(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 
-    // windows returns a leading carriage return, remove it
-    let output: string[] = []
+    const output: string[] = []
 
     for (const p of absolutePaths) {
       const idx = stdout.findIndex((entry) => entry.includes(p))
