@@ -180,8 +180,8 @@ const reporterWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
 })
 
-// we must update pr before calling userRunnerStyle, to make sure that values from GQL
-// will be available to
+// we must update preferences before calling useRunnerStyle, to make sure that values from GQL
+// will be available during the initial calculation that useRunnerStyle does
 
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
