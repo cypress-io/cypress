@@ -1108,13 +1108,6 @@ jobs:
             run-launchpad-integration-tests-chrome,
             run-webpack-dev-server-fresh-integration-tests,
             run-vite-dev-server-fresh-integration-tests
-      - run:
-          command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy upload packages/app/cypress/screenshots/screenshot.cy.tsx/percy
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
