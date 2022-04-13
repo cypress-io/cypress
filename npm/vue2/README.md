@@ -1,34 +1,34 @@
-# @cypress/vue
+# @cypress/vue2
 
 [![NPM][npm-icon] ][npm-url]
 
 [![semantic-release][semantic-image] ][semantic-url]
 
-> Browser-based Component Testing for Vue.js with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
+> Browser-based Component Testing for Vue.js 2.x with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
 >
 **✨ New** We're growing the Cypress Community Discord. We have dedicated sections on Component Testing. 👉 [Join now](https://discord.com/invite/TmzTGUW) and let's chat!
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
-### What is @cypress/vue?
-This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your Vue 3.x components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
+### What is @cypress/vue2?
+This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your Vue 2 components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
 
 ![Example component test](images/dynamic.gif)
 
 ### How is this different from Vue Test Utils?
-It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood. This is more of a replacement for node-based testing than it is replacing Vue Test Utils and its API. Instead of running your tests in node (using Jest or Mocha), the Cypress Component Testing Library runs each component in the **real browser** with full power of the Cypress Framework: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/). One benefit to using Cypress instead of a node-based runner is that limitations of Vue Test Utils in Node (e.g. manually awaiting Vue's internal event loop) are hidden from the user due to Cypress's retry-ability logic.
+It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood. This is more of a replacement for node-based testing than it is replacing Vue Test Utils and its API. Instead of running your tests in node (using Jest or Mocha), the Cypress Component Testing Library runs each component in the **real browser** with full power of the Cypress Framework: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/). One benefit to using Cypress instead of a node-based runner is that limitations of Vue Test Utils in Node (e.g. manually awaiting Vue's internal event loop) are hidden from the user due to Cypress's retry-ability logic.  
 
 - If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
 
-### How is this different from @cypress/vue2?
-Cypress packages the current version of Vue under @cypress/vue, and older versions under separate package names. Use [@cypress/vue2](cypress-vue2-npm-url) if you're still using vue@2, and this package if you're on vue@3.
+### How is this different from @cypress/vue?
+Cypress packages the current version of Vue under @cypress/vue, and older versions under separate package names. Use [@cypress/vue](cypress-vue-npm-url) if you're up to date, and this package if you're still using vue@2.
 
 ## Installation
 
 - Requires Cypress v7.0.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
-- Requires Vue 3.x. If you are using Vue 2.x, you want [@cypress/vue2](cypress-vue2-npm-url) instead.
-- Supports projects built with Vue CLI, Vite, and Webpack. If you would like us to support another build configuration, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md).
+- Requires Vue 2.x. If you are using Vue 3.0.0 or later, you want [@cypress/vue](cypress-vue-npm-url) instead.
+- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue2&template=3-feature.md) or, if an issue already exists subscribe to it.
 
 Now you are ready to install.
 
@@ -65,14 +65,15 @@ module.exports = (on) => {
 Install dev dependencies
 
 ```shell
-npm i -D @cypress/webpack-dev-server @cypress/vue
+npm i -D @cypress/webpack-dev-server \
+  vue-loader vue-template-compiler css-loader
 ```
 
 And write a test
 
 ```js
 import Hello from '../../components/Hello.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Hello.vue', () => {
   beforeEach(mountCallback(Hello))
@@ -87,7 +88,7 @@ describe('Hello.vue', () => {
 
 ```js
 // components/HelloWorld.spec.js
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import { HelloWorld } from './HelloWorld.vue'
 describe('HelloWorld component', () => {
   it('works', () => {
@@ -125,10 +126,10 @@ You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
 the `options`.
 
-- `components` - object of 'id' and components to register globally, see [Components](npm/vue/cypress/component/basic/components) example
-- `use` (alias `plugins`) - list of plugins, see [Plugins](npm/vue/cypress/component/basic/plugins)
-- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](npm/vue/cypress/component/basic/mixins) example
-- `filters` - hash of global filters, see [Filters](npm/vue/cypress/component/basic/filters) example
+- `components` - object of 'id' and components to register globally, see [Components](cypress/component/basic/components) example
+- `use` (alias `plugins`) - list of plugins, see [Plugins](cypress/component/basic/plugins)
+- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](cypress/component/basic/mixins) example
+- `filters` - hash of global filters, see [Filters](cypress/component/basic/filters) example
 
 ### intro example
 
@@ -161,7 +162,7 @@ Let's test it in [Cypress.io][cypress.io] (for the current version see
 [cypress/integration/spec.js](cypress/integration/spec.js)).
 
 ```js
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Declarative rendering', () => {
   // Vue code from https://vuejs.org/v2/guide/#Declarative-Rendering
@@ -227,7 +228,7 @@ var app4 = new Vue({
 Let's test it. Simple.
 
 ```js
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Declarative rendering', () => {
   // List example from https://vuejs.org/v2/guide/#Declarative-Rendering
@@ -292,7 +293,7 @@ var app5 = new Vue({
 We can write the test the same way
 
 ```js
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('Handling User Input', () => {
   // Example from https://vuejs.org/v2/guide/#Handling-User-Input
@@ -367,7 +368,7 @@ to have multiple components? No problem!
 
 ```js
 import Hello from '../../components/Hello.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 describe('Several components', () => {
   const template = `
     <div>
@@ -427,7 +428,7 @@ Simple - let us spy on the event, [spying and stubbing is built into Cypress](ht
 
 ```js
 import ButtonCounter from '../../components/ButtonCounter.vue'
-import { mountCallback } from '@cypress/vue'
+import { mountCallback } from '@cypress/vue2'
 
 describe('ButtonCounter', () => {
   beforeEach(mountCallback(ButtonCounter))
@@ -500,7 +501,7 @@ Calls to `window.alert` are automatically recorded, but do not show up. Instead 
 ## Comparison
 
 <!-- prettier-ignore-start -->
-Feature | Vue Test Utils or @testing-library/vue | Cypress + `@cypress/vue`
+Feature | Vue Test Utils or @testing-library/vue | Cypress + `@cypress/vue2`
 --- | --- | ---
 Test runs in real browser | ❌ | ✅
 Uses full mount | ❌ | ✅
@@ -521,7 +522,7 @@ Code coverage | ✅ | ✅
 
 ```js
 // components/HelloWorld.spec.js
-import { mount } from '@cypress/vue'
+import { mount } from '@cypress/vue2'
 import { HelloWorld } from './HelloWorld.vue'
 describe('HelloWorld component', () => {
   it('works', () => {
@@ -604,7 +605,7 @@ We were in the middle of moving into the Cypress NPM org, so any references to `
 
 ## Development
 
-To see all local tests, install dependencies, build the code and open Cypress using the open --component command
+To see all local tests, install dependencies, build the code and open Cypress using the open-ct command
 
 ```sh
 yarn install
@@ -614,11 +615,25 @@ yarn workspace @cypress/vue build
 The build is done using `rollup`. It bundles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
 
 ```sh
-# cypress open --component
+# cypress open-ct
 yarn workspace @cypress/vue cy:open
 ```
 
 Larger tests that use full application and run on CI (see [circle.yml](circle.yml)) are located in the folder [examples](examples).
+
+### Debugging
+
+Run Cypress with environment variable
+
+```
+DEBUG=@cypress/vue2
+``` 
+
+If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
+
+```
+DEBUG=@cypress/vue2 DEBUG_DEPTH=10
+```
 
 ## Related info
 
@@ -669,8 +684,8 @@ Let the world know your project is using Cypress.io to test with this cool badge
 [![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
 
 [npm-icon]: https://nodei.co/npm/@cypress/vue.svg?downloads=true
-[npm-url]: https://npmjs.org/package/@cypress/vue
-[cypress-vue2-npm-url]: https://www.npmjs.com/package/@cypress/vue2
+[npm-url]: https://npmjs.org/package/@cypress/vue2
+[cypress-vue-npm-url]: https://www.npmjs.com/package/@cypress/vue
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
