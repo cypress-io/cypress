@@ -41,6 +41,7 @@ cli/types
 # cli/react, cli/vue, and cli/mount-utils are all copied from dist'd builds
 cli/react
 cli/vue
+cli/vue2
 cli/mount-utils
 
 # packages/example is not linted (think about changing this)
@@ -68,6 +69,9 @@ npm/cypress-schematic/src/**/*.js
 **/.next/**
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
+
+# The global eslint configuration is not set up to parse vue@2 files
+/npm/vue2/**/*.vue
 
 packages/data-context/test/unit/codegen/files
 
