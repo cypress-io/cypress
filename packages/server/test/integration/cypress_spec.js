@@ -1033,7 +1033,8 @@ describe('lib/cypress', () => {
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
 
-            expect(BrowserCriClient.attachToBrowserAndTargetUrl).to.have.been.calledOnce
+            expect(BrowserCriClient.create).to.have.been.calledOnce
+            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
           })
         })
 

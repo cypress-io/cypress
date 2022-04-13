@@ -13,11 +13,6 @@ interface Version {
   minor: number
 }
 
-interface AttachedBrowserAndPage {
-  browserCriClient: BrowserCriClient
-  pageCriClient: CRIWrapper.Client
-}
-
 const isVersionGte = (a: Version, b: Version) => {
   return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
 }
@@ -45,57 +40,54 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
   }
 }
 
+const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
+  let retryIndex = 0
+
+  const retry = async () => {
+    try {
+      return await retryable()
+    } catch (err) {
+      retryIndex++
+      const delay = _getDelayMsForRetry(retryIndex, browserName)
+
+      debug('error finding browser target, maybe retrying %o', { delay, err })
+
+      if (typeof delay === 'undefined') {
+        debug('failed to connect to CDP %o', { err })
+        errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delay))
+
+      return retry()
+    }
+  }
+
+  return retry()
+}
+
 export class BrowserCriClient {
   private currentlyAttachedTarget: CRIWrapper.Client | undefined
-  private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private onAsynchronousError: Function) {}
+  private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
-   * browser target and the attached target url
+   * browser target
    *
    * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
-   * @param targetUrl the url to attach to
    * @param onAsynchronousError callback for any cdp fatal errors
-   * @returns a Promise resolving to an object containing
-   * browserCriClient: a wrapper around the chrome remote interface that is connected to the browser target
-   * pageCriClient: the chrome remote interface that is connected to the targetUrl target
+   * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async attachToBrowserAndTargetUrl (port: number, browserName: string, targetUrl: string, onAsynchronousError: Function): Promise<AttachedBrowserAndPage> {
+  static async create (port: number, browserName: string, onAsynchronousError: Function): Promise<BrowserCriClient> {
     await ensureLiveBrowser(port, browserName)
 
-    let retryIndex = 0
-    const retry = async (): Promise<AttachedBrowserAndPage> => {
-      debug('attempting to find CRI target... %o', { retryIndex })
+    return retryWithIncreasingDelay(async () => {
+      const versionInfo = await CRI.Version({ host: HOST, port })
+      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
 
-      try {
-        const versionInfo = await CRI.Version({ host: HOST, port })
-        const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
-
-        const browserCriClient = new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
-        const pageCriClient = await browserCriClient.attachToTargetUrl(targetUrl)
-
-        return {
-          browserCriClient,
-          pageCriClient,
-        }
-      } catch (err) {
-        retryIndex++
-        const delay = _getDelayMsForRetry(retryIndex, browserName)
-
-        debug('error finding CRI target, maybe retrying %o', { delay, err })
-
-        if (typeof delay === 'undefined') {
-          throw err
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, delay))
-
-        return retry()
-      }
-    }
-
-    return retry()
+      return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
+    }, browserName, port)
   }
 
   /**
@@ -110,6 +102,29 @@ export class BrowserCriClient {
     if (!isVersionGte(actualVersion, minimum)) {
       errors.throwErr('CDP_VERSION_TOO_OLD', protocolVersion, actualVersion)
     }
+  }
+
+  /**
+   * Attaches to a target with the given url
+   *
+   * @param url the url to attach to
+   * @returns the chrome remote interface wrapper for the target
+   */
+  attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
+    return retryWithIncreasingDelay(async () => {
+      debug('Attaching to target url %s', url)
+      const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
+
+      const target = targets.find((target) => target.url === url)
+
+      if (!target) {
+        throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
+      }
+
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+
+      return this.currentlyAttachedTarget
+    }, this.browserName, this.port)
   }
 
   /**
@@ -156,27 +171,5 @@ export class BrowserCriClient {
     }
 
     await this.browserClient.close()
-  }
-
-  /**
-   * Attaches to a target with the given url
-   *
-   * @param url the url to attach to
-   * @returns the chrome remote interface wrapper for the target
-   */
-  private attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
-    debug('Attaching to target url %s', url)
-    const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
-
-    const target = targets.find((target) => target.url === url)
-
-    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
-    if (!target) {
-      throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
-    }
-
-    this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
-
-    return this.currentlyAttachedTarget
   }
 }
