@@ -4,11 +4,12 @@ This is the front-end for the Cypress App.
 
 ## Development
 
-1. `yarn dev` (inside of `packages/app`)
-2. It will open launchpad
-3. Select Component or E2E Testing
-3. Open chrome (or another browser)
-4. It will show the new Vite powered app 
+1. `yarn watch` (inside of root)
+2. `yarn cypress:open` (inside of `packages/app`)
+3. It will open launchpad
+4. Select Component or E2E Testing
+5. Open chrome (or another browser)
+6. It will show the new Vite powered app
 
 ## How the App works
 
