@@ -1,6 +1,7 @@
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
 
 import pkg from './package.json'
 
@@ -23,12 +24,11 @@ function createEntry (options) {
     input,
     external: [
       'vue',
-      '@vue/test-utils',
-      '@cypress/mount-utils',
-      '@cypress/webpack-dev-server',
     ],
     plugins: [
-      resolve({ preferBuiltins: true }), commonjs(),
+      resolve({ preferBuiltins: true }),
+      commonjs(),
+      json(),
     ],
     output: {
       banner,
@@ -37,7 +37,6 @@ function createEntry (options) {
       format,
       globals: {
         vue: 'Vue',
-        '@vue/test-utils': 'VueTestUtils',
       },
       exports: 'auto',
     },

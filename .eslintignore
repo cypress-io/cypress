@@ -41,6 +41,7 @@ cli/types
 # cli/react, cli/vue, and cli/mount-utils are all copied from dist'd builds
 cli/react
 cli/vue
+cli/vue2
 cli/mount-utils
 
 # packages/example is not linted (think about changing this)

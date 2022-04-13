@@ -11,7 +11,7 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it.only('vueclivue2-configured', {
+  systemTests.it('vueclivue2-configured', {
     project: 'vueclivue2-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',
