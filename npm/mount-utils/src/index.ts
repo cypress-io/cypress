@@ -40,10 +40,10 @@ export interface StyleOptions {
 export const ROOT_SELECTOR = '[data-cy-root]'
 
 export const getContainerEl = (): HTMLElement => {
-  const els = document.querySelector(ROOT_SELECTOR)
+  const el = document.querySelector<HTMLElement>(ROOT_SELECTOR)
 
-  if (els) {
-    return els as HTMLElement
+  if (el) {
+    return el
   }
 
   throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
@@ -141,7 +141,7 @@ export const injectStylesBeforeElement = (
   options: Partial<StyleOptions & { log: boolean }>,
   document: Document,
   el: HTMLElement | null,
-) => {
+): HTMLElement => {
   if (!el) return
 
   // first insert all stylesheets as Link elements

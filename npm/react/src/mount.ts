@@ -13,7 +13,7 @@ import {
  * Inject custom style text or CSS file or 3rd party style resources
  */
 const injectStyles = (options: MountOptions) => {
-  return () => {
+  return (): HTMLElement => {
     const el = getContainerEl()
 
     return injectStylesBeforeElement(options, document, el)
@@ -72,7 +72,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
     if (!el) {
       throw new Error(
         [
-          '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
+          `[@cypress/react] 🔥 Hmm, cannot find root element to mount the component. Searched for ${ROOT_SELECTOR}`,
         ].join(' '),
       )
     }
