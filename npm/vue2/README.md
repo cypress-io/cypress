@@ -1,17 +1,17 @@
-# @cypress/vue
+# @cypress/vue2
 
 [![NPM][npm-icon] ][npm-url]
 
 [![semantic-release][semantic-image] ][semantic-url]
 
-> Browser-based Component Testing for Vue.js with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
+> Browser-based Component Testing for Vue.js 2.x with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
 >
 **✨ New** We're growing the Cypress Community Discord. We have dedicated sections on Component Testing. 👉 [Join now](https://discord.com/invite/TmzTGUW) and let's chat!
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
-### What is @cypress/vue?
-This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
+### What is @cypress/vue2?
+This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your Vue 2 components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
 
 ![Example component test](images/dynamic.gif)
 
@@ -20,11 +20,15 @@ It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood
 
 - If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
 
+### How is this different from @cypress/vue?
+Cypress packages the current version of Vue under @cypress/vue, and older versions under separate package names. Use [@cypress/vue](cypress-vue-npm-url) if you're up to date, and this package if you're still using vue@2.
+
 ## Installation
 
 - Requires Cypress v7.0.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
-- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) or, if an issue already exists subscribe to it.
+- Requires Vue 2.x. If you are using Vue 3.0.0 or later, you want [@cypress/vue](cypress-vue-npm-url) instead.
+- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue2&template=3-feature.md) or, if an issue already exists subscribe to it.
 
 Now you are ready to install.
 
@@ -497,7 +501,7 @@ Calls to `window.alert` are automatically recorded, but do not show up. Instead 
 ## Comparison
 
 <!-- prettier-ignore-start -->
-Feature | Vue Test Utils or @testing-library/vue | Cypress + `@cypress/vue`
+Feature | Vue Test Utils or @testing-library/vue | Cypress + `@cypress/vue2`
 --- | --- | ---
 Test runs in real browser | ❌ | ✅
 Uses full mount | ❌ | ✅
@@ -622,13 +626,13 @@ Larger tests that use full application and run on CI (see [circle.yml](circle.ym
 Run Cypress with environment variable
 
 ```
-DEBUG=@cypress/vue
+DEBUG=@cypress/vue2
 ``` 
 
 If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
 
 ```
-DEBUG=@cypress/vue DEBUG_DEPTH=10
+DEBUG=@cypress/vue2 DEBUG_DEPTH=10
 ```
 
 ## Related info
@@ -680,7 +684,8 @@ Let the world know your project is using Cypress.io to test with this cool badge
 [![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
 
 [npm-icon]: https://nodei.co/npm/@cypress/vue.svg?downloads=true
-[npm-url]: https://npmjs.org/package/@cypress/vue
+[npm-url]: https://npmjs.org/package/@cypress/vue2
+[cypress-vue-npm-url]: https://www.npmjs.com/package/@cypress/vue
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
