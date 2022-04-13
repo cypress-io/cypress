@@ -110,7 +110,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
     this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
-    this.ctx._modeOptions = {}
+    this.ctx._modeOptions = this.ctx._modeOptions || {}
   }
 
   async loadProjects () {

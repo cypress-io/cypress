@@ -1663,6 +1663,9 @@ describe('lib/cypress', () => {
       }).then(() => {
         const options = Events.start.firstCall.args[0]
 
+        // add the modeOptions to the context
+        ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
         return openProject.create(this.todosPath, { ...options, testingType: 'e2e' }, [])
       }).then(() => {
         const projectOptions = openProject.getProject().options
