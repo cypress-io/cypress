@@ -230,6 +230,78 @@ describe('App: Specs', () => {
         })
       })
 
+      context('scaffold examples', () => {
+        const expectedScaffoldPaths = [
+          'cypress/e2e/1-getting-started/todo.cy.ts',
+          ...([
+            'actions',
+            'aliasing',
+            'assertions',
+            'connectors',
+            'cookies',
+            'cypress_api',
+            'files',
+            'local_storage',
+            'location',
+            'navigation',
+            'network_requests',
+            'querying',
+            'spies_stubs_clocks',
+            'utilities',
+            'viewport',
+            'waiting',
+            'window',
+          ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.ts`)),
+        ]
+
+        const expectedScaffoldPathsForPlatform = expectedScaffoldPaths.map(getPathForPlatform)
+
+        it('scaffolds example files when card is clicked', () => {
+          cy.get('@ScaffoldCard').click()
+
+          cy.findByRole('dialog', {
+            name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader,
+          }).within(() => {
+            cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          })
+
+          cy.withCtx(async (ctx, options) => {
+            const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'e2e', ['**/*.cy.ts'], [], [])).map((spec) => spec.relative)
+
+            // Validate that all expected paths have been generated within the data context
+            expect(generatedSpecPaths.filter((path) => {
+              return options.expectedScaffoldPathsForPlatform.includes(path)
+            })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
+          }, { expectedScaffoldPathsForPlatform })
+
+          cy.percySnapshot()
+
+          // Dismisses dialog with close button press
+          cy.get('@CloseDialogButton').click()
+          cy.findByRole('dialog').should('not.exist')
+
+          expectedScaffoldPaths.forEach((spec) => {
+            // Validate that links for each generated spec are rendered
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
+          })
+        })
+
+        it('dismisses scaffold dialog with action button press', () => {
+          cy.get('@ScaffoldCard').click()
+
+          cy.findByRole('dialog', {
+            name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader,
+          }).within(() => {
+            cy.findByRole('button', {
+              name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton,
+            }).click()
+          })
+
+          // Dismisses dialog with close button press
+          cy.findByRole('dialog').should('not.exist')
+        })
+      })
+
       context('scaffold empty spec', () => {
         it('should generate empty spec for a TS project', () => {
           // Verify the modal can be closed

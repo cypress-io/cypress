@@ -43,6 +43,7 @@ export async function codeGenerator (
 
     const processBinaryFile = async () => {
       const rawFileContent = await fs.readFile(file)
+
       const computedPath = computePath(
         action.templateDir,
         action.target,
@@ -56,12 +57,19 @@ export async function codeGenerator (
     const processTextFile = async () => {
       const fileContent = (await fs.readFile(file)).toString()
       const { body, renderedAttributes } = frontMatter(fileContent, args)
+
+      let filename = renderedAttributes.fileName
+
+      if (!filename) {
+        filename = args.template === 'scaffoldIntegration' ? `${parsedFile.name}.${args.fileExtensionToUse}` : parsedFile.base
+      }
+
       const computedPath = computePath(
         action.templateDir,
         action.target,
         path.join(
           parsedFile.dir,
-          renderedAttributes.fileName || parsedFile.base,
+          filename,
         ),
         args,
       )

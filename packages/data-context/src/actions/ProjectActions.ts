@@ -455,7 +455,7 @@ export class ProjectActions {
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
-      {},
+      { fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse, template: 'scaffoldIntegration' },
     )
 
     if (results.failed.length) {
