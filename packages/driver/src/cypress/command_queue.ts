@@ -295,8 +295,8 @@ export class CommandQueue extends Queue<Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
-        // If we're enabled experimentalLoginFlows we no longer have to wait for stability at the end of the command queue.
-        if (Cypress.config('experimentalLoginFlows')) {
+        // If we're enabled experimentalSessionAndOrigin we no longer have to wait for stability at the end of the command queue.
+        if (Cypress.config('experimentalSessionAndOrigin')) {
           Cypress.action('cy:command:queue:end')
 
           return null
@@ -315,6 +315,12 @@ export class CommandQueue extends Queue<Command> {
 
       // store the previous timeout
       const prevTimeout = this.timeout()
+
+      // If we have created a timeout but are in an unstable state, clear the
+      // timeout in favor of the on load timeout already running.
+      if (!cy.state('isStable')) {
+        cy.clearTimeout()
+      }
 
       // store the current runnable
       const runnable = this.state('runnable')

@@ -35,7 +35,7 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
        causes domain navigation:
      CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
 
-In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:
+In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:
 
 \`cy.visit('http://localhost:4545/')\`
 \`<other commands targeting http://localhost:4545 go here>\`
@@ -66,7 +66,7 @@ https://on.cypress.io/cannot-visit-different-origin-domain
        "before each" hook for "never gets here":
      CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
 
-In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:
+In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:
 
 \`cy.visit('http://localhost:4545/')\`
 \`<other commands targeting http://localhost:4545 go here>\`

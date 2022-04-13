@@ -205,11 +205,11 @@ context('cy.origin navigation', () => {
     })
 
     // @ts-ignore
-    it('informs user to use cy.origin with experimental flag off', { experimentalLoginFlows: false }, (done) => {
+    it('informs user to use cy.origin with experimental flag off', { experimentalSessionAndOrigin: false }, (done) => {
       cy.on('fail', (e) => {
         expect(e.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          In order to visit a different origin, you can enable the \`experimentalLoginFlows\` flag and use \`cy.origin()\`:\n
+          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
           \`cy.visit('http://localhost:3500/fixtures/multi-domain.html')\`
           \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://foobar.com:3500', () => {\`
