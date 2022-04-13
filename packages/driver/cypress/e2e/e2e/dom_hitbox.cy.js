@@ -114,8 +114,9 @@ const ensureCorrectHighlightPositions = (sel) => {
     const doc = els.content[0].ownerDocument
 
     const contentHighlightCenter = [dims.content.x + dims.content.width / 2, dims.content.y + dims.content.height / 2]
+    const highlightedEl = doc.elementFromPoint(...contentHighlightCenter)
 
-    expect(doc.elementFromPoint(...contentHighlightCenter)).eq(els.content[0])
+    expect(highlightedEl).eq(els.content[0])
 
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
@@ -135,7 +136,7 @@ const getAndPin = (sel) => {
 const clickAndPin = (sel, ...args) => {
   cy.get(sel).click(...args)
 
-  clickCommandLog('click')
+  clickCommandLog('click', 'method')
 }
 
 const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {

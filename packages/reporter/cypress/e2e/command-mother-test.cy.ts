@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-describe('commands', () => {
+describe('commands', { retries: 2 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()

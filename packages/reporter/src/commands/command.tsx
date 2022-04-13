@@ -306,6 +306,7 @@ class Command extends Component<Props> {
               {
                 'command-is-event': !!model.event,
                 'command-is-pinned': this._isPinned(),
+                'command-is-interactive': model.hasConsoleProps || model.hasSnapshot,
               },
             )
           }

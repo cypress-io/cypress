@@ -1,13 +1,4 @@
-const { $, _, Promise } = Cypress
-
-export const getCommandLogWithText = (command, type = 'method') => {
-  // Open current test if not already open, so we can find the command log
-  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top.document).click()
-
-  return cy
-  .$$(`.runnable-active .command-${type}:contains(${command})`, top.document)
-  .closest('.command')
-}
+const { _, Promise } = Cypress
 
 export const findReactInstance = function (dom) {
   let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
@@ -24,21 +15,20 @@ export const clickCommandLog = (sel, type) => {
   return cy.wait(10)
   .then(() => {
     return withMutableReporterState(() => {
-      const commandLogEl = getCommandLogWithText(sel, type)
-      const reactCommandInstance = findReactInstance(commandLogEl[0])
+      // Open current test if not already open, so we can find the command log
+      const currTestName = Cypress.state('test').title
 
-      if (!reactCommandInstance) {
-        assert(false, 'failed to get command log React instance')
-      }
+      cy.log(`Open "${currTestName}" test`)
 
-      reactCommandInstance.props.appState.isRunning = false
-
-      $(commandLogEl).find('.command-wrapper')
+      cy.get(`.runnable-active .command-${type}:contains(${sel})`, {
+        withinSubject: top.document,
+      })
+      .closest('.command')
+      .eq(0)
+      .should('exist')
+      .find('.command-wrapper')
       .click()
-      .get(0).scrollIntoView()
-
-      // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.runnable-active .command-pin', top.document).length, 'command should be pinned').ok
+      .scrollIntoView()
     })
   })
 }
@@ -49,6 +39,7 @@ export const withMutableReporterState = (fn) => {
   const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
 
   currentTestLog.props.model._isOpen = true
+  currentTestLog.props.appState.isRunning = false
 
   return Promise.try(fn)
   .then(() => {
