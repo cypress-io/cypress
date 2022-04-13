@@ -5,10 +5,11 @@ exports['e2e cross origin navigation / captures cross origin failures when "expe
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (navigation_cross_origin_errors.ts)                                        │
-  │ Searched:   cypress/integration/navigation_cross_origin_errors.ts                              │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (navigation_cross_origin_errors.ts)                                      │
+  │ Searched:     cypress/integration/navigation_cross_origin_errors.ts                            │
+  │ Experiments:  experimentalLoginFlows=false                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -1418,6 +1418,29 @@ declare namespace Cypress {
     off: Actions
 
     /**
+     * Enables running Cypress commands in a secondary origin.
+     * @see https://on.cypress.io/origin
+     * @example
+     *    cy.origin('example.com', () => {
+     *      cy.get('h1').should('equal', 'Example Domain')
+     *    })
+     */
+    origin(urlOrDomain: string, fn: () => void): Chainable
+
+    /**
+     * Enables running Cypress commands in a secondary origin.
+     * @see https://on.cypress.io/origin
+     * @example
+     *    cy.origin('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
+     *      expect(key).to.equal('value')
+     *      expect(foo).to.equal('foo')
+     *    })
+     */
+    origin<T>(urlOrDomain: string, options: {
+      args: T
+    }, fn: (args: T) => void): Chainable
+
+    /**
      * Get the parent DOM element of a set of DOM elements.
      *
      * @see https://on.cypress.io/parent
@@ -1911,29 +1934,6 @@ declare namespace Cypress {
      *    })
      */
     spread(fn: (...args: any[]) => void): Chainable<Subject>
-
-    /**
-     * Enables running Cypress commands in a secondary domain
-     * @see https://on.cypress.io/origin
-     * @example
-     *    cy.origin('example.com', () => {
-     *      cy.get('h1').should('equal', 'Example Domain')
-     *    })
-     */
-    origin(urlOrDomain: string, fn: () => void): Chainable
-
-    /**
-     * Enables running Cypress commands in a secondary domain
-     * @see https://on.cypress.io/origin
-     * @example
-     *    cy.origin('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
-     *      expect(key).to.equal('value')
-     *      expect(foo).to.equal('foo')
-     *    })
-     */
-    origin<T>(urlOrDomain: string, options: {
-      args: T
-    }, fn: (args: T) => void): Chainable
 
     /**
      * Run a task in Node via the plugins file.
@@ -2841,7 +2841,7 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables cross-origin login support in Cypress, including the `cy.origin` and `cy.session` commands.
+     * Enables cross-origin login flows, including the `cy.origin` and `cy.session` commands.
      * @default false
      */
     experimentalLoginFlows: boolean
