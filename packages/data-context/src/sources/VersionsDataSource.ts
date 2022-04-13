@@ -33,12 +33,20 @@ export class VersionsDataSource {
   }
 
   #ensureData () {
-    this.ctx.update((d) => {
-      d.versionData.latestVersion ??= this.getLatestVersion().catch((e) => undefined)
-      d.versionData.npmMetadata ??= this.getVersionMetadata().catch((e) => undefined)
-    })
+    let versionData = this.ctx.coreData.versionData
 
-    return this.ctx.coreData.versionData
+    if (!versionData) {
+      versionData = {
+        latestVersion: this.getLatestVersion().catch((e) => pkg.version),
+        npmMetadata: this.getVersionMetadata().catch((e) => ({})),
+      }
+
+      this.ctx.update((d) => {
+        d.versionData = versionData
+      })
+    }
+
+    return versionData
   }
 
   /**
@@ -58,7 +66,7 @@ export class VersionsDataSource {
    */
   async versionData (): Promise<VersionData> {
     const versionData = this.#ensureData()
-    const [latestVersion = pkg.version, npmMetadata] = await Promise.all([
+    const [latestVersion, npmMetadata] = await Promise.all([
       versionData.latestVersion,
       versionData.npmMetadata,
     ])
@@ -66,7 +74,7 @@ export class VersionsDataSource {
     const latestVersionMetadata: Version = {
       id: latestVersion,
       version: latestVersion,
-      released: npmMetadata?.[latestVersion] ?? new Date().toISOString(),
+      released: npmMetadata[latestVersion] ?? new Date().toISOString(),
     }
 
     return {
@@ -74,7 +82,7 @@ export class VersionsDataSource {
       current: {
         id: pkg.version,
         version: pkg.version,
-        released: npmMetadata?.[pkg.version] ?? new Date().toISOString(),
+        released: npmMetadata[pkg.version] ?? new Date().toISOString(),
       },
     }
   }
@@ -84,7 +92,9 @@ export class VersionsDataSource {
       debug('resetting latest version telemetry call due to a different testing type')
       this._currentTestingType = this.ctx.coreData.currentTestingType
       this.ctx.update((d) => {
-        d.versionData.latestVersion = this.getLatestVersion()
+        if (d.versionData) {
+          d.versionData.latestVersion = this.getLatestVersion()
+        }
       })
     }
   }
