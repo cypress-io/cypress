@@ -110,26 +110,22 @@ export class WizardActions {
     debug('detectedLanguage %s', this.data.detectedLanguage)
     this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
-    try {
-      const detected = detect(this.ctx.currentProject)
+    const detected = detect(this.ctx.currentProject)
 
-      debug('detected %o', detected)
+    debug('detected %o', detected)
 
-      if (detected) {
-        this.ctx.update((coreData) => {
-          coreData.wizard.detectedFramework = detected.framework ?? null
-          coreData.wizard.chosenFramework = detected.framework ?? null
+    if (detected) {
+      this.ctx.update((coreData) => {
+        coreData.wizard.detectedFramework = detected.framework ?? null
+        coreData.wizard.chosenFramework = detected.framework ?? null
 
-          if (!detected.framework?.supportedBundlers[0]) {
-            return
-          }
+        if (!detected.framework?.supportedBundlers[0]) {
+          return
+        }
 
-          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
-          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
-        })
-      }
-    } catch {
-      // Could not detect anything - no problem, no need to do anything.
+        coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
+        coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
+      })
     }
   }
 
