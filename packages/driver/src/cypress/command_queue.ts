@@ -316,6 +316,12 @@ export class CommandQueue extends Queue<Command> {
       // store the previous timeout
       const prevTimeout = this.timeout()
 
+      // If we have created a timeout but are in an unstable state, clear the
+      // timeout in favor of the on load timeout already running.
+      if (!cy.state('isStable')) {
+        cy.clearTimeout()
+      }
+
       // store the current runnable
       const runnable = this.state('runnable')
 
