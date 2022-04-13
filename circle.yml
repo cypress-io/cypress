@@ -1109,7 +1109,10 @@ jobs:
             run-webpack-dev-server-fresh-integration-tests,
             run-vite-dev-server-fresh-integration-tests
       - run:
+      # packages/app/src/runner/screenshot/reference-screenshots
           command: |
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            yarn percy upload packages/app/src/runner/screenshot/reference-screenshots \
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             yarn percy build:finalize
 
