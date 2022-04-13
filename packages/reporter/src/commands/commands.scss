@@ -12,7 +12,7 @@
   }
 
   .command {
-    cursor: default;
+    cursor: pointer;
     min-height: 20px;
   }
 
@@ -441,7 +441,6 @@
 
     svg {
       color: $gray-600;
-      cursor: pointer;
       vertical-align: top;
     }
 
@@ -507,11 +506,6 @@
     .command-expander-is-open {
       transform: rotate(0deg);
     }
-  }
-
-  .command-has-snapshot:hover,
-  .command-has-console-props {
-    cursor: pointer;
   }
 
   .command-is-pinned {

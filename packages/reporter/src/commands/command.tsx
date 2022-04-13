@@ -227,10 +227,6 @@ const Progress = observer(({ model }: ProgressProps) => {
   const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
   const percentageRemaining = timeRemaining / model.timeout || 0
 
-  if (timeRemaining === 0) {
-    return null
-  }
-
   // we add a key to the span to ensure a rerender and restart of the animation on change
   return (
     <div className='command-progress'>
@@ -310,8 +306,6 @@ class Command extends Component<Props> {
               {
                 'command-is-event': !!model.event,
                 'command-is-pinned': this._isPinned(),
-                'command-has-console-props': model.hasConsoleProps,
-                'command-has-snapshot': model.hasSnapshot,
               },
             )
           }
@@ -368,7 +362,7 @@ class Command extends Component<Props> {
             </div>
           </FlashOnClick>
         </div>
-        <Progress model={model} />
+        {model.state === 'pending' && <Progress model={model} />}
         {(model.hasChildren && model.isOpen) && this._children()}
       </li>
     )

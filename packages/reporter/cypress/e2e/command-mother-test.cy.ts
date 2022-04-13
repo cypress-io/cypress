@@ -85,7 +85,7 @@ describe('commands', () => {
       message: '#my_element that _has_ a really long message to show **wrapping** works as expected',
       state: 'passed',
       timeout: 4000,
-      groupLevel: 1,
+      groupLevel: 2,
       group: 129,
       wallClockStartedAt: inProgressStartedAt,
     })
@@ -96,7 +96,7 @@ describe('commands', () => {
       state: 'passed',
       type: 'child',
       group: 129,
-      groupLevel: 1,
+      groupLevel: 2,
       timeout: 4000,
       wallClockStartedAt: inProgressStartedAt,
     })
@@ -107,7 +107,7 @@ describe('commands', () => {
       message: '#my_element_nested',
       state: 'passed',
       timeout: 4000,
-      groupLevel: 2,
+      groupLevel: 3,
       group: 1229,
       wallClockStartedAt: inProgressStartedAt,
     })
@@ -122,7 +122,7 @@ describe('commands', () => {
         indicator: 'bad',
         message: `bad indicator`,
       },
-      groupLevel: 2,
+      groupLevel: 3,
       group: 1229,
       wallClockStartedAt: inProgressStartedAt,
     })
@@ -135,7 +135,7 @@ describe('commands', () => {
       state: 'passed',
       timeout: 4000,
       group: 1229,
-      groupLevel: 2,
+      groupLevel: 3,
       wallClockStartedAt: inProgressStartedAt,
     })
 
@@ -146,7 +146,7 @@ describe('commands', () => {
       state: 'passed',
       timeout: 4000,
       group: 129,
-      groupLevel: 1,
+      groupLevel: 2,
       wallClockStartedAt: inProgressStartedAt,
     })
 
@@ -212,6 +212,8 @@ describe('commands', () => {
 
     addCommand(runner, {
       aliasType: 'route',
+      name: '(xhr)',
+      message: 'https://google.com/2l3j4l23j4l23j4l/souw04rml',
       renderProps: {
         wentToOrigin: true,
         status: 'some status',
@@ -586,7 +588,7 @@ describe('commands', () => {
     const date = new Date(inProgressStartedAt).setMilliseconds(2500)
 
     cy.clock(date, ['Date'])
-    cy.get('.command').should('have.length', 25)
+    cy.get('.command').should('have.length', 59)
 
     cy.percySnapshot()
   })
