@@ -1110,8 +1110,6 @@ jobs:
             run-vite-dev-server-fresh-integration-tests
       - run:
           command: |
-          PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            yarn percy build:finalize packages/app/src/runner/screenshot/reference-sreenshots
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             yarn percy build:finalize
 
