@@ -1,6 +1,6 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import { CODE_LANGUAGES } from '@packages/types'
-import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
@@ -206,7 +206,18 @@ export class WizardActions {
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
 
-    const fileContent = fileName === 'commands' ? this.commandsFileBody(language) : this.supportFileBody(fileName, language)
+    let fileContent: string | undefined
+
+    if (fileName === 'commands') {
+      fileContent = commandsFileBody(language)
+    } else if (fileName === 'e2e') {
+      fileContent = supportFileE2E(language)
+    } else if (fileName === 'component') {
+      assert(this.ctx.coreData.wizard.chosenFramework)
+      fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+    }
+
+    assert(fileContent)
 
     await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 
@@ -388,78 +399,7 @@ export class WizardActions {
   private ensureDir (type: 'component' | 'e2e' | 'fixtures') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
-
-  private supportFileBody (fileName: 'e2e' | 'component', language: CodeLanguageEnum) {
-    return dedent`
-      // ***********************************************************
-      // This example support/${fileName}.${language} is processed and
-      // loaded automatically before your test files.
-      //
-      // This is a great place to put global configuration and
-      // behavior that modifies Cypress.
-      //
-      // You can change the location of this file or turn off
-      // automatically serving support files with the
-      // 'supportFile' configuration option.
-      //
-      // You can read more here:
-      // https://on.cypress.io/configuration
-      // ***********************************************************
-  
-      // Import commands.js using ES2015 syntax:
-      import './commands'
-  
-      // Alternatively you can use CommonJS syntax:
-      // require('./commands')
-    `
-  }
-
-  private commandsFileBody (language: CodeLanguageEnum) {
-    return dedent`
-      ${language === 'ts' ? '/// <reference types="cypress" />' : ''}
-      // ***********************************************
-      // This example commands.${language} shows you how to
-      // create various custom commands and overwrite
-      // existing commands.
-      //
-      // For more comprehensive examples of custom
-      // commands please read more here:
-      // https://on.cypress.io/custom-commands
-      // ***********************************************
-      //
-      //
-      // -- This is a parent command --
-      // Cypress.Commands.add('login', (email, password) => { ... })
-      //
-      //
-      // -- This is a child command --
-      // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-      //
-      //
-      // -- This is a dual command --
-      // Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-      //
-      //
-      // -- This will overwrite an existing command --
-      // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-      ${language === 'ts' ? COMMAND_TYPES : ''}
-    `
-  }
 }
-
-const COMMAND_TYPES = dedent`
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
-`
 
 const E2E_SCAFFOLD_BODY = dedent`
   e2e: {
