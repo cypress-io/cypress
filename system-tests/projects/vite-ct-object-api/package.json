@@ -1,9 +1,8 @@
 {
-  "name": "@test-project/vite-ct",
+  "name": "@test-project/vite-ct-object-api",
   "version": "0.0.0-test",
   "private": true,
   "dependencies": {
-    "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "@testing-library/cypress": "8.0.2",
     "ansi-regex": "4.1.1",
     "typescript": "4.2.3",

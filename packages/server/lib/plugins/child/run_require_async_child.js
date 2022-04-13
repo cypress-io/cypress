@@ -185,6 +185,8 @@ function run (ipc, file, projectRoot) {
                 })
               }
 
+              devServerOpts.cypressConfig = config
+
               return devServer(devServerOpts, result.component && result.component.devServerConfig)
             })
 
