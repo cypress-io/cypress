@@ -1189,6 +1189,8 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - run: mkdir -p ~/.ssh
+      - run: ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run: yarn test-npm-package-release-script
 
   lint-types:
