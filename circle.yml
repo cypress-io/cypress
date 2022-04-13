@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - use-contexts
+        - unify-1449-beta-slug-length
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,8 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    
-    - equal: [ new-cmd-group-9.x, << pipeline.git.branch >> ]
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -49,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ use-contexts, << pipeline.git.branch >> ]
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -499,8 +498,6 @@ commands:
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
-      - store_artifacts:
-          path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
   run-system-tests:
@@ -695,13 +692,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: <<parameters.command>>
-
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
       - unless:
           condition: <<parameters.folder>>
           steps:
@@ -719,12 +709,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>>
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
   test-binary-against-repo:
@@ -836,13 +820,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: <<parameters.command>>
-
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
       - unless:
           condition: <<parameters.folder>>
           steps:
@@ -860,12 +837,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>>
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
   build-binary:
@@ -1465,8 +1436,6 @@ jobs:
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
-      - store_artifacts:
-          path: npm/vite-dev-server/cypress/videos
       - store-npm-logs
 
   npm-webpack-batteries-included-preprocessor:
@@ -1635,7 +1604,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "use-contexts" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-beta-slug-length" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1661,10 +1630,6 @@ jobs:
           name: Run Kitchensink example project
           command: |
             yarn cypress:run --project /tmp/cypress-example-kitchensink
-      - store_artifacts:
-          path: /tmp/cypress-example-kitchensink/cypress/screenshots
-      - store_artifacts:
-          path: /tmp/cypress-example-kitchensink/cypress/videos
       - store-npm-logs
 
   test-kitchensink-against-staging:
@@ -1912,7 +1877,6 @@ jobs:
 
   test-binary-against-recipes-chrome:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
@@ -1920,7 +1884,6 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
