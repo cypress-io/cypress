@@ -20,11 +20,13 @@ describe('cy.origin logging', () => {
       const getLog = _.find(logs, { name: 'get', message: '[data-cy="dom-check"]' })
       const invokeLog = _.find(logs, { name: 'invoke', message: '.text()' })
       const newUrlLog = _.find(logs, { name: 'new url' })
+      const logLog = _.find(logs, { name: 'log' })
 
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)
       expect(invokeLog.group).to.equal(originLog.id)
       expect(newUrlLog.group).to.equal(originLog.id)
+      expect(logLog.group).to.be.undefined // ensure the group has ended
     })
   })
 
