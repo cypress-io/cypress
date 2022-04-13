@@ -157,7 +157,6 @@ export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<J
 
 const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
   return cy.then(() => {
-
     return cy.get(ROOT_SELECTOR, { log: false }).then(($el) => {
       if (lastMountedReactDom) {
         const wasUnmounted = lastMountedReactDom.unmountComponentAtNode($el[0])
