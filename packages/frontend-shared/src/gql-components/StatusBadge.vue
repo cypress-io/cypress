@@ -12,6 +12,7 @@
           />
           {{ titleOn }}
           <i-cy-chevron-down-small_x8
+            v-if="!props.isRunning"
             class="h-8px ml-8px w-8px icon-dark-gray-500"
           />
         </MenuButton>
@@ -53,8 +54,6 @@
 <script lang="ts" setup>
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
-import { gql, useMutation } from '@urql/vue'
-import { TestingTypeSelectionAndReconfigureDocument } from '../generated/graphql'
 import type { TestingTypeEnum } from '../generated/graphql'
 import { computed } from 'vue'
 
@@ -73,37 +72,17 @@ const emit = defineEmits<{
   (event: 'chooseABrowser'): void
 }>()
 
-gql`
-mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!, $isApp: Boolean!) {
-  setTestingTypeAndReconfigureProject(testingType: $testingType, isApp: $isApp) {
-    currentProject {
-      id
-      currentTestingType
-      isCTConfigured
-      isE2EConfigured
-      isLoadingConfigFile
-      isLoadingNodeEvents
-    }
-  }
-}
-`
-
-const mutation = useMutation(TestingTypeSelectionAndReconfigureDocument)
-
-type EventName = 'chooseABrowser' | 'reconfigure'
+type EventName = 'chooseABrowser'
 
 const menuItems = computed(() => {
   const launchBrowser: { name: string, event: EventName } = { name: t('setupPage.testingCard.chooseABrowser'), event: 'chooseABrowser' }
-  const reconfigure: { name: string, event: EventName } = { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' }
 
-  return props.isRunning ? [reconfigure] : [launchBrowser, reconfigure]
+  return props.isRunning ? [] : [launchBrowser]
 })
 
 const handleMenuClick = (eventName: EventName) => {
   if (eventName === 'chooseABrowser') {
     emit(eventName)
-  } else if (eventName === 'reconfigure') {
-    mutation.executeMutation({ testingType: props.testingType, isApp: props.isApp })
   }
 }
 
