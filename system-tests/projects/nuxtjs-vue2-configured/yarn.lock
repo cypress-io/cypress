@@ -937,17 +937,13 @@
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
   integrity sha512-5a6wqoJV/xEdbRNKVo6I4hO3VjyDq//8q2f9I6PBAvMesJHFauXDorcNCsr9RzvsZnaWi5NYCcfyqP1QeFHFbw==
 
-"@cypress/mount-utils@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@cypress/mount-utils/-/mount-utils-1.0.2.tgz#afbc4f8c350b7cd86edc5ad0db0cbe1e0181edc8"
-  integrity sha512-Fn3fdTiyayHoy8Ol0RSu4MlBH2maQ2ZEXeEVKl/zHHXEQpld5HX3vdNLhK5YLij8cLynA4DxOT/nO9iEnIiOXw==
+"@cypress/mount-utils@file:../../../npm/mount-utils":
+  version "0.0.0-development"
 
-"@cypress/vue@2.2.4":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@cypress/vue/-/vue-2.2.4.tgz#a8d53e2b36816aae6ee3d7248b9e2e4b07d443e3"
-  integrity sha512-ve6aPUj1UHZRpfU9U/NKfsVgzCYVR2CeTdN/knhdWs8sbW5ERgbD1EkEdJ9+VCdqXcIoqRWdMQovnJUmJW6FLA==
+"@cypress/vue2@file:../../../npm/vue2":
+  version "0.0.0-development"
   dependencies:
-    "@cypress/mount-utils" "1.0.2"
+    "@cypress/mount-utils" "file:../../../npm/mount-utils"
     "@vue/test-utils" "^1.1.3"
 
 "@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":

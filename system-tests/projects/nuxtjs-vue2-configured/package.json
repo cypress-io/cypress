@@ -18,7 +18,8 @@
     "webpack-dev-server": "4.7.4"
   },
   "devDependencies": {
-    "@cypress/vue": "2.2.4",
+    "@cypress/vue2": "file:../../../npm/vue2",
+    "@cypress/mount-utils": "file:../../../npm/mount-utils",
     "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server"
   }
 }
