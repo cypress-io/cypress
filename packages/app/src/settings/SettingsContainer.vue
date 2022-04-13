@@ -43,7 +43,7 @@
       variant="outline"
       :prefix-icon="SettingsIcon"
       prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
-      @click="reconfigure"
+      href="https://docs.cypress.io/guides/references/configuration"
     >
       {{ t('settingsPage.footer.button') }}
     </Button>
@@ -52,7 +52,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
@@ -61,7 +61,6 @@ import ProjectSettings from './project/ProjectSettings.vue'
 import CloudSettings from '../settings/project/CloudSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
-import { SettingsContainer_ReconfigureProjectDocument } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
@@ -91,9 +90,4 @@ const props = defineProps<{
   gql: SettingsContainerFragment
 }>()
 
-const openElectron = useMutation(SettingsContainer_ReconfigureProjectDocument)
-
-function reconfigure () {
-  openElectron.executeMutation({})
-}
 </script>
