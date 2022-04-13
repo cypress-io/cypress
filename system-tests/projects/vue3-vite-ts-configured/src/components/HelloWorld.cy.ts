@@ -1,12 +1,13 @@
-import { mount } from '@cypress/vue'
+import { mount } from 'cypress/react'
 import HelloWorld from './HelloWorld.vue'
 
 it('works', () => {
-  mount(HelloWorld, {
-    props: {
-      msg: 'Hello!'
-    }
-  })
+  console.log({ mount})
+  // mount(HelloWorld, {
+  //   props: {
+  //     msg: 'Hello!'
+  //   }
+  // })
 
-  cy.contains('Hello!')
+  // cy.contains('Hello!')
 })

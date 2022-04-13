@@ -11,7 +11,8 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('vueclivue2-configured', {
+  // TODO: bundle vue2 in binary
+  systemTests.it.skip('vueclivue2-configured', {
     project: 'vueclivue2-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',
@@ -52,7 +53,8 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('nuxtjs-vue2-configured', {
+  // TODO: bundle vue2 in binary
+  systemTests.it.skip('nuxtjs-vue2-configured', {
     project: 'nuxtjs-vue2-configured',
     testingType: 'component',
     spec: 'components/Tutorial.cy.js',

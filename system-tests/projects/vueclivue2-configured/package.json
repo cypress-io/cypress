@@ -10,7 +10,6 @@
     "vue": "^2.6.11"
   },
   "devDependencies": {
-    "@cypress/vue": "^2.0.0",
     "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
     "@vue/cli-service": "~4.5.15",
     "vue-template-compiler": "^2.6.11"
