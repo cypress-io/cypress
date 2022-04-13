@@ -456,8 +456,7 @@ export = {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
-    const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
-    const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
+    const { browserCriClient, pageCriClient } = await BrowserCriClient.attachToBrowserAndTargetUrl(port, browser.displayName, options.url, options.onError)
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
   },
@@ -521,7 +520,10 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
+    const attachedBrowserAndPage = await BrowserCriClient.attachToBrowserAndTargetUrl(port, browser.displayName, 'about:blank', options.onError)
+
+    browserCriClient = attachedBrowserAndPage.browserCriClient
+    const pageCriClient = attachedBrowserAndPage.pageCriClient
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -551,8 +553,6 @@ export = {
 
       originalBrowserKill.apply(launchedBrowser, args)
     }
-
-    const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
 

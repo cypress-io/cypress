@@ -9,9 +9,9 @@ const PORT = 50505
 const THROWS_PORT = 66666
 
 describe('lib/browsers/cri-client', function () {
-  let browserCriClient: {
+  let testBrowserCriClient: {
     BrowserCriClient: {
-      create: typeof BrowserCriClient.create
+      attachToBrowserAndTargetUrl: typeof BrowserCriClient.attachToBrowserAndTargetUrl
     }
   }
   let send: sinon.SinonStub
@@ -21,7 +21,7 @@ describe('lib/browsers/cri-client', function () {
     Version: sinon.SinonStub
   }
   let onError: sinon.SinonStub
-  let getClient: () => ReturnType<typeof BrowserCriClient.create>
+  let getClient: () => ReturnType<typeof BrowserCriClient.attachToBrowserAndTargetUrl>
 
   beforeEach(function () {
     sinon.stub(protocol, '_connectAsync')
@@ -42,18 +42,23 @@ describe('lib/browsers/cri-client', function () {
       close,
     })
 
-    browserCriClient = proxyquire('../lib/browsers/browser-cri-client', {
+    testBrowserCriClient = proxyquire('../lib/browsers/browser-cri-client', {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = () => browserCriClient.BrowserCriClient.create(PORT, 'Chrome', onError)
+    const mockPageClient = {}
+
+    send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'about:blank' }] })
+    criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+
+    getClient = () => testBrowserCriClient.BrowserCriClient.attachToBrowserAndTargetUrl(PORT, 'Chrome', 'about:blank', onError)
   })
 
-  context('.create', function () {
+  context('.attachToBrowserAndTargetUrl', function () {
     it('returns an instance of the Browser CRI client', async function () {
-      const client = await getClient()
+      const { browserCriClient } = await getClient()
 
-      expect(client.attachToNewUrl).to.be.instanceOf(Function)
+      expect(browserCriClient.attachToNewUrl).to.be.instanceOf(Function)
     })
 
     it('throws an error when _connectAsync fails', async function () {
@@ -69,9 +74,9 @@ describe('lib/browsers/cri-client', function () {
       .onSecondCall().returns(100)
       .onThirdCall().returns(100)
 
-      const client = await browserCriClient.BrowserCriClient.create(THROWS_PORT, 'Chrome', onError)
+      const { browserCriClient } = await testBrowserCriClient.BrowserCriClient.attachToBrowserAndTargetUrl(THROWS_PORT, 'Chrome', 'about:blank', onError)
 
-      expect(client.attachToNewUrl).to.be.instanceOf(Function)
+      expect(browserCriClient.attachToNewUrl).to.be.instanceOf(Function)
 
       expect(criImport.Version).to.be.calledThrice
     })
@@ -81,7 +86,7 @@ describe('lib/browsers/cri-client', function () {
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create(THROWS_PORT, 'Chrome', onError)).to.be.rejected
+      await expect(testBrowserCriClient.BrowserCriClient.attachToBrowserAndTargetUrl(THROWS_PORT, 'Chrome', 'about:blank', onError)).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
     })
@@ -89,10 +94,10 @@ describe('lib/browsers/cri-client', function () {
     context('#ensureMinimumProtocolVersion', function () {
       function withProtocolVersion (actual, test) {
         return getClient()
-        .then((client: any) => {
-          client.versionInfo = { 'Protocol-Version': actual }
+        .then((attachedBrowserAndPage: any) => {
+          attachedBrowserAndPage.browserCriClient.versionInfo = { 'Protocol-Version': actual }
 
-          return client.ensureMinimumProtocolVersion(test)
+          return attachedBrowserAndPage.browserCriClient.ensureMinimumProtocolVersion(test)
         })
       }
 
@@ -112,32 +117,6 @@ describe('lib/browsers/cri-client', function () {
       })
     })
 
-    context('#attachToTargetUrl', function () {
-      it('creates a page client when the passed in url is found', async function () {
-        const mockPageClient = {}
-
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
-
-        const browserClient = await getClient()
-
-        const client = await browserClient.attachToTargetUrl('http://foo.com')
-
-        expect(client).to.be.equal(mockPageClient)
-      })
-
-      it('throws when the passed in url is not found', async function () {
-        const mockPageClient = {}
-
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
-
-        const browserClient = await getClient()
-
-        await expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
-      })
-    })
-
     context('#attachToNewUrl', function () {
       it('creates new target and creates a page client with the passed in url', async function () {
         const mockPageClient = {}
@@ -145,9 +124,9 @@ describe('lib/browsers/cri-client', function () {
         send.withArgs('Target.createTarget', { url: 'http://foo.com' }).resolves({ targetId: '10' })
         criClientCreateStub.withArgs('10', onError, HOST, PORT).resolves(mockPageClient)
 
-        const browserClient = await getClient()
+        const { browserCriClient } = await getClient()
 
-        const client = await browserClient.attachToNewUrl('http://foo.com')
+        const client = await browserCriClient.attachToNewUrl('http://foo.com')
 
         expect(client).to.be.equal(mockPageClient)
       })
@@ -162,19 +141,19 @@ describe('lib/browsers/cri-client', function () {
 
         send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
 
-        const browserClient = await getClient() as any
+        const { browserCriClient } = await getClient() as any
 
-        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+        browserCriClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
 
-        await browserClient.closeCurrentTarget()
+        await browserCriClient.closeCurrentTarget()
 
         expect(mockCurrentlyAttachedTarget.close).to.be.called
       })
 
       it('throws when there is no currently attached target', async function () {
-        const browserClient = await getClient() as any
+        const { browserCriClient } = await getClient() as any
 
-        await expect(browserClient.closeCurrentTarget()).to.be.rejected
+        await expect(browserCriClient.closeCurrentTarget()).to.be.rejected
       })
     })
 
@@ -184,20 +163,22 @@ describe('lib/browsers/cri-client', function () {
           close: sinon.stub().resolves(),
         }
 
-        const browserClient = await getClient() as any
+        const { browserCriClient } = await getClient() as any
 
-        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+        browserCriClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
 
-        await browserClient.close()
+        await browserCriClient.close()
 
         expect(mockCurrentlyAttachedTarget.close).to.be.called
         expect(close).to.be.called
       })
 
       it('just the browser client with no currently attached target', async function () {
-        const browserClient = await getClient() as any
+        const { browserCriClient } = await getClient() as any
 
-        await browserClient.close()
+        browserCriClient.currentlyAttachedTarget = undefined
+
+        await browserCriClient.close()
 
         expect(close).to.be.called
       })

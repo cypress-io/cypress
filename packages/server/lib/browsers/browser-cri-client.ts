@@ -13,6 +13,11 @@ interface Version {
   minor: number
 }
 
+interface AttachedBrowserAndPage {
+  browserCriClient: BrowserCriClient
+  pageCriClient: CRIWrapper.Client
+}
+
 const isVersionGte = (a: Version, b: Version) => {
   return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
 }
@@ -46,32 +51,34 @@ export class BrowserCriClient {
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
-   * browser target
+   * browser target and the attached target url
    *
    * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
+   * @param targetUrl the url to attach to
    * @param onAsynchronousError callback for any cdp fatal errors
-   * @returns a wrapper around the chrome remote interface that is connected to the browser target
+   * @returns a Promise resolving to an object containing
+   * browserCriClient: a wrapper around the chrome remote interface that is connected to the browser target
+   * pageCriClient: the chrome remote interface that is connected to the targetUrl target
    */
-  static async create (port: number, browserName: string, onAsynchronousError: Function): Promise<BrowserCriClient> {
+  static async attachToBrowserAndTargetUrl (port: number, browserName: string, targetUrl: string, onAsynchronousError: Function): Promise<AttachedBrowserAndPage> {
     await ensureLiveBrowser(port, browserName)
 
     let retryIndex = 0
-    const retry = async (): Promise<BrowserCriClient> => {
+    const retry = async (): Promise<AttachedBrowserAndPage> => {
       debug('attempting to find CRI target... %o', { retryIndex })
 
       try {
         const versionInfo = await CRI.Version({ host: HOST, port })
         const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
 
-        const { targetInfos: targets } = await browserClient.send('Target.getTargets')
+        const browserCriClient = new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
+        const pageCriClient = await browserCriClient.attachToTargetUrl(targetUrl)
 
-        if (targets.length === 0) {
-          await browserClient.close()
-          throw new Error('Could not find any targets in browser')
+        return {
+          browserCriClient,
+          pageCriClient,
         }
-
-        return new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
       } catch (err) {
         retryIndex++
         const delay = _getDelayMsForRetry(retryIndex, browserName)
@@ -103,28 +110,6 @@ export class BrowserCriClient {
     if (!isVersionGte(actualVersion, minimum)) {
       errors.throwErr('CDP_VERSION_TOO_OLD', protocolVersion, actualVersion)
     }
-  }
-
-  /**
-   * Attaches to a target with the given url
-   *
-   * @param url the url to attach to
-   * @returns the chrome remote interface wrapper for the target
-   */
-  attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
-    debug('Attaching to target url %s', url)
-    const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
-
-    const target = targets.find((target) => target.url === url)
-
-    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
-    if (!target) {
-      throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
-    }
-
-    this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
-
-    return this.currentlyAttachedTarget
   }
 
   /**
@@ -171,5 +156,27 @@ export class BrowserCriClient {
     }
 
     await this.browserClient.close()
+  }
+
+  /**
+   * Attaches to a target with the given url
+   *
+   * @param url the url to attach to
+   * @returns the chrome remote interface wrapper for the target
+   */
+  private attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
+    debug('Attaching to target url %s', url)
+    const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
+
+    const target = targets.find((target) => target.url === url)
+
+    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
+    if (!target) {
+      throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
+    }
+
+    this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+
+    return this.currentlyAttachedTarget
   }
 }
