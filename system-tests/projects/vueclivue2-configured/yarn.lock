@@ -41,10 +41,8 @@
     "@cypress/mount-utils" "file:../../../../../.cache/yarn/v6/npm-@cypress-vue2-0.0.0-development-fae1627f-469d-4c0e-883d-8dd054557026-1649705521580/node_modules/@cypress/mount-utils"
     "@vue/test-utils" "^1.1.3"
 
-"@cypress/webpack-dev-server@^1.0.0":
-  version "1.8.4"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-dev-server/-/webpack-dev-server-1.8.4.tgz#00c1d7510dccfcaef6ec69f70342d011bbdefc19"
-  integrity sha512-kDg57ozD4vzIwHa0FhT44IoMKqsgFy7WV5SbBjWLBPdoOhuCdf22gy8VukaxwYqh+MFKxqVJ7hqVLErmMgpAYA==
+"@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":
+  version "0.0.0-development"
   dependencies:
     debug "^4.3.2"
     lodash "^4.17.21"
