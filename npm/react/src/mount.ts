@@ -4,7 +4,8 @@ import getDisplayName from './getDisplayName'
 import {
   injectStylesBeforeElement,
   StyleOptions,
-  ROOT_ID,
+  getContainerEl,
+  ROOT_SELECTOR,
   setupHooks,
 } from '@cypress/mount-utils'
 
@@ -12,8 +13,8 @@ import {
  * Inject custom style text or CSS file or 3rd party style resources
  */
 const injectStyles = (options: MountOptions) => {
-  return () => {
-    const el = document.getElementById(ROOT_ID)
+  return (): HTMLElement => {
+    const el = getContainerEl()
 
     return injectStylesBeforeElement(options, document, el)
   }
@@ -66,12 +67,12 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
 
     lastMountedReactDom = reactDomToUse
 
-    const el = document.getElementById(ROOT_ID)
+    const el = getContainerEl()
 
     if (!el) {
       throw new Error(
         [
-          '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
+          `[@cypress/react] 🔥 Hmm, cannot find root element to mount the component. Searched for ${ROOT_SELECTOR}`,
         ].join(' '),
       )
     }
@@ -156,9 +157,7 @@ export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<J
 
 const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
   return cy.then(() => {
-    const selector = `#${ROOT_ID}`
-
-    return cy.get(selector, { log: false }).then(($el) => {
+    return cy.get(ROOT_SELECTOR, { log: false }).then(($el) => {
       if (lastMountedReactDom) {
         const wasUnmounted = lastMountedReactDom.unmountComponentAtNode($el[0])
 
@@ -185,7 +184,7 @@ const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => 
 // NOTE: we cannot use unmount here because
 // we are not in the context of a test
 const preMountCleanup = () => {
-  const el = document.getElementById(ROOT_ID)
+  const el = getContainerEl()
 
   if (el && lastMountedReactDom) {
     lastMountedReactDom.unmountComponentAtNode(el)
