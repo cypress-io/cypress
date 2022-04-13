@@ -3,7 +3,7 @@ import type { DraggablePanel } from '../../src/runner/useRunnerStyle'
 const testingTypes = ['component', 'e2e'] as const
 
 const dragHandleToClientX = (panel: DraggablePanel, x: number) => {
-  cy.get(`[data-cy="${panel}ResizeHandle"]`).trigger('mousedown', { eventConstructor: 'MouseEvent' })
+  return cy.get(`[data-cy="${panel}ResizeHandle"]`).trigger('mousedown', { eventConstructor: 'MouseEvent' })
   .trigger('mousemove', { clientX: x })
   .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 }
@@ -127,16 +127,17 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       // resize the reporter using each of the dragPositions and take Percy snapshots
       dragPositions.forEach((position, index) => {
-        dragHandleToClientX('panel2', position)
-        const expectedScale = testingTypeExpectedScales[testingType][index]
+        dragHandleToClientX('panel2', position).then(() => {
+          const expectedScale = testingTypeExpectedScales[testingType][index]
 
-        if (expectedScale) {
-          cy.contains(expectedScale).should('be.visible')
-        } else {
-          cy.contains('%)').should('not.exist')
-        }
+          if (expectedScale) {
+            cy.contains(expectedScale).should('be.visible')
+          } else {
+            cy.contains('%)').should('not.exist')
+          }
 
-        cy.percySnapshot(`panel 2 at ${ position } px`)
+          cy.percySnapshot(`panel 2 at ${ position } px`)
+        })
       })
 
       // now check vertical scaling with viewport resize, and take some snapshots too
@@ -144,16 +145,19 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // this viewport should be tall enough to not scale even the e2e test
       cy.viewport(1500, 1300)
 
-      // but we have to also collapse the Specs List to remove any reason to scale horizontally
-      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs').click()
+      // make sure the reporter is narrow enough (should be, but don't want to depend on leftover state from above)
+      dragHandleToClientX('panel2', 400).then(() => {
+        // but we have to also collapse the Specs List to remove any reason to scale horizontally
+        cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs').click()
 
-      // check that no message about scale % is shown
-      cy.contains('%)').should('not.exist')
-      cy.percySnapshot('tall viewport')
+        // check that no message about scale % is shown
+        cy.contains('%)').should('not.exist')
+        cy.percySnapshot('tall viewport')
 
-      cy.viewport(1500, 400)
-      cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('exist')
-      cy.percySnapshot('short viewport')
+        cy.viewport(1500, 400)
+        cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('exist')
+        cy.percySnapshot('short viewport')
+      })
     })
   })
 })
