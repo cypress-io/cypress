@@ -421,8 +421,10 @@ export class DataContext {
     }
 
     // We want to fetch the user immediately, but we don't need to block the UI on this
-    this.actions.auth.getUser().catch(() => {
-      // This error is handled internally by getUser, and isn't actionable here
+    this.actions.auth.getUser().catch((e) => {
+      // This error should never happen, since it's internally handled by getUser
+      // Log anyway, just incase
+      this.logTraceError(e)
     })
 
     const toAwait: Promise<any>[] = [
