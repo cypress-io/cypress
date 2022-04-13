@@ -35,7 +35,7 @@ for (const project of PROJECTS) {
         )
       })
 
-      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
+      cy.get('.failed > .num').should('contain', 1)
 
       cy.withCtx(async (ctx) => {
         const tutorialCyPath = ctx.path.join('components', 'Tutorial.cy.js')
