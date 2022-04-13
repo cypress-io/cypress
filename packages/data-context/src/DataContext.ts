@@ -16,7 +16,6 @@ import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
-  GitDataSource,
   FileDataSource,
   ProjectDataSource,
   WizardDataSource,
@@ -132,11 +131,6 @@ export class DataContext {
   @cached
   get file () {
     return new FileDataSource(this)
-  }
-
-  @cached
-  get git () {
-    return new GitDataSource(this)
   }
 
   @cached
@@ -433,7 +427,7 @@ export class DataContext {
       await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
-      if (this.coreData.currentTestingType && await this.lifecycleManager.waitForInitializeSuccess()) {
+      if (this.coreData.currentProject && this.coreData.currentTestingType && await this.lifecycleManager.waitForInitializeSuccess()) {
         this.lifecycleManager.setAndLoadCurrentTestingType(this.coreData.currentTestingType)
         this.lifecycleManager.scaffoldFilesIfNecessary()
       }

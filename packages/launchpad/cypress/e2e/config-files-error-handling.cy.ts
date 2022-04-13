@@ -56,7 +56,8 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Cypress no longer supports')
+    cy.contains('p', 'There is both a cypress.config.js and a cypress.json file at the location below:')
+    cy.contains('body', 'Cypress no longer supports cypress.json')
     expectStackToBe('closed')
 
     cy.withCtx(async (ctx) => {
@@ -154,6 +155,16 @@ describe('Launchpad: Error System Tests', () => {
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
+  })
+
+  it('shows correct stack trace when config with ts-module error', () => {
+    cy.scaffoldProject('config-with-ts-module-error')
+    cy.openProject('config-with-ts-module-error')
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:9')
   })
 })
 
