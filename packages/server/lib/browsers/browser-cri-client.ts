@@ -64,7 +64,15 @@ export class BrowserCriClient {
         const versionInfo = await CRI.Version({ host: HOST, port })
         const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
 
-        return new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
+        const browserCriClient = new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
+
+        const { targetInfos: targets } = await browserClient.send('Target.getTargets')
+
+        if (targets.length === 0) {
+          throw new Error('Could not find any targets in browser')
+        }
+
+        return browserCriClient
       } catch (err) {
         retryIndex++
         const delay = _getDelayMsForRetry(retryIndex, browserName)
