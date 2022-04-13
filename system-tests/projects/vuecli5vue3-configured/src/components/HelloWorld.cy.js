@@ -1,4 +1,4 @@
-import { mount } from '@cypress/vue'
+import { mount } from 'cypress/vue'
 import HelloWorld from './HelloWorld.vue'
 
 describe('<Logo />', () => {

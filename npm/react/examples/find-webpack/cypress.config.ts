@@ -31,7 +31,7 @@ export default defineConfig({
   },
   'env': {
     'cypress-react-selector': {
-      'root': '#__cy_root',
+      'root': '[data-cy-root]',
     },
   },
 })
