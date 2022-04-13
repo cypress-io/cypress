@@ -50,4 +50,11 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
   })
+
+  it('renders footer with CTA button', () => {
+    mountSettingsContainer()
+    cy.contains('p', defaultMessages.settingsPage.footer.text)
+    cy.contains('a', defaultMessages.settingsPage.footer.button)
+    .should('have.attr', 'href', defaultMessages.settingsPage.footer.buttonLink)
+  })
 })

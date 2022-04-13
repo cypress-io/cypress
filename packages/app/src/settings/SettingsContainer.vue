@@ -43,7 +43,7 @@
       variant="outline"
       :prefix-icon="SettingsIcon"
       prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
-      href="https://docs.cypress.io/guides/references/configuration"
+      :href="t('settingsPage.footer.buttonLink')"
     >
       {{ t('settingsPage.footer.button') }}
     </Button>
