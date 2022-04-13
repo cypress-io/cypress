@@ -55,7 +55,7 @@ const _getAutomation = async function (win, options, parent) {
     sendDebuggerCommandFn: sendCommand,
     onFn: on,
     automation: parent,
-    experimentalLoginFlows: options.experimentalLoginFlows,
+    experimentalSessionAndOrigin: options.experimentalSessionAndOrigin,
   })
 
   await automation.enable()

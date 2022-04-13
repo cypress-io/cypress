@@ -245,9 +245,9 @@ describe('cy.origin', () => {
 
   describe('errors', () => {
     // @ts-ignore
-    it('errors if experimental flag is not enabled', { experimentalLoginFlows: false }, (done) => {
+    it('errors if experimental flag is not enabled', { experimentalSessionAndOrigin: false }, (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.origin()` requires enabling the experimentalLoginFlows flag')
+        expect(err.message).to.equal('`cy.origin()` requires enabling the experimentalSessionAndOrigin flag')
 
         done()
       })

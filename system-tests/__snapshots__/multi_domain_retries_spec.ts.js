@@ -9,7 +9,7 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (multi_domain_retries_spec.ts)                                           │
   │ Searched:     cypress/integration/multi_domain_retries_spec.ts                                 │
-  │ Experiments:  experimentalLoginFlows=true                                                      │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

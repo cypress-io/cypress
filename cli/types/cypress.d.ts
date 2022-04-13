@@ -1055,7 +1055,7 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalLoginFlows` config option is enabled.
+      * Only available if the `experimentalSessionAndOrigin` config option is enabled.
       *
       * @see https://on.cypress.io/session
       */
@@ -2841,10 +2841,10 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables cross-origin login flows, including the `cy.origin` and `cy.session` commands.
+     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands.
      * @default false
      */
-    experimentalLoginFlows: boolean
+    experimentalSessionAndOrigin: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false

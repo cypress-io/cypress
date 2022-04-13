@@ -213,7 +213,7 @@ describe('navigates to about:blank between tests and shows warning about session
   it('t1', () => {
     // only warns after initial blank page
     // unfortunately this fails when run alongside other tests
-    // cy.contains('experimentalLoginFlows').should('not.exist')
+    // cy.contains('experimentalSessionAndOrigin').should('not.exist')
     cy.contains('default blank page')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
@@ -221,7 +221,7 @@ describe('navigates to about:blank between tests and shows warning about session
   })
 
   it('t2', () => {
-    cy.contains('Because experimentalLoginFlows')
+    cy.contains('Because experimentalSessionAndOrigin')
     cy.contains('default blank page')
   })
 })
@@ -721,13 +721,13 @@ describe.skip('consoleProps', () => {
 // bar.foo.com data.
 describe('ignores setting insecure context data when on secure context', () => {
   describe('no cross origin secure origins, nothing to clear', () => {
-    it('sets insecure content', { experimentalLoginFlows: false }, () => {
+    it('sets insecure content', { experimentalSessionAndOrigin: false }, () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('nothing to clear - 1/2', { experimentalLoginFlows: false }, () => {
+    it('nothing to clear - 1/2', { experimentalSessionAndOrigin: false }, () => {
       cy.visit('https://localhost:4466/form')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')
@@ -741,13 +741,13 @@ describe('ignores setting insecure context data when on secure context', () => {
   })
 
   describe('only secure origins cleared', () => {
-    it('sets insecure content', { experimentalLoginFlows: false }, () => {
+    it('sets insecure content', { experimentalSessionAndOrigin: false }, () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('switches to secure context - clears only secure context data - 1/2', { experimentalLoginFlows: false }, () => {
+    it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionAndOrigin: false }, () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/foo')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')
@@ -762,29 +762,29 @@ describe('ignores setting insecure context data when on secure context', () => {
 })
 
 describe('errors', () => {
-  it('throws error when experimentalLoginFlows not enabled', { experimentalLoginFlows: false }, (done) => {
+  it('throws error when experimentalSessionAndOrigin not enabled', { experimentalSessionAndOrigin: false }, (done) => {
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag')
       done()
     })
 
     cy.session('sessions-not-enabled')
   })
 
-  it('throws error when experimentalSessionSupport is enabled through test config', { experimentalLoginFlows: false, experimentalSessionSupport: true }, (done) => {
+  it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
       done()
     })
 
     cy.session('sessions-not-enabled')
   })
 
-  it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalLoginFlows: false }, (done) => {
+  it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalSessionAndOrigin: false }, (done) => {
     Cypress.config('experimentalSessionSupport', true)
 
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalLoginFlows\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
       done()
     })
 

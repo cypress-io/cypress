@@ -112,7 +112,7 @@ const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log,
       previousUrl: previousUrlVisited,
       attemptedUrl: remote,
       isCrossOriginSpecBridge,
-      experimentalLoginFlows: Cypress.config('experimentalLoginFlows'),
+      experimentalSessionAndOrigin: Cypress.config('experimentalSessionAndOrigin'),
     },
     errProps: {
       isCrossOrigin: true,
