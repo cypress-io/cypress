@@ -11,6 +11,7 @@ import type { Server } from 'http'
 import { vueCliHandler } from './helpers/vueCliHandler'
 import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
+import { nextHandler } from './helpers/nextHandler'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:devServer')
 
@@ -23,7 +24,7 @@ export type WebpackDevServerConfig = {
   webpackConfig?: unknown // Derived from the user's webpack
 }
 
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli'] as const
+const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next'] as const
 
 /**
  * @internal
@@ -136,6 +137,10 @@ devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
 
       case 'vue-cli':
         frameworkConfig = vueCliHandler({ devServerConfig, sourceWebpackModulesResult })
+        break
+
+      case 'next':
+        frameworkConfig = await nextHandler({ devServerConfig, sourceWebpackModulesResult })
         break
       default:
         throw new Error(`Unexpected framework ${devServerConfig.framework}, expected one of ${ALL_FRAMEWORKS.join(', ')}`)

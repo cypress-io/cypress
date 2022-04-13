@@ -66,6 +66,10 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
     htmlWebpackPlugin: {},
   } as SourceRelativeWebpackResult
 
+  const cypressWebpackPath = require.resolve('@cypress/webpack-batteries-included-preprocessor', {
+    paths: [__dirname],
+  })
+
   // First, we source the framework, ensuring it's sourced from the user's project and not the
   // Cypress binary. This is the path we use to relative-resolve the
   if (config.framework) {
@@ -94,30 +98,67 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
 
   let webpackJsonPath: string
 
-  try {
-    webpackJsonPath = require.resolve('webpack/package.json', {
-      paths: [searchRoot],
-    })
-  } catch (e) {
-    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
+  if (config.framework === 'next') {
+    try {
+      webpackJsonPath = require.resolve('next/dist/compiled/webpack/package.json', {
+        paths: [searchRoot],
+      })
+    } catch (e) {
       throw e
     }
 
-    webpackJsonPath = require.resolve('webpack/package.json', {
-      paths: [
-        require.resolve('@cypress/webpack-batteries-included-preprocessor', {
-          paths: [__dirname],
-        }),
-      ],
-    })
+    let webpack5 = true
+    const importPath = path.dirname(webpackJsonPath)
+    const webpackModule = require(path.join(importPath, 'webpack.js'))
+
+    try {
+      const nextConfig = require(path.resolve(config.cypressConfig.projectRoot, 'next.config.js'))
+
+      if (nextConfig.webpack5 === false) {
+        webpack5 = false
+      }
+    } catch (e) {
+      // No next.config.js, assume webpack 5
+    }
+
+    webpackModule.init(webpack5)
+
+    const packageJson = require(webpackJsonPath)
+
+    result.webpack.importPath = importPath
+    result.webpack.packageJson = { ...packageJson, version: webpack5 ? '5' : '4' }
+    result.webpack.module = webpackModule.webpack
+    result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
+  } else {
+    try {
+      webpackJsonPath = require.resolve('webpack/package.json', {
+        paths: [searchRoot],
+      })
+    } catch (e) {
+      if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
+        throw e
+      }
+
+      webpackJsonPath = require.resolve('webpack/package.json', {
+        paths: [cypressWebpackPath],
+      })
+    }
+
+    result.webpack.importPath = path.dirname(webpackJsonPath)
+    result.webpack.packageJson = require(webpackJsonPath)
+    result.webpack.module = require(result.webpack.importPath)
+    result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
   }
 
-  result.webpack.importPath = path.dirname(webpackJsonPath)
-  result.webpack.packageJson = require(webpackJsonPath)
-  result.webpack.module = require(result.webpack.importPath)
-  result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5]);
-
   (Module as ModuleClass)._load = function (request, parent, isMain) {
+    if (request === 'webpack' || request.startsWith('webpack/') && config.framework === 'next' && result.webpack.majorVersion === 4) {
+      const resolvePath = require.resolve(request, {
+        paths: [cypressWebpackPath],
+      })
+
+      return originalModuleLoad(resolvePath, parent, isMain)
+    }
+
     if (request === 'webpack' || request.startsWith('webpack/')) {
       const resolvePath = require.resolve(request, {
         paths: [searchRoot],
