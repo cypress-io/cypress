@@ -62,7 +62,7 @@ const failedUnzipWindowsMaxPathLength = {
   description: 'The Cypress App could not be unzipped.',
   solution: `This is most likely because the maximum path length is being exceeded on your system.
 
-  Read here for solutions to this problem: https://on.cypress.io/error-messages#win-max-path-length`,
+  Read here for solutions to this problem: https://on.cypress.io/win-max-path-length-error`,
 }
 
 const missingApp = (binaryDir) => {
