@@ -48,13 +48,6 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.17.3.tgz#b07702b982990bf6fdc1da5049a23fece4c5c3d0"
   integrity "sha1-sHcCuYKZC/b9wdpQSaI/7OTFw9A= sha512-7yJPvPV+ESz2IUTPbOL+YkIGyCqOyNIzdguKQuJGnH7bg1WTIifuM21YqokFt/THWh1AkCRn9IgoykTRCBVpzA=="
 
-"@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":
-  version "0.0.0-development"
-  dependencies:
-    debug "^4.3.2"
-    semver "^7.3.4"
-    webpack-merge "^5.4.0"
-
 "@hapi/hoek@^9.0.0":
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
@@ -1393,13 +1386,6 @@ debug@^4.1.0, debug@^4.1.1:
   dependencies:
     ms "2.1.2"
 
-debug@^4.3.2:
-  version "4.3.4"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
-  integrity "sha1-Exn2V5NX8jONMzfSzdSRS7XcyGU= sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ=="
-  dependencies:
-    ms "2.1.2"
-
 deep-equal@^1.0.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.1.1.tgz#b5c98c942ceffaf7cb051e24e1434a25a2e6076a"
@@ -2045,7 +2031,7 @@ html-minifier-terser@^6.0.2:
     relateurl "^0.2.7"
     terser "^5.10.0"
 
-html-webpack-plugin@^5.0.0, html-webpack-plugin@^5.1.0:
+html-webpack-plugin@^5.1.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-5.5.0.tgz#c3911936f57681c1f9f4d8b68c158cd9dfe52f50"
   integrity "sha1-w5EZNvV2gcH59Ni2jBWM2d/lL1A= sha512-sy88PC2cRTVxvETRgUHFrL4No3UxvcH8G1NepGhqaTT+GXN2kTamqasot0inS5hXeg1cMbFDt27zzo9p35lZVw=="
@@ -4201,7 +4187,7 @@ webpack-dev-middleware@^5.3.1:
     range-parser "^1.2.1"
     schema-utils "^4.0.0"
 
-webpack-dev-server@^4.0.0, webpack-dev-server@^4.7.3:
+webpack-dev-server@^4.7.3:
   version "4.7.4"
   resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-4.7.4.tgz#d0ef7da78224578384e795ac228d8efb63d5f945"
   integrity "sha1-0O99p4IkV4OE55WsIo2O+2PV+UU= sha512-nfdsb02Zi2qzkNmgtZjkrMOcXnYZ6FLKcQwpxT7MvmHKc+oTtDsBju8j+NMyAygZ9GW1jMEUpy3itHtqgEhe1A=="
@@ -4237,7 +4223,7 @@ webpack-dev-server@^4.0.0, webpack-dev-server@^4.7.3:
     webpack-dev-middleware "^5.3.1"
     ws "^8.4.2"
 
-webpack-merge@^5.4.0, webpack-merge@^5.7.3:
+webpack-merge@^5.7.3:
   version "5.8.0"
   resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.8.0.tgz#2b39dbf22af87776ad744c390223731d30a68f61"
   integrity "sha1-Kznb8ir4d3atdEw5AiNzHTCmj2E= sha512-/SaI7xY0831XwP6kzuwhKWVKDP9t1QY1h65lAFLbZqMPIuYcD9QAW4u9STIbU9kaJbPBB/geU/gLr1wDjOhQ+Q=="
@@ -4255,7 +4241,7 @@ webpack-virtual-modules@^0.4.2:
   resolved "https://registry.yarnpkg.com/webpack-virtual-modules/-/webpack-virtual-modules-0.4.3.tgz#cd597c6d51d5a5ecb473eea1983a58fa8a17ded9"
   integrity "sha1-zVl8bVHVpey0c+6hmDpY+ooX3tk= sha512-5NUqC2JquIL2pBAAo/VfBP6KuGkHIZQXW/lNKupLPfhViwh8wNsu0BObtl09yuKZszeEUfbXz8xhrHvSG16Nqw=="
 
-webpack@^5.0.0, webpack@^5.54.0:
+webpack@^5.54.0:
   version "5.69.1"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.69.1.tgz#8cfd92c192c6a52c99ab00529b5a0d33aa848dc5"
   integrity "sha1-jP2SwZLGpSyZqwBSm1oNM6qEjcU= sha512-+VyvOSJXZMT2V5vLzOnDuMz5GxEqLk7hKWQ56YxPW/PQRUuKimPqmEIJOx8jHYeyo65pKbapbW464mvsKbaj4A=="
