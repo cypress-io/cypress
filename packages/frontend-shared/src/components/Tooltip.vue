@@ -1,6 +1,7 @@
 <template>
   <Tooltip
     :popper-class="{'no-arrow': hideArrow}"
+    :popper-hide-triggers="['hover']"
   >
     <slot />
     <template #popper>
