@@ -966,6 +966,53 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     cy.waitForWizard()
   })
+
+  it('completes journey for migration-e2e-with-extra-files', () => {
+    startMigrationFor('migration-e2e-with-extra-files')
+    // defaults, rename all the things
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+
+    cy.withCtx(async (ctx) => {
+      const files = ['cypress/e2e/foo.cy.js', 'cypress/e2e/example.json']
+
+      for (const file of files) {
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(file))
+
+        expect(stats, `file ${file}`).to.not.be.null
+      }
+    })
+
+    renameSupport('ts')
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
 })
 
 // TODO: UNIFY-1350 toLaunchpad emitter not working in Cypress in Cypress,
