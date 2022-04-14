@@ -410,7 +410,7 @@
       }
     },
     "footer": {
-      "text": "You can reconfigure the component testing settings for this project if you're experiencing issues with your Cypress configuration.",
+      "text": "You can reconfigure the {testingType} testing settings for this project if you're experiencing issues with your Cypress configuration.",
       "button": "Configuration Guide",
       "buttonLink": "https://docs.cypress.io/guides/references/configuration"
     }
