@@ -30,6 +30,7 @@
 <script lang="ts" setup>
 
 import { Menu, MenuButton } from '@headlessui/vue'
+import type { TestingTypeEnum } from '../generated/graphql'
 
 const props = defineProps<{
   status: boolean
