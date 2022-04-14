@@ -58,6 +58,13 @@ const failedUnzip = {
   solution: genericErrorSolution,
 }
 
+const failedUnzipWindowsMaxPathLength = {
+  description: 'The Cypress App could not be unzipped.',
+  solution: `This is most likely because the maximum path length is being exceeded on your system.
+
+  Read here for solutions to this problem: https://on.cypress.io/win-max-path-length-error`,
+}
+
 const missingApp = (binaryDir) => {
   return {
     description: `No version of Cypress is installed in: ${chalk.cyan(
@@ -419,6 +426,7 @@ module.exports = {
     unexpected,
     failedDownload,
     failedUnzip,
+    failedUnzipWindowsMaxPathLength,
     invalidCypressEnv,
     invalidCacheDirectory,
     CYPRESS_RUN_BINARY,
