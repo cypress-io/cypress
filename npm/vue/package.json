@@ -25,7 +25,6 @@
     "@babel/preset-typescript": "7.10.1",
     "@cypress/code-coverage": "3.8.1",
     "@cypress/mount-utils": "0.0.0-development",
-    "@cypress/webpack-dev-server": "0.0.0-development",
     "@intlify/vue-i18n-loader": "2.0.0-rc.1",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",

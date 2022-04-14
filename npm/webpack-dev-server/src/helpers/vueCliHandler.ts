@@ -4,7 +4,7 @@ import type { Configuration } from 'webpack'
 
 type PresetHandler = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
 
-const debug = debugLib('cypress:webpack-dev-server-fresh:vueCliHandler')
+const debug = debugLib('cypress:webpack-dev-server:vueCliHandler')
 
 export function vueCliHandler ({ devServerConfig }: PresetHandler): Configuration {
   try {

@@ -1,4 +1,4 @@
-const { devServer } = require('@cypress/vite-dev-server-fresh')
+const { devServer } = require('../../../npm/vite-dev-server')
 
 module.exports = {
   retries: null,

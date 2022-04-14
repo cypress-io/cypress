@@ -3,7 +3,7 @@ import debugLib from 'debug'
 import type { Configuration } from 'webpack'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 
-const debug = debugLib('cypress:webpack-dev-server-fresh:makeDefaultWebpackConfig')
+const debug = debugLib('cypress:webpack-dev-server:makeDefaultWebpackConfig')
 
 const OUTPUT_PATH = path.join(__dirname, 'dist')
 

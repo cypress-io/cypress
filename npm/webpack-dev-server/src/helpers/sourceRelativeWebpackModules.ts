@@ -3,7 +3,7 @@ import path from 'path'
 import type { WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
 
-const debug = debugFn('cypress:webpack-dev-server-fresh:sourceRelativeWebpackModules')
+const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
 
 type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any

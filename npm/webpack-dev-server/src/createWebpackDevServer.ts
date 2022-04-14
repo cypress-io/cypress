@@ -5,7 +5,7 @@ import type { WebpackDevServerConfig } from './devServer'
 import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { makeWebpackConfig } from './makeWebpackConfig'
 
-const debug = debugLib('cypress:webpack-dev-server-fresh:start')
+const debug = debugLib('cypress:webpack-dev-server:start')
 
 /**
  * Takes the webpack / webpackDevServer modules, the configuration provide

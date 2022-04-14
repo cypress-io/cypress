@@ -1080,8 +1080,8 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
-            run-webpack-dev-server-fresh-integration-tests,
-            run-vite-dev-server-fresh-integration-tests
+            run-webpack-dev-server-integration-tests,
+            run-vite-dev-server-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1416,7 +1416,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-webpack-dev-server-fresh-integration-tests:
+  run-webpack-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1430,15 +1430,15 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server-fresh
-          working_directory: npm/webpack-dev-server-fresh
+            yarn cypress:run --record --parallel --group webpack-dev-server
+          working_directory: npm/webpack-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs      
 
-  run-vite-dev-server-fresh-integration-tests:
+  run-vite-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1452,8 +1452,8 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server-fresh
-          working_directory: npm/vite-dev-server-fresh
+            yarn cypress:run --record --parallel --group vite-dev-server
+          working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1527,7 +1527,7 @@ jobs:
           command: yarn workspace @cypress/webpack-dev-server test
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server-fresh test
+          command: yarn workspace @cypress/webpack-dev-server test
 
   npm-vite-dev-server:
     <<: *defaults
@@ -2249,11 +2249,11 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
-    - run-webpack-dev-server-fresh-integration-tests:
+    - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
-    - run-vite-dev-server-fresh-integration-tests:
+    - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install          

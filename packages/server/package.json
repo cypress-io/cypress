@@ -131,7 +131,7 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.39.0",
     "@cypress/sinon-chai": "2.9.1",
-    "@cypress/webpack-dev-server-fresh": "0.0.0-development",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/config": "0.0.0-development",
     "@packages/data-context": "0.0.0-development",

@@ -38,7 +38,6 @@
     "@angular/platform-browser-dynamic": "11.2.13",
     "@angular/router": "11.2.13",
     "@cypress/code-coverage": "3.9.5",
-    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "5.7.0",
     "@types/cypress-image-snapshot": "3.1.5",
     "@types/node": "8.10.66",

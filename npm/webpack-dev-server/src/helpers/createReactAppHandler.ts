@@ -5,7 +5,7 @@ import path from 'path'
 
 type PresetHandlerOptions = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
 
-const debug = debugLib('cypress:webpack-dev-server-fresh:create-react-app')
+const debug = debugLib('cypress:webpack-dev-server:create-react-app')
 
 /**
  * Sourcing the config for create-react-app

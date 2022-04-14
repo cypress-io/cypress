@@ -4,7 +4,7 @@ import type { Configuration } from 'webpack'
 
 type PresetHandler = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
 
-const debug = debugLib('cypress:webpack-dev-server-fresh:nuxtHandler')
+const debug = debugLib('cypress:webpack-dev-server:nuxtHandler')
 
 export async function nuxtHandler ({ devServerConfig }: PresetHandler): Promise<Configuration> {
   try {

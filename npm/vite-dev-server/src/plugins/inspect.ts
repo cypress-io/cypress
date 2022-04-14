@@ -3,8 +3,12 @@ import type { PluginOption } from 'vite'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:inspect')
 
-export const CypressInspect = async (): Promise<(() => PluginOption) | null> => {
-  if (!process.env.DEBUG) return null
+export const CypressInspect = async (): Promise<PluginOption | null> => {
+  if (!process.env.CYPRESS_INTERNAL_VITE_INSPECT) {
+    debug('skipping vite inspect because CYPRESS_INTERNAL_VITE_INSPECT is not set')
+
+    return null
+  }
 
   let Inspect
 

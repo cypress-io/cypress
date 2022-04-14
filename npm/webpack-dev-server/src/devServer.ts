@@ -12,7 +12,7 @@ import { vueCliHandler } from './helpers/vueCliHandler'
 import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 
-const debug = debugLib('cypress:webpack-dev-server-fresh:devServer')
+const debug = debugLib('cypress:webpack-dev-server:devServer')
 
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
