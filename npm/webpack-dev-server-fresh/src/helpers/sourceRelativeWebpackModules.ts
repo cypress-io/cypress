@@ -3,7 +3,7 @@ import path from 'path'
 import type { WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
 
-const debug = debugFn('cypress:webpack:sourceRelativeWebpackModules')
+const debug = debugFn('cypress:webpack-dev-server-fresh:sourceRelativeWebpackModules')
 
 type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
@@ -73,7 +73,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   // Cypress binary. This is the path we use to relative-resolve the
   // This is generally used for Create React App and Vue CLI and other packages
   // that ship webpack as a dependency. e.g. your-project/node_modules/react-scripts/node_modules/webpack
-  // SO what we do, is we grab the framework's path, and try and find webpack relative to that framework.
+  // So what we do, is we grab the framework's path, and try and find webpack relative to that framework.
   if (config.framework) {
     try {
       const frameworkJsonPath = require.resolve(`${config.framework}/package.json`, {
@@ -133,14 +133,12 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   result.webpack.module = require(result.webpack.importPath)
   result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
 
-  const pathsVal = [path.dirname(result.webpack.importPath)]
-
-  debug('Resolving pathsVal %s', pathsVal)
+  const webpackImportPath = result.webpack.importPath
 
   ;(Module as ModuleClass)._load = function (request, parent, isMain) {
     if (request === 'webpack' || request.startsWith('webpack/')) {
       const resolvePath = require.resolve(request, {
-        paths: pathsVal,
+        paths: [webpackImportPath],
       })
 
       debug('Resolve path %s', resolvePath)
@@ -154,7 +152,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   (Module as ModuleClass)._resolveFilename = function (request, parent, isMain, options) {
     if (request === 'webpack' || request.startsWith('webpack/') && !options?.paths) {
       return originalModuleResolveFilename(request, parent, isMain, {
-        paths: pathsVal,
+        paths: [webpackImportPath],
       })
     }
 
