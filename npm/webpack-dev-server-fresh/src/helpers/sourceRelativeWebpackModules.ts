@@ -66,6 +66,8 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
     htmlWebpackPlugin: {},
   } as SourceRelativeWebpackResult
 
+  // We bundle webpack@4 with "@cypress/webpack-batteries-included-preprocessor" in the binary. This
+  // serves as our fallback if we can't source webpack@4 from the project.
   const cypressWebpackPath = require.resolve('@cypress/webpack-batteries-included-preprocessor', {
     paths: [__dirname],
   })
@@ -99,6 +101,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   let webpackJsonPath: string
 
   if (config.framework === 'next') {
+    // Next bundles webpack internally so we cannot source it with normal module resolution
     try {
       webpackJsonPath = require.resolve('next/dist/compiled/webpack/package.json', {
         paths: [searchRoot],
@@ -107,6 +110,8 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
       throw e
     }
 
+    // Next 11 allows the choice of webpack@4 or webpack@5, depending on the "webpack5" property in their next.config.js
+    // The webpackModule.init" for Next 11 returns a webpack@4 or webpack@4 compiler instance based on this boolean
     let webpack5 = true
     const importPath = path.dirname(webpackJsonPath)
     const webpackModule = require(path.join(importPath, 'webpack.js'))
@@ -126,10 +131,12 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
     const packageJson = require(webpackJsonPath)
 
     result.webpack.importPath = importPath
+    // The package.json of "next/dist/compiled/webpack/package.json" has no version so we supply the version for later use
     result.webpack.packageJson = { ...packageJson, version: webpack5 ? '5' : '4' }
     result.webpack.module = webpackModule.webpack
     result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
   } else {
+    // Normal webpack module resolution
     try {
       webpackJsonPath = require.resolve('webpack/package.json', {
         paths: [searchRoot],
@@ -151,6 +158,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   }
 
   (Module as ModuleClass)._load = function (request, parent, isMain) {
+    // Next with webpack@4 doesn't ship certain dependencies that HtmlWebpackPlugin requires, so we patch the resolution through to our bundled version
     if (request === 'webpack' || request.startsWith('webpack/') && config.framework === 'next' && result.webpack.majorVersion === 4) {
       const resolvePath = require.resolve(request, {
         paths: [cypressWebpackPath],

@@ -15,6 +15,8 @@ export async function nextHandler ({ devServerConfig, sourceWebpackModulesResult
 
   checkSWC(webpackConfig, devServerConfig.cypressConfig)
 
+  // Next webpack compiler ignored watching any node_modules changes, but we need to watch
+  // for changes to 'dist/browser.js' in order to detect new specs that have been added
   if (webpackConfig.watchOptions && Array.isArray(webpackConfig.watchOptions.ignored)) {
     webpackConfig.watchOptions = {
       ...webpackConfig.watchOptions,
@@ -27,6 +29,11 @@ export async function nextHandler ({ devServerConfig, sourceWebpackModulesResult
   return webpackConfig
 }
 
+/**
+ * Acquire the modules needed to load the Next webpack config
+ * `loadConfig` acquires the next.config.js
+ * `getNextJsBaseWebpackConfig` acquires the webpackConfig dependent on the next.config.js
+ */
 function getNextJsPackages ({ devServerConfig }: PresetHandler) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
   const packages = {} as { loadConfig: Function, getNextJsBaseWebpackConfig: Function }
@@ -72,6 +79,10 @@ async function loadWebpackConfig ({ devServerConfig, sourceWebpackModulesResult 
   return webpackConfig
 }
 
+/**
+ * Check if Next is using the SWC compiler. Compilation will fail if user has `nodeVersion: "bundled"` set
+ * due to SWC certificate issues.
+ */
 export function checkSWC (
   webpackConfig: Configuration,
   cypressConfig: Cypress.PluginConfigOptions,
@@ -114,7 +125,7 @@ export function findPagesDir (projectRoot: string) {
     return pagesDir
   }
 
-  pagesDir = path.join(projectRoot, 'src/pages')
+  pagesDir = path.join(projectRoot, 'src', 'pages')
   if (existsSync(pagesDir)) {
     return pagesDir
   }
