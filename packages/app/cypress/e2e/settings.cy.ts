@@ -27,19 +27,6 @@ describe('App: Settings', () => {
     cy.get('button').contains('Log In')
   })
 
-  it('can reconfigure a project', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp('settings')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.project, 'reconfigureProject')
-    })
-
-    cy.findByText('Reconfigure Project').click()
-    cy.withRetryableCtx((ctx) => {
-      expect(ctx.actions.project.reconfigureProject).to.have.been.called
-    })
-  })
-
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
       cy.withCtx(async (ctx, o) => {
