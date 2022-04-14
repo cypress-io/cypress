@@ -505,7 +505,7 @@ class Log {
 
       consoleObj[key] = _this.get('name')
 
-      // in the case a log is being recreated from the specbridge to the primary, consoleProps may be an Object
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
       const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
 
       // merge in the other properties from consoleProps
