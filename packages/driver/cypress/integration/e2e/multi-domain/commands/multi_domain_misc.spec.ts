@@ -70,9 +70,6 @@ context('cy.origin misc', () => {
       })
     })
 
-    // NOTE: there is no log for .end()
-    it.skip('.end()', () => undefined)
-
     it('.exec()', (done) => {
       cy.on('command:queue:end', () => {
         setTimeout(() => {

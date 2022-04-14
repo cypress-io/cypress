@@ -58,9 +58,6 @@ context('cy.origin files', () => {
       })
     })
 
-    // NOTE: there is no command log for .fixture(). shows up as a (new url)
-    it.skip('.fixture()', () => undefined)
-
     it('.readFile()', (done) => {
       cy.on('command:queue:end', () => {
         setTimeout(() => {

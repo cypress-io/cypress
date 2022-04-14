@@ -57,9 +57,6 @@ context('cy.origin connectors', () => {
       })
     })
 
-    // NOTE: there is no command log for .each()
-    it.skip('.each()', () => undefined)
-
     it('.its()', (done) => {
       cy.on('command:queue:end', () => {
         setTimeout(() => {
@@ -118,11 +115,5 @@ context('cy.origin connectors', () => {
         cy.get('#button').invoke('text')
       })
     })
-
-    // NOTE: there is no command log for .spread()
-    it.skip('.spread()', () => undefined)
-
-    // NOTE: there is no command log for .then()
-    it.skip('.then()', () => undefined)
   })
 })
