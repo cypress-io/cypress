@@ -23,7 +23,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @cypress/vue@^2.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
+    expect(actual).to.eq(`npm install -D @cypress/vue2@^1.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
   })
 
   it('vueclivue3-unconfigured', async () => {
@@ -95,7 +95,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq('npm install -D @cypress/vue@^2.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0')
+    expect(actual).to.eq('npm install -D @cypress/vue2@^1.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0')
   })
 
   it('pristine-with-e2e-testing-and-storybook', async () => {

@@ -25,10 +25,10 @@ export const STORYBOOK_DEPS = [
 
 export const CYPRESS_VUE_2 = {
   type: 'cypress-adapter',
-  name: 'Cypress Vue',
-  package: '@cypress/vue',
-  installer: '@cypress/vue@^2.0.0',
-  description: 'Allows Cypress to mount each Vue component using <span class="text-purple-400">cy.mount()</span>',
+  name: 'Cypress Vue2',
+  package: '@cypress/vue2',
+  installer: '@cypress/vue2@^1.0.0',
+  description: 'Allows Cypress to mount each Vue@2 component using <span class="text-purple-400">cy.mount()</span>',
 } as const
 
 export const CYPRESS_VUE_3 = {
@@ -36,7 +36,7 @@ export const CYPRESS_VUE_3 = {
   name: 'Cypress Vue',
   package: '@cypress/vue',
   installer: '@cypress/vue@^3.0.0',
-  description: 'Allows Cypress to mount each Vue component using <span class="text-purple-400">cy.mount()</span>',
+  description: 'Allows Cypress to mount each Vue@3 component using <span class="text-purple-400">cy.mount()</span>',
 } as const
 
 export const WEBPACK_DEV_SERVER_4 = {
