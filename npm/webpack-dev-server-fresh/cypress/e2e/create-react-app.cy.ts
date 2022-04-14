@@ -38,7 +38,7 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.get('.failed > .num', { timeout: 10000 }).should('contain', 1)
+      cy.get('.failed > .num').should('contain', 1)
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
