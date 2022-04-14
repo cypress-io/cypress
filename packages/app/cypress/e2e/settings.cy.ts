@@ -27,19 +27,6 @@ describe('App: Settings', () => {
     cy.get('button').contains('Log In')
   })
 
-  it('can reconfigure a project', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp('settings')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.project, 'reconfigureProject')
-    })
-
-    cy.findByText('Reconfigure Project').click()
-    cy.withRetryableCtx((ctx) => {
-      expect(ctx.actions.project.reconfigureProject).to.have.been.called
-    })
-  })
-
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
       cy.withCtx(async (ctx, o) => {
@@ -207,14 +194,14 @@ describe('App: Settings', () => {
       })
 
       cy.get('[data-cy="config-code"]').within(() => {
-        cy.get('.bg-teal-100').contains('tests/_fixtures')
-        cy.get('.bg-teal-100').contains('abc123')
-        cy.get('.bg-teal-100').contains('tests/**/*')
-        cy.get('.bg-teal-100').contains('tests/_support/spec_helper.js')
-        cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
-        cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
-        cy.get('.bg-yellow-100').contains('INTERNAL_GRAPHQL_PORT')
-        cy.get('.bg-red-50').contains('4455')
+        cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
+        cy.get('[data-cy-config="config"]').contains('abc123')
+        cy.get('[data-cy-config="config"]').contains('tests/**/*')
+        cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
+        cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('[data-cy-config="cli"]').contains('4455')
       })
     })
 
@@ -230,6 +217,35 @@ describe('App: Settings', () => {
       cy.findByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
+      })
+    })
+
+    it('highlights values set via config file, envFile, env, or CLI in the appropriate color with default specPattern', () => {
+      cy.scaffoldProject('config-with-js')
+      cy.openProject('config-with-js')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="config-legend"]').within(() => {
+        cy.get('.bg-gray-50').contains('default')
+        cy.get('.bg-teal-100').contains('config')
+        cy.get('.bg-yellow-100').contains('env')
+        cy.get('.bg-red-50').contains('cli')
+      })
+
+      cy.get('[data-cy="config-code"]').within(() => {
+        cy.get('[data-cy-config="default"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
+        cy.get('[data-cy-config="config"]').contains('500')
+        cy.get('[data-cy-config="config"]').contains('10000')
+        cy.get('[data-cy-config="config"]').contains('false')
+        cy.get('[data-cy-config="config"]').contains('20')
+        cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('[data-cy-config="cli"]').contains('4455')
       })
     })
   })
