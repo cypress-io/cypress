@@ -2,6 +2,7 @@ import { plugin } from 'nexus'
 import debugLib from 'debug'
 import { getNamedType, isNonNullType } from 'graphql'
 import type { DataContext } from '@packages/data-context'
+import { remoteSchema } from '../stitching/remoteSchema'
 
 const NO_RESULT = {}
 // 2ms should be enough time to resolve from the local cache of the
@@ -22,10 +23,10 @@ export const nexusDeferIfNotLoadedPlugin = plugin({
   onCreateFieldResolver (def) {
     const { name: parentTypeName } = def.parentTypeConfig
 
-    // Don't ever need to do this on Subscription / Mutation fields,
-    // or on the Cloud types themselves, since these don't actually need to resolve themselves,
-    // they're resolved from the remote request
-    if (parentTypeName === 'Mutation' || parentTypeName === 'Subscription' || parentTypeName.startsWith('Cloud')) {
+    // Don't ever need to do this on Subscription / Mutation fields.
+    // Also don't need to if the type is in the cloud schema, since these don't
+    // actually need to resolve themselves, they're resolved from the remote request
+    if (parentTypeName === 'Mutation' || parentTypeName === 'Subscription' || remoteSchema.getType(parentTypeName)) {
       return
     }
 
