@@ -2,6 +2,12 @@ import { runSpec } from './support/spec-loader'
 import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './retries.mochaEvents.snapshots'
 
+/**
+ * These tests are slow, particular slow on windows, thus the
+ * 7500m timeout.
+ * TODO: Find out if they are objectively slower on windows than on linux,
+ * and if it's a 10.x specific performance regression.
+ */
 describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   // NOTE: for test-retries
 

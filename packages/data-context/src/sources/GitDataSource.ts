@@ -320,7 +320,7 @@ export class GitDataSource {
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
     const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
 
-    const stdout = normalize(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
+    const stdout = ensurePosixPathSeparators(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 
     const output: string[] = []
 
