@@ -55,7 +55,7 @@ export const Cypress = (
 
       // insert the script in the end of the body
       return `${indexHtmlContent.substring(0, endOfBody)
-    }<script>
+    }<script type="module">
     ${loader}
     </script>${
       indexHtmlContent.substring(endOfBody)

@@ -10,6 +10,7 @@ const npmModulesToCopy = [
   'mount-utils',
   'react',
   'vue',
+  'vue2',
 ]
 
 npmModulesToCopy.forEach((folder) => {
