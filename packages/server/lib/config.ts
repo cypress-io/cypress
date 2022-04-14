@@ -138,14 +138,7 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  let defaultsForRuntime = configUtils.getDefaultValues(options)
-
-  // As we normalize the config based on the selected testing type, we need
-  // to do the same with the default values to resolve those correctly
-  defaultsForRuntime = {
-    ...defaultsForRuntime,
-    ...defaultsForRuntime[options.testingType],
-  }
+  const defaultsForRuntime = configUtils.getDefaultValues(options)
 
   _.defaultsDeep(config, defaultsForRuntime)
 

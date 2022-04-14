@@ -54,6 +54,26 @@ describe('src/index', () => {
 
       snapshot(defaultValues)
     })
+
+    it('returns list of public config keys for selected testing type', () => {
+      const defaultValues = configUtil.getDefaultValues({ testingType: 'e2e' })
+
+      expect(defaultValues).to.deep.include({
+        defaultCommandTimeout: 4000,
+        scrollBehavior: 'top',
+        watchForFileChanges: true,
+      })
+
+      expect(defaultValues.env).to.deep.eq({})
+
+      // remove these since they are different depending on your machine
+      ;['platform', 'arch', 'version'].forEach((x) => {
+        expect(defaultValues[x]).to.exist
+        delete defaultValues[x]
+      })
+
+      snapshot(defaultValues)
+    })
   })
 
   describe('.getPublicConfigKeys', () => {
