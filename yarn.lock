@@ -3292,6 +3292,9 @@
   dependencies:
     mocha ">=1.13.0"
 
+"@cypress/mount-utils@link:npm/mount-utils":
+  version "0.0.0-development"
+
 "@cypress/parse-domain@2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@cypress/parse-domain/-/parse-domain-2.4.0.tgz#3034b50babfd0adffa2a018aa03264b1e5be4d9e"

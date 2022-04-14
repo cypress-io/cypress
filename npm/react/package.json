@@ -36,7 +36,7 @@
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
     "@cypress/code-coverage": "3.9.4",
-    "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/mount-utils": "link:../mount-utils",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
