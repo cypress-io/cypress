@@ -2,6 +2,7 @@ import path from 'path'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
+import componentIndexHtmlGenerator from './component-index-template'
 import { defineConfigAvailable } from '@packages/data-context/src/sources/migration/codegen'
 import semver from 'semver'
 import resolveFrom from 'resolve-from'
@@ -122,6 +123,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vueclivue2',
@@ -142,6 +144,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vueclivue3',
@@ -162,6 +165,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'nextjs',
@@ -181,6 +185,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'nuxtjs',
@@ -200,6 +205,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vue2',
@@ -219,6 +225,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vue3',
@@ -238,6 +245,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'react',
@@ -257,5 +265,6 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    componentIndexHtml: componentIndexHtmlGenerator('<div id="__next_css__DO_NOT_USE__"></div>'),
   },
 ] as const
