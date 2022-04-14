@@ -1,3 +1,5 @@
+import { findCrossOriginLogs } from '../../../../support/utils'
+
 context('cy.origin viewport', () => {
   it('syncs the viewport from the primary to secondary', () => {
     // change the viewport in the primary first
@@ -175,6 +177,37 @@ context('cy.origin viewport', () => {
             expect(win.innerWidth).to.equal(320)
             expect(win.innerHeight).to.equal(480)
           })
+        })
+      })
+    })
+
+    context('#consoleProps', () => {
+      let logs: Map<string, any>
+
+      beforeEach(() => {
+        logs = new Map()
+
+        cy.on('log:changed', (attrs, log) => {
+          logs.set(attrs.id, log)
+        })
+      })
+
+      it('.viewport()', (done) => {
+        cy.on('command:queue:end', () => {
+          setTimeout(() => {
+            const { consoleProps, crossOriginLog } = findCrossOriginLogs('viewport', logs, 'foobar.com')
+
+            expect(crossOriginLog).to.be.true
+            expect(consoleProps.Command).to.equal('viewport')
+            expect(consoleProps.Width).to.equal(320)
+            expect(consoleProps.Height).to.equal(480)
+
+            done()
+          }, 250)
+        })
+
+        cy.origin('http://foobar.com:3500', () => {
+          cy.viewport(320, 480)
         })
       })
     })

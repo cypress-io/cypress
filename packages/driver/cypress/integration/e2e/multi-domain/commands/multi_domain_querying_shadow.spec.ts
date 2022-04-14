@@ -1,3 +1,5 @@
+import { findCrossOriginLogs } from '../../../../support/utils'
+
 context('cy.origin shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
@@ -8,6 +10,42 @@ context('cy.origin shadow dom', () => {
     cy.origin('http://foobar.com:3500', () => {
       cy.get('#shadow-element-1').shadow().find('p.shadow-1')
       .should('have.text', 'Shadow Content 1')
+    })
+  })
+
+  context('#consoleProps', () => {
+    let logs: Map<string, any>
+
+    beforeEach(() => {
+      logs = new Map()
+
+      cy.on('log:changed', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+    })
+
+    it('.shadow()', (done) => {
+      cy.on('command:queue:end', () => {
+        setTimeout(() => {
+          const { consoleProps, crossOriginLog } = findCrossOriginLogs('shadow', logs, 'foobar.com')
+
+          expect(crossOriginLog).to.be.true
+
+          expect(consoleProps.Command).to.equal('shadow')
+          expect(consoleProps.Elements).to.equal(1)
+
+          expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
+          expect(consoleProps['Applied To']).to.have.property('id').that.equals('shadow-element-1')
+
+          expect(consoleProps.Yielded).to.be.null
+
+          done()
+        }, 250)
+      })
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.get('#shadow-element-1').shadow()
+      })
     })
   })
 })
