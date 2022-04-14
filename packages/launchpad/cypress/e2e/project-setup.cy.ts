@@ -32,7 +32,7 @@ describe('Launchpad: Setup Project', () => {
   }
 
   const verifyChooseABrowserPage = () => {
-    cy.contains('Choose a Browser', { timeout: 10000 })
+    cy.contains('Choose a Browser', { timeout: 15000 })
 
     cy.findByRole('radio', { name: 'Chrome v1' })
     cy.findByRole('radio', { name: 'Firefox v5' })
