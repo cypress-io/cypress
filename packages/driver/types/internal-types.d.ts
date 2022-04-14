@@ -45,6 +45,7 @@ declare namespace Cypress {
     isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
     fail: (err: Error, options:{ async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
+    createSnapshot:  ISnapshots['createSnapshot']
   }
 
   interface Cypress {
