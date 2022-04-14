@@ -191,65 +191,63 @@ async function makeE2ETasks () {
 
       const operationCount: Record<string, number> = {}
 
-      sinon.stub(ctx.util, 'fetch').get(() => {
-        return async (url: RequestInfo, init?: RequestInit) => {
-          if (String(url).endsWith('/test-runner-graphql')) {
-            const { query, variables } = JSON.parse(String(init?.body))
-            const document = parse(query)
-            const operationName = getOperationName(document)
+      sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url).endsWith('/test-runner-graphql')) {
+          const { query, variables } = JSON.parse(String(init?.body))
+          const document = parse(query)
+          const operationName = getOperationName(document)
 
-            operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
+          operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
 
-            let result = await execute({
-              operationName,
-              document,
-              variableValues: variables,
-              schema: cloudSchema,
-              rootValue: CloudRunQuery,
-              contextValue: {
-                __server__: ctx,
-              },
-            })
+          let result = await execute({
+            operationName,
+            document,
+            variableValues: variables,
+            schema: cloudSchema,
+            rootValue: CloudRunQuery,
+            contextValue: {
+              __server__: ctx,
+            },
+          })
 
-            operationCount[operationName ?? 'unknown']++
+          operationCount[operationName ?? 'unknown']++
 
-            if (remoteGraphQLIntercept) {
-              try {
-                result = await remoteGraphQLIntercept({
-                  operationName,
-                  variables,
-                  document,
-                  query,
-                  result,
-                  callCount: operationCount[operationName ?? 'unknown'],
-                }, testState)
-              } catch (e) {
-                const err = e as Error
+          if (remoteGraphQLIntercept) {
+            try {
+              result = await remoteGraphQLIntercept({
+                operationName,
+                variables,
+                document,
+                query,
+                result,
+                callCount: operationCount[operationName ?? 'unknown'],
+              }, testState)
+            } catch (e) {
+              const err = e as Error
 
-                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
-              }
+              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
             }
-
-            return new Response(JSON.stringify(result), { status: 200 })
           }
 
-          if (String(url) === 'https://download.cypress.io/desktop.json') {
-            return new Response(JSON.stringify({
-              name: 'Cypress',
-              version: pkg.version,
-            }), { status: 200 })
-          }
-
-          if (String(url) === 'https://registry.npmjs.org/cypress') {
-            return new Response(JSON.stringify({
-              'time': {
-                [pkg.version]: '2022-02-10T01:07:37.369Z',
-              },
-            }), { status: 200 })
-          }
-
-          return fetchApi(url, init)
+          return new Response(JSON.stringify(result), { status: 200 })
         }
+
+        if (String(url) === 'https://download.cypress.io/desktop.json') {
+          return new Response(JSON.stringify({
+            name: 'Cypress',
+            version: pkg.version,
+          }), { status: 200 })
+        }
+
+        if (String(url) === 'https://registry.npmjs.org/cypress') {
+          return new Response(JSON.stringify({
+            'time': {
+              [pkg.version]: '2022-02-10T01:07:37.369Z',
+            },
+          }), { status: 200 })
+        }
+
+        return fetchApi(url, init)
       })
 
       return null

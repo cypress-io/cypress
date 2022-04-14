@@ -4,7 +4,6 @@ import {
   dedupExchange,
   errorExchange,
   fetchExchange,
-  ssrExchange,
   subscriptionExchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
@@ -20,7 +19,6 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
-import { decodeBase64Unicode } from '../utils/decodeBase64'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
 
@@ -38,8 +36,6 @@ declare global {
      * to use cy.intercept in tests that we need it
      */
     __CYPRESS_GQL_NO_SOCKET__?: string
-    __CYPRESS_INITIAL_DATA__: object
-    __CYPRESS_INITIAL_DATA_ENCODED__: string
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
@@ -53,16 +49,6 @@ declare global {
 
 const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
 
-export async function preloadLaunchpadData () {
-  try {
-    const resp = await fetch('/__launchpad/preload')
-
-    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
-  } catch (e) {
-    //
-  }
-}
-
 interface LaunchpadUrqlClientConfig {
   target: 'launchpad'
 }
@@ -75,12 +61,16 @@ interface AppUrqlClientConfig {
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 
-export function makeUrqlClient (config: UrqlClientConfig): Client {
+export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client> {
   let hasError = false
 
   const exchanges: Exchange[] = [dedupExchange]
 
   const io = window.ws ?? getPubSubSource(config)
+
+  const connectPromise = new Promise<void>((resolve) => {
+    io.once('connect', resolve)
+  })
 
   const socketClient = getSocketSource(config)
 
@@ -120,13 +110,6 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
-    ssrExchange({
-      isClient: true,
-      // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
-      initialState: (window.__CYPRESS_INITIAL_DATA_ENCODED__
-        ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA_ENCODED__))
-        : window.__CYPRESS_INITIAL_DATA__) || {},
-    }),
     namedRouteExchange,
     fetchExchange,
     subscriptionExchange({
@@ -151,7 +134,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const url = config.target === 'launchpad' ? `/__launchpad/graphql` : `/${config.namespace}/graphql`
 
-  return createClient({
+  const client = createClient({
     url,
     requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
     exchanges,
@@ -161,6 +144,10 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // swap in-and-out during integration tests.
     fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
   })
+
+  await connectPromise
+
+  return client
 }
 
 interface LaunchpadPubSubConfig {
