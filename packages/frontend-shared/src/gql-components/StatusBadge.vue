@@ -1,5 +1,5 @@
 <template>
-  <template v-if="status">
+  <template v-if="props.status">
     <div class="border rounded-full font-medium p-5px pr-16px text-size-14px text-jade-500 leading-20px inline-flex items-center relative">
       <Menu>
         <MenuButton
@@ -10,7 +10,7 @@
           <i-cy-grommet_x16
             class="h-16px mr-4px ml-4px w-16px icon-light-jade-400 icon-dark-jade-400"
           />
-          {{ titleOn }}
+          {{ props.titleOn }}
         </MenuButton>
       </Menu>
     </div>
@@ -22,7 +22,7 @@
       <i-cy-grommet_x16
         class="h-16px mx-4px w-16px icon-dark-gray-200 icon-dark-gray-50"
       />
-      {{ titleOff }}
+      {{ props.titleOff }}
     </span>
   </template>
 </template>
@@ -30,5 +30,14 @@
 <script lang="ts" setup>
 
 import { Menu, MenuButton } from '@headlessui/vue'
+
+const props = defineProps<{
+  status: boolean
+  titleOn: string
+  titleOff: string
+  testingType: TestingTypeEnum
+  isRunning: boolean
+  isApp: boolean
+}>()
 
 </script>
