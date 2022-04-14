@@ -70,64 +70,42 @@ context('cy.origin misc', () => {
       })
     })
 
-    it('.exec()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('exec', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('exec')
-          expect(consoleProps['Shell Used']).to.be.undefined
-          expect(consoleProps.Yielded).to.have.property('code').that.equals(0)
-          expect(consoleProps.Yielded).to.have.property('stderr').that.equals('')
-          expect(consoleProps.Yielded).to.have.property('stdout').that.equals('foobar')
-
-          done()
-        }, 250)
-      })
-
+    it('.exec()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.exec('echo foobar')
       })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('exec', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('exec')
+        expect(consoleProps['Shell Used']).to.be.undefined
+        expect(consoleProps.Yielded).to.have.property('code').that.equals(0)
+        expect(consoleProps.Yielded).to.have.property('stderr').that.equals('')
+        expect(consoleProps.Yielded).to.have.property('stdout').that.equals('foobar')
+      })
     })
 
-    it('.focused()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('focused', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('focused')
-          expect(consoleProps.Elements).to.equal(1)
-          expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
-          expect(consoleProps.Yielded).to.have.property('id').that.equals('button')
-          done()
-        }, 250)
-      })
-
+    it('.focused()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.get('#button').click().focused()
       })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('focused', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('focused')
+        expect(consoleProps.Elements).to.equal(1)
+        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.Yielded).to.have.property('id').that.equals('button')
+      })
     })
 
-    it('.wrap()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('wrap', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('wrap')
-          expect(consoleProps.Yielded[0]).to.equal('foo')
-          expect(consoleProps.Yielded[1]).to.equal('bar')
-          expect(consoleProps.Yielded[2]).to.equal('baz')
-
-          done()
-        }, 250)
-      })
-
+    it('.wrap()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const arr = ['foo', 'bar', 'baz']
 
@@ -137,47 +115,36 @@ context('cy.origin misc', () => {
           expect(baz).to.equal('baz')
         })
       })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('wrap', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('wrap')
+        expect(consoleProps.Yielded[0]).to.equal('foo')
+        expect(consoleProps.Yielded[1]).to.equal('bar')
+        expect(consoleProps.Yielded[2]).to.equal('baz')
+      })
     })
 
-    it('.debug()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('debug', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('debug')
-          expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
-          expect(consoleProps.Yielded).to.have.property('id').that.equals('button')
-          done()
-        }, 250)
-      })
-
+    it('.debug()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.get('#button').debug()
       })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('debug', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('debug')
+        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.Yielded).to.have.property('id').that.equals('button')
+      })
     })
 
-    it('.pause()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          if (Cypress.config('isInteractive')) {
-          // if `isInteractive`, the .pause() will NOT show up in the command log in this case. Essentially a no-op.
-            done()
-
-            return
-          }
-
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('pause', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('pause')
-          expect(consoleProps.Yielded).to.be.undefined
-          done()
-        }, 250)
-      })
-
+    it('.pause()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const afterPaused = new Promise<void>((resolve) => {
           cy.once('paused', () => {
@@ -192,25 +159,36 @@ context('cy.origin misc', () => {
           cy.wrap(afterPaused)
         }
       })
+
+      cy.shouldWithTimeout(() => {
+        if (Cypress.config('isInteractive')) {
+          // if `isInteractive`, the .pause() will NOT show up in the command log in this case. Essentially a no-op.
+          return
+        }
+
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('pause', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('pause')
+        expect(consoleProps.Yielded).to.be.undefined
+      })
     })
 
-    it('.task()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('task', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('task')
-          expect(consoleProps.Yielded).to.equal('works')
-          expect(consoleProps.arg).to.equal('works')
-          expect(consoleProps.task).to.equal('return:arg')
-          done()
-        }, 250)
-      })
-
+    it('.task()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.task('return:arg', 'works')
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('task', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('task')
+        expect(consoleProps.Yielded).to.equal('works')
+        expect(consoleProps.arg).to.equal('works')
+        expect(consoleProps.task).to.equal('return:arg')
       })
     })
   })
@@ -218,8 +196,8 @@ context('cy.origin misc', () => {
 
 it('verifies number of cy commands', () => {
   // @ts-ignore
-  // remove 'getAll' command since it's a custom command we add for our own testing and not an actual cy command
-  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => command === 'getAll')
+  // remove 'getAll' and 'shouldWithTimeout' commands since they are custom commands we added for our own testing and are not actual cy commands
+  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => command === 'getAll' || command === 'shouldWithTimeout')
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',

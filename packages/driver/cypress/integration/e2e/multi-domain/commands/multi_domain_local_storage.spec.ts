@@ -31,19 +31,7 @@ context('cy.origin local storage', () => {
       })
     })
 
-    it('.clearLocalStorage()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { crossOriginLog, consoleProps } = findCrossOriginLogs('clearLocalStorage', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-          expect(consoleProps.Command).to.equal('clearLocalStorage')
-          expect(consoleProps.Yielded).to.be.null
-
-          done()
-        }, 250)
-      })
-
+    it('.clearLocalStorage()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.window().then((win) => {
           win.localStorage.setItem('foo', 'bar')
@@ -51,6 +39,14 @@ context('cy.origin local storage', () => {
         })
 
         cy.clearLocalStorage()
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { crossOriginLog, consoleProps } = findCrossOriginLogs('clearLocalStorage', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+        expect(consoleProps.Command).to.equal('clearLocalStorage')
+        expect(consoleProps.Yielded).to.be.null
       })
     })
   })

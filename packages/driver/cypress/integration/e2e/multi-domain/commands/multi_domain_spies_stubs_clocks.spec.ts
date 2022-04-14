@@ -100,20 +100,7 @@ context('cy.origin spies, stubs, and clock', () => {
       })
     })
 
-    it('spy()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
-
-          expect(spyLog.crossOriginLog).to.be.true
-          expect(spyLog.consoleProps.Command).to.equal('spy-1')
-          expect(spyLog.callCount).to.be.a('number')
-          expect(spyLog.functionName).to.equal('bar')
-
-          done()
-        }, 250)
-      })
-
+    it('spy()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const foo = { bar () { } }
 
@@ -121,22 +108,18 @@ context('cy.origin spies, stubs, and clock', () => {
         foo.bar()
         expect(foo.bar).to.be.called
       })
+
+      cy.shouldWithTimeout(() => {
+        const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
+
+        expect(spyLog.crossOriginLog).to.be.true
+        expect(spyLog.consoleProps.Command).to.equal('spy-1')
+        expect(spyLog.callCount).to.be.a('number')
+        expect(spyLog.functionName).to.equal('bar')
+      })
     })
 
-    it('.stub()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
-
-          expect(stubLog.crossOriginLog).to.be.true
-          expect(stubLog.consoleProps.Command).to.equal('stub-1')
-          expect(stubLog.callCount).to.be.a('number')
-          expect(stubLog.functionName).to.equal('bar')
-
-          done()
-        }, 250)
-      })
-
+    it('.stub()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const foo = { bar () { } }
 
@@ -144,58 +127,59 @@ context('cy.origin spies, stubs, and clock', () => {
         foo.bar()
         expect(foo.bar).to.be.called
       })
+
+      cy.shouldWithTimeout(() => {
+        const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
+
+        expect(stubLog.crossOriginLog).to.be.true
+        expect(stubLog.consoleProps.Command).to.equal('stub-1')
+        expect(stubLog.callCount).to.be.a('number')
+        expect(stubLog.functionName).to.equal('bar')
+      })
     })
 
-    it('.clock()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const clockLog = findCrossOriginLogs('clock', logs, 'foobar.com')
-
-          expect(clockLog.crossOriginLog).to.be.true
-          expect(clockLog.name).to.equal('clock')
-
-          const consoleProps = clockLog.consoleProps()
-
-          expect(consoleProps.Command).to.equal('clock')
-          expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-          expect(consoleProps).to.have.property('Now').that.is.a('number')
-
-          done()
-        }, 250)
-      })
-
+    it('.clock()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const now = Date.UTC(2022, 0, 12)
 
         cy.clock(now)
       })
+
+      cy.shouldWithTimeout(() => {
+        const clockLog = findCrossOriginLogs('clock', logs, 'foobar.com')
+
+        expect(clockLog.crossOriginLog).to.be.true
+        expect(clockLog.name).to.equal('clock')
+
+        const consoleProps = clockLog.consoleProps()
+
+        expect(consoleProps.Command).to.equal('clock')
+        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps).to.have.property('Now').that.is.a('number')
+      })
     })
 
-    it('.tick()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const tickLog = findCrossOriginLogs('tick', logs, 'foobar.com')
-
-          expect(tickLog.crossOriginLog).to.be.true
-          expect(tickLog.name).to.equal('tick')
-
-          const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
-
-          expect(consoleProps.Command).to.equal('tick')
-          expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-          expect(consoleProps).to.have.property('Now').that.is.a('number')
-          expect(consoleProps).to.have.property('Ticked').that.is.a('string')
-
-          done()
-        }, 250)
-      })
-
+    it('.tick()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const now = Date.UTC(2022, 0, 12)
 
         cy.clock(now)
 
         cy.tick(10000)
+      })
+
+      cy.shouldWithTimeout(() => {
+        const tickLog = findCrossOriginLogs('tick', logs, 'foobar.com')
+
+        expect(tickLog.crossOriginLog).to.be.true
+        expect(tickLog.name).to.equal('tick')
+
+        const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
+
+        expect(consoleProps.Command).to.equal('tick')
+        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps).to.have.property('Now').that.is.a('number')
+        expect(consoleProps).to.have.property('Ticked').that.is.a('string')
       })
     })
   })

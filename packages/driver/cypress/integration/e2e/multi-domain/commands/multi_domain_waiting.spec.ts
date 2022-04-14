@@ -23,21 +23,17 @@ context('cy.origin waiting', () => {
       })
     })
 
-    it('.wait()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('wait', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-          expect(consoleProps.Command).to.equal('wait')
-          expect(consoleProps).to.have.property('Waited For').to.equal('500ms before continuing')
-
-          done()
-        }, 250)
+    it('.wait()', () => {
+      cy.origin('http://foobar.com:3500', () => {
+        cy.wait(200)
       })
 
-      cy.origin('http://foobar.com:3500', () => {
-        cy.wait(500)
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('wait', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+        expect(consoleProps.Command).to.equal('wait')
+        expect(consoleProps).to.have.property('Waited For').to.equal('200ms before continuing')
       })
     })
   })

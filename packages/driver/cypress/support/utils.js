@@ -108,6 +108,10 @@ const getAllFn = (...aliases) => {
   )
 }
 
+const shouldWithTimeout = (cb, timeout = 250) => {
+  cy.wrap({}, { timeout }).should(cb)
+}
+
 export const keyEvents = [
   'keydown',
   'keyup',
@@ -133,6 +137,8 @@ export const expectCaret = (start, end) => {
 }
 
 Cypress.Commands.add('getAll', getAllFn)
+
+Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 
 const chaiSubset = require('chai-subset')
 

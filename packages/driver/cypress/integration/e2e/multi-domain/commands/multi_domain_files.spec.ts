@@ -58,41 +58,23 @@ context('cy.origin files', () => {
       })
     })
 
-    it('.readFile()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { crossOriginLog, consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('readFile')
-          expect(consoleProps['File Path']).to.include('cypress/fixtures/example.json')
-          expect(consoleProps.Contents).to.deep.equal({ example: true })
-
-          done()
-        }, 250)
-      })
-
+    it('.readFile()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.readFile('cypress/fixtures/example.json')
       })
+
+      cy.shouldWithTimeout(() => {
+        const { crossOriginLog, consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('readFile')
+        expect(consoleProps['File Path']).to.include('cypress/fixtures/example.json')
+        expect(consoleProps.Contents).to.deep.equal({ example: true })
+      })
     })
 
-    it('.writeFile()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { crossOriginLog, consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('writeFile')
-          expect(consoleProps['File Path']).to.equal('foo.json')
-          expect(consoleProps.Contents).to.equal('{"foo":"bar"}')
-
-          done()
-        }, 250)
-      })
-
+    it('.writeFile()', () => {
       cy.origin('http://foobar.com:3500', () => {
         const contents = JSON.stringify({ foo: 'bar' })
 
@@ -102,6 +84,16 @@ context('cy.origin files', () => {
         })
 
         cy.writeFile('foo.json', contents)
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { crossOriginLog, consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('writeFile')
+        expect(consoleProps['File Path']).to.equal('foo.json')
+        expect(consoleProps.Contents).to.equal('{"foo":"bar"}')
       })
     })
   })

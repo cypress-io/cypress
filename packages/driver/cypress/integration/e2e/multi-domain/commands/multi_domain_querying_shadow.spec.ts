@@ -24,27 +24,23 @@ context('cy.origin shadow dom', () => {
       })
     })
 
-    it('.shadow()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('shadow', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-
-          expect(consoleProps.Command).to.equal('shadow')
-          expect(consoleProps.Elements).to.equal(1)
-
-          expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
-          expect(consoleProps['Applied To']).to.have.property('id').that.equals('shadow-element-1')
-
-          expect(consoleProps.Yielded).to.be.null
-
-          done()
-        }, 250)
-      })
-
+    it('.shadow()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.get('#shadow-element-1').shadow()
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('shadow', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+
+        expect(consoleProps.Command).to.equal('shadow')
+        expect(consoleProps.Elements).to.equal(1)
+
+        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
+        expect(consoleProps['Applied To']).to.have.property('id').that.equals('shadow-element-1')
+
+        expect(consoleProps.Yielded).to.be.null
       })
     })
   })

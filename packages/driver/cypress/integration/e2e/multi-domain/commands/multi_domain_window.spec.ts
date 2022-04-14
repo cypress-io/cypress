@@ -35,57 +35,45 @@ context('cy.origin window', () => {
       })
     })
 
-    it('.window()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('window', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-          expect(consoleProps.Command).to.equal('window')
-          expect(consoleProps.Yielded).to.be.null
-
-          done()
-        }, 250)
-      })
-
+    it('.window()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.window()
       })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('window', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+        expect(consoleProps.Command).to.equal('window')
+        expect(consoleProps.Yielded).to.be.null
+      })
     })
 
-    it('.document()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('document', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-          expect(consoleProps.Command).to.equal('document')
-          expect(consoleProps.Yielded).to.be.null
-
-          done()
-        }, 250)
-      })
-
+    it('.document()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.document()
       })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('document', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+        expect(consoleProps.Command).to.equal('document')
+        expect(consoleProps.Yielded).to.be.null
+      })
     })
 
-    it('.title()', (done) => {
-      cy.on('command:queue:end', () => {
-        setTimeout(() => {
-          const { consoleProps, crossOriginLog } = findCrossOriginLogs('title', logs, 'foobar.com')
-
-          expect(crossOriginLog).to.be.true
-          expect(consoleProps.Command).to.equal('title')
-          expect(consoleProps.Yielded).to.equal('DOM Fixture')
-
-          done()
-        }, 250)
-      })
-
+    it('.title()', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.title()
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps, crossOriginLog } = findCrossOriginLogs('title', logs, 'foobar.com')
+
+        expect(crossOriginLog).to.be.true
+        expect(consoleProps.Command).to.equal('title')
+        expect(consoleProps.Yielded).to.equal('DOM Fixture')
       })
     })
   })

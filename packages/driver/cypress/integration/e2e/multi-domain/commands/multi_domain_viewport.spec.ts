@@ -192,22 +192,18 @@ context('cy.origin viewport', () => {
         })
       })
 
-      it('.viewport()', (done) => {
-        cy.on('command:queue:end', () => {
-          setTimeout(() => {
-            const { consoleProps, crossOriginLog } = findCrossOriginLogs('viewport', logs, 'foobar.com')
-
-            expect(crossOriginLog).to.be.true
-            expect(consoleProps.Command).to.equal('viewport')
-            expect(consoleProps.Width).to.equal(320)
-            expect(consoleProps.Height).to.equal(480)
-
-            done()
-          }, 250)
-        })
-
+      it('.viewport()', () => {
         cy.origin('http://foobar.com:3500', () => {
           cy.viewport(320, 480)
+        })
+
+        cy.shouldWithTimeout(() => {
+          const { consoleProps, crossOriginLog } = findCrossOriginLogs('viewport', logs, 'foobar.com')
+
+          expect(crossOriginLog).to.be.true
+          expect(consoleProps.Command).to.equal('viewport')
+          expect(consoleProps.Width).to.equal(320)
+          expect(consoleProps.Height).to.equal(480)
         })
       })
     })
