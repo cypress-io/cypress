@@ -167,7 +167,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               })
 
               wrappedErr.name = err.name
-              wrappedErr.stack = $stackUtils.replacedStack(err, err.stack)
+              wrappedErr.stack = $stackUtils.replacedStack(wrappedErr, err.stack)
 
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}
@@ -240,7 +240,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
               wrappedErr.name = err.name
 
-              const stack = $stackUtils.replacedStack(err, userInvocationStack)
+              const stack = $stackUtils.replacedStack(wrappedErr, userInvocationStack)
 
               // add the actual stack, since it might be useful for debugging
               // the failure

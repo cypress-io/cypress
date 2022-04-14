@@ -156,6 +156,7 @@ describe('cy.origin', () => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('variable is not defined')
           expect(err.message).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
+          expect(err.stack).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
           //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
@@ -230,6 +231,7 @@ describe('cy.origin', () => {
       it('has non serializable arguments', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include(`This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`)
+          expect(err.stack).to.include(`This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`)
           //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
           expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
