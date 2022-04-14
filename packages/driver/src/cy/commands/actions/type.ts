@@ -233,12 +233,11 @@ export default function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        // In Firefox, submit event is automatically fired
+        // Before Firefox 98, submit event is automatically fired
         // when we send {Enter} KeyboardEvent to the input fields.
         // Because of that, we don't have to click the submit buttons.
         // Otherwise, we trigger submit events twice.
-        // But after Firefox 98, submit event isn't automatically fired.
-        if (!isFirefoxBefore98 || !Cypress.isBrowser('firefox')) {
+        if (!isFirefoxBefore98) {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
