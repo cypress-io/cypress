@@ -1,7 +1,7 @@
 import debugFn from 'debug'
 import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
-import { normalizePath } from 'vite'
+import { vite } from '../getVite'
 import fs from 'fs'
 
 import type { ViteDevServerConfig } from '../devServer'
@@ -82,7 +82,7 @@ export const Cypress = (
       debug('handleHotUpdate - file', file)
 
       // If the user provided IndexHtml is changed, do a full-reload
-      if (normalizePath(file) === resolve(projectRoot, indexHtmlFile)) {
+      if (vite.normalizePath(file) === resolve(projectRoot, indexHtmlFile)) {
         server.ws.send({
           type: 'full-reload',
         })

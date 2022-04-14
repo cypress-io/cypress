@@ -6,7 +6,8 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
-import { InlineConfig, mergeConfig } from 'vite'
+import type { InlineConfig } from 'vite'
+import { vite } from './getVite'
 import path from 'path'
 
 import { configFiles } from './constants'
@@ -61,11 +62,11 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig) => 
     },
     plugins: [
       Cypress(config),
-      await CypressInspect(),
+      CypressInspect(config),
     ],
   }
 
-  const finalConfig = mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
+  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 

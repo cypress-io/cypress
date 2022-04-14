@@ -1,6 +1,6 @@
 import debugFn from 'debug'
 import getPort from 'get-port'
-import { createServer as viteCreateServer } from 'vite'
+import { vite, initVite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
@@ -17,8 +17,11 @@ export type ViteDevServerConfig = {
 }
 
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
+  // This has to be the first thing we do as we need to source vite from their project's dependencies
+  initVite(config)
+
   debug('Creating Vite Server')
-  const server = await devServer.create(config) as import('vite').ViteDevServer
+  const server = await devServer.create(config)
 
   debug('Vite server created')
   const port = await getPort({ port: 3000 })
@@ -40,7 +43,7 @@ devServer.create = async function createDevServer (devServerConfig: ViteDevServe
   try {
     const config = await createViteDevServerConfig(devServerConfig)
 
-    return await viteCreateServer(config)
+    return await vite.createServer(config)
   } catch (err) {
     if (err instanceof Error) {
       throw err
