@@ -1479,7 +1479,7 @@ module.exports = {
           compressedVideoName: videoRecordProps.compressedVideoName,
           endVideoCapture: videoRecordProps.endVideoCapture,
           startedVideoCapture: videoRecordProps.startedVideoCapture,
-          exit: config.exit,
+          exit: options.exit,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
@@ -1603,6 +1603,7 @@ module.exports = {
               quiet: options.quiet,
               outputPath: options.outputPath,
               testingType: options.testingType,
+              exit: options.exit,
             })
             .tap((runSpecs) => {
               if (!options.quiet) {

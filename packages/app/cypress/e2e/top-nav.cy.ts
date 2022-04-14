@@ -1,15 +1,18 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type Sinon from 'sinon'
 
 const pkg = require('@packages/root')
 
 const loginText = defaultMessages.topNav.login
 
+beforeEach(() => {
+  cy.clock(Date.UTC(2021, 9, 30), ['Date'])
+})
+
 describe('App Top Nav Workflows', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
-
-    cy.clock(Date.UTC(2021, 9, 30), ['Date'])
   })
 
   describe('Page Name', () => {
@@ -219,16 +222,15 @@ describe('App Top Nav Workflows', () => {
     context('version data unreachable', () => {
       it('treats unreachable data as current version', () => {
         cy.withCtx((ctx, o) => {
+          (ctx.util.fetch as Sinon.SinonStub).restore()
           const oldFetch = ctx.util.fetch
 
-          o.sinon.stub(ctx.util, 'fetch').get(() => {
-            return async (url: RequestInfo, init?: RequestInit) => {
-              if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
-                throw new Error(String(url))
-              }
-
-              return oldFetch(url, init)
+          o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
+            if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+              throw new Error(String(url))
             }
+
+            return oldFetch(url, init)
           })
         })
 
@@ -627,6 +629,8 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.contains('E2E Specs')
+    cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
 
@@ -642,6 +646,8 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.contains('E2E Specs')
+    cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })
 })
