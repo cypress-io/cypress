@@ -208,8 +208,7 @@
       "cli",
       "packages/*",
       "npm/*",
-      "system-tests",
-      "internal/*"
+      "system-tests"
     ],
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",
