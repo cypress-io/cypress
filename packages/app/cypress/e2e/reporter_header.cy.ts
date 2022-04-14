@@ -14,7 +14,7 @@ describe('Reporter Header', () => {
       })
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
-      cy.get('[data-selected-spec="false"]').should('have.length', '4')
+      cy.get('[data-selected-spec="false"]').should('have.length', '6')
     })
 
     it('filters the list of specs when searching for specs', () => {

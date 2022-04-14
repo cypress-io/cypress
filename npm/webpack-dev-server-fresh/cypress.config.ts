@@ -3,7 +3,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   projectId: 'ypt4pf',
   e2e: {
-    defaultCommandTimeout: 10000, // these take a bit longer b/c they're e2e open mode test
+    defaultCommandTimeout: 20000, // these take a bit longer b/c they're e2e open mode test
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
         throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. Close Cypress and run tests using the `yarn cypress:*` commands from the `packages/app` directory')
