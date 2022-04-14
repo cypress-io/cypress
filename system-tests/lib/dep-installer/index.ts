@@ -214,6 +214,8 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // 4. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
 
+    console.log(lockFilePath)
+
     log(`Writing ${lockFilename} with fixed relative paths to temp dir`)
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 

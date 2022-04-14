@@ -103,7 +103,8 @@ describe('scaffolding component testing', {
       cy.get('button').should('be.visible').contains('Nuxt.js(detected)')
       cy.get('button').contains('Next Step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
+      // Don't verify this config file b/c we've had to modify it to get vue2 resolving
+      // verifyConfigFile(`cypress.config.js`)
     })
   })
 })
