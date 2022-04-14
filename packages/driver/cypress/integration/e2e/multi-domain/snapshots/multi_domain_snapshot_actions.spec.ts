@@ -1,7 +1,7 @@
-import _ from 'lodash'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 describe('cross-origin snapshot actions', () => {
+  const { _ } = Cypress
   let logs: Map<string, any>
 
   beforeEach(() => {

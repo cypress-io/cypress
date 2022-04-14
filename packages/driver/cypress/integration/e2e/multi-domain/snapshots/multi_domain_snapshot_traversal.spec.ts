@@ -1,8 +1,8 @@
-import _ from 'lodash'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 context('cross-origin snapshot traversal', { experimentalSessionSupport: true }, () => {
+  const { _ } = Cypress
   let logs: Map<string, any>
 
   beforeEach(() => {
