@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - unify-1449-check-path-length-in-build
+        - chore/cutover-to-bundled-react-mount
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -39,7 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ unify-1449-check-path-length-in-build, << pipeline.git.branch >> ]
+    - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -49,7 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ unify-1449-check-path-length-in-build, << pipeline.git.branch >> ]
+    - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1706,7 +1706,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-check-path-length-in-build" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "chore/cutover-to-bundled-react-mount" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
