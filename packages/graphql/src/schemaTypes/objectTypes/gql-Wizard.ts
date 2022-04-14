@@ -3,7 +3,7 @@ import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { CODE_LANGUAGES } from '@packages/types'
-import { BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
@@ -13,28 +13,28 @@ export const Wizard = objectType({
     t.nonNull.list.nonNull.field('allBundlers', {
       type: WizardBundler,
       description: 'All of the bundlers to choose from',
-      resolve: () => Array.from(BUNDLERS),
+      resolve: () => Array.from(WIZARD_BUNDLERS),
     })
 
     t.field('bundler', {
       type: WizardBundler,
-      resolve: (source, args, ctx) => ctx.wizard.chosenBundler ?? null,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.chosenBundler ?? null,
     })
 
     t.field('framework', {
       type: WizardFrontendFramework,
-      resolve: (source, args, ctx) => ctx.wizard.chosenFramework ?? null,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.chosenFramework ?? null,
     })
 
     t.nonNull.list.nonNull.field('frameworks', {
       type: WizardFrontendFramework,
       description: 'All of the component testing frameworks to choose from',
-      resolve: () => Array.from(FRONTEND_FRAMEWORKS), // TODO(tim): fix this in nexus to accept Readonly
+      resolve: () => Array.from(WIZARD_FRAMEWORKS), // TODO(tim): fix this in nexus to accept Readonly
     })
 
     t.field('language', {
       type: WizardCodeLanguage,
-      resolve: (source, args, ctx) => ctx.wizard.chosenLanguage ?? null,
+      resolve: (source, args, ctx) => CODE_LANGUAGES.find((x) => x.type === ctx.coreData.wizard.chosenLanguage) ?? null,
     })
 
     t.nonNull.list.nonNull.field('allLanguages', {
@@ -43,15 +43,21 @@ export const Wizard = objectType({
       resolve: () => Array.from(CODE_LANGUAGES), // TODO(tim): fix this in nexus to accept Readonly
     })
 
-    t.list.nonNull.field('packagesToInstall', {
+    t.nonNull.list.nonNull.field('packagesToInstall', {
       type: WizardNpmPackage,
       description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
-      resolve: (source, args, ctx) => ctx.wizard.packagesToInstall(),
-    })
-
-    t.list.nonNull.string('installedPackages', {
-      description: 'The list of packages to install that are currently installed',
-      resolve: (source, args, ctx) => ctx.wizard.installedPackages(),
+      resolve: (source, args, ctx) => {
+        return ctx.wizard.packagesToInstall().map((pkg) => {
+          return {
+            name: pkg.dependency.name,
+            package: pkg.dependency.package,
+            description: pkg.dependency.description,
+            minVersion: pkg.dependency.minVersion,
+            detectedVersion: pkg.detectedVersion,
+            satisfied: pkg.satisfied,
+          }
+        })
+      },
     })
 
     t.string('installDependenciesCommand', {
