@@ -24,9 +24,13 @@ export const nexusDeferIfNotLoadedPlugin = plugin({
     const { name: parentTypeName } = def.parentTypeConfig
 
     // Don't ever need to do this on Subscription / Mutation fields.
-    // Also don't need to if the type is in the cloud schema, since these don't
+    if (parentTypeName === 'Mutation' || parentTypeName === 'Subscription') {
+      return
+    }
+
+    // Also don't need to if the type is in the cloud schema, (and isn't a Query) since these don't
     // actually need to resolve themselves, they're resolved from the remote request
-    if (parentTypeName === 'Mutation' || parentTypeName === 'Subscription' || remoteSchema.getType(parentTypeName)) {
+    if (parentTypeName !== 'Query' && remoteSchema.getType(parentTypeName)) {
       return
     }
 
