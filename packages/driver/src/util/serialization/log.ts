@@ -60,12 +60,13 @@ const preprocessDomElement = (props: HTMLElement) => {
 }
 
 /**
- * Takes an HTMLElement that might be a <body> for a given snapshot or any other element, likely pertaining to log consoleProps,
- * on the page that needs to be preprocessed for serialization. The method here is to do a very shallow serialization,
- * by trying to make the HTML as stateful as possible before preprocessing.
+ * Takes an PreprocessedHTMLElement that might represent a given snapshot or any other element that needs to be reified
+ * after postMessage() serialization. The method here is to do a very basic reification,
+ * attempting to create an element based off the PreprocessedHTMLElement tagName, and populating some basic state if applicable,
+ * such as element type, id, value, etc.
  *
  * @param {PreprocessedHTMLElement} props - a preprocessed element that was fed through postMessage() that need to be reified in the primary.
- * @returns {HTMLElement} a reified element that can be used in a snapshot body or consoleProps.
+ * @returns {HTMLElement} a reified element, likely a log snapshot, $el, or consoleProp elements.
  */
 const reifyDomElement = (props: any) => {
   const reifiedEl = document.createElement(props.tagName)
