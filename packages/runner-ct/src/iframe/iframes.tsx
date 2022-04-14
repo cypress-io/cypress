@@ -134,7 +134,7 @@ export const Iframes = namedObserver('Iframes', ({
       highlightEl: autIframe.current.highlightEl,
       detachDom: autIframe.current.detachDom,
       isAUTSameOrigin: autIframe.current.doesAUTMatchTopOriginPolicy,
-      removeSrc: autIframe.current.removeSrcAttributeFromAUTIframe,
+      removeSrc: autIframe.current.removeSrcAttribute,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={eventManager}

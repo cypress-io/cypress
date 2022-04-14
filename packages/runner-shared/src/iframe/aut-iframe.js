@@ -98,7 +98,7 @@ export class AutIframe {
    * Removes the src attribute from the AUT iframe, resulting in 'about:blank' being loaded into the iframe
    * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src for more details
    */
-  removeSrcAttributeFromAUTIframe = () => {
+  removeSrcAttribute = () => {
     this.$iframe.removeAttr('src')
   }
 
@@ -130,7 +130,7 @@ export class AutIframe {
       })
 
       // The iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. NOTE: This should only be done ONCE.
-      this.removeSrcAttributeFromAUTIframe()
+      this.removeSrcAttribute()
 
       return
     }

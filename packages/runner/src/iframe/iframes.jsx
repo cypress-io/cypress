@@ -110,7 +110,7 @@ export default class Iframes extends Component {
       highlightEl: this.autIframe.highlightEl,
       detachDom: this.autIframe.detachDom,
       isAUTSameOrigin: this.autIframe.doesAUTMatchTopOriginPolicy,
-      removeSrc: this.autIframe.removeSrcAttributeFromAUTIframe,
+      removeSrc: this.autIframe.removeSrcAttribute,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={this.props.eventManager}
