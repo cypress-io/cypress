@@ -244,7 +244,7 @@ interface GraphQLRequestContextOptions {
  * Since the DataContext is considered a singleton throughout the electron app process,
  * we create a Proxy object for it, adding metadata associated each GraphQL operation.
  * This is used in middleware, such as the `nexusDeferIfNotLoadedPlugin`, to associate
- * remote requests to operations needing to be refetch on the client.
+ * remote requests to operations needing to be refetched on the client.
  */
 function graphqlRequestContext (options: GraphQLRequestContextOptions) {
   const app = options.app ?? (options.req?.originalUrl.startsWith('/__launchpad') ? 'launchpad' : 'app')

@@ -21,7 +21,6 @@ import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
-import pDefer from 'p-defer'
 
 const toast = useToast()
 
@@ -65,12 +64,13 @@ export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client> {
   let hasError = false
 
-  const dfd = pDefer()
   const exchanges: Exchange[] = [dedupExchange]
 
   const io = window.ws ?? getPubSubSource(config)
 
-  io.on('connect', dfd.resolve)
+  const connectPromise = new Promise<void>((resolve) => {
+    io.once('connect', resolve)
+  })
 
   const socketClient = getSocketSource(config)
 
@@ -145,7 +145,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
     fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
   })
 
-  await dfd.promise
+  await connectPromise
 
   return client
 }
