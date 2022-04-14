@@ -102,11 +102,15 @@ export const getBreakingRootKeys = () => {
   return breakingRootOptions
 }
 
-export const getDefaultValues = (runtimeOptions = {}) => {
+export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
   // Default values can be functions, in which case they are evaluated
   // at runtime - for example, slowTestThreshold where the default value
   // varies between e2e and component testing.
-  return _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+  const defaultsForRuntime = _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+
+  // As we normalize the config based on the selected testing type, we need
+  // to do the same with the default values to resolve those correctly
+  return { ...defaultsForRuntime, ...defaultsForRuntime[runtimeOptions.testingType] }
 }
 
 export const getPublicConfigKeys = () => {
