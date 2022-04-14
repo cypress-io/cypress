@@ -8,6 +8,8 @@ import type { SpecFile } from '@packages/types/src'
 import { getPathForPlatform } from '../paths'
 
 const initialized = ref(false)
+let specsWatcher
+let specWatcher
 
 export function useUnifiedRunner () {
   onMounted(async () => {
@@ -18,6 +20,14 @@ export function useUnifiedRunner () {
   onBeforeUnmount(() => {
     UnifiedRunnerAPI.teardown()
     initialized.value = false
+
+    if (specsWatcher) {
+      specsWatcher()
+    }
+
+    if (specWatcher) {
+      specWatcher()
+    }
   })
 
   return {
@@ -28,7 +38,7 @@ export function useUnifiedRunner () {
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-      watch(() => specs.value, (newVal) => {
+      specsWatcher = watch(() => specs.value, (newVal) => {
         const fileParam = getPathForPlatform(route.query.file as string)
 
         if (!fileParam) {
@@ -46,7 +56,7 @@ export function useUnifiedRunner () {
         }
       })
 
-      return watch(() => getPathForPlatform(route.query.file as string), (queryParam) => {
+      specWatcher = watch(() => getPathForPlatform(route.query.file as string), (queryParam) => {
         const spec = specs.value.find((x) => x.relative === queryParam)
 
         if (selectorPlaygroundStore.show) {
