@@ -63,7 +63,7 @@ const preprocessDomElement = (props: HTMLElement) => {
  * Takes an PreprocessedHTMLElement that might represent a given snapshot or any other element that needs to be reified
  * after postMessage() serialization. The method here is to do a very basic reification,
  * attempting to create an element based off the PreprocessedHTMLElement tagName, and populating some basic state if applicable,
- * such as element type, id, value, etc.
+ * such as element type, id, value, classes, attributes, etc.
  *
  * @param {PreprocessedHTMLElement} props - a preprocessed element that was fed through postMessage() that need to be reified in the primary.
  * @returns {HTMLElement} a reified element, likely a log snapshot, $el, or consoleProp elements.
@@ -97,13 +97,13 @@ const reifyDomElement = (props: any) => {
 }
 
 /**
- * Attempts to take a generic data structure that is log-like and preprocess them for serialization.  * This generic may be/contain properties that are either
+ * Attempts to take a generic data structure that is log-like and preprocess them for serialization. This generic may be/contain properties that are either
  *  a) unserializable entirely
  *  b) unserializable natively but can be processed to a serializable form (DOM elements or Functions)
  *  c) serializable
  *
  * DOM elements are preprocessed via some key properties
- * (attributes, classes, ids, tagName, value) including their innerHTML. Before the innerHTML is captures, `input`s are traversed to set their stateful value
+ * (attributes, classes, ids, tagName, value) including their innerHTML. Before the innerHTML is captured, inputs are traversed to set their stateful value
  * inside the DOM element. This is crucial for body copy snapshots that are being sent to the primary domain to make the snapshot 'stateful'. Functions, if
  * explicitly stated, will be preprocessed with whatever value they return (assuming that value is serializable). If a value cannot be preprocessed for whatever reason,
  * null is returned.
