@@ -1,6 +1,9 @@
 import Module from 'module'
 import path from 'path'
 import type { WebpackDevServerConfig } from '../devServer'
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:webpack:sourceRelativeWebpackModules')
 
 type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
@@ -68,12 +71,19 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
 
   // First, we source the framework, ensuring it's sourced from the user's project and not the
   // Cypress binary. This is the path we use to relative-resolve the
+  // This is generally used for Create React App and Vue CLI and other packages
+  // that ship webpack as a dependency. e.g. your-project/node_modules/react-scripts/node_modules/webpack
+  // SO what we do, is we grab the framework's path, and try and find webpack relative to that framework.
   if (config.framework) {
     try {
       const frameworkJsonPath = require.resolve(`${config.framework}/package.json`, {
         paths: [searchRoot],
       })
+
+      debug('Framework JSON path is %s', frameworkJsonPath)
       const frameworkPathRoot = path.dirname(frameworkJsonPath)
+
+      debug('Framework JSON path root is %s', frameworkPathRoot)
 
       // Want to make sure we're sourcing this from the user's code. Otherwise we can
       // warn and tell them they don't have their dependencies installed
@@ -86,13 +96,17 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
         searchRoot = frameworkPathRoot
       }
     } catch (e) {
+      debug('Error %o', e)
       // TODO
     }
   }
 
   // Webpack:
-
+  // At this point, we know where we're looking for webpack!
+  // We've made accommodations for certain frameworks that bundle it in (e.g. react-scripts)
   let webpackJsonPath: string
+
+  debug('search root is %s', searchRoot)
 
   try {
     webpackJsonPath = require.resolve('webpack/package.json', {
@@ -110,18 +124,26 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
         }),
       ],
     })
+
+    debug('using webpack-batteries-included %s', webpackJsonPath)
   }
 
   result.webpack.importPath = path.dirname(webpackJsonPath)
   result.webpack.packageJson = require(webpackJsonPath)
   result.webpack.module = require(result.webpack.importPath)
-  result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5]);
+  result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
 
-  (Module as ModuleClass)._load = function (request, parent, isMain) {
+  const pathsVal = [path.dirname(result.webpack.importPath)]
+
+  debug('Resolving pathsVal %s', pathsVal)
+
+  ;(Module as ModuleClass)._load = function (request, parent, isMain) {
     if (request === 'webpack' || request.startsWith('webpack/')) {
       const resolvePath = require.resolve(request, {
-        paths: [searchRoot],
+        paths: pathsVal,
       })
+
+      debug('Resolve path %s', resolvePath)
 
       return originalModuleLoad(resolvePath, parent, isMain)
     }
@@ -132,7 +154,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   (Module as ModuleClass)._resolveFilename = function (request, parent, isMain, options) {
     if (request === 'webpack' || request.startsWith('webpack/') && !options?.paths) {
       return originalModuleResolveFilename(request, parent, isMain, {
-        paths: [searchRoot],
+        paths: pathsVal,
       })
     }
 
