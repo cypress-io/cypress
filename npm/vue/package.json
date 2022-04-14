@@ -16,7 +16,7 @@
     "test:ci:ct": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
-    "@cypress/mount-utils": "file:../mount-utils",
+    "@cypress/mount-utils": "*",
     "@vue/test-utils": "2.0.0-rc.19"
   },
   "devDependencies": {
