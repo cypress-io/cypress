@@ -1,10 +1,25 @@
-import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
+import type { Wizard, WizardBundler } from '../generated/test-graphql-types.gen'
 import { CODE_LANGUAGES } from '@packages/types/src/constants'
-import { BUNDLERS, CYPRESS_REACT_LATEST, CYPRESS_WEBPACK, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import * as wizardDeps from '@packages/scaffold-config/src/dependencies'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
 
-export const allBundlers = BUNDLERS.map((bundler, idx) => {
+const testBundlerVite = {
+  type: 'vite',
+  name: 'Vite',
+} as const
+
+const testBundlerWebpack = {
+  type: 'webpack',
+  name: 'Webpack',
+} as const
+
+const testBundlers = [
+  testBundlerWebpack,
+  testBundlerVite,
+] as const
+
+export const allBundlers = testBundlers.map((bundler, idx) => {
   return {
     ...testNodeId('WizardBundler'),
     isSelected: idx === 0,
@@ -13,28 +28,37 @@ export const allBundlers = BUNDLERS.map((bundler, idx) => {
   }
 })
 
+const testFrameworks = [
+  { name: 'Create React App (v5)', type: 'reactscripts', supportedBundlers: [testBundlerWebpack], category: 'framework' },
+  { name: 'Vue.js (v3)', type: 'vue3', supportedBundlers: [testBundlerVite, testBundlerWebpack], category: 'library' },
+] as const
+
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
-  installDependenciesCommand: 'npm install -D @cypress/react @cypress/webpack-dev-server',
+  installDependenciesCommand: `npm install -D ${wizardDeps.WIZARD_DEPENDENCY_REACT_SCRIPTS.package} ${wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT.package}`,
   packagesToInstall: [
     {
-      ...testNodeId('WizardNpmPackage'),
-      ...CYPRESS_REACT_LATEST,
+      __typename: 'WizardNpmPackage',
+      id: 'cra',
+      satisfied: true,
+      ...wizardDeps.WIZARD_DEPENDENCY_REACT_SCRIPTS,
     },
     {
-      ...testNodeId('WizardNpmPackage'),
-      ...CYPRESS_WEBPACK,
+      __typename: 'WizardNpmPackage',
+      id: 'typescript',
+      satisfied: false,
+      detectedVersion: '2.0.1',
+      ...wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT,
     },
   ],
   allBundlers,
-  frameworks: FRONTEND_FRAMEWORKS.map((framework, idx) => {
-    // get around readonly errors
-    const supportedBundlers = framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>
-
+  frameworks: testFrameworks.map(({ name, type, supportedBundlers, category }, idx) => {
     return {
       ...testNodeId('WizardFrontendFramework'),
-      ...framework,
-      supportedBundlers,
+      name,
+      category,
+      type,
+      supportedBundlers: supportedBundlers as unknown as WizardBundler[],
       isSelected: idx === 0,
       isDetected: false,
     }

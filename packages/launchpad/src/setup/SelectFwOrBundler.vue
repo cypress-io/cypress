@@ -61,12 +61,10 @@
 </template>
 
 <script lang="ts">
-
 interface RootOption {
   name: string
   description?: string
   id: string
-  isSelected?: boolean
   isDetected?: boolean
   disabled?: boolean
 }
@@ -130,5 +128,4 @@ const selectOption = (opt) => {
     emit('selectBundler', opt.type)
   }
 }
-
 </script>
