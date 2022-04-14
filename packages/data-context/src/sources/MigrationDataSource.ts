@@ -90,7 +90,7 @@ export class MigrationDataSource {
         }
 
         // TODO(lachlan): is this the right place to use the emitter?
-        this.ctx.deref.emitter.toLaunchpad()
+        this.ctx.emitter.toLaunchpad()
       }
 
       const { status, watcher } = await initComponentTestingMigration(

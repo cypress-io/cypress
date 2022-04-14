@@ -255,7 +255,6 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
-      slowLogThreshold: false,
       description: 'Auth with Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
@@ -276,7 +275,6 @@ export const mutation = mutationType({
 
     t.field('launchOpenProject', {
       type: CurrentProject,
-      slowLogThreshold: false,
       description: 'Launches project from open_project global singleton',
       args: {
         specPath: stringArg(),
@@ -349,7 +347,7 @@ export const mutation = mutationType({
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
 
-        return ctx.appData
+        return {}
       },
     })
 
@@ -556,7 +554,6 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
-      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         await ctx.actions.migration.createConfigFile()
         await ctx.actions.migration.nextStep()
@@ -631,7 +628,7 @@ export const mutation = mutationType({
           await ctx.actions.project.reconfigureProject()
         }
 
-        return true
+        return {}
       },
     })
 
