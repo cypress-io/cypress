@@ -167,4 +167,15 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('#unified-runner').should('have.css', 'width', '333px')
     cy.get('#unified-runner').should('have.css', 'height', '333px')
   })
+
+  it('stops correctly running spec while switching specs', () => {
+    cy.visitApp()
+    cy.contains('withFailure.spec').click()
+    cy.contains('switch spec')
+    cy.contains('withWait.spec').click()
+
+    cy.wait(5000)
+    cy.get('.passed > .num').should('contain', 4)
+    cy.get('.failed > .num').should('not.contain', 1)
+  })
 })

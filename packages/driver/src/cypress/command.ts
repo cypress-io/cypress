@@ -75,7 +75,7 @@ export class $Command {
     return this.attributes
   }
 
-  _removeNonPrimitives (args) {
+  _removeNonPrimitives (args: Array<any> = []) {
     // if the obj has options and
     // log is false, set it to true
     for (let i = args.length - 1; i >= 0; i--) {
