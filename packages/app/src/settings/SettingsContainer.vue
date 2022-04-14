@@ -36,7 +36,7 @@
     </div>
     <hr class="border-gray-100">
     <p class="mx-auto font-light text-center text-gray-500 max-w-500px text-16px leading-24px">
-      {{ t('settingsPage.footer.text') }}
+      {{ footerText }}
     </p>
     <Button
       class="mx-auto group"
@@ -51,6 +51,8 @@
 </template>
 
 <script lang="ts" setup>
+
+import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
@@ -67,6 +69,13 @@ import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
 
 const { t } = useI18n()
+
+const footerText = computed(() => {
+  return t('settingsPage.footer.text',
+    { testingType: props.gql.currentProject?.currentTestingType === 'component'
+      ? 'component'
+      : 'E2E' })
+})
 
 gql`
 fragment SettingsContainer on Query {
