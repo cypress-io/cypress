@@ -231,7 +231,7 @@ export class WizardActions {
 
     return {
       status: 'valid',
-      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress api`,
+      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress API`,
       file: {
         absolute: supportFile,
       },
