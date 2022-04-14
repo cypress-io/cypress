@@ -902,6 +902,7 @@ export default {
     retry_timed_out ({ ms }) {
       return `Timed out retrying after ${ms}ms: `
     },
+    test_stopped: 'Cypress test was stopped while running this command.',
   },
 
   mocha: {

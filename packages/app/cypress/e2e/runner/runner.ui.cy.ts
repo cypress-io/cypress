@@ -290,6 +290,7 @@ describe('src/cypress/runner', () => {
       })
 
       cy.get('.runnable-err-message').should('not.contain', 'ran afterEach even though specs were stopped')
+      cy.get('.runnable-err-message').should('contain', 'Cypress test was stopped while running this command.')
     })
 
     // TODO: blocked by UNIFY-1077
