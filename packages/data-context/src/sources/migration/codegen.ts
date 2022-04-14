@@ -147,7 +147,7 @@ async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot:
 // project's node_modules, we don't want to include
 // defineConfig(/***/) in their cypress.config.js,
 // since it won't exist.
-function defineConfigAvailable (projectRoot: string) {
+export function defineConfigAvailable (projectRoot: string) {
   try {
     const cypress = require.resolve('cypress', {
       paths: [projectRoot],

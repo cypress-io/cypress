@@ -51,7 +51,6 @@ export interface InjectedConfigApi {
 }
 
 export interface ProjectMetaState {
-  hasFrontendFramework: 'nuxt' | 'react' | 'react-scripts' | 'vue' | 'next' | false
   hasTypescript: boolean
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
@@ -62,7 +61,6 @@ export interface ProjectMetaState {
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
-  hasFrontendFramework: false,
   hasTypescript: false,
   hasLegacyCypressJson: false,
   allFoundConfigFiles: [],
@@ -597,13 +595,6 @@ export class ProjectLifecycleManager {
 
       if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
         metaState.hasTypescript = true
-      }
-
-      for (const framework of ['next', 'nuxt', 'react-scripts', 'react', 'vue'] as const) {
-        if (packageJson.dependencies?.[framework] || packageJson.devDependencies?.[framework]) {
-          metaState.hasFrontendFramework = framework
-          break
-        }
       }
     } catch {
       // No need to handle

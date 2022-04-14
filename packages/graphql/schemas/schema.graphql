@@ -697,23 +697,15 @@ type FileParts implements Node {
   relative: String!
 }
 
-enum FrontendFrameworkCategoryEnum {
-  react
-  vue
-}
-
 enum FrontendFrameworkEnum {
-  crav4
-  crav5
   nextjs
   nuxtjs
   react
+  reactscripts
   vue2
   vue3
-  vuecli4vue2
-  vuecli4vue3
-  vuecli5vue2
-  vuecli5vue3
+  vueclivue2
+  vueclivue3
 }
 
 """Error from generated spec"""
@@ -1290,13 +1282,6 @@ type Subscription {
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
-  webpack4
-  webpack5
-}
-
-"""The packages for bundlers that we can use with Cypress"""
-enum SupportedPackage {
-  vite
   webpack
 }
 
@@ -1352,15 +1337,12 @@ type Wizard {
 
   """Command to install required command"""
   installDependenciesCommand: String
-
-  """The list of packages to install that are currently installed"""
-  installedPackages: [String!]
   language: WizardCodeLanguage
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
   """
-  packagesToInstall: [WizardNpmPackage!]
+  packagesToInstall: [WizardNpmPackage!]!
 }
 
 """Wizard bundler"""
@@ -1371,14 +1353,8 @@ type WizardBundler implements Node {
   """Whether this is the detected bundler"""
   isDetected: Boolean!
 
-  """Whether this is the selected framework bundler"""
-  isSelected: Boolean
-
   """Display name of the bundler"""
   name: String!
-
-  """Name of package on npm"""
-  package: SupportedPackage!
 
   """The name of the framework"""
   type: SupportedBundlers!
@@ -1413,8 +1389,8 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
-  """Classification or label of framework. e.g. React, Vue, or Other"""
-  category: FrontendFrameworkCategoryEnum!
+  """The category (framework, like react-scripts, or library, like react"""
+  category: String!
 
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
@@ -1425,26 +1401,40 @@ type WizardFrontendFramework implements Node {
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!
 
-  """The name of the framework"""
+  """The display name of the framework"""
   name: String!
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
 
-  """The name of the framework"""
+  """The unique identifier for a framework or library"""
   type: FrontendFrameworkEnum!
 }
 
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage implements Node {
+  """Short description about the purpose of the package"""
   description: String!
+
+  """Version of the package the user has installed"""
+  detectedVersion: String
 
   """Relay style Node ID field for the WizardNpmPackage field"""
   id: ID!
 
+  """Minimum version of the package that Cypress works with"""
+  minVersion: String!
+
   """The package name that you would npm install"""
   name: String!
+
+  """Name of the package on npm"""
   package: String!
+
+  """
+  If the package is installed, does the version satisfy Cypress minimum requirements
+  """
+  satisfied: Boolean!
 }
 
 input WizardUpdateInput {
