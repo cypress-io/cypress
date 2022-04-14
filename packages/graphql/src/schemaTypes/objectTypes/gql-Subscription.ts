@@ -20,12 +20,12 @@ export const Subscription = subscriptionType({
 
     t.field('cloudViewerChange', {
       type: Query,
-      description: '',
+      description: 'Triggered when there is a change to the info associated with the cloud project (org added, project added)',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('cloudViewerChange'),
       resolve: (source, args, ctx) => {
         return {
           requestPolicy: 'network-only',
-        }
+        } as const
       },
     })
 

@@ -1,6 +1,6 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
-import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
-import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+import type { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
@@ -62,13 +62,13 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: Bundler | null
-  chosenFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
-  chosenLanguage: NexusGenEnums['CodeLanguageEnum']
+  chosenBundler: typeof WIZARD_BUNDLERS[number] | null
+  chosenFramework: typeof WIZARD_FRAMEWORKS[number] | null
+  chosenLanguage: 'js' | 'ts'
   chosenManualInstall: boolean
-  detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
-  detectedBundler: Bundler | null
-  detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
+  detectedLanguage: 'js' | 'ts' | null
+  detectedBundler: typeof WIZARD_BUNDLERS[number] | null
+  detectedFramework: typeof WIZARD_FRAMEWORKS[number] | null
 }
 
 export interface MigrationDataShape {
@@ -138,6 +138,10 @@ export interface CoreDataShape {
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
   cancelActiveLogin: (() => void) | null
+  versionData: {
+    latestVersion: Promise<string>
+    npmMetadata: Promise<Record<string, string>>
+  } | null
 }
 
 /**
@@ -209,5 +213,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     cancelActiveLogin: null,
+    versionData: null,
   }
 }
