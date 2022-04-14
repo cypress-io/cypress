@@ -12,7 +12,7 @@
           />
           {{ titleOn }}
           <i-cy-chevron-down-small_x8
-            v-if="!props.isRunning"
+            v-if="menuItems.length > 0"
             class="h-8px ml-8px w-8px icon-dark-gray-500"
           />
         </MenuButton>
