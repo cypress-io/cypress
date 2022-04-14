@@ -22,24 +22,22 @@ const specStore = useSpecStore()
 const router = useRouter()
 const route = useRoute()
 
-const { initialized, watchSpec } = useUnifiedRunner()
-
 const specs = computed(() => {
   return props.gql.currentProject?.specs ?? []
 })
 
-watchSpec(specs)
+const queryFile = getPathForPlatform(route.query.file as string)
+
+const { initialized } = useUnifiedRunner(specs, queryFile)
 
 specStore.$subscribe((mutation, state) => {
-  const file = getPathForPlatform(route.query.file as string)
-
-  const shouldRedirect = route.name === 'SpecRunner' && file && state.activeSpec === null
+  const shouldRedirect = route.name === 'SpecRunner' && queryFile && state.activeSpec === null
 
   if (shouldRedirect) {
     router.push({
       name: 'Specs',
       params: {
-        unrunnable: file,
+        unrunnable: queryFile,
       },
     })
   }

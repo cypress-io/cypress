@@ -15,14 +15,15 @@ import SpecRunnerRunMode from './SpecRunnerRunMode.vue'
 import type { SpecFile } from '@packages/types/src'
 import { useUnifiedRunner } from './unifiedRunner'
 import { ref } from 'vue'
+import { getPathForPlatform } from '../paths'
+import { useRoute } from 'vue-router'
 
 const props = defineProps<{
   runModeSpecs: SpecFile[]
 }>()
 
 const specStore = useSpecStore()
+const route = useRoute()
 
-const { initialized, watchSpec } = useUnifiedRunner()
-
-watchSpec(ref(props.runModeSpecs))
+const { initialized } = useUnifiedRunner(ref(props.runModeSpecs), getPathForPlatform(route.query.file as string))
 </script>
