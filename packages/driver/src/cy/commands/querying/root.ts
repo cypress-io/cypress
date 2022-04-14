@@ -1,7 +1,8 @@
 import _ from 'lodash'
+import type { Log } from '../../../cypress/log'
 
 interface InternalRootOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {
@@ -18,7 +19,7 @@ export default (Commands, Cypress, cy, state) => {
 
       const log = ($el) => {
         if (options.log) {
-          options._log.set({ $el })
+          options._log!.set({ $el })
         }
 
         return $el

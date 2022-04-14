@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { LogUtils } from '../../cypress/log'
+import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
 
@@ -411,7 +411,7 @@ type InvalidContentTypeError = Error & {
 }
 
 interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -974,13 +974,13 @@ export default (Commands, Cypress, cy, state, config) => {
           }
 
           if (options.log) {
-            let message = options._log.get('message')
+            let message = options._log!.get('message')
 
             if (redirects && redirects.length) {
               message = [message].concat(redirects).join(' -> ')
             }
 
-            options._log.set({ message })
+            options._log!.set({ message })
           }
 
           consoleProps['Resolved Url'] = url

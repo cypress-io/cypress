@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import $utils from '../../cypress/utils'
+import type { Log } from '../../cypress/log'
 
 const resume = (state, resumeAll = true) => {
   const onResume = state('onResume')
@@ -33,11 +34,11 @@ const getNextQueuedCommand = (state, queue) => {
 }
 
 interface InternalPauseOptions extends Partial<Cypress.Loggable> {
-  _log?: any
+  _log?: Log
 }
 
 interface InternalDebugOptions extends Partial<Cypress.Loggable> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -78,7 +79,7 @@ export default (Commands, Cypress, cy, state, config) => {
             state('onPaused', null)
 
             if (options.log) {
-              options._log.end()
+              options._log!.end()
             }
           }
 

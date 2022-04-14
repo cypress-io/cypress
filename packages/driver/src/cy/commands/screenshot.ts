@@ -8,6 +8,7 @@ import $Screenshot from '../../cypress/screenshot'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
+import type { Log } from '../../cypress/log'
 
 const getViewportHeight = (state) => {
   // TODO this doesn't seem correct
@@ -411,7 +412,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
 }
 
 interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
-  _log?: any
+  _log?: Log
 }
 
 export default function (Commands, Cypress, cy, state, config) {

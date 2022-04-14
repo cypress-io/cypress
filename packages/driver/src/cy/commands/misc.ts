@@ -4,9 +4,10 @@ import Promise from 'bluebird'
 import $Command from '../../cypress/command'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   timeout: number
 }
 
@@ -70,7 +71,7 @@ export default (Commands, Cypress, cy, state) => {
         })
 
         if ($dom.isElement(arg)) {
-          options._log.set({ $el: arg })
+          options._log!.set({ $el: arg })
         }
       }
 

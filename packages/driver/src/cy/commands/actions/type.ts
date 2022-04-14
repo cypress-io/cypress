@@ -8,11 +8,13 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
+import type { Log } from '../../../cypress/log'
+
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
 
 interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
-  _log?: any
+  _log?: Log
   $el: JQuery
   ensure?: object
   verify: boolean
@@ -20,7 +22,7 @@ interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
 }
 
 interface InternalClearOptions extends Partial<Cypress.ClearOptions> {
-  _log?: any
+  _log?: Log
   ensure?: object
 }
 
@@ -118,7 +120,7 @@ export default function (Commands, Cypress, cy, state, config) {
         },
       })
 
-      options._log.snapshot('before', { next: 'after' })
+      options._log!.snapshot('before', { next: 'after' })
     }
 
     if (options.$el.length > 1) {

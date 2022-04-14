@@ -5,11 +5,12 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import type { Log } from '../../../cypress/log'
 
 const newLineRe = /\n/g
 
 interface InternalSelectOptions extends Partial<Cypress.SelectOptions> {
-  _log?: any
+  _log?: Log
   $el: JQuery<HTMLSelectElement>
   error?: any
 }
@@ -58,7 +59,7 @@ export default (Commands, Cypress, cy) => {
           },
         })
 
-        options._log.snapshot('before', { next: 'after' })
+        options._log!.snapshot('before', { next: 'after' })
       }
 
       let node

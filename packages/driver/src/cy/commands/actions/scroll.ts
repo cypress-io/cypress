@@ -5,6 +5,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
+import type { Log } from '../../../cypress/log'
 
 const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)
@@ -29,7 +30,7 @@ const isNaNOrInfinity = (item) => {
 }
 
 interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
-  _log?: any
+  _log?: Log
   $el: JQuery
   $parent: any
   axis: string
@@ -37,7 +38,7 @@ interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions>
 }
 
 interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
-  _log?: any
+  _log?: Log
   $el: any
   x: number
   y: number

@@ -2,9 +2,10 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
+import type { Log } from '../../../cypress/log'
 
 interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
-  _log?: any
+  _log?: Log
   verify: boolean
 }
 
@@ -25,7 +26,7 @@ export default (Commands, Cypress, cy, state) => {
           return
         }
 
-        options._log.set({
+        options._log!.set({
           $el,
           consoleProps () {
             const ret = $el ? $dom.getElements($el) : '--nothing--'

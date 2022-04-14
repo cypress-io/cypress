@@ -219,7 +219,7 @@ const defaults = function (state, config, obj) {
   return obj
 }
 
-class Log {
+export class Log {
   cy: any
   state: any
   config: any

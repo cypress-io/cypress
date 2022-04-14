@@ -2,9 +2,10 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
-  _log?: any
+  _log?: Log
   cmd?: string
 }
 

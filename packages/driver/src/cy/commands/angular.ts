@@ -3,11 +3,12 @@ import $ from 'jquery'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 const ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
 interface InternalNgOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {

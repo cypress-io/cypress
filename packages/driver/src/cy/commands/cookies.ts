@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS
@@ -79,17 +80,17 @@ function cookieValidatesSecurePrefix (options) {
 }
 
 interface InternalGetCookieOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   cookie?: any
 }
 
 interface InternalGetCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   cookies?: any
 }
 
 interface InternalSetCookieOptions extends Partial<Cypress.SetCookieOptions> {
-  _log?: any
+  _log?: Log
   name: string
   cookie?: any
 }
@@ -97,7 +98,7 @@ interface InternalSetCookieOptions extends Partial<Cypress.SetCookieOptions> {
 type InternalClearCookieOptions = InternalGetCookieOptions
 
 interface InternalClearCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   cookies?: any
   domain?: any
 }

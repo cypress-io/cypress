@@ -4,11 +4,12 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
+import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 
 interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> {
-  _log?: any
+  _log?: Log
   _retries?: number
   filter?: any
   onRetry?: Function
@@ -16,7 +17,7 @@ interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeouta
 }
 
 interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {
@@ -110,7 +111,7 @@ export default (Commands, Cypress, cy, state) => {
           return consoleProps
         }
 
-        options._log.set(obj)
+        options._log!.set(obj)
       }
 
       let allParts
@@ -273,7 +274,7 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
-        options._log.set({ $el })
+        options._log!.set({ $el })
       }
 
       const getElements = () => {
@@ -305,7 +306,7 @@ export default (Commands, Cypress, cy, state) => {
               return err
             }
 
-            options._log.error(err)
+            options._log!.error(err)
           }
 
           throw err
@@ -466,7 +467,7 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
-        options._log.set({ $el })
+        options._log!.set({ $el })
       }
 
       // find elements by the :cy-contains psuedo selector

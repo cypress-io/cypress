@@ -2,14 +2,15 @@ import _ from 'lodash'
 import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   encoding: Cypress.Encodings
 }
 
 interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {

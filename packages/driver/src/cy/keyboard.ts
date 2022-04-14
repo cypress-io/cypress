@@ -12,6 +12,7 @@ import type { HTMLTextLikeElement } from '../dom/elements'
 import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
+import type { Log } from '../cypress/log'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -680,7 +681,7 @@ export interface typeOptions {
   force?: boolean
   simulated?: boolean
   release?: boolean
-  _log?: any
+  _log?: Log
   delay?: number
   onError?: Function
   onEvent?: Function

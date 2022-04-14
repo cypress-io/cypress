@@ -5,9 +5,10 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
+import type { Log } from '../../../cypress/log'
 
 interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
-  _log?: any
+  _log?: Log
   $el: JQuery<HTMLFormElement>
 }
 
@@ -37,7 +38,7 @@ export default (Commands, Cypress, cy) => {
           },
         })
 
-        options._log.snapshot('before', { next: 'after' })
+        options._log!.snapshot('before', { next: 'after' })
       }
 
       if (!options.$el.is('form')) {

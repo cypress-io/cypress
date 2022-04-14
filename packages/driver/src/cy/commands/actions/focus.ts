@@ -4,16 +4,17 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import type { Log } from '../../../cypress/log'
 
 interface InternalFocusOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   $el: JQuery
   error: boolean
   verify: boolean
 }
 
 interface InternalBlurOptions extends Partial<Cypress.BlurOptions> {
-  _log?: any
+  _log?: Log
   $el: JQuery
   $focused: JQuery
   error: boolean

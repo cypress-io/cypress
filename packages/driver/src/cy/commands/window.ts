@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 const viewports = {
   'macbook-16': '1536x960',
@@ -36,21 +37,21 @@ type CurrentViewport = Pick<Cypress.Config, 'viewportWidth' | 'viewportHeight'>
 let currentViewport: CurrentViewport | null = null
 
 interface InternalTitleOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
 }
 
 interface InternalWindowOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   error?: any
 }
 
 interface InternalDocumentOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: any
+  _log?: Log
   error?: any
 }
 
 interface InternalViewportOptions extends Partial<Cypress.Loggable> {
-  _log?: any
+  _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {
