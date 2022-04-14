@@ -73,7 +73,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * a re-query of data on the frontend
    */
   toApp (...args: any[]) {
-    this.ctx.coreData.servers.appSocketServer?.emit('data-context-push', ...args)
+    this.ctx.coreData.servers.appSocketServer?.emit('graphql-refresh')
   }
 
   /**
@@ -81,7 +81,21 @@ export class DataEmitterActions extends DataEmitterEvents {
    * typically used to trigger a re-query of data on the frontend
    */
   toLaunchpad (...args: any[]) {
-    this.ctx.coreData.servers.gqlSocketServer?.emit('data-context-push', ...args)
+    this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refresh')
+  }
+
+  /**
+   * Notifies the client to refetch a specific query, fired when we hit a remote data
+   * source, and respond with the data before the initial hit was able to resolve
+   */
+  notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
+    const server = target === 'app' ? this.ctx.coreData.servers.appSocketServer : this.ctx.coreData.servers.gqlSocketServer
+
+    server?.emit('graphql-refresh', {
+      field,
+      operation,
+      variables,
+    })
   }
 
   /**

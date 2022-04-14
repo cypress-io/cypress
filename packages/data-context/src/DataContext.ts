@@ -23,19 +23,18 @@ import {
   StorybookDataSource,
   CloudDataSource,
   EnvDataSource,
-  GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
   BrowserApiShape,
   MigrationDataSource,
 } from './sources/'
 import { cached } from './util/cached'
-import type { GraphQLSchema } from 'graphql'
-import type { Server } from 'http'
+import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
+import type { IncomingHttpHeaders, Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { Socket, SocketIOServer } from '@packages/socket'
+import type { SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
@@ -69,7 +68,17 @@ export interface DataContextConfig {
   browserApi: BrowserApiShape
 }
 
+export interface GraphQLRequestInfo {
+  app: 'app' | 'launchpad'
+  operationName: string | null
+  document: DocumentNode
+  operation: OperationTypeNode
+  variables: Record<string, any> | null
+  headers: IncomingHttpHeaders
+}
+
 export class DataContext {
+  readonly graphqlRequestInfo?: GraphQLRequestInfo
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
@@ -194,10 +203,6 @@ export class DataContext {
     return new DataEmitterActions(this)
   }
 
-  graphqlClient () {
-    return new GraphQLDataSource(this, this._config.schema)
-  }
-
   @cached
   get html () {
     return new HtmlDataSource(this)
@@ -232,11 +237,7 @@ export class DataContext {
 
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
-      if (d.servers.appSocketServer !== socketServer) {
-        d.servers.appSocketServer?.off('connection', this.initialPush)
-        socketServer?.on('connection', this.initialPush)
-      }
-
+      d.servers.appSocketServer?.disconnectSockets(true)
       d.servers.appSocketServer = socketServer
     })
   }
@@ -250,21 +251,9 @@ export class DataContext {
 
   setGqlSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
-      if (d.servers.gqlSocketServer !== socketServer) {
-        d.servers.gqlSocketServer?.off('connection', this.initialPush)
-        socketServer?.on('connection', this.initialPush)
-      }
-
+      d.servers.gqlSocketServer?.disconnectSockets(true)
       d.servers.gqlSocketServer = socketServer
     })
-  }
-
-  initialPush = (socket: Socket) => {
-    // TODO: This is a hack that will go away when we refine the whole socket communication
-    // layer w/ GraphQL subscriptions, we shouldn't be pushing so much
-    setTimeout(() => {
-      socket.emit('data-context-push')
-    }, 100)
   }
 
   /**
@@ -369,16 +358,6 @@ export class DataContext {
     }
   }
 
-  /**
-   * If we really want to get around the guards added in proxyContext
-   * which disallow referencing ctx.actions / ctx.emitter from context for a GraphQL query,
-   * we can call ctx.deref.emitter, etc. This should only be used in exceptional situations where
-   * we're certain this is a good idea.
-   */
-  get deref () {
-    return this
-  }
-
   async destroy () {
     const destroy = util.promisify(this.coreData.servers.gqlServer?.destroy || (() => {}))
 
@@ -441,10 +420,14 @@ export class DataContext {
       this.actions.dev.watchForRelaunch()
     }
 
+    // We want to fetch the user immediately, but we don't need to block the UI on this
+    this.actions.auth.getUser().catch((e) => {
+      // This error should never happen, since it's internally handled by getUser
+      // Log anyway, just incase
+      this.logTraceError(e)
+    })
+
     const toAwait: Promise<any>[] = [
-      // load the cached user & validate the token on start
-      this.actions.auth.getUser(),
-      // and grab the user device settings
       this.actions.localSettings.refreshLocalSettings(),
     ]
 

@@ -107,18 +107,18 @@
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
-            v-if="!!props.gql?.cloudViewer"
+            v-if="userData"
             #login-title
           >
             <UserAvatar
-              :email="email"
+              :email="userData?.email"
               class="h-24px w-24px"
               data-cy="user-avatar-title"
             />
             <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
           <template
-            v-if="!!props.gql?.cloudViewer"
+            v-if="userData"
             #login-panel
           >
             <div
@@ -127,14 +127,14 @@
             >
               <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
-                  :email="email"
+                  :email="userData?.email"
                   class="h-48px mr-16px w-48px"
                   data-cy="user-avatar-panel"
                 />
                 <div>
-                  <span class="text-gray-800">{{ props.gql?.cloudViewer?.fullName }}</span>
+                  <span class="text-gray-800">{{ userData?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ props.gql?.cloudViewer?.email }}</span>
+                  <span class="text-gray-600">{{ userData?.email }}</span>
                   <br>
                   <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
@@ -153,7 +153,7 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!props.gql?.cloudViewer">
+        <div v-if="!userData">
           <button
             class="flex text-gray-600 items-center group focus:outline-transparent"
             @click="openLogin"
@@ -179,7 +179,6 @@ import { ref, computed } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
   GlobalPageHeader_ClearCurrentProjectDocument,
-  GlobalPageHeader_ClearCurrentTestingTypeDocument,
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
@@ -193,9 +192,25 @@ import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
 
 gql`
+fragment HeaderBarContent_Auth on Query {
+  cloudViewer {
+    id
+    fullName
+    email
+  }
+  cachedUser {
+    id
+    fullName
+    email
+  }
+}
+`
+
+gql`
 subscription HeaderBarContent_authChange {
   authChange {
     ...Auth
+    ...HeaderBarContent_Auth
   }
 }
 `
@@ -237,8 +252,13 @@ fragment HeaderBar_HeaderBarContent on Query {
   projectRootFromCI
   ...TopNav
   ...Auth
+  ...HeaderBarContent_Auth
 }
 `
+
+const userData = computed(() => {
+  return props.gql.cloudViewer ?? props.gql.cachedUser
+})
 
 const savedState = computed(() => {
   return props.gql?.currentProject?.savedState
@@ -257,8 +277,6 @@ const hasLinkToCurrentProject = computed(() => {
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
-const clearCurrentTestingTypeMutation = useMutation(GlobalPageHeader_ClearCurrentTestingTypeDocument)
-const email = computed(() => props.gql.cloudViewer?.email || undefined)
 
 const openLogin = () => {
   isLoginOpen.value = true
