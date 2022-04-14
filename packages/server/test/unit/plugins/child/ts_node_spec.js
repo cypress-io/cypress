@@ -1,27 +1,44 @@
 require('../../../spec_helper')
 
 const tsnode = require('ts-node')
+const typescriptObject = require('typescript/lib/typescript.js')
 
-const resolve = require(`${root}../../lib/util/resolve`)
+const resolve = require(`../../../../lib/util/resolve`)
 
-const tsNodeUtil = require(`${root}../../lib/util/ts_node`)
+const tsNodeUtil = require('../../../../lib/plugins/child/ts_node')
 
-describe('lib/util/ts_node', () => {
+describe('lib/plugins/child/ts_node', () => {
   beforeEach(() => {
     sinon.stub(tsnode, 'register')
-    sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
+    sinon.stub(resolve, 'typescript').returns('typescript/lib/typescript.js')
   })
 
   describe('typescript registration', () => {
     it('registers ts-node if typescript is installed', () => {
+      sinon.stub(typescriptObject, 'version').value('1.1.1')
       tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')
 
       expect(tsnode.register).to.be.calledWith({
         transpileOnly: true,
-        compiler: '/path/to/typescript.js',
+        compiler: 'typescript/lib/typescript.js',
         dir: '/path/to/plugins',
         compilerOptions: {
-          module: 'CommonJS',
+          module: 'commonjs',
+        },
+      })
+    })
+
+    it('registers ts-node with preserveValueImports if typescript 4.5.0 is installed', () => {
+      sinon.stub(typescriptObject, 'version').value('4.5.0')
+      tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')
+
+      expect(tsnode.register).to.be.calledWith({
+        transpileOnly: true,
+        compiler: 'typescript/lib/typescript.js',
+        dir: '/path/to/plugins',
+        compilerOptions: {
+          module: 'commonjs',
+          preserveValueImports: false,
         },
       })
     })

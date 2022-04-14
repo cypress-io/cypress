@@ -69,7 +69,7 @@ describe('e2e web security', () => {
 
   context('when enabled', () => {
     systemTests.it('fails', {
-      spec: 'web_security_spec.js',
+      spec: 'web_security.cy.js',
       snapshot: true,
       expectedExitCode: 4,
     })
@@ -77,7 +77,7 @@ describe('e2e web security', () => {
 
   context('when disabled', () => {
     systemTests.it('passes', {
-      spec: 'web_security_spec.js',
+      spec: 'web_security.cy.js',
       config: {
         chromeWebSecurity: false,
       },
@@ -88,7 +88,7 @@ describe('e2e web security', () => {
 
   context('firefox', () => {
     systemTests.it('displays warning when firefox and chromeWebSecurity:false', {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       snapshot: true,
       browser: 'firefox',
       config: {

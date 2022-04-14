@@ -8,7 +8,7 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (beforehook-and-test-navigation.js)                                        │
-  │ Searched:   cypress/integration/beforehook-and-test-navigation.js                              │
+  │ Searched:   cypress/e2e/beforehook-and-test-navigation.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -128,7 +128,7 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (runnable-run-count.spec.js)                                               │
-  │ Searched:   cypress/integration/runnable-run-count.spec.js                                     │
+  │ Searched:   cypress/e2e/runnable-run-count.spec.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -199,7 +199,7 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (runnables_already_run_suite.js)                                           │
-  │ Searched:   cypress/integration/runnables_already_run_suite.js                                 │
+  │ Searched:   cypress/e2e/runnables_already_run_suite.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -8,7 +8,7 @@ describe('e2e issue 8111 iframe input focus', function () {
     // and also having --auto-open-devtools-for-tabs plugins option
     // (which pulls focus from main browser window)
     project: 'issue-8111-iframe-input',
-    spec: 'iframe_input_spec.js',
+    spec: 'iframe_input.cy.js',
     browser: 'chrome',
     headed: true,
   })

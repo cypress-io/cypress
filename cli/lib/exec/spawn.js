@@ -171,8 +171,13 @@ module.exports = {
           args.unshift(startScriptPath)
         }
 
+        if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
+          args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
+        }
+
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
         debug('spawning Cypress with executable: %s', executable)
+
         const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event) {

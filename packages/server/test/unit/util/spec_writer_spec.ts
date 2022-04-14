@@ -5,7 +5,7 @@ import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import { expect } from 'chai'
 
-import Fixtures from '@tooling/system-tests/lib/fixtures'
+import Fixtures from '@tooling/system-tests'
 import { fs } from '../../../lib/util/fs'
 import {
   generateCypressCommand,
@@ -47,9 +47,9 @@ describe('lib/util/spec_writer', () => {
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
     Fixtures.scaffold()
-    mockSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/integration/unwritten.spec.js'))
-    emptyCommentsSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/integration/empty-comments.spec.js'))
-    writtenSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/integration/written.spec.js'))
+    mockSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/e2e/unwritten.spec.js'))
+    emptyCommentsSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/e2e/empty-comments.spec.js'))
+    writtenSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/e2e/written.spec.js'))
 
     readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
@@ -457,7 +457,7 @@ describe('lib/util/spec_writer', () => {
 
   describe('#createFile', () => {
     it('creates a new file with templated comments', () => {
-      return createFile('/path/to/project/cypress/integration/my_new_spec.js')
+      return createFile('/path/to/project/cypress/e2e/my_new_spec.js')
     })
   })
 

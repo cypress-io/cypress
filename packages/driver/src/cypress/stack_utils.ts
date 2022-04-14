@@ -6,11 +6,13 @@ import { codeFrameColumns } from '@babel/code-frame'
 
 import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
+
+// Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
 import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
-const customProtocolRegex = /^[^:\/]+:\/+/
+const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -316,7 +318,7 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     fileUrl: generatedDetails.file,
     originalFile,
     relativeFile,
-    absoluteFile: (relativeFile && projectRoot) ? path.join(projectRoot, relativeFile) : undefined,
+    absoluteFile: (relativeFile && projectRoot) ? path.resolve(projectRoot, relativeFile) : undefined,
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,

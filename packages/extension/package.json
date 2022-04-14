@@ -7,7 +7,7 @@
     "build": "gulp build",
     "build-prod": "yarn build",
     "clean": "gulp clean",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -20,7 +20,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@cypress/icons": "0.7.0",
+    "@packages/icons": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "chai": "3.5.0",
     "coffeescript": "1.12.7",

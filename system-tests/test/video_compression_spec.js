@@ -40,7 +40,7 @@ describe('e2e video compression', () => {
     systemTests.it(`passes (head${headed ? 'ed' : 'less'})`, {
       // videos are corrupted in firefox due to known issues
       browser: '!firefox',
-      spec: 'video_compression_spec.js',
+      spec: 'video_compression.cy.js',
       snapshot: false,
       headed,
       config: {

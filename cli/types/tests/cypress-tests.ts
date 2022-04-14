@@ -33,9 +33,11 @@ namespace CypressConfigTests {
   Cypress.config().baseUrl // $ExpectType string | null
 
   // setters
-  Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config('baseUrl', null) // $ExpectType void
-  Cypress.config({ baseUrl: '.', }) // $ExpectType void
+  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectType void
+  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectType void
+  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectType void
+  Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
+  Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
@@ -798,7 +800,6 @@ namespace CypressTestConfigOverridesTests {
   // set config on a per-test basis
   it('test', {
     animationDistanceThreshold: 10,
-    baseUrl: 'www.foobar.com',
     defaultCommandTimeout: 6000,
     env: {},
     execTimeout: 6000,
@@ -859,7 +860,6 @@ namespace CypressTestConfigOverridesTests {
   // set config on a per-suite basis
   describe('suite', {
     browser: {family: 'firefox'},
-    baseUrl: 'www.example.com',
     keystrokeDelay: 0
   }, () => {})
 
@@ -867,7 +867,6 @@ namespace CypressTestConfigOverridesTests {
 
   describe('suite', {
     browser: {family: 'firefox'},
-    baseUrl: 'www.example.com',
     keystrokeDelay: false // $ExpectError
     foo: 'foo' // $ExpectError
   }, () => {})

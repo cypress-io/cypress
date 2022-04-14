@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "react": "17.0.2"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0"
+  },
+  "_cySkipDepInstall": true
+}

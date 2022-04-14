@@ -119,7 +119,7 @@ describe('e2e subdomain', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'subdomain_spec.js',
+    spec: 'subdomain.cy.js',
     snapshot: true,
     config: {
       hosts: {

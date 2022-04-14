@@ -7,14 +7,14 @@ exports['e2e issue 1669 passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_1669_spec.js)                                                       │
-  │ Searched:   cypress/integration/issue_1669_spec.js                                             │
+  │ Specs:      1 found (issue_1669.cy.js)                                                         │
+  │ Searched:   cypress/e2e/issue_1669.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  issue_1669_spec.js                                                              (1 of 1)
+  Running:  issue_1669.cy.js                                                                (1 of 1)
 
 
   issue-1669 undefined err.stack in beforeEach hook
@@ -45,21 +45,21 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     issue_1669_spec.js                                                               │
+  │ Spec Ran:     issue_1669.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_1669_spec.js/issue-1669 undefined err.sta     (1280x720)
-     ck in beforeEach hook -- cy.setCookie should fail with correct error -- before e               
-     ach hook (failed).png                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_1669.cy.js/issue-1669 undefined err.stack     (1280x720)
+      in beforeEach hook -- cy.setCookie should fail with correct error -- before eac               
+     h hook (failed).png                                                                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_1669_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_1669.cy.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -69,7 +69,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  issue_1669_spec.js                       XX:XX        1        -        1        -        - │
+  │ ✖  issue_1669.cy.js                         XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 

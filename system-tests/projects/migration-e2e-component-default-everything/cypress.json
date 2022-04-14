@@ -1,0 +1,9 @@
+{
+  "viewportWidth": 1200,
+  "e2e": {
+    "viewportWidth": 1600
+  },
+  "component": {
+    "viewportWidth": 400
+  }
+}

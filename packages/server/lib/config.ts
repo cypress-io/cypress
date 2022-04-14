@@ -1,34 +1,22 @@
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
-import configUtils from '@packages/config'
-import errors from './errors'
-import scaffold from './scaffold'
+import type { ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
+import * as configUtils from '@packages/config'
+import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
 import pathHelpers from './util/path_helpers'
-import * as settings from './util/settings'
 
-import type { ConfigValidationError } from '@packages/errors'
+import type { ConfigValidationFailureInfo } from '@packages/errors'
+
+import { getCtx } from './makeDataContext'
 
 const debug = Debug('cypress:server:config')
-
-export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
-
-export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
-
-export type ResolvedFromConfig = {
-  from: ResolvedConfigurationOptionSource
-  value: ResolvedConfigurationOptionSource
-}
-
-export type ResolvedConfigurationOptions = Partial<{
-  [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
-}>
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -45,18 +33,6 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
   , {})
 }
 
-const validateFile = (file) => {
-  return (settings) => {
-    return configUtils.validate(settings, (validationResult: ConfigValidationError | string) => {
-      if (_.isString(validationResult)) {
-        return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file, validationResult)
-      }
-
-      return errors.throw('CONFIG_VALIDATION_ERROR', 'configFile', file, validationResult)
-    })
-  }
-}
-
 const hideSpecialVals = function (val, key) {
   if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
     return keys.hide(val)
@@ -71,59 +47,26 @@ export const utils = {
     return require.resolve(name)
   },
 
-  // tries to find support or plugins file
   // returns:
   //   false - if the file should not be set
   //   string - found filename
   //   null - if there is an error finding the file
   discoverModuleFile (options) {
     debug('discover module file %o', options)
-    const { filename, isDefault } = options
+    const { filename } = options
 
-    if (!isDefault) {
-      // they have it explicitly set, so it should be there
-      return fs.pathExists(filename)
-      .then((found) => {
-        if (found) {
-          debug('file exists, assuming it will load')
-
-          return filename
-        }
-
-        debug('could not find %o', { filename })
-
-        return null
-      })
-    }
-
-    // support or plugins file doesn't exist on disk?
-    debug(`support file is default, check if ${path.dirname(filename)} exists`)
-
+    // they have it explicitly set, so it should be there
     return fs.pathExists(filename)
     .then((found) => {
       if (found) {
-        debug('is there index.ts in the support or plugins folder %o?', { filename })
-        const tsFilename = path.join(filename, 'index.ts')
+        debug('file exists, assuming it will load')
 
-        return fs.pathExists(tsFilename)
-        .then((foundTsFile) => {
-          if (foundTsFile) {
-            debug('found index TS file %o', { tsFilename })
-
-            return tsFilename
-          }
-
-          // if the directory exists, set it to false so it's ignored
-          debug('setting support or plugins file to false')
-
-          return false
-        })
+        return filename
       }
 
-      debug('folder does not exist, set to default index.js')
+      debug('could not find %o', { filename })
 
-      // otherwise, set it up to be scaffolded later
-      return path.join(filename, 'index.js')
+      return null
     })
   },
 }
@@ -135,25 +78,9 @@ export function isValidCypressInternalEnvValue (value) {
   return _.includes(names, value)
 }
 
-export function get (projectRoot, options = {}) {
-  return Promise.all([
-    settings.read(projectRoot, options).then(validateFile('cypress.json')),
-    settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-  ])
-  .spread((settings, envFile) => {
-    return set({
-      projectName: getNameFromRoot(projectRoot),
-      projectRoot,
-      config: _.cloneDeep(settings),
-      envFile: _.cloneDeep(envFile),
-      options,
-    })
-  })
-}
-
-export function set (obj: Record<string, any> = {}) {
-  debug('setting config object')
-  let { projectRoot, projectName, config, envFile, options } = obj
+export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
+  debug('setting config object %o', obj)
+  let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
   // just force config to be an object so we dont have to do as much
   // work in our tests
@@ -168,10 +95,14 @@ export function set (obj: Record<string, any> = {}) {
   config.projectRoot = projectRoot
   config.projectName = projectName
 
-  return mergeDefaults(config, options)
+  return mergeDefaults(config, options, cliConfig)
 }
 
-export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}) {
+export function mergeDefaults (
+  config: Record<string, any> = {},
+  options: Record<string, any> = {},
+  cliConfig: Record<string, any> = {},
+) {
   const resolved = {}
 
   config.rawJson = _.cloneDeep(config)
@@ -180,12 +111,22 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(configUtils.allowed(options))
+  .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
-  .each((val, key) => {
-    resolved[key] = 'cli'
-    config[key] = val
+  .each((val: any, key) => {
+    // If users pass in testing-type specific keys (eg, specPattern),
+    // we want to merge this with what we've read from the config file,
+    // rather than override it entirely.
+    if (typeof config[key] === 'object' && typeof val === 'object') {
+      if (Object.keys(val).length) {
+        resolved[key] = 'cli'
+        config[key] = { ...config[key], ...val }
+      }
+    } else {
+      resolved[key] = 'cli'
+      config[key] = val
+    }
   }).value()
 
   let url = config.baseUrl
@@ -201,14 +142,22 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   _.defaultsDeep(config, defaultsForRuntime)
 
+  let additionalIgnorePattern = config.additionalIgnorePattern
+
+  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+    additionalIgnorePattern = config.e2e.specPattern
+  }
+
+  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+
   // split out our own app wide env from user env variables
   // and delete envFile
-  config.env = parseEnv(config, options.env, resolved)
+  config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
 
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.throwErr('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -229,28 +178,37 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config = setUrls(config)
   }
 
-  config = setAbsolutePaths(config)
-
-  config = setParentTestsPaths(config)
-
-  config = setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
-
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationError | string) => {
-    // return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
+    // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
     if (_.isString(validationResult)) {
-      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', null, null, validationResult)
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   })
 
-  configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
+  config = setAbsolutePaths(config)
 
-  return setSupportFileAndFolder(config, defaultsForRuntime)
-  .then((obj) => setPluginsFile(obj, defaultsForRuntime))
-  .then(setScaffoldPaths)
+  config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
+
+  debug('validate that there is no breaking config options before setupNodeEvents')
+
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
+    throw errors.get(err, ...args)
+  })
+
+  // We need to remove the nested propertied by testing type because it has been
+  // flattened/compacted based on the current testing type that is selected
+  // making the config only available with the properties that are valid,
+  // also, having the correct values that can be used in the setupNodeEvents
+  delete config['e2e']
+  delete config['component']
+  delete config['resolved']['e2e']
+  delete config['resolved']['component']
+
+  return setSupportFileAndFolder(config)
 }
 
 export function setResolvedConfigValues (config, defaults, resolved) {
@@ -291,26 +249,34 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configUtils.validate(overrides, (validationResult: ConfigValidationError | string) => {
-    const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+  configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
+    let configFile = getCtx().lifecycleManager.configFile
 
     if (_.isString(validationResult)) {
-      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', relativePluginsPath, validationResult)
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, validationResult)
-    // return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
   })
 
-  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
+  debug('validate that there is no breaking config options added by setupNodeEvents')
 
-  if (!originalResolvedBrowsers) {
-    // have something to resolve with if plugins return nothing
-    originalResolvedBrowsers = {
-      value: cfg.browsers,
-      from: 'default',
-    } as ResolvedFromConfig
-  }
+  configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
+    throw errors.get(err, options)
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.e2e, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `e2e.${options.name}` })
+  })
+
+  configUtils.validateNoBreakingConfig(overrides.component, errors.warning, (err, options) => {
+    throw errors.get(err, { ...options, name: `component.${options.name}` })
+  })
+
+  const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
+    value: cfg.browsers,
+    from: 'default',
+  } as ResolvedFromConfig
 
   const diffs = deepDiff(cfg, overrides, true)
 
@@ -360,7 +326,7 @@ export function updateWithPluginValues (cfg, overrides) {
 }
 
 // combines the default configuration object with values specified in the
-// configuration file like "cypress.json". Values in configuration file
+// configuration file like "cypress.{ts|js}". Values in configuration file
 // overwrite the defaults.
 export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
@@ -411,35 +377,48 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
   return obj
 }
 
-export function setScaffoldPaths (obj) {
-  obj = _.clone(obj)
+export function relativeToProjectRoot (projectRoot: string, file: string) {
+  if (!file.startsWith(projectRoot)) {
+    return file
+  }
 
-  debug('set scaffold paths')
+  // captures leading slash(es), both forward slash and back slash
+  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
 
-  return scaffold.fileTree(obj)
-  .then((fileTree) => {
-    debug('got file tree')
-    obj.scaffoldedFiles = fileTree
-
-    return obj
-  })
+  return file.replace(projectRoot, '').replace(leadingSlashRe, '')
 }
 
 // async function
-export function setSupportFileAndFolder (obj, defaults) {
+export async function setSupportFileAndFolder (obj) {
   if (!obj.supportFile) {
-    return Promise.resolve(obj)
+    return Bluebird.resolve(obj)
   }
 
   obj = _.clone(obj)
 
+  const ctx = getCtx()
+
+  const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile, { absolute: false })
+
+  if (supportFilesByGlob.length > 1) {
+    return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob)
+  }
+
+  if (supportFilesByGlob.length === 0) {
+    if (obj.resolved.supportFile.from === 'default') {
+      return errors.throwErr('DEFAULT_SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
+    }
+
+    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
+  }
+
   // TODO move this logic to find support file into util/path_helpers
-  const sf = obj.supportFile
+  const sf = supportFilesByGlob[0]
 
   debug(`setting support file ${sf}`)
   debug(`for project root ${obj.projectRoot}`)
 
-  return Promise
+  return Bluebird
   .try(() => {
     // resolve full path with extension
     obj.supportFile = utils.resolveModule(sf)
@@ -455,12 +434,15 @@ export function setSupportFileAndFolder (obj, defaults) {
     // /tmp/foo -> /private/tmp/foo
     // which can confuse the rest of the code
     // switch it back to "normal" file
-    obj.supportFile = path.join(sf, path.basename(obj.supportFile))
+    const supportFileName = path.basename(obj.supportFile)
+    const base = sf.endsWith(supportFileName) ? path.dirname(sf) : sf
+
+    obj.supportFile = path.join(base, supportFileName)
 
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
+        errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -468,16 +450,13 @@ export function setSupportFileAndFolder (obj, defaults) {
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('support JS module %s does not load', sf)
 
-    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
-
     return utils.discoverModuleFile({
       filename: sf,
-      isDefault: loadingDefaultSupportFile,
       projectRoot: obj.projectRoot,
     })
     .then((result) => {
       if (result === null) {
-        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })
@@ -495,82 +474,6 @@ export function setSupportFileAndFolder (obj, defaults) {
 
     return obj
   })
-}
-
-// set pluginsFile to an absolute path with the following rules:
-// - do nothing if pluginsFile is falsey
-// - look up the absolute path via node, so 'cypress/plugins' can resolve
-//   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
-// - if not found
-//   * and the pluginsFile is set to the default
-//     - and the path to the pluginsFile directory exists
-//       * assume the user doesn't need a pluginsFile, set it to false
-//         so it's ignored down the pipeline
-//     - and the path to the pluginsFile directory does not exist
-//       * set it to cypress/plugins/index.js, it will get scaffolded
-//   * and the pluginsFile is NOT set to the default
-//     - throw an error, because it should be there if the user
-//       explicitly set it
-export const setPluginsFile = Promise.method((obj, defaults) => {
-  if (!obj.pluginsFile) {
-    return obj
-  }
-
-  obj = _.clone(obj)
-
-  const {
-    pluginsFile,
-  } = obj
-
-  debug(`setting plugins file ${pluginsFile}`)
-  debug(`for project root ${obj.projectRoot}`)
-
-  return Promise
-  .try(() => {
-    // resolve full path with extension
-    obj.pluginsFile = utils.resolveModule(pluginsFile)
-
-    debug(`set pluginsFile to ${obj.pluginsFile}`)
-  })
-  .catch({ code: 'MODULE_NOT_FOUND' }, (err) => {
-    debug('plugins module does not exist %o', { pluginsFile })
-
-    const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaults.pluginsFile)
-
-    return utils.discoverModuleFile({
-      filename: pluginsFile,
-      isDefault: isLoadingDefaultPluginsFile,
-      projectRoot: obj.projectRoot,
-    })
-    .then((result) => {
-      if (result === null) {
-        return errors.throw('PLUGINS_FILE_NOT_FOUND', pluginsFile)
-      }
-
-      debug('setting plugins file to %o', { result })
-      obj.pluginsFile = result
-
-      return obj
-    })
-  }).return(obj)
-})
-
-export function setParentTestsPaths (obj) {
-  // projectRoot:              "/path/to/project"
-  // integrationFolder:        "/path/to/project/cypress/integration"
-  // componentFolder:          "/path/to/project/cypress/components"
-  // parentTestsFolder:        "/path/to/project/cypress"
-  // parentTestsFolderDisplay: "project/cypress"
-
-  obj = _.clone(obj)
-
-  const ptfd = (obj.parentTestsFolder = path.dirname(obj.integrationFolder))
-
-  const prd = path.dirname(obj.projectRoot != null ? obj.projectRoot : '')
-
-  obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
-
-  return obj
 }
 
 export function setAbsolutePaths (obj) {
@@ -632,9 +535,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   envCLI = envCLI != null ? envCLI : {}
 
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgKey: string
-
-    cfgKey = configUtils.matchesConfigKey(key)
+    const cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
       // only change the value if it hasn't been
@@ -664,7 +565,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   resolveFrom('env', envProc)
   resolveFrom('cli', envCLI)
 
-  // envCfg is from cypress.json
+  // envCfg is from cypress.config.{ts|js}
   // envFile is from cypress.env.json
   // envProc is from process env vars
   // envCLI is from CLI arguments
@@ -679,8 +580,4 @@ export function getResolvedRuntimeConfig (config, runtimeConfig) {
     ...runtimeConfig,
     resolved: { ...config.resolved, ...resolvedRuntimeFields },
   }
-}
-
-export function getNameFromRoot (root = '') {
-  return path.basename(root)
 }

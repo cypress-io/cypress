@@ -5,8 +5,8 @@ const os = require('os')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const minimist = require('minimist')
-const argsUtil = require(`${root}../lib/util/args`)
-const getWindowsProxyUtil = require(`${root}../lib/util/get-windows-proxy`)
+const argsUtil = require(`../../../lib/util/args`)
+const getWindowsProxyUtil = require(`../../../lib/util/get-windows-proxy`)
 
 const cwd = process.cwd()
 
@@ -68,8 +68,6 @@ describe('lib/util/args', () => {
         // string properties
         project: true,
         appPath: '/foo/bar',
-        // this option can be string or false
-        configFile: false,
         // unknown properties will be preserved
         somethingElse: 42,
       }
@@ -77,7 +75,6 @@ describe('lib/util/args', () => {
 
       expect(output).to.deep.equal({
         appPath: '/foo/bar',
-        configFile: false,
         somethingElse: 42,
       })
     })
@@ -398,9 +395,11 @@ describe('lib/util/args', () => {
       const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file')
 
       expect(options.config.port).to.eq(1111)
-      expect(options.config.supportFile).to.eq('path/to/support_file')
+      expect(options.config.e2e.supportFile).to.eq('path/to/support_file')
+      expect(options.config.component.supportFile).to.eq('path/to/support_file')
 
       expect(options).not.to.have.property('foo')
+      expect(options.config).not.to.have.property('supportFile')
     })
 
     it('overrides port in config', function () {
@@ -452,7 +451,6 @@ describe('lib/util/args', () => {
         browser: 'browser',
         ci: 'ci',
         ciBuildId: 'ciBuildId',
-        clearLogs: 'clearLogs',
         userNodePath: 'userNodePath',
         userNodeVersion: 'userNodeVersion',
         config: 'config',
@@ -466,7 +464,6 @@ describe('lib/util/args', () => {
         headed: 'headed',
         inspectBrk: 'inspectBrk',
         key: 'key',
-        logs: 'logs',
         mode: 'mode',
         outputPath: 'outputPath',
         parallel: 'parallel',
@@ -495,9 +492,6 @@ describe('lib/util/args', () => {
         '--browser=browser',
         '--ci=ci',
         '--ciBuildId=ciBuildId',
-        '--clearLogs=clearLogs',
-        '--userNodePath=userNodePath',
-        '--userNodeVersion=userNodeVersion',
         '--config=config',
         '--configFile=configFile',
         '--cwd=cwd',
@@ -509,7 +503,6 @@ describe('lib/util/args', () => {
         '--headed=headed',
         '--inspectBrk=inspectBrk',
         '--key=key',
-        '--logs=logs',
         '--mode=mode',
         '--outputPath=outputPath',
         '--parallel=parallel',
@@ -529,6 +522,8 @@ describe('lib/util/args', () => {
         '--tag=tag',
         '--testingType=testingType',
         '--updating=updating',
+        '--userNodePath=userNodePath',
+        '--userNodeVersion=userNodeVersion',
         '--version=version',
       ])
     })
@@ -587,7 +582,6 @@ describe('lib/util/args', () => {
         config: this.config,
         invokedFromCli: false,
         spec: this.specs,
-        testingType: 'e2e',
       })
     })
 
@@ -608,7 +602,6 @@ describe('lib/util/args', () => {
         `--config=${mergedConfig}`,
         `--cwd=${cwd}`,
         `--spec=${JSON.stringify(this.specs)}`,
-        '--testingType=e2e',
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({
@@ -617,7 +610,6 @@ describe('lib/util/args', () => {
         invokedFromCli: true,
         config: this.config,
         spec: this.specs,
-        testingType: 'e2e',
       })
     })
 
@@ -629,8 +621,21 @@ describe('lib/util/args', () => {
         cwd,
         _: [],
         invokedFromCli: false,
-        testingType: 'e2e',
         config: {},
+      })
+    })
+
+    it('moves testing-type specific config options', function () {
+      const result = argsUtil.toObject(['--config', '{"baseUrl": "http://foobar.com", "specPattern":"**/*.test.js"}'])
+
+      expect(result).to.deep.equal({
+        cwd,
+        _: [],
+        invokedFromCli: false,
+        config: {
+          e2e: { baseUrl: 'http://foobar.com', specPattern: '**/*.test.js' },
+          component: { specPattern: '**/*.test.js' },
+        },
       })
     })
   })
@@ -657,7 +662,6 @@ describe('lib/util/args', () => {
         appPath: '/Applications/Cypress.app',
         execPath: '/Applications/Cypress.app',
         invokedFromCli: false,
-        testingType: 'e2e',
         updating: true,
       })
     })
@@ -683,7 +687,6 @@ describe('lib/util/args', () => {
         appPath: 'a',
         execPath: 'e',
         invokedFromCli: false,
-        testingType: 'e2e',
         updating: true,
       })
     })
@@ -750,7 +753,7 @@ describe('lib/util/args', () => {
       })
     })
 
-    it('doesn\'t mess with env vars if Windows registry doesn\'t have proxy', function () {
+    it(`doesn't mess with env vars if Windows registry doesn't have proxy`, function () {
       sinon.stub(getWindowsProxyUtil, 'getWindowsProxy').returns()
       sinon.stub(os, 'platform').returns('win32')
       const options = this.setup()

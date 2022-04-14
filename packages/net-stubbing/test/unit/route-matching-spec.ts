@@ -90,7 +90,7 @@ describe('intercept-request', function () {
       })
     })
 
-    it('doesn\'t match on a partial match', function () {
+    it(`doesn't match on a partial match`, function () {
       tryMatch({
         headers: {
           authorization: 'basic Zm9vOmJhcg==',

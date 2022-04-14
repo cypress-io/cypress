@@ -44,7 +44,7 @@ export const clickCommandLog = (sel, type) => {
 }
 
 export const withMutableReporterState = (fn) => {
-  top.Runner.configureMobx({ enforceActions: 'never' })
+  top.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
 
   const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
 
@@ -52,7 +52,7 @@ export const withMutableReporterState = (fn) => {
 
   return Promise.try(fn)
   .then(() => {
-    top.Runner.configureMobx({ enforceActions: 'always' })
+    top.UnifiedRunner.MobX.configure({ enforceActions: 'always' })
   })
 }
 

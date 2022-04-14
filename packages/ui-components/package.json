@@ -7,7 +7,7 @@
     "build-for-tests": "webpack",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "pretest": "npm run check-deps-pre",
@@ -21,7 +21,9 @@
     "@babel/preset-react": "7.9.4",
     "@cypress/react-tooltip": "^0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@fortawesome/fontawesome-free": "5.12.1",
+    "@fortawesome/fontawesome-free": "6.0.0",
+    "@percy/core": "^1.0.0-beta.48",
+    "@percy/cypress": "^3.1.0",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
     "babel-loader": "8.1.0",
@@ -36,7 +38,8 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "webpack": "4.41.6",
+    "rimraf": "3.0.2",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.11"
   }
 }

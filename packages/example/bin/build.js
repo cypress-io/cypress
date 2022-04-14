@@ -1,16 +1,35 @@
 #!/usr/bin/env node
 
-const shell = require('shelljs')
 const resolvePkg = require('resolve-pkg')
 const { join } = require('path')
+const fs = require('fs-extra')
+const path = require('path')
+const glob = require('glob')
+const util = require('util')
+const childProcess = require('child_process')
 
-shell.set('-v') // verbose
-shell.set('-e') // any error is fatal
+const EXAMPLE_DIR = path.join(__dirname, '..')
+const globAsync = util.promisify(glob)
 
-shell.rm('-rf', 'app')
-shell.cp('-r', join(resolvePkg('cypress-example-kitchensink'), 'app'), '.')
+async function build() {
+  await Promise.all([
+    fs.remove(path.join(EXAMPLE_DIR, 'app')),
+    fs.remove(path.join(EXAMPLE_DIR, 'cypress'))
+  ])
+  await Promise.all([
+    fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'app'), path.join(EXAMPLE_DIR, 'app')),
+    fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'cypress'), path.join(EXAMPLE_DIR, 'cypress')),
+  ])
+  childProcess.execSync('node ./bin/convert.js', {
+    cwd: EXAMPLE_DIR,
+    stdio: 'inherit'
+  })
+}
 
-shell.rm('-rf', 'cypress')
-shell.cp('-r', join(resolvePkg('cypress-example-kitchensink'), 'cypress'), '.')
-
-shell.exec('node ./bin/convert.js')
+build().then(() => {
+  console.log('Built example')
+  process.exit(0)
+}).catch((e) => {
+  console.error(e.stack)
+  process.exit(1)
+})

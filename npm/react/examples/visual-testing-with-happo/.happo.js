@@ -1,8 +1,8 @@
 // https://docs.happo.io/docs/cypress
 const { RemoteBrowserTarget } = require('happo.io')
 
-// use the same resolution as cypress.json
-const cypressConfig = require('./cypress.json')
+// use the same resolution as cypress.config.js
+const cypressConfig = require('./cypress.config.js')
 const width = cypressConfig.viewportWidth || 1000
 const height = cypressConfig.viewportHeight || 660
 const viewport = `${width}x${height}`

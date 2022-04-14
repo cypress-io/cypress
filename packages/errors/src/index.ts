@@ -1,11 +1,12 @@
 import * as errorsApi from './errors'
-
-export * from './errors'
-
-import * as stackUtils from './stackUtils'
 import * as errorUtils from './errorUtils'
+import * as stackUtils from './stackUtils'
+
+export { theme } from './errTemplate'
 
 export { stackUtils, errorUtils }
+
+export * from './errors'
 
 export * from './errorTypes'
 

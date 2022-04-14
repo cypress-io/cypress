@@ -1,3 +1,4 @@
+//
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
@@ -11,6 +12,8 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
 
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
+
+require('./lib/unhandled_exceptions')
 
 process.env.UV_THREADPOOL_SIZE = 128
 

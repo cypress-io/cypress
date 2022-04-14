@@ -1,14 +1,14 @@
+/* eslint-disable no-redeclare */
+import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { FoundBrowser } from '@packages/launcher'
-
-import errors from '../errors'
+import type { FoundBrowser } from '@packages/types'
+import * as errors from '../errors'
 // @ts-ignore
 import plugins from '../plugins'
 import { getError } from '@packages/errors'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
-const Bluebird = require('bluebird')
 const getPort = require('get-port')
 const launcher = require('@packages/launcher')
 const { fs } = require('../util/fs')
@@ -160,7 +160,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     .value()
 
     if (unexpectedProperties.length) {
-      errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
+      errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
     }
   }
 
@@ -183,7 +183,130 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
+const getBrowsers = () => {
+  debug('getBrowsers')
+
+  return launcher.detect()
+  .then((browsers: FoundBrowser[] = []) => {
+    let majorVersion
+
+    debug('found browsers %o', { browsers })
+
+    if (!process.versions.electron) {
+      debug('not in electron, skipping adding electron browser')
+
+      return browsers
+    }
+
+    // @ts-ignore
+    const version = process.versions.chrome || ''
+
+    if (version) {
+      majorVersion = getMajorVersion(version)
+    }
+
+    const electronBrowser: FoundBrowser = {
+      name: 'electron',
+      channel: 'stable',
+      family: 'chromium',
+      displayName: 'Electron',
+      version,
+      path: '',
+      majorVersion,
+      info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+    }
+
+    // the internal version of Electron, which won't be detected by `launcher`
+    debug('adding Electron browser %o', electronBrowser)
+
+    return browsers.concat(electronBrowser)
+  })
+}
+
+const isValidPathToBrowser = (str) => {
+  return path.basename(str) !== str
+}
+
+const parseBrowserOption = (opt) => {
+  // it's a name or a path
+  if (!_.isString(opt) || !opt.includes(':')) {
+    return {
+      name: opt,
+      channel: 'stable',
+    }
+  }
+
+  // it's in name:channel format
+  const split = opt.indexOf(':')
+
+  return {
+    name: opt.slice(0, split),
+    channel: opt.slice(split + 1),
+  }
+}
+
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers: FoundBrowser[]): Bluebird<FoundBrowser>
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers: FoundBrowser[]): Bluebird<FoundBrowser[]>
+
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []) {
+  const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
+
+  return findBrowsers
+  .then((browsers: FoundBrowser[] = []) => {
+    const filter = parseBrowserOption(nameOrPath)
+
+    debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
+
+    // try to find the browser by name with the highest version property
+    const sortedBrowsers = _.sortBy(browsers, ['version'])
+
+    const browser = _.findLast(sortedBrowsers, filter)
+
+    if (browser) {
+      // short circuit if found
+      if (returnAll) {
+        return browsers
+      }
+
+      return browser
+    }
+
+    // did the user give a bad name, or is this actually a path?
+    if (isValidPathToBrowser(nameOrPath)) {
+      // looks like a path - try to resolve it to a FoundBrowser
+      return launcher.detectByPath(nameOrPath)
+      .then((browser) => {
+        if (returnAll) {
+          return [browser].concat(browsers)
+        }
+
+        return browser
+      }).catch((err) => {
+        errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+      })
+    }
+
+    // not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
+  })
+}
+
+const formatBrowsersToOptions = (browsers) => {
+  return browsers.map((browser) => {
+    if (browser.channel !== 'stable') {
+      return [browser.name, browser.channel].join(':')
+    }
+
+    return browser.name
+  })
+}
+
+const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
+  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
+}
+
 export = {
+
   extendLaunchOptionsFromPlugins,
 
   executeBeforeBrowserLaunch,
@@ -208,7 +331,13 @@ export = {
 
   removeOldProfiles,
 
-  getBrowserByPath: launcher.detectByPath,
+  ensureAndGetByNameOrPath,
+
+  getBrowsers,
+
+  formatBrowsersToOptions,
+
+  throwBrowserNotFound,
 
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
@@ -233,46 +362,6 @@ export = {
         return fs.writeFileAsync(extensionBg, str)
       })
       .return(extensionDest)
-    })
-  },
-
-  getBrowsers () {
-    debug('getBrowsers')
-
-    return launcher.detect()
-    .then((browsers: FoundBrowser[] = []) => {
-      let majorVersion
-
-      debug('found browsers %o', { browsers })
-
-      if (!process.versions.electron) {
-        debug('not in electron, skipping adding electron browser')
-
-        return browsers
-      }
-
-      // @ts-ignore
-      const version = process.versions.chrome || ''
-
-      if (version) {
-        majorVersion = getMajorVersion(version)
-      }
-
-      const electronBrowser: FoundBrowser = {
-        name: 'electron',
-        channel: 'stable',
-        family: 'chromium',
-        displayName: 'Electron',
-        version,
-        path: '',
-        majorVersion,
-        info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
-      }
-
-      // the internal version of Electron, which won't be detected by `launcher`
-      debug('adding Electron browser %o', electronBrowser)
-
-      return browsers.concat(electronBrowser)
     })
   },
 }

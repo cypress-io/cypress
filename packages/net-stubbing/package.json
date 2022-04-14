@@ -5,7 +5,7 @@
   "main": "./lib/server",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
   },
   "dependencies": {
@@ -20,7 +20,8 @@
   "devDependencies": {
     "bin-up": "1.2.0",
     "chai": "4.2.0",
-    "mocha": "7.1.2"
+    "mocha": "7.1.2",
+    "rimraf": "3.0.2"
   },
   "files": [
     "lib"

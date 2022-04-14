@@ -3,7 +3,7 @@ require('../../spec_helper')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-const trash = require(`${root}../lib/util/trash`)
+const trash = require(`../../../lib/util/trash`)
 
 const populateDirectories = function (basePath) {
   fs.mkdirSync(basePath)
@@ -43,7 +43,7 @@ describe('lib/util/trash', () => {
       })
     })
 
-    it('doesn\'t fail if directory is non-existent', () => {
+    it(`doesn't fail if directory is non-existent`, () => {
       return trash.folder('bar')
       .tapCatch(() => {
         throw new Error('should not have errored')

@@ -30,7 +30,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     <input
       type='text'
       className='other-input'
-      value={otherOption?.openerId || ''}
+      value={otherOption?.binary || ''}
       onFocus={_.partial(onChange, 'other')}
       onChange={updateOtherPath}
     />

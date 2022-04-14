@@ -1,11 +1,14 @@
 {
   "extends": "./../ts/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": false
+  },
   "include": [
     "lib/*.ts",
-    "./lib/**/*.ts"
   ],
   "files": [
-    "index.ts",
     "./../ts/index.d.ts"
   ]
 }

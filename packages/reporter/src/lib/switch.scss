@@ -1,0 +1,100 @@
+button.switch {
+  border: 1px solid transparent;
+  border-radius: 50px;
+  display: block;
+  padding: 0;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+
+  &:focus,
+  &:hover {
+    // similar to hocus-default
+    border: 1px solid $indigo-700;
+    box-shadow: 0 0 0 2px $indigo-700;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  &.switch-sm {
+    width: 16px;
+    height: 10px;
+
+    &[aria-checked="true"] {
+      .indicator {
+        transform: translateX(6px);
+      }
+    }
+
+    .indicator {
+      width: 6px;
+      height: 6px;
+      margin-left: 2px;
+    }
+  }
+
+  &.switch-md {
+    width: 24px;
+    height: 12px;
+
+    &[aria-checked="true"] {
+      .indicator {
+        transform: translateX(12px);
+      }
+    }
+
+    .indicator {
+      width: 8px;
+      height: 8px;
+      margin-left: 2px;
+    }
+  }
+
+  &.switch-lg {
+    width: 32px;
+    height: 16px;
+
+    &[aria-checked="true"] {
+      .indicator {
+        transform: translateX(14px);
+      }
+    }
+
+    .indicator {
+      width: 12px;
+      height: 12px;
+      margin-left: 2px;
+    }
+  }
+
+  &.switch-xl {
+    width: 48px;
+    height: 24px;
+
+    &[aria-checked="true"] {
+      .indicator {
+        transform: translateX(24px);
+      }
+    }
+
+    .indicator {
+      width: 16px;
+      height: 16px;
+      margin-left: 4px;
+    }
+  }
+
+  &[aria-checked="true"] {
+    background-color: $jade-400;
+  }
+
+  &[aria-checked="false"] {
+    background-color: $gray-300;
+  }
+
+  span.indicator {
+    background-color: $white;
+    border-radius: 50px;
+    display: block;
+    transition: transform 200ms ease-out;
+  }
+}

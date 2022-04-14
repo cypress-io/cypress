@@ -26,7 +26,7 @@ describe('e2e launching browsers by path', () => {
   it('fails with bad browser path', function () {
     return systemTests.exec(this, {
       project: 'e2e',
-      spec: 'simple_spec.js',
+      spec: 'simple.cy.js',
       browser: '/this/aint/gonna/be/found',
       expectedExitCode: 1,
     })
@@ -53,7 +53,7 @@ describe('e2e launching browsers by path', () => {
     .then((foundPath) => {
       return systemTests.exec(this, {
         project: 'e2e',
-        spec: 'simple_spec.js',
+        spec: 'simple.cy.js',
         browser: foundPath,
         snapshot: true,
       })

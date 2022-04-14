@@ -61,7 +61,7 @@ describe('lib/errors', () => {
     it('logs err.details', () => {
       const userError = new Error('asdf')
 
-      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', userError)
+      const err = errors.get('CONFIG_FILE_UNEXPECTED_ERROR', 'foo/bar/baz', userError)
 
       const ret = errors.log(err)
 
@@ -88,14 +88,14 @@ describe('lib/errors', () => {
   context('.clone', () => {
     it('converts err.message from ansi to html with span classes when html true', () => {
       const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
-      const obj = errors.clone(err, { html: true })
+      const obj = errors.cloneErr(err, { html: true })
 
       expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
     })
 
     it('does not convert err.message from ansi to html when no html option', () => {
       const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
-      const obj = errors.clone(err)
+      const obj = errors.cloneErr(err)
 
       expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
     })

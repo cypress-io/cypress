@@ -2,10 +2,10 @@ require('../spec_helper')
 
 delete global.fs
 
-const api = require(`${root}lib/api`)
-const user = require(`${root}lib/user`)
-const exception = require(`${root}lib/exception`)
-const system = require(`${root}lib/util/system`)
+const api = require(`../../lib/api`)
+const user = require(`../../lib/user`)
+const exception = require(`../../lib/exception`)
+const system = require(`../../lib/util/system`)
 const pkg = require('@packages/root')
 
 describe('lib/exceptions', () => {

@@ -4,17 +4,22 @@ import _ from 'lodash'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
-import errors from './errors'
+import * as errors from './errors'
 import exec from './exec'
 import files from './files'
 import fixture from './fixture'
 import task from './task'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
-import { openFile } from './util/file-opener'
+import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
+// eslint-disable-next-line no-duplicate-imports
+import type { Socket } from '@packages/socket'
+import path from 'path'
+import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -70,13 +75,16 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  private _sendCloseBrowserTabsMessage
+  private _sendResetBrowserStateMessage
+  private _isRunnerSocketConnected
+  private _sendFocusBrowserMessage
+
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
-  protected testsDir: string | null
 
-  constructor (config: Record<string, any>) {
+  constructor () {
     this.ended = false
-    this.testsDir = null
   }
 
   protected ensureProp = ensureProp
@@ -86,11 +94,11 @@ export class SocketBase {
   }
 
   toReporter (event: string, data?: any) {
-    return this.io && this.io.to('reporter').emit(event, data)
+    return this._io?.to('reporter').emit(event, data)
   }
 
   toRunner (event: string, data?: any) {
-    return this.io && this.io.to('runner').emit(event, data)
+    return this._io?.to('runner').emit(event, data)
   }
 
   isSocketConnected (socket) {
@@ -98,7 +106,7 @@ export class SocketBase {
   }
 
   toDriver (event, ...data) {
-    return this.io && this.io.emit(event, ...data)
+    return this._io?.emit(event, ...data)
   }
 
   onAutomation (socket, message, data, id) {
@@ -157,14 +165,15 @@ export class SocketBase {
     })
 
     let automationClient
+    let runnerSocket
 
     const { socketIoRoute, socketIoCookie } = config
 
-    this._io = this.createIo(server, socketIoRoute, socketIoCookie)
+    const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie)
 
     automation.use({
       onPush: (message, data) => {
-        return this.io.emit('automation:push:message', message, data)
+        return io.emit('automation:push:message', message, data)
       },
     })
 
@@ -184,8 +193,20 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    this.io.on('connection', (socket: any) => {
+    io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
       debug('socket connected')
+
+      socket.on('disconnecting', (reason) => {
+        debug(`socket-disconnecting ${reason}`)
+      })
+
+      socket.on('disconnect', (reason) => {
+        debug(`socket-disconnect ${reason}`)
+      })
+
+      socket.on('error', (err) => {
+        debug(`socket-error ${err.message}`)
+      })
 
       // cache the headers so we can access
       // them at any time
@@ -227,7 +248,7 @@ export class SocketBase {
             errors.warning('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
-            return this.io.emit('automation:disconnected')
+            io.emit('automation:disconnected')
           })
         })
 
@@ -255,9 +276,25 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
+
+      this._sendCloseBrowserTabsMessage = async () => {
+        await automationRequest('close:browser:tabs', {})
+      }
+
+      this._sendResetBrowserStateMessage = async () => {
+        await automationRequest('reset:browser:state', {})
+      }
+
+      this._sendFocusBrowserMessage = async () => {
+        await automationRequest('focus:browser:window', {})
+      }
+
+      this._isRunnerSocketConnected = () => {
+        return !!(runnerSocket && runnerSocket.connected)
+      }
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
@@ -276,10 +313,14 @@ export class SocketBase {
           return
         }
 
+        runnerSocket = socket
+
         socket.inRunnerRoom = true
 
         return socket.join('runner')
       })
+
+      socket.on('graphql:request', handleGraphQLSocketRequest)
 
       // TODO: what to do about runner disconnections?
 
@@ -353,6 +394,11 @@ export class SocketBase {
         debug('backend:request %o', { eventName, args })
 
         const backendRequest = () => {
+          // TODO: standardize `configFile`; should it be absolute or relative to projectRoot?
+          const cfgFile = config.configFile && config.configFile.includes(config.projectRoot)
+            ? config.configFile
+            : path.join(config.projectRoot, config.configFile)
+
           switch (eventName) {
             case 'preserve:run:state':
               existingState = args[0]
@@ -391,7 +437,7 @@ export class SocketBase {
             case 'exec':
               return exec.run(config.projectRoot, args[0])
             case 'task':
-              return task.run(config.pluginsFile, args[0])
+              return task.run(cfgFile ?? null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
             case 'clear:session':
@@ -421,7 +467,7 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 
@@ -464,13 +510,28 @@ export class SocketBase {
       socket.on('get:user:editor', (cb) => {
         getUserEditor(false)
         .then(cb)
+        .catch(() => {})
       })
 
       socket.on('set:user:editor', (editor) => {
-        setUserEditor(editor)
+        setUserEditor(editor).catch(() => {})
       })
 
-      socket.on('open:file', (fileDetails) => {
+      socket.on('open:file', async (fileDetails: OpenFileDetails) => {
+        // todo(lachlan): post 10.0 we should not pass the
+        // editor (in the `fileDetails.where` key) from the
+        // front-end, but rather rely on the server context
+        // to grab the prefered editor, like I'm doing here,
+        // so we do not need to
+        // maintain two sources of truth for the preferred editor
+        // adding this conditional to maintain backwards compat with
+        // existing runner and reporter API.
+        fileDetails.where = {
+          binary: getCtx().coreData.localSettings.preferences.preferredEditorBinary || 'computer',
+        }
+
+        debug('opening file %o', fileDetails)
+
         openFile(fileDetails)
       })
 
@@ -489,7 +550,7 @@ export class SocketBase {
       callbacks.onSocketConnection(socket)
     })
 
-    return this.io
+    return io
   }
 
   end () {
@@ -497,15 +558,37 @@ export class SocketBase {
 
     // TODO: we need an 'ack' from this end
     // event from the other side
-    return this.io.emit('tests:finished')
+    return this._io?.emit('tests:finished')
   }
 
   changeToUrl (url) {
     return this.toRunner('change:to:url', url)
   }
 
+  async closeBrowserTabs () {
+    if (this._sendCloseBrowserTabsMessage) {
+      await this._sendCloseBrowserTabsMessage()
+    }
+  }
+
+  async resetBrowserState () {
+    if (this._sendResetBrowserStateMessage) {
+      await this._sendResetBrowserStateMessage()
+    }
+  }
+
+  isRunnerSocketConnected () {
+    if (this._isRunnerSocketConnected) {
+      return this._isRunnerSocketConnected()
+    }
+  }
+
+  async sendFocusBrowserMessage () {
+    await this._sendFocusBrowserMessage()
+  }
+
   close () {
-    return this.io.close()
+    return this._io?.close()
   }
 
   sendSpecList (specs, testingType: Cypress.TestingType) {

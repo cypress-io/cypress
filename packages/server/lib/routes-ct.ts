@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import { Request, Response, Router } from 'express'
+import type { InitializeRoutes } from './routes'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -18,9 +18,18 @@ export const createRoutesCT = ({
 }: InitializeRoutes) => {
   const routesCt = Router()
 
+  routesCt.get(`/${config.namespace}/static/*`, (req, res) => {
+    debug(`proxying to %s/static, originalUrl %s`, config.namespace, req.originalUrl)
+    const pathToFile = getPathToDist('static', req.params[0])
+
+    return send(req, pathToFile)
+    .pipe(res)
+  })
+
   // user app code + spec code
   // default mounted to /__cypress/src/*
   routesCt.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+    debug(`proxying to %s, originalUrl %s`, config.devServerPublicPathRoute, req.originalUrl)
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files

@@ -3,8 +3,7 @@ import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, MouseEvent } from 'react'
-// @ts-ignore
+import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState, { AppState } from '../lib/app-state'
@@ -17,16 +16,17 @@ import { Alias, AliasObject } from '../instruments/instrument-model'
 import CommandModel from './command-model'
 import TestError from '../errors/test-error'
 
+import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
+import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
+import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
+
 const md = new Markdown()
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const invisibleMessage = (model: CommandModel) => {
-  if (model.visible) {
-    return ''
-  }
-
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
     'This element is not visible.'
@@ -46,6 +46,26 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
+
+const CommandColumn = observer(({ model }) => {
+  if (model.hasChildren) {
+    return (
+      <div className='command-expander-column'>
+        <ChevronIcon
+          className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className='command-number-column'>
+      {<PinIcon className='command-pin' />}
+      {model._isPending() && <RunningIcon className='fa-spin' />}
+      {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
+    </div>
+  )
+})
 
 interface AliasReferenceProps {
   aliasObj: AliasObject
@@ -80,7 +100,7 @@ interface AliasesReferencesProps {
 const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => (
   <span>
     {_.map(([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject)), (aliasObj) => (
-      <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
+      <span className='command-alias-container' key={aliasObj.name + aliasObj.cardinal}>
         <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       </span>
     ))}
@@ -117,20 +137,22 @@ const Interceptions = observer(({ model }: InterceptionsProps) => {
   return (
     <Tooltip placement='top' title={getTitle()} className='cy-tooltip'>
       <span>
-        <span className={cs('command-interceptions', 'route', count > 1 && 'show-count')}>{model.renderProps.status ? <span className='status'>{model.renderProps.status} </span> : null}{displayAlias || <em className="no-alias">no alias</em>}</span>
-        {count > 1 ? <span className={'command-interceptions-count'}>{count}</span> : null}
+        <span className={cs('command-interceptions', 'route', count > 1 && 'show-count')}>
+          {model.renderProps.status && <span className='status'>{model.renderProps.status} </span>}
+          {displayAlias || <em className='no-alias'>no alias</em>}
+        </span>
+        {count > 1 && <span className={'command-interceptions-count'}>{count}</span>}
       </span>
     </Tooltip>
   )
 })
 
 interface AliasesProps {
-  isOpen: boolean
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
 }
 
-const Aliases = observer(({ model, aliasesWithDuplicates, isOpen }: AliasesProps) => {
+const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
   if (!model.alias || model.aliasType === 'route') return null
 
   return (
@@ -138,7 +160,7 @@ const Aliases = observer(({ model, aliasesWithDuplicates, isOpen }: AliasesProps
       {_.map(([] as Array<Alias>).concat(model.alias), (alias) => {
         const aliases = [alias]
 
-        if (!isOpen && model.hasChildren) {
+        if (model.hasChildren && !model.isOpen) {
           aliases.push(..._.compact(model.children.map((dupe) => dupe.alias)))
         }
 
@@ -160,11 +182,17 @@ interface MessageProps {
 
 const Message = observer(({ model }: MessageProps) => (
   <span>
-    <i className={cs(
-      model.renderProps.wentToOrigin ? 'fas' : 'far',
-      'fa-circle',
-      model.renderProps.indicator,
-    )} />
+    {!!model.renderProps.indicator && (
+      <i
+        className={
+          cs(
+            model.renderProps.wentToOrigin ? 'fas' : 'far',
+            'fa-circle',
+            `command-message-indicator-${model.renderProps.indicator}`,
+          )
+        }
+      />
+    )}
     <span
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
@@ -226,6 +254,7 @@ class Command extends Component<Props> {
     }
 
     const commandName = model.name ? nameClassName(model.name) : ''
+    const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
     const isSystemEvent = model.type === 'system' && model.event
     const isSessionCommand = commandName === 'session'
     const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
@@ -235,22 +264,8 @@ class Command extends Component<Props> {
         className={cs(
           'command',
           `command-name-${commandName}`,
-          `command-state-${model.state}`,
-          `command-type-${model.type}`,
           {
-            'command-is-studio': model.isStudio,
-            'command-is-event': !!model.event,
-            'command-is-invisible': !model.visible,
-            'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
-            'command-is-pinned': this._isPinned(),
-            'command-with-indicator': !!model.renderProps.indicator,
             'command-scaled': message && message.length > 100,
-            'no-elements': !model.numElements,
-            'command-has-snapshot': model.hasSnapshot,
-            'command-has-console-props': model.hasConsoleProps,
-            'multiple-elements': model.numElements > 1,
-            'command-has-children': model.hasChildren,
-            'command-is-open': this._isOpen(),
           },
         )}
       >
@@ -259,68 +274,72 @@ class Command extends Component<Props> {
           onClick={this._onClick}
           shouldShowMessage={this._shouldShowClickMessage}
         >
-          <div className='command-wrapper'
+          <div
+            className={
+              cs(
+                'command-wrapper',
+                  `command-state-${model.state}`,
+                  `command-type-${model.type}`,
+                  {
+                    'command-is-event': !!model.event,
+                    'command-is-pinned': this._isPinned(),
+                    'command-has-console-props': model.hasConsoleProps,
+                    'command-has-snapshot': model.hasSnapshot,
+                  },
+              )
+            }
             onMouseEnter={() => this._snapshot(true)}
             onMouseLeave={() => this._snapshot(false)}
           >
             <div className='command-wrapper-text'>
-              <span className='command-expander' >
-                <i className='fas' />
-              </span>
-              <span className='command-number'>
-                <i className='fas fa-spinner fa-spin' />
-                <span>{model.number || ''}</span>
-              </span>
-              {!model.hasChildren && (
-                <span className='command-pin'>
-                  <i className='fas fa-thumbtack' />
-                </span>
-              )}
+              <CommandColumn model={model} />
               <span className='command-method'>
-                <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
+                <span>
+                  {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+                </span>
               </span>
               <span className='command-message'>
-                {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
+                {model.referencesAlias ?
+                  <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                  : <Message model={model} />
+                }
               </span>
               <span className='command-controls'>
-                <i className='far fa-times-circle studio-command-remove' onClick={this._removeStudioCommand} />
-                <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-                  <i className='command-invisible far fa-eye-slash' />
-                </Tooltip>
-                <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                  <span className='num-elements'>{model.numElements}</span>
-                </Tooltip>
+                {(model.visible != null && !model.visible) && (
+                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+                    <span>
+                      <HiddenIcon className='command-invisible' />
+                    </span>
+                  </Tooltip>
+                )}
+                {displayNumOfElements && (
+                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                    <span className={cs('num-elements', 'command-num-elements')}>{model.numElements}</span>
+                  </Tooltip>
+                )}
                 <span className='alias-container'>
                   <Interceptions model={model} />
-                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
+                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
                   {displayNumOfChildren && (
                     <Tooltip placement='top' title={numberOfChildrenMessage(model.numChildren, model.event)} className='cy-tooltip'>
-                      <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
+                      <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
+                        {model.numChildren}
+                      </span>
                     </Tooltip>
                   )}
                 </span>
-
               </span>
             </div>
             <Progress model={model} />
-
           </div>
         </FlashOnClick>
-        {this._children()}
+        {(model.hasChildren && model.isOpen) && this._children()}
       </li>
     )
   }
 
-  _isOpen () {
-    const { model } = this.props
-
-    return !!model.isOpen
-  }
-
   _children () {
     const { appState, events, model, runnablesStore } = this.props
-
-    if (!this._isOpen()) return
 
     return (
       <ul className='command-child-container'>
@@ -352,13 +371,13 @@ class Command extends Component<Props> {
   }
 
   @action _onClick = () => {
+    if (this.props.appState.isRunning) return
+
     if (this.props.model.hasChildren) {
       this.props.model.toggleOpen()
 
       return
     }
-
-    if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model
 
@@ -420,17 +439,6 @@ class Command extends Component<Props> {
         }
       }, 50)
     }
-  }
-
-  _removeStudioCommand = (e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    const { model, events } = this.props
-
-    if (!model.isStudio) return
-
-    events.emit('studio:remove:command', model.number)
   }
 }
 

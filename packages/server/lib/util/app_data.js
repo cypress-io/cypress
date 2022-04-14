@@ -92,7 +92,11 @@ module.exports = {
       'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
 
     // allow overriding the app_data folder
-    const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV
+    let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV
+
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      folder = `${folder}-e2e-test`
+    }
 
     const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 

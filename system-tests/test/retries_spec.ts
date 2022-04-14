@@ -12,7 +12,7 @@ describe('retries', () => {
   })
 
   it('completes a run of many retries in a reasonable time', {
-    spec: 'hanging_retries_spec.js',
+    spec: 'hanging_retries.cy.js',
     expectedExitCode: 10,
   })
 

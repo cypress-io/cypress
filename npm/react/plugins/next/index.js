@@ -1,4 +1,3 @@
-const path = require('path')
 const findNextWebpackConfig = require('./findNextWebpackConfig')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
@@ -11,7 +10,6 @@ async function devServer (cypressDevServerConfig) {
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig,
-    template: path.resolve(__dirname, 'index-template.html'),
   })
 }
 

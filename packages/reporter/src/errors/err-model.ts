@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
-import type { FileDetails } from '@packages/ui-components'
+import type { FileDetails } from '@packages/types'
 
 export interface ParsedStackMessageLine {
   message: string

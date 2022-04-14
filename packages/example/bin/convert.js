@@ -41,7 +41,7 @@ function replaceStringsIn (file) {
 glob('./app/**/*.html', { realpath: true }, (err, htmlFiles) => {
   if (err) throw err
 
-  glob('./cypress/integration/**/*.js', { realpath: true }, (err, specFiles) => {
+  glob('./cypress/e2e/**/*.js', { realpath: true }, (err, specFiles) => {
     if (err) throw err
 
     htmlFiles.concat(specFiles).forEach(function (file) {

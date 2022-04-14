@@ -8,6 +8,8 @@ import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
 
+const isCi = require('is-ci')
+
 require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
@@ -47,7 +49,8 @@ export type ItOptions = ExecOptions & {
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
-    execFn: ExecFn
+    execFn: ExecFn,
+    browser: BrowserName
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
@@ -386,7 +389,12 @@ const replaceDurationFromReporter = (str, p1, p2, p3) => {
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
-const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
+const replaceNodeVersion = (str, p1, p2, p3) => {
+  // Accounts for paths that break across lines
+  const p3Length = p3.includes('\n') ? p3.split('\n')[0].length - 1 : p3.length
+
+  return _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3Length))
+}
 
 const replaceCypressVersion = (str, p1, p2) => {
   // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
@@ -467,7 +475,7 @@ const normalizeStdout = function (str, options: any = {}) {
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   // duration='1589' -> duration='XXXX'
@@ -559,7 +567,7 @@ const copy = function () {
   }
 }
 
-const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
+const getMochaItFn = function (title, only, skip, browser, specifiedBrowser) {
   // if we've been told to skip this test
   // or if we specified a particular browser and this
   // doesn't match the one we're currently trying to run...
@@ -569,6 +577,12 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   }
 
   if (only) {
+    if (isCi) {
+      // fixes the problem where systemTests can accidentally by skipped using systemTests.it.only(...)
+      // https://github.com/cypress-io/cypress/pull/20276
+      throw new Error(`the system test: "${chalk.yellow(title)}" has been set to run with an it.only() which is not allowed in CI environments.\n\nPlease remove the it.only()`)
+    }
+
     return it.only
   }
 
@@ -639,7 +653,7 @@ const localItFn = function (title: string, opts: ItOptions) {
   const browsersToTest = getBrowsers(options.browser)
 
   const browserToTest = function (browser) {
-    const mochaItFn = getMochaItFn(options.only, options.skip, browser, specifiedBrowser)
+    const mochaItFn = getMochaItFn(title, options.only, options.skip, browser, specifiedBrowser)
 
     const testTitle = `${title} [${browser}]`
 
@@ -785,7 +799,7 @@ const systemTests = {
         }
 
         const specDir = options.specDir
-          || (options.testingType === 'component' ? 'cypress/component' : 'cypress/integration')
+        || (options.testingType === 'component' ? '' : 'cypress/e2e')
 
         return path.join(projectPath, specDir, spec)
       })
@@ -811,10 +825,6 @@ const systemTests = {
       `--run-project=${projectPath}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]
-
-    if (options.testingType === 'component') {
-      args.push('--component-testing')
-    }
 
     if (options.spec) {
       args.push(`--spec=${options.spec}`)
@@ -935,7 +945,7 @@ const systemTests = {
     if (!options.skipScaffold) {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
-      Fixtures.scaffoldProject(options.project)
+      await Fixtures.scaffoldProject(options.project)
       await DepInstaller.scaffoldProjectNodeModules(options.project)
     }
 
@@ -944,7 +954,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.write(e2ePath, ctx.settings)
+      await settings.writeForTesting(e2ePath, ctx.settings)
     }
 
     let stdout = ''
@@ -954,7 +964,11 @@ const systemTests = {
       const { expectedExitCode } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
-        expect(code).to.eq(expectedExitCode, 'expected exit code')
+        if (expectedExitCode === 0) {
+          expect(code).to.eq(expectedExitCode, `Process errored: Exit code ${code}`)
+        } else {
+          expect(code).to.to.eq(expectedExitCode, `expected exit code ${expectedExitCode} but got ${code}`)
+        }
       })
 
       // snapshot the stdout!

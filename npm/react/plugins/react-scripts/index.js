@@ -4,13 +4,11 @@ const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
 function devServer (cypressDevServerConfig, {
   webpackConfigPath,
-} = {
-  webpackConfigPath: 'react-scripts/config/webpack.config',
-}) {
+} = {}) {
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig: findReactScriptsWebpackConfig(cypressDevServerConfig.config, {
-      webpackConfigPath,
+      webpackConfigPath: webpackConfigPath || 'react-scripts/config/webpack.config',
     }),
   })
 }
@@ -24,7 +22,3 @@ module.exports = getLegacyDevServer(devServer, (config) => {
 
 // New signature
 module.exports.devServer = devServer
-
-module.exports.defineDevServerConfig = function (devServerConfig) {
-  return devServerConfig
-}

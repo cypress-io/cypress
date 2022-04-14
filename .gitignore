@@ -9,21 +9,17 @@ _test-output
 cypress.zip
 .babel-cache
 
+# from config, compiled .js files
+packages/config/src/*.js
+
 # from extension
 Cached Theme.pak
 Cached Theme Material Design.pak
-
-# from config, compiled .js files
-packages/config/lib/*.js
 
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
 packages/errors/src/**/*.js
 packages/errors/test/**/*.js
-
-# from desktop-gui
-packages/desktop-gui/cypress/videos
-packages/desktop-gui/src/jsconfig.json
 
 # from driver
 packages/driver/cypress/videos
@@ -72,6 +68,7 @@ packages/socket/lib/*.js
 system-tests/.projects
 system-tests/.http-mitm-proxy
 system-tests/fixtures/large-img
+system-tests/lib/fixtureDirs.ts
 
 # from npm/react
 /npm/react/bin/*
@@ -82,6 +79,9 @@ system-tests/fixtures/large-img
 /npm/design-system/bin/*
 /npm/design-system/cypress/videos
 /npm/design-system/.babel-cache
+
+# from npm/webpack-dev-server-fresh
+/npm/webpack-dev-server-fresh/cypress/videos
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
@@ -94,6 +94,8 @@ system-tests/fixtures/large-img
 # graphql, auto-generated
 /packages/launchpad/src/generated
 /packages/app/src/generated
+/packages/frontend-shared/src/generated
+/packages/frontend-shared/cypress/e2e/support/e2eProjectDirs.ts
 
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template
@@ -104,7 +106,6 @@ scripts/support
 binary-url.json
 
 # Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts
-.eslintrc.js
 cli/visual-snapshots
 
 # Created by https://www.gitignore.io/api/osx,git,node,windows,intellij,linux

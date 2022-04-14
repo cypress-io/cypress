@@ -2,30 +2,33 @@
   <div>
     <h1>Using Axios Wrapper</h1>
     <ul v-if="users && users.length">
-      <li v-for="user of users" v-bind:key="user.id">
-        <p><strong>{{user.id}}</strong> - {{user.name}}</p>
+      <li
+        v-for="user of users"
+        :key="user.id"
+      >
+        <p><strong>{{ user.id }}</strong> - {{ user.name }}</p>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-import {get} from './AxiosApi';
+import { get } from './AxiosApi'
 
 export default {
-  data() {
+  data () {
     return {
-      users: []
+      users: [],
     }
   },
 
   // Fetches posts when the component is created.
-  created() {
+  created () {
     get('https://jsonplaceholder.cypress.io/users?_limit=3')
-    .then(response => {
+    .then((response) => {
       // JSON responses are automatically parsed.
       this.users = response.data
     })
-  }
+  },
 }
 </script>

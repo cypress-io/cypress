@@ -3,9 +3,9 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
-const appData = require(`${root}../lib/util/app_data`)
-const open = require(`${root}../lib/util/open`)
-const menu = require(`${root}../lib/gui/menu`)
+const appData = require(`../../../lib/util/app_data`)
+const open = require(`../../../lib/util/open`)
+const menu = require(`../../../lib/gui/menu`)
 
 const getMenuItem = function (label) {
   return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
@@ -89,6 +89,20 @@ describe('gui/menu', function () {
       menu.set({ onLogOutClicked })
       getSubMenuItem(getMenuItem('File'), 'Log Out').click()
       expect(onLogOutClicked).to.be.called
+    })
+
+    it('merges options and calls callback functions', () => {
+      const onLogOutClicked1 = sinon.stub()
+      const onLogOutClicked2 = sinon.stub()
+
+      menu.set()
+      menu.set({ onLogOutClicked: onLogOutClicked1 })
+      menu.set({ onLogOutClicked: onLogOutClicked2 })
+
+      getSubMenuItem(getMenuItem('File'), 'Log Out').click()
+
+      expect(onLogOutClicked1).not.to.be.called
+      expect(onLogOutClicked2).to.be.called
     })
 
     it('calls original logout callback when menu is reset without new callback', () => {
@@ -238,19 +252,30 @@ describe('gui/menu', function () {
   })
 
   context('Developer Tools', () => {
-    it('does not exist by default', () => {
+    it('exists by default', () => {
       menu.set()
-      expect(getMenuItem('Developer Tools')).to.be.undefined
+      expect(getMenuItem('Developer Tools')).to.be.defined
     })
 
-    it('does not exist by when withDevTools is false', () => {
-      menu.set({ withDevTools: false })
-      expect(getMenuItem('Developer Tools')).to.be.undefined
+    it('exists when withInternalDevTools is false', () => {
+      menu.set({ withInternalDevTools: false })
+      expect(getMenuItem('Developer Tools')).to.be.defined
     })
 
-    describe('when withDevTools is true', () => {
+    it('contains only Reload and Toggle Developer Tools items in expected order', () => {
+      menu.set()
+      const labels = getLabels(getMenuItem('Developer Tools').submenu)
+
+      expect(labels).to.eql([
+        'Reload',
+        'Toggle Developer Tools',
+        'View App Data',
+      ])
+    })
+
+    describe('when withInternalDevTools is true', () => {
       beforeEach(function () {
-        menu.set({ withDevTools: true })
+        menu.set({ withInternalDevTools: true })
         this.devSubmenu = getMenuItem('Developer Tools').submenu
       })
 
@@ -260,6 +285,9 @@ describe('gui/menu', function () {
         expect(labels).to.eql([
           'Reload',
           'Toggle Developer Tools',
+          'View App Data',
+          'GraphQL requests over Fetch (off)',
+          'GraphiQL',
         ])
       })
 
@@ -284,7 +312,7 @@ describe('gui/menu', function () {
 
       it('sets shortcut for Toggle Developer Tools when not macOS', () => {
         os.platform.returns('linux')
-        menu.set({ withDevTools: true })
+        menu.set({ withInternalDevTools: true })
         expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
       })
 

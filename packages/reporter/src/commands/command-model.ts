@@ -127,6 +127,7 @@ export default class Command extends Instrument {
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
     this.hasConsoleProps = !!props.hasConsoleProps
+
     this._checkLongRunning()
   }
 

@@ -130,7 +130,7 @@ describe('e2e sessions', () => {
   })
 
   it('session tests', {
-    spec: 'session_spec.js',
+    spec: 'session.cy.js',
     snapshot: true,
     config: {
       experimentalSessionSupport: true,

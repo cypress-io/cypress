@@ -12,8 +12,8 @@ const verifyPassedAndFailedAreSame = (expectedFailures) => {
 describe('e2e error ui', function () {
   systemTests.setup()
 
-  beforeEach(() => {
-    Fixtures.scaffoldProject('e2e')
+  beforeEach(async () => {
+    await Fixtures.scaffoldProject('e2e')
   })
 
   ;[
@@ -25,7 +25,7 @@ describe('e2e error ui', function () {
   .forEach((project) => {
     systemTests.it(`handles sourcemaps in webpack for project: ${project}`, {
       project,
-      spec: 'failing_spec.*',
+      spec: 'failing.*',
       expectedExitCode: 1,
       onRun (exec) {
         return exec().then(verifyPassedAndFailedAreSame(1))
@@ -34,12 +34,12 @@ describe('e2e error ui', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/16255
-  systemTests.it('handles errors when integration folder is outside of project root', {
+  systemTests.it('handles errors when test files are outside of project root', {
     project: 'integration-outside-project-root/project-root',
-    spec: '../../../integration/failing_spec.js',
+    spec: '../../../e2e/failing.cy.js',
     expectedExitCode: 1,
-    onRun (exec) {
-      Fixtures.scaffoldProject('integration-outside-project-root')
+    onRun: async (exec) => {
+      await Fixtures.scaffoldProject('integration-outside-project-root')
 
       return exec().then(verifyPassedAndFailedAreSame(1))
     },

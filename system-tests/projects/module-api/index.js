@@ -14,7 +14,7 @@ const onSuccess = (runResult) => {
 }
 
 cypress.run({
-  spec: './cypress/integration/a-spec.js',
+  spec: './cypress/e2e/a-spec.cy.js',
 })
 .then(onSuccess)
 .catch(console.error)

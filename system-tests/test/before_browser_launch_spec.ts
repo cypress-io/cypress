@@ -22,11 +22,11 @@ describe('e2e before:browser:launch', () => {
     },
     project: 'chrome-browser-preferences',
     snapshot: true,
-    spec: 'spec.js',
+    spec: 'spec.cy.js',
   })
 
   systemTests.it('can add extensions', {
-    spec: 'spec.js',
+    spec: 'spec.cy.js',
     config: {
       video: false,
     },
@@ -35,7 +35,7 @@ describe('e2e before:browser:launch', () => {
     sanitizeScreenshotDimensions: true,
     snapshot: true,
     onRun: async (exec) => {
-      Fixtures.scaffoldProject('plugin-extension')
+      await Fixtures.scaffoldProject('plugin-extension')
       await exec()
     },
   })

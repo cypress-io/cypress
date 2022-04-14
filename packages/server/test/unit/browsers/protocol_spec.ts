@@ -1,9 +1,6 @@
 import '../../spec_helper'
 import 'chai-as-promised' // for the types!
-import Bluebird from 'bluebird'
 import { expect } from 'chai'
-import CRI from 'chrome-remote-interface'
-import { stripIndents } from 'common-tags'
 import humanInterval from 'human-interval'
 import _ from 'lodash'
 import sinon from 'sinon'
@@ -13,9 +10,6 @@ import { connect } from '@packages/network'
 import * as protocol from '../../../lib/browsers/protocol'
 
 describe('lib/browsers/protocol', () => {
-  // protocol connects explicitly to this host
-  const host = '127.0.0.1'
-
   context('._getDelayMsForRetry', () => {
     it('retries as expected for up to 50 seconds', () => {
       const log = sinon.spy(console, 'log')
@@ -41,146 +35,19 @@ describe('lib/browsers/protocol', () => {
     })
   })
 
-  context('.getWsTargetFor', () => {
-    const expectedCdpFailedError = stripIndents`
-      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
-
-      This usually indicates there was a problem opening the Foobrowser browser.
-
-      The CDP port requested was 12345.
-    `
-
-    it('rejects if CDP connection fails', () => {
-      const innerErr = new Error('cdp connection failure')
-
-      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
-      const p = protocol.getWsTargetFor(12345, 'foobrowser')
-
-      return expect(p).to.eventually.be.rejected.then((val) => {
-        expect(stripAnsi(val.message)).include(expectedCdpFailedError)
-        expect(stripAnsi(val.details)).include(innerErr.message)
-      })
-    })
-
-    it('rejects if CRI.List fails', () => {
-      const innerErr = new Error('cdp connection failure')
-
-      sinon.stub(Bluebird, 'delay').resolves()
-
-      sinon.stub(CRI, 'List')
-      .withArgs({ host, port: 12345, getDelayMsForRetry: sinon.match.func })
-      .rejects(innerErr)
-
+  context('._connectAsync', () => {
+    it('creates a retrying socket to test the connection', async function () {
       const end = sinon.stub()
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
-      const p = protocol.getWsTargetFor(12345, 'FooBrowser')
+      const opts = {
+        host: '127.0.0.1',
+        port: 3333,
+      }
 
-      return expect(p).to.eventually.be.rejected.then((val) => {
-        expect(stripAnsi(val.message)).include(expectedCdpFailedError)
-        expect(stripAnsi(val.details)).include(innerErr.message)
-      })
-    })
-
-    it('returns the debugger URL of the first about:blank tab', async () => {
-      const targets = [
-        {
-          type: 'page',
-          url: 'chrome://newtab',
-          webSocketDebuggerUrl: 'foo',
-        },
-        {
-          type: 'page',
-          url: 'about:blank',
-          webSocketDebuggerUrl: 'bar',
-        },
-      ]
-
-      const end = sinon.stub()
-
-      sinon.stub(CRI, 'List')
-      .withArgs({ host, port: 12345, getDelayMsForRetry: sinon.match.func })
-      .resolves(targets)
-
-      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
-
-      const p = protocol.getWsTargetFor(12345, 'FooBrowser')
-
-      await expect(p).to.eventually.equal('bar')
+      await protocol._connectAsync(opts)
       expect(end).to.be.calledOnce
-    })
-  })
-
-  context('CRI.List', () => {
-    const port = 1234
-    const targets = [
-      {
-        type: 'page',
-        url: 'chrome://newtab',
-        webSocketDebuggerUrl: 'foo',
-      },
-      {
-        type: 'page',
-        url: 'about:blank',
-        webSocketDebuggerUrl: 'ws://debug-url',
-      },
-    ]
-
-    it('retries several times if starting page cannot be found', async () => {
-      const end = sinon.stub()
-
-      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
-
-      const criList = sinon.stub(CRI, 'List')
-      .withArgs({ host, port, getDelayMsForRetry: sinon.match.func }).resolves(targets)
-      .onFirstCall().resolves([])
-      .onSecondCall().resolves([])
-      .onThirdCall().resolves(targets)
-
-      const targetUrl = await protocol.getWsTargetFor(port, 'FooBrowser')
-
-      expect(criList).to.have.been.calledThrice
-      expect(targetUrl).to.equal('ws://debug-url')
-    })
-
-    it('logs correctly if retries occur while connecting to CDP and while listing CRI targets', async () => {
-      const log = sinon.spy(console, 'log')
-
-      const end = sinon.stub()
-
-      // fail 20 times to get 2 log lines from connect failures
-      sinon.stub(connect, 'createRetryingSocket').callsFake((opts, cb) => {
-        _.times(20, (i) => {
-          opts.getDelayMsForRetry(i, new Error)
-        })
-
-        // @ts-ignore
-        return cb(null, { end })
-      })
-
-      sinon.stub(Bluebird, 'delay').resolves()
-
-      // fail an additional 2 times on CRI.List
-      const criList = sinon.stub(CRI, 'List')
-      .withArgs({ host, port, getDelayMsForRetry: sinon.match.func }).resolves(targets)
-      .onFirstCall().resolves([])
-      .onSecondCall().resolves([])
-      .onThirdCall().resolves(targets)
-
-      const targetUrl = await protocol.getWsTargetFor(port, 'FooBrowser')
-
-      expect(criList).to.have.been.calledThrice
-      expect(targetUrl).to.equal('ws://debug-url')
-
-      // 2 from connect failing, 2 from CRI.List failing
-      expect(log).to.have.callCount(4)
-
-      log.getCalls().forEach((log, i) => {
-        const line = stripAnsi(log.args[0])
-
-        expect(line).to.include(`Still waiting to connect to Foobrowser, retrying in 1 second (attempt ${i + 18}/62)`)
-      })
     })
   })
 })

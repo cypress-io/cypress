@@ -1,5 +1,7 @@
+/// <reference path="../../../../../../cli/types/mocha/index.d.ts" />
+
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
-import { join, resolve } from 'path'
+import { join } from 'path'
 import { expect } from 'chai'
 
 describe('@cypress/schematic:e2e ng-generate', () => {
@@ -15,7 +17,7 @@ describe('@cypress/schematic:e2e ng-generate', () => {
     version: '12.0.0',
   }
 
-  const appOptions = {
+  const appOptions: Parameters<typeof schematicRunner['runExternalSchematicAsync']>[2] = {
     name: 'sandbox',
     inlineTemplate: false,
     routing: false,
@@ -28,16 +30,11 @@ describe('@cypress/schematic:e2e ng-generate', () => {
     appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
   })
 
-  it('should create cypress files', async () => {
-    const files = ['cypress/integration/foo.spec.ts']
-    const homePath = '/projects/sandbox/'
-
+  it('should create cypress spec file', async () => {
     return schematicRunner.runSchematicAsync('e2e', { name: 'foo' }, appTree).toPromise().then((tree) => {
-      files.forEach((f) => {
-        const pathToFile = resolve(homePath, f)
+      const files = tree.files
 
-        expect(tree.exists(pathToFile), pathToFile).equal(true)
-      })
+      expect(files).to.contain('/projects/sandbox/cypress/e2e/foo.cy.ts')
     })
   })
 })

@@ -9,7 +9,7 @@ const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 const machineId = require('./util/machine_id')
 const errors = require('./errors')
-const { apiRoutes, onRoutes } = require('./util/routes')
+const { apiRoutes } = require('./util/routes')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -189,28 +189,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getOrgs (authToken) {
-    return rp.get({
-      url: apiRoutes.orgs(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
-  getProjects (authToken) {
-    return rp.get({
-      url: apiRoutes.projects(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
   getProject (projectId, authToken) {
     return rp.get({
       url: apiRoutes.project(projectId),
@@ -222,26 +200,6 @@ module.exports = {
         'x-route-version': '2',
       },
     })
-    .catch(tagError)
-  },
-
-  getProjectRuns (projectId, authToken, options = {}) {
-    if (options.page == null) {
-      options.page = 1
-    }
-
-    return rp.get({
-      url: apiRoutes.projectRuns(projectId),
-      json: true,
-      timeout: options.timeout != null ? options.timeout : 10000,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '3',
-      },
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
   },
 
@@ -432,42 +390,6 @@ module.exports = {
     })
     .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
-  },
-
-  getProjectRecordKeys (projectId, authToken) {
-    return rp.get({
-      url: apiRoutes.projectRecordKeys(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
-  requestAccess (projectId, authToken) {
-    return rp.post({
-      url: apiRoutes.membershipRequests(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-  },
-
-  getReleaseNotes (version) {
-    return rp.get({
-      url: onRoutes.releaseNotes(version),
-      json: true,
-    })
-    .catch((err) => {
-      // log and ignore by sending an empty response if there's an error
-      debug('error getting release notes for version %s: %s', version, err.stack || err.message || err)
-
-      return {}
-    })
   },
 
   clearCache () {

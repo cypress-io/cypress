@@ -2,9 +2,6 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
-import { eventManager } from '../event-manager'
-
-import { studioRecorder } from './studio-recorder'
 
 import './studio-modals.scss'
 
@@ -79,7 +76,7 @@ export class StudioInitModal extends Component {
       <Dialog
         className='studio-modal studio-init-modal'
         aria-label='Start Studio'
-        isOpen={studioRecorder.initModalIsOpen}
+        isOpen={this.props.eventManager.studioRecorder.initModalIsOpen}
         onDismiss={this._close}
       >
         <div className='body'>
@@ -113,11 +110,11 @@ export class StudioInitModal extends Component {
   }
 
   _close = () => {
-    studioRecorder.closeInitModal()
-    studioRecorder.clearRunnableIds()
+    this.props.eventManager.studioRecorder.closeInitModal()
+    this.props.eventManager.studioRecorder.clearRunnableIds()
   }
 
-  _start = () => eventManager.emit('studio:start')
+  _start = () => this.props.eventManager.emit('studio:start')
 }
 
 @observer
@@ -133,8 +130,8 @@ export class StudioSaveModal extends Component {
       <Dialog
         className='studio-modal studio-save-modal'
         aria-label='Save New Test'
-        isOpen={studioRecorder.saveModalIsOpen}
-        onDismiss={studioRecorder.closeSaveModal}
+        isOpen={this.props.eventManager.studioRecorder.saveModalIsOpen}
+        onDismiss={this.props.eventManager.studioRecorder.closeSaveModal}
       >
         <div className='body'>
           <h1 className='title'>
@@ -156,7 +153,7 @@ export class StudioSaveModal extends Component {
             </form>
           </div>
         </div>
-        <button className='close-button' onClick={studioRecorder.closeSaveModal}>
+        <button className='close-button' onClick={this.props.eventManager.studioRecorder.closeSaveModal}>
           <VisuallyHidden>Close</VisuallyHidden>
           <span aria-hidden={true}>
             <i className='fas fa-times' />
@@ -177,13 +174,13 @@ export class StudioSaveModal extends Component {
 
     if (!name) return
 
-    studioRecorder.save(name)
+    this.props.eventManager.studioRecorder.save(name)
   }
 }
 
-export const StudioModals = () => (
+export const StudioModals = (props) => (
   <>
-    <StudioInitModal />
-    <StudioSaveModal />
+    <StudioInitModal eventManager={props.eventManager} />
+    <StudioSaveModal eventManager={props.eventManager} />
   </>
 )

@@ -3,6 +3,7 @@ const EE = require('events')
 const path = require('path')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
+const debugVerbose = require('debug')('cypress-verbose:server:browsers:electron')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
 const { CdpAutomation, screencastOpts } = require('./cdp_automation')
@@ -35,7 +36,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options, parent) {
+const _getAutomation = async function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -51,26 +52,39 @@ const _getAutomation = function (win, options, parent) {
     })
   }
 
-  const automation = new CdpAutomation(sendCommand, on, parent)
+  const sendClose = () => {
+    win.destroy()
+  }
 
-  if (!options.onScreencastFrame) {
-    // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-    // workaround: start and stop screencasts between screenshots
-    // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
-      if (message !== 'take:screenshot') {
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
+
+  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+    switch (message) {
+      case 'take:screenshot': {
+        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+        // workaround: start and stop screencasts between screenshots
+        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+        if (!options.onScreencastFrame) {
+          await sendCommand('Page.startScreencast', screencastOpts)
+          const ret = await fn(message, data)
+
+          await sendCommand('Page.stopScreencast')
+
+          return ret
+        }
+
         return fn(message, data)
       }
+      case 'focus:browser:window': {
+        win.show()
 
-      await sendCommand('Page.startScreencast', screencastOpts)
-
-      const ret = await fn(message, data)
-
-      await sendCommand('Page.stopScreencast')
-
-      return ret
-    })
-  }
+        return
+      }
+      default: {
+        return fn(message, data)
+      }
+    }
+  })
 
   return automation
 }
@@ -87,25 +101,23 @@ const _installExtensions = function (win, extensionPaths = [], options) {
   })
 }
 
-const _maybeRecordVideo = function (webContents, options) {
-  return async () => {
-    const { onScreencastFrame } = options
+const _maybeRecordVideo = async function (webContents, options) {
+  const { onScreencastFrame } = options
 
-    debug('maybe recording video %o', { onScreencastFrame })
+  debug('maybe recording video %o', { onScreencastFrame })
 
-    if (!onScreencastFrame) {
-      return
-    }
-
-    webContents.debugger.on('message', (event, method, params) => {
-      if (method === 'Page.screencastFrame') {
-        onScreencastFrame(params)
-        webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
-      }
-    })
-
-    await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
+  if (!onScreencastFrame) {
+    return
   }
+
+  webContents.debugger.on('message', (event, method, params) => {
+    if (method === 'Page.screencastFrame') {
+      onScreencastFrame(params)
+      webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
+    }
+  })
+
+  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
 }
 
 module.exports = {
@@ -134,7 +146,7 @@ module.exports = {
       },
       onFocus () {
         if (options.show) {
-          return menu.set({ withDevTools: true })
+          return menu.set({ withInternalDevTools: true })
         }
       },
       onNewWindow (e, url) {
@@ -170,7 +182,7 @@ module.exports = {
 
   _getAutomation,
 
-  _render (url, automation, preferences = {}, options = {}) {
+  async _render (url, automation, preferences = {}, options = {}) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -184,8 +196,6 @@ module.exports = {
     }
 
     return this._launch(win, url, automation, preferences)
-    .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -212,7 +222,7 @@ module.exports = {
 
   _launch (win, url, automation, options) {
     if (options.show) {
-      menu.set({ withDevTools: true })
+      menu.set({ withInternalDevTools: true })
     }
 
     ELECTRON_DEBUG_EVENTS.forEach((e) => {
@@ -249,14 +259,22 @@ module.exports = {
       )
     })
     .then(() => {
-      return win.loadURL(url)
+      return win.loadURL('about:blank')
+    })
+    .then(() => this._getAutomation(win, options, automation))
+    .then((cdpAutomation) => automation.use(cdpAutomation))
+    .then(() => {
+      return Promise.all([
+        _maybeRecordVideo(win.webContents, options),
+        this._handleDownloads(win, options.downloadsFolder, automation),
+      ])
     })
     .then(() => {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      return this._handleDownloads(win, options.downloadsFolder, automation)
+      return win.loadURL(url)
     })
     .return(win)
   },
@@ -273,7 +291,7 @@ module.exports = {
     const originalSendCommand = webContents.debugger.sendCommand
 
     webContents.debugger.sendCommand = function (message, data) {
-      debug('debugger: sending %s with params %o', message, data)
+      debugVerbose('debugger: sending %s with params %o', message, data)
 
       return originalSendCommand.call(webContents.debugger, message, data)
       .then((res) => {
@@ -284,7 +302,7 @@ module.exports = {
           debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
         }
 
-        debug('debugger: received response to %s: %o', message, debugRes)
+        debugVerbose('debugger: received response to %s: %o', message, debugRes)
 
         return res
       }).catch((err) => {
@@ -377,6 +395,14 @@ module.exports = {
       // https://github.com/cypress-io/cypress/issues/1872
       proxyBypassRules: '<-loopback>',
     })
+  },
+
+  async connectToNewSpec (browser, options, automation) {
+    this.open(browser, options.url, options, automation)
+  },
+
+  async connectToExisting () {
+    throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
   open (browser, url, options = {}, automation) {

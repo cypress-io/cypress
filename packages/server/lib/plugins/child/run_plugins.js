@@ -1,226 +1,262 @@
+// @ts-check
 // this module is responsible for loading the plugins file
 // and running the exported function to register event handlers
 // and executing any tasks that the plugin registers
-const debug = require('debug')('cypress:server:plugins:child')
+const debugLib = require('debug')
 const Promise = require('bluebird')
+const _ = require('lodash')
+
+const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
 const resolve = require('../../util/resolve')
-const tsNodeUtil = require('../../util/ts_node')
 const browserLaunch = require('./browser_launch')
-const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
 
-let registeredEventsById = {}
-let registeredEventsByName = {}
+const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
-const invoke = (eventId, args = []) => {
-  const event = registeredEventsById[eventId]
-
-  return event.handler(...args)
-}
-
-const getDefaultPreprocessor = function (config) {
-  const tsPath = resolve.typescript(config.projectRoot)
-  const options = {
-    typescript: tsPath,
+class RunPlugins {
+  constructor (ipc, projectRoot, requiredFile) {
+    this.ipc = ipc
+    /**
+     * @type {string}
+     */
+    this.projectRoot = projectRoot
+    /**
+     * @type {string}
+     */
+    this.requiredFile = requiredFile
+    this.eventIdCount = 0
+    this.registrations = []
+    /**
+     * @type {Record<string, {event: string, handler: Function}>}
+     */
+    this.registeredEventsById = {}
+    this.registeredEventsByName = {}
   }
 
-  debug('creating webpack preprocessor with options %o', options)
+  invoke = (eventId, args = []) => {
+    const event = this.registeredEventsById[eventId]
 
-  const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+    return event.handler(...args)
+  }
 
-  return webpackPreprocessor(options)
-}
-
-let plugins
-
-const load = (ipc, config, pluginsFile) => {
-  debug('run plugins function')
-
-  let eventIdCount = 0
-  const registrations = []
-
-  // we track the register calls and then send them all at once
-  // to the parent process
-  const register = (event, handler) => {
-    const { isValid, userEvents, error } = validateEvent(event, handler, config, register)
-
-    if (!isValid) {
-      if (userEvents) {
-        ipc.send('load:error', 'PLUGINS_INVALID_EVENT_NAME_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
-      } else {
-        ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(error))
-      }
-
-      return
+  getDefaultPreprocessor (config) {
+    const tsPath = resolve.typescript(config.projectRoot)
+    const options = {
+      ...tsPath && { typescript: tsPath },
     }
 
-    if (event === 'task') {
-      const existingEventId = registeredEventsByName[event]
+    debug('creating webpack preprocessor with options %o', options)
 
-      if (existingEventId) {
-        handler = task.merge(registeredEventsById[existingEventId].handler, handler)
-        registeredEventsById[existingEventId] = { event, handler }
-        debug('extend task events with id', existingEventId)
+    const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+    return webpackPreprocessor(options)
+  }
+
+  load (initialConfig, setupNodeEvents) {
+    debug('Loading the RunPlugins')
+
+    // we track the register calls and then send them all at once
+    // to the parent process
+    const registerChildEvent = (event, handler) => {
+      const { isValid, userEvents, error } = validateEvent(event, handler, initialConfig)
+
+      if (!isValid) {
+        const err = userEvents
+          ? require('@packages/errors').getError('SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR', this.requiredFile, event, userEvents, error)
+          : require('@packages/errors').getError('CONFIG_FILE_SETUP_NODE_EVENTS_ERROR', this.requiredFile, initialConfig.testingType, error)
+
+        this.ipc.send('setupTestingType:error', util.serializeError(err))
 
         return
       }
+
+      if (event === 'dev-server:start' && this.registeredEventsByName[event]) {
+        const err = require('@packages/errors').getError('SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER', this.requiredFile)
+
+        this.ipc.send('setupTestingType:error', util.serializeError(err))
+
+        return
+      }
+
+      if (event === 'task') {
+        const existingEventId = this.registeredEventsByName[event]
+
+        if (existingEventId) {
+          handler = this.taskMerge(this.registeredEventsById[existingEventId].handler, handler)
+          this.registeredEventsById[existingEventId] = { event, handler }
+          debug('extend task events with id', existingEventId)
+
+          return
+        }
+      }
+
+      const eventId = this.eventIdCount++
+
+      this.registeredEventsById[eventId] = { event, handler }
+      this.registeredEventsByName[event] = eventId
+
+      debug('register event', event, 'with id', eventId)
+
+      this.registrations.push({
+        event,
+        eventId,
+      })
     }
 
-    const eventId = eventIdCount++
+    // events used for parent/child communication
+    registerChildEvent('_get:task:body', () => {})
+    registerChildEvent('_get:task:keys', () => {})
 
-    registeredEventsById[eventId] = { event, handler }
-    registeredEventsByName[event] = eventId
+    Promise
+    .try(() => {
+      debug('Calling setupNodeEvents')
 
-    debug('register event', event, 'with id', eventId)
-
-    registrations.push({
-      event,
-      eventId,
+      return setupNodeEvents(registerChildEvent, initialConfig)
+    })
+    .tap(() => {
+      if (!this.registeredEventsByName['file:preprocessor']) {
+        debug('register default preprocessor')
+        registerChildEvent('file:preprocessor', this.getDefaultPreprocessor(initialConfig))
+      }
+    })
+    .then((modifiedCfg) => {
+      debug('plugins file successfully loaded')
+      this.ipc.send('setupTestingType:reply', {
+        setupConfig: modifiedCfg,
+        registrations: this.registrations,
+        requires: util.nonNodeRequires(),
+      })
+    })
+    .catch((err) => {
+      debug('plugins file errored:', err && err.stack)
+      this.ipc.send('setupTestingType:error', util.serializeError(require('@packages/errors').getError(
+        'CONFIG_FILE_SETUP_NODE_EVENTS_ERROR',
+        this.requiredFile,
+        initialConfig.testingType,
+        err,
+      )))
     })
   }
 
-  // events used for parent/child communication
-  register('_get:task:body', () => {})
-  register('_get:task:keys', () => {})
+  execute (event, ids, args = []) {
+    debug(`execute plugin event: ${event} (%o)`, ids)
 
-  Promise
-  .try(() => {
-    debug('run plugins function')
+    switch (event) {
+      case 'dev-server:start':
+        return devServer.wrap(this.ipc, this.invoke, ids, args)
+      case 'file:preprocessor':
+        return preprocessor.wrap(this.ipc, this.invoke, ids, args)
+      case 'before:run':
+      case 'before:spec':
+      case 'after:run':
+      case 'after:spec':
+      case 'after:screenshot':
+        return util.wrapChildPromise(this.ipc, this.invoke, ids, args)
+      case 'task':
+        return this.taskExecute(ids, args)
+      case '_get:task:keys':
+        return this.taskGetKeys(ids)
+      case '_get:task:body':
+        return this.taskGetBody(ids, args)
+      case 'before:browser:launch':
+        return browserLaunch.wrap(this.ipc, this.invoke, ids, args)
+      default:
+        debug('unexpected execute message:', event, args)
 
-    return plugins(register, config)
-  })
-  .tap(() => {
-    if (!registeredEventsByName['file:preprocessor']) {
-      debug('register default preprocessor')
-      register('file:preprocessor', getDefaultPreprocessor(config))
+        return
     }
-  })
-  .then((modifiedCfg) => {
-    debug('plugins file successfully loaded')
-    ipc.send('loaded', modifiedCfg, registrations)
-  })
-  .catch((err) => {
-    debug('plugins file errored:', err && err.stack)
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(err))
-  })
-}
-
-const execute = (ipc, event, ids, args = []) => {
-  debug(`execute plugin event: ${event} (%o)`, ids)
-
-  const wrapChildPromise = () => {
-    util.wrapChildPromise(ipc, invoke, ids, args)
   }
 
-  switch (event) {
-    case 'dev-server:start':
-      return devServer.wrap(ipc, invoke, ids, args)
-    case 'file:preprocessor':
-      return preprocessor.wrap(ipc, invoke, ids, args)
-    case 'before:run':
-    case 'before:spec':
-    case 'after:run':
-    case 'after:spec':
-    case 'after:screenshot':
-      return wrapChildPromise()
-    case 'task':
-      return task.wrap(ipc, registeredEventsById, ids, args)
-    case '_get:task:keys':
-      return task.getKeys(ipc, registeredEventsById, ids)
-    case '_get:task:body':
-      return task.getBody(ipc, registeredEventsById, ids, args)
-    case 'before:browser:launch':
-      return browserLaunch.wrap(ipc, invoke, ids, args)
-    default:
-      debug('unexpected execute message:', event, args)
+  wrapChildPromise (invoke, ids, args = []) {
+    return Promise.try(() => {
+      return invoke(ids.eventId, args)
+    })
+    .then((value) => {
+      // undefined is coerced into null when sent over ipc, but we need
+      // to differentiate between them for 'task' event
+      if (value === undefined) {
+        value = UNDEFINED_SERIALIZED
+      }
 
-      return
-  }
-}
-
-let tsRegistered = false
-
-const runPlugins = (ipc, pluginsFile, projectRoot) => {
-  debug('pluginsFile:', pluginsFile)
-  debug('project root:', projectRoot)
-  if (!projectRoot) {
-    throw new Error('Unexpected: projectRoot should be a string')
+      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
+    }).catch((err) => {
+      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, util.serializeError(err))
+    })
   }
 
-  process.on('uncaughtException', (err) => {
-    debug('uncaught exception:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
+  taskGetBody (ids, args) {
+    const [event] = args
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
+    const invoke = () => {
+      const fn = taskEvent[event]
 
-    return false
-  })
-
-  process.on('unhandledRejection', (event) => {
-    let err = event
-
-    debug('unhandled rejection:', event)
-
-    // Rejected Bluebird promises will return a reason object.
-    // OpenSSL error returns a reason as user-friendly string.
-    if (event && event.reason && typeof event.reason === 'object') {
-      err = event.reason
+      return _.isFunction(fn) ? fn.toString() : ''
     }
 
-    ipc.send('error', util.serializeError(err))
-
-    return false
-  })
-
-  if (!tsRegistered) {
-    tsNodeUtil.register(projectRoot, pluginsFile)
-
-    // ensure typescript is only registered once
-    tsRegistered = true
+    util.wrapChildPromise(this.ipc, invoke, ids)
   }
 
-  try {
-    debug('require pluginsFile')
-    plugins = require(pluginsFile)
+  taskGetKeys (ids) {
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
+    const invoke = () => _.keys(taskEvent)
 
-    // Handle export default () => {}
-    if (plugins && typeof plugins.default === 'function') {
-      plugins = plugins.default
+    util.wrapChildPromise(this.ipc, invoke, ids)
+  }
+
+  taskMerge (target, events) {
+    const duplicates = _.intersection(_.keys(target), _.keys(events))
+
+    if (duplicates.length) {
+      require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates)
     }
-  } catch (err) {
-    debug('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, util.serializeError(err))
 
-    return
+    return _.extend(target, events)
   }
 
-  if (typeof plugins !== 'function') {
-    debug('not a function')
-    ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
+  taskExecute (ids, args) {
+    const task = args[0]
+    let arg = args[1]
 
-    return
+    // ipc converts undefined to null.
+    // we're restoring it.
+    if (arg && arg.__cypress_task_no_argument__) {
+      arg = undefined
+    }
+
+    const invoke = (eventId, args = []) => {
+      const handler = _.get(this.registeredEventsById, `${eventId}.handler.${task}`)
+
+      if (_.isFunction(handler)) {
+        return handler(...args)
+      }
+
+      return '__cypress_unhandled__'
+    }
+
+    util.wrapChildPromise(this.ipc, invoke, ids, [arg])
   }
 
-  ipc.on('load', (config) => {
-    debug('plugins load file "%s"', pluginsFile)
+  /**
+   *
+   * @param {Function} setupNodeEventsFn
+   */
+  runSetupNodeEvents (config, setupNodeEventsFn) {
+    debug('project root:', this.projectRoot)
+    if (!this.projectRoot) {
+      throw new Error('Unexpected: projectRoot should be a string')
+    }
+
     debug('passing config %o', config)
-    load(ipc, config, pluginsFile)
-  })
+    this.load(config, setupNodeEventsFn)
 
-  ipc.on('execute', (event, ids, args) => {
-    execute(ipc, event, ids, args)
-  })
-
-  ipc.send('ready')
+    this.ipc.on('execute:plugins', (event, ids, args) => {
+      this.execute(event, ids, args)
+    })
+  }
 }
 
-// for testing purposes
-runPlugins.__reset = () => {
-  tsRegistered = false
-  registeredEventsById = {}
-  registeredEventsByName = {}
-}
-
-module.exports = runPlugins
+exports.RunPlugins = RunPlugins

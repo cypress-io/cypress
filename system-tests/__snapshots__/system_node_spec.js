@@ -1,9 +1,9 @@
 exports['e2e system node uses system node when launching plugins file 1'] = `
-Deprecation Warning: nodeVersion is currently set to system in the cypress.json configuration file.
+Deprecation Warning: nodeVersion is currently set to system in the cypress.config.js configuration file.
 
 As of Cypress version 9.0.0 the default behavior of nodeVersion has changed to always use the version of Node used to start cypress via the cli.
 
-Please remove the nodeVersion configuration option from cypress.json.
+Please remove the nodeVersion configuration option from cypress.config.js.
 
 
 ====================================================================================================
@@ -15,7 +15,7 @@ Please remove the nodeVersion configuration option from cypress.json.
   │ Browser:        FooBrowser 88                                                                  │
   │ Node Version:   vX (/foo/bar/node)                                                             │
   │ Specs:          1 found (system.spec.js)                                                       │
-  │ Searched:       cypress/integration/system.spec.js                                             │
+  │ Searched:       cypress/e2e/system.spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -65,13 +65,13 @@ Please remove the nodeVersion configuration option from cypress.json.
 `
 
 exports['e2e system node uses bundled node when launching plugins file 1'] = `
-Deprecation Warning: nodeVersion is currently set to bundled in the cypress.json configuration file.
+Deprecation Warning: nodeVersion is currently set to bundled in the cypress.config.js configuration file.
 
 As of Cypress version 9.0.0 the default behavior of nodeVersion has changed to always use the version of Node used to start cypress via the cli.
 
 When nodeVersion is set to bundled, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
 
-As the nodeVersion configuration option will be removed in a future release, it is recommended to remove the nodeVersion configuration option from cypress.json.
+As the nodeVersion configuration option will be removed in a future release, it is recommended to remove the nodeVersion configuration option from cypress.config.js.
 
 
 ====================================================================================================
@@ -142,7 +142,7 @@ exports['e2e system node uses default node when launching plugins file 1'] = `
   │ Browser:        FooBrowser 88                                                                  │
   │ Node Version:   vX (/foo/bar/node)                                                             │
   │ Specs:          1 found (default.spec.js)                                                      │
-  │ Searched:       cypress/integration/default.spec.js                                            │
+  │ Searched:       cypress/e2e/default.spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -6,7 +6,7 @@ describe('e2e issue 1669', () => {
   // https://github.com/cypress-io/cypress/issues/1669
   it('passes', function () {
     return systemTests.exec(this, {
-      spec: 'issue_1669_spec.js',
+      spec: 'issue_1669.cy.js',
       snapshot: true,
       browser: 'chrome',
       expectedExitCode: 1,

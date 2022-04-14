@@ -214,6 +214,8 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // 4. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
 
+    console.log(lockFilePath)
+
     log(`Writing ${lockFilename} with fixed relative paths to temp dir`)
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
@@ -271,7 +273,13 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
  */
 export async function scaffoldCommonNodeModules () {
   await Promise.all([
+    '@babel/preset-env',
+    '@babel/preset-react',
+    'babel-loader',
+    // Used for import { defineConfig } from 'cypress'
+    'cypress',
     '@cypress/code-coverage',
+    '@cypress/react',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',

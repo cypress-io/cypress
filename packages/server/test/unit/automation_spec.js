@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const _ = require('lodash')
-const { Automation } = require(`${root}lib/automation`)
+const { Automation } = require(`../../lib/automation`)
 
 describe('lib/automation', () => {
   beforeEach(function () {

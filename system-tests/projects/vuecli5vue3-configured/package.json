@@ -1,0 +1,25 @@
+{
+  "name": "vuecli5vue3",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "vue": "^3.2.13"
+  },
+  "devDependencies": {
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server-fresh",
+    "@vue/cli-service": "~5.0.0",
+    "html-webpack-plugin": "^5.0.0",
+    "webpack": "^5.0.0",
+    "webpack-dev-server": "^4.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}

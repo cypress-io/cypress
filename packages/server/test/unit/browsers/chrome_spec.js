@@ -7,23 +7,29 @@ const _ = require('lodash')
 
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
-const plugins = require(`${root}../lib/plugins`)
-const utils = require(`${root}../lib/browsers/utils`)
-const chrome = require(`${root}../lib/browsers/chrome`)
-const { fs } = require(`${root}../lib/util/fs`)
+const plugins = require(`../../../lib/plugins`)
+const utils = require(`../../../lib/browsers/utils`)
+const chrome = require(`../../../lib/browsers/chrome`)
+const { fs } = require(`../../../lib/util/fs`)
+const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
     beforeEach(function () {
       // mock CRI client during testing
-      this.criClient = {
-        ensureMinimumProtocolVersion: sinon.stub().resolves(),
+      this.pageCriClient = {
         send: sinon.stub().resolves(),
         Page: {
           screencastFrame: sinon.stub().returns(),
         },
         close: sinon.stub().resolves(),
         on: sinon.stub(),
+      }
+
+      this.browserCriClient = {
+        attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
+        close: sinon.stub().resolves(),
+        ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
       }
 
       this.automation = {
@@ -37,16 +43,16 @@ describe('lib/browsers/chrome', () => {
       }
 
       this.onCriEvent = (event, data, options) => {
-        this.criClient.on.withArgs(event).yieldsAsync(data)
+        this.pageCriClient.on.withArgs(event).yieldsAsync(data)
 
-        return chrome.open('chrome', 'http://', options, this.automation)
+        return chrome.open({ isHeadless: true }, 'http://', options, this.automation)
         .then(() => {
-          this.criClient.on = undefined
+          this.pageCriClient.on = undefined
         })
       }
 
       sinon.stub(chrome, '_writeExtension').resolves('/path/to/ext')
-      sinon.stub(chrome, '_connectToChromeRemoteInterface').resolves(this.criClient)
+      sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
       sinon.stub(plugins, 'execute').callThrough()
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
@@ -63,25 +69,25 @@ describe('lib/browsers/chrome', () => {
 
     afterEach(function () {
       mockfs.restore()
-      expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
+      expect(this.browserCriClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
     it('focuses on the page, calls CRI Page.visit, enables Page events, and sets download behavior', function () {
-      return chrome.open('chrome', 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send.callCount).to.equal(5)
-        expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
+        expect(this.pageCriClient.send.callCount).to.equal(5)
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.bringToFront')
 
-        expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
-        expect(this.criClient.send).to.have.been.calledWith('Page.enable')
-        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
-        expect(this.criClient.send).to.have.been.calledWith('Network.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
       })
     })
 
     it('is noop without before:browser:launch', function () {
-      return chrome.open('chrome', 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(plugins.execute).not.to.be.called
       })
@@ -95,20 +101,20 @@ describe('lib/browsers/chrome', () => {
 
       plugins.execute.resolves(null)
 
-      return chrome.open('chrome', 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
-        expect(launch.launch).to.be.calledWith('chrome', 'about:blank', args)
+        expect(launch.launch).to.be.calledWith({ isHeadless: true }, 'about:blank', 50505, args)
       })
     })
 
     it('sets default window size and DPR in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[2]
+        const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
           '--headless',
@@ -121,9 +127,9 @@ describe('lib/browsers/chrome', () => {
     it('does not load extension in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[2]
+        const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
           '--headless',
@@ -154,7 +160,7 @@ describe('lib/browsers/chrome', () => {
         channel: 'stable',
       }, 'http://', {}, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[2]
+        const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
           `--user-data-dir=${fullPath}`,
@@ -163,7 +169,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve(['--foo=bar', '--load-extension=/foo/bar/baz.js'])
       })
 
@@ -171,9 +177,9 @@ describe('lib/browsers/chrome', () => {
 
       const onWarning = sinon.stub()
 
-      return chrome.open('chrome', 'http://', { onWarning }, this.automation)
+      return chrome.open({ isHeaded: true }, 'http://', { onWarning }, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[2]
+        const args = launch.launch.firstCall.args[3]
 
         expect(args).to.deep.eq([
           '--foo=bar',
@@ -187,7 +193,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('normalizes --load-extension if provided in plugin', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({
           args: ['--foo=bar', '--load-extension=/foo/bar/baz.js'],
         })
@@ -195,9 +201,9 @@ describe('lib/browsers/chrome', () => {
 
       const pathToTheme = extension.getPathToTheme()
 
-      return chrome.open('chrome', 'http://', {}, this.automation)
+      return chrome.open({ isHeaded: true }, 'http://', {}, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[2]
+        const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
           '--foo=bar',
@@ -209,7 +215,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('normalizes multiple extensions from plugins', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
       })
 
@@ -217,9 +223,9 @@ describe('lib/browsers/chrome', () => {
 
       const onWarning = sinon.stub()
 
-      return chrome.open('chrome', 'http://', { onWarning }, this.automation)
+      return chrome.open({ isHeaded: true }, 'http://', { onWarning }, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[2]
+        const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
           '--foo=bar',
@@ -279,7 +285,7 @@ describe('lib/browsers/chrome', () => {
 
       sinon.stub(fs, 'outputJson').resolves()
 
-      return chrome.open('chrome', 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(fs.outputJson).to.be.calledWith('/profile/dir/Default/Preferences', {
           profile: {
@@ -296,21 +302,21 @@ describe('lib/browsers/chrome', () => {
         kill,
       } = this.launchedBrowser
 
-      return chrome.open('chrome', 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a('function')
+        expect(typeof this.launchedBrowser.kill).to.eq('function')
 
         this.launchedBrowser.kill()
 
-        expect(this.criClient.close).to.be.calledOnce
+        expect(this.browserCriClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
       })
     })
 
     it('rejects if CDP version check fails', function () {
-      this.criClient.ensureMinimumProtocolVersion.rejects()
+      this.browserCriClient.ensureMinimumProtocolVersion.throws()
 
-      return expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+      return expect(chrome.open({ isHeadless: true }, 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
     // https://github.com/cypress-io/cypress/issues/9265
@@ -321,9 +327,9 @@ describe('lib/browsers/chrome', () => {
 
       return this.onCriEvent('Page.screencastFrame', frameMeta, options)
       .then(() => {
-        expect(this.criClient.send).to.have.been.calledWith('Page.startScreencast')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.startScreencast')
         expect(write).to.have.been.calledWith(frameMeta)
-        expect(this.criClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
       })
     })
 
@@ -361,6 +367,47 @@ describe('lib/browsers/chrome', () => {
           })
         })
       })
+    })
+  })
+
+  context('#connectToNewSpec', () => {
+    it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+
+      const browserCriClient = {
+        attachToNewUrl: sinon.stub().withArgs('about:blank').resolves(pageCriClient),
+      }
+
+      const automation = {
+        use: sinon.stub().returns(),
+      }
+
+      const launchedBrowser = {
+        kill: sinon.stub().returns(),
+      }
+
+      let onInitializeNewBrowserTabCalled = false
+      const options = { onError: () => {}, url: 'https://www.google.com', downloadsFolder: '/tmp/folder', onInitializeNewBrowserTab: () => {
+        onInitializeNewBrowserTabCalled = true
+      } }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+      sinon.stub(chrome, '_maybeRecordVideo').withArgs(pageCriClient, options, 354).resolves()
+      sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
+      sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
+
+      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, launchedBrowser)
+
+      expect(browserCriClient.attachToNewUrl).to.be.called
+      expect(automation.use).to.be.called
+      expect(chrome._getBrowserCriClient).to.be.called
+      expect(chrome._maybeRecordVideo).to.be.called
+      expect(chrome._navigateUsingCRI).to.be.called
+      expect(chrome._handleDownloads).to.be.called
+      expect(onInitializeNewBrowserTabCalled).to.be.true
     })
   })
 

@@ -25,7 +25,7 @@ const validate = (chosenEditor: Editor) => {
   let isValid = !!chosenEditor && !!chosenEditor.id
   let validationMessage = 'Please select a preference'
 
-  if (isValid && chosenEditor.isOther && !chosenEditor.openerId) {
+  if (isValid && chosenEditor.isOther && !chosenEditor.binary) {
     isValid = false
     validationMessage = 'Please enter the path for the "Other" editor'
   }
@@ -42,7 +42,7 @@ const EditorPickerModal = observer(({ chosenEditor, editors, isOpen, onClose, on
       const otherOption = _.find(external.editors, { isOther: true })
 
       if (otherOption) {
-        otherOption.openerId = otherPath
+        otherOption.binary = otherPath
       }
     }),
   }), { editors })

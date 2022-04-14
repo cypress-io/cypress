@@ -23,6 +23,9 @@ describe('e2e new project', () => {
       .then(() => {
         return fs.statAsync(supportPath)
       })
+      .catch((err) => {
+        expect(err.code).eq('ENOENT')
+      })
     })
   })
 })

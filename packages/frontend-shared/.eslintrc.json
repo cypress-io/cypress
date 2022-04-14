@@ -1,0 +1,71 @@
+{
+  "globals": {
+    "defineProps": "readonly",
+    "defineEmits": "readonly",
+    "defineExpose": "readonly",
+    "withDefaults": "readonly"
+  },
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests",
+    "../reporter/src/.eslintrc.json",
+    "plugin:vue/vue3-recommended"
+  ],
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
+  "env": {
+    "cypress/globals": true
+  },
+  "overrides": [
+    {
+      "files": "**/*.vue",
+      "rules": {
+        "vue/no-v-html": "off",
+        "no-spaced-func": "off",
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "@packages/graphql/*"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "lib/*"
+      ],
+      "rules": {
+        "no-console": 1
+      }
+    },
+    {
+      "files": [
+        "**/*.json"
+      ],
+      "rules": {
+        "quotes": "off",
+        "comma-dangle": "off"
+      }
+    },
+    {
+      "files": [
+        "*.tsx",
+        "*.jsx"
+      ],
+      "rules": {
+        "no-unused-vars": "off",
+        "react/jsx-no-bind": "off",
+        "react/react-in-jsx-scope": "off",
+        "react/no-unknown-property": "off"
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@ exports['retries / supports retries'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (fail-twice.js)                                                            │
-  │ Searched:   cypress/integration/fail-twice.js                                                  │
+  │ Searched:   cypress/e2e/fail-twice.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -84,7 +84,7 @@ https://on.cypress.io/test-retries
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (main.spec.js)                                                             │
-  │ Searched:   cypress/integration/main.spec.js                                                   │
+  │ Searched:   cypress/e2e/main.spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

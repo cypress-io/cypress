@@ -67,11 +67,12 @@ context('lib/browsers/cdp_automation', () => {
   })
 
   context('.CdpAutomation', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
+      this.sendCloseTargetCommand = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn)
+      this.automation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
@@ -216,6 +217,36 @@ context('lib/browsers/cdp_automation', () => {
 
         return expect(this.onRequest('take:screenshot'))
         .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+      })
+    })
+
+    describe('reset:browser:state', function () {
+      it('sends Storage.clearDataForOrigin and Network.clearBrowserCache', async function () {
+        this.sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }).resolves()
+        this.sendDebuggerCommand.withArgs('Network.clearBrowserCache').resolves()
+
+        await this.onRequest('reset:browser:state')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.sendDebuggerCommand).to.be.calledWith('Network.clearBrowserCache')
+      })
+    })
+
+    describe('close:browser:tabs', function () {
+      it('sends the close target message for the attached target tabs', async function () {
+        this.sendCloseTargetCommand.resolves()
+
+        await this.onRequest('close:browser:tabs')
+
+        expect(this.sendCloseTargetCommand).to.be.called
+      })
+    })
+
+    describe('focus:browser:window', function () {
+      it('sends Page.bringToFront when focus is requested', function () {
+        this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
+
+        return this.onRequest('focus:browser:window').then((resp) => expect(resp).to.be.undefined)
       })
     })
   })

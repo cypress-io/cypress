@@ -61,7 +61,7 @@ describe('e2e screenshots', () => {
   // and are also generated automatically on failure with
   // the test title as the file name
   systemTests.it('passes', {
-    spec: 'screenshots_spec.js',
+    spec: 'screenshots.cy.js',
     expectedExitCode: 5,
     snapshot: true,
     timeout: 180000,
@@ -70,7 +70,7 @@ describe('e2e screenshots', () => {
       return exec()
       .then(() => {
         const screenshot = (...paths) => {
-          return path.join(e2ePath, 'cypress', 'screenshots', 'screenshots_spec.js', ...paths)
+          return path.join(e2ePath, 'cypress', 'screenshots', 'screenshots.cy.js', ...paths)
         }
 
         const screenshot1 = screenshot('black.png')

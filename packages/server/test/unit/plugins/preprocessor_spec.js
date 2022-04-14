@@ -1,11 +1,11 @@
 require('../../spec_helper')
 
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const path = require('path')
-const appData = require(`${root}../lib/util/app_data`)
+const appData = require(`../../../lib/util/app_data`)
 
-const plugins = require(`${root}../lib/plugins`)
-const preprocessor = require(`${root}../lib/plugins/preprocessor`)
+const plugins = require(`../../../lib/plugins`)
+const preprocessor = require(`../../../lib/plugins/preprocessor`)
 
 describe('lib/plugins/preprocessor', () => {
   beforeEach(function () {
@@ -14,13 +14,12 @@ describe('lib/plugins/preprocessor', () => {
 
     this.filePath = 'path/to/test.coffee'
     this.fullFilePath = path.join(this.todosPath, this.filePath)
-    this.integrationFolder = '/integration-path/'
 
     this.testPath = path.join(this.todosPath, 'test.coffee')
     this.localPreprocessorPath = path.join(this.todosPath, 'prep.coffee')
 
     this.plugin = sinon.stub().returns('/path/to/output.js')
-    plugins.register('file:preprocessor', this.plugin)
+    plugins.registerEvent('file:preprocessor', this.plugin)
 
     preprocessor.close()
 
@@ -40,13 +39,6 @@ describe('lib/plugins/preprocessor', () => {
 
     it('executes the plugin with output path', function () {
       preprocessor.getFile(this.filePath, this.config)
-      const expectedPath = appData.projectsPath(appData.toHashName(this.todosPath), 'bundles', this.filePath)
-
-      expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
-    })
-
-    it('executes the plugin with output path when integrationFolder was defined', function () {
-      preprocessor.getFile(this.integrationFolder + this.filePath, Object.assign({ integrationFolder: this.integrationFolder }, this.config))
       const expectedPath = appData.projectsPath(appData.toHashName(this.todosPath), 'bundles', this.filePath)
 
       expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)

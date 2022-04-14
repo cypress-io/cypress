@@ -3,6 +3,8 @@ import React, { Component, CSSProperties, MouseEvent, ReactNode, RefObject } fro
 
 import { onEnterOrSpace } from '../lib/util'
 
+import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+
 interface Props {
   isOpen?: boolean
   headerClass?: string
@@ -54,7 +56,7 @@ class Collapsible extends Component<Props, State> {
               style={this.props.headerStyle}
               tabIndex={-1}
             >
-              <i className='collapsible-indicator fa-fw fas' />
+              <ChevronIcon className='collapsible-indicator' />
               <span className='collapsible-header-text'>
                 {this.props.header}
               </span>

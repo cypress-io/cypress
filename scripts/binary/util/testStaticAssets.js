@@ -47,21 +47,6 @@ const testStaticAssets = async (buildResourcePath) => {
         ['-ms-', 20],
       ],
     }),
-
-    testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
-      goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        `window.env = 'production'`,
-      ],
-    }),
-    testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/app.js`,
-      goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        'react.production.min.js',
-      ],
-    }),
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/socket/node_modules/socket.io-parser/dist/binary.js`,
       badStrings: [
@@ -79,15 +64,6 @@ const testStaticAssets = async (buildResourcePath) => {
       goodStrings: [
         'This extra check is made because the "instanceof ArrayBuffer" check does not work',
         'return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);',
-      ],
-    }),
-    testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/node_modules/winston/lib/winston/common.js`,
-      badStrings: [
-        `if (target.padLevels) {`,
-      ],
-      goodStrings: [
-        `if (target.hasOwnProperty('padLevels') && target.padLevels) {`,
       ],
     }),
   ])

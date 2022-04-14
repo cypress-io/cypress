@@ -4,10 +4,10 @@ const os = require('os')
 const path = require('path')
 const Promise = require('bluebird')
 const lockFile = Promise.promisifyAll(require('lockfile'))
-const { fs } = require(`${root}../lib/util/fs`)
-const env = require(`${root}../lib/util/env`)
-const exit = require(`${root}../lib/util/exit`)
-const FileUtil = require(`${root}../lib/util/file`)
+const { fs } = require(`../../../lib/util/fs`)
+const env = require(`../../../lib/util/env`)
+const exit = require(`../../../lib/util/exit`)
+const FileUtil = require(`../../../lib/util/file`)
 
 describe('lib/util/file', () => {
   beforeEach(function () {

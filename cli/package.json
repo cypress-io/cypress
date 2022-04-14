@@ -101,8 +101,13 @@
     "bin",
     "lib",
     "index.js",
+    "index.mjs",
     "types/**/*.d.ts",
-    "types/net-stubbing.ts"
+    "types/net-stubbing.ts",
+    "mount-utils",
+    "vue",
+    "react",
+    "vue2"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -110,5 +115,30 @@
   "engines": {
     "node": ">=12.0.0"
   },
-  "types": "types"
+  "types": "types",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    },
+    "./vue": {
+      "import": "./vue/dist/cypress-vue.esm-bundler.js",
+      "require": "./vue/dist/cypress-vue.cjs.js"
+    },
+    "./vue2": {
+      "import": "./vue2/dist/cypress-vue2.esm-bundler.js",
+      "require": "./vue2/dist/cypress-vue2.cjs.js"
+    },
+    "./package.json": {
+      "import": "./package.json",
+      "require": "./package.json"
+    },
+    "./react": {
+      "import": "./react/dist/cypress-react.esm-bundler.js",
+      "require": "./react/dist/cypress-react.cjs.js"
+    },
+    "./mount-utils": {
+      "require": "./mount-utils/dist/index.js"
+    }
+  }
 }

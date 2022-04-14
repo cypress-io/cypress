@@ -61,18 +61,11 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
 export interface CypressWebpackDevServerConfig{
   /* support passing a path to the user's webpack config */
   webpackConfig?: WebpackConfigurationWithDevServer
-  /* base html template to render in AUT */
-  template?: string
 }
 
 export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressWebpackDevServerConfig) {
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig: devServerConfig?.webpackConfig,
-    template: devServerConfig?.template,
   })
-}
-
-export function defineDevServerConfig (devServerConfig: CypressWebpackDevServerConfig) {
-  return devServerConfig
 }

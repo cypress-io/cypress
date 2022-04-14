@@ -198,12 +198,15 @@ const parseOpts = (opts) => {
     'cacheClear',
     'cachePrune',
     'ciBuildId',
+    'ct',
+    'component',
     'config',
     'configFile',
     'cypressVersion',
     'destination',
     'detached',
     'dev',
+    'e2e',
     'exit',
     'env',
     'force',
@@ -211,6 +214,8 @@ const parseOpts = (opts) => {
     'group',
     'headed',
     'headless',
+    'inspect',
+    'inspectBrk',
     'key',
     'path',
     'parallel',
@@ -252,12 +257,16 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    folder = `${folder}-e2e-test`
+  }
 
   const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 

@@ -1,0 +1,23 @@
+{
+  "name": "vueclivue2-unconfigured",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "vue": "^2.6.11"
+  },
+  "devDependencies": {
+    "@cypress/vue2": "file:../../../npm/vue2",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "@vue/cli-service": "~4.5.15",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

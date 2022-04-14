@@ -3,14 +3,12 @@ import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
+import type { CypressWebpackDevServerConfig } from '.'
+import { normalizeError } from './plugin'
 
-export interface StartDevServer extends UserWebpackDevServerOptions {
+export interface StartDevServer extends UserWebpackDevServerOptions, CypressWebpackDevServerConfig {
   /* this is the Cypress dev server configuration object */
   options: Cypress.DevServerConfig
-  /* Base webpack config object used for loading component testing */
-  webpackConfig?: WebpackConfigurationWithDevServer
-  /* base html template to render in AUT */
-  template?: string
 }
 
 export interface WebpackConfigurationWithDevServer extends webpack.Configuration {
@@ -19,16 +17,16 @@ export interface WebpackConfigurationWithDevServer extends webpack.Configuration
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, template, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
 
-  const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
+  const { projectRoot, devServerPublicPathRoute, isTextTerminal, indexHtmlFile } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
-    template,
+    indexHtmlFile,
     projectRoot,
     devServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
@@ -43,9 +41,13 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
 
   // When compiling in run mode
   // Stop the clock early, no need to run all the tests on a failed build
+
   if (isTextTerminal) {
     compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
       if (stats.hasErrors()) {
+        const errors = stats.compilation.errors
+
+        options.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
         exitProcess(1)
       }
     })

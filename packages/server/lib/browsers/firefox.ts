@@ -5,8 +5,9 @@ import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
-import { launch } from '@packages/launcher/lib/browsers'
+import { launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import FirefoxProfile from 'firefox-profile'
+import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
 import * as launcherDebug from '@packages/launcher/lib/log'
@@ -16,8 +17,8 @@ import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
-
-const errors = require('../errors')
+import type { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -341,13 +342,21 @@ toolbar {
 
 `
 
-export function _createDetachedInstance (browserInstance: BrowserInstance): BrowserInstance {
+let browserCriClient
+
+export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
 
   detachedInstance.pid = browserInstance.pid
 
   // kill the entire process tree, from the spawned instance up
   detachedInstance.kill = (): void => {
+    // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
+    if (browserCriClient) {
+      browserCriClient.close().catch()
+      browserCriClient = undefined
+    }
+
     treeKill(browserInstance.pid, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
@@ -355,6 +364,14 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   }
 
   return detachedInstance
+}
+
+export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation) {
+  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
+}
+
+export function connectToExisting () {
+  throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')
 }
 
 export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
@@ -502,23 +519,41 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await launch(browser, 'about:blank', launchOptions.args, {
+  const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
-  })
+  }) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
 
   try {
-    await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
-  } catch (err) {
-    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  }
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
 
-  if (os.platform() === 'win32') {
-    // override the .kill method for Windows so that the detached Firefox process closes between specs
-    // @see https://github.com/cypress-io/cypress/issues/6392
-    return _createDetachedInstance(browserInstance)
+    if (os.platform() === 'win32') {
+      // override the .kill method for Windows so that the detached Firefox process closes between specs
+      // @see https://github.com/cypress-io/cypress/issues/6392
+      return _createDetachedInstance(browserInstance, browserCriClient)
+    }
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalBrowserKill = browserInstance.kill
+
+    /* @ts-expect-error */
+    browserInstance.kill = (...args) => {
+      debug('closing remote interface client')
+
+      // Do nothing on failure here since we're shutting down anyway
+      if (browserCriClient) {
+        browserCriClient.close().catch()
+        browserCriClient = undefined
+      }
+
+      debug('closing firefox')
+
+      originalBrowserKill.apply(browserInstance, args)
+    }
+  } catch (err) {
+    errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
   return browserInstance

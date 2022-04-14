@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "error",
+    "types": []
+  },
+  "include": ["**/*"]
+}

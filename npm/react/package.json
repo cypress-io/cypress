@@ -5,10 +5,11 @@
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
     "build": "rimraf dist && yarn transpile-plugins && rollup -c rollup.config.js",
+    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress.js open-ct",
+    "cy:open": "node ../../scripts/cypress.js open --component",
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct",
+    "cy:run": "node ../../scripts/cypress.js run --component",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn test-unit && yarn test-component",
@@ -20,7 +21,6 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
-    "@cypress/mount-utils": "0.0.0-development",
     "debug": "^4.3.2",
     "find-webpack": "2.2.1",
     "find-yarn-workspace-root": "2.0.0"
@@ -36,6 +36,7 @@
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
     "@cypress/code-coverage": "3.9.4",
+    "@cypress/mount-utils": "0.0.0-development",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
@@ -94,7 +95,7 @@
     "svg-url-loader": "3.0.3",
     "typescript": "^4.2.3",
     "victory": "34.3.6",
-    "webpack": "4.44.1",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.9"
   },
   "peerDependencies": {

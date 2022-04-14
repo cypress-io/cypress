@@ -2,24 +2,26 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import { Dialog } from '@reach/dialog'
-import { eventManager } from '../event-manager'
 
+import { createEventManager } from '../../test/utils'
 import { StudioModals, StudioInstructionsModal, StudioInitModal, StudioSaveModal } from './studio-modals'
-import { studioRecorder } from './studio-recorder'
 
 describe('<StudioModals />', () => {
+  let eventManager
+
   beforeEach(() => {
+    eventManager = createEventManager()
     sinon.stub(eventManager, 'emit')
   })
 
   afterEach(() => {
-    studioRecorder.cancel()
+    eventManager.studioRecorder.cancel()
 
     sinon.restore()
   })
 
   it('renders init and save modals', () => {
-    const component = shallow(<StudioModals />)
+    const component = shallow(<StudioModals eventManager={eventManager} />)
 
     expect(component.find(StudioInitModal)).to.exist
     expect(component.find(StudioSaveModal)).to.exist
@@ -48,37 +50,37 @@ describe('<StudioModals />', () => {
 
   describe('<StudioInitModal />', () => {
     it('is not open by default', () => {
-      const component = shallow(<StudioInitModal />)
+      const component = shallow(<StudioInitModal eventManager={eventManager} />)
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
     })
 
     it('is open and closes with studio recorder variable', () => {
-      studioRecorder.initModalIsOpen = true
-      const component = shallow(<StudioInitModal />)
+      eventManager.studioRecorder.initModalIsOpen = true
+      const component = shallow(<StudioInitModal eventManager={eventManager} />)
 
       expect(component.find(Dialog)).to.have.prop('isOpen', true)
 
-      studioRecorder.closeInitModal()
+      eventManager.studioRecorder.closeInitModal()
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
     })
 
     it('closes and clears studio runnable ids when close is clicked', () => {
-      sinon.stub(studioRecorder, 'clearRunnableIds')
-      studioRecorder.initModalIsOpen = true
-      const component = shallow(<StudioInitModal />)
+      sinon.stub(eventManager.studioRecorder, 'clearRunnableIds')
+      eventManager.studioRecorder.initModalIsOpen = true
+      const component = shallow(<StudioInitModal eventManager={eventManager} />)
 
       component.find('.close-button').simulate('click')
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
-      expect(studioRecorder.initModalIsOpen).to.equal(false)
-      expect(studioRecorder.clearRunnableIds).to.be.called
+      expect(eventManager.studioRecorder.initModalIsOpen).to.equal(false)
+      expect(eventManager.studioRecorder.clearRunnableIds).to.be.called
     })
 
     it('emits studio:start when start button is clicked', () => {
-      studioRecorder.initModalIsOpen = true
-      const component = shallow(<StudioInitModal />)
+      eventManager.studioRecorder.initModalIsOpen = true
+      const component = shallow(<StudioInitModal eventManager={eventManager} />)
 
       component.find('.btn-main').simulate('click')
 
@@ -88,41 +90,41 @@ describe('<StudioModals />', () => {
 
   describe('<StudioSaveModal />', () => {
     it('is not open by default', () => {
-      const component = shallow(<StudioSaveModal />)
+      const component = shallow(<StudioSaveModal eventManager={eventManager} />)
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
     })
 
     it('is open and closes with studio recorder variable', () => {
-      studioRecorder.saveModalIsOpen = true
-      const component = shallow(<StudioSaveModal />)
+      eventManager.studioRecorder.saveModalIsOpen = true
+      const component = shallow(<StudioSaveModal eventManager={eventManager} />)
 
       expect(component.find(Dialog)).to.have.prop('isOpen', true)
 
-      studioRecorder.closeSaveModal()
+      eventManager.studioRecorder.closeSaveModal()
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
     })
 
     it('closes when close is clicked', () => {
-      studioRecorder.saveModalIsOpen = true
-      const component = shallow(<StudioSaveModal />)
+      eventManager.studioRecorder.saveModalIsOpen = true
+      const component = shallow(<StudioSaveModal eventManager={eventManager} />)
 
       component.find('.close-button').simulate('click')
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
-      expect(studioRecorder.saveModalIsOpen).to.equal(false)
+      expect(eventManager.studioRecorder.saveModalIsOpen).to.equal(false)
     })
 
     context('form', () => {
       beforeEach(() => {
-        sinon.stub(studioRecorder, 'save')
+        sinon.stub(eventManager.studioRecorder, 'save')
 
-        studioRecorder.saveModalIsOpen = true
+        eventManager.studioRecorder.saveModalIsOpen = true
       })
 
       it('updates input when typed into', () => {
-        const component = shallow(<StudioSaveModal />)
+        const component = shallow(<StudioSaveModal eventManager={eventManager} />)
 
         component.find('input').simulate('change', { target: { value: 'my test name' } })
 
@@ -130,7 +132,7 @@ describe('<StudioModals />', () => {
       })
 
       it('calls studio recorder save with inputted text on submit', () => {
-        const component = shallow(<StudioSaveModal />)
+        const component = shallow(<StudioSaveModal eventManager={eventManager} />)
 
         component.find('input').simulate('change', { target: { value: 'my test name' } })
 
@@ -138,17 +140,17 @@ describe('<StudioModals />', () => {
 
         component.find('form').simulate('submit', { preventDefault: () => {} })
 
-        expect(studioRecorder.save).to.be.calledWith('my test name')
+        expect(eventManager.studioRecorder.save).to.be.calledWith('my test name')
       })
 
       it('disables form when there is no input', () => {
-        const component = shallow(<StudioSaveModal />)
+        const component = shallow(<StudioSaveModal eventManager={eventManager} />)
 
         expect(component.find('.btn-main')).to.have.prop('disabled', true)
 
         component.find('form').simulate('submit', { preventDefault: () => {} })
 
-        expect(studioRecorder.save).not.to.be.called
+        expect(eventManager.studioRecorder.save).not.to.be.called
       })
     })
   })

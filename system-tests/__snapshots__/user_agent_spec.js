@@ -7,14 +7,14 @@ exports['e2e user agent / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (user_agent_spec.js)                                                       │
-  │ Searched:   cypress/integration/user_agent_spec.js                                             │
+  │ Specs:      1 found (user_agent.cy.js)                                                         │
+  │ Searched:   cypress/e2e/user_agent.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  user_agent_spec.js                                                              (1 of 1)
+  Running:  user_agent.cy.js                                                                (1 of 1)
 
 
   user agent
@@ -36,14 +36,14 @@ exports['e2e user agent / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     user_agent_spec.js                                                               │
+  │ Spec Ran:     user_agent.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/user_agent_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/user_agent.cy.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -53,7 +53,7 @@ exports['e2e user agent / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  user_agent_spec.js                       XX:XX        2        2        -        -        - │
+  │ ✔  user_agent.cy.js                         XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 

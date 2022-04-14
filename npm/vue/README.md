@@ -11,19 +11,23 @@
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
 ### What is @cypress/vue?
-This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
+This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your Vue 3.x components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
 
 ![Example component test](images/dynamic.gif)
 
 ### How is this different from Vue Test Utils?
-It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood. This is more of a replacement for node-based testing than it is replacing Vue Test Utils and its API. Instead of running your tests in node (using Jest or Mocha), the Cypress Component Testing Library runs each component in the **real browser** with full power of the Cypress Framework: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/). One benefit to using Cypress instead of a node-based runner is that limitations of Vue Test Utils in Node (e.g. manually awaiting Vue's internal event loop) are hidden from the user due to Cypress's retry-ability logic.  
+It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood. This is more of a replacement for node-based testing than it is replacing Vue Test Utils and its API. Instead of running your tests in node (using Jest or Mocha), the Cypress Component Testing Library runs each component in the **real browser** with full power of the Cypress Framework: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/). One benefit to using Cypress instead of a node-based runner is that limitations of Vue Test Utils in Node (e.g. manually awaiting Vue's internal event loop) are hidden from the user due to Cypress's retry-ability logic.
 
 - If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
+
+### How is this different from @cypress/vue2?
+Cypress packages the current version of Vue under @cypress/vue, and older versions under separate package names. Use [@cypress/vue2](cypress-vue2-npm-url) if you're still using vue@2, and this package if you're on vue@3.
 
 ## Installation
 
 - Requires Cypress v7.0.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
+- Requires Vue 3.x. If you are using Vue 2.x, you want [@cypress/vue2](cypress-vue2-npm-url) instead.
 - Supports projects built with Vue CLI, Vite, and Webpack. If you would like us to support another build configuration, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md).
 
 Now you are ready to install.
@@ -600,7 +604,7 @@ We were in the middle of moving into the Cypress NPM org, so any references to `
 
 ## Development
 
-To see all local tests, install dependencies, build the code and open Cypress using the open-ct command
+To see all local tests, install dependencies, build the code and open Cypress using the open --component command
 
 ```sh
 yarn install
@@ -610,7 +614,7 @@ yarn workspace @cypress/vue build
 The build is done using `rollup`. It bundles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
 
 ```sh
-# cypress open-ct
+# cypress open --component
 yarn workspace @cypress/vue cy:open
 ```
 
@@ -666,6 +670,7 @@ Let the world know your project is using Cypress.io to test with this cool badge
 
 [npm-icon]: https://nodei.co/npm/@cypress/vue.svg?downloads=true
 [npm-url]: https://npmjs.org/package/@cypress/vue
+[cypress-vue2-npm-url]: https://www.npmjs.com/package/@cypress/vue2
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square

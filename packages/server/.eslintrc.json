@@ -1,6 +1,6 @@
 {
   "extends": [
-    "../../.eslintrc.json"
+    "../../.eslintrc.js"
   ],
   "parser": "@typescript-eslint/parser",
   "env": {
@@ -8,5 +8,17 @@
   },
   "plugins": [
     "cypress"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "./lib/graphql/entities/**/*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [
+          "error"
+        ]
+      }
+    }
   ]
 }

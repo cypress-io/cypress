@@ -1,7 +1,11 @@
 <template>
   <div>
-    <slot name="label"></slot>
-    <input type="text" :name="name" :id="inputId" />
+    <slot name="label" />
+    <input
+      :id="inputId"
+      type="text"
+      :name="name"
+    >
   </div>
 </template>
 <script>
@@ -16,5 +20,5 @@ export default {
       type: String,
     },
   },
-};
+}
 </script>

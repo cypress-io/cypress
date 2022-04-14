@@ -15,8 +15,7 @@ import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
-import errors from './errors'
-import logger from './logger'
+import * as errors from './errors'
 import Request from './request'
 import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
@@ -25,19 +24,14 @@ import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import type { SpecsStore } from './specs-store'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
+import type { FoundSpec } from '@packages/types'
+import type { Server as WebSocketServer } from 'ws'
 
-const ALLOWED_PROXY_BYPASS_URLS = [
-  '/',
-  '/__cypress/runner/cypress_runner.css',
-  '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/runner/favicon.ico',
-]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 
@@ -49,7 +43,14 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute) {
+const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+  const ALLOWED_PROXY_BYPASS_URLS = [
+    '/',
+    `/${namespace}/runner/cypress_runner.css`,
+    `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
+    `/${namespace}/runner/favicon.ico`,
+  ]
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -95,13 +96,12 @@ export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
-  specsStore: SpecsStore
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
 
@@ -118,6 +118,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
+  protected _graphqlWS?: WebSocketServer
 
   protected _remoteAuth: unknown
   protected _remoteProps: unknown
@@ -175,7 +176,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onError,
     onWarning,
     shouldCorrelatePreRequests,
-    specsStore,
     testingType,
     SocketCtor,
     exit,
@@ -184,64 +184,59 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    return Bluebird.try(() => {
-      if (!config.baseUrl && testingType === 'component') {
-        throw new Error('ServerCt#open called without config.baseUrl.')
-      }
+    if (!config.baseUrl && testingType === 'component') {
+      throw new Error('ServerCt#open called without config.baseUrl.')
+    }
 
-      const app = this.createExpressApp(config)
+    const app = this.createExpressApp(config)
 
-      logger.setSettings(config)
-
-      this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
-      })
-
-      this._socket = new SocketCtor(config) as TSocket
-
-      clientCertificates.loadClientCertificateConfig(config)
-
-      const getRemoteState = () => {
-        return this._getRemoteState()
-      }
-
-      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
-
-      if (config.experimentalSourceRewriting) {
-        createInitialWorkers()
-      }
-
-      this.createHosts(config.hosts)
-
-      const routeOptions: InitializeRoutes = {
-        config,
-        specsStore,
-        getRemoteState,
-        nodeProxy: this.nodeProxy,
-        networkProxy: this._networkProxy!,
-        onError,
-        getSpec,
-        getCurrentBrowser,
-        testingType,
-        exit,
-      }
-
-      const runnerSpecificRouter = testingType === 'e2e'
-        ? createRoutesE2E(routeOptions)
-        : createRoutesCT(routeOptions)
-
-      app.use(runnerSpecificRouter)
-      app.use(createCommonRoutes(routeOptions))
-
-      return this.createServer(app, config, onWarning)
+    this._nodeProxy = httpProxy.createProxyServer({
+      target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
+
+    this._socket = new SocketCtor(config) as TSocket
+
+    clientCertificates.loadClientCertificateConfig(config)
+
+    const getRemoteState = () => {
+      return this._getRemoteState()
+    }
+
+    this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+    if (config.experimentalSourceRewriting) {
+      createInitialWorkers()
+    }
+
+    this.createHosts(config.hosts)
+
+    const routeOptions: InitializeRoutes = {
+      config,
+      getRemoteState,
+      nodeProxy: this.nodeProxy,
+      networkProxy: this._networkProxy!,
+      onError,
+      getSpec,
+      getCurrentBrowser,
+      testingType,
+      exit,
+    }
+
+    const runnerSpecificRouter = testingType === 'e2e'
+      ? createRoutesE2E(routeOptions)
+      : createRoutesCT(routeOptions)
+
+    app.use(runnerSpecificRouter)
+    app.use(createCommonRoutes(routeOptions))
+
+    return this.createServer(app, config, onWarning)
   }
 
   createExpressApp (config) {
-    const { morgan, clientRoute } = config
+    const { morgan, clientRoute, namespace } = config
     const app = express()
 
-    // set the cypress config from the cypress.json file
+    // set the cypress config from the cypress.config.{ts|js} file
     app.set('view engine', 'html')
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
@@ -263,12 +258,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return next()
     })
 
-    app.use(_forceProxyMiddleware(clientRoute))
+    app.use(_forceProxyMiddleware(clientRoute, namespace))
 
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(require('morgan')('dev'))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -278,6 +273,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.disable('x-powered-by')
 
     return app
+  }
+
+  useMorgan () {
+    return require('morgan')('dev')
   }
 
   getHttpServer () {
@@ -487,7 +486,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
-    // bail if this is our own namespaced socket.io request
+    // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
       if (!this.socketAllowed.isRequestAllowed(req)) {
@@ -495,7 +494,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         socket.end()
       }
 
-      // we can return here either way, if the socket is still valid socket.io will hook it up
+      // we can return here either way, if the socket is still valid socket.io or graphql-ws will hook it up
       return
     }
 
@@ -518,6 +517,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
           host: hostname,
           port,
           protocol,
+        },
+        headers: {
+          'x-cypress-forwarded-from-cypress': true,
         },
         agent,
       }, onProxyErr)
@@ -547,8 +549,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this.reset()
 
-    logger.unsetSettings()
-
     evilDns.clear()
 
     return this._server.destroyAsync()
@@ -563,6 +563,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
+      this._graphqlWS?.close(),
     ])
     .then((res) => {
       this._middleware = null
@@ -577,6 +578,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   changeToUrl (url) {
     return this._socket && this._socket.changeToUrl(url)
+  }
+
+  async sendFocusBrowserMessage () {
+    this._socket && await this._socket.sendFocusBrowserMessage()
   }
 
   onRequest (fn) {

@@ -7,14 +7,14 @@ exports['e2e issue 2891 passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (default_layout_spec.js)                                                   │
-  │ Searched:   cypress/integration/default_layout_spec.js                                         │
+  │ Specs:      1 found (default_layout.cy.js)                                                     │
+  │ Searched:   cypress/e2e/default_layout.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  default_layout_spec.js                                                          (1 of 1)
+  Running:  default_layout.cy.js                                                            (1 of 1)
 
 
   ✓ works
@@ -33,14 +33,14 @@ exports['e2e issue 2891 passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     default_layout_spec.js                                                           │
+  │ Spec Ran:     default_layout.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/default_layout_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/default_layout.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -50,7 +50,7 @@ exports['e2e issue 2891 passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  default_layout_spec.js                   XX:XX        1        1        -        -        - │
+  │ ✔  default_layout.cy.js                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

@@ -4,7 +4,8 @@ import { observer, useLocalStore } from 'mobx-react'
 import React, { MouseEvent, ReactNode } from 'react'
 
 import EditorPickerModal from './editor-picker-modal'
-import { GetUserEditorResult, Editor, FileDetails } from './file-model'
+import { GetUserEditorResult, Editor } from './file-model'
+import type { FileDetails } from '@packages/types'
 
 interface Props {
   children: ReactNode

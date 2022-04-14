@@ -8,6 +8,7 @@ const human = require('human-interval')
 const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
+const assert = require('assert')
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -24,9 +25,7 @@ const system = require('../util/system')
 const duration = require('../util/duration')
 const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
-const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
-const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
@@ -66,6 +65,14 @@ const getWidth = (table, index) => {
   if (columnWidth) {
     return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
   }
+}
+
+const relativeSpecPattern = (projectRoot, pattern) => {
+  if (typeof pattern === 'string') {
+    return pattern.replace(`${projectRoot}/`, '')
+  }
+
+  return pattern.map((x) => x.replace(`${projectRoot}/`, ''))
 }
 
 const formatBrowser = (browser) => {
@@ -119,7 +126,16 @@ const formatSymbolSummary = (failures) => {
   return getSymbol(failures)
 }
 
-const formatPath = (name, n, colour = 'reset') => {
+const macOSRemovePrivate = (str) => {
+  // consistent snapshots when running system tests on macOS
+  if (process.platform === 'darwin' && str.startsWith('/private')) {
+    return str.slice(8)
+  }
+
+  return str
+}
+
+const formatPath = (name, n, colour = 'reset', caller) => {
   if (!name) return ''
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
@@ -133,6 +149,8 @@ const formatPath = (name, n, colour = 'reset') => {
     name = name
     .split(cwdPath)
     .join(fakeCwdPath)
+
+    name = macOSRemovePrivate(name)
   }
 
   // add newLines at each n char and colorize the path
@@ -198,9 +216,15 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
-  const formatSpecPattern = () => {
+  const formatSpecPattern = (projectRoot, specPattern) => {
     // foo.spec.js, bar.spec.js, baz.spec.js
     // also inserts newlines at col width
+    if (typeof specPattern === 'string') {
+      specPattern = [specPattern]
+    }
+
+    specPattern = relativeSpecPattern(projectRoot, specPattern)
+
     if (specPattern) {
       return formatPath(specPattern.join(', '), getWidth(table, 1))
     }
@@ -208,7 +232,7 @@ const displayRunStarting = function (options = {}) {
 
   const formatSpecs = (specs) => {
     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'name')
+    const names = _.map(specs, 'baseName')
     const specsTruncated = _.truncate(names.join(', '), { length: 250 })
 
     const stringifiedSpecs = [
@@ -228,7 +252,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
-    [gray('Searched:'), formatSpecPattern(specPattern)],
+    [gray('Searched:'), formatSpecPattern(config.projectRoot, specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
@@ -281,6 +305,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
 const collectTestResults = (obj = {}, estimated) => {
   return {
     name: _.get(obj, 'spec.name'),
+    baseName: _.get(obj, 'spec.baseName'),
     tests: _.get(obj, 'stats.tests'),
     passes: _.get(obj, 'stats.passes'),
     pending: _.get(obj, 'stats.pending'),
@@ -345,7 +370,7 @@ const renderSummaryTable = (runUrl) => {
 
         const ms = duration.format(stats.wallClockDuration || 0)
 
-        const formattedSpec = formatPath(spec.name, getWidth(table2, 1))
+        const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
 
         if (run.skippedSpec) {
           return table2.push([
@@ -602,10 +627,11 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     // to give user's plugins file a chance to change it
     browsers: args.browsers,
     onWarning,
+    spec: args.spec,
     onError: args.onError,
   }
 
-  return openProject.create(projectRoot, args, options)
+  return openProject.create(projectRoot, args, options, args.browsers)
 }
 
 async function checkAccess (folderPath) {
@@ -619,24 +645,27 @@ async function checkAccess (folderPath) {
   })
 }
 
-const createAndOpenProject = async (socketId, options) => {
-  const { projectRoot, projectId } = options
+const createAndOpenProject = async (options) => {
+  const { projectRoot, projectId, socketId } = options
 
   await checkAccess(projectRoot)
 
-  return openProjectCreate(projectRoot, socketId, options)
-  .then((open_project) => open_project.getProject())
-  .then((project) => {
-    return Promise.all([
-      project,
-      project.getConfig(),
-      getProjectId(project, projectId),
-    ]).then(([project, config, projectId]) => ({
-      project,
-      config,
-      projectId,
-    }))
-  })
+  const open_project = await openProjectCreate(projectRoot, socketId, options)
+  const project = open_project.getProject()
+
+  const [_project, _config, _projectId] = await Promise.all([
+    project,
+    project.getConfig(),
+    getProjectId(project, projectId),
+  ])
+
+  return {
+    project: _project,
+    config: _config,
+    projectId: _projectId,
+    // Lazy require'd here, so as to not execute until we're in the electron process
+    configFile: require('@packages/data-context').getCtx().lifecycleManager.configFile,
+  }
 }
 
 const removeOldProfiles = (browser) => {
@@ -705,7 +734,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   }
 
   const videoPath = (suffix) => {
-    return path.join(videosFolder, spec.name + suffix)
+    return path.join(videosFolder, spec.relativeToCommonRoot + suffix)
   }
 
   const videoName = videoPath('.mp4')
@@ -730,8 +759,6 @@ const warnVideoRecordingFailed = (err) => {
 }
 
 module.exports = {
-  collectTestResults,
-
   getProjectId,
 
   writeOutput,
@@ -782,7 +809,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', formatPath(results.name, getWidth(table, 1), c)],
+      ['Spec Ran:', formatPath(results.baseName, getWidth(table, 1), c)],
     ])
     .compact()
     .map((arr) => {
@@ -930,7 +957,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -961,6 +988,7 @@ module.exports = {
     const warnings = {}
 
     browserOpts.projectRoot = projectRoot
+    browserOpts.shouldLaunchNewTab = shouldLaunchNewTab
 
     browserOpts.onWarning = (err) => {
       const { message } = err
@@ -980,12 +1008,6 @@ module.exports = {
     debug('browser launched')
 
     return openProject.launch(browser, spec, browserOpts)
-  },
-
-  navigateToNextSpec (spec) {
-    debug('navigating to next spec')
-
-    return openProject.changeUrlToSpec(spec)
   },
 
   listenForProjectEnd (project, exit) {
@@ -1059,7 +1081,7 @@ module.exports = {
     return this.currentWriteVideoFrameCallback(...arguments)
   },
 
-  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
+  waitForBrowserToConnect (options = {}) {
     const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
@@ -1075,7 +1097,7 @@ module.exports = {
     // path for next spec in launch browser.
     // we need it to run on every spec even in single browser mode
     this.currentSetScreenshotMetadata = (data) => {
-      data.specName = spec.name
+      data.specName = spec.relativeToCommonRoot
 
       return data
     }
@@ -1086,13 +1108,6 @@ module.exports = {
 
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
-
-      if (!shouldLaunchBrowser) {
-        // If we do not launch the browser,
-        // we tell it that we are ready
-        // to receive the next spec
-        return Promise.resolve(this.navigateToNextSpec(options.spec))
-      }
 
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
@@ -1154,7 +1169,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, testingType } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1230,13 +1245,17 @@ module.exports = {
         }
       }
 
-      if (testingType === 'e2e') {
-        // always close the browser now as opposed to letting
-        // it exit naturally with the parent process due to
-        // electron bug in windows
-        debug('attempting to close the browser')
-        await openProject.closeBrowser()
-      }
+      // Close the browser if the environment variable is set to do so
+      // if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
+      //   debug('attempting to close the browser')
+      //   await openProject.closeBrowser()
+      // } else {
+      debug('attempting to close the browser tab')
+      await openProject.closeBrowserTabs()
+      // }
+
+      debug('resetting server state')
+      openProject.projectBase.server.reset()
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
@@ -1315,7 +1334,7 @@ module.exports = {
 
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
-        displaySpecHeader(spec.name, index + 1, length, estimated)
+        displaySpecHeader(spec.baseName, index + 1, length, estimated)
       }
 
       return this.runSpec(config, spec, options, estimated, firstSpec)
@@ -1428,6 +1447,7 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
+      console.log('')
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
@@ -1463,7 +1483,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
-          testingType: options.testingType,
+          browser,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1476,25 +1496,10 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, options.testingType === 'e2e' || firstSpec),
+          shouldLaunchNewTab: !firstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !firstSpec,
+          // TODO(tim): investigate the socket disconnect
+        }),
       })
-    })
-  },
-
-  findSpecs (config, specPattern) {
-    return specsUtil.default
-    .findSpecs(config, specPattern)
-    .tap((specs = []) => {
-      if (debug.enabled) {
-        const names = _.map(specs, 'name')
-
-        return debug(
-          'found \'%d\' specs using spec pattern \'%s\': %o',
-          names.length,
-          specPattern,
-          names,
-        )
-      }
     })
   },
 
@@ -1511,8 +1516,9 @@ module.exports = {
       quiet: false,
     })
 
-    const socketId = random.id()
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId } = options
+
+    assert(socketId)
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1521,7 +1527,7 @@ module.exports = {
     }
 
     // alias and coerce to null
-    let specPattern = options.spec || null
+    let specPatternFromCli = options.spec || null
 
     // ensure the project exists
     // and open up the project
@@ -1530,8 +1536,8 @@ module.exports = {
       debug('found all system browsers %o', browsers)
       options.browsers = browsers
 
-      return createAndOpenProject(socketId, options)
-      .then(({ project, projectId, config }) => {
+      return createAndOpenProject(options)
+      .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
         // if we have a project id and a key but record hasnt been given
@@ -1539,7 +1545,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
+          recordMode.throwIfNoProjectId(projectId, configFile)
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }
@@ -1548,45 +1554,24 @@ module.exports = {
         // but be defensive about it
         const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
 
-        // all these operations are independent and should be run in parallel to
-        // speed the initial booting time
+        let specPattern = specPatternFromCli || config.specPattern
+
+        specPattern = relativeSpecPattern(projectRoot, specPattern)
+
         return Promise.all([
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
-          this.findSpecs(config, specPattern),
           trashAssets(config),
         ])
-        .spread((sys = {}, browser = {}, specs = []) => {
-          const originalSpecPattern = specPattern
-
-          if (specPattern) {
-            // remap the spec pattern for terminal display purposes
-            // relative to the projectRoot
-            specPattern = specsUtil.default.getPatternRelativeToPath(specPattern, projectRoot)
+        .spread(async (sys = {}, browser = {}) => {
+          if (!project.ctx.project.specs.length) {
+            errors.throwErr('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
-          specs = specs.filter((spec) => {
-            return options.testingType === 'component'
-              ? spec.specType === 'component'
-              : spec.specType === 'integration'
-          })
-
-          if (!specs.length) {
-            // did we use the spec pattern?
-            if (specPattern) {
-              // for error purposes: display the specPattern relative to the
-              // current working directly, not the project root as done above
-              const relativeCwdSpecPattern = specsUtil.default.getPatternRelativeToPath(originalSpecPattern, options.cwd)
-
-              errors.throw('NO_SPECS_FOUND', options.cwd, relativeCwdSpecPattern)
-            } else {
-              // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder)
-            }
-          }
+          const specs = project.ctx.project.specs
 
           if (browser.unsupportedVersion && browser.warning) {
-            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
+            errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {
@@ -1661,7 +1646,7 @@ module.exports = {
     })
   },
 
-  async run (options) {
+  async run (options, loading = Promise.resolve()) {
     if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
       const app = require('electron').app
 
@@ -1675,6 +1660,11 @@ module.exports = {
       await app.whenReady()
     }
 
-    return this.ready(options)
+    await loading
+    try {
+      return this.ready(options)
+    } catch (e) {
+      return this.exitEarly(e)
+    }
   },
 }

@@ -165,6 +165,7 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('request.url_invalid', {
           args: {
             configFile: Cypress.config('configFile'),
+            projectRoot: Cypress.config('projectRoot'),
           },
         })
       }
@@ -176,6 +177,7 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('request.url_invalid', {
           args: {
             configFile: Cypress.config('configFile'),
+            projectRoot: Cypress.config('projectRoot'),
           },
         })
       }
