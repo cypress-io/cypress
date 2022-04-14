@@ -695,13 +695,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: <<parameters.command>>
-
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
       - unless:
           condition: <<parameters.folder>>
           steps:
@@ -719,12 +712,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>>
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
   test-binary-against-repo:
@@ -844,13 +831,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: <<parameters.command>>
-
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
       - unless:
           condition: <<parameters.folder>>
           steps:
@@ -868,12 +848,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>>
-            - store_artifacts:
-                name: screenshots
-                path: /tmp/<<parameters.repo>>/cypress/screenshots
-            - store_artifacts:
-                name: videos
-                path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
   wait-on-circle-jobs:
@@ -956,7 +930,7 @@ commands:
           command: ls -la types
           working_directory: cli/build
       - run:
-          command: ls -la vue mount-utils react
+          command: ls -la vue vue2 mount-utils react
           working_directory: cli/build
       - unless:
           condition:
@@ -1565,8 +1539,6 @@ jobs:
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
-      - store_artifacts:
-          path: npm/vite-dev-server/cypress/videos
       - store-npm-logs
 
   npm-webpack-batteries-included-preprocessor:
@@ -1774,10 +1746,6 @@ jobs:
           name: Run Kitchensink example project
           command: |
             yarn cypress:run --project /tmp/cypress-example-kitchensink
-      - store_artifacts:
-          path: /tmp/cypress-example-kitchensink/cypress/screenshots
-      - store_artifacts:
-          path: /tmp/cypress-example-kitchensink/cypress/videos
       - store-npm-logs
 
   test-kitchensink-against-staging:
@@ -2020,7 +1988,6 @@ jobs:
 
   test-binary-against-recipes-chrome:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
@@ -2028,7 +1995,6 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
-    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
