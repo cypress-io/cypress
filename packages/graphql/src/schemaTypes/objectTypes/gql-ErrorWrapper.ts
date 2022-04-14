@@ -34,7 +34,7 @@ export const ErrorWrapper = objectType({
     t.nonNull.string('errorMessage', {
       description: 'The markdown formatted content associated with the ErrorTypeEnum',
       resolve (source) {
-        return source.cypressError.messageMarkdown
+        return source.cypressError.messageMarkdown ?? source.cypressError.message
       },
     })
 

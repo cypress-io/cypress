@@ -69,8 +69,6 @@ gulp.task(
         'codegen',
       ),
 
-      killExistingCypress,
-
       // Now that we have the codegen, we can start the frontend(s)
       gulp.parallel(
         viteApp,
@@ -100,6 +98,8 @@ gulp.task(
   'dev',
   gulp.series(
     'dev:watch',
+
+    killExistingCypress,
 
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
