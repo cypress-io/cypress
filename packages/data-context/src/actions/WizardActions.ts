@@ -161,7 +161,7 @@ export class WizardActions {
         return
       }
       case 'component': {
-        const { chosenBundler, chosenFramework } = this.ctx.wizard
+        const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
 
         if (!chosenBundler || !chosenFramework) {
           return
