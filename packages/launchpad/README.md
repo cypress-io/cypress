@@ -41,14 +41,25 @@ For the best development experience, you will want to use VS Code with the [Vola
 
 ```bash
 ## from repo root
-yarn dev
+yarn watch
 ```
 
-This starts Vite in watch mode. It also starts the GraphQL Server. You can access it on `http://localhost:52200/graphql`.
+This starts Vite in watch mode, and any code-generation scripts that need to be running in the background to support our environment. 
+
+In a seprate terminal, run:
+
+```bash
+## from repo root
+yarn cypress:open
+```
+
+This starts the GraphQL Server, and opens Cypress. By running this separate from the `yarn watch`, you can kill & respawn the Cypress binary without the overhead of the watch processes you'd see by running `yarn dev`. 
+
+You can access the GraphQL inspector on `http://localhost:52200/graphql`.
 
 ![graphql](../graphql/gql.png)
 
-If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run, you might need to reopen your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
+If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run, you might need to reload your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
 
 ## Testing
 

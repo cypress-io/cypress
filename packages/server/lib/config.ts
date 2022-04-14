@@ -148,7 +148,11 @@ export function mergeDefaults (
     additionalIgnorePattern = config.e2e.specPattern
   }
 
-  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+  config = {
+    ...config,
+    ...config[options.testingType],
+    additionalIgnorePattern,
+  }
 
   // split out our own app wide env from user env variables
   // and delete envFile
