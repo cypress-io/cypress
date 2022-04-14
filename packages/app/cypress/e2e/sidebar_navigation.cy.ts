@@ -65,6 +65,7 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 

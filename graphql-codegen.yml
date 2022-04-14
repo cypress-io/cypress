@@ -44,24 +44,6 @@ config:
     DateTime: string
     JSON: any  
 generates:
-  './packages/data-context/src/gen/all-operations.gen.ts':
-    config:
-      <<: *documentFilters
-      flattenGeneratedTypes: true
-    schema: 'packages/graphql/schemas/schema.graphql'
-    documents:
-      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
-    plugins:
-      - add:
-          content: '/* eslint-disable */'
-      - 'typescript':
-          noExport: true
-      - 'typescript-operations':
-          noExport: true
-      - 'typed-document-node'
-
   ###
   # Generates types for us to infer the correct "source types" when we mock out on the frontend
   # This ensures we have proper type checking when we're using cy.mountFragment in component tests

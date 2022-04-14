@@ -131,7 +131,7 @@ query SideBarNavigation {
 }
 `
 
-const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
+const query = useQuery({ query: SideBarNavigationDocument })
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
 
