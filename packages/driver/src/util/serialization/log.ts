@@ -3,9 +3,6 @@ import { isSerializableInCurrentBrowser, preprocessForSerialization } from './in
 import $dom from '../../dom'
 
 interface PreprocessedHTMLElement {
-  value?: any
-  type?: any
-  id?: string
   tagName: string
   attributes: { [key: string]: string }
   innerHTML: string
