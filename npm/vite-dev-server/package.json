@@ -11,7 +11,7 @@
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
-    "test": "yarn cy:run && yarn cy:run-legacy",
+    "test": "yarn cypress:run",
     "watch": "tsc -w"
   },
   "dependencies": {
