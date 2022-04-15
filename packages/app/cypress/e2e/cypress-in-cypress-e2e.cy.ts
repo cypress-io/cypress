@@ -174,8 +174,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('switch spec')
     cy.contains('withWait.spec').click()
 
-    cy.wait(5000)
-    cy.get('.passed > .num').should('contain', 4)
+    cy.get('.passed > .num', { timeout: 10000 }).should('contain', 4)
     cy.get('.failed > .num').should('not.contain', 1)
   })
 

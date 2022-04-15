@@ -1,13 +1,14 @@
-import type { Ref } from 'vue'
-import { onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
+import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } from 'vue'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { SpecFile } from '@packages/types/src'
+import { useRoute } from 'vue-router'
+import { getPathForPlatform } from '../paths'
 
 const initialized = ref(false)
 
-export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>, queryFile: string) {
+export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>) {
   onMounted(async () => {
     await UnifiedRunnerAPI.initialize()
     initialized.value = true
@@ -19,9 +20,12 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>, queryFile
   })
 
   const specStore = useSpecStore()
+  const route = useRoute()
   const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-  watch(specs, () => {
+  watchEffect(() => {
+    const queryFile = getPathForPlatform(route.query.file as string)
+
     if (!queryFile) {
       // no file param, we are not showing a file
       // so no action needed when specs list updates
@@ -30,15 +34,15 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>, queryFile
 
     const activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)
 
-    if (!activeSpecInSpecsList) {
-      // the specs list no longer contains the spec being shown
-      // so set active state to null and let the UI handle it
-      specStore.setActiveSpec(null)
-    }
+    specStore.setActiveSpec(activeSpecInSpecsList ?? null)
   })
 
-  watch(() => queryFile, () => {
-    const spec = specs.value.find((x) => x.relative === queryFile)
+  watch(() => getPathForPlatform(route.query.file as string), (newQueryFile) => {
+    if (!newQueryFile) {
+      // no file param, we are not showing a file
+      // so no action needed when specs list updates
+      return
+    }
 
     if (selectorPlaygroundStore.show) {
       const autIframe = getAutIframeModel()
@@ -47,9 +51,7 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>, queryFile
       selectorPlaygroundStore.setEnabled(false)
       selectorPlaygroundStore.setShow(false)
     }
-
-    specStore.setActiveSpec(spec ?? null)
-  }, { immediate: true, flush: 'post' })
+  }, { flush: 'post' })
 
   return {
     initialized: readonly(initialized),

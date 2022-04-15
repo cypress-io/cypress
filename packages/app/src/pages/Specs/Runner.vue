@@ -26,6 +26,7 @@
 
 <script lang="ts" setup>
 import { gql, useQuery, useSubscription } from '@urql/vue'
+import { onMounted } from 'vue'
 import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument } from '../../generated/graphql'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
@@ -68,6 +69,10 @@ const query = useQuery({
 // this works fine - we know that during run mode, no new specs will
 // be added or removed.
 const specs = window.__RUN_MODE_SPECS__
+
+onMounted(() => {
+  query.executeQuery()
+})
 
 </script>
 
