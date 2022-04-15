@@ -1,6 +1,7 @@
 // necessary to have mocha types working correctly
 import 'mocha'
 import path from 'path'
+import fs from 'fs-extra'
 import Fixtures, { fixtureDirs } from '@tooling/system-tests'
 import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
@@ -15,7 +16,11 @@ export function getSystemTestProject<T extends typeof fixtureDirs[number]> (proj
   return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>
 }
 
-export async function scaffoldMigrationProject (project: typeof fixtureDirs[number]) {
+export function removeCommonNodeModules () {
+  fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
+}
+
+export async function scaffoldMigrationProject (project: typeof fixtureDirs[number]): Promise<string> {
   Fixtures.removeProject(project)
 
   await Fixtures.scaffoldProject(project)

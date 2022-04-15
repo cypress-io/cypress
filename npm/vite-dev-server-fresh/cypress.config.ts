@@ -19,6 +19,9 @@ export default defineConfig({
       return await e2ePluginSetup(on, config)
     },
   },
+  retries: {
+    runMode: 2,
+  },
   // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',

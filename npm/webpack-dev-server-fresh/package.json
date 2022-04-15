@@ -20,9 +20,8 @@
   "dependencies": {
     "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
-    "rimraf": "3.0.2",
     "speed-measure-webpack-plugin": "1.4.2",
-    "tsutils": "^3.21.0",
+    "tslib": "^2.3.1",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.4.0"
   },

@@ -1,6 +1,9 @@
 import Module from 'module'
 import path from 'path'
 import type { WebpackDevServerConfig } from '../devServer'
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:webpack-dev-server-fresh:sourceRelativeWebpackModules')
 
 type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
@@ -66,20 +69,21 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
     htmlWebpackPlugin: {},
   } as SourceRelativeWebpackResult
 
-  // We bundle webpack@4 with "@cypress/webpack-batteries-included-preprocessor" in the binary. This
-  // serves as our fallback if we can't source webpack@4 from the project.
-  const cypressWebpackPath = require.resolve('@cypress/webpack-batteries-included-preprocessor', {
-    paths: [__dirname],
-  })
-
   // First, we source the framework, ensuring it's sourced from the user's project and not the
   // Cypress binary. This is the path we use to relative-resolve the
+  // This is generally used for Create React App and Vue CLI and other packages
+  // that ship webpack as a dependency. e.g. your-project/node_modules/react-scripts/node_modules/webpack
+  // So what we do, is we grab the framework's path, and try and find webpack relative to that framework.
   if (config.framework) {
     try {
       const frameworkJsonPath = require.resolve(`${config.framework}/package.json`, {
         paths: [searchRoot],
       })
+
+      debug('Framework JSON path is %s', frameworkJsonPath)
       const frameworkPathRoot = path.dirname(frameworkJsonPath)
+
+      debug('Framework JSON path root is %s', frameworkPathRoot)
 
       // Want to make sure we're sourcing this from the user's code. Otherwise we can
       // warn and tell them they don't have their dependencies installed
@@ -92,85 +96,52 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
         searchRoot = frameworkPathRoot
       }
     } catch (e) {
+      debug('Error %o', e)
       // TODO
     }
   }
 
   // Webpack:
-
+  // At this point, we know where we're looking for webpack!
+  // We've made accommodations for certain frameworks that bundle it in (e.g. react-scripts)
   let webpackJsonPath: string
 
-  if (config.framework === 'next') {
-    // Next bundles webpack internally so we cannot source it with normal module resolution
-    try {
-      webpackJsonPath = require.resolve('next/dist/compiled/webpack/package.json', {
-        paths: [searchRoot],
-      })
-    } catch (e) {
+  debug('search root is %s', searchRoot)
+
+  try {
+    webpackJsonPath = require.resolve('webpack/package.json', {
+      paths: [searchRoot],
+    })
+  } catch (e) {
+    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
       throw e
     }
 
-    // Next 11 allows the choice of webpack@4 or webpack@5, depending on the "webpack5" property in their next.config.js
-    // The webpackModule.init" for Next 11 returns a webpack@4 or webpack@4 compiler instance based on this boolean
-    let webpack5 = true
-    const importPath = path.dirname(webpackJsonPath)
-    const webpackModule = require(path.join(importPath, 'webpack.js'))
+    webpackJsonPath = require.resolve('webpack/package.json', {
+      paths: [
+        require.resolve('@cypress/webpack-batteries-included-preprocessor', {
+          paths: [__dirname],
+        }),
+      ],
+    })
 
-    try {
-      const nextConfig = require(path.resolve(config.cypressConfig.projectRoot, 'next.config.js'))
-
-      if (nextConfig.webpack5 === false) {
-        webpack5 = false
-      }
-    } catch (e) {
-      // No next.config.js, assume webpack 5
-    }
-
-    webpackModule.init(webpack5)
-
-    const packageJson = require(webpackJsonPath)
-
-    result.webpack.importPath = importPath
-    // The package.json of "next/dist/compiled/webpack/package.json" has no version so we supply the version for later use
-    result.webpack.packageJson = { ...packageJson, version: webpack5 ? '5' : '4' }
-    result.webpack.module = webpackModule.webpack
-    result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
-  } else {
-    // Normal webpack module resolution
-    try {
-      webpackJsonPath = require.resolve('webpack/package.json', {
-        paths: [searchRoot],
-      })
-    } catch (e) {
-      if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
-        throw e
-      }
-
-      webpackJsonPath = require.resolve('webpack/package.json', {
-        paths: [cypressWebpackPath],
-      })
-    }
-
-    result.webpack.importPath = path.dirname(webpackJsonPath)
-    result.webpack.packageJson = require(webpackJsonPath)
-    result.webpack.module = require(result.webpack.importPath)
-    result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
+    debug('using webpack-batteries-included %s', webpackJsonPath)
   }
 
-  (Module as ModuleClass)._load = function (request, parent, isMain) {
-    // Next with webpack@4 doesn't ship certain dependencies that HtmlWebpackPlugin requires, so we patch the resolution through to our bundled version
-    if (request === 'webpack' || request.startsWith('webpack/') && config.framework === 'next' && result.webpack.majorVersion === 4) {
-      const resolvePath = require.resolve(request, {
-        paths: [cypressWebpackPath],
-      })
+  result.webpack.importPath = path.dirname(webpackJsonPath)
+  result.webpack.packageJson = require(webpackJsonPath)
+  result.webpack.module = require(result.webpack.importPath)
+  result.webpack.majorVersion = getMajorVersion(result.webpack.packageJson, [4, 5])
 
-      return originalModuleLoad(resolvePath, parent, isMain)
-    }
+  const webpackImportPath = result.webpack.importPath
 
+  ;(Module as ModuleClass)._load = function (request, parent, isMain) {
     if (request === 'webpack' || request.startsWith('webpack/')) {
       const resolvePath = require.resolve(request, {
-        paths: [searchRoot],
+        paths: [webpackImportPath],
       })
+
+      debug('Resolve path %s', resolvePath)
 
       return originalModuleLoad(resolvePath, parent, isMain)
     }
@@ -181,7 +152,7 @@ export function sourceRelativeWebpackModules (config: WebpackDevServerConfig) {
   (Module as ModuleClass)._resolveFilename = function (request, parent, isMain, options) {
     if (request === 'webpack' || request.startsWith('webpack/') && !options?.paths) {
       return originalModuleResolveFilename(request, parent, isMain, {
-        paths: [searchRoot],
+        paths: [webpackImportPath],
       })
     }
 
