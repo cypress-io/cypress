@@ -26,25 +26,50 @@ interface PreprocessedFunction {
  * @returns {PreprocessedHTMLElement} a preprocessed element that can be fed through postMessage() that can be reified in the primary.
  */
 const preprocessDomElement = (props: HTMLElement) => {
-  // hydrate values in HTML copy so when serialized they show up correctly in snapshot. This is important for input boxes with typing and other 'value' attributes
-  props.querySelectorAll('input').forEach((input: HTMLInputElement) => {
-    input.setAttribute('value', input.value)
-    if (input.checked) {
-      input.setAttribute('checked', `${input.checked}`)
+  const inputPreprocessArray = Array.from(props.querySelectorAll('input, textarea, select'))
+
+  // Since we serialize on innerHTML, we also need to account for the props element itself in the case it is an input, select, or textarea.
+  inputPreprocessArray.push(props)
+
+  // Hydrate values in the HTML copy so when serialized they show up correctly in snapshot.
+  // We do this by mapping certain properties to attributes that are not already reflected in the attributes map.
+  // Things like id, class, type, and others are reflected in the attribute map and do not need to be explicitly added.
+  inputPreprocessArray.forEach((el: any) => {
+    switch (el.type) {
+      case 'checkbox':
+      case 'radio':
+        if (el.checked) {
+          el.setAttribute('checked', '')
+        }
+
+        break
+      case 'select-one':
+      case 'select-multiple': {
+        const options = el.type === 'select-one' ? el.options : el.selectedOptions
+
+        if (el.selectedIndex !== -1) {
+          for (let option of options) {
+            if (option.selected) {
+              option.setAttribute('selected', 'true')
+            } else {
+              option.removeAttribute('selected')
+            }
+          }
+        }
+      }
+        break
+      case 'textarea': {
+        el.innerHTML = el.value
+      }
+        break
+      default:
+        if (el.value !== undefined) {
+          el.setAttribute('value', el.value)
+        }
     }
   })
 
-  // TODO: figure out reifying option selection
-  // props.querySelectorAll('option').forEach((option) => {
-  //   if (option.selected) {
-  //     option.setAttribute('selected', option.selected)
-  //   }
-  // })
-
   const el: PreprocessedHTMLElement = {
-    value: (props as HTMLInputElement)?.value,
-    type: (props as HTMLInputElement)?.type,
-    id: props?.id,
     tagName: props.tagName,
     attributes: {},
     innerHTML: props.innerHTML,
@@ -70,22 +95,6 @@ const preprocessDomElement = (props: HTMLElement) => {
  */
 const reifyDomElement = (props: any) => {
   const reifiedEl = document.createElement(props.tagName)
-
-  if (props.value) {
-    reifiedEl.value = props.value
-  }
-
-  try {
-    if (props.type) {
-      reifiedEl.type = props.type
-    }
-  } catch (e) {
-    // swallow this. certain elements this is a read-only property on (such as <select>)
-  }
-
-  if (props.id) {
-    reifiedEl.id = props.id
-  }
 
   reifiedEl.innerHTML = props.innerHTML
 
