@@ -1,4 +1,4 @@
-# Remaining Platform Agnostic
+# Writing Cross-Platform JavaScript
 
 Cypress works on Linux, macOS and Windows. This includes both installing from npm, as well as for local development. Code should be written in a platform agnostic style.
 

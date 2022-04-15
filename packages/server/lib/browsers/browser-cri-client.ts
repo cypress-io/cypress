@@ -111,6 +111,10 @@ export class BrowserCriClient {
    * @returns the chrome remote interface wrapper for the target
    */
   attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
+    // Continue trying to re-attach until succcessful.
+    // If the browser opens slowly, this will fail until
+    // The browser and automation API is ready, so we try a few
+    // times until eventually timing out.
     return retryWithIncreasingDelay(async () => {
       debug('Attaching to target url %s', url)
       const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
@@ -146,7 +150,6 @@ export class BrowserCriClient {
    * Closes the currently attached page target
    */
   closeCurrentTarget = async (): Promise<void> => {
-    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
