@@ -46,11 +46,13 @@ const normalize = (output) => {
 describe('successful tests', () => {
   const projectFolder = fromFolder('successful')
 
-  beforeEach(() => {
-    chdir.to(projectFolder)
+  beforeEach(async () => {
+    await chdir.to(projectFolder)
   })
 
-  afterEach(chdir.back)
+  afterEach(async () => {
+    await chdir.back()
+  })
 
   it('returns with all successful tests', () => {
     return cypress.run()
