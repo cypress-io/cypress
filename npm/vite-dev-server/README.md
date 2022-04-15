@@ -41,7 +41,7 @@ Install `@cypress/vue` or `@cypress/react` to get this package working properly
 - Responds to every query with the prefix `__cypress/src/` (base path should be this prefix).
 - Responds to `__cypress/src/index.html` with an html page. 
     This page
-    - will contain an element `<div id="__cy_root"></div>`. Tis will be used by mount function to mount the app containing the components we want.
+    - will contain an element `<div data-cy-root></div>`. Tis will be used by mount function to mount the app containing the components we want.
     - will load support files
     - will load the current spec from the url
     - will start the test when both files are done loading

@@ -54,7 +54,7 @@ For many developers, it's tempting to write a quick bash script to automate task
 }
 ```
 
-This will stop developers on windows from running `yarn clean`. Instead, opt for a Node.js script where possible, or use a cross-platform Node.js module. In this case, we could use the [`rimraf`](https://www.npmjs.com/package/rimraf) module:
+This will stop developers on Windows from running `yarn clean` unless they are specifically using a POSIX shell (like Git Bash). Instead, opt for a Node.js script where possible, or use a cross-platform Node.js module. In this case, we could use the [`rimraf`](https://www.npmjs.com/package/rimraf) module:
 
 ```json
 { 

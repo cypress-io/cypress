@@ -1,11 +1,11 @@
-import express from 'express'
+import express, { Request } from 'express'
 import type { AddressInfo, Socket } from 'net'
-import { DataContext, getCtx, globalPubSub } from '@packages/data-context'
+import { DataContext, getCtx, globalPubSub, GraphQLRequestInfo } from '@packages/data-context'
 import pDefer from 'p-defer'
 import cors from 'cors'
 import { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import { graphqlHTTP, GraphQLParams } from 'express-graphql'
+import { graphqlHTTP } from 'express-graphql'
 import serverDestroy from 'server-destroy'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -15,11 +15,11 @@ import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
-import { execute, parse } from 'graphql'
+import { DefinitionNode, DocumentNode, execute, Kind, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql'
 
-const debugOperation = debugLib(`cypress-verbose:graphql:operation`)
+const debug = debugLib(`cypress-verbose:graphql:operation`)
 
-const SHOW_GRAPHIQL = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 let gqlSocketServer: SocketIOServer
 let gqlServer: Server
@@ -34,17 +34,6 @@ export async function makeGraphQLServer () {
   const app = express()
 
   app.use(cors())
-
-  app.get('/__launchpad/preload', (req, res) => {
-    const ctx = getCtx()
-
-    ctx.html.fetchLaunchpadInitialData().then((data) => {
-      res.json(data)
-    }).catch((e) => {
-      ctx.logTraceError(e)
-      res.json({})
-    })
-  })
 
   app.get('/cloud-notification', (req, res) => {
     const ctx = getCtx()
@@ -106,7 +95,7 @@ export async function makeGraphQLServer () {
       console.log(`GraphQL server is running at ${endpoint}`)
     }
 
-    ctx.debug(`GraphQL Server at ${endpoint}`)
+    debug(`GraphQL Server at ${endpoint}`)
 
     gqlServer = srv
 
@@ -153,13 +142,19 @@ interface GraphQLSocketPayload {
 export async function handleGraphQLSocketRequest (uid: string, payload: string, callback: Function) {
   try {
     const operation = JSON.parse(payload) as GraphQLSocketPayload
-
+    const context = getCtx()
+    const document = parse(operation.query)
     const result = await execute({
       operationName: operation.operationName,
       variableValues: operation.variables,
-      document: parse(operation.query),
+      document,
       schema: graphqlSchema,
-      contextValue: getCtx(),
+      contextValue: graphqlRequestContext({
+        app: 'app',
+        context,
+        document,
+        variables: operation.variables ?? null,
+      }),
     })
 
     callback(result)
@@ -195,20 +190,41 @@ export const graphqlWS = (httpServer: Server, targetRoute: string) => {
   return graphqlWs
 }
 
+/**
+ * An Express middleware function handler which can be added to
+ * routes expected to service a GraphQL request from an HTTP client.
+ */
 export const graphQLHTTP = graphqlHTTP((req, res, params) => {
   const context = getCtx()
-  const ctx = SHOW_GRAPHIQL ? maybeProxyContext(params, context) : context
+  let document: DocumentNode | undefined
+
+  // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
+  try {
+    // @ts-expect-error
+    document = parse(params.query)
+  } catch {
+    // error will be re-thrown in customParseFn below
+  }
 
   return {
     schema: graphqlSchema,
-    graphiql: SHOW_GRAPHIQL,
-    context: ctx,
+    graphiql: IS_DEVELOPMENT,
+    context: params && document ? graphqlRequestContext({
+      req: req as Request,
+      context,
+      document,
+      variables: params.variables,
+    }) : undefined,
+    customParseFn: (source) => {
+      // No need to re-parse if we have a document, otherwise re-parse to throw the error
+      return document ?? parse(source)
+    },
     customExecuteFn: (args) => {
       const date = new Date()
       const prefix = `${args.operationName ?? '(anonymous)'}`
 
       return Promise.resolve(execute(args)).then((val) => {
-        debugOperation(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
+        debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
 
         return val
       })
@@ -216,39 +232,58 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
   }
 })
 
-/**
- * Adds runtime validations during development to ensure patterns of access are enforced
- * on the DataContext
- */
-function maybeProxyContext (params: GraphQLParams | undefined, context: DataContext): DataContext {
-  if (params?.query) {
-    const parsed = parse(params.query)
-    const def = parsed.definitions[0]
-
-    if (def?.kind === 'OperationDefinition') {
-      return def.operation === 'query' ? proxyContext(context, def.name?.value ?? '(anonymous)') : context
-    }
-  }
-
-  return context
+interface GraphQLRequestContextOptions {
+  app?: 'launchpad' | 'app'
+  req?: Request
+  context: DataContext
+  document: DocumentNode
+  variables: Record<string, unknown> | null
 }
 
-function proxyContext (ctx: DataContext, operationName: string) {
-  return new Proxy(ctx, {
+/**
+ * Since the DataContext is considered a singleton throughout the electron app process,
+ * we create a Proxy object for it, adding metadata associated each GraphQL operation.
+ * This is used in middleware, such as the `nexusDeferIfNotLoadedPlugin`, to associate
+ * remote requests to operations needing to be refetched on the client.
+ */
+function graphqlRequestContext (options: GraphQLRequestContextOptions) {
+  const app = options.app ?? (options.req?.originalUrl.startsWith('/__launchpad') ? 'launchpad' : 'app')
+
+  const primaryOperation = getPrimaryOperation(options.document)
+
+  const requestInfo: GraphQLRequestInfo = {
+    app,
+    operation: (primaryOperation?.kind ?? 'query') as OperationTypeNode,
+    document: options.document,
+    headers: options.req?.headers ?? {},
+    variables: options.variables,
+    operationName: primaryOperation?.name?.value ?? null,
+  }
+
+  debug('Creating context for %s, operation %s', app, primaryOperation?.name?.value)
+
+  return new Proxy(options.context, {
     get (target, p, receiver) {
-      // Allows us to get the context value, deref'ed so it's not guarded
-      if (p === 'deref') {
-        return Reflect.get(ctx, 'deref', ctx)
+      if (p === 'graphqlRequestInfo') {
+        return requestInfo
       }
 
-      if (p === 'actions' || p === 'emitter') {
+      if (p === 'actions' && IS_DEVELOPMENT && requestInfo.operation === 'query') {
         throw new Error(
           `Cannot access ctx.${p} within a query, only within mutations / outside of a GraphQL request\n` +
-          `Seen in operation: ${operationName}`,
+          `Seen in operation: ${requestInfo.operationName}`,
         )
       }
 
       return Reflect.get(target, p, receiver)
     },
   })
+}
+
+function getPrimaryOperation (query: DocumentNode): OperationDefinitionNode | undefined {
+  return query.definitions.find(isOperationDefinitionNode)
+}
+
+function isOperationDefinitionNode (node: DefinitionNode): node is OperationDefinitionNode {
+  return node.kind === Kind.OPERATION_DEFINITION
 }
