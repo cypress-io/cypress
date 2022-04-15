@@ -154,7 +154,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.get('h1').should('contain', 'Error Loading Config')
     cy.percySnapshot()
 
-    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:3:23')
   })
 
   it('shows correct stack trace when config with ts-module error', () => {
