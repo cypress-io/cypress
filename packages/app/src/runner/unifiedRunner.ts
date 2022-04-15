@@ -34,8 +34,10 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>) {
 
     const activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)
 
-    if (specStore.activeSpec?.relative !== activeSpecInSpecsList?.relative) {
-      specStore.setActiveSpec(activeSpecInSpecsList ?? null)
+    if (activeSpecInSpecsList && specStore.activeSpec?.relative !== activeSpecInSpecsList.relative) {
+      specStore.setActiveSpec(activeSpecInSpecsList)
+    } else if (!activeSpecInSpecsList) {
+      specStore.setActiveSpec(null)
     }
   })
 
