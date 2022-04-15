@@ -54,6 +54,26 @@ describe('src/index', () => {
 
       snapshot(defaultValues)
     })
+
+    it('returns list of public config keys for selected testing type', () => {
+      const defaultValues = configUtil.getDefaultValues({ testingType: 'e2e' })
+
+      expect(defaultValues).to.deep.include({
+        defaultCommandTimeout: 4000,
+        scrollBehavior: 'top',
+        watchForFileChanges: true,
+      })
+
+      expect(defaultValues.env).to.deep.eq({})
+
+      // remove these since they are different depending on your machine
+      ;['platform', 'arch', 'version'].forEach((x) => {
+        expect(defaultValues[x]).to.exist
+        delete defaultValues[x]
+      })
+
+      snapshot(defaultValues)
+    })
   })
 
   describe('.getPublicConfigKeys', () => {
@@ -114,12 +134,13 @@ describe('src/index', () => {
       configUtil.validateNoBreakingConfig({
         'experimentalNetworkStubbing': 'should break',
         configFile: 'config.js',
-      }, warningFn, errorFn)
+      }, warningFn, errorFn, 'e2e')
 
       expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED', {
         name: 'experimentalNetworkStubbing',
         newName: undefined,
         value: undefined,
+        testingType: 'e2e',
         configFile: 'config.js',
       })
 
@@ -133,13 +154,14 @@ describe('src/index', () => {
       configUtil.validateNoBreakingConfig({
         'blacklistHosts': 'should break',
         configFile: 'config.js',
-      }, warningFn, errorFn)
+      }, warningFn, errorFn, 'e2e')
 
       expect(warningFn).to.have.been.callCount(0)
       expect(errorFn).to.have.been.calledOnceWith('RENAMED_CONFIG_OPTION', {
         name: 'blacklistHosts',
         newName: 'blockHosts',
         value: undefined,
+        testingType: 'e2e',
         configFile: 'config.js',
       })
     })
@@ -159,6 +181,7 @@ describe('src/index', () => {
         name: 'experimentalStudio',
         newName: undefined,
         value: undefined,
+        testingType: undefined,
         configFile: 'config.js',
       })
 

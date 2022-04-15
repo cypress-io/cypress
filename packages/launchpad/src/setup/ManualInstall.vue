@@ -13,7 +13,7 @@
         class="border-b border-b-gray-100 py-16px last-of-type:border-b-0"
       >
         <i-cy-status-download-done_x24
-          v-if="props.packagesInstalled.includes(dep.package)"
+          v-if="dep.satisfied"
           class="h-24px my-12px ml-24px w-24px float-right"
           :aria-label="t('setupPage.install.installed')"
         />
@@ -22,12 +22,23 @@
           class="h-24px my-8px ml-24px w-24px float-right"
           :aria-label="t('setupPage.install.pendingInstall')"
         />
-        <ExternalLink
-          :href="`https://www.npmjs.com/package/${dep.package}`"
-          class="text-indigo-500 text-14px hocus-link-default"
-        >
-          {{ dep.package }}
-        </ExternalLink>
+        <span class="text-14px ">
+          <ExternalLink
+            :href="`https://www.npmjs.com/package/${dep.package}`"
+            class="text-indigo-500 hocus-link-default"
+          >
+            {{ dep.package }}
+          </ExternalLink>
+          <span class="border rounded-md font-semibold border-gray-100 text-xs ml-6px text-gray-700">
+            <span class="p-4px">{{ dep.minVersion }}</span>
+            <span
+              v-if="!dep.satisfied && dep.detectedVersion"
+              class="border-l font-medium bg-gray-50 border-gray-100 px-4px text-gray-600"
+            >
+              detected {{ dep.detectedVersion }}
+            </span>
+          </span>
+        </span>
         <p
           class="text-gray-500 text-14px leading-5"
           v-html="dep.description"
@@ -55,6 +66,9 @@ fragment ManualInstall on Query {
       name
       description
       package
+      minVersion
+      detectedVersion
+      satisfied
     }
     installDependenciesCommand
   }
@@ -70,6 +84,5 @@ const projectFolder = computed(() => props.gql.currentProject?.title ?? '')
 
 const props = defineProps<{
   gql: ManualInstallFragment
-  packagesInstalled: string[]
 }>()
 </script>

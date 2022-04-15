@@ -5,6 +5,9 @@
     "test",
     "script"
   ],
+  "files": [
+    "./../ts/index.d.ts"
+  ],
   "compilerOptions": {
     "lib": ["es2020"],
     "strict": true,
@@ -15,6 +18,6 @@
     "noUnusedLocals": false,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
-    "types": [],
+    "types": []
   }
 }
