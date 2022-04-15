@@ -157,7 +157,6 @@ async function getRunWebpackSpan (): Promise<{ runWebpackSpan?: any }> {
 }
 
 const originalModuleLoad = (Module as ModuleClass)._load
-const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
 
 function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
   const framework = sourceFramework(devServerConfig)!
@@ -216,7 +215,6 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
   ;(Module as ModuleClass)._load = function (request, parent, isMain) {
     // Next with webpack@4 doesn't ship certain dependencies that HtmlWebpackPlugin requires, so we patch the resolution through to our bundled version
     if ((request === 'webpack' || request.startsWith('webpack/')) && webpack.majorVersion === 4) {
-      console.log('Webpack 4 module load wtf', request)
       const resolvePath = require.resolve(request, {
         paths: [cypressWebpackPath],
       })
@@ -225,9 +223,8 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
     }
 
     if (request === 'webpack' || request.startsWith('webpack/')) {
-      console.log('Webpack module load', request)
       const resolvePath = require.resolve(request, {
-        paths: [webpack.importPath],
+        paths: [framework.importPath],
       })
 
       return originalModuleLoad(resolvePath, parent, isMain)
@@ -236,25 +233,5 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
     return originalModuleLoad(request, parent, isMain)
   }
 
-  ;(Module as ModuleClass)._resolveFilename = function (request, parent, isMain, options) {
-    if (request === 'webpack' || request.startsWith('webpack/') && !options?.paths) {
-      console.log('Webpack module resolve', request, webpack.importPath, { parent, isMain, options })
-      console.trace()
-
-      return originalModuleResolveFilename(request, parent, isMain, {
-        paths: [webpack.importPath],
-      })
-    }
-
-    return originalModuleResolveFilename(request, parent, isMain, options)
-  }
-
-  console.log({ webpack })
-
   return webpack
-}
-
-export function restoreLoadHook () {
-  (Module as ModuleClass)._load = originalModuleLoad;
-  (Module as ModuleClass)._resolveFilename = originalModuleResolveFilename
 }

@@ -1,10 +1,10 @@
 import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 import { expect } from 'chai'
 import { createReactAppHandler, cypressGlobals } from '../../src/helpers/createReactAppHandler'
-import { SourceRelativeWebpackResult } from '../../src/helpers/sourceRelativeWebpackModules'
 import { WebpackDevServerConfig } from '../../src/devServer'
 import { Configuration } from 'webpack'
 import * as path from 'path'
+import '../support'
 
 const expectEslintModifications = (webpackConfig: Configuration) => {
   const eslintPlugin: any = webpackConfig.plugins?.find((plugin) => plugin.constructor.name === 'ESLintWebpackPlugin')
@@ -55,12 +55,9 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const webpackConfig = createReactAppHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      } as WebpackDevServerConfig,
-      sourceWebpackModulesResult: { webpack: { majorVersion: 4 } } as SourceRelativeWebpackResult,
-    })
+    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
     expectEslintModifications(webpackConfig)
@@ -73,12 +70,9 @@ describe('createReactAppHandler', function () {
 
     process.chdir(projectRoot)
 
-    const webpackConfig = createReactAppHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      } as WebpackDevServerConfig,
-      sourceWebpackModulesResult: { webpack: { majorVersion: 5 } } as SourceRelativeWebpackResult,
-    })
+    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
     expectEslintModifications(webpackConfig)
@@ -88,16 +82,13 @@ describe('createReactAppHandler', function () {
   })
 
   it('sources the config from ejected cra', async () => {
-    const projectRoot = await scaffoldMigrationProject('cra-5')
+    const projectRoot = await scaffoldMigrationProject('cra-ejected')
 
     process.chdir(projectRoot)
 
-    const webpackConfig = createReactAppHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      } as WebpackDevServerConfig,
-      sourceWebpackModulesResult: { webpack: { majorVersion: 5 } } as SourceRelativeWebpackResult,
-    })
+    const { frameworkConfig: webpackConfig } = createReactAppHandler({
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     expect(webpackConfig.mode).eq('development')
     expectEslintModifications(webpackConfig)

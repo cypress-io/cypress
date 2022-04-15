@@ -3,7 +3,8 @@ import { expect } from 'chai'
 import { nextHandler } from '../../src/helpers/nextHandler'
 import type { Configuration } from 'webpack'
 import * as path from 'path'
-import { restoreLoadHook } from '../../src/helpers/sourceRelativeWebpackModules'
+import { WebpackDevServerConfig } from '../../src/devServer'
+import '../support'
 
 const expectWatchOverrides = (webpackConfig: Configuration) => {
   expect(webpackConfig.watchOptions.ignored).to.contain('**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**')
@@ -22,15 +23,6 @@ const expectWebpackSpan = (webpackConfig: Configuration) => {
 }
 
 describe('nextHandler', function () {
-  beforeEach(() => {
-    delete require.cache
-    restoreLoadHook()
-  })
-
-  after(() => {
-    restoreLoadHook()
-  })
-
   // can take a while since we install node_modules
   this.timeout(1000 * 60)
 
@@ -39,11 +31,10 @@ describe('nextHandler', function () {
 
     process.chdir(projectRoot)
 
-    const webpackConfig = await nextHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      },
-    } as any)
+    const { frameworkConfig: webpackConfig } = await nextHandler({
+      framework: 'next',
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     expectWatchOverrides(webpackConfig)
     expectPagesDir(webpackConfig, projectRoot)
@@ -55,11 +46,10 @@ describe('nextHandler', function () {
 
     process.chdir(projectRoot)
 
-    const webpackConfig = await nextHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      },
-    } as any)
+    const { frameworkConfig: webpackConfig } = await nextHandler({
+      framework: 'next',
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     expectWatchOverrides(webpackConfig)
     expectPagesDir(webpackConfig, projectRoot)
@@ -75,10 +65,9 @@ describe('nextHandler', function () {
 
     try {
       await nextHandler({
-        devServerConfig: {
-          cypressConfig: { projectRoot, nodeVersion: 'bundled' } as Cypress.PluginConfigOptions,
-        },
-      } as any)
+
+        framework: 'next', cypressConfig: { projectRoot, nodeVersion: 'bundled' } as Cypress.PluginConfigOptions,
+      } as WebpackDevServerConfig)
     } catch (e) {
       err = e
     }
