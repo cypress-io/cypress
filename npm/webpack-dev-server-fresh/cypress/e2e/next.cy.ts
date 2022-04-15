@@ -5,7 +5,7 @@ import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 const WEBPACK_REACT: ProjectFixtureDir[] = ['next-11', 'next-12', 'next-11-webpack-4']
 
 // Add to this list to focus on a particular permutation
-const ONLY_PROJECTS: ProjectFixtureDir[] = []
+const ONLY_PROJECTS: ProjectFixtureDir[] = ['next-12']
 
 for (const project of WEBPACK_REACT) {
   if (ONLY_PROJECTS.length && !ONLY_PROJECTS.includes(project)) {
@@ -19,7 +19,7 @@ for (const project of WEBPACK_REACT) {
       cy.startAppServer('component')
     })
 
-    it('should mount a passing test', () => {
+    it.only('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('index.cy.js').click()
       cy.get('.passed > .num').should('contain', 1)

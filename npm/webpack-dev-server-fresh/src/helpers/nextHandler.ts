@@ -1,15 +1,15 @@
-import type { CreateFinalWebpackConfig } from '../createWebpackDevServer'
 import debugLib from 'debug'
+import Module from 'module'
 import type { Configuration } from 'webpack'
 import * as fs from 'fs'
 import * as path from 'path'
-
-type PresetHandler = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
+import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
+import { cypressWebpackPath, getMajorVersion, ModuleClass, SourcedDependency, SourcedWebpack, sourceFramework, sourceHtmlWebpackPlugin, sourceWebpackDevServer } from './sourceRelativeWebpackModules'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:nextHandler')
 
-export async function nextHandler ({ devServerConfig, sourceWebpackModulesResult }: PresetHandler) {
-  const webpackConfig = await loadWebpackConfig({ devServerConfig, sourceWebpackModulesResult })
+export async function nextHandler (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
+  const webpackConfig = await loadWebpackConfig(devServerConfig)
 
   debug('resolved next.js webpack config %o', webpackConfig)
 
@@ -26,7 +26,7 @@ export async function nextHandler ({ devServerConfig, sourceWebpackModulesResult
     debug('found options next.js watchOptions.ignored %O', webpackConfig.watchOptions.ignored)
   }
 
-  return webpackConfig
+  return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceNextWebpackDeps(devServerConfig) }
 }
 
 /**
@@ -34,7 +34,7 @@ export async function nextHandler ({ devServerConfig, sourceWebpackModulesResult
  * `loadConfig` acquires the next.config.js
  * `getNextJsBaseWebpackConfig` acquires the webpackConfig dependent on the next.config.js
  */
-function getNextJsPackages ({ devServerConfig }: PresetHandler) {
+function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
   const packages = {} as { loadConfig: Function, getNextJsBaseWebpackConfig: Function }
 
@@ -57,8 +57,8 @@ function getNextJsPackages ({ devServerConfig }: PresetHandler) {
   return packages
 }
 
-async function loadWebpackConfig ({ devServerConfig, sourceWebpackModulesResult }: PresetHandler): Promise<Configuration> {
-  const { loadConfig, getNextJsBaseWebpackConfig } = getNextJsPackages({ devServerConfig, sourceWebpackModulesResult })
+async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Promise<Configuration> {
+  const { loadConfig, getNextJsBaseWebpackConfig } = getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = await getRunWebpackSpan()
@@ -83,7 +83,7 @@ async function loadWebpackConfig ({ devServerConfig, sourceWebpackModulesResult 
  * Check if Next is using the SWC compiler. Compilation will fail if user has `nodeVersion: "bundled"` set
  * due to SWC certificate issues.
  */
-export function checkSWC (
+function checkSWC (
   webpackConfig: Configuration,
   cypressConfig: Cypress.PluginConfigOptions,
 ) {
@@ -117,7 +117,7 @@ const existsSync = (file: string) => {
  * `${projectRoot}/pages` or `${projectRoot}/src/pages`.
  * If neither is found, return projectRoot
  */
-export function findPagesDir (projectRoot: string) {
+function findPagesDir (projectRoot: string) {
   // prioritize ./pages over ./src/pages
   let pagesDir = path.join(projectRoot, 'pages')
 
@@ -137,7 +137,7 @@ export function findPagesDir (projectRoot: string) {
 // 'next/dist/telemetry/trace/trace' only exists since v10.0.9
 // and our peerDeps support back to v8 so try-catch this import
 // Starting from 12.0 trace is now located in 'next/dist/trace/trace'
-export async function getRunWebpackSpan (): Promise<{ runWebpackSpan?: any }> {
+async function getRunWebpackSpan (): Promise<{ runWebpackSpan?: any }> {
   let trace: (name: string) => any
 
   try {
@@ -154,4 +154,107 @@ export async function getRunWebpackSpan (): Promise<{ runWebpackSpan?: any }> {
   } catch (_) {
     return {}
   }
+}
+
+const originalModuleLoad = (Module as ModuleClass)._load
+const originalModuleResolveFilename = (Module as ModuleClass)._resolveFilename
+
+function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
+  const framework = sourceFramework(devServerConfig)!
+  const webpack = sourceNextWebpack(devServerConfig, framework)
+  const webpackDevServer = sourceWebpackDevServer(devServerConfig, framework)
+  const htmlWebpackPlugin = sourceHtmlWebpackPlugin(devServerConfig, framework, webpack)
+
+  return {
+    framework,
+    webpack,
+    webpackDevServer,
+    htmlWebpackPlugin,
+  }
+}
+
+function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: SourcedDependency) {
+  const searchRoot = framework.importPath
+
+  let webpackJsonPath: string
+  const webpack = {} as SourcedWebpack
+
+  try {
+    webpackJsonPath = require.resolve('next/dist/compiled/webpack/package.json', {
+      paths: [searchRoot],
+    })
+  } catch (e) {
+    throw e
+  }
+
+  // Next 11 allows the choice of webpack@4 or webpack@5, depending on the "webpack5" property in their next.config.js
+  // The webpackModule.init" for Next 11 returns a webpack@4 or webpack@4 compiler instance based on this boolean
+  let webpack5 = true
+  const importPath = path.join(path.dirname(webpackJsonPath), 'webpack.js')
+  const webpackModule = require(importPath)
+
+  try {
+    const nextConfig = require(path.resolve(devServerConfig.cypressConfig.projectRoot, 'next.config.js'))
+
+    if (nextConfig.webpack5 === false) {
+      webpack5 = false
+    }
+  } catch (e) {
+    // No next.config.js, assume webpack 5
+  }
+
+  webpackModule.init(webpack5)
+
+  const packageJson = require(webpackJsonPath)
+
+  webpack.importPath = importPath
+  // The package.json of "next/dist/compiled/webpack/package.json" has no version so we supply the version for later use
+  webpack.packageJson = { ...packageJson, version: webpack5 ? '5' : '4' }
+  webpack.module = webpackModule.webpack
+  webpack.majorVersion = getMajorVersion(webpack.packageJson, [4, 5])
+
+  ;(Module as ModuleClass)._load = function (request, parent, isMain) {
+    // Next with webpack@4 doesn't ship certain dependencies that HtmlWebpackPlugin requires, so we patch the resolution through to our bundled version
+    if ((request === 'webpack' || request.startsWith('webpack/')) && webpack.majorVersion === 4) {
+      console.log('Webpack 4 module load wtf', request)
+      const resolvePath = require.resolve(request, {
+        paths: [cypressWebpackPath],
+      })
+
+      return originalModuleLoad(resolvePath, parent, isMain)
+    }
+
+    if (request === 'webpack' || request.startsWith('webpack/')) {
+      console.log('Webpack module load', request)
+      const resolvePath = require.resolve(request, {
+        paths: [webpack.importPath],
+      })
+
+      return originalModuleLoad(resolvePath, parent, isMain)
+    }
+
+    return originalModuleLoad(request, parent, isMain)
+  }
+
+  ;(Module as ModuleClass)._resolveFilename = function (request, parent, isMain, options) {
+    if (request === 'webpack' || request.startsWith('webpack/') && !options?.paths) {
+      console.log('Webpack module resolve', request, webpack.importPath, { parent, isMain, options })
+      console.trace()
+
+      return originalModuleResolveFilename(request, parent, isMain, {
+        paths: [webpack.importPath],
+      })
+    }
+
+    return originalModuleResolveFilename(request, parent, isMain, options)
+  }
+
+  console.log({ webpack })
+
+  return webpack
+}
+
+export function restoreLoadHook () {
+  (Module as ModuleClass)._load = originalModuleLoad;
+  (Module as ModuleClass)._resolveFilename = originalModuleResolveFilename
 }
