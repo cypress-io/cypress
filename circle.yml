@@ -31,6 +31,14 @@ mainBuildFilters: &mainBuildFilters
         - 10.0-release
         - zachw/add-dev-server-deps
 
+# uncomment & add to the branch conditions below to disable the main linux
+# flow if we don't want to test it for a certain branch
+linuxWorkflowExcludeFilters: &linux-workflow-exclude-filters
+  unless:
+    or:
+    - false
+    # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
+
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
 # so just add your branch to the list here to build and test on Mac
@@ -2535,6 +2543,7 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
+    <<: *linux-workflow-exclude-filters
   mac:
     <<: *mac-workflow
     <<: *mac-workflow-filters
