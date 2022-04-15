@@ -281,14 +281,14 @@ commands:
               circleci-agent step halt
             fi
       - run: date +%Y-%U > cache_date
-      - restore_cache:
-          name: Restore weekly yarn cache
-          keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
+      # - restore_cache:
+      #     name: Restore weekly yarn cache
+      #     keys:
+      #       - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
       - run:
           name: Install Node Modules
           command: |
-            yarn --prefer-offline --frozen-lockfile
+            yarn --frozen-lockfile
           no_output_timeout: 20m
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
