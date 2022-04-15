@@ -3,6 +3,7 @@ import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
 import type { HttpMiddleware } from './'
+import { AllowedContentEncodings } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -111,15 +112,18 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 }
 
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else
-  const acceptEncoding = this.req.headers['accept-encoding']
+  // ignore as header is a string
+  // @ts-ignore
+  const acceptEncoding: string = this.req.headers['accept-encoding'] || ''
+  const acceptEncodingArray: string[] = acceptEncoding
+  .split(',')
+  .filter((str) => AllowedContentEncodings.includes(str))
+  .map((str) => str.trim())
 
-  if (acceptEncoding) {
-    if (acceptEncoding.includes('gzip')) {
-      this.req.headers['accept-encoding'] = 'gzip'
-    } else {
-      delete this.req.headers['accept-encoding']
-    }
+  if (acceptEncodingArray.length) {
+    this.req.headers['accept-encoding'] = acceptEncodingArray.join(', ')
+  } else {
+    delete this.req.headers['accept-encoding']
   }
 
   this.next()

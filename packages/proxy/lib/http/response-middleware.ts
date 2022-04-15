@@ -5,6 +5,7 @@ import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
 import type { HttpMiddleware } from '.'
+import { AllowedContentEncodings } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -20,7 +21,7 @@ export type ResponseMiddleware = HttpMiddleware<{
    * This is done as-needed to avoid unnecessary g(un)zipping.
    */
   makeResStreamPlainText: () => void
-  isGunzipped: boolean
+  isUncompressed: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
 }>
@@ -28,7 +29,7 @@ export type ResponseMiddleware = HttpMiddleware<{
 const debug = debugModule('cypress:proxy:http:response-middleware')
 
 // https://github.com/cypress-io/cypress/issues/1756
-const zlibOptions = {
+const zlibGzipOptions = {
   flush: zlib.Z_SYNC_FLUSH,
   finishFlush: zlib.Z_SYNC_FLUSH,
 }
@@ -88,10 +89,6 @@ function isHtml (res: IncomingMessage) {
   return !resContentTypeIsJavaScript(res)
 }
 
-function resIsGzipped (res: IncomingMessage) {
-  return (res.headers['content-encoding'] || '').includes('gzip')
-}
-
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
   let opts: CookieOptions = { domain }
 
@@ -137,18 +134,53 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
+function resGetContentEncodings (res: IncomingMessage) {
+  if (!res.headers['content-encoding']) {
+    return []
+  }
+
+  return (res.headers['content-encoding'])
+  .split(',')
+  .map((str) => str.trim())
+}
+
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
     debug('ensuring resStream is plaintext')
 
-    if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
-      debug('gunzipping response body')
+    if (!this.isUncompressed) {
+      const encodings: string[] = resGetContentEncodings(this.incomingRes)
 
-      const gunzip = zlib.createGunzip(zlibOptions)
+      debug('received encodings: %o', encodings)
+      // first pass, make sure we support all the encodings
+      for (let encoding of encodings) {
+        if (!AllowedContentEncodings.includes(encoding)) {
+          debug('received unsupported content encoding: %s, not uncompressing body', encoding)
+          this.next()
+          return
+        }
+      }
+      for (let i = encodings.length - 1; i >= 0; i--) {
+        const encoding = encodings[i]
 
-      this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
+        let uncompressor: zlib.Gunzip | zlib.BrotliDecompress | zlib.Inflate | undefined
 
-      this.isGunzipped = true
+        if (encoding === 'gzip') {
+          debug('gunzipping response body')
+          uncompressor = zlib.createGunzip(zlibGzipOptions)
+        } else if (encoding === 'deflate') {
+          debug('inflating response body')
+          uncompressor = zlib.createInflate()
+        } else if (encoding === 'br') {
+          debug('unbrotling response body')
+          uncompressor = zlib.createBrotliDecompress()
+        }
+
+        if (uncompressor) {
+          this.incomingResStream = this.incomingResStream.pipe(uncompressor).on('error', this.onError)
+          this.isUncompressed = true
+        }
+      }
     }
   }
 
@@ -441,10 +473,34 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
-  if (this.isGunzipped) {
-    debug('regzipping response body')
-    this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+const ReCompressBody: ResponseMiddleware = function () {
+  if (this.isUncompressed) {
+    const encodings: string[] = resGetContentEncodings(this.incomingRes)
+
+    debug('encodings to recompress: %o', encodings)
+    for (let encoding of encodings) {
+      let recompressor: zlib.Gzip | zlib.BrotliCompress | undefined
+
+      if (encoding === 'gzip') {
+        debug('recompressing gzip encoding')
+        recompressor = zlib.createGzip(zlibGzipOptions)
+      } else if (encoding === 'deflate') {
+        debug('inflating response body')
+        recompressor = zlib.createDeflate()
+      } else if (encoding === 'br') {
+        debug('recompressing brotli encoding')
+        recompressor = zlib.createBrotliCompress()
+      } else {
+        debug('unsupported content-encoding to recompress: %o', encoding)
+        break
+      }
+
+      if (recompressor) {
+        this.incomingResStream = this.incomingResStream.pipe(recompressor).on('error', this.onError)
+      }
+    }
+  } else {
+    debug('not recompressing body')
   }
 
   this.next()
@@ -471,6 +527,6 @@ export default {
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
-  GzipBody,
+  ReCompressBody,
   SendResponseBodyToClient,
 }

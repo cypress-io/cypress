@@ -20,6 +20,12 @@ import { DeferredSourceMapCache } from '@packages/rewriter'
 
 const debugRequests = Debug('cypress-verbose:proxy:http')
 
+export const AllowedContentEncodings = [
+  'gzip',
+  'deflate',
+  'br',
+]
+
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
