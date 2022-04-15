@@ -1,19 +1,14 @@
-const { devServer } = require('@cypress/webpack-dev-server')
+const { defineConfig } = require('cypress')
 
-module.exports = {
-  'projectId': 'abcdef42',
+module.exports = defineConfig({
+  projectId: 'abcdef42',
   e2e: {
     specPattern: 'cypress/e2e/**/*',
   },
   component: {
     specPattern: 'cypress/component-tests/**/*',
-    devServer,
-    devServerConfig: {
-      webpackConfig: {
-        output: {
-          publicPath: '/',
-        },
-      },
+    devServer: {
+      bundler: 'webpack',
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
@@ -21,4 +16,4 @@ module.exports = {
       return config
     },
   },
-}
+})
