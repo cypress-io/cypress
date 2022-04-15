@@ -7,6 +7,7 @@ import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../util/config'
 import { $Location } from '../../cypress/location'
 import { LogUtils } from '../../cypress/log'
+import logGroup from '../logGroup'
 
 const reHttp = /^https?:\/\//
 
@@ -62,7 +63,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       // origin run, so it can't have its own timeout
       cy.clearTimeout()
 
-      if (!config('experimentalLoginFlows')) {
+      if (!config('experimentalSessionAndOrigin')) {
         $errUtils.throwErrByPath('origin.experiment_not_enabled')
       }
 
@@ -79,11 +80,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const log = Cypress.log({
+      let log
+
+      logGroup(Cypress, {
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
-        end: true,
+        // @ts-ignore TODO: revisit once log-grouping has more implementations
+      }, (_log) => {
+        log = _log
       })
 
       const validator = new Validator({

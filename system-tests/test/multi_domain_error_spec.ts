@@ -33,7 +33,7 @@ describe('e2e cy.origin errors', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      experimentalLoginFlows: true,
+      experimentalSessionAndOrigin: true,
     },
     async onRun (exec) {
       const res = await exec()

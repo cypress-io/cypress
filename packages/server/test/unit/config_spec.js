@@ -1494,7 +1494,7 @@ describe('lib/config', () => {
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalLoginFlows: { value: false, from: 'default' },
+            experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
@@ -1583,7 +1583,7 @@ describe('lib/config', () => {
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalLoginFlows: { value: false, from: 'default' },
+            experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             env: {

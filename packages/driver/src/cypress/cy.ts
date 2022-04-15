@@ -569,7 +569,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // With cross-origin support, this is an expected error that may or may
         // not be bad, we will rely on the page load timeout to throw if we
         // don't end up where we expect to be.
-        if (this.config('experimentalLoginFlows') && err.name === 'SecurityError') {
+        if (this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
           return
         }
 

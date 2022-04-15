@@ -54,10 +54,20 @@ export const create = (Cypress, state) => ({
   },
 
   whenStableOrAnticipatingCrossOriginResponse (fn, command) {
-    const commandIsOrigin = command?.get('name') === 'origin' || false
+    const commandIsOrigin = command?.get('name') === 'origin'
+    const commandIsEndLogGroup = command?.get('name') === 'end-logGroup'
 
-    // origin is a special command that can continue even when unstable.
-    if ((!!state('anticipatingCrossOriginResponse') && commandIsOrigin) || state('isStable') !== false) {
+    if (
+      // cy.origin() needs to run when unstable (if we're anticipating
+      // a cross-origin response) in order to allow it to set up a spec bridge
+      // before the page loads and stability is restored
+      (!!state('anticipatingCrossOriginResponse') && commandIsOrigin)
+      // the end-logGroup command is inserted internally to mark the end of
+      // a command group and needs to be allowed or stability will hang things
+      // up if chaining cy.origin commands
+      || commandIsEndLogGroup
+      || state('isStable') !== false
+    ) {
       return Promise.try(fn)
     }
 

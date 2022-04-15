@@ -14,5 +14,5 @@
     "runMode": 2,
     "openMode": 0
   },
-  "experimentalLoginFlows": true
+  "experimentalSessionAndOrigin": true
 }
