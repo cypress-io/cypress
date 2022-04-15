@@ -447,7 +447,6 @@ describe('Settings', () => {
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
 
-          cy.ensureAnimationsFinished()
           cy.percySnapshot()
         })
 
