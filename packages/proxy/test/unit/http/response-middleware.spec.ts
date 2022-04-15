@@ -24,7 +24,7 @@ describe('http/response-middleware', function () {
       'MaybeEndWithEmptyBody',
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
-      'GzipBody',
+      'ReCompressBody',
       'SendResponseBodyToClient',
     ])
   })
