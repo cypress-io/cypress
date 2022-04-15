@@ -65,8 +65,10 @@ interface CreateCypressConfig {
 }
 
 export function createCypressConfig (config: CreateCypressConfig): string {
+  const isDefineConfigAvailable = defineConfigAvailable(config.projectRoot)
+
   if (config.language === 'ts') {
-    if (defineConfigAvailable(config.projectRoot)) {
+    if (isDefineConfigAvailable) {
       return dedent`
         import { defineConfig } from 'cypress'
 
@@ -89,6 +91,20 @@ export function createCypressConfig (config: CreateCypressConfig): string {
           }
         }
       }`
+  }
+
+  if (isDefineConfigAvailable) {
+    return dedent`
+      const { defineConfig } = require('cypress')
+
+      module.exports = defineConfig({
+        component: {
+          devServer: {
+            framework: '${config.framework}',
+            bundler: '${config.bundler}'
+          }
+        }
+      })`
   }
 
   return dedent`
