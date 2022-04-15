@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
+import $stackUtils from '../../cypress/stack_utils'
 import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
@@ -52,8 +53,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
+      const userInvocationStack = state('current').get('userInvocationStack')
+
       // store the invocation stack in the case that `cy.origin` errors
-      communicator.userInvocationStack = state('current').get('userInvocationStack')
+      communicator.userInvocationStack = userInvocationStack
 
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
@@ -169,7 +172,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               })
 
               wrappedErr.name = err.name
-              wrappedErr.stack = err.stack
+              wrappedErr.stack = $stackUtils.replacedStack(wrappedErr, err.stack)
 
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}
@@ -194,13 +197,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // to stack up listeners on it after it's originally bound
         if (!communicator.listeners('uncaught:error').length) {
           communicator.once('uncaught:error', ({ err }) => {
-            if (err?.name === 'CypressError') {
-              // This is a Cypress error thrown from the secondary origin after the command queue has finished, do not wrap it as a spec or app error.
-              cy.fail(err, { async: true })
-            } else {
-              // @ts-ignore
-              Cypress.runner.onSpecError('error')({ error: err })
-            }
+            cy.fail(err, { async: true })
           })
         }
 
@@ -247,7 +244,22 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               })
 
               wrappedErr.name = err.name
-              wrappedErr.stack = err.stack
+
+              const stack = $stackUtils.replacedStack(wrappedErr, userInvocationStack)
+
+              // add the actual stack, since it might be useful for debugging
+              // the failure
+              wrappedErr.stack = $stackUtils.stackWithContentAppended({
+                appendToStack: {
+                  title: 'From Cypress Internals',
+                  content: $stackUtils.stackWithoutMessage(err.stack),
+                },
+              }, stack)
+
+              // @ts-ignore - This keeps Bluebird from messing with the stack.
+              // It tries to add a bunch of stuff that's not useful and ends up
+              // messing up the stack that we want on the error
+              wrappedErr.__stackCleaned__ = true
 
               // Prevent cypress from trying to add the function to the error log
               wrappedErr.onFail = () => {}
