@@ -5,6 +5,7 @@ import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
 import type { HttpMiddleware } from '.'
+// eslint-disable-next-line no-duplicate-imports
 import { AllowedContentEncodings } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
@@ -157,6 +158,7 @@ const AttachPlainTextStreamFn: ResponseMiddleware = function () {
         if (!AllowedContentEncodings.includes(encoding)) {
           debug('received unsupported content encoding: %s, not uncompressing body', encoding)
           this.next()
+
           return
         }
       }

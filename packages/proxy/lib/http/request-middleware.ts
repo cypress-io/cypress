@@ -3,6 +3,7 @@ import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
 import type { HttpMiddleware } from './'
+// eslint-disable-next-line no-duplicate-imports
 import { AllowedContentEncodings } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
