@@ -34,16 +34,12 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>) {
 
     const activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)
 
-    specStore.setActiveSpec(activeSpecInSpecsList ?? null)
+    if (specStore.activeSpec?.relative !== activeSpecInSpecsList?.relative) {
+      specStore.setActiveSpec(activeSpecInSpecsList ?? null)
+    }
   })
 
   watch(() => getPathForPlatform(route.query.file as string), (newQueryFile) => {
-    if (!newQueryFile) {
-      // no file param, we are not showing a file
-      // so no action needed when specs list updates
-      return
-    }
-
     if (selectorPlaygroundStore.show) {
       const autIframe = getAutIframeModel()
 
