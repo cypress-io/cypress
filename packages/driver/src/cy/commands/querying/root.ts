@@ -31,7 +31,10 @@ export default (Commands, Cypress, cy, state) => {
         return log(withinSubject)
       }
 
-      return cy.now('get', 'html', { log: false }).then(log)
+      return cy.now('get', 'html', {
+        log: false,
+        timeout: options.timeout,
+      }).then(log)
     },
   })
 }

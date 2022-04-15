@@ -83,7 +83,7 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
-    subject // $ExpectType unknown
+    subject // $ExpectType any
     arg // $ExpectType string
     return
   })
@@ -113,11 +113,13 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
-    subject // $ExpectType JQuery<HTMLElement>
+    subject // $ExpectType JQueryWithSelector<HTMLElement>
+    subject.selector // $ExpectType string | null | undefined
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
-    subject // $ExpectType JQuery<HTMLElement>
+    subject // $ExpectType JQueryWithSelector<HTMLElement>
+    subject.selector // $ExpectType string | null | undefined
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
@@ -126,7 +128,8 @@ namespace CypressCommandsTests {
     } else if (subject instanceof Document) {
       subject // $ExpectType Document
     } else {
-      subject // $ExpectType JQuery<HTMLElement>
+      subject // $ExpectType JQueryWithSelector<HTMLElement>
+      subject.selector // $ExpectType string | null | undefined
     }
     arg // $ExpectType string
   })
@@ -136,7 +139,7 @@ namespace CypressCommandsTests {
     } else if (subject instanceof Document) {
       subject // $ExpectType Document
     } else if (subject) {
-      subject // $ExpectType JQuery<HTMLElement>
+      subject // $ExpectType JQueryWithSelector<HTMLElement>
     } else {
       subject // $ExpectType void
     }
@@ -147,6 +150,118 @@ namespace CypressCommandsTests {
     arg
     return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
   })
+
+  Cypress.Commands.addAll({
+    newCommand(arg) {
+      // $ExpectType any
+      arg
+      this // $ExpectType Context
+      return
+    },
+    newCommand2(arg, arg2) {
+      // $ExpectType any
+      arg
+      // $ExpectType any
+      arg2
+    },
+    newCommand3: (arg) => {
+      // $ExpectType any
+      arg
+      return
+    },
+    newCommand4: (arg) => {
+      // $ExpectType any
+      arg
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: true }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType unknown
+      arg // $ExpectType any
+      return
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: false }, {
+    newCommand: (arg) => {
+      arg // $ExpectType any
+      return
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: 'optional' }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType unknown
+      arg // $ExpectType any
+      return
+    },
+    newCommand2: (subject, arg) => {
+      subject // $ExpectType unknown
+      arg // $ExpectType any
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: ['optional'] }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType unknown
+      arg // $ExpectType any
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: 'document' }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType Document
+      arg // $ExpectType any
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: 'window' }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType Window
+      arg // $ExpectType any
+    },
+  })
+  Cypress.Commands.addAll({ prevSubject: 'element' }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType JQuery<HTMLElement>
+      arg // $ExpectType any
+    }
+  })
+  Cypress.Commands.addAll({ prevSubject: ['element'] }, {
+    newCommand: (subject, arg) => {
+      subject // $ExpectType JQuery<HTMLElement>
+      arg // $ExpectType any
+    }
+  })
+  Cypress.Commands.addAll({ prevSubject: ['element', 'document', 'window'] }, {
+    newCommand: (subject, arg) => {
+      if (subject instanceof Window) {
+        subject // $ExpectType Window
+      } else if (subject instanceof Document) {
+        subject // $ExpectType Document
+      } else {
+        subject // $ExpectType JQuery<HTMLElement>
+      }
+      arg // $ExpectType any
+    }
+  })
+  Cypress.Commands.addAll({ prevSubject: ['window', 'document', 'optional', 'element'] }, {
+    newCommand: (subject, arg) => {
+      if (subject instanceof Window) {
+        subject // $ExpectType Window
+      } else if (subject instanceof Document) {
+        subject // $ExpectType Document
+      } else if (subject) {
+        subject // $ExpectType JQuery<HTMLElement>
+      } else {
+        subject // $ExpectType void
+      }
+      arg // $ExpectType any
+    }
+  })
+  Cypress.Commands.addAll({
+    newCommand: (arg) => {
+      // $ExpectType any
+      arg
+      return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
+    }
+  })
+
   Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
@@ -159,7 +274,7 @@ namespace CypressCommandsTests {
     originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
   })
   Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
-    element // $ExpectType JQuery<HTMLElement>
+    element // $ExpectType JQueryWithSelector<HTMLElement>
     text // $ExpectType string
 
     if (options && options.sensitive) {

@@ -16,7 +16,21 @@ const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
 const isRenderWorkerRe = /\.RenderWorker-/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe]
+// Chromium (which Electron uses) always makes several attempts to connect to the system dbus.
+// This works fine in most desktop environments, but in a docker container, there is no dbus service
+// and Chromium emits several error lines, similar to these:
+
+// [1957:0406/160550.146820:ERROR:bus.cc(392)] Failed to connect to the bus: Failed to connect to socket /var/run/dbus/system_bus_socket: No such file or directory
+// [1957:0406/160550.147994:ERROR:bus.cc(392)] Failed to connect to the bus: Address does not contain a colon
+
+// These warnings are absolutely harmless. Failure to connect to dbus means that electron won't be able to access the user's
+// credential wallet (none exists in a docker container) and won't show up in the system tray (again, none exists).
+// Failure to connect is expected and normal here, but users frequently misidentify these errors as the cause of their problems.
+
+// https://github.com/cypress-io/cypress/issues/19299
+const isDbusWarning = /Failed to connect to the bus:/
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
@@ -102,13 +116,13 @@ module.exports = {
         const electronArgs = []
         const node11WindowsFix = isPlatform('win32')
 
+        let startScriptPath
+
         if (options.dev) {
+          executable = 'node'
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          executable = 'node'
-          electronArgs.unshift(
-            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
-          )
+          startScriptPath = path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
 
           debug('in dev mode the args became %o', args)
         }
@@ -118,6 +132,9 @@ module.exports = {
         }
 
         // strip dev out of child process options
+        /**
+         * @type {import('child_process').ForkOptions}
+         */
         let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
 
         // figure out if we're going to be force enabling or disabling colors.
@@ -141,9 +158,7 @@ module.exports = {
 
         if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
           // Since we are running electron as node, we need to add an entry point file.
-          const serverEntryPoint = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
-
-          args = [serverEntryPoint, ...args]
+          startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
         } else {
           // Start arguments with "--" so Electron knows these are OUR
           // arguments and does not try to sanitize them. Otherwise on Windows
@@ -152,8 +167,12 @@ module.exports = {
           args = [...electronArgs, '--', ...args]
         }
 
-        debug('spawning Cypress with executable: %s', executable)
+        if (startScriptPath) {
+          args.unshift(startScriptPath)
+        }
+
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
+        debug('spawning Cypress with executable: %s', executable)
         const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event) {

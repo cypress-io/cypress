@@ -3,6 +3,7 @@ const path = require('path')
 const { promisify } = require('util')
 const glob = promisify(require('glob'))
 const Fixtures = require('../lib/fixtures')
+const { scaffoldProjectNodeModules } = require('../lib/dep-installer')
 
 const logTag = '[update-cache.js]'
 const log = (...args) => console.log(logTag, ...args)
@@ -29,7 +30,7 @@ const log = (...args) => console.log(logTag, ...args)
     log('Scaffolding node_modules for', project)
 
     Fixtures.scaffoldProject(project)
-    await Fixtures.scaffoldProjectNodeModules(project)
+    await scaffoldProjectNodeModules(project)
     console.timeEnd(timeTag)
   }
 
