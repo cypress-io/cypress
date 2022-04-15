@@ -25,6 +25,8 @@ fs.ensureDirSync(join(__dirname, '..', 'types'))
 includeTypes.forEach((folder) => {
   const source = resolvePkg(`@types/${folder}`, { cwd: __dirname })
 
+  console.log(`copying ${folder} from ${source}`)
+
   fs.copySync(source, join(__dirname, '..', 'types', folder))
 })
 
