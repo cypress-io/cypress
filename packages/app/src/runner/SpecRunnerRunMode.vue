@@ -1,5 +1,5 @@
 <template>
-  <RemovePositioningDuringScreenshot
+  <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex border-gray-900"
   >
@@ -68,7 +68,7 @@
         <ScreenshotHelperPixels />
       </template>
     </ResizablePanels>
-  </RemovePositioningDuringScreenshot>
+  </AdjustRunnerStyleDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -79,7 +79,7 @@ import { useAutStore, useRunnerUiStore } from '../store'
 import SnapshotControls from './SnapshotControls.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
-import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
+import AdjustRunnerStyleDuringScreenshot from './screenshot/AdjustRunnerStyleDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ScriptError from './ScriptError.vue'
