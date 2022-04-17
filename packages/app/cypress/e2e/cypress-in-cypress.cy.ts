@@ -94,6 +94,12 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     })
 
     it(`scales the AUT correctly in ${testingType}`, () => {
+      const assertNoScaleShown = () => {
+        // check that no message about scale % is shown,
+        // meaning the AUT is at 100% scale
+        cy.contains('%)').should('not.exist')
+      }
+
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
@@ -130,10 +136,11 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         dragHandleToClientX('panel2', position).then(() => {
           const expectedScale = testingTypeExpectedScales[testingType][index]
 
+          // CT hits 100% scale "earlier" than E2E, so sometimes there is no expected scale
           if (expectedScale) {
             cy.contains(expectedScale).should('be.visible')
           } else {
-            cy.contains('%)').should('not.exist')
+            assertNoScaleShown()
           }
 
           cy.percySnapshot(`panel 2 at ${ position } px`)
@@ -150,8 +157,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         // but we have to also collapse the Specs List to remove any reason to scale horizontally
         cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs').click()
 
-        // check that no message about scale % is shown
-        cy.contains('%)').should('not.exist')
+        assertNoScaleShown()
         cy.percySnapshot('tall viewport')
 
         cy.viewport(1500, 400)
