@@ -3,7 +3,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
+import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, TestingType } from '@packages/types'
 import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
@@ -12,7 +12,7 @@ import keys from './util/keys'
 import origin from './util/origin'
 import pathHelpers from './util/path_helpers'
 
-import type { ConfigValidationFailureInfo } from '@packages/errors'
+import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
 
 import { getCtx } from './makeDataContext'
 
@@ -148,7 +148,11 @@ export function mergeDefaults (
     additionalIgnorePattern = config.e2e.specPattern
   }
 
-  config = { ...config, ...config[options.testingType], additionalIgnorePattern }
+  config = {
+    ...config,
+    ...config[options.testingType],
+    additionalIgnorePattern,
+  }
 
   // split out our own app wide env from user env variables
   // and delete envFile
@@ -195,9 +199,21 @@ export function mergeDefaults (
 
   debug('validate that there is no breaking config options before setupNodeEvents')
 
+  const { testingType } = options
+
+  function makeConfigError (cyError: CypressError) {
+    cyError.name = `Obsolete option used in config object`
+
+    return cyError
+  }
+
+  configUtils.validateNoBreakingConfig(config[testingType], errors.warning, (err, options) => {
+    throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
+  }, testingType)
+
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
-    throw errors.get(err, ...args)
-  })
+    throw makeConfigError(errors.get(err, ...args))
+  }, testingType)
 
   // We need to remove the nested propertied by testing type because it has been
   // flattened/compacted based on the current testing type that is selected
@@ -240,7 +256,7 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
   })
 }
 
-export function updateWithPluginValues (cfg, overrides) {
+export function updateWithPluginValues (cfg, overrides, testingType: TestingType) {
   if (!overrides) {
     overrides = {}
   }
@@ -261,17 +277,22 @@ export function updateWithPluginValues (cfg, overrides) {
 
   debug('validate that there is no breaking config options added by setupNodeEvents')
 
+  function makeSetupError (cyError: CypressError) {
+    cyError.name = `Error running ${testingType}.setupNodeEvents()`
+
+    return cyError
+  }
+
   configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
-    throw errors.get(err, options)
-  })
+    throw makeSetupError(errors.get(err, options))
+  }, testingType)
 
-  configUtils.validateNoBreakingConfig(overrides.e2e, errors.warning, (err, options) => {
-    throw errors.get(err, { ...options, name: `e2e.${options.name}` })
-  })
-
-  configUtils.validateNoBreakingConfig(overrides.component, errors.warning, (err, options) => {
-    throw errors.get(err, { ...options, name: `component.${options.name}` })
-  })
+  configUtils.validateNoBreakingConfig(overrides[testingType], errors.warning, (err, options) => {
+    throw makeSetupError(errors.get(err, {
+      ...options,
+      name: `${testingType}.${options.name}`,
+    }))
+  }, testingType)
 
   const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
     value: cfg.browsers,

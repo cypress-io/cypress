@@ -19,5 +19,6 @@ describe('nuxtHandler', function () {
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
     expect(config.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+    expect(config.performance).to.be.undefined
   })
 })
