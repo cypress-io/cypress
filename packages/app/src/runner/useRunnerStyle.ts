@@ -59,6 +59,8 @@ export const useRunnerStyle = () => {
     transform: scale(${scale.value});
     `
 
+    // to keep the AUT iframe centered during scaling, we need to calculate the difference between
+    // viewport with midpoint and the the container width midpoint and apply a negative margin
     if (!screenshotStore.isScreenshotting) {
       style += `
       margin-left: ${(containerWidth.value / 2) - (autStore.viewportDimensions.width / 2) }px`
