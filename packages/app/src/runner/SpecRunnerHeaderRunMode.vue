@@ -1,7 +1,7 @@
 <template>
   <div
     id="spec-runner-header"
-    ref="AUTHeaderEl"
+    ref="autHeaderEl"
     class="min-h-64px px-16px text-14px"
     :style="{ width: `${props.width}px` }"
   >
@@ -72,9 +72,9 @@ const displayScale = computed(() => {
 
 const autStore = useAutStore()
 
-const AUTHeaderEl = ref<HTMLDivElement>()
+const autHeaderEl = ref<HTMLDivElement>()
 
-const { height } = useElementSize(AUTHeaderEl)
+const { height } = useElementSize(autHeaderEl)
 
 watch(height, () => {
   autStore.setSpecRunnerHeaderHeight(height.value)
