@@ -534,10 +534,8 @@ commands:
   run-binary-system-tests:
     steps:
       - restore_cached_workspace
+      - update_cached_system_tests_deps
       - restore_cached_system_tests_deps
-      - run:
-          name: Update system-tests node_modules cache
-          command: yarn workspace @tooling/system-tests projects:yarn:install
       - run:
           name: Run system tests
           command: |
