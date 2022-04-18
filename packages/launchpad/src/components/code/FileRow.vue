@@ -9,7 +9,7 @@
     <template #target="{open}">
       <ListRowHeader
         :class="{ 'border-b border-b-gray-100 rounded-b-none': open }"
-        class="cursor-pointer"
+        class="cursor-pointer font-semibold"
         :description="description"
         :icon="statusInfo.icon"
       >
