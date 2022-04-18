@@ -26,6 +26,7 @@
       </div>
       <SpecRunnerDropdown
         data-cy="select-browser"
+        :disabled="autStore.isRunning"
       >
         <template #heading>
           <img

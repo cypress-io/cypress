@@ -4,11 +4,19 @@
     #="{ open, close }"
   >
     <PopoverButton
-      class="border-transparent rounded flex-grow h-full border-1px px-12px group hocus-default"
+      class="border-transparent rounded flex-grow h-full border-1px px-12px group"
+      :class="{
+        'hocus-default': !props.disabled,
+        'bg-gray-50 cursor-auto': props.disabled,
+      }"
+      :disabled="props.disabled"
     >
       <div
-        class="flex text-gray-600 gap-8px items-center group-hocus:text-indigo-600"
-        :class="open ? 'text-indigo-600' : ''"
+        class="flex text-gray-600 gap-8px items-center"
+        :class="{
+          'text-indigo-600': open,
+          'group-hocus:text-indigo-600': !props.disabled,
+        }"
       >
         <slot
           name="heading"
@@ -16,8 +24,12 @@
           :close="close"
         />
         <i-cy-chevron-down
-          class="transform transition-all w-10px duration-300 group-hocus:icon-dark-indigo-500"
-          :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
+          class="transform transition-all w-10px duration-300"
+          :class="{
+            'rotate-180 icon-dark-indigo-500': open,
+            'icon-dark-gray-200': !open,
+            'group-hocus:icon-dark-indigo-500': !props.disabled,
+          }"
         />
       </div>
     </PopoverButton>
@@ -47,8 +59,10 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 const props = withDefaults(defineProps<{
   variant?: 'panel'
   align?: 'left' | 'right'
+  disabled?: boolean
 }>(), {
   variant: undefined,
   align: 'right',
+  disabled: false,
 })
 </script>
