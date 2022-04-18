@@ -1569,14 +1569,6 @@ jobs:
           name: Type Check
           command: yarn typecheck
           working_directory: npm/vue
-      - run:
-          name: Run component tests
-          command: yarn test:ci:ct
-          working_directory: npm/vue
-      - run:
-          name: Run e2e tests
-          command: yarn test:ci:e2e
-          working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:

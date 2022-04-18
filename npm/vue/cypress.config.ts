@@ -14,8 +14,8 @@ export default defineConfig({
   'component': {
     excludeSpecPattern: 'examples/**/*',
     devServer: {
-      bundler: 'webpack',
-      framework: 'vue-cli',
+      bundler: 'vite',
+      framework: 'vue',
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
