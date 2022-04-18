@@ -39,7 +39,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       return `${Cypress._.lowerCase(frameworkName).replace(' ', '')}-logo`
     }
 
-    ;['Create React App (v5)', 'Vue.js (v3)'].forEach((name) => {
+    ;['Create React App (v5) Alpha', 'Vue.js (v3)'].forEach((name) => {
       cy.findByRole('option', { name })
       .find('svg')
       .should('have.attr', 'data-cy', frameworkIconName(name))
@@ -73,7 +73,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (v5) (detected)' }).should('be.visible')
+    cy.findByRole('option', { name: 'Create React App (v5) Alpha (detected)' }).should('be.visible').click()
   })
 
   it('shows the description of bundler as Dev Server', () => {

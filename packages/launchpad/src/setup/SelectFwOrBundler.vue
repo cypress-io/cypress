@@ -32,6 +32,7 @@
       <span class="text-gray-800 inline-block">
         {{ selectedOptionName }}
       </span>
+      <AlphaLabel v-if="selectedFrameworkOptionObject?.alpha" />
       <span
         v-if="isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -44,6 +45,7 @@
       <span class="text-gray-800 inline-block">
         {{ itemValue.name }}
       </span>
+      <AlphaLabel v-if="itemValue.alpha" />
       <span
         v-if="itemValue.isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -71,6 +73,7 @@ interface RootOption {
 
 interface FrameworkOption extends RootOption {
   type: FrontendFrameworkEnum
+  alpha: boolean
 }
 
 interface BundlerOption extends RootOption {
@@ -90,6 +93,7 @@ import type {
   SupportedBundlers,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import AlphaLabel from './AlphaLabel.vue'
 
 const { t } = useI18n()
 
@@ -114,6 +118,12 @@ const emit = defineEmits<{
 
 const selectedOptionObject = computed(() => {
   return props.options.find((opt) => opt.type === props.value)
+})
+
+const selectedFrameworkOptionObject = computed(() => {
+  const found = props.options.find((opt) => opt.type === props.value)
+
+  return found ? found as FrameworkOption : undefined
 })
 
 const selectedOptionName = ref(selectedOptionObject.value?.name || '')

@@ -31,6 +31,10 @@ export const WizardFrontendFramework = objectType({
       description: 'The display name of the framework',
     })
 
+    t.nonNull.boolean('alpha', {
+      description: 'Whether the framework is in alpha or not',
+    })
+
     t.nonNull.list.nonNull.field('supportedBundlers', {
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',

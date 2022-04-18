@@ -1389,6 +1389,9 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
+  """Whether the framework is in alpha or not"""
+  alpha: Boolean!
+
   """The category (framework, like react-scripts, or library, like react"""
   category: String!
 
