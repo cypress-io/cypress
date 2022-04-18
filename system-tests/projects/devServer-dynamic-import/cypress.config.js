@@ -1,9 +1,10 @@
 module.exports = {
   component: {
     supportFile: false,
-    devServer: import('@cypress/react/plugins/load-webpack/index.js'),
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
     },
   },
 }

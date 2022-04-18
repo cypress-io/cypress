@@ -1,8 +1,9 @@
-const { devServer } = require('@cypress/react/plugins/react-scripts')
-
 module.exports = {
   component: {
-    devServer,
+    devServer: {
+      framework: 'vue',
+      bundler: 'webpack'
+    },
     indexHtmlFile: 'cypress/support/custom-component-index.html',
   },
 }

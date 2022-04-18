@@ -115,18 +115,18 @@ describe('specChange subscription', () => {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -230,18 +230,18 @@ module.exports = {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -332,18 +332,18 @@ module.exports = {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',

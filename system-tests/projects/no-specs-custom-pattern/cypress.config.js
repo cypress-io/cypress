@@ -1,13 +1,12 @@
-const { devServer } = require('@cypress/react/plugins/load-webpack')
-
 module.exports = {
   component: {
     supportFile: false,
     specPattern: 'src/specs-folder/*.cy.{js,jsx}',
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     supportFile: false,
