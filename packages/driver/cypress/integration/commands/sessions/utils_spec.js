@@ -35,7 +35,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       })
     })
 
-    it('for one domain with only local storage', () => {
+    it('for one domain with only local storage set', () => {
       const sessionState = {
         id: 'session1',
         localStorage: [
