@@ -125,6 +125,12 @@ export class AutIframe {
 
   restoreDom = (snapshot) => {
     if (!this.doesAUTMatchTopOriginPolicy()) {
+      /**
+       * A load event fires here when the src is removed (as does an unload event).
+       * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).
+       * This doesn't resort in a log message being generated for a new page.
+       * In the event-manager code, we stop adding logs from other domains once the spec is finished.
+       */
       this.$iframe.one('load', () => {
         this.restoreDom(snapshot)
       })
