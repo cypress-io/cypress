@@ -2273,7 +2273,7 @@ linux-workflow: &linux-workflow
     - binary-system-tests:
         requires:
           - create-build-artifacts
-          # - system-tests-node-modules-install
+          - system-tests-node-modules-install
 
 mac-workflow: &mac-workflow
   jobs:
