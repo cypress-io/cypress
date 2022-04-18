@@ -6,7 +6,7 @@ const {
 
 describe('src/cy/commands/sessions/utils.ts', () => {
   describe('.getSessionDetails', () => {
-    it('for one domain with both cookies and local storage set', () => {
+    it('for one domain with neither cookies or local storage set', () => {
       const sessionState = {
         id: 'session1',
       }
