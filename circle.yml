@@ -57,7 +57,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
+    - equal: [ 'alejandro/fix/do-not-scaffold-fixtures-if-folder-exist', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
