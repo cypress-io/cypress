@@ -232,6 +232,14 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       cy.contains('cypress/e2e/foo.cy.ts')
       cy.contains('cypress/component/button.cy.js')
 
+      cy.get('[data-cy="migrate-before"]').within(() => {
+        cy.get('.text-red-500').should('contain', 'spec')
+      })
+
+      cy.get('[data-cy="migrate-after"]').within(() => {
+        cy.get('.text-jade-500').should('contain', 'cy')
+      })
+
       cy.findByText('change').click()
 
       cy.get('[data-cy=migration-button-proceed]').click()
@@ -241,6 +249,16 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       cy.findByText('Rename folder only.').click()
 
       cy.findByText('Save Changes').click()
+
+      cy.percySnapshot()
+
+      cy.get('[data-cy="migrate-before"]').within(() => {
+        cy.get('.text-red-500').should('not.contain', 'spec')
+      })
+
+      cy.get('[data-cy="migrate-after"]').within(() => {
+        cy.get('.text-jade-500').should('not.contain', 'cy')
+      })
 
       cy.findByText('Rename the folder for me').click()
 

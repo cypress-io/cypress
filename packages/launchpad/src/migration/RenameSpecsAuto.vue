@@ -55,13 +55,13 @@
     <BeforeAfter>
       <template #before>
         <HighlightedFilesList
-          :files="props.gql.specFiles.map(x => x.before)"
+          :files="specFiles.map(x => x.before)"
           highlight-class="text-red-500"
         />
       </template>
       <template #after>
         <HighlightedFilesList
-          :files="props.gql.specFiles.map(x => x.after)"
+          :files="specFiles.map(x => x.after)"
           highlight-class="text-jade-500"
         />
       </template>
@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
@@ -100,6 +100,7 @@ import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import type { PossibleOption } from './types'
 import { useI18n } from '@cy/i18n'
+import _ from 'lodash'
 
 const { t } = useI18n()
 
@@ -113,6 +114,7 @@ fragment RenameSpecsAuto on Migration {
         id
         text
         highlight
+        group
       }
     }
 
@@ -122,6 +124,7 @@ fragment RenameSpecsAuto on Migration {
         id
         text
         highlight
+        group
       }
     }
   }
@@ -144,4 +147,26 @@ function applySkipResult (val: PossibleOption) {
   selectOption.value = val
   emits('selectOption', selectOption.value)
 }
+
+const specFiles = computed(() => {
+  if (selectOption.value !== 'renameFolder') {
+    return props.gql.specFiles
+  }
+
+  const updateHighlight = (spec) => {
+    if (spec.group === 'preExtension') {
+      spec.highlight = false
+    }
+
+    return spec
+  }
+
+  return _.cloneDeep(props.gql.specFiles).map((spec) => {
+    spec.before.parts = spec.before.parts.map(updateHighlight)
+
+    spec.after.parts = spec.after.parts.map(updateHighlight)
+
+    return spec
+  })
+})
 </script>
