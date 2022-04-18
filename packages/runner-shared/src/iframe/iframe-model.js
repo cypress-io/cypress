@@ -222,7 +222,7 @@ export class IframeModel {
     if (!this.isAUTSameOrigin()) {
       const Cypress = eventManager.getCypress()
 
-      // go get the final cross origin snapshot. Do this optimistically while we render the selected snapshot
+      // Go get the final cross origin snapshot. Do this optimistically while we render the selected snapshot.
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
       Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
         this.originalState = {

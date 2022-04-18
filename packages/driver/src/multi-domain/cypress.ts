@@ -38,7 +38,6 @@ const createCypress = () => {
 
     if (requestedSnapshotUrlLocation.originPolicy === specBridgeLocation.originPolicy) {
       // if true, this is the correct specbridge to take the snapshot and send it back
-      // @ts-ignore
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
       Cypress.specBridgeCommunicator.toPrimary('final:snapshot:generated', finalSnapshot)

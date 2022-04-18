@@ -46,6 +46,7 @@ declare namespace Cypress {
     fail: (err: Error, options:{ async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
     createSnapshot:  ISnapshots['createSnapshot']
+    getStyles: ISnapshots['getStyles']
     // NOTE: This command is added in support/utils.js for testing convenience and does not ship with cy!
     shouldWithTimeout(cb: (subj: {}) => void, timeout?: number): Chainable
   }

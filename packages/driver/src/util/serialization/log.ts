@@ -309,7 +309,6 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
     return null
   }
 
-  // @ts-ignore
   preprocessedSnapshot.styles = cy.getStyles(snapshot)
 
   return preprocessedSnapshot
@@ -323,7 +322,6 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
 export const reifySnapshotFromSerialization = (snapshot) => {
   snapshot.body = reifyLogLikeFromSerialization(snapshot.body, false)
 
-  // @ts-ignore
   return cy.createSnapshot(snapshot.name, null, snapshot)
 }
 
@@ -383,20 +381,19 @@ export const reifyLogFromSerialization = (logAttrs) => {
   let { snapshots, ... logAttrsRest } = logAttrs
 
   if (snapshots) {
-    // @ts-ignore
     snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => reifySnapshotFromSerialization(snapshot))
   }
 
   const reified = reifyLogLikeFromSerialization(logAttrsRest)
 
   if (reified.$el && reified.$el.length) {
-    // make sure $els are jQuery Arrays to keep was is expected in the log
+    // Make sure $els are jQuery Arrays to keep what is expected in the log.
     reified.$el = Cypress.$(reified.$el.map((el) => el))
   }
 
   reified.snapshots = snapshots
 
-  // use this flag to help reify the log correctly when certain property types slightly differ
+  // Use this flag to help reify the log correctly when certain property types slightly differ.
   reified.crossOriginLog = true
 
   return reified

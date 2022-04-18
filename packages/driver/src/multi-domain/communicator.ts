@@ -45,7 +45,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         this.crossOriginDriverWindows[data.originPolicy] = source as Window
       }
 
-      // reify any logs coming back from the spec bridges to serialize snapshot/consoleProp DOM elements as well as select functions.
+      // reify any logs coming back from the cross-origin spec bridges to serialize snapshot/consoleProp DOM elements as well as select functions.
       if (LOG_EVENTS.includes(data?.event)) {
         data.data = reifyLogFromSerialization(data.data as any)
       }

@@ -175,7 +175,7 @@ export const create = ($$, state) => {
     // for the head and body, get an array of all CSS,
     // whether it's links or style tags
     // if it's same-origin, it will get the actual styles as a string
-    // it it's cross-domain, it will get a reference to the link's href
+    // if it's cross-origin, it will get a reference to the link's href
     const { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
 
     // replaces iframes with placeholders
