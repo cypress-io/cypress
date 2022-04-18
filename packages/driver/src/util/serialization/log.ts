@@ -22,7 +22,7 @@ interface PreprocessedFunction {
  * @param {HTMLElement} props - an HTMLElement
  * @returns {PreprocessedHTMLElement} a preprocessed element that can be fed through postMessage() that can be reified in the primary.
  */
-const preprocessDomElement = (props: HTMLElement) => {
+export const preprocessDomElement = (props: HTMLElement) => {
   const inputPreprocessArray = Array.from(props.querySelectorAll('input, textarea, select'))
 
   // Since we serialize on innerHTML, we also need to account for the props element itself in the case it is an input, select, or textarea.
@@ -90,7 +90,7 @@ const preprocessDomElement = (props: HTMLElement) => {
  * @param {PreprocessedHTMLElement} props - a preprocessed element that was fed through postMessage() that need to be reified in the primary.
  * @returns {HTMLElement} a reified element, likely a log snapshot, $el, or consoleProp elements.
  */
-const reifyDomElement = (props: any) => {
+export const reifyDomElement = (props: any) => {
   const reifiedEl = document.createElement(props.tagName)
 
   reifiedEl.innerHTML = props.innerHTML
@@ -100,6 +100,107 @@ const reifyDomElement = (props: any) => {
   })
 
   return reifiedEl
+}
+
+/**
+ * Attempts to preprocess an Object/Array by excluding unserializable values except for DOM elements and possible functions (if attemptToSerializeFunctions is true).
+ * DOM elements are processed to a serializable object via preprocessDomElement, and functions are serialized to an object with a value key containing their output contents.
+ *
+ * @param {any} props an Object/Array that needs to be preprocessed before being sent through postMessage().
+ * @param {boolean} [attemptToSerializeFunctions=false] - Whether or not the function should attempt to preprocess a function by invoking it.
+ * @returns
+ */
+export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
+  if (_.isArray(props)) {
+    return props.map((prop) => {
+      try {
+        return preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions)
+      } catch (e) {
+        return null
+      }
+    })
+  }
+
+  if (_.isPlainObject(props)) {
+    // only attempt to try and serialize dom elements and functions (if attemptToSerializeFunctions is set to true)
+    let objWithPossiblySerializableProps = _.pickBy(props, (value) => {
+      const isSerializable = isSerializableInCurrentBrowser(value)
+
+      if (!isSerializable && $dom.isDom(value) || _.isFunction(value) || _.isObject(value)) {
+        return true
+      }
+
+      return false
+    })
+
+    let objWithOnlySerializableProps = _.pickBy(props, (value) => isSerializableInCurrentBrowser(value))
+
+    // assign the properties we know we can serialize here
+    let preprocessed: any = preprocessForSerialization(objWithOnlySerializableProps)
+
+    // and attempt to serialize possibly unserializable props here and fail gracefully if unsuccessful
+    _.forIn(objWithPossiblySerializableProps, (value, key) => {
+      try {
+        preprocessed[key] = preprocessLogLikeForSerialization(value, attemptToSerializeFunctions)
+      } catch (e) {
+        preprocessed[key] = null
+      }
+    })
+
+    return preprocessed
+  }
+
+  return preprocessForSerialization(props)
+}
+
+/**
+ * Attempts to take an Object and reify it correctly. Most of this is handled by reifyLogLikeFromSerialization, with the exception here being DOM elements.
+ * DOM elements, if needed to match against the snapshot DOM, are defined as getters on the object to have their values calculated at request.
+ * This is important for certain log items, such as consoleProps, to be rendered correctly against the snapshot. Other DOM elements, such as snapshots, do not need to be matched
+ * against the current DOM and can be reified immediately. Since there is a potential need for object getters to exist within an array, arrays are wrapped in a proxy, with array indices
+ * proxied to the reified object or array, and other methods proxying to the preprocessed array (such as native array methods like map, foreach, etc...).
+ *
+ * @param {Object} props - a preprocessed Object/Array that was fed through postMessage() that need to be reified in the primary.
+ * @param {boolean} matchElementsAgainstSnapshotDOM - whether DOM elements within the Object/Array should be matched against
+ * @returns {Object|Proxy} - a reified version of the Object or Array (Proxy).
+ */
+export const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM) => {
+  let reifiedObjectOrArray = {}
+
+  _.forIn(props, (value, key) => {
+    const val = reifyLogLikeFromSerialization(value, matchElementsAgainstSnapshotDOM)
+
+    if (val?.serializationKey === 'dom') {
+      if (matchElementsAgainstSnapshotDOM) {
+        // dynamically calculate the element (snapshot or otherwise).
+        // This is important for consoleProp/$el based properties on the log because it calculates the requested element AFTER the snapshot has been rendered into the AUT.
+        reifiedObjectOrArray = {
+          ...reifiedObjectOrArray,
+          get [key] () {
+            return val.reifyElement()
+          },
+        }
+      } else {
+        // The DOM element in question is something like a snapshot. It can be reified immediately
+        reifiedObjectOrArray[key] = val.reifyElement()
+      }
+    } else {
+      reifiedObjectOrArray[key] = reifyLogLikeFromSerialization(value, matchElementsAgainstSnapshotDOM)
+    }
+  })
+
+  // NOTE: transforms arrays into objects to have defined getters for DOM elements, and proxy back to that object via an ES6 Proxy.
+  if (_.isArray(props)) {
+    // if an array, map the array to our special getter object.
+    return new Proxy(reifiedObjectOrArray, {
+      get (target, name) {
+        return target[name] || props[name]
+      },
+    })
+  }
+
+  // otherwise, just returned the object with our special getter
+  return reifiedObjectOrArray
 }
 
 /**
@@ -123,45 +224,6 @@ const reifyDomElement = (props: any) => {
  */
 export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
   try {
-    if (_.isArray(props)) {
-      return props.map((prop) => {
-        try {
-          return preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions)
-        } catch (e) {
-          return null
-        }
-      })
-    }
-
-    if (_.isPlainObject(props)) {
-      // only attempt to try and serialize dom elements and function (if attemptToSerializeFunctions is set to true)
-      let objWithPossiblySerializableProps = _.pickBy(props, (value) => {
-        const isSerializable = isSerializableInCurrentBrowser(value)
-
-        if (!isSerializable && $dom.isDom(value) || _.isFunction(value) || _.isObject(value)) {
-          return true
-        }
-
-        return false
-      })
-
-      let objWithOnlySerializableProps = _.pickBy(props, (value) => isSerializableInCurrentBrowser(value))
-
-      // assign the properties we know we can serialize here
-      let preprocessed: any = preprocessForSerialization(objWithOnlySerializableProps)
-
-      // and attempt to serialize possibly unserializable props here and fail gracefully if unsuccessful
-      _.forIn(objWithPossiblySerializableProps, (value, key) => {
-        try {
-          preprocessed[key] = preprocessLogLikeForSerialization(value, attemptToSerializeFunctions)
-        } catch (e) {
-          preprocessed[key] = null
-        }
-      })
-
-      return preprocessed
-    }
-
     if ($dom.isDom(props)) {
       if (props.length !== undefined && $dom.isJquery(props)) {
         const serializableArray: any[] = []
@@ -195,6 +257,10 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
       return null
     }
 
+    if (_.isObject(props)) {
+      return preprocessObjectLikeForSerialization(props, attemptToSerializeFunctions)
+    }
+
     return preprocessForSerialization(props)
   } catch (e) {
     return null
@@ -213,11 +279,11 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
  * NOTE: this function recursively calls itself to reify a log
  *
  * @param {any} props - a generic variable that represents a value that has been preprocessed and sent through postMessage() and needs to be reified.
- * @param {boolean} matchElementsAgainstCurrentDOM - Whether or not the element should be reconstructed lazily
+ * @param {boolean} matchElementsAgainstSnapshotDOM - Whether or not the element should be reconstructed lazily
  * against the currently rendered DOM (usually against a rendered snapshot) or should be completely recreated from scratch (common with snapshots as they will replace the DOM)
  * @returns {any} the reified version of the generic.
  */
-export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrentDOM = true) => {
+export const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = true) => {
   try {
     if (props?.serializationKey === 'dom') {
       props.reifyElement = function () {
@@ -226,7 +292,7 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrent
         // If the element needs to be matched against the currently rendered DOM. This is useful when analyzing consoleProps or $el in a log
         // where elements need to be evaluated LAZILY after the snapshot is attached to the page.
         // this option is set to false when reifying snapshots, since they will be replacing the current DOM when the user interacts with said snapshot.
-        if (matchElementsAgainstCurrentDOM) {
+        if (matchElementsAgainstSnapshotDOM) {
           const attributes = Object.keys(props.attributes).map((attribute) => {
             return `[${attribute}="${props.attributes[attribute]}"]`
           }).join('')
@@ -248,43 +314,13 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstCurrent
     }
 
     if (props?.serializationKey === 'function') {
-      const reifiedFunctionData = reifyLogLikeFromSerialization(props.value, matchElementsAgainstCurrentDOM)
+      const reifiedFunctionData = reifyLogLikeFromSerialization(props.value, matchElementsAgainstSnapshotDOM)
 
       return () => reifiedFunctionData
     }
 
     if (_.isObject(props)) {
-      let reifiedObjectOrArray = {}
-
-      _.forIn(props, (value, key) => {
-        const val = reifyLogLikeFromSerialization(value, matchElementsAgainstCurrentDOM)
-
-        if (val?.serializationKey === 'dom') {
-          reifiedObjectOrArray = {
-            ...reifiedObjectOrArray,
-            get [key] () {
-              // dynamically calculate the element (snapshot or otherwise).
-              // This is important for consoleProp/$el based properties on the log because it calculates the requested element AFTER the snapshot has been rendered into the AUT.
-              return val.reifyElement()
-            },
-          }
-        } else {
-          reifiedObjectOrArray[key] = reifyLogLikeFromSerialization(value, matchElementsAgainstCurrentDOM)
-        }
-      })
-
-      // NOTE: transforms arrays into objects to have defined getters for DOM elements, and proxy back to that object via an ES6 Proxy.
-      if (_.isArray(props)) {
-        // if an array, map the array to our special getter object.
-        return new Proxy(reifiedObjectOrArray, {
-          get (target, name) {
-            return target[name] || props[name]
-          },
-        })
-      }
-
-      // otherwise, just returned the object with our special getter
-      return reifiedObjectOrArray
+      return reifyObjectLikeForSerialization(props, matchElementsAgainstSnapshotDOM)
     }
 
     return props
@@ -358,7 +394,7 @@ export const preprocessLogForSerialization = (logAttrs) => {
 }
 
 /**
- * Re defines log messages being received in the primary domain before sending them out through the event-manager.
+ * Redefines log messages being received in the primary domain before sending them out through the event-manager.
  *
  * Efforts here include importing captured snapshots from the spec bridge into the primary snapshot document, importing inline
  * snapshot styles into the snapshot css map, and reconstructing DOM elements and functions somewhat naively.
