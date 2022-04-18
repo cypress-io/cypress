@@ -153,7 +153,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       expect(localStorageTable.data).to.deep.eq([{ key: 'stor-foo', value: 's-f' }])
     })
 
-    it('for one domain with both cookies and localStorage', () => {
+    it('for one domain with both cookies and localStorage set', () => {
       const sessionState = {
         id: 'session1',
         cookies: [
