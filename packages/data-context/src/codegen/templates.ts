@@ -7,4 +7,5 @@ export default {
   component: getPath('./templates/empty-component'),
   e2e: getPath('./templates/empty-e2e'),
   scaffoldIntegration: cypressEx.getPathToE2E(),
+  scaffoldIntegrationTSRequiredFiles: cypressEx.getPathToE2ETSRequiredFiles(),
 } as const

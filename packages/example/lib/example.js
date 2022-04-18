@@ -20,6 +20,10 @@ module.exports = {
     return path.join(__dirname, '..', 'cypress', 'e2e')
   },
 
+  getPathToE2ETSRequiredFiles() {
+    return path.join(__dirname, '..', 'tsRequiredFiles')
+  },
+
   getPathToExampleFolders () {
     return glob(`${pathToExamples}${path.sep}`)
   },

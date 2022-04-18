@@ -458,6 +458,16 @@ export class ProjectActions {
       { fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse, template: 'scaffoldIntegration' },
     )
 
+    if (this.ctx.lifecycleManager.fileExtensionToUse === 'ts') {
+      const tsResults = await codeGenerator(
+        { templateDir: templates['scaffoldIntegrationTSRequiredFiles'], target: this.defaultE2EPath },
+        {},
+      )
+
+      results.files = [...results.files, ...tsResults.files]
+      results.failed = [...results.failed, ...tsResults.failed]
+    }
+
     if (results.failed.length) {
       throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
     }
