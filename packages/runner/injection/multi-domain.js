@@ -16,7 +16,18 @@ const findCypress = () => {
     try {
       // If Cypress is defined and we haven't gotten a cross origin error we have found the correct bridge.
       if (frame.Cypress) {
-        return frame.Cypress
+        // If the ending $ is not included in the template string, it breaks transpilation
+        // eslint-disable-next-line no-useless-concat
+        const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replaceAll('.', '\\.') }` + '$')
+
+        // Compare the locations origin policy without pulling in more dependencies.
+        // Compare host, protocol and test that the window's host ends with the frame's host.
+        // This works because the spec bridge's host is always created without a sub domain.
+        if (window.location.port === frame.location.port
+          && window.location.protocol === frame.location.protocol
+          && frameHostRegex.test(window.location.host)) {
+          return frame.Cypress
+        }
       }
     } catch (error) {
       // Catch DOMException: Blocked a frame from accessing a cross-origin frame.
