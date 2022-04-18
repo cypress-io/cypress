@@ -25,7 +25,7 @@ module.exports = {
 
     return {
       send (event, ...args) {
-        if (aProcess.killed) {
+        if (aProcess.killed || !aProcess.connected) {
           return
         }
 
