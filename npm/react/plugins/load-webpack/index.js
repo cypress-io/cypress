@@ -16,7 +16,8 @@ function normalizeWebpackPath (config, webpackConfigPath) {
  * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
  */
 function devServer (cypressDevServerConfig, { webpackFilename }) {
-  const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(cypressDevServerConfig.config, webpackFilename))
+  cypressDevServerConfig.cypressConfig = cypressDevServerConfig.cypressConfig || cypressDevServerConfig.config
+  const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(cypressDevServerConfig.cypressConfig, webpackFilename))
 
   if (!webpackConfig) {
     throw new Error(`Can not load webpack config from path ${webpackFilename}.`)

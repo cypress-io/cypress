@@ -4,6 +4,7 @@ const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
 function devServer (cypressDevServerConfig, cracoConfig) {
   process.env.FAST_REFRESH = 'false'
+  cypressDevServerConfig.cypressConfig = cypressDevServerConfig.cypressConfig || cypressDevServerConfig.config
 
   return startDevServer({
     options: cypressDevServerConfig,
