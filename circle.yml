@@ -1624,7 +1624,7 @@ jobs:
           command: yarn workspace @cypress/react build
       - run:
           name: Run tests
-          command: yarn test-ci
+          command: yarn test
           working_directory: npm/react
       - store_test_results:
           path: npm/react/test_results
