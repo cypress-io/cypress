@@ -192,8 +192,13 @@ describe('App: Specs', () => {
     })
 
     context('ts project with default spec pattern', () => {
+      let projectPath: string
+
       beforeEach(() => {
-        cy.scaffoldProject('no-specs-no-storybook')
+        cy.scaffoldProject('no-specs-no-storybook').then((p) => {
+          projectPath = p
+        })
+
         cy.openProject('no-specs-no-storybook')
 
         cy.withCtx(async (ctx) => {
@@ -239,7 +244,7 @@ describe('App: Specs', () => {
             'assertions',
             'connectors',
             'cookies',
-            'cypress_api',
+            // 'cypress_api', // needs custom command definition
             'files',
             'local_storage',
             'location',
@@ -284,6 +289,8 @@ describe('App: Specs', () => {
             // Validate that links for each generated spec are rendered
             cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('exist')
           })
+
+          cy.task('tsCheck', { projectPath, specs: expectedScaffoldPaths })
         })
 
         it('dismisses scaffold dialog with action button press', () => {

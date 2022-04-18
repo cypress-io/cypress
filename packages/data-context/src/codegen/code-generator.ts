@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra'
 import { isBinaryFile } from 'isbinaryfile'
+import os from 'os'
 import * as path from 'path'
 import * as ejs from 'ejs'
 import fm from 'front-matter'
@@ -21,6 +22,32 @@ export interface CodeGenResult {
 export interface CodeGenResults {
   files: Array<CodeGenResult>
   failed: Array<Error>
+}
+
+// matches const requiredExample = require('../../fixtures/example')
+const cjsModuleRegexp = /const (.*?)\s.*require\((.*)\)/
+
+function transformRequireToImport (body: string) {
+  return body.split(os.EOL).map((line) => {
+    if (line.includes(`expect(greeter.greet())`)) {
+      return `expect(greeter.greet(undefined)).to.equal('Hello, undefined!')`
+    }
+
+    const match = line.match(cjsModuleRegexp)
+
+    if (!match?.[1] || !match?.[2]) {
+      return line
+    }
+
+    const esImport = `import ${match[1]} from ${match[2]}`
+
+    // must consider json imports...
+    if (esImport.includes('fixtures/example')) {
+      return esImport.replace('example', 'example.json')
+    }
+
+    return esImport
+  }).join(os.EOL)
 }
 
 /**
@@ -56,7 +83,9 @@ export async function codeGenerator (
 
     const processTextFile = async () => {
       const fileContent = (await fs.readFile(file)).toString()
-      const { body, renderedAttributes } = frontMatter(fileContent, args)
+      let { body, renderedAttributes } = frontMatter(fileContent, args)
+
+      body = transformRequireToImport(body)
 
       let filename = renderedAttributes.fileName
 

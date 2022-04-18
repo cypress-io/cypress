@@ -262,7 +262,7 @@ export class WizardActions {
     )
   }
 
-  private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
+  async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
 
     await this.ensureDir('fixtures')

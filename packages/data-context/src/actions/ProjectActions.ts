@@ -453,6 +453,8 @@ export class ProjectActions {
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
+    await this.ctx.actions.wizard.scaffoldFixtures()
+
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
       { fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse, template: 'scaffoldIntegration' },
