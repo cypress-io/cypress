@@ -7,6 +7,7 @@ import fs from 'fs'
 
 import { devServer } from '..'
 import { restoreLoadHook } from '../src/helpers/sourceRelativeWebpackModules'
+import './support'
 
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {

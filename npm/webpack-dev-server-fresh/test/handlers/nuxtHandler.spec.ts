@@ -1,6 +1,8 @@
 import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 import { expect } from 'chai'
 import { nuxtHandler } from '../../src/helpers/nuxtHandler'
+import { WebpackDevServerConfig } from '../../src/devServer'
+import '../support'
 
 describe('nuxtHandler', function () {
   // can take a while since we install node_modules
@@ -11,14 +13,12 @@ describe('nuxtHandler', function () {
 
     process.chdir(projectRoot)
 
-    const config = await nuxtHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      },
-    } as any)
+    const { frameworkConfig: webpackConfig } = await nuxtHandler({
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
-    expect(config.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
-    expect(config.performance).to.be.undefined
+    expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+    expect(webpackConfig.performance).to.be.undefined
   })
 })
