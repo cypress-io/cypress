@@ -5,9 +5,6 @@ import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
 import Debug from 'debug'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { useI18n } from '@cy/i18n'
-const { t } = useI18n()
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
@@ -218,23 +215,23 @@ export class WizardActions {
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
 
     let fileContent: string | undefined
+    let description: string = ''
 
     if (fileName === 'commands') {
       fileContent = commandsFileBody(language)
+      description = 'A support file that is useful for creating custom Cypress commands and overwriting existing ones.'
     } else if (fileName === 'e2e') {
       fileContent = supportFileE2E(language)
+      description = 'The support file that is bundled and loaded before each E2E spec.'
     } else if (fileName === 'component') {
       assert(this.ctx.coreData.wizard.chosenFramework)
       fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+      description = 'The support file that is bundled and loaded before each component testing spec.'
     }
 
     assert(fileContent)
 
     await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
-
-    const description = fileName === 'commands'
-      ? defaultMessages.setupWizard.configFiles.fileDescription.commands
-      : t(defaultMessages.setupWizard.configFiles.fileDescription.support, { testingType: (fileName === 'e2e' ? 'E2E' : 'component') })
 
     return {
       status: 'valid',
@@ -292,7 +289,7 @@ export class WizardActions {
     return this.scaffoldFile(
       this.ctx.lifecycleManager.configFilePath,
       configCode,
-      t(defaultMessages.setupWizard.configFiles.fileDescription.config, { adjective }),
+      `The Cypress config file where the ${adjective} dev server is configured.`,
     )
   }
 
@@ -303,7 +300,7 @@ export class WizardActions {
 
     return this.scaffoldFile(exampleScaffoldPath,
       `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
-      defaultMessages.setupWizard.configFiles.fileDescription.example)
+      'An example fixture for data imported into your Cypress tests, such as `cy.intercept()`.')
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
@@ -354,7 +351,7 @@ export class WizardActions {
     return this.scaffoldFile(
       componentIndexHtmlPath,
       template,
-      'The HTML used as the wrapper for all component tests',
+      'The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.',
     )
   }
 
