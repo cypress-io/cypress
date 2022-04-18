@@ -5,4 +5,15 @@
 # cd to this "scripts" directory
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-cat ../projects/**/{package.json,yarn.lock}
+file_list=$(ls ../projects/**/{package.json,yarn.lock} | sort -f)
+
+contents=''
+for t in ${file_list[@]}; do
+  contents+=$(<$t)
+done
+
+# md5=$contents | md5
+
+# echo $md5
+
+echo $contents
