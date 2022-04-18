@@ -533,9 +533,8 @@ commands:
 
   run-binary-system-tests:
     steps:
-      - restore_cached_workspace
       - update_cached_system_tests_deps
-      - restore_cached_system_tests_deps
+      - restore_cached_workspace
       - run:
           name: Run system tests
           command: |
