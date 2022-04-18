@@ -533,7 +533,8 @@ commands:
 
   run-binary-system-tests:
     steps:
-      - system-tests-node-modules-install
+      - restore_cached_workspace
+      - update_cached_system_tests_deps
       - restore_cached_system_tests_deps
       - run:
           name: Run system tests
