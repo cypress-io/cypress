@@ -258,6 +258,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
       cy.get('[data-cy="migrate-after"]').within(() => {
         cy.get('.text-jade-500').should('not.contain', 'cy')
+        cy.get('.text-jade-500').should('not.contain', 'spec')
       })
 
       cy.findByText('Rename the folder for me').click()

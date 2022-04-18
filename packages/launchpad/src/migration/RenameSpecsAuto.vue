@@ -148,35 +148,41 @@ function applySkipResult (val: PossibleOption) {
   emits('selectOption', selectOption.value)
 }
 
+type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
+
+type WriteableSpecFile = DeepWriteable<RenameSpecsAutoFragment['specFiles'][number]>
+
 const specFiles = computed(() => {
   if (selectOption.value !== 'renameFolder') {
     return props.gql.specFiles
   }
 
-  const updateHighlight = (spec) => {
-    if (spec.group === 'preExtension') {
-      spec.highlight = false
-    }
+  return _.cloneDeep(props.gql.specFiles).map((specFile) => {
+    const spec = specFile as WriteableSpecFile
+
+    spec.before.parts = spec.before.parts.map((spec) => {
+      if (spec.group === 'preExtension') {
+        spec.highlight = false
+      }
+
+      return spec
+    })
+
+    const beforePreExtension = _.find(spec.before.parts, { group: 'preExtension' })
+
+    spec.after.parts = spec.after.parts.map((spec) => {
+      if (spec.group === 'preExtension') {
+        spec.highlight = false
+
+        if (beforePreExtension) {
+          spec.text = beforePreExtension.text
+        }
+      }
+
+      return spec
+    })
 
     return spec
-  }
-
-  return _.cloneDeep(props.gql.specFiles).map((spec) => {
-    const beforeParts = spec.before.parts.map(updateHighlight)
-
-    const afterParts = spec.after.parts.map(updateHighlight)
-
-    return {
-      ...spec,
-      before: {
-        ...spec.before,
-        parts: beforeParts,
-      },
-      after: {
-        ...spec.after,
-        parts: afterParts,
-      },
-    }
   })
 })
 </script>
