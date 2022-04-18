@@ -222,7 +222,11 @@ export class IframeModel {
     if (!this.isAUTSameOrigin()) {
       const Cypress = eventManager.getCypress()
 
-      // Go get the final cross origin snapshot. Do this optimistically while we render the selected snapshot.
+      /**
+       * This only happens if the AUT ends in a cross origin state that the primary doesn't have access to.
+       * In this case, the final snapshot request from the primary is sent out to the cross-origin spec bridges.
+       * The spec bridge that matches the origin policy will take a snapshot and send it back to the primary for the runner to store in originalState.
+       */
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
       Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
         this.originalState = {
