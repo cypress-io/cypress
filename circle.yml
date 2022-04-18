@@ -196,7 +196,7 @@ commands:
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
       - run:
           name: Test output for cache key
-          command: echo ./system-tests/scripts/test-cache-set.sh
+          command: ./system-tests/scripts/test-cache-set.sh
       - run:
           name: Generate platform key
           command: echo $PLATFORM > platform_key
@@ -214,7 +214,7 @@ commands:
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
       - run:
           name: Test output for cache key
-          command: echo ./system-tests/scripts/test-cache-set.sh
+          command: ./system-tests/scripts/test-cache-set.sh
       - run:
           name: Generate platform key
           command: echo $PLATFORM > platform_key
