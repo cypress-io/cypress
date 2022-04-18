@@ -1,15 +1,14 @@
-import type { Interception } from '@packages/net-stubbing/lib/external-types'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
-  beforeEach(() => {
-    cy.scaffoldProject('component-tests')
-    cy.openProject('component-tests')
-    cy.startAppServer('component')
-  })
-
   context('Runs Page', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     it('resolves the runs page', () => {
       cy.loginUser()
       cy.visitApp()
@@ -34,6 +33,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Login', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     it('when logged out, shows call to action', () => {
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
@@ -51,14 +56,14 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('if logged in and connected', { viewportWidth: 1200 }, () => {
       cy.loginUser()
-      cy.__incorrectlyVisitAppWithIntercept()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+      cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
       cy.contains('a', 'OVERLIMIT').click()
-      cy.wait('@OpenExternal')
-      .its('request.body.variables.url')
-      .should('equal', 'http://dummy.cypress.io/runs/4')
+
+      cy.withCtx((ctx) => {
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/4')
+      })
     })
   })
 
@@ -84,49 +89,131 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
-      cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
+      cy.validateExternalLink({
+        name: defaultMessages.runs.connect.modal.createOrg.button,
+        href: 'http://dummy.cypress.io/organizations/create',
+      })
+
+      // validateExternalLink includes clicking on the createOrg button, which triggers the waiting state
       cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
-      cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
+
+      cy.validateExternalLink({
+        name: defaultMessages.links.needHelp,
+        href: 'https://on.cypress.io/adding-new-project',
+      })
+
+      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('[aria-modal="true"]').should('not.exist')
+    })
+
+    it('opens create Org modal after clicking Connect Project button and refetch data from the cloud', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer')) {
+          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+            obj.result.data.cloudViewer.organizations.nodes = []
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.refreshButton).click()
+
+      cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+    })
+  })
+
+  context('Runs - Connect Project', () => {
+    it('opens Connect Project modal after clicking Connect Project button', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          const nodes = obj.result.data.cloudViewer.organizations.nodes
+
+          nodes.push({ ...nodes[0], name: 'aaa', id: 'aaa-id' })
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.validateExternalLink({
+        name: defaultMessages.runs.connect.modal.selectProject.manageOrgs,
+        href: 'http://dummy.cypress.io/organizations',
+      })
+
+      cy.contains('button', 'Cypress Test Account 1').click()
+      cy.findByText('aaa').should('exist')
 
       cy.get('button').get('[aria-label="Close"').click()
       cy.get('[aria-modal="true"]').should('not.exist')
     })
   })
 
-  context('Runs - Connect Project', () => {
-    it('when no project Id in the config file, shows call to action', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+  context('Runs - Create Project', () => {
+    it('when a project is created, injects new projectId into the config file', () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          obj.result.data!.cloudProjectCreate = {
+            slug: 'newProjectId',
+            id: 'newId',
+          }
+        }
+
+        return obj.result
       })
 
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
-      cy.contains(defaultMessages.runs.connect.buttonProject).should('exist')
-    })
-
-    it('opens Connect Project modal after clicking Connect Project button', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
-      })
+        const config = await ctx.project.getConfig()
 
-      cy.loginUser()
-      cy.visitApp()
+        expect(config.projectId).to.not.equal('newProjectId')
+      })
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('[aria-modal="true"]').should('exist')
-      cy.get('button').get('[aria-label="Close"').click()
-      cy.get('[aria-modal="true"]').should('not.exist')
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.equal('newProjectId')
+      })
     })
   })
 
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef42\'}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithInvalidProjectId.config.js'])
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -174,14 +261,43 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Unauthorized Project', () => {
     beforeEach(() => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
 
       cy.loginUser()
+    })
+
+    it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
-        // Currently, all remote requests go through here, we want to use this to modify the
-        // remote request before it's used and avoid touching the login query
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectUnauthorized'
+            proj.message = 'Cloud Project Unauthorized'
+            proj.hasRequestedAccess = false
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp('/runs')
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
+    })
+
+    it('clicking on the call to action should call the mutation', () => {
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
+          obj.result.data!.cloudProjectRequestAccess = {
+            __typename: 'CloudProject',
+            message: 'Cloud Project',
+            hasRequestedAccess: true,
+          }
+
+          testState.cloudProjectRequestAccessWasCalled = true
+
+          return obj.result
+        }
 
         if (obj.result.data?.cloudProjectsBySlugs) {
           for (const proj of obj.result.data.cloudProjectsBySlugs) {
@@ -193,28 +309,46 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
-    })
 
-    it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.visitApp('/runs')
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
+
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
+
+      cy.withCtx((ctx, o) => {
+        expect(o.testState.cloudProjectRequestAccessWasCalled).to.eql(true)
+      })
     })
 
-    it('clicking on the call to action should call the mutation', () => {
-      cy.__incorrectlyVisitAppWithIntercept('/runs')
-      cy.intercept('mutation-RunsErrorRenderer_RequestAccess').as('RequestAccess')
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
-      cy.wait('@RequestAccess').then((interception: Interception) => {
-        expect(interception.request.url).to.include('graphql/mutation-RunsErrorRenderer_RequestAccess')
+    it('updates the button text when the request access button is clicked', () => {
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'Runs_currentProject_cloudProject_batched') {
+          for (const proj of obj!.result!.data!.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectUnauthorized'
+            proj.message = 'Cloud Project Unauthorized'
+            proj.hasRequestedAccess = false
+            testState.project = proj
+          }
+        } else if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
+          obj!.result!.data!.cloudProjectRequestAccess = {
+            ...testState.project,
+            hasRequestedAccess: true,
+          }
+        }
+
+        return obj.result
       })
+
+      cy.visitApp('/runs')
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
+      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('exist')
     })
   })
 
-  context('Runs - Unauthorized Project Requested', () => {
+  context('Runs - Pending authorization to project', () => {
     beforeEach(() => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\' }')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -244,9 +378,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - No Runs', () => {
     it('when no runs and not connected, shows connect to dashboard button', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null }')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -269,9 +403,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays how to record prompt when connected and no runs', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
-      })
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -294,9 +428,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays a copy button', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+
       cy.withCtx(async (ctx, o) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
-        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
       })
 
       cy.loginUser()
@@ -323,6 +460,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Runs List', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     it('displays a list of recorded runs if a run has been recorded', () => {
       cy.loginUser()
       cy.visitApp()
@@ -368,17 +511,24 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens the run page if a run is clicked', () => {
       cy.loginUser()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
+
       cy.get('[href="#/runs"]').click()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
       cy.get('[data-cy^="runCard-"]').first().click()
-      cy.wait('@OpenExternal').then((interception: Interception) => {
-        expect(interception.request.url).to.include('graphql/mutation-ExternalLink_OpenExternal')
+
+      cy.withCtx((ctx) => {
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/0')
       })
     })
   })
 
   describe('no internet connection', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+    })
+
     afterEach(() => {
       cy.goOnline()
     })

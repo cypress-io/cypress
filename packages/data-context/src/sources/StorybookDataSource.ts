@@ -10,8 +10,6 @@ const STORYBOOK_FILES = [
   'preview-body.html',
 ]
 
-export const STORIES_GLOB = '*.stories.*'
-
 export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 

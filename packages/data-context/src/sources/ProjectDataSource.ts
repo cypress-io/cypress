@@ -1,6 +1,7 @@
 import os from 'os'
+import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
-import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
 import { debounce, isEqual } from 'lodash'
@@ -8,6 +9,10 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
+import { defaultSpecPattern } from '@packages/config'
+import parseGlob from 'parse-glob'
+import mm from 'micromatch'
+import RandExp from 'randexp'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
@@ -15,8 +20,6 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
-import { STORIES_GLOB } from '.'
-import { getDefaultSpecPatterns } from '../util/config-options'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -101,6 +104,62 @@ export function transformSpec ({
   }
 }
 
+export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?: 'js' | 'ts') {
+  function replaceWildCard (s: string, fallback: string) {
+    return s.replace(/\*/g, fallback)
+  }
+
+  const parsedGlob = parseGlob(specPattern)
+
+  if (!parsedGlob.is.glob) {
+    return specPattern
+  }
+
+  let dirname = parsedGlob.path.dirname
+
+  if (dirname.startsWith('**')) {
+    dirname = dirname.replace('**', 'cypress')
+  }
+
+  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, 'e2e')).join('/')
+  const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
+
+  const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+  let extname = replaceWildCard(extnameWithoutExt, 'cy')
+
+  if (extname.startsWith('.')) {
+    extname = extname.substr(1)
+  }
+
+  if (extname.endsWith('.')) {
+    extname = extname.slice(0, -1)
+  }
+
+  const basename = [fileName, extname, parsedGlob.path.ext].filter(Boolean).join('.')
+
+  const glob = splittedDirname + basename
+
+  const globWithoutBraces = mm.braces(glob, { expand: true })
+
+  let finalGlob = globWithoutBraces[0]
+
+  if (fileExtensionToUse) {
+    const filteredGlob = mm(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
+
+    if (filteredGlob?.length) {
+      finalGlob = filteredGlob[0]
+    }
+  }
+
+  if (!finalGlob) {
+    return
+  }
+
+  const randExp = new RandExp(finalGlob.replace(/\./g, '\\.'))
+
+  return randExp.gen()
+}
+
 export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: FoundSpec[] = []
@@ -139,7 +198,7 @@ export class ProjectDataSource {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
   }
 
-  async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
+  async specPatterns (): Promise<{
     specPattern?: string[]
     excludeSpecPattern?: string[]
   }> {
@@ -148,8 +207,8 @@ export class ProjectDataSource {
     const config = await this.getConfig()
 
     return {
-      specPattern: toArray(config[testingType]?.specPattern),
-      excludeSpecPattern: toArray(config[testingType]?.excludeSpecPattern),
+      specPattern: toArray(config.specPattern),
+      excludeSpecPattern: toArray(config.excludeSpecPattern),
     }
   }
 
@@ -193,21 +252,62 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
-    const onSpecsChanged = debounce(async () => {
+    // When file system changes are detected, we retrieve any spec files matching
+    // the determined specPattern. This function is debounced to limit execution
+    // during sequential file operations.
+    const onProjectFileSystemChange = debounce(async () => {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
-      this.setSpecs(specs)
-
-      if (testingType === 'component') {
-        this.api.getDevServer().updateSpecs(specs)
+      if (isEqual(this.specs, specs)) {
+        // If no differences are found, we do not need to emit events
+        return
       }
 
-      this.ctx.emitter.toApp()
+      this.ctx.actions.project.setSpecs(specs)
+    }, 250)
+
+    // We respond to all changes to the project's filesystem when
+    // files or directories are added and removed that are not explicitly
+    // ignored by config
+    this._specWatcher = chokidar.watch('.', {
+      ignoreInitial: true,
+      cwd: projectRoot,
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnore],
     })
 
-    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
-    this._specWatcher.on('add', onSpecsChanged)
-    this._specWatcher.on('unlink', onSpecsChanged)
+    // the 'all' event includes: add, addDir, change, unlink, unlinkDir
+    this._specWatcher.on('all', onProjectFileSystemChange)
+  }
+
+  async defaultSpecFileName () {
+    const defaultFileName = 'cypress/e2e/filename.cy.js'
+
+    try {
+      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+        return null
+      }
+
+      let specPatternSet: string | undefined
+      const { specPattern = [] } = await this.ctx.project.specPatterns()
+
+      if (Array.isArray(specPattern)) {
+        specPatternSet = specPattern[0]
+      }
+
+      if (!specPatternSet) {
+        return defaultFileName
+      }
+
+      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.lifecycleManager.fileExtensionToUse)
+
+      if (!specFileName) {
+        return defaultFileName
+      }
+
+      return specFileName
+    } catch {
+      return defaultFileName
+    }
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {
@@ -217,7 +317,7 @@ export class ProjectDataSource {
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatterns()
 
     for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
@@ -234,12 +334,17 @@ export class ProjectDataSource {
     return false
   }
 
+  destroy () {
+    this.stopSpecWatcher()
+  }
+
   stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
+    this._specWatcher.close().catch(() => {})
+    this._specWatcher = null
   }
 
   getCurrentSpecByAbsolute (absolute: string) {
@@ -252,13 +357,13 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
-  frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
+  frameworkLoader = this.ctx.loader<string, typeof WIZARD_FRAMEWORKS[number] | null>((projectRoots) => {
     return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
   })
 
   private guessFramework (projectRoot: string) {
-    const guess = FRONTEND_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map((x) => x.dependency).reduce(
+    const guess = WIZARD_FRAMEWORKS.find((framework) => {
+      const lookingForDeps = framework.detectors.map((x) => x.package).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
         {},
       )
@@ -278,7 +383,6 @@ export class ProjectDataSource {
 
     return {
       component: framework?.glob ?? looseComponentGlob,
-      story: STORIES_GLOB,
     }
   }
 
@@ -331,9 +435,9 @@ export class ProjectDataSource {
     assert(this.ctx.currentProject)
     assert(this.ctx.coreData.currentTestingType)
 
-    const { e2e, component } = getDefaultSpecPatterns()
+    const { e2e, component } = defaultSpecPattern
 
-    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
       return isEqual(specPattern, [e2e])

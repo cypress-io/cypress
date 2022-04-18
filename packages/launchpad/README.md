@@ -19,6 +19,8 @@ It is using the following technologies:
 - TypeScript
 - [Urql](https://formidable.com/open-source/urql/) for the GraphQL client
 
+More details on the front-end setup are found in the `@packages/frontend-shared` [package README](../frontend-shared/README.md).
+
 Cypress' entire back-end is powered by the `@packages/server` package. Launchpad interfaces with it via a GraphQL layer, found in `@packages/graphql`.
 
 [Here is a short tutorial](https://github.com/lmiller1990/vue-3-urql-example) building a simple app using the same technologies we are using for launchpad. There are a lot of moving pieces; understanding how everything works will help you contribute to Launchpad.
@@ -39,14 +41,25 @@ For the best development experience, you will want to use VS Code with the [Vola
 
 ```bash
 ## from repo root
-yarn dev
+yarn watch
 ```
 
-This starts Vite in watch mode. It also starts the GraphQL Server. You can access it on `http://localhost:52200/graphql`.
+This starts Vite in watch mode, and any code-generation scripts that need to be running in the background to support our environment. 
+
+In a seprate terminal, run:
+
+```bash
+## from repo root
+yarn cypress:open
+```
+
+This starts the GraphQL Server, and opens Cypress. By running this separate from the `yarn watch`, you can kill & respawn the Cypress binary without the overhead of the watch processes you'd see by running `yarn dev`. 
+
+You can access the GraphQL inspector on `http://localhost:52200/graphql`.
 
 ![graphql](../graphql/gql.png)
 
-If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run`, you might need to reopen your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
+If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run, you might need to reload your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
 
 ## Testing
 
@@ -66,13 +79,4 @@ E2E tests:
 ```bash
 ## from repo root
 yarn workspace @packages/launchpad cypress:open
-```
-
-## Utility class usage
-
-Windi CSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
-
-```bash
-## from launchpad directory
-yarn windi
 ```

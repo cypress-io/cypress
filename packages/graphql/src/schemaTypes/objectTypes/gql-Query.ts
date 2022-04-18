@@ -8,6 +8,7 @@ import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
+import { CachedUser } from './gql-CachedUser'
 
 export const Query = objectType({
   name: 'Query',
@@ -16,6 +17,11 @@ export const Query = objectType({
     t.field('baseError', {
       type: ErrorWrapper,
       resolve: (root, args, ctx) => ctx.baseError,
+    })
+
+    t.field('cachedUser', {
+      type: CachedUser,
+      resolve: (root, args, ctx) => ctx.user,
     })
 
     t.nonNull.list.nonNull.field('warnings', {
@@ -35,7 +41,7 @@ export const Query = objectType({
     t.field('migration', {
       type: Migration,
       description: 'Metadata about the migration, null if we aren\'t showing it',
-      resolve: (root, args, ctx) => ctx.coreData.migration,
+      resolve: (root, args, ctx) => ctx.coreData.migration.legacyConfigForMigration ? ctx.coreData.migration : null,
     })
 
     t.nonNull.field('dev', {
@@ -45,6 +51,7 @@ export const Query = objectType({
     })
 
     t.field('versions', {
+      deferIfNotLoaded: true,
       type: VersionData,
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {
@@ -99,5 +106,9 @@ export const Query = objectType({
       type: ScaffoldedFile,
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
+  },
+  sourceType: {
+    module: '@packages/graphql',
+    export: 'RemoteExecutionRoot',
   },
 })

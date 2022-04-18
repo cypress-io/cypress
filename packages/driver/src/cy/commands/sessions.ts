@@ -7,16 +7,18 @@ import $stackUtils from '../../cypress/stack_utils'
 import Bluebird from 'bluebird'
 const currentTestRegisteredSessions = new Map()
 
+type ActiveSessions = Cypress.Commands.Session.ActiveSessions
+type SessionData = Cypress.Commands.Session.SessionData
 /**
  * rules for clearing session data:
- * if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
- * if user relaunches the browser or launches a new spec, session data SHOULD be cleared
- * session data SHOULD be cleared between specs in run mode
+ *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
+ *  - if user relaunches the browser or launches a new spec, session data SHOULD be cleared
+ *  - session data SHOULD be cleared between specs in run mode
  *
  * therefore session data should be cleared with spec browser launch
  */
 
-const getSessionDetails = (sessState) => {
+const getSessionDetails = (sessState: SessionData) => {
   return {
     id: sessState.id,
     data: _.merge(
@@ -25,14 +27,14 @@ const getSessionDetails = (sessState) => {
     ) }
 }
 
-const getSessionDetailsForTable = (sessState) => {
+const getSessionDetailsForTable = (sessState: SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
     ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
   )
 }
 
-const isSecureContext = (url) => url.startsWith('https:')
+const isSecureContext = (url: string) => url.startsWith('https:')
 
 const getCurrentOriginStorage = () => {
   // localStorage.length property is not always accurate, we must stringify to check for entries
@@ -109,7 +111,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
     specWindow.removeEventListener('message', onPostMessage)
     $iframeContainer.remove()
   })
-  .catch((err) => {
+  .catch(() => {
     Cypress.log({
       name: 'warning',
       message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
@@ -117,31 +119,39 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (sessState) => {
-  const ret = {
-    id: sessState.id,
-    table: _.compact(_.flatMap(getSessionDetailsForTable(sessState), (val, domain) => {
-      return [() => {
-        return {
-          name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
-          data: val.cookies,
-        }
-      },
-      val.localStorage && (() => {
-        return {
-          name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
-          data: _.map(val.localStorage.value, (value, key) => {
-            return {
-              key, value,
-            }
-          }),
-        }
-      })]
-    }))
-    ,
-  }
+const getConsoleProps = (sessState: SessionData) => {
+  const sessionDetails = getSessionDetailsForTable(sessState)
 
-  return ret
+  const tables = _.flatMap(sessionDetails, (val, domain) => {
+    const cookiesTable = () => {
+      return {
+        name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
+        data: val.cookies,
+      }
+    }
+
+    const localStorageTable = () => {
+      return {
+        name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
+        data: _.map(val.localStorage.value, (value, key) => {
+          return {
+            key,
+            value,
+          }
+        }),
+      }
+    }
+
+    return [
+      val.cookies && cookiesTable,
+      val.localStorage && localStorageTable,
+    ]
+  })
+
+  return {
+    id: sessState.id,
+    table: _.compact(tables),
+  }
 }
 
 const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
@@ -198,7 +208,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 export default function (Commands, Cypress, cy) {
   const { Promise } = Cypress
 
-  const setActiveSession = (obj) => {
+  const setActiveSession = (obj: ActiveSessions) => {
     const currentSessions = cy.state('activeSessions') || {}
 
     const newSessions = { ...currentSessions, ...obj }
@@ -206,11 +216,12 @@ export default function (Commands, Cypress, cy) {
     cy.state('activeSessions', newSessions)
   }
 
-  const getActiveSession = (id) => {
+  const getActiveSession = (id: string): SessionData => {
     const currentSessions = cy.state('activeSessions') || {}
 
     return currentSessions[id]
   }
+
   const clearActiveSessions = () => {
     const curSessions = cy.state('activeSessions') || {}
 
@@ -284,9 +295,8 @@ export default function (Commands, Cypress, cy) {
   }
 
   const sessions = {
-
-    defineSession (options = {} as any) {
-      const sess_state = {
+    defineSession (options = {} as any): SessionData {
+      const sess_state: SessionData = {
         id: options.id,
         cookies: null,
         localStorage: null,
@@ -495,7 +505,6 @@ export default function (Commands, Cypress, cy) {
         return
       })
     },
-
   }
 
   Cypress.on('run:start', () => {
@@ -515,7 +524,7 @@ export default function (Commands, Cypress, cy) {
       // backup session command so we can set it as codeFrame location for errors later on
       const sessionCommand = cy.state('current')
 
-      // stringfy deterministically if we were given an object
+      // stringify deterministically if we were given an object
       id = typeof id === 'string' ? id : stringifyStable(id)
 
       if (options) {
@@ -523,12 +532,12 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.wrongArgOptions')
         }
 
-        const validopts = {
+        const validOpts = {
           'validate': 'function',
         }
 
         Object.keys(options).forEach((key) => {
-          const expectedType = validopts[key]
+          const expectedType = validOpts[key]
 
           if (!expectedType) {
             $errUtils.throwErrByPath('sessions.session.wrongArgOptionUnexpected', { args: { key } })
@@ -542,7 +551,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession = getActiveSession(id)
+      let existingSession: SessionData = getActiveSession(id)
 
       if (!setup) {
         if (!existingSession || !currentTestRegisteredSessions.has(id)) {
@@ -568,7 +577,7 @@ export default function (Commands, Cypress, cy) {
 
       const _log = Cypress.log({
         name: 'session',
-        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
         snapshot: false,
       })
@@ -576,7 +585,7 @@ export default function (Commands, Cypress, cy) {
       const dataLog = Cypress.log({
         name: 'session',
         sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
       })
 
       function runSetup (existingSession) {

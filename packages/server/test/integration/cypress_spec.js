@@ -7,7 +7,7 @@ const http = require('http')
 const Promise = require('bluebird')
 const electron = require('electron')
 const commitInfo = require('@cypress/commit-info')
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const pkg = require('@packages/root')
@@ -27,10 +27,8 @@ const runMode = require(`../../lib/modes/run`)
 const api = require(`../../lib/api`)
 const cwd = require(`../../lib/cwd`)
 const user = require(`../../lib/user`)
-const config = require(`../../lib/config`)
 const cache = require(`../../lib/cache`)
 const errors = require(`../../lib/errors`)
-const plugins = require(`../../lib/plugins`)
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerE2E } = require(`../../lib/server-e2e`)
@@ -127,7 +125,6 @@ describe('lib/cypress', () => {
     // force cypress to call directly into main without
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
-    sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
@@ -429,30 +426,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    // NOTE: We no longer do this in the new flow
-    it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
-      .then((cfg) => {
-        return fs.statAsync(cfg.integrationFolder)
-        .then(() => {
-          throw new Error('integrationFolder should not exist!')
-        }).catch(() => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(cfg.integrationFolder)
-        }).then(() => {
-          return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
-          )
-        })
-      })
-    })
-
     it('does not scaffold when headless and exits with error when no existing project', function () {
       const ensureDoesNotExist = function (inspection, index) {
         if (!inspection.isRejected()) {
@@ -481,7 +454,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
-      return config.get(this.pristineWithConfigPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then(() => {
         return fs.rmdir(supportFolder, { recursive: true })
       }).then(() => {
@@ -504,7 +477,7 @@ describe('lib/cypress', () => {
     it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      config.get(this.idsPath)
+      ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -564,7 +537,7 @@ describe('lib/cypress', () => {
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
-      return config.get(this.idsPath)
+      return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
         this.cfg = cfg
 
@@ -921,8 +894,6 @@ describe('lib/cypress', () => {
       })
 
       it('can override values in plugins', function () {
-        plugins.init.restore()
-
         return cypress.start([
           `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=false',
           '--env=foo=foo,bar=bar',
@@ -964,7 +935,6 @@ describe('lib/cypress', () => {
 
     describe('plugins', () => {
       beforeEach(() => {
-        plugins.init.restore()
         browsers.open.restore()
 
         const ee = new EE()

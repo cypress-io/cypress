@@ -147,7 +147,7 @@ async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot:
 // project's node_modules, we don't want to include
 // defineConfig(/***/) in their cypress.config.js,
 // since it won't exist.
-function defineConfigAvailable (projectRoot: string) {
+export function defineConfigAvailable (projectRoot: string) {
   try {
     const cypress = require.resolve('cypress', {
       paths: [projectRoot],
@@ -306,21 +306,25 @@ export interface SpecToMove {
 }
 
 export async function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
-  await Promise.all(specs.map(async (spec) => {
+  await Promise.all(specs.map((spec) => {
     const from = path.join(projectRoot, spec.from)
     const to = path.join(projectRoot, spec.to)
 
-    if (from !== to) {
-      await fs.move(from, to)
+    if (from === to) {
+      return
     }
+
+    return fs.move(from, to)
   }))
 }
 
 export async function cleanUpIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
+  const e2ePath = path.join(projectRoot, 'cypress', 'e2e')
 
   try {
-    fs.rmSync(integrationPath, { recursive: true })
+    await fs.copy(integrationPath, e2ePath, { recursive: true })
+    await fs.remove(integrationPath)
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
@@ -398,8 +402,8 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
       case 'ignoreTestFiles':
         return {
           ...acc,
-          e2e: { ...acc.e2e, specExcludePattern: val },
-          component: { ...acc.component, specExcludePattern: val },
+          e2e: { ...acc.e2e, excludeSpecPattern: val },
+          component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
         return {

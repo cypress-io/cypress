@@ -9,16 +9,18 @@ describe('App: Spec List (E2E)', () => {
 
       yesterday.setDate(yesterday.getDate() - 1)
 
-      sinon.stub(ctx.git, 'gitInfo').callsFake(() => {
-        return Promise.resolve({
+      sinon.stub(ctx.lifecycleManager.git!, 'gitInfoFor').callsFake(() => {
+        return {
           author: 'Test Author',
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
-        })
+          statusType: 'unmodified',
+        }
       })
     })
 
     cy.visitApp()
+    cy.contains('E2E Specs')
   })
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
@@ -40,24 +42,24 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('4 Matches')
+    cy.get('button').contains('6 Matches')
 
     cy.get('input').type('content', { force: true })
 
     cy.get('[data-cy="spec-item"]').should('have.length', 2)
     .should('contain', 'dom-content.spec.js')
 
-    cy.get('button').contains('2 of 4 Matches')
+    cy.get('button').contains('2 of 6 Matches')
 
     cy.get('input').clear().type('asdf', { force: true })
 
     cy.get('[data-cy="spec-item"]').should('have.length', 0)
 
-    cy.get('button').contains('0 of 4 Matches')
+    cy.get('button').contains('0 of 6 Matches')
   })
 
   it('shows a git status for each spec', () => {
-    cy.findAllByTestId('specs-list-row').each((row) => {
+    cy.get('[data-cy="spec-list-file"]').each((row) => {
       cy.wrap(row).contains('.git-info-row', 'Test Author')
     })
   })

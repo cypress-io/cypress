@@ -1,12 +1,12 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
-import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
-import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+import type { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { LegacyCypressConfigJson } from '../sources'
+import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
 
@@ -56,21 +56,19 @@ export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
-  refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
   browserStatus: BrowserStatus
   relaunchBrowser: boolean
 }
 
 export interface WizardDataShape {
-  chosenBundler: Bundler | null
-  chosenFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
-  chosenLanguage: NexusGenEnums['CodeLanguageEnum']
+  chosenBundler: typeof WIZARD_BUNDLERS[number] | null
+  chosenFramework: typeof WIZARD_FRAMEWORKS[number] | null
+  chosenLanguage: 'js' | 'ts'
   chosenManualInstall: boolean
-  detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
-  detectedBundler: Bundler | null
-  detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
+  detectedLanguage: 'js' | 'ts' | null
+  detectedBundler: typeof WIZARD_BUNDLERS[number] | null
+  detectedFramework: typeof WIZARD_FRAMEWORKS[number] | null
 }
 
 export interface MigrationDataShape {
@@ -111,8 +109,8 @@ export interface ForceReconfigureProjectDataShape {
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
-  chosenBrowser: FoundBrowser | null
-  machineBrowsers: Promise<FoundBrowser[]> | FoundBrowser[] | null
+  activeBrowser: FoundBrowser | null
+  machineBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -128,6 +126,7 @@ export interface CoreDataShape {
   localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: string | null
+  currentProjectGitInfo: GitDataSource | null
   currentTestingType: TestingType | null
   wizard: WizardDataShape
   migration: MigrationDataShape
@@ -139,6 +138,10 @@ export interface CoreDataShape {
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
   cancelActiveLogin: (() => void) | null
+  versionData: {
+    latestVersion: Promise<string>
+    npmMetadata: Promise<Record<string, string>>
+  } | null
 }
 
 /**
@@ -158,10 +161,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
       browserStatus: 'closed',
       relaunchBrowser: false,
@@ -175,6 +176,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
+    currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
       chosenBundler: null,
@@ -201,7 +203,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       },
     },
     warnings: [],
-    chosenBrowser: null,
+    activeBrowser: null,
     user: null,
     electron: {
       app: null,
@@ -211,5 +213,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     cancelActiveLogin: null,
+    versionData: null,
   }
 }

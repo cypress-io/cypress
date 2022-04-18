@@ -8,6 +8,7 @@ import { CurrentProject } from './gql-CurrentProject'
 import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
+import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 export const mutation = mutationType({
   definition (t) {
@@ -24,12 +25,17 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('reinitializeCypress', {
+    t.field('resetErrorsAndLoadConfig', {
       type: Query,
-      description: 'Re-initializes Cypress from the initial CLI options',
+      description: 'Resets errors and attempts to reload the config',
       resolve: async (_, args, ctx) => {
-        await ctx.reinitializeCypress(ctx.modeOptions)
-        await ctx.initializeMode()
+        ctx.update((d) => {
+          d.baseError = null
+          d.warnings = []
+        })
+
+        // Wait for the project config to be reloaded
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },
@@ -82,9 +88,16 @@ export const mutation = mutationType({
       type: 'Boolean',
       args: {
         url: nonNull(stringArg()),
+        includeGraphqlPort: booleanArg(),
       },
       resolve: (_, args, ctx) => {
-        ctx.actions.electron.openExternal(args.url)
+        let url = args.url
+
+        if (args.includeGraphqlPort && process.env.CYPRESS_INTERNAL_GRAPHQL_PORT) {
+          url = `${args.url}?port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`
+        }
+
+        ctx.actions.electron.openExternal(url)
 
         return true
       },
@@ -143,19 +156,19 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.lifecycleManager.setCurrentTestingType(null)
+        ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}
       },
     })
 
-    t.field('setCurrentTestingType', {
+    t.field('setAndLoadCurrentTestingType', {
       type: 'Query',
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         // if necessary init the wizard for configuration
         if (ctx.coreData.currentTestingType
@@ -186,11 +199,11 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         if (args.input.framework) {
-          ctx.actions.wizard.setFramework(args.input.framework)
+          ctx.actions.wizard.setFramework(WIZARD_FRAMEWORKS.find((x) => x.type === args.input.framework) ?? null)
         }
 
         if (args.input.bundler) {
-          ctx.actions.wizard.setBundler(args.input.bundler)
+          ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
         }
 
         if (args.input.codeLanguage) {
@@ -213,8 +226,8 @@ export const mutation = mutationType({
           description: 'ID of the browser that we want to set',
         })),
       },
-      resolve (_, args, ctx) {
-        ctx.actions.app.setActiveBrowserById(args.id)
+      async resolve (_, args, ctx) {
+        await ctx.actions.app.setActiveBrowserById(args.id)
 
         return ctx.lifecycleManager
       },
@@ -242,7 +255,6 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
-      slowLogThreshold: false,
       description: 'Auth with Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
@@ -263,7 +275,6 @@ export const mutation = mutationType({
 
     t.field('launchOpenProject', {
       type: CurrentProject,
-      slowLogThreshold: false,
       description: 'Launches project from open_project global singleton',
       args: {
         specPath: stringArg(),
@@ -336,7 +347,7 @@ export const mutation = mutationType({
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
 
-        return ctx.appData
+        return {}
       },
     })
 
@@ -465,16 +476,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('migrateStart', {
-      description: 'Initialize the migration wizard to the first step',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.lifecycleManager._pendingMigrationInitialize?.promise
-
-        return {}
-      },
-    })
-
     t.field('migrateRenameSpecs', {
       description: 'While migrating to 10+ renames files to match the new .cy pattern',
       type: Query,
@@ -553,7 +554,6 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
-      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         await ctx.actions.migration.createConfigFile()
         await ctx.actions.migration.nextStep()
@@ -579,14 +579,10 @@ export const mutation = mutationType({
         projectId: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
-        } catch {
-          // ignore error as not useful for end user to see
-        }
+        await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
 
         // Wait for the project config to be reloaded
-        await ctx.lifecycleManager.reloadConfig()
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },
@@ -610,7 +606,7 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.project.setRelaunchBrowser(true)
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
         return true
@@ -626,13 +622,13 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
-        ctx.actions.project.setCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         if (args.isApp) {
           await ctx.actions.project.reconfigureProject()
         }
 
-        return true
+        return {}
       },
     })
 

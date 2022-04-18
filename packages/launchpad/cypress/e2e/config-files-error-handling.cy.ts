@@ -27,6 +27,8 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
+    cy.findByRole('button', { name: 'Try again' }).click()
+
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
@@ -54,12 +56,15 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Cypress no longer supports')
+    cy.contains('p', 'There is both a cypress.config.js and a cypress.json file at the location below:')
+    cy.contains('body', 'Cypress no longer supports cypress.json')
     expectStackToBe('closed')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
@@ -74,11 +79,13 @@ describe('Config files error handling', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'was removed in Cypress version')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalComponentTesting')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('h1').should('contain', 'Choose a Browser')
   })
@@ -148,5 +155,77 @@ describe('Launchpad: Error System Tests', () => {
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
+  })
+
+  it('shows correct stack trace when config with ts-module error', () => {
+    cy.scaffoldProject('config-with-ts-module-error')
+    cy.openProject('config-with-ts-module-error')
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:9')
+  })
+})
+
+describe('setupNodeEvents', () => {
+  it('throws an error when in setupNodeEvents updating a config value that was removed in 10.X', () => {
+    cy.scaffoldProject('config-update-non-migrated-value')
+    cy.openProject('config-update-non-migrated-value')
+    cy.visitLaunchpad()
+    cy.findByText('E2E Testing').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+  })
+
+  it('throws an error when in setupNodeEvents updating a config value on a clone of config that was removed in 10.X', () => {
+    cy.scaffoldProject('config-update-non-migrated-value-clone')
+    cy.openProject('config-update-non-migrated-value-clone')
+    cy.visitLaunchpad()
+    cy.findByText('E2E Testing').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
+  })
+
+  it('throws an error when in setupNodeEvents updating an e2e config value that was removed in 10.X', () => {
+    cy.scaffoldProject('config-update-non-migrated-value-e2e')
+    cy.openProject('config-update-non-migrated-value-e2e')
+    cy.visitLaunchpad()
+    cy.findByText('E2E Testing').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+  })
+
+  it('handles deprecated config fields in setupNodeEvents', () => {
+    cy.openProject('pristine')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js',
+`module.exports = { 
+  e2e: { 
+    supportFile: false, 
+    setupNodeEvents(on, config){
+      config.testFiles = '**/*.spec.js'
+      return config
+    }
+  }
+}`)
+    })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'testFiles')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'setupNodeEvents')
+    expectStackToBe('closed')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+
+    cy.get('h1').should('contain', 'Choose a Browser')
   })
 })

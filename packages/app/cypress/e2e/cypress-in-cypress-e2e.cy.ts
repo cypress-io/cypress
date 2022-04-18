@@ -100,7 +100,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
-    cy.visitApp(`/specs/runner?file=${getPathForPlatform(badFilePath)}`)
+    cy.visitApp(`/specs/runner?file=${badFilePath}`)
     cy.contains(noSpecErrorTitle).should('be.visible')
     cy.contains(noSpecErrorIntro).should('be.visible')
     cy.contains(noSpecErrorExplainer).should('be.visible')
@@ -121,18 +121,13 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${getPathForPlatform(goodFilePath)}`)
+    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
 
     cy.contains('Dom Content').should('be.visible')
 
-    cy.withCtx((ctx) => {
-      // rename relative path for any specs that happen to be found
-
-      const specs = ctx.project.specs.map((spec) => ({ ...spec, relative: `${spec.relative}-updated` }))
-
-      ctx.actions.project.setSpecs(specs)
-      ctx.emitter.toApp()
-    }).then(() => {
+    cy.withCtx((ctx, o) => {
+      ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
+    }, { path: goodFilePath }).then(() => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
@@ -158,5 +153,29 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
     cy.percySnapshot()
+  })
+
+  it('set the correct viewport values from CLI', () => {
+    cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333'])
+    cy.startAppServer()
+
+    cy.visitApp()
+    cy.contains('dom-content.spec').click()
+
+    cy.get('.toggle-specs-wrapper').click()
+
+    cy.get('#unified-runner').should('have.css', 'width', '333px')
+    cy.get('#unified-runner').should('have.css', 'height', '333px')
+  })
+
+  it('stops correctly running spec while switching specs', () => {
+    cy.visitApp()
+    cy.contains('withFailure.spec').click()
+    cy.contains('switch spec')
+    cy.contains('withWait.spec').click()
+
+    cy.wait(5000)
+    cy.get('.passed > .num').should('contain', 4)
+    cy.get('.failed > .num').should('not.contain', 1)
   })
 })

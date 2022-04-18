@@ -129,6 +129,5 @@
     "presets": [
       "react-app"
     ]
-  },
-  "_cySkipYarnInstall": true
+  }
 }

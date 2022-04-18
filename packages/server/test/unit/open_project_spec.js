@@ -6,7 +6,7 @@ const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const runEvents = require(`../../lib/plugins/run_events`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const delay = require('lodash/delay')
 
 const todosPath = Fixtures.projectPath('todos')
@@ -28,9 +28,7 @@ describe('lib/open_project', () => {
     sinon.stub(browsers, 'open')
     sinon.stub(browsers, 'connectToNewSpec')
     sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
-      e2e: {
-        specPattern: 'cypress/integration/**/*',
-      },
+      specPattern: 'cypress/integration/**/*',
     })
 
     sinon.stub(ProjectBase.prototype, 'open').resolves()

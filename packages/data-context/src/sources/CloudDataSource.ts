@@ -5,7 +5,7 @@ import debugLib from 'debug'
 import type { DataContext } from '..'
 import pDefer from 'p-defer'
 import getenv from 'getenv'
-import { pipe, subscribe, toPromise } from 'wonka'
+import { pipe, subscribe, toPromise, take } from 'wonka'
 import type { DocumentNode, OperationTypeNode } from 'graphql'
 import {
   createClient,
@@ -15,10 +15,10 @@ import {
   Client,
   createRequest,
   OperationResult,
-  RequestPolicy,
 } from '@urql/core'
 import _ from 'lodash'
 import { getError } from '@packages/errors'
+import type { RemoteExecutionRoot } from '@packages/graphql'
 
 const debug = debugLib('cypress:data-context:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
@@ -29,12 +29,11 @@ const REMOTE_SCHEMA_URLS = {
   production: 'https://dashboard.cypress.io',
 }
 
-export interface CloudExecuteRemote {
+export interface CloudExecuteRemote extends RemoteExecutionRoot {
   operationType: OperationTypeNode
   query: string
   document?: DocumentNode
   variables: any
-  requestPolicy?: RequestPolicy
 }
 
 export class CloudDataSource {
@@ -52,7 +51,10 @@ export class CloudDataSource {
         cacheExchange,
         fetchExchange,
       ],
-      fetch: this.ctx.util.fetch,
+      // Set this way so we can intercept the fetch on the context for testing
+      fetch: (...args) => {
+        return this.ctx.util.fetch(...args)
+      },
     })
   }
 
@@ -67,7 +69,7 @@ export class CloudDataSource {
       return { data: null }
     }
 
-    const requestPolicy = config.requestPolicy ?? 'cache-and-network'
+    const requestPolicy = config.requestPolicy ?? 'cache-first'
 
     const isQuery = config.operationType !== 'mutation'
 
@@ -114,10 +116,8 @@ export class CloudDataSource {
               this.ctx.coreData.dashboardGraphQLError = null
             }
 
-            // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
-            // since we know we're up-to-date
-            this.ctx.deref.emitter.toApp()
-            this.ctx.deref.emitter.toLaunchpad()
+            this.ctx.emitter.toApp()
+            this.ctx.emitter.toLaunchpad()
           }
 
           if (!res.stale) {
@@ -129,7 +129,10 @@ export class CloudDataSource {
       return dfd.promise
     }
 
-    return pipe(executingQuery, toPromise).then((data) => {
+    // take(1) completes the stream immediately after the first value was emitted
+    // avoiding it to hang forever on query operations
+    // https://github.com/FormidableLabs/urql/issues/298
+    return pipe(executingQuery, take(1), toPromise).then((data) => {
       debug('executeRemoteGraphQL toPromise res %o', data)
 
       if (data.error) {

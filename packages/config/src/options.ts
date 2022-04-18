@@ -1,13 +1,18 @@
 import os from 'os'
+import path from 'path'
+
 import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
 
 export type BreakingOptionErrorKey =
   | 'COMPONENT_FOLDER_REMOVED'
+  | 'INTEGRATION_FOLDER_REMOVED'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG'
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
+  | 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
+  | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E'
   | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
   | 'EXPERIMENTAL_SAMESITE_REMOVED'
   | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
@@ -98,6 +103,11 @@ const isValidConfig = (key: string, config: any) => {
   return true
 }
 
+export const defaultSpecPattern = {
+  e2e: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+  component: '**/*.cy.{js,jsx,ts,tsx}',
+}
+
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -141,7 +151,8 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'component',
     // runner-ct overrides
     defaultValue: {
-      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+      specPattern: defaultSpecPattern.component,
+      indexHtmlFile: 'cypress/support/component-index.html',
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -160,7 +171,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {
-      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+      specPattern: defaultSpecPattern.e2e,
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -174,11 +185,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'exit',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
@@ -378,12 +384,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'viewportHeight',
-    defaultValue: 660,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
     name: 'viewportWidth',
-    defaultValue: 1000,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
@@ -425,6 +431,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // so we don't consider it a "public" option
     isInternal: true,
     canUpdateDuringTestTime: false,
+  }, {
+    name: 'cypressBinaryRoot',
+    defaultValue: path.join(__dirname, '..', '..', '..'),
+    validation: validate.isString,
+    isInternal: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
@@ -500,6 +511,16 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
+  }, {
+    // Internal config field, useful to ignore the e2e specPattern set by the user
+    // or the default one when looking fot CT, it needs to be a config property because after
+    // having the final config that has the e2e property flattened/compacted
+    // we may not be able to get the value to ignore.
+    name: 'additionalIgnorePattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
+    validation: validate.isString,
+    isInternal: true,
+    canUpdateDuringTestTime: false,
   },
 ]
 
@@ -508,21 +529,49 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...runtimeOptions,
 ]
 
+// These properties are going to be added to the resolved properties of the
+// config, but do not mean that are valid config properties coming from the user.
+export const additionalOptionsToResolveConfig = [
+  {
+    name: 'specPattern',
+    isInternal: false,
+  },
+]
+
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
 export const breakingOptions: Array<BreakingOption> = [
   {
-    name: 'blacklistHosts',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'blockHosts',
-  }, {
     name: 'componentFolder',
     errorKey: 'COMPONENT_FOLDER_REMOVED',
     isWarning: false,
   }, {
+    name: 'integrationFolder',
+    errorKey: 'INTEGRATION_FOLDER_REMOVED',
+    isWarning: false,
+  }, {
+    name: 'testFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'specPattern',
+    isWarning: false,
+  }, {
+    name: 'ignoreTestFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'excludeSpecPattern',
+    isWarning: false,
+  }, {
+    name: 'pluginsFile',
+    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+    isWarning: false,
+  }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+    isWarning: false,
+  }, {
+    name: 'blacklistHosts',
+    errorKey: 'RENAMED_CONFIG_OPTION',
+    newName: 'blockHosts',
     isWarning: false,
   }, {
     name: 'experimentalGetCookiesSameSite',
@@ -559,13 +608,6 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
-  }, {
-    name: 'pluginsFile',
-    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
-  }, {
-    name: 'testFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    isWarning: false,
   },
 ]
 
@@ -606,10 +648,22 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['component', 'e2e'],
   },
+  {
+    name: 'indexHtmlFile',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
+    isWarning: false,
+    testingTypes: ['component'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
-  e2e: [],
+  e2e: [
+    {
+      name: 'indexHtmlFile',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
+      isWarning: false,
+    },
+  ],
   component: [
     {
       name: 'baseUrl',

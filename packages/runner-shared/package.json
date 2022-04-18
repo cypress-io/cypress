@@ -25,7 +25,7 @@
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
     "mocha": "7.0.1",
-    "nanoid": "3.1.20",
+    "nanoid": "3.1.31",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-popper": "2.2.5",

@@ -9,7 +9,8 @@
 
 <script lang="ts" setup>
 import { useRunnerUiStore } from '../../store'
+import { UnifiedRunnerAPI } from '../index'
 
-const automationElementId = window.__CYPRESS_CONFIG__.namespace
+const automationElementId = UnifiedRunnerAPI.getAutomationElementId()
 const runnerUiStore = useRunnerUiStore()
 </script>

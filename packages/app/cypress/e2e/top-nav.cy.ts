@@ -1,15 +1,18 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type Sinon from 'sinon'
 
 const pkg = require('@packages/root')
 
 const loginText = defaultMessages.topNav.login
 
+beforeEach(() => {
+  cy.clock(Date.UTC(2021, 9, 30), ['Date'])
+})
+
 describe('App Top Nav Workflows', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
-
-    cy.clock(Date.UTC(2021, 9, 30), ['Date'])
   })
 
   describe('Page Name', () => {
@@ -49,7 +52,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
       })
 
       it('shows the current browser in the top nav browser list button', () => {
@@ -93,12 +96,22 @@ describe('App Top Nav Workflows', () => {
       it('performs mutations to update and relaunch browser', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
-        cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.app, 'setActiveBrowserById')
+          o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
+        })
 
-        cy.findAllByTestId('top-nav-browser-list-item').eq(1).click().then(($element) => {
-          cy.wait('@setBrowser').then(({ request }) => {
-            expect(request.body.variables.id).to.eq($element.attr('data-browser-id'))
-          })
+        cy.findAllByTestId('top-nav-browser-list-item').eq(1).click()
+
+        cy.withCtx((ctx, o) => {
+          const browserId = (ctx.actions.app.setActiveBrowserById as SinonStub).args[0][0]
+          const genId = ctx.fromId(browserId, 'Browser')
+
+          expect(ctx.actions.app.setActiveBrowserById).to.have.been.calledWith(browserId)
+          expect(genId).to.eql('edge-chromium-stable')
+          expect(ctx.actions.project.launchProject).to.have.been.calledWith(
+            ctx.coreData.currentTestingType, {}, undefined,
+          )
         })
       })
     })
@@ -129,7 +142,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
-          href: 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0',
+          href: 'https://on.cypress.io/changelog#10-0-0',
         })
       })
     })
@@ -164,14 +177,14 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('top-nav-version-list').contains('v10.0.0 • Upgrade').click()
 
         cy.findByTestId('update-hint').within(() => {
-          cy.validateExternalLink({ name: '10.1.0', href: 'https://github.com/cypress-io/cypress/releases/tag/v10.1.0' })
+          cy.validateExternalLink({ name: '10.1.0', href: 'https://on.cypress.io/changelog#10-1-0' })
           cy.findByText('Latest').should('be.visible')
         })
 
         cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' })
 
         cy.findByTestId('current-hint').within(() => {
-          cy.validateExternalLink({ name: '10.0.0', href: 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0' })
+          cy.validateExternalLink({ name: '10.0.0', href: 'https://on.cypress.io/changelog#10-0-0' })
           cy.findByText('Installed').should('be.visible')
         })
 
@@ -209,16 +222,15 @@ describe('App Top Nav Workflows', () => {
     context('version data unreachable', () => {
       it('treats unreachable data as current version', () => {
         cy.withCtx((ctx, o) => {
+          (ctx.util.fetch as Sinon.SinonStub).restore()
           const oldFetch = ctx.util.fetch
 
-          o.sinon.stub(ctx.util, 'fetch').get(() => {
-            return async (url: RequestInfo, init?: RequestInit) => {
-              if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
-                throw new Error(String(url))
-              }
-
-              return oldFetch(url, init)
+          o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
+            if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+              throw new Error(String(url))
             }
+
+            return oldFetch(url, init)
           })
         })
 
@@ -229,7 +241,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: `v${pkg.version}`,
-          href: `https://github.com/cypress-io/cypress/releases/tag/v${pkg.version}`,
+          href: `https://on.cypress.io/changelog#${pkg.version.replaceAll('.', '-')}`,
         })
       })
     })
@@ -240,7 +252,7 @@ describe('App Top Nav Workflows', () => {
       cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
 
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
@@ -286,23 +298,25 @@ describe('App Top Nav Workflows', () => {
     it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
       cy.get('@docsButton').click()
 
-      cy.intercept('mutation-TopNav_SetPromptShown').as('SetPromptShown')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setPromptShown')
+      })
 
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.wait('@SetPromptShown')
-      .its('request.body.variables.slug')
-      .should('equal', 'ci1')
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
+      })
 
       cy.findByRole('button', { name: 'Run tests faster' }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.wait('@SetPromptShown')
-      .its('request.body.variables.slug')
-      .should('equal', 'orchestration1')
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
+      })
     })
   })
 
@@ -313,7 +327,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.loginUser()
-        cy.__incorrectlyVisitAppWithIntercept()
+        cy.visitApp()
 
         cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })
@@ -341,11 +355,7 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
-        cy.intercept('mutation-Auth_Logout').as('logout')
-
         cy.findByRole('button', { name: 'Log Out' }).click()
-
-        cy.wait('@logout')
 
         cy.findByTestId('app-header-bar').findByText('Log In').should('be.visible')
       })
@@ -604,7 +614,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     cy.clock(1609891200000)
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad')
-    cy.startAppServer()
+    cy.startAppServer('e2e', { skipMockingPrompts: true })
   })
 
   it('CI prompt auto-opens 4 days after first project opened', () => {
@@ -619,6 +629,8 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.contains('E2E Specs')
+    cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
 
@@ -634,6 +646,8 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.contains('E2E Specs')
+    cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })
 })

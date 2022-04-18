@@ -13,7 +13,7 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) =>
 }
 
 export type LoadSpecOptions = {
-  fileName: string
+  filePath: string
   setup?: () => void
   passCount?: number | string
   failCount?: number | string
@@ -21,9 +21,9 @@ export type LoadSpecOptions = {
   hasPreferredIde?: boolean
 }
 
-export function loadSpec (options: LoadSpecOptions): void {
+export function loadSpec (options: LoadSpecOptions) {
   const {
-    fileName,
+    filePath,
     setup,
     passCount = '--',
     failCount = '--',
@@ -55,15 +55,22 @@ export function loadSpec (options: LoadSpecOptions): void {
     })
   }, { hasPreferredIde })
 
-  // TODO: investigate why directly visiting the spec will sometimes hang
-  // https://cypress-io.atlassian.net/browse/UNIFY-1154
-  // cy.__incorrectlyVisitAppWithIntercept(`specs/runner?file=cypress/e2e/errors/${fileName}`)
-
-  cy.__incorrectlyVisitAppWithIntercept()
+  cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
 
   if (setup) {
     setup()
   }
+
+  // Wait for specs to complete
+  shouldHaveTestResults({ passCount, failCount, pendingCount })
+}
+
+export function runSpec ({ fileName }: { fileName: string }) {
+  cy.scaffoldProject('runner-e2e-specs')
+  cy.openProject('runner-e2e-specs')
+  cy.startAppServer()
+
+  cy.visitApp()
 
   cy.findByLabelText('Search Specs').type(fileName)
   // wait for virtualized spec list to update, there is a chance
@@ -75,6 +82,5 @@ export function loadSpec (options: LoadSpecOptions): void {
     expect(location.hash).to.contain(fileName)
   })
 
-  // Wait for specs to complete
-  shouldHaveTestResults({ passCount, failCount, pendingCount })
+  return cy.window()
 }

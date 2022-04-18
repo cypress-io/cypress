@@ -1,12 +1,14 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
+import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
 import type { BreakingOption, BreakingOptionErrorKey } from './options'
+import type { TestingType } from '@packages/types'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
 
 export {
+  defaultSpecPattern,
   validation,
   options,
   breakingOptions,
@@ -31,7 +33,7 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 
@@ -42,6 +44,7 @@ export type BreakingErrResult = {
   newName?: string
   value?: any
   configFile: string
+  testingType?: TestingType
 }
 
 type ErrorHandler = (
@@ -49,7 +52,7 @@ type ErrorHandler = (
   options: BreakingErrResult
 ) => void
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
@@ -70,6 +73,7 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
           newName,
           value,
           configFile: cfg.configFile,
+          testingType,
         })
       }
 
@@ -78,6 +82,7 @@ const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: an
         newName,
         value,
         configFile: cfg.configFile,
+        testingType,
       })
     }
   })
@@ -97,11 +102,15 @@ export const getBreakingRootKeys = () => {
   return breakingRootOptions
 }
 
-export const getDefaultValues = (runtimeOptions = {}) => {
+export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
   // Default values can be functions, in which case they are evaluated
   // at runtime - for example, slowTestThreshold where the default value
   // varies between e2e and component testing.
-  return _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+  const defaultsForRuntime = _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+
+  // As we normalize the config based on the selected testing type, we need
+  // to do the same with the default values to resolve those correctly
+  return { ...defaultsForRuntime, ...defaultsForRuntime[runtimeOptions.testingType] }
 }
 
 export const getPublicConfigKeys = () => {
@@ -140,12 +149,12 @@ export const validate = (cfg: any, onErr: (property: string) => void) => {
   })
 }
 
-export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
-  return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr)
+export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType: TestingType) => {
+  return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr, testingType)
 }
 
-export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
-  return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
+export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType: TestingType) => {
+  return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr, testingType)
 }
 
 export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
@@ -155,7 +164,7 @@ export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHand
 export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof typeof testingTypeBreakingOptions, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   const options = testingTypeBreakingOptions[testingType]
 
-  return validateNoBreakingOptions(options, cfg, onWarning, onErr)
+  return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
 export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {

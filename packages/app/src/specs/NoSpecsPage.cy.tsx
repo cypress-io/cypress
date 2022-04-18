@@ -18,7 +18,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
             ...ctx.currentProject!,
             config: {},
             id: 'id',
-            storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             currentTestingType: 'component',
           }
@@ -42,12 +41,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       cy.get(pageTitleSelector).should('contain.text', messages.page.defaultPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.component.description)
 
-      const text = defaultMessages.createSpec.component
-
-      cy.contains(text.importFromComponent.header).should('be.visible')
-      cy.contains(text.importFromComponent.description).should('be.visible')
-      cy.contains(text.importFromStory.header).should('be.visible')
-      cy.contains(text.importFromStory.notSetupDescription).should('be.visible')
       cy.percySnapshot()
     })
   })
@@ -61,7 +54,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
             config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             id: 'id',
-            storybook: null,
             currentTestingType: 'e2e',
           }
         },
@@ -96,8 +88,8 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
         onResult: (res) => {
           if (res.currentProject?.config) {
             res.currentProject.config = res.currentProject.config.map((x) => {
-              if (x.field === 'e2e') {
-                return { ...x, value: { ...x.value, specPattern: customSpecPattern } }
+              if (x.field === 'specPattern') {
+                return { ...x, value: customSpecPattern }
               }
 
               return x

@@ -7,7 +7,6 @@ const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
 
 const errors = require(`../../lib/errors`)
-const config = require(`../../lib/config`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
@@ -15,7 +14,7 @@ const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const { fs } = require(`../../lib/util/fs`)
 
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const Fixtures = require('@tooling/system-tests')
 const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
@@ -38,7 +37,7 @@ describe('lib/socket', () => {
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return config.get(this.todosPath)
+    return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       this.cfg = cfg
     })

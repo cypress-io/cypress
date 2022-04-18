@@ -5,5 +5,5 @@
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3"
   },
-  "_cySkipYarnInstall": true
+  "_cySkipDepInstall": true
 }

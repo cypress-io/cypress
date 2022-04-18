@@ -3,6 +3,7 @@ import path from 'path'
 import { fork } from 'child_process'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
+import _ from 'lodash'
 import type { DataContext } from '..'
 import {
   cleanUpIntegrationFolder,
@@ -23,9 +24,44 @@ import {
   getComponentFolder,
   getIntegrationTestFilesGlobs,
   getSpecPattern,
+  legacyOptions,
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
+
+export function getConfigWithDefaults (legacyConfig: any) {
+  const newConfig = _.cloneDeep(legacyConfig)
+
+  legacyOptions.forEach(({ defaultValue, name }) => {
+    if (defaultValue !== undefined && legacyConfig[name] === undefined) {
+      newConfig[name] = typeof defaultValue === 'function' ? defaultValue() : defaultValue
+    }
+  })
+
+  return newConfig
+}
+
+export function getDiff (oldConfig: any, newConfig: any) {
+  // get all the values updated
+  const result: any = _.reduce(oldConfig, (acc: any, value, key) => {
+    // ignore values that have been removed
+    if (newConfig[key] && !_.isEqual(value, newConfig[key])) {
+      acc[key] = newConfig[key]
+    }
+
+    return acc
+  }, {})
+
+  // get all the values added
+  return _.reduce(newConfig, (acc: any, value, key) => {
+    // their key is in the new config but not in the old config
+    if (!oldConfig.hasOwnProperty(key)) {
+      acc[key] = value
+    }
+
+    return acc
+  }, result)
+}
 
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
@@ -39,22 +75,35 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const cwd = path.join(projectRoot, pluginFile)
 
+    const { CYPRESS_INTERNAL_E2E_TESTING_SELF, ...env } = process.env
+
     const childOptions: ForkOptions = {
       stdio: 'inherit',
       cwd: path.dirname(cwd),
-      env: process.env,
+      env,
     }
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
     const ipc = new LegacyPluginsIpc(fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions))
 
+    const legacyConfigWithDefaults = getConfigWithDefaults(legacyConfig)
+
     ipc.on('ready', () => {
-      ipc.send('loadLegacyPlugins', legacyConfig)
+      ipc.send('loadLegacyPlugins', legacyConfigWithDefaults)
     })
 
     ipc.on('loadLegacyPlugins:reply', (modifiedLegacyConfig) => {
-      resolve(modifiedLegacyConfig)
+      const diff = getDiff(legacyConfigWithDefaults, modifiedLegacyConfig)
+
+      // if env is updated by plugins, avoid adding it to the config file
+      if (diff.env) {
+        delete diff.env
+      }
+
+      const legacyConfigWithChanges = _.merge(legacyConfig, diff)
+
+      resolve(legacyConfigWithChanges)
       ipc.childProcess.kill()
     })
 
@@ -243,9 +292,8 @@ export class MigrationActions {
   }
 
   async finishReconfigurationWizard () {
-    this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
-    await this.ctx.lifecycleManager.reloadConfig()
+    await this.ctx.lifecycleManager.refreshLifecycle()
   }
 
   async nextStep () {
@@ -276,30 +324,10 @@ export class MigrationActions {
   }
 
   async assertSuccessfulConfigMigration (migratedConfigFile: string = 'cypress.config.js') {
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(migratedConfigFile))
+    const actual = formatConfig(await this.ctx.file.readFileInProject(migratedConfigFile))
 
     const configExtension = path.extname(migratedConfigFile)
-    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config${configExtension}`))
-
-    if (actual !== expected) {
-      throw Error(`Expected ${actual} to equal ${expected}`)
-    }
-  }
-
-  async assertSuccessfulConfigScaffold (configFile: `cypress.config.${'js'|'ts'}`) {
-    assert(this.ctx.currentProject)
-
-    // we assert the generated configuration file against one from a project that has
-    // been verified to run correctly.
-    // each project has an `unconfigured` and `configured` variant in `system-tests/projects`
-    // for example vueclivue2-configured and vueclivue2-unconfigured.
-    // after setting the project up with the launchpad, the two projects should contain the same files.
-
-    const configuredProject = this.ctx.project.projectTitle(this.ctx.currentProject).replace('unconfigured', 'configured')
-    const expectedProjectConfig = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', configuredProject, configFile)
-
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))
-    const expected = formatConfig(await this.ctx.fs.readFile(expectedProjectConfig, 'utf8'))
+    const expected = formatConfig(await this.ctx.file.readFileInProject(`expected-cypress.config${configExtension}`))
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)

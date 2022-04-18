@@ -587,7 +587,9 @@ export default {
       docsUrl: 'https://on.cypress.io/go',
     },
   },
-
+  group: {
+    missing_fn: '`group` API must be called with a function.',
+  },
   hover: {
     not_implemented: {
       message: [
@@ -900,6 +902,7 @@ export default {
     retry_timed_out ({ ms }) {
       return `Timed out retrying after ${ms}ms: `
     },
+    test_stopped: 'Cypress test was stopped while running this command.',
   },
 
   mocha: {

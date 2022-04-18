@@ -3,7 +3,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
+import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, TestingType } from '@packages/types'
 import * as configUtils from '@packages/config'
 import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
@@ -12,7 +12,7 @@ import keys from './util/keys'
 import origin from './util/origin'
 import pathHelpers from './util/path_helpers'
 
-import type { ConfigValidationFailureInfo } from '@packages/errors'
+import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
 
 import { getCtx } from './makeDataContext'
 
@@ -76,20 +76,6 @@ export function isValidCypressInternalEnvValue (value) {
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
-}
-
-export async function get (
-  projectRoot,
-  // Options are only used in testing
-  options?: Partial<AllModeOptions>,
-): Promise<FullConfig> {
-  const ctx = getCtx()
-
-  options ??= ctx.modeOptions
-
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.getFullInitialConfig(options, false)
 }
 
 export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
@@ -156,6 +142,18 @@ export function mergeDefaults (
 
   _.defaultsDeep(config, defaultsForRuntime)
 
+  let additionalIgnorePattern = config.additionalIgnorePattern
+
+  if (options.testingType === 'component' && config.e2e && config.e2e.specPattern) {
+    additionalIgnorePattern = config.e2e.specPattern
+  }
+
+  config = {
+    ...config,
+    ...config[options.testingType],
+    additionalIgnorePattern,
+  }
+
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
@@ -199,11 +197,34 @@ export function mergeDefaults (
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
-  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
-    throw errors.get(err, ...args)
-  })
+  debug('validate that there is no breaking config options before setupNodeEvents')
 
-  return setSupportFileAndFolder(config, defaultsForRuntime)
+  const { testingType } = options
+
+  function makeConfigError (cyError: CypressError) {
+    cyError.name = `Obsolete option used in config object`
+
+    return cyError
+  }
+
+  configUtils.validateNoBreakingConfig(config[testingType], errors.warning, (err, options) => {
+    throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
+  }, testingType)
+
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
+    throw makeConfigError(errors.get(err, ...args))
+  }, testingType)
+
+  // We need to remove the nested propertied by testing type because it has been
+  // flattened/compacted based on the current testing type that is selected
+  // making the config only available with the properties that are valid,
+  // also, having the correct values that can be used in the setupNodeEvents
+  delete config['e2e']
+  delete config['component']
+  delete config['resolved']['e2e']
+  delete config['resolved']['component']
+
+  return setSupportFileAndFolder(config)
 }
 
 export function setResolvedConfigValues (config, defaults, resolved) {
@@ -235,7 +256,7 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
   })
 }
 
-export function updateWithPluginValues (cfg, overrides) {
+export function updateWithPluginValues (cfg, overrides, testingType: TestingType) {
   if (!overrides) {
     overrides = {}
   }
@@ -252,18 +273,31 @@ export function updateWithPluginValues (cfg, overrides) {
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
-    // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
-  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
+  debug('validate that there is no breaking config options added by setupNodeEvents')
 
-  if (!originalResolvedBrowsers) {
-    // have something to resolve with if plugins return nothing
-    originalResolvedBrowsers = {
-      value: cfg.browsers,
-      from: 'default',
-    } as ResolvedFromConfig
+  function makeSetupError (cyError: CypressError) {
+    cyError.name = `Error running ${testingType}.setupNodeEvents()`
+
+    return cyError
   }
+
+  configUtils.validateNoBreakingConfig(overrides, errors.warning, (err, options) => {
+    throw makeSetupError(errors.get(err, options))
+  }, testingType)
+
+  configUtils.validateNoBreakingConfig(overrides[testingType], errors.warning, (err, options) => {
+    throw makeSetupError(errors.get(err, {
+      ...options,
+      name: `${testingType}.${options.name}`,
+    }))
+  }, testingType)
+
+  const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
+    value: cfg.browsers,
+    from: 'default',
+  } as ResolvedFromConfig
 
   const diffs = deepDiff(cfg, overrides, true)
 
@@ -364,8 +398,19 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
   return obj
 }
 
+export function relativeToProjectRoot (projectRoot: string, file: string) {
+  if (!file.startsWith(projectRoot)) {
+    return file
+  }
+
+  // captures leading slash(es), both forward slash and back slash
+  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
+
+  return file.replace(projectRoot, '').replace(leadingSlashRe, '')
+}
+
 // async function
-export async function setSupportFileAndFolder (obj, defaults) {
+export async function setSupportFileAndFolder (obj) {
   if (!obj.supportFile) {
     return Bluebird.resolve(obj)
   }
@@ -381,7 +426,11 @@ export async function setSupportFileAndFolder (obj, defaults) {
   }
 
   if (supportFilesByGlob.length === 0) {
-    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
+    if (obj.resolved.supportFile.from === 'default') {
+      return errors.throwErr('DEFAULT_SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
+    }
+
+    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
   }
 
   // TODO move this logic to find support file into util/path_helpers
@@ -414,7 +463,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throwErr('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
+        errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -428,7 +477,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     })
     .then((result) => {
       if (result === null) {
-        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })

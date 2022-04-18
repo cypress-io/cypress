@@ -1,10 +1,21 @@
-import { expect } from 'chai'
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape } from '../../../src/sources'
+import chai from 'chai'
+import os from 'os'
+
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getDefaultSpecFileName } from '../../../src/sources'
 import path from 'path'
-import { DataContext } from '../../../src'
+import sinon from 'sinon'
+import chokidar from 'chokidar'
+import _ from 'lodash'
+import sinonChai from 'sinon-chai'
 import { graphqlSchema } from '@packages/graphql/src/schema'
+import { FoundSpec, TestingType } from '@packages/types'
+import { DataContext } from '../../../src'
 import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
 import { InjectedConfigApi } from '../../../src/data'
+import { createTestDataContext } from '../helper'
+
+chai.use(sinonChai)
+const { expect } = chai
 
 describe('matchedSpecs', () => {
   context('got a single spec pattern from --spec via cli', () => {
@@ -121,7 +132,7 @@ describe('transformSpec', () => {
 })
 
 describe('findSpecs', () => {
-  const temporary = 'tmp'
+  const temporary = path.join(os.tmpdir(), 'findSpecs')
 
   const fixture = [
     'node_modules/test/App.spec.js',
@@ -137,21 +148,8 @@ describe('findSpecs', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
-    ctx = new DataContext({
-      schema: graphqlSchema,
-      mode: 'run',
-      modeOptions: {},
-      appApi: {} as AppApiShape,
-      localSettingsApi: {} as LocalSettingsApiShape,
-      authApi: {} as AuthApiShape,
-      configApi: {
-        getServerPluginHandlers: () => [],
-      } as InjectedConfigApi,
-      projectApi: {} as ProjectApiShape,
-      electronApi: {} as ElectronApiShape,
-      browserApi: {} as BrowserApiShape,
-    })
-
+    ctx = createTestDataContext('run')
+    await ctx.fs.ensureDir(temporary)
     await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(temporary, element), '')))
   })
 
@@ -187,5 +185,270 @@ describe('findSpecs', () => {
     const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], ['e2e/*.{spec,cy}.{ts,js}'])
 
     expect(specs).to.have.length(3)
+  })
+})
+
+describe('getDefaultSpecFileName', () => {
+  context('dirname', () => {
+    it('returns pattern without change if it is do not a glob', () => {
+      const specPattern = 'cypress/e2e/foo.spec.ts'
+      const defaultFileName = getDefaultSpecFileName(specPattern)
+
+      expect(defaultFileName).to.eq(specPattern)
+    })
+
+    it('remove ** from glob if it is not in the beginning', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/**/foo.spec.ts')
+
+      expect(defaultFileName).to.eq('cypress/foo.spec.ts')
+    })
+
+    it('replace ** for cypress if it starts with **', () => {
+      const defaultFileName = getDefaultSpecFileName('**/e2e/foo.spec.ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
+    })
+
+    it('replace ** for cypress if it starts with ** and omit extra **', () => {
+      const defaultFileName = getDefaultSpecFileName('**/**/foo.spec.ts')
+
+      expect(defaultFileName).to.eq('cypress/foo.spec.ts')
+    })
+
+    it('selects first option if there are multiples possibilities of values', () => {
+      const defaultFileName = getDefaultSpecFileName('{cypress,tests}/{integration,e2e}/foo.spec.ts')
+
+      expect(defaultFileName).to.eq('cypress/integration/foo.spec.ts')
+    })
+  })
+
+  context('filename', () => {
+    it('replace * for filename', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/*.spec.ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.spec.ts')
+    })
+
+    it('selects first option if there are multiples possibilities of values', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/{foo,filename}.spec.ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
+    })
+  })
+
+  context('test extension', () => {
+    it('replace * for filename', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/filename.*.ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+    })
+
+    it('selects first option if there are multiples possibilities of values', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/filename.{spec,cy}.ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.spec.ts')
+    })
+  })
+
+  context('lang extension', () => {
+    it('if project use TS, set TS as extension if it exists in the glob', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/filename.cy.ts', 'ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+    })
+
+    it('if project use TS, set TS as extension if it exists in the options of extensions', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/filename.cy.{js,ts,tsx}', 'ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+    })
+
+    it('if project use TS, do not set TS as extension if it do not exists in the options of extensions', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/filename.cy.{js,jsx}', 'ts')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.js')
+    })
+
+    it('selects first option if there are multiples possibilities of values', () => {
+      const defaultFileName = getDefaultSpecFileName('cypress/e2e/filename.cy.{ts,js}')
+
+      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+    })
+  })
+
+  context('extra cases', () => {
+    it('creates specName for tests/*.js', () => {
+      const defaultFileName = getDefaultSpecFileName('tests/*.js')
+
+      expect(defaultFileName).to.eq('tests/filename.js')
+    })
+
+    it('creates specName for src/*-test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*-test.js')
+
+      expect(defaultFileName).to.eq('src/filename-test.js')
+    })
+
+    it('creates specName for src/*.foo.bar.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*.foo.bar.js')
+
+      expect(defaultFileName).to.eq('src/filename.foo.bar.js')
+    })
+
+    it('creates specName for src/prefix.*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/prefix.*.test.js')
+
+      expect(defaultFileName).to.eq('src/prefix.cy.test.js')
+    })
+
+    it('creates specName for src/*/*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*/*.test.js')
+
+      expect(defaultFileName).to.eq('src/e2e/filename.test.js')
+    })
+
+    it('creates specName for src-*/**/*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('src-*/**/*.test.js')
+
+      expect(defaultFileName).to.eq('src-e2e/filename.test.js')
+    })
+
+    it('creates specName for src/*.test.(js|jsx)', () => {
+      const defaultFileName = getDefaultSpecFileName('src/*.test.(js|jsx)')
+
+      const possiblesFileNames = ['src/filename.test.jsx', 'src/filename.test.js']
+
+      expect(possiblesFileNames.includes(defaultFileName)).to.eq(true)
+    })
+
+    it('creates specName for (src|components)/**/*.test.js', () => {
+      const defaultFileName = getDefaultSpecFileName('(src|components)/**/*.test.js')
+
+      const possiblesFileNames = ['src/filename.test.js', 'components/filename.test.js']
+
+      expect(possiblesFileNames.includes(defaultFileName)).to.eq(true)
+    })
+
+    it('creates specName for e2e/**/*.cy.{js,jsx,ts,tsx}', () => {
+      const defaultFileName = getDefaultSpecFileName('e2e/**/*.cy.{js,jsx,ts,tsx}')
+
+      expect(defaultFileName).to.eq('e2e/filename.cy.js')
+    })
+  })
+})
+
+describe('startSpecWatcher', () => {
+  const temporary = 'tmp'
+
+  let ctx: DataContext
+
+  beforeEach(async () => {
+    ctx = new DataContext({
+      schema: graphqlSchema,
+      mode: 'run',
+      modeOptions: {},
+      appApi: {} as AppApiShape,
+      localSettingsApi: {} as LocalSettingsApiShape,
+      authApi: {} as AuthApiShape,
+      configApi: {} as InjectedConfigApi,
+      projectApi: {} as ProjectApiShape,
+      electronApi: {} as ElectronApiShape,
+      browserApi: {} as BrowserApiShape,
+    })
+
+    ctx.coreData.currentProject = temporary
+  })
+
+  afterEach(async () => {
+    sinon.restore()
+  })
+
+  it('throws if no current project defined', () => {
+    ctx.coreData.currentProject = null
+
+    expect(() => ctx.project.startSpecWatcher(temporary, 'e2e', ['**/*.{cy,spec}.{ts,js}'], ['**/ignore.spec.ts'], [])).to.throw()
+  })
+
+  it('creates file watcher based on given config properties', () => {
+    const onStub = sinon.stub()
+
+    sinon.stub(chokidar, 'watch').callsFake(() => {
+      const mockWatcher = {
+        on: onStub,
+        close: () => ({ catch: () => {} }),
+      } as unknown
+
+      return mockWatcher as chokidar.FSWatcher
+    })
+
+    let handleFsChange
+
+    sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+      handleFsChange = (() => funcToDebounce())
+
+      return handleFsChange as _.DebouncedFunc<any>
+    })
+
+    ctx.project.startSpecWatcher(temporary, 'e2e', ['**/*.{cy,spec}.{ts,js}'], ['**/ignore.spec.ts'], ['additional.ignore.cy.js'])
+
+    expect(_.debounce).to.have.been.calledWith(sinon.match.func, 250)
+
+    expect(chokidar.watch).to.have.been.calledWith('.', {
+      ignoreInitial: true,
+      cwd: temporary,
+      ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
+    })
+
+    expect(onStub).to.have.been.calledWith('all', handleFsChange)
+  })
+
+  it('implements change handler with duplicate result handling', async () => {
+    const mockFoundSpecs = [
+      { name: 'test-1.cy.js' },
+      { name: 'test-2.cy.js' },
+      { name: 'test-3.cy.js' },
+    ] as FoundSpec[]
+
+    sinon.stub(ctx.project, 'findSpecs').resolves(mockFoundSpecs)
+    sinon.stub(ctx.actions.project, 'setSpecs')
+
+    sinon.stub(chokidar, 'watch').callsFake(() => {
+      const mockWatcher = {
+        on: () => {},
+        close: () => ({ catch: () => {} }),
+      } as unknown
+
+      return mockWatcher as chokidar.FSWatcher
+    })
+
+    let handleFsChange
+
+    sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+      handleFsChange = (() => funcToDebounce())
+
+      return handleFsChange as _.DebouncedFunc<any>
+    })
+
+    const watchOptions: [string, TestingType, string[], string[], string[]] = [temporary, 'e2e', ['**/*.{cy,spec}.{ts,js}'], ['**/ignore.spec.ts'], ['additional.ignore.cy.js']]
+
+    ctx.project.startSpecWatcher(...watchOptions)
+
+    // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
+    ctx.project.setSpecs(mockFoundSpecs)
+
+    await handleFsChange()
+
+    expect(ctx.project.findSpecs).to.have.been.calledWith(...watchOptions)
+    expect(ctx.actions.project.setSpecs).not.to.have.been.called
+
+    // Update internal specs state so that a change will be detected on next FS event
+    const updatedSpecs = [...mockFoundSpecs, { name: 'test-4.cy.js' }] as FoundSpec[]
+
+    ctx.project.setSpecs(updatedSpecs)
+
+    await handleFsChange()
+
+    expect(ctx.project.findSpecs).to.have.been.calledWith(...watchOptions)
+    expect(ctx.actions.project.setSpecs).to.have.been.calledWith(mockFoundSpecs)
   })
 })

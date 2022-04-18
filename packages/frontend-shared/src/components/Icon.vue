@@ -5,6 +5,7 @@
   >
     <component
       :is="icon"
+      :class="iconClass"
     />
   </span>
 </template>
@@ -20,5 +21,6 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 defineProps<{
   icon?: FunctionalComponent<SVGAttributes, {}>
+  iconClass?: string
 }>()
 </script>

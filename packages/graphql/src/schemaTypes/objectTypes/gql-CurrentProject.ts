@@ -9,7 +9,6 @@ import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
-import { Storybook } from './gql-Storybook'
 
 export const PackageManagerEnum = enumType({
   name: 'PackageManagerEnum',
@@ -42,11 +41,11 @@ export const CurrentProject = objectType({
       resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
-    t.field('currentBrowser', {
+    t.field('activeBrowser', {
       type: Browser,
-      description: 'The currently selected browser for the application',
+      description: 'The currently selected browser for the project',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.chosenBrowser
+        return ctx.coreData.activeBrowser
       },
     })
 
@@ -129,6 +128,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.string('defaultSpecFileName', {
+      description: 'Default spec file name for spec creation',
+      resolve: (source, args, ctx) => {
+        return ctx.project.defaultSpecFileName()
+      },
+    })
+
     t.nonNull.list.nonNull.field('specs', {
       description: 'A list of specs for the currently open testing type of a project',
       type: Spec,
@@ -173,11 +179,6 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.field('storybook', {
-      type: Storybook,
-      resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
-    })
-
     t.nonNull.field('codeGenGlobs', {
       type: CodeGenGlobs,
       resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
@@ -197,9 +198,7 @@ export const CurrentProject = objectType({
     t.string('branch', {
       description: 'The current branch of the project',
       resolve: async (source, args, ctx) => {
-        const branchName = await ctx.git.getBranch(source.projectRoot)
-
-        return branchName
+        return source.git?.currentBranch ?? null
       },
     })
 

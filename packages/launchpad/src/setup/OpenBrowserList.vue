@@ -55,7 +55,7 @@
           </div>
           <div
             class="font-medium pt-2 text-indigo-600 text-18px leading-28px"
-            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled || !browser.isVersionSupported }"
+            :class="{ 'text-jade-600': checked, 'text-gray-500': browser.disabled || !browser.isVersionSupported }"
           >
             {{ browser.displayName }}
           </div>
@@ -70,68 +70,69 @@
       class="mb-14"
     >
       <div class="flex mb-4 gap-16px items-center justify-center">
-        <template v-if="browserStatus.closed || browserStatus.opening">
-          <Button
-            v-if="browserStatus.closed"
-            size="lg"
-            type="submit"
-            :prefix-icon="testingTypeIcon"
-            prefix-icon-class="icon-dark-white"
-            variant="secondary"
-            data-cy="launch-button"
-            class="font-medium"
-          >
-            {{ browserText[props.gql.currentTestingType].start }}
-          </Button>
-          <Button
-            v-else
-            size="lg"
-            type="button"
-            disabled
-            variant="pending"
-            class="font-medium disabled:cursor-default"
-            :prefix-icon="StatusRunningIcon"
-            prefix-icon-class="icon-light-gray-300 icon-dark-white animate-spin"
-          >
-            {{ browserText[props.gql.currentTestingType].opening }}
-          </Button>
-        </template>
-
-        <template v-else>
-          <Button
-            size="lg"
-            type="button"
-            disabled
-            variant="pending"
-            :prefix-icon="testingTypeIcon"
-            prefix-icon-class="icon-dark-white"
-            class="font-medium disabled:cursor-default"
-          >
-            {{ browserText.running }}
-          </Button>
-          <Button
-            v-if="props.gql.currentBrowser?.isFocusSupported"
-            size="lg"
-            type="button"
-            variant="outline"
-            :prefix-icon="ExportIcon"
-            prefix-icon-class="icon-dark-gray-500"
-            class="font-medium"
-            @click="emit('focusBrowser')"
-          >
-            {{ browserText.focus }}
-          </Button>
-          <Button
-            size="lg"
-            type="button"
-            variant="outline"
-            :prefix-icon="PowerStandbyIcon"
-            prefix-icon-class="icon-dark-gray-500"
-            class="font-medium"
-            @click="emit('closeBrowser')"
-          >
-            {{ browserText.close }}
-          </Button>
+        <template v-if="selectedBrowserId">
+          <template v-if="browserStatus.closed || browserStatus.opening">
+            <Button
+              v-if="browserStatus.closed"
+              size="lg"
+              type="submit"
+              :prefix-icon="testingTypeIcon"
+              prefix-icon-class="icon-dark-white"
+              variant="secondary"
+              data-cy="launch-button"
+              class="font-medium"
+            >
+              {{ browserText[props.gql.currentTestingType].start }}
+            </Button>
+            <Button
+              v-else
+              size="lg"
+              type="button"
+              disabled
+              variant="pending"
+              class="font-medium disabled:cursor-default"
+              :prefix-icon="StatusRunningIcon"
+              prefix-icon-class="icon-light-gray-300 icon-dark-white animate-spin"
+            >
+              {{ browserText[props.gql.currentTestingType].opening }}
+            </Button>
+          </template>
+          <template v-else>
+            <Button
+              size="lg"
+              type="button"
+              disabled
+              variant="pending"
+              :prefix-icon="testingTypeIcon"
+              prefix-icon-class="icon-dark-white"
+              class="font-medium disabled:cursor-default"
+            >
+              {{ browserText.running }}
+            </Button>
+            <Button
+              v-if="props.gql.activeBrowser?.isFocusSupported"
+              size="lg"
+              type="button"
+              variant="outline"
+              :prefix-icon="ExportIcon"
+              prefix-icon-class="icon-dark-gray-500"
+              class="font-medium"
+              @click="emit('focusBrowser')"
+            >
+              {{ browserText.focus }}
+            </Button>
+            <Button
+              size="lg"
+              type="button"
+              variant="outline"
+              :prefix-icon="PowerStandbyIcon"
+              prefix-icon-class="icon-dark-gray-500"
+              class="font-medium"
+              @click="emit('closeBrowser')"
+            >
+              {{ browserText.close }}
+            </Button>
+          </template>
         </template>
       </div>
 
@@ -139,7 +140,7 @@
         size="sm"
         variant="text"
         :prefix-icon="ArrowRightIcon"
-        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in -translate-y-1px duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-2px"
+        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:-translate-x-2px"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
@@ -180,23 +181,16 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 gql`
 fragment OpenBrowserList on CurrentProject {
   id
-  currentBrowser {
+  activeBrowser {
     id
-    displayName
-    path
     isFocusSupported
   }
   browsers {
     id
-    name
-    family
     disabled
-    isSelected
     isVersionSupported
-    channel
+    name
     displayName
-    path
-    version
     warning
     majorVersion
   }
@@ -208,6 +202,10 @@ subscription OpenBrowserList_browserStatusChange {
   browserStatusChange {
     id
     browserStatus
+    activeBrowser {
+      id
+      isFocusSupported
+    }
   }
 }
 `
@@ -238,7 +236,12 @@ const browsers = computed(() => {
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const selectedBrowserId = computed({
-  get: () => props.gql.currentBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id,
+  get: () => {
+    // NOTE: The activeBrowser is set during project initialization. It should always be defined.
+    if (!props.gql.activeBrowser) throw new Error('Missing activeBrowser in selectedBrowserId')
+
+    return props.gql.activeBrowser.id
+  },
   set (browserId) {
     if (browserId) {
       setBrowser.executeMutation({ id: browserId })

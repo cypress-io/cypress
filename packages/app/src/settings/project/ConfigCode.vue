@@ -28,16 +28,19 @@
             v-if="field === 'browsers' && Array.isArray(value)"
             :browsers="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+            :data-cy-config="from"
           />
           <RenderObject
             v-else-if="value && typeof value === 'object'"
             :value="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+            :from="from"
           />
           <span
             v-else
             class="rounded-sm px-2px"
             :class="colorMap[from]"
+            :data-cy-config="from"
           >{{ renderPrimitive(value) }}</span>,
           <br>
         </span>

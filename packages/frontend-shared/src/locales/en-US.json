@@ -49,10 +49,8 @@
     "edit": "Edit",
     "git": {
       "modified": "Modified",
-      "added": "Added",
       "created": "Created",
-      "unmodified": "Unmodified",
-      "deleted": "Deleted"
+      "unmodified": "Modified"
     }
   },
   "status": {
@@ -105,12 +103,6 @@
       }
     },
     "component": {
-      "importFromStory": {
-        "header": "Create from story",
-        "description": "We'll generate a spec file from the Storybook files that you've written for each component in this project.",
-        "notSetupDescription": "We cannot import any stories because we couldn't detect Storybook in this project.",
-        "chooseAStoryHeader": "Choose a story"
-      },
       "importFromComponent": {
         "header": "Create from component",
         "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
@@ -118,6 +110,7 @@
       },
       "importEmptySpec": {
         "header": "Create a new spec",
+        "description": "We'll generate an empty spec file to start testing components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }
@@ -251,14 +244,14 @@
     "install": {
       "startButton": "Install",
       "waitForInstall": "Waiting for you to install the dependencies...",
-      "checkForUpdates": "Refresh",
       "installed": "installed",
       "pendingInstall": "pending installation"
     },
     "step": {
       "continue": "Continue",
       "next": "Next Step",
-      "back": "Back"
+      "back": "Back",
+      "skip": "Skip"
     },
     "configFile": {
       "createManually": "Create file manually",
@@ -282,8 +275,12 @@
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
-    "done": "Done",
-    "selectPreferredEditor": "Select Preferred Editor",
+    "settings": "Settings",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "externalEditorPreferences": "External Editor Preferences",
+    "externalEditorPreferencesDescription1": "Select your preference for opening files on your system.",
+    "externalEditorPreferencesDescription2": "You can change this later in the {0} page.",
     "recentProjectsHeader": "Recent Projects",
     "searchPlaceholder": "Search projects",
     "addProjectButton": "Add Project",
@@ -413,8 +410,9 @@
       }
     },
     "footer": {
-      "text": "You can reconfigure the settings for this project if you're experiencing issues with your Cypress configuration.",
-      "button": "Reconfigure Project"
+      "text": "You can reconfigure the {testingType} testing settings for this project if you're experiencing issues with your Cypress configuration.",
+      "button": "Configuration Guide",
+      "buttonLink": "https://docs.cypress.io/guides/references/configuration"
     }
   },
   "runs": {
@@ -652,6 +650,20 @@
       "printTooltip": "Printed to console",
       "invalidSelector": "Invalid",
       "selectorMethodsLabel": "Selector Methods"
+    },
+    "automation": {
+      "disconnected": {
+        "title": "The Cypress extension has disconnected.",
+        "description": "Cypress cannot run tests without this extension.",
+        "reload": "Reload the browser"
+      },
+      "missing": {
+        "title": "The Cypress extension is missing.",
+        "description": "Cypress cannot run tests without this extension. Please choose another browser."
+      },
+      "shared": {
+        "link": "Read more about browser management"
+      }
     }
   },
   "warnings": {

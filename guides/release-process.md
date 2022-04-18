@@ -76,7 +76,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 5. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
 
-6. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. The release scripts assumes you are using the `production` profile. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable.
+6. [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `production`. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable. Log into AWS SSO with `aws sso login --profile <name_of_profile>`.
 
 7. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
     * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3

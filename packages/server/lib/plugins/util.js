@@ -9,8 +9,8 @@ const serializeError = (err) => {
     'name', 'message', 'stack', 'code', 'annotated', 'type',
     'details', 'isCypressErr', 'messageMarkdown',
     'originalError',
-    // Location of the error when a TSError occurs (parse error from ts-node)
-    'tsErrorLocation')
+    // Location of the error when a TSError or a esbuild error occurs (parse error from ts-node or esbuild)
+    'compilerErrorLocation')
 
   if (obj.originalError) {
     obj.originalError = serializeError(obj.originalError)
@@ -39,7 +39,7 @@ module.exports = {
 
     return {
       send (event, ...args) {
-        if (aProcess.killed) {
+        if (aProcess.killed || !aProcess.connected) {
           return
         }
 

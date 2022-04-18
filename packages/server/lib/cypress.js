@@ -13,7 +13,6 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-const { openProject } = require('../lib/open_project')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -118,7 +117,7 @@ module.exports = {
   openProject (options) {
     // this code actually starts a project
     // and is spawned from nodemon
-    openProject.open(options.project, options)
+    require('../lib/open_project').open(options.project, options)
   },
 
   start (argv = []) {

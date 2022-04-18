@@ -1,5 +1,8 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
+/// <reference path="./cy/commands/session.d.ts" />
+/// <reference path="./cy/logGroup.d.ts" />
+/// <reference path="./cypress/log.d.ts" />
 
 declare namespace Cypress {
   interface Actions {
@@ -36,7 +39,6 @@ declare namespace Cypress {
     sinon: sinon.SinonApi
     utils: CypressUtils
     state: State
-
     originalConfig: Record<string, any>
   }
 
@@ -46,40 +48,19 @@ declare namespace Cypress {
     warning: (message: string) => void
   }
 
-  type Log = ReturnType<Cypress.log>
-
-  interface LogConfig {
-    message: any[]
-    instrument?: 'route'
-    isStubbed?: boolean
-    alias?: string
-    aliasType?: 'route'
-    commandName?: string
-    type?: 'parent'
-    event?: boolean
-    method?: string
-    url?: string
-    status?: number
-    numResponses?: number
-    response?: string | object
-    renderProps?: () => {
-      indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
-      message?: string
-    }
-    browserPreRequest?: any
-  }
-
+  // Extend Cypress.state properties here
   interface State {
+    (k: 'activeSessions', v?: Cypress.Commands.Sessions.ActiveSessions):  ActiveSessionsSessionData | undefined
     (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
     (k: 'routes', v?: RouteMap): RouteMap
     (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
     (k: 'document', v?: Document): Document
     (k: 'window', v?: Window): Window
+    (k: 'logGroupIds', v?: Array<InternalLogConfig['id']>): Array<InternalLogConfig['id']>
     (k: string, v?: any): any
     state: Cypress.state
   }
 
-  // Extend Cypress.state properties here
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document

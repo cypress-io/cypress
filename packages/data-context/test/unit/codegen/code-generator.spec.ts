@@ -1,5 +1,5 @@
 import { parse } from '@babel/parser'
-import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
@@ -173,68 +173,9 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: dedent`
-            import { mount } from "@cypress/react"
-            import Button from "./Button"
-            
-            describe('<Button />', () => {
-              it('renders', () => {
-                // see: https://on.cypress.io/component-testing
-                mount(<Button />)
-              })
-            })`,
-        },
-      ],
-      failed: [],
-    }
-
-    expect(codeGenResults).deep.eq(expected)
-
-    const fileContent = (await fs.readFile(fileAbsolute)).toString()
-
-    expect(fileContent).eq(expected.files[0].content)
-
-    expect(() => babelParse(fileContent)).not.throw()
-  })
-
-  it('should generate from story template', async () => {
-    const fileName = 'Button.stories.jsx'
-    const target = path.join(tmpPath, 'story')
-    const fileAbsolute = path.join(target, fileName)
-    const action: Action = {
-      templateDir: templates.story,
-      target,
-    }
-    const codeGenArgs = {
-      imports: [
-        'import React from "react"',
-        'import { mount } from "@cypress/react"',
-        'import { composeStories } from "@storybook/testing-react"',
-        `import * as stories from "./Button.stories"`,
-      ],
-      stories: [{ component: 'Primary', mount: 'mount(<Primary />)' }],
-      title: 'ButtonStories',
-      fileName,
-    }
-
-    const codeGenResults = await codeGenerator(action, codeGenArgs)
-    const expected: CodeGenResults = {
-      files: [
-        {
-          type: 'text',
-          status: 'add',
-          file: fileAbsolute,
-          content: dedent`
-            import React from "react"
-            import { mount } from "@cypress/react"
-            import { composeStories } from "@storybook/testing-react"
-            import * as stories from "./Button.stories"
-            
-            const composedStories = composeStories(stories)
-            
-            describe('ButtonStories', () => {
-              it('should render Primary', () => {
-                const { Primary } = composedStories
-                mount(<Primary />)
+            describe('Button.tsx', () => {
+              it('playground', () => {
+                // cy.mount()
               })
             })`,
         },
@@ -280,33 +221,11 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[0])
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[0])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      specFileExtension: '.cy',
-    })
-
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    const codeGenResult = await codeGenerator(action, codeGenOptions)
-
-    expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
-  })
-
-  it('should generate from react story', async () => {
-    const target = path.join(tmpPath, 'react-component')
-    const action: Action = {
-      templateDir: templates.story,
-      target,
-    }
-
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[0])
-
-    const newSpecCodeGenOptions = new SpecOptions(ctx, {
-      codeGenPath: path.join(__dirname, 'files', 'react', 'Button.stories.jsx'),
-      codeGenType: 'story',
       specFileExtension: '.cy',
     })
 
@@ -324,7 +243,7 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
@@ -337,27 +256,5 @@ describe('code-generator', () => {
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
     expect(() => codeGenResult.files[0].content).not.throw()
-  })
-
-  it('should generate from vue story', async () => {
-    const target = path.join(tmpPath, 'vue-component')
-    const action: Action = {
-      templateDir: templates.story,
-      target,
-    }
-
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
-
-    const newSpecCodeGenOptions = new SpecOptions(ctx, {
-      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.ts'),
-      codeGenType: 'story',
-      specFileExtension: '.cy',
-    })
-
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    const codeGenResult = await codeGenerator(action, codeGenOptions)
-
-    expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
   })
 })

@@ -24,21 +24,21 @@ export class ErrorDataSource {
       return null
     }
 
-    // If we saw a TSError, we will extract the error location from the message
-    const tsErrorLocation = source.cypressError.originalError?.tsErrorLocation
+    // If we saw a TSError,  or a esbuild error we will extract the error location from the message
+    const compilerErrorLocation = source.cypressError.originalError?.compilerErrorLocation
 
     let line: number | null | undefined
     let column: number | null | undefined
     let absolute: string | null | undefined
 
-    if (tsErrorLocation) {
-      line = tsErrorLocation.line
-      column = tsErrorLocation.column
-      absolute = path.join(this.ctx.currentProject, tsErrorLocation.filePath)
+    if (compilerErrorLocation) {
+      line = compilerErrorLocation.line
+      column = compilerErrorLocation.column
+      absolute = path.join(this.ctx.currentProject, compilerErrorLocation.filePath)
     } else {
       // Skip any stack trace lines which come from node:internal code
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
-      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:internal'))
+      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:internal') && !stackLine.includes('source-map-support'))
       const parsedLine = stackUtils.parseStackLine(filteredStackLines[0] ?? '')
 
       if (parsedLine) {
@@ -52,7 +52,7 @@ export class ErrorDataSource {
       return null
     }
 
-    const codeBlock = codeFrameColumns(await this.ctx.file.readFile(absolute), {
+    const codeBlock = codeFrameColumns(await this.ctx.fs.readFile(absolute, 'utf8'), {
       start: { line, column },
     }, {
       linesAbove: 2,

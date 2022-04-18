@@ -11,37 +11,6 @@ const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', '
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
 
-  async fetchLaunchpadInitialData () {
-    const graphql = this.ctx.graphqlClient()
-
-    await Promise.all([
-      graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
-      graphql.executeQuery('MainLaunchpadQueryDocument', {}),
-    ])
-
-    return graphql.getSSRData()
-  }
-
-  async fetchAppInitialData () {
-    // run mode is not driven by GraphQL, so we don't
-    // need the data from these queries.
-    if (this.ctx.isRunMode) {
-      return {}
-    }
-
-    const graphql = this.ctx.graphqlClient()
-
-    await Promise.all([
-      graphql.executeQuery('SettingsDocument', {}),
-      graphql.executeQuery('SpecPageContainerDocument', {}),
-      graphql.executeQuery('SpecsPageContainerDocument', {}),
-      graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
-      graphql.executeQuery('SideBarNavigationDocument', {}),
-    ])
-
-    return graphql.getSSRData()
-  }
-
   async fetchAppHtml () {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
       const response = await this.ctx.util.fetch(`http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`, { method: 'GET' })
@@ -90,29 +59,23 @@ export class HtmlDataSource {
       return this.ctx.fs.readFile(PATH_TO_NON_PROXIED_ERROR, 'utf-8')
     }
 
-    const [appHtml, appInitialData, serveConfig] = await Promise.all([
+    const [appHtml, serveConfig] = await Promise.all([
       this.fetchAppHtml(),
-      this.fetchAppInitialData(),
       this.makeServeConfig(),
     ])
 
-    return this.replaceBody(appHtml, appInitialData, serveConfig)
+    return this.replaceBody(appHtml, serveConfig)
   }
 
-  private replaceBody (html: string, initialData: object, serveConfig: object) {
-    // base64 before embedding so user-supplied contents can't break out of <script>
-    // https://github.com/cypress-io/cypress/issues/4952
-    const base64InitialData = Buffer.from(JSON.stringify(initialData)).toString('base64')
-
+  private replaceBody (html: string, serveConfig: object) {
     return html.replace('<body>', `
       <body>
         <script>
           window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
-          window.__CYPRESS_INITIAL_DATA_ENCODED__ = "${base64InitialData}";
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')};
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
-          window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.chosenBrowser)}
+          window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
           ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
       ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';`
       : ''

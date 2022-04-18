@@ -30,6 +30,7 @@ import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
+import type { Server as WebSocketServer } from 'ws'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -117,6 +118,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
+  protected _graphqlWS?: WebSocketServer
 
   protected _remoteAuth: unknown
   protected _remoteProps: unknown
@@ -561,6 +563,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
+      this._graphqlWS?.close(),
     ])
     .then((res) => {
       this._middleware = null

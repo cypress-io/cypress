@@ -24,8 +24,14 @@ declare namespace Cypress {
   interface CommandFn<T extends keyof ChainableMethods> {
     (this: Mocha.Context, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
+  interface CommandFns {
+    [name: string]: (this: Mocha.Context, ...args: any) => any
+  }
   interface CommandFnWithSubject<T extends keyof ChainableMethods, S> {
     (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnsWithSubject<S> {
+    [name: string]: (this: Mocha.Context, prevSubject: S, ...args: any) => any
   }
   interface CommandOriginalFn<T extends keyof ChainableMethods> extends CallableFunction {
     (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
@@ -466,6 +472,14 @@ declare namespace Cypress {
       ): void
       add<T extends keyof Chainable, S extends PrevSubject>(
           name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
+      ): void
+      addAll<T extends keyof Chainable>(fns: CommandFns): void
+      addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
+      addAll<T extends keyof Chainable, S extends PrevSubject>(
+          options: CommandOptions & { prevSubject: true | S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+      ): void
+      addAll<T extends keyof Chainable, S extends PrevSubject>(
+          options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
       ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
@@ -2341,7 +2355,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
   }
 
   interface Failable {
@@ -2698,12 +2712,6 @@ declare namespace Cypress {
      */
     fixturesFolder: string | false
     /**
-     * Path to folder containing integration test files
-     * @default "cypress/integration"
-     * @deprecated
-     */
-    integrationFolder: string
-    /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
      */
@@ -2864,7 +2872,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: CoreConfigOptions
+    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
 
     /**
      * An array of objects defining the certificates
@@ -2874,7 +2882,9 @@ declare namespace Cypress {
     /**
      * Handle Cypress plugins
      */
-    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
+
+    indexHtmlFile: string
   }
 
   /**
@@ -2923,6 +2933,7 @@ declare namespace Cypress {
     namespace: string
     projectRoot: string
     devServerPublicPathRoute: string
+    cypressBinaryRoot: string
   }
 
   /**
@@ -2968,16 +2979,45 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
+  interface DefineDevServerConfig {
+    // This interface can be extended by the user, to inject the types for their
+    // preferred bundler: e.g.
+    //
+    // import type * as webpack from 'webpack'
+    //
+    // declare global {
+    //   namespace Cypress {
+    //     interface DefineDevServerConfig {
+    //       webpackConfig?: webpack.Configuration
+    //     }
+    //   }
+    // }
+    [key: string]: any
+  }
+
+  type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
+
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+
+  type DevServerConfigObject = {
+    bundler: 'webpack'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app'
+    webpackConfig?: PickConfigOpt<'webpackConfig'>
+  } | {
+    bundler: 'vite'
+    framework: 'react' | 'vue'
+    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+  }
+
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
-    devServer: DevServerFn<ComponentDevServerOpts>
+    devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigObject
     devServerConfig?: ComponentDevServerOpts
   }
 
   /**
    * Config options that can be assigned on cypress.config.{ts|js} file
    */
-  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern'>
+  type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern' | 'indexHtmlFile'>
 
   /**
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
@@ -5432,7 +5472,7 @@ declare namespace Cypress {
 
   interface ResolvedDevServerConfig {
     port: number
-    close: (done?: () => any) => void
+    close: (done?: (err?: Error) => any) => void
   }
 
   interface PluginEvents {
@@ -5726,6 +5766,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
+    /** additional information to include in the log */
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean

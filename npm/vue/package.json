@@ -4,10 +4,11 @@
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
-    "build": "rimraf dist && rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
+    "build": "rimraf dist && rollup -c rollup.config.js",
+    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "typecheck": "vue-tsc --noEmit",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
@@ -15,8 +16,7 @@
     "test:ci:ct": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
-    "@cypress/mount-utils": "*",
-    "@vue/test-utils": "^2.0.0-rc.10"
+    "@vue/test-utils": "2.0.0-rc.19"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
@@ -24,6 +24,7 @@
     "@babel/preset-env": "7.9.5",
     "@babel/preset-typescript": "7.10.1",
     "@cypress/code-coverage": "3.8.1",
+    "@cypress/mount-utils": "0.0.0-development",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@intlify/vue-i18n-loader": "2.0.0-rc.1",
     "@rollup/plugin-commonjs": "^17.1.0",

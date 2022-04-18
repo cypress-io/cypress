@@ -14,6 +14,20 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when the checked out git branch changes
+   */
+  branchChange () {
+    this._emit('branchChange')
+  }
+
+  /**
+   * Emitted when the git info for a given spec changes
+   */
+  gitInfoChange (specPath: string[]) {
+    this._emit('gitInfoChange', specPath)
+  }
+
+  /**
    * Emitted when we have modified part of the backend and want to show
    * a notification to possibly restart the app
    */
@@ -21,8 +35,28 @@ abstract class DataEmitterEvents {
     this._emit('devChange')
   }
 
+  /**
+   * Emitted when we have a notification from the cloud to refresh the data
+   */
+  cloudViewerChange () {
+    this._emit('cloudViewerChange')
+  }
+
+  /**
+   * Emitted when the browserStatus field has changed due to the browser
+   * having opened or closed.
+   */
   browserStatusChange () {
     this._emit('browserStatusChange')
+  }
+
+  /**
+   * Emitted when the specs for the current project have changed. This can
+   * be due to files being added or removed or due to a change in
+   * the spec pattern in the config
+   */
+  specsChange () {
+    this._emit('specsChange')
   }
 
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
@@ -39,7 +73,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * a re-query of data on the frontend
    */
   toApp (...args: any[]) {
-    this.ctx.coreData.servers.appSocketServer?.emit('data-context-push', ...args)
+    this.ctx.coreData.servers.appSocketServer?.emit('graphql-refresh')
   }
 
   /**
@@ -47,7 +81,21 @@ export class DataEmitterActions extends DataEmitterEvents {
    * typically used to trigger a re-query of data on the frontend
    */
   toLaunchpad (...args: any[]) {
-    this.ctx.coreData.servers.gqlSocketServer?.emit('data-context-push', ...args)
+    this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refresh')
+  }
+
+  /**
+   * Notifies the client to refetch a specific query, fired when we hit a remote data
+   * source, and respond with the data before the initial hit was able to resolve
+   */
+  notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
+    const server = target === 'app' ? this.ctx.coreData.servers.appSocketServer : this.ctx.coreData.servers.gqlSocketServer
+
+    server?.emit('graphql-refresh', {
+      field,
+      operation,
+      variables,
+    })
   }
 
   /**
@@ -62,34 +110,60 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncIterator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncGenerator<any> {
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
+    let pending: any[] = []
+    let done = false
 
-    function subscribed (val: any) {
-      dfd?.resolve(val)
+    function subscribed (value: any) {
+      // We can get events here before next() is called setting up the deferred promise
+      // If that happens, we will queue them up to be handled once next eventually is called
+      if (dfd) {
+        dfd.resolve({ done: false, value })
+        dfd = undefined
+      } else {
+        pending.push({ done: false, value })
+      }
     }
     this.pub.on(evt, subscribed)
 
     const iterator = {
       async next () {
+        if (done) {
+          return { done: true, value: undefined }
+        }
+
         if (!hasSentInitial && sendInitial) {
           hasSentInitial = true
 
-          return { done: false, value: {} }
+          return { done: false, value: undefined }
         }
 
-        dfd = pDefer()
+        if (pending.length === 0) {
+          dfd = pDefer()
 
-        return { done: false, value: await dfd.promise }
+          return await dfd.promise
+        }
+
+        return pending.shift()
+      },
+      throw: async (error: Error) => {
+        throw error
       },
       return: async () => {
         this.pub.off(evt, subscribed)
+        // If we are currently waiting on a deferred promise, we need to resolve it and signify we're done to ensure that the async loop terminates
+        if (dfd) {
+          dfd.resolve({ done: true, value: undefined })
+        }
+
+        done = true
+
         dfd = undefined
 
         return { done: true, value: undefined }
       },
-
       [Symbol.asyncIterator] () {
         return iterator
       },
