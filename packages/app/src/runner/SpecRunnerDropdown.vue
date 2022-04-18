@@ -1,6 +1,6 @@
 <template>
   <Popover
-    :key="popoverKey"
+    :key="`${popoverKey}`"
     class="bg-white rounded border-1px border-gray-100 h-32px relative"
     #="{ open, close }"
   >
