@@ -117,7 +117,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       expect(consoleProps.table).to.have.length(0)
     })
 
-    it('for one domain with only cookies', () => {
+    it('for one domain with only cookies set', () => {
       const sessionState = {
         id: 'session1',
         cookies: [
