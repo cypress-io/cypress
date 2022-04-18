@@ -178,7 +178,7 @@ import { gql, useMutation, useSubscription } from '@urql/vue'
 import { ref, computed } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
-  GlobalPageHeader_ClearCurrentProjectDocument,
+  GlobalPageHeader_ClearCurrentProjectDocument, GlobalPageHeader_ClearCurrentTestingTypeDocument,
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
@@ -277,6 +277,7 @@ const hasLinkToCurrentProject = computed(() => {
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
+const clearCurrentTestingTypeMutation = useMutation(GlobalPageHeader_ClearCurrentTestingTypeDocument)
 
 const openLogin = () => {
   isLoginOpen.value = true
