@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 /// <reference path="../support/e2e.ts" />
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import type { fixtureDirs } from '@tooling/system-tests'
 
-type ProjectDirs = typeof e2eProjectDirs
+type ProjectDirs = typeof fixtureDirs
 
 const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
 
