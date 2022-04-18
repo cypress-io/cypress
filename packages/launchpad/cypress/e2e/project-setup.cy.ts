@@ -195,7 +195,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
-        cy.findByText('We added the following files to your project.')
+        cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=changes]').within(() => {
           cy.contains('cypress.config.js')
@@ -225,7 +225,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
-        cy.findByText('We added the following files to your project.')
+        cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
@@ -288,7 +288,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
-        cy.findByText('We added the following files to your project.')
+        cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
@@ -329,7 +329,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
-        cy.findByText('We added the following files to your project.')
+        cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
@@ -363,7 +363,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
-        cy.findByText('We added the following files to your project.')
+        cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=changes]').within(() => {
           cy.contains('cypress.config.js')
