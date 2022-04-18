@@ -106,7 +106,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
   })
 
   describe('.getConsoleProps', () => {
-    it('for one domain with neither cookies and localStorage set', () => {
+    it('for one domain with neither cookies or localStorage set', () => {
       const sessionState = {
         id: 'session1',
       }
