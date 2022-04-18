@@ -195,7 +195,7 @@ export class WizardActions {
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
 
-    return await Promise.all([
+    const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage),
@@ -205,6 +205,8 @@ export class WizardActions {
         chosenLanguage,
       }),
     ])
+
+    return scaffoldedFiles
   }
 
   private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
