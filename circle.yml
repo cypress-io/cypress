@@ -1647,9 +1647,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn workspace create-cypress-tests build
-      - run:
-          name: Run unit test
-          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
