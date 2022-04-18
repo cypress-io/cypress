@@ -5,9 +5,6 @@ import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
 import Debug from 'debug'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { useI18n } from '@cy/i18n'
-const { t } = useI18n()
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
@@ -230,15 +227,11 @@ export class WizardActions {
 
     assert(fileContent)
 
-    await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
-
-    const description = fileName === 'commands'
-      ? defaultMessages.setupWizard.configFiles.fileDescription.commands
-      : t(defaultMessages.setupWizard.configFiles.fileDescription.support, { testingType: (fileName === 'e2e' ? 'E2E' : 'component') })
+    await this.scaffoldFile(supportFile, fileContent, '')
 
     return {
       status: 'valid',
-      description,
+      description: '',
       file: {
         absolute: supportFile,
       },
@@ -287,13 +280,7 @@ export class WizardActions {
     // only do this if config file doesn't exist
     this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
 
-    const adjective = (testingType === 'e2e') ? 'E2E' : 'component testing'
-
-    return this.scaffoldFile(
-      this.ctx.lifecycleManager.configFilePath,
-      configCode,
-      t(defaultMessages.setupWizard.configFiles.fileDescription.config, { adjective }),
-    )
+    return this.scaffoldFile(this.ctx.lifecycleManager.configFilePath, configCode, '')
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
@@ -301,9 +288,7 @@ export class WizardActions {
 
     await this.ensureDir('fixtures')
 
-    return this.scaffoldFile(exampleScaffoldPath,
-      `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
-      defaultMessages.setupWizard.configFiles.fileDescription.example)
+    return this.scaffoldFile(exampleScaffoldPath, JSON.stringify(FIXTURE_DATA, null, 2), '')
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
@@ -351,11 +336,7 @@ export class WizardActions {
 
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
-    return this.scaffoldFile(
-      componentIndexHtmlPath,
-      template,
-      'The HTML used as the wrapper for all component tests',
-    )
+    return this.scaffoldFile(componentIndexHtmlPath, template, '')
   }
 
   private getComponentTemplate = (opts: { headModifier: string, bodyModifier: string }) => {
@@ -395,7 +376,7 @@ export class WizardActions {
       if (e.code === 'EEXIST') {
         return {
           status: 'skipped',
-          description: 'File already exists',
+          description,
           file: {
             absolute: filePath,
           },
@@ -404,7 +385,7 @@ export class WizardActions {
 
       return {
         status: 'error',
-        description: e.message || 'Error writing file',
+        description: e.message,
         file: {
           absolute: filePath,
           contents,
