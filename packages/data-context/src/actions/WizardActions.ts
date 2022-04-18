@@ -5,6 +5,9 @@ import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
 import Debug from 'debug'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { useI18n } from '@cy/i18n'
+const { t } = useI18n()
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
@@ -229,9 +232,13 @@ export class WizardActions {
 
     await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 
+    const description = fileName === 'commands'
+      ? defaultMessages.setupWizard.configFiles.fileDescription.commands
+      : t(defaultMessages.setupWizard.configFiles.fileDescription.support, { testingType: (fileName === 'e2e' ? 'E2E' : 'component') })
+
     return {
       status: 'valid',
-      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress API`,
+      description,
       file: {
         absolute: supportFile,
       },
@@ -280,10 +287,12 @@ export class WizardActions {
     // only do this if config file doesn't exist
     this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
 
+    const adjective = (testingType === 'e2e') ? 'E2E' : 'component testing'
+
     return this.scaffoldFile(
       this.ctx.lifecycleManager.configFilePath,
       configCode,
-      'Created a new config file',
+      t(defaultMessages.setupWizard.configFiles.fileDescription.config, { adjective }),
     )
   }
 
@@ -294,7 +303,7 @@ export class WizardActions {
 
     return this.scaffoldFile(exampleScaffoldPath,
       `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
-      'Added an example fixtures file/folder')
+      defaultMessages.setupWizard.configFiles.fileDescription.example)
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {

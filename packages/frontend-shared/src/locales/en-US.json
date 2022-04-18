@@ -610,7 +610,18 @@
     },
     "configFiles": {
       "title": "Configuration Files",
-      "description": "We added the following files to your project."
+      "description": "We added the following files to your project:",
+      "fileDescription": {
+        "config": "The Cypress config file where the {adjective} dev server is configured.",
+        "support": "The support file that is bundled and loaded before each {testingType} spec.",
+        "componentWrapper": "The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.",
+        "commands": "A support file that is useful for creating custom Cypress commands and overwriting existing ones.",
+        "example": "An example fixture for data imported into your Cypress tests, such as `cy.intercept()`."
+      },
+      "status": {
+        "skipped": "File already exists",
+        "error": "Error writing file"
+      }
     },
     "chooseBrowser": {
       "title": "Choose a Browser",
