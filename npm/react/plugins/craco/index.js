@@ -1,4 +1,4 @@
-const { startDevServer } = require('@cypress/webpack-dev-server')
+const { devServer: startDevServer } = require('@cypress/webpack-dev-server')
 const { createWebpackDevConfig } = require('@craco/craco')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 

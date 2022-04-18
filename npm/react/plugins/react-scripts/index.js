@@ -1,4 +1,4 @@
-const { startDevServer } = require('@cypress/webpack-dev-server')
+const { devServer: startDevServer } = require('@cypress/webpack-dev-server')
 const findReactScriptsWebpackConfig = require('./findReactScriptsWebpackConfig')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 

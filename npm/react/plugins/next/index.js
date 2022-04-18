@@ -5,7 +5,7 @@ async function devServer (cypressDevServerConfig) {
   const webpackConfig = await findNextWebpackConfig(cypressDevServerConfig.config)
 
   // require('webpack') now points to nextjs bundled version
-  const { startDevServer } = require('@cypress/webpack-dev-server')
+  const { devServer: startDevServer } = require('@cypress/webpack-dev-server')
 
   return startDevServer({
     options: cypressDevServerConfig,

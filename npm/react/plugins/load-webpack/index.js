@@ -1,5 +1,5 @@
 const path = require('path')
-const { startDevServer } = require('@cypress/webpack-dev-server')
+const { devServer: startDevServer } = require('@cypress/webpack-dev-server')
 const tryLoadWebpackConfig = require('../utils/tryLoadWebpackConfig')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
