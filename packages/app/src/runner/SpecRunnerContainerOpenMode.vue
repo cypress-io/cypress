@@ -26,7 +26,9 @@ const specs = computed(() => {
   return props.gql.currentProject?.specs ?? []
 })
 
-const { initialized } = useUnifiedRunner(specs)
+const { initialized, watchSpecs } = useUnifiedRunner()
+
+watchSpecs(specs)
 
 specStore.$subscribe((mutation, state) => {
   const queryFile = getPathForPlatform(route.query.file as string)
