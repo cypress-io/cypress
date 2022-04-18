@@ -233,7 +233,7 @@ export const create = ($$, state) => {
         $body,
         $htmlAttrs,
         ...styleAttrs
-      } = !preprocessedSnapshot ? createSnapshotBody($elToHighlight) : reifySnapshotBody(preprocessedSnapshot)
+      } = preprocessedSnapshot ? reifySnapshotBody(preprocessedSnapshot) : createSnapshotBody($elToHighlight)
 
       let attachedBody
       const body = {
