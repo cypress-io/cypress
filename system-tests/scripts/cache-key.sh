@@ -5,15 +5,14 @@
 # cd to this "scripts" directory
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-file_list=$(ls ../projects/**/{package.json,yarn.lock} | sort -f)
+# Sort files as globbing can vary based on architecture. LC_ALL required for locale-agnostic sort
+file_list=$(ls ../projects/**/{package.json,yarn.lock} | LC_ALL=C sort -f)
 
 contents=''
 for t in ${file_list[@]}; do
   contents+=$(<$t)
 done
 
-# md5=$contents | md5
-
-# echo $md5
+# md5=$contents | md5sum
 
 echo $contents
