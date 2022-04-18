@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded cursor-pointer h-auto outline-none border-1
+    class="relative rounded cursor-pointer h-auto outline-none border-1
       text-center block group focus-within-default hocus-default
       children:hyphens-manual"
     :class="{
@@ -9,6 +9,12 @@
     data-cy="card"
     @click="emits('click')"
   >
+    <div
+      v-if="title === t('testingType.component.name')"
+      class="ribbon absolute top-0 right-0 text-teal-600"
+    >
+      {{ t('versions.beta') }}
+    </div>
     <div
       class="mx-auto children:transition-all children:duration-300"
       :class="`w-${iconSize}px h-${iconSize}px mb-${iconMargin}px`"
@@ -50,6 +56,9 @@
 <script setup lang="ts">
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   title: string
@@ -83,3 +92,17 @@ const emits = defineEmits<{
   (event: 'click'): void
 }>()
 </script>
+
+<style scoped>
+.ribbon {
+  /* https://css-tricks.com/the-shapes-of-css/#aa-trapezoid-shape */
+  transform: rotate(45deg);
+  border-bottom: 25px solid #C2F1DE; /* Primary/Jade/100 */
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  height: 10px;
+  width: 100px;
+  top: 14px !important;
+  right: -24px !important;
+}
+</style>
