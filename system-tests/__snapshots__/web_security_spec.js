@@ -5,10 +5,11 @@ exports['e2e web security / when enabled / fails'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.js)                                                     │
-  │ Searched:   cypress/integration/web_security_spec.js                                           │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (web_security_spec.js)                                                   │
+  │ Searched:     cypress/integration/web_security_spec.js                                         │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -22,78 +23,79 @@ exports['e2e web security / when enabled / fails'] = `
     2) fails when submitted a form and being redirected to another origin
     3) fails when using a javascript redirect to another origin
     4) fails when doing a CORS request cross-origin
+    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
 
 
-  0 passing
+  1 passing
   4 failing
 
   1) web security
        fails when clicking <a> to another origin:
-     CypressError: Cypress detected a cross origin error happened on page load:
+     CypressError: Timed out after waiting \`5000ms\` for your remote page to load on origin(s):
 
-  > [Cross origin error message]
+- \`http://localhost:4466\`
 
-Before the page load, you were bound to the origin policy:
+A cross-origin request for \`https://www.foo.com:44665/cross_origin\` was detected.
 
-  > http://localhost:4466
+A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:
 
-A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+\`cy.origin('https://foo.com:44665', () => {\`
+\`  <commands targeting https://www.foo.com:44665 go here>\`
+\`})\`
 
-A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Cypress does not allow you to navigate to a different origin URL within a single test.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-You may need to restructure some of your test code to avoid this problem.
+When this \`load\` event occurs, Cypress will continue running commands.
 
-Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-
-https://on.cypress.io/cross-origin-violation
+https://on.cypress.io/origin
       [stack trace lines]
 
   2) web security
        fails when submitted a form and being redirected to another origin:
-     CypressError: Cypress detected a cross origin error happened on page load:
+     CypressError: Timed out after waiting \`5000ms\` for your remote page to load on origin(s):
 
-  > [Cross origin error message]
+- \`http://localhost:4466\`
 
-Before the page load, you were bound to the origin policy:
+A cross-origin request for \`https://www.foo.com:44665/cross_origin\` was detected.
 
-  > http://localhost:4466
+A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:
 
-A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+\`cy.origin('https://foo.com:44665', () => {\`
+\`  <commands targeting https://www.foo.com:44665 go here>\`
+\`})\`
 
-A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Cypress does not allow you to navigate to a different origin URL within a single test.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-You may need to restructure some of your test code to avoid this problem.
+When this \`load\` event occurs, Cypress will continue running commands.
 
-Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-
-https://on.cypress.io/cross-origin-violation
+https://on.cypress.io/origin
       [stack trace lines]
 
   3) web security
        fails when using a javascript redirect to another origin:
-     CypressError: Cypress detected a cross origin error happened on page load:
+     CypressError: Timed out after waiting \`5000ms\` for your remote page to load on origin(s):
 
-  > [Cross origin error message]
+- \`http://localhost:4466\`
 
-Before the page load, you were bound to the origin policy:
+A cross-origin request for \`https://www.foo.com:44665/cross_origin\` was detected.
 
-  > http://localhost:4466
+A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:
 
-A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+\`cy.origin('https://foo.com:44665', () => {\`
+\`  <commands targeting https://www.foo.com:44665 go here>\`
+\`})\`
 
-A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Cypress does not allow you to navigate to a different origin URL within a single test.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-You may need to restructure some of your test code to avoid this problem.
+When this \`load\` event occurs, Cypress will continue running commands.
 
-Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-
-https://on.cypress.io/cross-origin-violation
+https://on.cypress.io/origin
       [stack trace lines]
 
   4) web security
@@ -107,8 +109,8 @@ https://on.cypress.io/cross-origin-violation
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      0                                                                                │
+  │ Tests:        5                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      4                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -144,9 +146,9 @@ https://on.cypress.io/cross-origin-violation
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security_spec.js                     XX:XX        4        -        4        -        - │
+  │ ✖  web_security_spec.js                     XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
 
 
 `
@@ -158,10 +160,11 @@ exports['e2e web security / when disabled / passes'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.js)                                                     │
-  │ Searched:   cypress/integration/web_security_spec.js                                           │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (web_security_spec.js)                                                   │
+  │ Searched:     cypress/integration/web_security_spec.js                                         │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -175,16 +178,17 @@ exports['e2e web security / when disabled / passes'] = `
     ✓ fails when submitted a form and being redirected to another origin
     ✓ fails when using a javascript redirect to another origin
     ✓ fails when doing a CORS request cross-origin
+    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
 
 
-  4 passing
+  5 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      4                                                                                │
+  │ Tests:        5                                                                                │
+  │ Passing:      5                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -208,9 +212,9 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security_spec.js                     XX:XX        4        4        -        -        - │
+  │ ✔  web_security_spec.js                     XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
+    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
 
 
 `
