@@ -162,11 +162,21 @@ const specFiles = computed(() => {
   }
 
   return _.cloneDeep(props.gql.specFiles).map((spec) => {
-    spec.before.parts = spec.before.parts.map(updateHighlight)
+    const beforeParts = spec.before.parts.map(updateHighlight)
 
-    spec.after.parts = spec.after.parts.map(updateHighlight)
+    const afterParts = spec.after.parts.map(updateHighlight)
 
-    return spec
+    return {
+      ...spec,
+      before: {
+        ...spec.before,
+        parts: beforeParts,
+      },
+      after: {
+        ...spec.after,
+        parts: afterParts,
+      },
+    }
   })
 })
 </script>
