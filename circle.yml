@@ -195,12 +195,16 @@ commands:
           name: Generate Circle Cache key for system tests
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
       - run:
+          name: Test output for cache key
+          command: echo ./system-tests/scripts/test-cache-set.sh
+      - run:
           name: Generate platform key
           command: echo $PLATFORM > platform_key
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
             - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
@@ -208,6 +212,9 @@ commands:
       - run:
           name: Generate Circle Cache key for system tests
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - run:
+          name: Test output for cache key
+          command: echo ./system-tests/scripts/test-cache-set.sh
       - run:
           name: Generate platform key
           command: echo $PLATFORM > platform_key
