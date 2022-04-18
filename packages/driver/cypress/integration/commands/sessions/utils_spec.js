@@ -53,7 +53,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       })
     })
 
-    it('for one domain with both local storage', () => {
+    it('for one domain with both cookies and localStorage', () => {
       const sessionState = {
         id: 'session1',
         cookies: [
