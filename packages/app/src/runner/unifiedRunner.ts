@@ -1,4 +1,4 @@
-import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } from 'vue'
+import { Ref, onMounted, ref, watchEffect, onBeforeUnmount, readonly } from 'vue'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
@@ -24,6 +24,14 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>) {
   const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
   watchEffect(() => {
+    if (selectorPlaygroundStore.show) {
+      const autIframe = getAutIframeModel()
+
+      autIframe.toggleSelectorPlayground(false)
+      selectorPlaygroundStore.setEnabled(false)
+      selectorPlaygroundStore.setShow(false)
+    }
+
     const queryFile = getPathForPlatform(route.query.file as string)
 
     if (!queryFile) {
@@ -40,16 +48,6 @@ export function useUnifiedRunner (specs: Ref<ReadonlyArray<SpecFile>>) {
       specStore.setActiveSpec(null)
     }
   })
-
-  watch(() => getPathForPlatform(route.query.file as string), (newQueryFile) => {
-    if (selectorPlaygroundStore.show) {
-      const autIframe = getAutIframeModel()
-
-      autIframe.toggleSelectorPlayground(false)
-      selectorPlaygroundStore.setEnabled(false)
-      selectorPlaygroundStore.setShow(false)
-    }
-  }, { flush: 'post' })
 
   return {
     initialized: readonly(initialized),
