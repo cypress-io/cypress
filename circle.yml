@@ -200,8 +200,8 @@ commands:
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
@@ -215,7 +215,7 @@ commands:
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
       - run:
           name: Send root honeycomb event for this CI build
           command: cd system-tests/scripts && node ./send-root-honecomb-event.js
@@ -229,20 +229,20 @@ commands:
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
       - save_cache:
           name: Save system tests node_modules cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
           paths:
             - ~/.cache/cy-system-tests-node-modules
       - run: touch /tmp/system_tests_node_modules_installed
       - save_cache:
           name: Save system tests node_modules cache state key
-          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-force-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
           paths:
             - /tmp/system_tests_node_modules_installed
 
