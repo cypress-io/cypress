@@ -536,6 +536,9 @@ commands:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - run:
+        name: Update system-tests node_modules cache
+        command: yarn workspace @tooling/system-tests projects:yarn:install
+      - run:
           name: Run system tests
           command: |
             ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
