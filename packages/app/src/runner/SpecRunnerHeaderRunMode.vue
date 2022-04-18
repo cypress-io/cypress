@@ -54,12 +54,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import { useElementSize } from '@vueuse/core'
+import { useAutHeader } from './useAutHeader'
 
 const props = defineProps<{
   eventManager: EventManager
@@ -72,13 +72,7 @@ const displayScale = computed(() => {
 
 const autStore = useAutStore()
 
-const autHeaderEl = ref<HTMLDivElement>()
-
-const { height } = useElementSize(autHeaderEl)
-
-watch(height, () => {
-  autStore.setSpecRunnerHeaderHeight(height.value)
-})
+const { autHeaderEl } = useAutHeader()
 
 const selectedBrowser = window.__CYPRESS_BROWSER__
 const testingType = window.__CYPRESS_TESTING_TYPE__
