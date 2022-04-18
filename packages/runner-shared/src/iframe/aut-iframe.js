@@ -73,7 +73,7 @@ export class AutIframe {
    * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
    * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
    * Otherwise, if top and the AUT match origins, the method returns true.
-   * If the AUT origin is 'null', that means the src attribute has been stripped off the iframe and is adhering to same origin policy
+   * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
    */
   doesAUTMatchTopOriginPolicy = () => {
     const Cypress = eventManager.getCypress()
@@ -81,10 +81,11 @@ export class AutIframe {
     if (!Cypress) return
 
     try {
-      const { location: locationAUT } = this.$iframe[0].contentWindow.document
-      const locationTop = Cypress.utils.locExisting(window.location.href)
+      const { href: currentHref } = this.$iframe[0].contentWindow.document.location
+      const locationTop = Cypress.Location.create(window.location.href)
+      const locationAUT = Cypress.Location.create(currentHref)
 
-      return locationTop.origin === locationAUT.origin || locationAUT.origin === 'null'
+      return locationTop.originPolicy === locationAUT.originPolicy || locationAUT.originPolicy === 'about://blank'
     } catch (err) {
       if (err.name === 'SecurityError') {
         return false
