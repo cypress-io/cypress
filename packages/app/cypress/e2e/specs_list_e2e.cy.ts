@@ -86,6 +86,8 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-selected-spec="true"]').should('not.exist')
     cy.get('[data-cy="spec-item-link"]').should('have.attr', 'href')
     cy.get('[data-cy="spec-item-link"]').contains('dom-content.spec.js').click()
+    cy.wait(1000)
+    cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').contains('dom-content.spec.js')
     cy.get('[data-cy="runnable-header"]').should('be.visible')
   })
