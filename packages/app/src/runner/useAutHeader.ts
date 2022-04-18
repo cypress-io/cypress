@@ -9,6 +9,8 @@ export function useAutHeader () {
 
   watch(height, () => {
     autStore.setSpecRunnerHeaderHeight(height.value)
+  }, {
+    immediate: true,
   })
 
   return {
