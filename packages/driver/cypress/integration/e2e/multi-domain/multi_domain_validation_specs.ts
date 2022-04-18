@@ -198,6 +198,15 @@ describe('cy.origin', () => {
       .should('equal', 'Welcome TJohnson')
     })
 
+    it('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', () => {
+      // Establish a spec bridge with a 'bar.com' host prior to loading 'foobar.com'
+      cy.origin('http://www.bar.com:3500', () => undefined)
+
+      cy.origin('http://www.app.foobar.com:3500', () => {
+        cy.visit('/fixtures/multi-domain.html')
+      })
+    })
+
     it('uses cy.origin twice', () => {
       cy.visit('/fixtures/auth/index.html')
       cy.get('[data-cy="login-idp"]').click()
