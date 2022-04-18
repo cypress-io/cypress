@@ -533,8 +533,8 @@ commands:
 
   run-binary-system-tests:
     steps:
-      - update_cached_system_tests_deps
-      - restore_cached_workspace
+      - system-tests-node-modules-install
+      - restore_cached_system_tests_deps
       - run:
           name: Run system tests
           command: |
@@ -2274,7 +2274,7 @@ linux-workflow: &linux-workflow
     - binary-system-tests:
         requires:
           - create-build-artifacts
-          - system-tests-node-modules-install
+          # - system-tests-node-modules-install
 
 mac-workflow: &mac-workflow
   jobs:
