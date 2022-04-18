@@ -16,7 +16,7 @@ const findCypress = () => {
     try {
       // If Cypress is defined and we haven't gotten a cross origin error we have found the correct bridge.
       if (frame.Cypress) {
-        // If the ending $ is not included in the template string, it breaks transpilation
+        // If the ending $ is included in the template string, it breaks transpilation
         // eslint-disable-next-line no-useless-concat
         const frameHostRegex = new RegExp(`(^|\\.)${ frame.location.host.replaceAll('.', '\\.') }` + '$')
 
