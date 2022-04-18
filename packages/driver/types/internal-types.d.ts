@@ -1,5 +1,6 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
+/// <reference path="./cy/commands/session.d.ts" />
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
@@ -49,6 +50,7 @@ declare namespace Cypress {
 
   // Extend Cypress.state properties here
   interface State {
+    (k: 'activeSessions', v?: Cypress.Commands.Sessions.ActiveSessions):  ActiveSessionsSessionData | undefined
     (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
     (k: 'routes', v?: RouteMap): RouteMap
     (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]

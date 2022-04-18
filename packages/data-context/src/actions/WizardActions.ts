@@ -1,10 +1,9 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { CodeLanguage, CODE_LANGUAGES } from '@packages/types'
-import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect } from '@packages/scaffold-config'
+import { CODE_LANGUAGES } from '@packages/types'
+import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
-import fs from 'fs-extra'
 import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:wizard-actions')
@@ -12,8 +11,8 @@ const debug = Debug('cypress:data-context:wizard-actions')
 import type { DataContext } from '..'
 
 interface WizardGetCodeComponent {
-  chosenLanguage: CodeLanguage
-  chosenFramework: FrontendFramework
+  chosenLanguage: 'js' | 'ts'
+  chosenFramework: typeof WIZARD_FRAMEWORKS[number]
 }
 
 export class WizardActions {
@@ -29,13 +28,15 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null): void {
-    const next = FRONTEND_FRAMEWORKS.find((x) => x.type === framework)
+  setFramework (framework: typeof WIZARD_FRAMEWORKS[number] | null): void {
+    const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework?.type)
 
-    this.ctx.coreData.wizard.chosenFramework = framework
+    this.ctx.update((coreData) => {
+      coreData.wizard.chosenFramework = framework
+    })
 
     if (next?.supportedBundlers?.length === 1) {
-      this.setBundler(next?.supportedBundlers?.[0].type)
+      this.setBundler(next?.supportedBundlers?.[0])
 
       return
     }
@@ -45,26 +46,30 @@ export class WizardActions {
     // if the previous bundler was incompatible with the
     // new framework that was selected, we need to reset it
     const doesNotSupportChosenBundler = (chosenBundler && !new Set(
-      this.ctx.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
-    ).has(chosenBundler)) ?? false
+      this.ctx.coreData.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+    ).has(chosenBundler.type)) ?? false
 
-    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework?.type ?? null
 
-    if (doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
+    if (!prevFramework || doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
       this.setBundler(null)
     }
   }
 
-  setBundler (bundler: Bundler | null) {
-    this.ctx.coreData.wizard.chosenBundler = bundler
+  setBundler (bundler: typeof WIZARD_BUNDLERS[number] | null) {
+    this.ctx.update((coreData) => {
+      coreData.wizard.chosenBundler = bundler
+    })
 
-    return this.data
+    return this.ctx.coreData.wizard
   }
 
   setCodeLanguage (lang: NexusGenEnums['CodeLanguageEnum']) {
-    this.ctx.coreData.wizard.chosenLanguage = lang
+    this.ctx.update((coreData) => {
+      coreData.wizard.chosenLanguage = lang
+    })
 
-    return this.data
+    return this.ctx.coreData.wizard
   }
 
   async completeSetup () {
@@ -83,11 +88,15 @@ export class WizardActions {
 
   /// reset wizard status, useful for when changing to a new project
   resetWizard () {
-    this.data.chosenBundler = null
-    this.data.chosenFramework = null
-    this.data.chosenLanguage = 'js'
+    this.ctx.update((coreData) => {
+      coreData.wizard.chosenBundler = null
+      coreData.wizard.chosenFramework = null
+      coreData.wizard.chosenLanguage = 'js'
+      coreData.wizard.detectedBundler = null
+      coreData.wizard.detectedFramework = null
+    })
 
-    return this.data
+    return this.ctx.coreData.wizard
   }
 
   async initialize () {
@@ -95,36 +104,28 @@ export class WizardActions {
       return
     }
 
-    this.ctx.update((coreData) => {
-      coreData.wizard.detectedFramework = null
-      coreData.wizard.detectedBundler = null
-      coreData.wizard.detectedLanguage = null
-    })
+    this.resetWizard()
 
     await this.detectLanguage()
     debug('detectedLanguage %s', this.data.detectedLanguage)
     this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
-    try {
-      const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
+    const detected = detect(this.ctx.currentProject)
 
-      debug('detected %o', detected)
+    debug('detected %o', detected)
 
-      if (detected) {
-        this.ctx.update((coreData) => {
-          coreData.wizard.detectedFramework = detected.framework?.type ?? null
-          coreData.wizard.chosenFramework = detected.framework?.type ?? null
+    if (detected) {
+      this.ctx.update((coreData) => {
+        coreData.wizard.detectedFramework = detected.framework ?? null
+        coreData.wizard.chosenFramework = detected.framework ?? null
 
-          if (!detected.framework?.supportedBundlers[0]) {
-            return
-          }
+        if (!detected.framework?.supportedBundlers[0]) {
+          return
+        }
 
-          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0].type
-          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0].type
-        })
-      }
-    } catch {
-      // Could not detect anything - no problem, no need to do anything.
+        coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
+        coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
+      })
     }
   }
 
@@ -146,8 +147,10 @@ export class WizardActions {
   async scaffoldTestingType () {
     const { currentTestingType, wizard: { chosenLanguage } } = this.ctx.coreData
 
-    assert(currentTestingType)
-    assert(chosenLanguage)
+    // TODO: tgriesser, clean this up as part of UNIFY-1256
+    if (!currentTestingType || !chosenLanguage) {
+      return
+    }
 
     switch (currentTestingType) {
       case 'e2e': {
@@ -155,14 +158,20 @@ export class WizardActions {
         this.ctx.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
-        return chosenLanguage
+        return
       }
       case 'component': {
+        const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
+
+        if (!chosenBundler || !chosenFramework) {
+          return
+        }
+
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
-        return chosenLanguage
+        return
       }
       default:
         throw new Error('Unreachable')
@@ -182,15 +191,15 @@ export class WizardActions {
 
   private async scaffoldComponent () {
     debug('scaffoldComponent')
-    const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
+    const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.coreData.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
 
     return await Promise.all([
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
-      this.scaffoldSupport('component', chosenLanguage.type),
-      this.scaffoldSupport('commands', chosenLanguage.type),
+      this.scaffoldSupport('component', chosenLanguage),
+      this.scaffoldSupport('commands', chosenLanguage),
       this.getComponentIndexHtml({
         chosenFramework,
         chosenLanguage,
@@ -205,7 +214,18 @@ export class WizardActions {
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
 
-    const fileContent = fileName === 'commands' ? this.commandsFileBody(language) : this.supportFileBody(fileName, language)
+    let fileContent: string | undefined
+
+    if (fileName === 'commands') {
+      fileContent = commandsFileBody(language)
+    } else if (fileName === 'e2e') {
+      fileContent = supportFileE2E(language)
+    } else if (fileName === 'component') {
+      assert(this.ctx.coreData.wizard.chosenFramework)
+      fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+    }
+
+    assert(fileContent)
 
     await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 
@@ -222,11 +242,16 @@ export class WizardActions {
     if (testingType === 'component') {
       const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
 
-      const { chosenBundler, chosenFramework } = this.ctx.wizard
+      const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
 
-      assert(chosenFramework && chosenLanguage && chosenBundler)
+      assert(chosenFramework && chosenLanguage && chosenBundler && this.ctx.currentProject)
 
-      return chosenFramework.config[chosenLanguage.type](chosenBundler.type)
+      return chosenFramework.createCypressConfig({
+        language: chosenLanguage.type,
+        bundler: chosenBundler.type,
+        framework: chosenFramework.configFramework,
+        projectRoot: this.ctx.currentProject,
+      })
     }
 
     return this.wizardGetConfigCodeE2E(language)
@@ -338,7 +363,7 @@ export class WizardActions {
         </head>
         <body>
           ${opts.bodyModifier}
-          <div id="__cy_root"></div>
+          <div data-cy-root></div>
         </body>
       </html>`
   }
@@ -382,78 +407,7 @@ export class WizardActions {
   private ensureDir (type: 'component' | 'e2e' | 'fixtures') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
-
-  private supportFileBody (fileName: 'e2e' | 'component', language: CodeLanguageEnum) {
-    return dedent`
-      // ***********************************************************
-      // This example support/${fileName}.${language} is processed and
-      // loaded automatically before your test files.
-      //
-      // This is a great place to put global configuration and
-      // behavior that modifies Cypress.
-      //
-      // You can change the location of this file or turn off
-      // automatically serving support files with the
-      // 'supportFile' configuration option.
-      //
-      // You can read more here:
-      // https://on.cypress.io/configuration
-      // ***********************************************************
-  
-      // Import commands.js using ES2015 syntax:
-      import './commands'
-  
-      // Alternatively you can use CommonJS syntax:
-      // require('./commands')
-    `
-  }
-
-  private commandsFileBody (language: CodeLanguageEnum) {
-    return dedent`
-      ${language === 'ts' ? '/// <reference types="cypress" />' : ''}
-      // ***********************************************
-      // This example commands.${language} shows you how to
-      // create various custom commands and overwrite
-      // existing commands.
-      //
-      // For more comprehensive examples of custom
-      // commands please read more here:
-      // https://on.cypress.io/custom-commands
-      // ***********************************************
-      //
-      //
-      // -- This is a parent command --
-      // Cypress.Commands.add('login', (email, password) => { ... })
-      //
-      //
-      // -- This is a child command --
-      // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-      //
-      //
-      // -- This is a dual command --
-      // Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-      //
-      //
-      // -- This will overwrite an existing command --
-      // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-      ${language === 'ts' ? COMMAND_TYPES : ''}
-    `
-  }
 }
-
-const COMMAND_TYPES = dedent`
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
-`
 
 const E2E_SCAFFOLD_BODY = dedent`
   e2e: {

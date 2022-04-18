@@ -1,17 +1,11 @@
 import { CODE_LANGUAGES } from '@packages/types'
-import { BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
 import { enumType } from 'nexus'
 
 export const SupportedBundlerEnum = enumType({
   name: 'SupportedBundlers',
   description: 'The bundlers that we can use with Cypress',
-  members: BUNDLERS.map((t) => t.type),
-})
-
-export const SupportedPackageEnum = enumType({
-  name: 'SupportedPackage',
-  description: 'The packages for bundlers that we can use with Cypress',
-  members: BUNDLERS.map((t) => t.package),
+  members: WIZARD_BUNDLERS.map((t) => t.type),
 })
 
 export const WizardConfigFileStatusEnum = enumType({
@@ -21,12 +15,7 @@ export const WizardConfigFileStatusEnum = enumType({
 
 export const FrontendFrameworkEnum = enumType({
   name: 'FrontendFrameworkEnum',
-  members: FRONTEND_FRAMEWORKS.map((t) => t.type),
-})
-
-export const FrontendFrameworkCategoryEnum = enumType({
-  name: 'FrontendFrameworkCategoryEnum',
-  members: FRONTEND_FRAMEWORKS.map((t) => t.category),
+  members: WIZARD_FRAMEWORKS.map((t) => t.type),
 })
 
 export const CodeLanguageEnum = enumType({

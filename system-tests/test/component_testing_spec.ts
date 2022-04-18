@@ -15,7 +15,7 @@ describe('component testing projects', function () {
     project: 'vueclivue2-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',
-    browser: 'chrome',
+    browser: 'electron',
     expectedExitCode: 0,
   })
 
@@ -60,7 +60,9 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('vuecli5vue3-configured', {
+  // TODO: Once the Object API for each of the dev-servers is available we can re-enable this
+  // Because of an issue with the system-testing infrastructure #UNIFY-1565, Webpack 5 system tests don't work.
+  systemTests.it.skip('vuecli5vue3-configured', {
     project: 'vuecli5vue3-configured',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',

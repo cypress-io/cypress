@@ -1409,20 +1409,32 @@ export const AllCypressErrors = {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     const newName = errShape.newName || '<unknown>'
-    const code = errPartial`
-    {
-      e2e: {
-        specPattern: '...',
-      },
-      component: {
-        specPattern: '...',
-      },
-    }`
+
+    const testingTypedHelpMessage = errShape.testingType
+      ? errPartial`${fmt.highlightSecondary(`${errShape.testingType}.${newName}`)}`
+      : errPartial`${fmt.highlightSecondary(`e2e.${newName}`)} or ${fmt.highlightSecondary(`component.${newName}`)}`
+
+    const code = errShape.testingType
+      ? errPartial`
+        {
+          ${fmt.off(errShape.testingType)}: {
+            specPattern: '...',
+          },
+        }`
+      : errPartial`
+        {
+          e2e: {
+            specPattern: '...',
+          },
+          component: {
+            specPattern: '...',
+          },
+        }`
 
     return errTemplate`\
-     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
-      It is now renamed to ${fmt.highlight(newName)} and configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${newName}`)} and ${fmt.highlightSecondary(`component.${newName}`)}
+      It is now renamed to ${fmt.highlight(newName)} and configured separately as a testing type property: ${testingTypedHelpMessage}
       ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide
@@ -1442,7 +1454,7 @@ export const AllCypressErrors = {
     }`
 
     return errTemplate`\
-     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
       It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
       ${fmt.code(code)}
@@ -1464,9 +1476,9 @@ export const AllCypressErrors = {
     }`
 
     return errTemplate`\
-     The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
-      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
+      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a end to end testing property: ${fmt.highlightSecondary('e2e.specPattern')}
       ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide

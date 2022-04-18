@@ -1,6 +1,6 @@
 import { WizardBundler } from './gql-WizardBundler'
+import { FrontendFrameworkEnum } from '../enumTypes/gql-WizardEnums'
 import { objectType } from 'nexus'
-import { FrontendFrameworkEnum, FrontendFrameworkCategoryEnum } from '../enumTypes/gql-WizardEnums'
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -9,26 +9,26 @@ export const WizardFrontendFramework = objectType({
   definition (t) {
     t.nonNull.field('type', {
       type: FrontendFrameworkEnum,
-      description: 'The name of the framework',
+      description: 'The unique identifier for a framework or library',
     }),
 
     t.nonNull.field('category', {
-      type: FrontendFrameworkCategoryEnum,
-      description: 'Classification or label of framework. e.g. React, Vue, or Other',
-    })
+      type: 'String',
+      description: 'The category (framework, like react-scripts, or library, like react',
+    }),
 
     t.nonNull.boolean('isSelected', {
       description: 'Whether this is the selected framework in the wizard',
-      resolve: (source, args, ctx) => ctx.wizardData.chosenFramework === source.type,
+      resolve: (source, args, ctx) => ctx.wizardData.chosenFramework?.type === source.type,
     })
 
     t.nonNull.boolean('isDetected', {
       description: 'Whether this is the detected framework',
-      resolve: (source, args, ctx) => ctx.wizardData.detectedFramework === source.type,
+      resolve: (source, args, ctx) => ctx.wizardData.detectedFramework?.type === source.type,
     })
 
     t.nonNull.string('name', {
-      description: 'The name of the framework',
+      description: 'The display name of the framework',
     })
 
     t.nonNull.list.nonNull.field('supportedBundlers', {
@@ -42,6 +42,6 @@ export const WizardFrontendFramework = objectType({
 
   sourceType: {
     module: '@packages/scaffold-config',
-    export: 'FrontendFramework',
+    export: 'WizardFrontendFramework',
   },
 })
