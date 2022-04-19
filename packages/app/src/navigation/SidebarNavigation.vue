@@ -48,29 +48,34 @@
           />
         </RouterLink>
       </nav>
-      <SidebarTooltip
-        class="border border-transparent rounded
-              cursor-pointer m-16px p-7px
-              transform transition-all right-0
-              bottom-0 w-32px duration-300
-              inline-block absolute hover:border-gray-500"
-        :class="{ '-translate-y-48px': !isNavBarExpanded }"
+      <Tooltip
+        placement="right"
         :disabled="isNavBarExpanded"
-        :popper-top-offset="-4"
-        @click="bindingsOpen = true"
+        :distance="8"
+        :skidding="-16"
       >
-        <i-cy-command-key_x16
-          class="h-16px w-16px icon-dark-gray-500"
-          data-cy="keyboard-shortcuts"
-        />
+        <div
+          class="border border-transparent rounded
+              cursor-pointer h-32px m-16px
+              p-7px transform transition-all
+              right-0 bottom-0 w-32px duration-300
+              inline-block absolute hover:border-gray-500"
+          :class="{ '-translate-y-48px': !isNavBarExpanded }"
+          @click="bindingsOpen = true"
+        >
+          <i-cy-command-key_x16
+            class="h-16px w-16px icon-dark-gray-500"
+            data-cy="keyboard-shortcuts"
+          />
+        </div>
         <template #popper>
           {{ t('sideBar.keyboardShortcuts.title') }}
         </template>
-        <KeyboardBindingsModal
-          :show="bindingsOpen"
-          @close="bindingsOpen = false"
-        />
-      </SidebarTooltip>
+      </Tooltip>
+      <KeyboardBindingsModal
+        :show="bindingsOpen"
+        @close="bindingsOpen = false"
+      />
       <img
         :src="CypressLogo"
         class="h-32px m-16px w-32px"
@@ -87,7 +92,7 @@ import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
-import SidebarTooltip from './SidebarTooltip.vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'

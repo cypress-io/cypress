@@ -13,6 +13,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [Building release artifacts](./building-release-artifacts.md)
 * [Code signing](./code-signing.md)
 * [Determining the next version of Cypress to be released](./next-version.md)
+* [Remaining Platform Agnostic](./remaining-platform-agnostic.md)
 * [Error handling](./error-handling.md)
 * [Patching packages](./patch-package.md)
 * [Release process](./release-process.md)

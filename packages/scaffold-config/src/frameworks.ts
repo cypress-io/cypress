@@ -182,7 +182,7 @@ export const WIZARD_FRAMEWORKS = [
   {
     type: 'nextjs',
     category: 'template',
-    configFramework: 'nextjs',
+    configFramework: 'next',
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -200,7 +200,7 @@ export const WIZARD_FRAMEWORKS = [
   },
   {
     type: 'nuxtjs',
-    configFramework: 'nuxtjs',
+    configFramework: 'nuxt',
     category: 'template',
     name: 'Nuxt.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
