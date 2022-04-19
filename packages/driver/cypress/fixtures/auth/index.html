@@ -70,8 +70,6 @@
 
     } else {
       const token = JSON.parse(cypressAuthToken)
-      // ToDo, check for expiry maybe?
-
       // If the token exists, hooray, give them a logout button to destroy the token and refresh.
       const tag = document.createElement("p");
       const text = document.createTextNode(`Welcome ${token.body.username}`);
