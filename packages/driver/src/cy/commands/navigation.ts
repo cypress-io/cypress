@@ -1224,6 +1224,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // not a network failure, and we should throw the original error
           if (err.isCallbackError || err.isCrossOrigin) {
             delete err.isCallbackError
+            delete err.isCrossOrigin
             throw err
           }
 
