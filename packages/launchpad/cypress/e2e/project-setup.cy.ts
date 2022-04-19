@@ -551,68 +551,26 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('Project Setup')
       })
 
-      it('can move forward to choose browser if e2e is configured and is selected from the dropdown list', () => {
+      it('can move forward to choose browser if e2e is configured', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="e2e"]').within(() => {
-          cy.get('[data-cy=status-badge-menu]').click()
-          cy.get('[data-cy="Choose a Browser"]').click()
-        })
+        cy.get('[data-cy-testingtype="e2e"]').click()
 
         verifyChooseABrowserPage()
       })
 
-      it('can reconfigure config from the testing type card selecting E2E', () => {
-        cy.openProject('pristine-with-e2e-testing')
-        cy.visitLaunchpad()
-
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
-
-        cy.get('[data-cy-testingtype="component"]').within(() => {
-          cy.contains('Not Configured')
-        })
-
-        cy.get('[data-cy-testingtype="e2e"]').within(() => {
-          cy.get('[data-cy=status-badge-menu]').click()
-          cy.get('[data-cy="Reconfigure"]').click()
-        })
-
-        cy.contains('Project Setup')
-      })
-
-      it('can move forward to choose browser if component is configured and is selected from the dropdown list', () => {
+      it('can move forward to choose browser if component is configured', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
-        cy.get('[data-cy-testingtype="component"]').within(() => {
-          cy.get('[data-cy=status-badge-menu]').click()
-          cy.get('[data-cy="Choose a Browser"]').click()
-        })
+        cy.get('[data-cy-testingtype="component"]').click()
 
         verifyChooseABrowserPage()
-      })
-
-      it('can reconfigure config from the testing type card selecting Component', () => {
-        cy.openProject('pristine-with-ct-testing')
-        cy.visitLaunchpad()
-
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
-
-        cy.get('[data-cy-testingtype="e2e"]').within(() => {
-          cy.contains('Not Configured')
-        })
-
-        cy.get('[data-cy-testingtype="component"]').within(() => {
-          cy.get('[data-cy=status-badge-menu]').click()
-          cy.get('[data-cy="Reconfigure"]').click()
-        })
-
-        cy.contains('Project Setup')
       })
     })
   })

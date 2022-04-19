@@ -342,40 +342,5 @@ describe('Sidebar Navigation', () => {
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
     })
-
-    it('shows dropdown to reconfigure project when clicking switch testing type', () => {
-      cy.scaffoldProject('pristine-with-ct-testing')
-      cy.openProject('pristine-with-ct-testing')
-      cy.startAppServer('component')
-      cy.visitApp()
-
-      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
-      cy.findByRole('dialog', {
-        name: 'Choose a testing type',
-      }).should('be.visible')
-
-      cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Running')
-      }).click()
-
-      cy.findByRole('dialog', {
-        name: 'Choose a testing type',
-      }).should('not.exist')
-
-      cy.get('@switchTestingType').click()
-      cy.findByRole('dialog', {
-        name: 'Choose a testing type',
-      }).should('be.visible')
-
-      cy.get('[data-cy-testingtype="e2e"]').within(() => {
-        cy.contains('Not Configured')
-      })
-
-      cy.get('[data-cy-testingtype="component"]').within(() => {
-        cy.get('[data-cy=status-badge-menu]').click()
-        cy.get('[data-cy="Choose a Browser"]').should('not.exist')
-        cy.get('[data-cy="Reconfigure"]').should('exist')
-      })
-    })
   })
 })
