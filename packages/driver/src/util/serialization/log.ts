@@ -112,13 +112,7 @@ export const reifyDomElement = (props: any) => {
  */
 export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
   if (_.isArray(props)) {
-    return props.map((prop) => {
-      try {
-        return preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions)
-      } catch (e) {
-        return null
-      }
-    })
+    return props.map((prop) => preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions))
   }
 
   if (_.isPlainObject(props)) {
@@ -140,11 +134,7 @@ export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFu
 
     // and attempt to serialize possibly unserializable props here and fail gracefully if unsuccessful
     _.forIn(objWithPossiblySerializableProps, (value, key) => {
-      try {
-        preprocessed[key] = preprocessLogLikeForSerialization(value, attemptToSerializeFunctions)
-      } catch (e) {
-        preprocessed[key] = null
-      }
+      preprocessed[key] = preprocessLogLikeForSerialization(value, attemptToSerializeFunctions)
     })
 
     return preprocessed
@@ -204,7 +194,7 @@ export const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnaps
 }
 
 /**
- * Attempts to take a generic data structure that is log-like and preprocess them for serialization. This generic may be/contain properties that are either
+ * Attempts to take a generic data structure that is log-like and preprocess them for serialization. This generic may contain properties that are either
  *  a) unserializable entirely
  *  b) unserializable natively but can be processed to a serializable form (DOM elements or Functions)
  *  c) serializable
@@ -235,9 +225,9 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
       }
 
       // otherwise, preprocess the element to an object with pertinent DOM properties
-      const serializableDOM = preprocessDomElement(props)
+      const serializedDom = preprocessDomElement(props)
 
-      return serializableDOM
+      return serializedDom
     }
 
     /**
