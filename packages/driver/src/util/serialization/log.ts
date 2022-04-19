@@ -327,17 +327,15 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapsho
  * @returns a serializable form of a snapshot, including a serializable <body> with styles
  */
 export const preprocessSnapshotForSerialization = (snapshot) => {
-  const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot, true)
-
   try {
-    preprocessedSnapshot.body.get.value[0] = preprocessLogLikeForSerialization(snapshot.body.get()[0])
+    const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot, true)
+
+    preprocessedSnapshot.styles = cy.getStyles(snapshot)
+
+    return preprocessedSnapshot
   } catch (e) {
     return null
   }
-
-  preprocessedSnapshot.styles = cy.getStyles(snapshot)
-
-  return preprocessedSnapshot
 }
 
 /**
