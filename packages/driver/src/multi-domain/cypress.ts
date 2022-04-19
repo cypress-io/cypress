@@ -33,10 +33,10 @@ const createCypress = () => {
   })
 
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const specBridgeLocation = $Location.create(window.location.href)
+    const currentAutOriginPolicy = cy.state('autOrigin')
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
-    if (requestedSnapshotUrlLocation.originPolicy === specBridgeLocation.originPolicy) {
+    if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
       // if true, this is the correct specbridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 

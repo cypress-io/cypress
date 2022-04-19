@@ -93,7 +93,7 @@ export class IframeModel {
     this.state.highlightUrl = true
 
     if (!this.originalState) {
-      this._storeOriginalState(snapshotProps?.url)
+      this._storeOriginalState()
     }
 
     this.detachedId = snapshotProps.id
@@ -218,7 +218,7 @@ export class IframeModel {
     this.state.messageType = 'warning'
   }
 
-  _storeOriginalState (snapshotUrl) {
+  _storeOriginalState () {
     if (!this.isAUTSameOrigin()) {
       const Cypress = eventManager.getCypress()
 
@@ -227,7 +227,7 @@ export class IframeModel {
        * In this case, the final snapshot request from the primary is sent out to the cross-origin spec bridges.
        * The spec bridge that matches the origin policy will take a snapshot and send it back to the primary for the runner to store in originalState.
        */
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', snapshotUrl)
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', this.state.url)
       Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
         this.originalState = {
           body: finalSnapshot.body,
