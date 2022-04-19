@@ -8,6 +8,7 @@
     />
     <label
       for="toggle-highlights"
+      class="cursor-pointer"
     >{{ t('runner.snapshot.highlightsLabel') }}
     </label>
   </div>
