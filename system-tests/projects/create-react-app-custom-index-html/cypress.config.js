@@ -1,7 +1,7 @@
 module.exports = {
   component: {
     devServer: {
-      framework: 'vue',
+      framework: 'create-react-app',
       bundler: 'webpack'
     },
     indexHtmlFile: 'cypress/support/custom-component-index.html',
