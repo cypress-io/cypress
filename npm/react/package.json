@@ -25,14 +25,15 @@
     "axios": "0.21.2",
     "cypress": "0.0.0-development",
     "prop-types": "15.7.2",
-    "react": "18.0.0",
-    "react-dom": "18.0.0",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
     "react-router": "6.0.0-alpha.1",
     "react-router-dom": "6.0.0-alpha.1",
     "rollup": "^2.38.5",
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "^4.2.3",
-    "vite": "2.9.5"
+    "vite": "2.9.5",
+    "vite-plugin-require-transform": "1.0.3"
   },
   "peerDependencies": {
     "@types/react": "^16.9.16 || ^17.0.0",

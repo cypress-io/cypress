@@ -6,7 +6,8 @@ import * as services from './services'
 
 const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 
-describe('RemotePizza', () => {
+// TODO: Support stubbing ES Modules
+describe.skip('RemotePizza', () => {
   it('mocks named import from services', () => {
     cy.stub(services, 'fetchIngredients')
     .resolves({ args: { ingredients } })

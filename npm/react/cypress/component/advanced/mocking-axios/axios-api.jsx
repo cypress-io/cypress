@@ -1,2 +1,4 @@
 // wrap Axios exports
-export * from 'axios'
+import axios from 'axios'
+
+export default axios
