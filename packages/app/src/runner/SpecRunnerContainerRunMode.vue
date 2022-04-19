@@ -22,7 +22,7 @@ const props = defineProps<{
 
 const specStore = useSpecStore()
 
-const { initialized, watchSpec } = useUnifiedRunner()
+const { initialized, watchSpecs } = useUnifiedRunner()
 
-watchSpec(ref(props.runModeSpecs))
+watchSpecs(ref(props.runModeSpecs))
 </script>
