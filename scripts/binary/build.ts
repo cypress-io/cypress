@@ -95,7 +95,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   if (!keepBuild) {
     log('#buildPackages')
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--scope', '\"@cypress/design-system\"'], {
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--scope', '\"@cypress/design-system\"', '--scope', '\"@packages/icons\"'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
