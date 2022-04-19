@@ -339,7 +339,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
 
-    const snapshots = createSnapshots(jquery.$$, state)
+    const snapshots = createSnapshots(this.$$, state)
 
     this.createSnapshot = snapshots.createSnapshot
     this.detachDom = snapshots.detachDom
