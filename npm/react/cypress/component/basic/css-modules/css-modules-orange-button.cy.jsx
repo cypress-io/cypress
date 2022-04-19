@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
-import styles from './Button.modules.css'
+import styles from './Button.module.css'
 import { Button } from './Button.jsx'
 
 describe('Button', () => {
