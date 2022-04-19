@@ -49,7 +49,6 @@
         :style="{height: 'calc(100% + 4px)'}"
       >
         <span
-          ref="ghostLeft"
           class="flex pl-12px inset-y-0 text-gray-600 absolute items-center pointer-events-none"
           data-cy="selected-playground-method"
         >
