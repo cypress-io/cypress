@@ -67,7 +67,7 @@
           :id="getIdIfDirectory(row)"
           :key="row.index"
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
-          :data-cy-row="row.data.data?.relative"
+          :data-cy-row="row.data.data?.baseName"
         >
           <template #file>
             <RouterLink

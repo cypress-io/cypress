@@ -25,7 +25,6 @@ describe('Sidebar Navigation', () => {
   context('as e2e testing type', () => {
     beforeEach(() => {
       cy.scaffoldProject('todos')
-      cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
@@ -51,6 +50,7 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
