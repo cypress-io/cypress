@@ -1022,7 +1022,7 @@ describe('Server', () => {
           // this will be the current origin
           this.server.remoteStates.set('http://localhost:3500/')
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { previousUrlVisited: { origin: 'http://localhost:3500' } })
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { alreadyVisitedUrl: true })
           .then((obj = {}) => {
             // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
@@ -1057,7 +1057,7 @@ describe('Server', () => {
           // this will be the current origin
           this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { previousUrlVisited: { origin: 'http://localhost:3500' } })
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { alreadyVisitedUrl: true })
           .then(() => {
             // Verify the remote state was not updated
             expect(this.server.remoteStates.current()).to.deep.eq({

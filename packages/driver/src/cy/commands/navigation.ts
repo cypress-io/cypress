@@ -851,7 +851,7 @@ export default (Commands, Cypress, cy, state, config) => {
         onLoad () {},
       })
 
-      options.previousUrlVisited = previousUrlVisited
+      options.alreadyVisitedUrl = !!previousUrlVisited
 
       if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
         $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(options.qs) } })
@@ -1150,16 +1150,9 @@ export default (Commands, Cypress, cy, state, config) => {
           // origin which isn't allowed within a cy.origin block
           if (Cypress.isCrossOriginSpecBridge) {
             const existingAutOrigin = win ? $Location.create(win.location.href) : $Location.create(Cypress.state('currentActiveOriginPolicy'))
-
-            if (isPrimaryOrigin) {
-              const params = { remote, log: options._log, originalUrl, previousUrlVisited: existingAutOrigin }
-
-              return cannotVisitPreviousOrigin(params)
-            }
-
             const params = { remote, existing, originalUrl, previousUrlVisited: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true, isPrimaryOrigin }
 
-            return cannotVisitDifferentOrigin(params)
+            return isPrimaryOrigin ? cannotVisitPreviousOrigin(params) : cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing origins
