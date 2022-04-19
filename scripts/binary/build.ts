@@ -100,7 +100,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
       cwd: CY_ROOT_DIR,
     })
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--stream', '--ignore', 'cli', '--ignore', '\"@cypress/design-system\"'], {
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--stream', '--ignore', 'cli', '--ignore', '\"@cypress/design-system\"', '--scope', '\"@packages/icons\"'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
