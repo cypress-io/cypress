@@ -417,9 +417,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       }
 
       const onCrossOriginFailure = (err) => {
-        options._log.set('message', '--page loaded--').snapshot().end()
-        options._log.set('state', 'failed')
-        options._log.set('error', err)
+        options._log.set('message', '--page loaded--').snapshot().error(err)
 
         resolve()
       }
