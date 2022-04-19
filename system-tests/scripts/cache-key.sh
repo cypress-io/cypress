@@ -6,7 +6,7 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 # Sort files as globbing can vary based on architecture. LC_ALL required for locale-agnostic sort
-file_list=$(ls ../projects/**/{package.json,yarn.lock} | LC_ALL=C sort -f)
+file_list=$(ls ../projects/**/{package.json,yarn.lock})
 
 contents=''
 for t in ${file_list[@]}; do
