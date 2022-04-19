@@ -23,6 +23,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('todos')
     cy.openProject('todos', ['--e2e'])
     cy.visitLaunchpad()
+    cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
     // e2e testing is configured for the todo project, so we don't expect an error.
     cy.get('h1').should('contain', 'Choose a Browser')
   })
@@ -31,6 +32,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad', ['--component'])
     cy.visitLaunchpad()
+    cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
     // Component testing is not configured for the todo project
     cy.get('h1').should('contain', 'Project Setup')
   })
