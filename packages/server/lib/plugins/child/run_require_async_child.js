@@ -77,7 +77,7 @@ function run (ipc, file, projectRoot) {
       }
 
       if (devServer.bundler === 'vite') {
-        return { devServer: require('../../../../../npm/vite-dev-server').devServer, objApi: true }
+        return { devServer: require('@cypress/vite-dev-server').devServer, objApi: true }
       }
     }
 
