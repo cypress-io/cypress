@@ -1,5 +1,8 @@
 <template>
-  <div :style="style">
+  <div
+    :style="style"
+    :class="screenshotStore.isScreenshotting ? '' : 'border-l-1'"
+  >
     <slot />
   </div>
 </template>

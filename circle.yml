@@ -452,6 +452,20 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  windows-install-chrome:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - run:
+          # TODO: How can we have preinstalled browsers on CircleCI?
+          name: 'Install Chrome on Windows'
+          command: |
+            # install with `--ignore-checksums` to avoid checksum error
+            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+
   run-new-ui-tests:
     parameters:
       package:
@@ -475,13 +489,8 @@ commands:
         default: ''
     steps:
       - restore_cached_workspace
-      - run:
-          # TODO: How can we have preinstalled browsers on CircleCI?
-          name: 'Install Chrome on Windows'
-          command: |
-            # install with `--ignore-checksums` to avoid checksum error
-            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
@@ -589,24 +598,26 @@ commands:
       - restore_cached_binary
       - run:
           name: "Cloning test project and checking out release branch: <<parameters.repo>>"
-          working_directory: ~/
+          working_directory: /tmp/<<parameters.repo>>
           command: |
-            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
+            cd ~/cypress/..
             # install some deps for get-next-version
             npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+            cd -
 
-            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
+            git checkout $NEXT_VERSION || true
       - when:
-            condition: <<parameters.pull_request_id>>
-            steps:
-              - run:
-                  name: Check out PR <<parameters.pull_request_id>>
-                  working_directory: /tmp/<<parameters.repo>>
-                  command: |
-                    git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
-                    git checkout pr-<<parameters.pull_request_id>>
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
 
   test-binary-against-rwa:
     description: |
@@ -821,6 +832,8 @@ commands:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
           command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
       - when:
           condition: <<parameters.folder>>
           steps:
@@ -2466,8 +2479,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    # maybe run all unit tests?
-
     - create-build-artifacts:
         name: darwin-create-build-artifacts
         context:
@@ -2539,6 +2550,11 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
+    - test-binary-against-kitchensink-chrome:
+        name: windows-test-binary-against-kitchensink-chrome
+        executor: windows
+        requires:
+          - windows-create-build-artifacts
 
 workflows:
   linux:

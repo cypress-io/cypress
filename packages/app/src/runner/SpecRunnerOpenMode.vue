@@ -1,7 +1,7 @@
 <template>
-  <RemovePositioningDuringScreenshot
+  <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900 border-l-1"
+    class="flex border-gray-900"
   >
     <AutomationElement />
     <AutomationDisconnected
@@ -75,7 +75,7 @@
           <div
             v-show="!autStore.scriptError"
             :id="RUNNER_ID"
-            class="origin-top-left viewport"
+            class="origin-top viewport"
             :style="viewportStyle"
           />
         </RemoveClassesDuringScreenshotting>
@@ -86,7 +86,7 @@
         <ScreenshotHelperPixels />
       </template>
     </ResizablePanels>
-  </RemovePositioningDuringScreenshot>
+  </AdjustRunnerStyleDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -100,7 +100,7 @@ import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
-import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
+import AdjustRunnerStyleDuringScreenshot from './screenshot/AdjustRunnerStyleDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
@@ -160,14 +160,6 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
-
-const {
-  viewportStyle,
-  windowWidth,
-  reporterWidth,
-  specListWidth,
-} = useRunnerStyle()
-
 const {
   handlePanelWidthUpdated,
   handleResizeEnd,
@@ -179,19 +171,30 @@ const {
   cleanupRunner,
 } = useEventManager()
 
+const specsListWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
+})
+
+const reporterWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
+})
+
+// we must update preferences before calling useRunnerStyle, to make sure that values from GQL
+// will be available during the initial calculation that useRunnerStyle does
+
+preferences.update('reporterWidth', reporterWidthPreferences.value)
+preferences.update('specListWidth', specsListWidthPreferences.value)
+
+const {
+  viewportStyle,
+  windowWidth,
+} = useRunnerStyle()
+
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
 
 onMounted(() => {
   initializeRunnerLifecycleEvents()
-})
-
-const specsListWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.specListWidth ?? specListWidth.value
-})
-
-const reporterWidthPreferences = computed(() => {
-  return props.gql.localSettings.preferences.reporterWidth ?? reporterWidth.value
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
@@ -219,7 +222,6 @@ function openFile () {
     },
   })
 }
-
 onMounted(() => {
   const eventManager = getEventManager()
 
