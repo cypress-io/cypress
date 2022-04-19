@@ -99,10 +99,6 @@ declare namespace Cypress {
     document: Document
     projectRoot?: string
   }
-
-  interface RuntimeConfigOptions {
-    remote: RemoteState
-  }
 }
 
 type AliasedRequest = {

@@ -7,4 +7,8 @@ declare namespace Cypress {
     fileServer: string | null
     props: Record<string, any>
   }
+
+  interface RuntimeConfigOptions {
+    remote: RemoteState
+  }
 }
