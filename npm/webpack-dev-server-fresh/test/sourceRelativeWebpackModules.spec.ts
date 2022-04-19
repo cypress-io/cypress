@@ -5,8 +5,9 @@ import { expect } from 'chai'
 import path from 'path'
 import fs from 'fs'
 
-import { restoreLoadHook, sourceRelativeWebpackModules } from '../src/helpers/sourceRelativeWebpackModules'
+import { sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
 import { WebpackDevServerConfig } from '../src/devServer'
+import './support'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -45,7 +46,7 @@ async function sourceModulesForProject (fixture: ProjectDirs[number]) {
 
   await FixturesScaffold.scaffoldProjectNodeModules(fixture)
 
-  const result = sourceRelativeWebpackModules({
+  const result = sourceDefaultWebpackDependencies({
     cypressConfig: {
       projectRoot,
     },
@@ -56,16 +57,7 @@ async function sourceModulesForProject (fixture: ProjectDirs[number]) {
 
 // Ensures that we are properly sourcing the webpacks from the node_modules in the given project,
 // rather than from the node_modules in the project root
-describe('sourceRelativeWebpackModules', () => {
-  beforeEach(() => {
-    delete require.cache
-    restoreLoadHook()
-  })
-
-  after(() => {
-    restoreLoadHook()
-  })
-
+describe('sourceDefaultWebpackDependencies', () => {
   for (const [fixture, versionsToMatch] of Object.entries(WEBPACK_REACT)) {
     describe(fixture, () => {
       it(`sources the correct webpack versions for ${fixture}`, async () => {

@@ -1,23 +1,22 @@
-import type { CreateFinalWebpackConfig } from '../createWebpackDevServer'
 import debugLib from 'debug'
 import type { Configuration, ResolvePluginInstance, RuleSetRule } from 'webpack'
 import path from 'path'
-
-type PresetHandlerOptions = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
+import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
+import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:create-react-app')
 
 /**
  * Sourcing the config for create-react-app
  */
-export function createReactAppHandler (presetHandler: PresetHandlerOptions) {
-  const { devServerConfig, sourceWebpackModulesResult } = presetHandler
+export function createReactAppHandler (devServerConfig: WebpackDevServerConfig): PresetHandlerResult {
+  const sourceWebpackModulesResult = sourceDefaultWebpackDependencies(devServerConfig)
 
   // this is required because
   // 1) we use our own HMR and we don't need react-refresh transpiling overhead
   // 2) it doesn't work with process.env=test @see https://github.com/cypress-io/cypress-realworld-app/pull/832
   process.env.FAST_REFRESH = 'false'
-  const webpackConfig = loadWebpackConfig(presetHandler)
+  const webpackConfig = loadWebpackConfig(devServerConfig)
 
   addCypressToWebpackEslintRulesInPlace(webpackConfig)
 
@@ -32,10 +31,13 @@ export function createReactAppHandler (presetHandler: PresetHandlerOptions) {
     reactScriptsFiveModifications(webpackConfig)
   }
 
-  return webpackConfig
+  return {
+    frameworkConfig: webpackConfig,
+    sourceWebpackModulesResult,
+  }
 }
 
-function loadWebpackConfig ({ devServerConfig }: PresetHandlerOptions): Configuration {
+function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Configuration {
   let webpackConfigPath: string
 
   const envName = 'test'
