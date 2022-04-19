@@ -35,6 +35,9 @@ const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
+function ensurePosixPathSeparators (text: string) {
+  return text.replace(/\\/g, '/') // normalize \ to /
+}
 export interface GitInfo {
   author: string | null
   lastModifiedTimestamp: string | null
@@ -315,20 +318,24 @@ export class GitDataSource {
   async #getInfoWindows (absolutePaths: readonly string[]) {
     const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
-    const result = await execa(cmd, { shell: true })
+    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
 
-    const split = result.stdout
-    .split('\r\n') // windows uses CRLF for carriage returns
-    .filter((str) => !str.includes('git log')) // windows stdout contains [cmd,output]. So we remove the code containing the executed command, `git log`
+    const stdout = ensurePosixPathSeparators(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 
-    // windows returns a leading carriage return, remove it
-    const [, ...stdout] = split
+    const output: string[] = []
 
-    if (stdout.length !== absolutePaths.length) {
-      debug('stdout', stdout)
-      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
+    for (const p of absolutePaths) {
+      const idx = stdout.findIndex((entry) => entry.includes(p))
+      const text = stdout[idx + 1] ?? ''
+
+      output.push(text)
     }
 
-    return stdout
+    if (output.length !== absolutePaths.length) {
+      debug('stdout', output)
+      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${output.length}`)
+    }
+
+    return output
   }
 }
