@@ -31,6 +31,12 @@ context('cy.origin assertions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const assertionLogs = findCrossOriginLogs('assert', logs, 'foobar.com')
 
         expect(assertionLogs[0].consoleProps.Message).to.equal('expected <input> not to be checked')

@@ -49,6 +49,12 @@ context('cy.origin querying', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { crossOriginLog, consoleProps } = findCrossOriginLogs('contains', logs, 'foobar.com')
 
         expect(crossOriginLog).to.be.true
@@ -70,6 +76,12 @@ context('cy.origin querying', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { crossOriginLog, consoleProps } = findCrossOriginLogs('within', logs, 'foobar.com')
 
         expect(crossOriginLog).to.be.true

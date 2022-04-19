@@ -255,6 +255,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { alias, aliasType, consoleProps, $el, crossOriginLog } = findCrossOriginLogs('click', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -303,6 +309,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('dblclick', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -346,6 +358,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('rightclick', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -389,6 +407,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { alias, aliasType, consoleProps, $el, crossOriginLog } = findCrossOriginLogs('type', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -457,6 +481,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('submit', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -485,6 +515,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('focus', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -504,6 +540,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('blur', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -523,6 +565,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('clear', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -543,6 +591,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('check', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -583,6 +637,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('uncheck', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -623,6 +683,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('select', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -666,6 +732,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('scrollIntoView', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
@@ -733,6 +805,12 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('selectFile', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok

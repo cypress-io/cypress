@@ -30,6 +30,12 @@ context('cy.origin shadow dom', () => {
       })
 
       cy.shouldWithTimeout(() => {
+        // in the case of some firefox browsers, the document state is left in a cross origin context when running these assertions
+        // set to  context to undefined to run the assertions
+        if (Cypress.isBrowser('firefox')) {
+          cy.state('document', undefined)
+        }
+
         const { consoleProps, crossOriginLog } = findCrossOriginLogs('shadow', logs, 'foobar.com')
 
         expect(crossOriginLog).to.be.true
