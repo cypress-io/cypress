@@ -2136,6 +2136,22 @@ linux-workflow: &linux-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
+    - driver-integration-tests-chrome-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-chrome-beta-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-electron-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - runner-integration-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
