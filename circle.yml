@@ -29,7 +29,6 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - unify-1449-check-path-length-in-build
 
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
@@ -47,7 +46,6 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ unify-1449-check-path-length-in-build, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
