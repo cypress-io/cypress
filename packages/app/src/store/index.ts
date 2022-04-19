@@ -8,6 +8,8 @@ export * from './runner-ui-store'
 
 export * from './mobx-runner-store'
 
+export * from './selector-playground-store'
+
 // Reusable installation function, used as an entry point for tests that
 // require an identical setup to main.ts
 export const createPinia = () => {

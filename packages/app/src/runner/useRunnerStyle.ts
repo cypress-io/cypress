@@ -3,7 +3,6 @@ import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
 import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { runnerConstants } from './runner-constants'
 
 export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
 
@@ -15,26 +14,16 @@ const collapsedNavBarWidth = 64
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
 
-interface UseRunnerUI {
-  initialSpecsListWidth: number
-  initialReporterWidth: number
-}
-
-export const useRunnerStyle = ({
-  initialReporterWidth,
-  initialSpecsListWidth,
-}: UseRunnerUI = {
-  initialReporterWidth: runnerConstants.defaultReporterWidth,
-  initialSpecsListWidth: runnerConstants.defaultSpecListWidth,
-}) => {
-  reporterWidth.value = initialReporterWidth
-  specListWidth.value = initialSpecsListWidth
-
+export const useRunnerStyle = () => {
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
-  const containerWidth = computed(() => {
-    const { isSpecsListOpen } = useRunnerUiStore()
+  // using the runner store for initial values, it will take care of setting defaults if needed
+  const { isSpecsListOpen, reporterWidth: uiStoreReporterWidth, specListWidth: uiStoreSpecListWidth } = useRunnerUiStore()
 
+  reporterWidth.value = uiStoreReporterWidth
+  specListWidth.value = uiStoreSpecListWidth
+
+  const containerWidth = computed(() => {
     const miscBorders = 4
     let nonAutWidth = reporterWidth.value + (isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
@@ -45,17 +34,14 @@ export const useRunnerStyle = ({
     return windowWidth.value - nonAutWidth
   })
 
-  const containerHeight = computed(() => {
-    const autHeaderHeight = 70
-
-    const nonAutHeight = autHeaderHeight + (autMargin * 2)
-
-    return windowHeight.value - nonAutHeight
-  })
-
   const screenshotStore = useScreenshotStore()
   const autStore = useAutStore()
 
+  const containerHeight = computed(() => {
+    const nonAutHeight = autStore.specRunnerHeaderHeight + (autMargin * 2)
+
+    return windowHeight.value - nonAutHeight
+  })
   const scale = computed(() => {
     let scale = 1
 
@@ -67,10 +53,20 @@ export const useRunnerStyle = ({
   })
 
   const viewportStyle = computed(() => {
-    return `
-      width: ${autStore.viewportDimensions.width}px;
-      height: ${autStore.viewportDimensions.height}px;
-      transform: scale(${scale.value});`
+    let style = `
+    width: ${autStore.viewportDimensions.width}px;
+    height: ${autStore.viewportDimensions.height}px;
+    transform: scale(${scale.value});
+    `
+
+    // to keep the AUT iframe centered during scaling, we need to calculate the difference between
+    // viewport with midpoint and the the container width midpoint and apply a negative margin
+    if (!screenshotStore.isScreenshotting) {
+      style += `
+      margin-left: ${(containerWidth.value / 2) - (autStore.viewportDimensions.width / 2) }px`
+    }
+
+    return style
   })
 
   watchEffect(() => {
@@ -79,10 +75,6 @@ export const useRunnerStyle = ({
 
   return {
     viewportStyle,
-    reporterWidth,
-    specListWidth,
-    containerHeight,
-    containerWidth,
     windowWidth: computed(() => {
       if (window.__CYPRESS_MODE__ === 'run') {
         return windowWidth.value
