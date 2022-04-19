@@ -1290,6 +1290,7 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: chrome:beta
+          install-chrome-channel: beta
 
   driver-integration-tests-firefox:
     <<: *defaults
@@ -1307,7 +1308,7 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
- driver-integration-tests-chrome-experimentalSessionAndOrigin:
+  driver-integration-tests-chrome-experimentalSessionAndOrigin:
     <<: *defaults
     resource_class: medium
     parallelism: 5
