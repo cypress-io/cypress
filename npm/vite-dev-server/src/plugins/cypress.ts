@@ -1,11 +1,11 @@
 import debugFn from 'debug'
 import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
+import type { Vite } from '../getVite'
 import fs from 'fs'
 
 import type { ViteDevServerConfig } from '../devServer'
 import path from 'path'
-import type { Vite } from '../getVite'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 

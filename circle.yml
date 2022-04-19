@@ -59,10 +59,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
     - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
-    - matches:
-          pattern: "-release$"
-          value: << pipeline.git.branch >>
-    - matches:
           pattern: "win*"
           value: << pipeline.git.branch >>
 

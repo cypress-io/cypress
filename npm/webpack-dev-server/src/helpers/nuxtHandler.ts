@@ -1,12 +1,12 @@
-import type { CreateFinalWebpackConfig } from '../createWebpackDevServer'
 import debugLib from 'debug'
-import type { Configuration } from 'webpack'
-
-type PresetHandler = Omit<CreateFinalWebpackConfig, 'frameworkConfig'>
+import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
+import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 
 const debug = debugLib('cypress:webpack-dev-server:nuxtHandler')
 
-export async function nuxtHandler ({ devServerConfig }: PresetHandler): Promise<Configuration> {
+export async function nuxtHandler (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
+  const sourceWebpackModulesResult = sourceDefaultWebpackDependencies(devServerConfig)
+
   try {
     const nuxt = require.resolve('nuxt', {
       paths: [devServerConfig.cypressConfig.projectRoot],
@@ -22,7 +22,7 @@ export async function nuxtHandler ({ devServerConfig }: PresetHandler): Promise<
 
     debug('webpack config %o', webpackConfig)
 
-    return webpackConfig
+    return { frameworkConfig: webpackConfig, sourceWebpackModulesResult }
   } catch (e) {
     console.error(e) // eslint-disable-line no-console
     throw Error(`Error loading nuxt. Looked in ${require.resolve.paths(devServerConfig.cypressConfig.projectRoot)}`)

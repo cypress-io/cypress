@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import EventEmitter from 'events'
 import snapshot from 'snap-shot-it'
 import { WebpackDevServerConfig } from '../src/devServer'
-import { sourceRelativeWebpackModules } from '../src/helpers/sourceRelativeWebpackModules'
+import { sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
 import { makeWebpackConfig } from '../src/makeWebpackConfig'
 
 describe('makeWebpackConfig', () => {
@@ -24,7 +24,7 @@ describe('makeWebpackConfig', () => {
     }
     const actual = await makeWebpackConfig({
       devServerConfig,
-      sourceWebpackModulesResult: sourceRelativeWebpackModules(devServerConfig),
+      sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig),
     })
 
     // plugins contain circular deps which cannot be serialized in a snapshot.

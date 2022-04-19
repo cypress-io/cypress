@@ -17,6 +17,7 @@ export type ViteDevServerConfig = {
 }
 
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
+  // This has to be the first thing we do as we need to source vite from their project's dependencies
   const vite = getVite(config)
 
   debug('Creating Vite Server')

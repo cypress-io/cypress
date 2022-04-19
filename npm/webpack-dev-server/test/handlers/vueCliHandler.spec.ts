@@ -1,6 +1,8 @@
 import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 import { expect } from 'chai'
 import { vueCliHandler } from '../../src/helpers/vueCliHandler'
+import { WebpackDevServerConfig } from '../../src/devServer'
+import '../support'
 
 describe('vueCliHandler', function () {
   // can take a while since we install node_modules
@@ -11,14 +13,12 @@ describe('vueCliHandler', function () {
 
     process.chdir(projectRoot)
 
-    const config = vueCliHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      },
-    } as any)
+    const { frameworkConfig: webpackConfig } = vueCliHandler({
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
-    expect(config.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+    expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
   })
 
   it('sources from a @vue/cli-service@4.x project with Vue 2', async () => {
@@ -26,13 +26,11 @@ describe('vueCliHandler', function () {
 
     process.chdir(projectRoot)
 
-    const config = vueCliHandler({
-      devServerConfig: {
-        cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      },
-    } as any)
+    const { frameworkConfig: webpackConfig } = vueCliHandler({
+      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+    } as WebpackDevServerConfig)
 
     // Verify it's a Vue-specific webpack config by seeing if VueLoader is present.
-    expect(config.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
+    expect(webpackConfig.plugins.find((plug) => plug.constructor.name === 'VueLoader'))
   })
 })
