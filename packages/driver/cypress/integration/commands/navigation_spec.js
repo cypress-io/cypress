@@ -2295,9 +2295,9 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.on('command:queue:before:end', () => {
-        // force us to become unstable immediately
-        // else the beforeunload event fires at the end
-        // of the tick which is too late
+          // force us to become unstable immediately
+          // else the beforeunload event fires at the end
+          // of the tick which is too late
           cy.isStable(false, 'testing')
 
           win.location.href = '/timeout?ms=100'
@@ -2321,9 +2321,9 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.on('command:queue:before:end', () => {
-        // force us to become unstable immediately
-        // else the beforeunload event fires at the end
-        // of the tick which is too late
+          // force us to become unstable immediately
+          // else the beforeunload event fires at the end
+          // of the tick which is too late
           cy.isStable(false, 'testing')
 
           win.location.href = '/timeout?ms=100'
