@@ -33,7 +33,6 @@
       </router-view>
     </main>
   </div>
-  <div id="tooltip-target" />
 </template>
 
 <script lang="ts" setup>

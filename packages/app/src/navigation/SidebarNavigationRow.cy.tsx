@@ -16,7 +16,6 @@ describe('SidebarNavigationRow', () => {
         <SidebarNavigationRow icon={TestResultsIcon} name="test-results" isNavBarExpanded/>
         <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" isNavBarExpanded/>
       </div>
-      <div id="tooltip-target"/>
     </div>))
   })
 })

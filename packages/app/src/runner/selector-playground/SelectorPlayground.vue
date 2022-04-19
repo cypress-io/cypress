@@ -84,7 +84,14 @@
     </div>
 
     <div class="flex gap-12px">
-      <SelectorPlaygroundTooltip>
+      <Tooltip
+        :triggers="['click', 'touch']"
+        :hide-triggers="['hover']"
+        :distance="8"
+        auto-hide
+        :delay="{ hide: 2000 }"
+        hide-arrow
+      >
         <Button
           size="md"
           variant="outline"
@@ -102,9 +109,16 @@
             {{ t('runner.selectorPlayground.copyTooltip') }}
           </div>
         </template>
-      </SelectorPlaygroundTooltip>
+      </Tooltip>
 
-      <SelectorPlaygroundTooltip>
+      <Tooltip
+        :triggers="['click', 'touch']"
+        :hide-triggers="['hover']"
+        :distance="8"
+        auto-hide
+        :delay="{ hide: 2000 }"
+        hide-arrow
+      >
         <Button
           size="md"
           variant="outline"
@@ -122,7 +136,7 @@
             {{ t('runner.selectorPlayground.printTooltip') }}
           </div>
         </template>
-      </SelectorPlaygroundTooltip>
+      </Tooltip>
     </div>
   </div>
 </template>
@@ -133,9 +147,9 @@ import { useSelectorPlaygroundStore } from '../../store/selector-playground-stor
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
-import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
 import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@cy/gql-components/useClipboard'
 

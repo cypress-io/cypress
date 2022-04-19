@@ -40,9 +40,35 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
   }
 }
 
+const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
+  let retryIndex = 0
+
+  const retry = async () => {
+    try {
+      return await retryable()
+    } catch (err) {
+      retryIndex++
+      const delay = _getDelayMsForRetry(retryIndex, browserName)
+
+      debug('error finding browser target, maybe retrying %o', { delay, err })
+
+      if (typeof delay === 'undefined') {
+        debug('failed to connect to CDP %o', { err })
+        errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delay))
+
+      return retry()
+    }
+  }
+
+  return retry()
+}
+
 export class BrowserCriClient {
   private currentlyAttachedTarget: CRIWrapper.Client | undefined
-  private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private onAsynchronousError: Function) {}
+  private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -56,32 +82,12 @@ export class BrowserCriClient {
   static async create (port: number, browserName: string, onAsynchronousError: Function): Promise<BrowserCriClient> {
     await ensureLiveBrowser(port, browserName)
 
-    let retryIndex = 0
-    const retry = async (): Promise<BrowserCriClient> => {
-      debug('attempting to find CRI target... %o', { retryIndex })
+    return retryWithIncreasingDelay(async () => {
+      const versionInfo = await CRI.Version({ host: HOST, port })
+      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
 
-      try {
-        const versionInfo = await CRI.Version({ host: HOST, port })
-        const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
-
-        return new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
-      } catch (err) {
-        retryIndex++
-        const delay = _getDelayMsForRetry(retryIndex, browserName)
-
-        debug('error finding CRI target, maybe retrying %o', { delay, err })
-
-        if (typeof delay === 'undefined') {
-          throw err
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, delay))
-
-        return retry()
-      }
-    }
-
-    return retry()
+      return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
+    }, browserName, port)
   }
 
   /**
@@ -105,19 +111,24 @@ export class BrowserCriClient {
    * @returns the chrome remote interface wrapper for the target
    */
   attachToTargetUrl = async (url: string): Promise<CRIWrapper.Client> => {
-    debug('Attaching to target url %s', url)
-    const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
+    // Continue trying to re-attach until succcessful.
+    // If the browser opens slowly, this will fail until
+    // The browser and automation API is ready, so we try a few
+    // times until eventually timing out.
+    return retryWithIncreasingDelay(async () => {
+      debug('Attaching to target url %s', url)
+      const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
 
-    const target = targets.find((target) => target.url === url)
+      const target = targets.find((target) => target.url === url)
 
-    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
-    if (!target) {
-      throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
-    }
+      if (!target) {
+        throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
+      }
 
-    this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
 
-    return this.currentlyAttachedTarget
+      return this.currentlyAttachedTarget
+    }, this.browserName, this.port)
   }
 
   /**
@@ -139,7 +150,6 @@ export class BrowserCriClient {
    * Closes the currently attached page target
    */
   closeCurrentTarget = async (): Promise<void> => {
-    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
