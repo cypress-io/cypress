@@ -1,6 +1,7 @@
 <template>
   <div
     id="spec-runner-header"
+    ref="autHeaderEl"
     class="min-h-64px px-16px text-14px"
     :style="{ width: `${props.width}px` }"
   >
@@ -58,6 +59,7 @@ import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { useAutHeader } from './useAutHeader'
 
 const props = defineProps<{
   eventManager: EventManager
@@ -69,6 +71,8 @@ const displayScale = computed(() => {
 })
 
 const autStore = useAutStore()
+
+const { autHeaderEl } = useAutHeader()
 
 const selectedBrowser = window.__CYPRESS_BROWSER__
 const testingType = window.__CYPRESS_TESTING_TYPE__
