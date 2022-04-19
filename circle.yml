@@ -1102,8 +1102,8 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
-            run-webpack-dev-server-fresh-integration-tests,
-            run-vite-dev-server-fresh-integration-tests
+            run-webpack-dev-server-integration-tests,
+            run-vite-dev-server-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1162,8 +1162,10 @@ jobs:
             - run: yarn test-scripts
             # make sure our snapshots are compared correctly
             - run: yarn test-mocha-snapshot
+            # run @cypress/design-system before other packages are built
+            - run: yarn lerna run build-prod --scope \"@cypress/design-system\"
             # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream
+            - run: yarn lerna run build-prod --stream --ignore \"@cypress/design-system\"
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1438,7 +1440,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-webpack-dev-server-fresh-integration-tests:
+  run-webpack-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1452,15 +1454,15 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server-fresh
-          working_directory: npm/webpack-dev-server-fresh
+            yarn cypress:run --record --parallel --group webpack-dev-server
+          working_directory: npm/webpack-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs      
 
-  run-vite-dev-server-fresh-integration-tests:
+  run-vite-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1474,8 +1476,8 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server-fresh
-          working_directory: npm/vite-dev-server-fresh
+            yarn cypress:run --record --parallel --group vite-dev-server
+          working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1549,7 +1551,7 @@ jobs:
           command: yarn workspace @cypress/webpack-dev-server test
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server-fresh test
+          command: yarn workspace @cypress/webpack-dev-server test
 
   npm-vite-dev-server:
     <<: *defaults
@@ -1557,7 +1559,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
+          command: yarn test
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
@@ -1582,14 +1584,6 @@ jobs:
       - run:
           name: Type Check
           command: yarn typecheck
-          working_directory: npm/vue
-      - run:
-          name: Run component tests
-          command: yarn test:ci:ct
-          working_directory: npm/vue
-      - run:
-          name: Run e2e tests
-          command: yarn test:ci:e2e
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1646,7 +1640,7 @@ jobs:
           command: yarn workspace @cypress/react build
       - run:
           name: Run tests
-          command: yarn test-ci
+          command: yarn test
           working_directory: npm/react
       - store_test_results:
           path: npm/react/test_results
@@ -1669,9 +1663,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn workspace create-cypress-tests build
-      - run:
-          name: Run unit test
-          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2271,11 +2262,11 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
-    - run-webpack-dev-server-fresh-integration-tests:
+    - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
-    - run-vite-dev-server-fresh-integration-tests:
+    - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install          

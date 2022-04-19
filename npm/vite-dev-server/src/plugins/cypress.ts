@@ -1,8 +1,11 @@
 import debugFn from 'debug'
-import { readFile } from 'fs/promises'
 import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import { normalizePath } from 'vite'
+import fs from 'fs'
+
+import type { ViteDevServerConfig } from '../devServer'
+import path from 'path'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 
@@ -22,18 +25,19 @@ function getSpecsPathsSet (specs: Spec[]) {
 }
 
 export const Cypress = (
-  options,
+  options: ViteDevServerConfig,
 ): Plugin => {
   let base = '/'
 
-  const projectRoot = options.config.projectRoot
-  const supportFilePath = options.config.supportFile
+  const projectRoot = options.cypressConfig.projectRoot
+  const supportFilePath = options.cypressConfig.supportFile ? path.resolve(projectRoot, options.cypressConfig.supportFile) : false
+
   const devServerEvents = options.devServerEvents
   const specs = options.specs
-  const indexHtmlFile = options.config.indexHtmlFile
+  const indexHtmlFile = options.cypressConfig.indexHtmlFile
 
   let specsPathsSet = getSpecsPathsSet(specs)
-  let loader
+  let loader = fs.readFileSync(INIT_FILEPATH, 'utf8')
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
@@ -49,23 +53,27 @@ export const Cypress = (
       const indexHtmlPath = resolve(projectRoot, indexHtmlFile)
 
       debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
-      const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+      const indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
       // insert the script in the end of the body
       return `${indexHtmlContent.substring(0, endOfBody)
-    }<script type="module">
+    }<script>
     ${loader}
     </script>${
       indexHtmlContent.substring(endOfBody)
     }`
     },
     configureServer: async (server: ViteDevServer) => {
-      loader = await readFile(INIT_FILEPATH)
-
       server.middlewares.use(`${base}index.html`, async (req, res) => {
-        const transformedIndexHtml = await server.transformIndexHtml(base, '')
+        let transformedIndexHtml = await server.transformIndexHtml(base, '')
+        const viteImport = `<script type="module" src="${options.cypressConfig.devServerPublicPathRoute}/@vite/client"></script>`
+
+        // If we're doing cy-in-cy, we need to be able to access the Cypress instance from the parent frame.
+        if (process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING) {
+          transformedIndexHtml = transformedIndexHtml.replace(viteImport, `<script>document.domain = 'localhost';</script>${viteImport}`)
+        }
 
         return res.end(transformedIndexHtml)
       })

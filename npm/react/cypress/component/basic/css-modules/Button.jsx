@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import styles from './Button.modules.css'
+import styles from './Button.module.css'
 
 export const Button = ({ name, orange, wide }) => {
   const className = [
