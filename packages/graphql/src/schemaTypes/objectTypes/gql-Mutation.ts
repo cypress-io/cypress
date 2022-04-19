@@ -35,7 +35,7 @@ export const mutation = mutationType({
         })
 
         // Wait for the project config to be reloaded
-        await ctx.lifecycleManager.refreshLifecycle()
+        ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },
@@ -582,7 +582,7 @@ export const mutation = mutationType({
         await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
 
         // Wait for the project config to be reloaded
-        await ctx.lifecycleManager.refreshLifecycle()
+        ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },

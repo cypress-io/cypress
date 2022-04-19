@@ -268,7 +268,7 @@ export class ProjectLifecycleManager {
 
         this._pendingInitialize?.resolve(finalConfig)
       },
-      refreshLifecycle: async () => this.refreshLifecycle(),
+      refreshLifecycle: () => this.refreshLifecycle(),
     })
   }
 
@@ -309,24 +309,21 @@ export class ProjectLifecycleManager {
     }
   }
 
-  async refreshLifecycle () {
-    assert(this._projectRoot, 'Cannot reload config without a project root')
-    assert(this._configManager, 'Cannot reload config without a config manager')
-
-    if (this.readyToInitialize(this._projectRoot)) {
+  refreshLifecycle () {
+    if (this._projectRoot && this._configManager && this.readyToInitialize(this._projectRoot)) {
       this._configManager.resetLoadingState()
-      await this.initializeConfig()
-
-      if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-        this._configManager.loadTestingType()
-      } else {
-        this.setAndLoadCurrentTestingType(null)
-      }
-
-      return true
+      this.initializeConfig()
+      .then(() => {
+        if (this._configManager) {
+          if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+            this._configManager.loadTestingType()
+          } else {
+            this.setAndLoadCurrentTestingType(null)
+          }
+        }
+      })
+      .catch(this.onLoadError)
     }
-
-    return false
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
@@ -395,6 +392,8 @@ export class ProjectLifecycleManager {
       s.packageManager = packageManagerUsed
     })
 
+    this.verifyProjectRoot(projectRoot)
+
     if (this.readyToInitialize(this._projectRoot)) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
@@ -408,8 +407,6 @@ export class ProjectLifecycleManager {
    * @returns true if we can initialize and false if not
    */
   readyToInitialize (projectRoot: string): boolean {
-    this.verifyProjectRoot(projectRoot)
-
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
@@ -427,7 +424,7 @@ export class ProjectLifecycleManager {
     return this.metaState.hasValidConfigFile
   }
 
-  async legacyMigration (legacyConfigPath: string) {
+  private async legacyMigration (legacyConfigPath: string) {
     try {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
@@ -504,12 +501,6 @@ export class ProjectLifecycleManager {
     assert(this._configManager, 'Cannot load a testing type without a config manager')
 
     this._configManager.loadTestingType()
-  }
-
-  scaffoldFilesIfNecessary () {
-    if (this._currentTestingType && this._projectMetaState.hasValidConfigFile && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-    }
   }
 
   private resetInternalState () {
