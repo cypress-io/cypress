@@ -95,12 +95,8 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   if (!keepBuild) {
     log('#buildPackages')
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--scope', '\"@cypress/design-system\"', '--scope', '\"@packages/icons\"'], {
-      stdio: 'inherit',
-      cwd: CY_ROOT_DIR,
-    })
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--stream', '--ignore', 'cli', '--ignore', '\"@cypress/design-system\"', '--scope', '\"@packages/icons\"'], {
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '1'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
