@@ -13,6 +13,8 @@
 /// <reference path="../../cli/types/cypress-global-vars.d.ts" />
 /// <reference path="../../cli/types/cypress-type-helpers.d.ts" />
 
+/// <reference path="../driver/types/internal-types.d.ts" />
+
 // types for the `server` package
 export namespace CyServer {
   // TODO: pull this from main types
