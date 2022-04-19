@@ -19,7 +19,7 @@ module.exports = defineConfig({
         }
       }
 
-      return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
+      return devServer({ ...cypressDevServerConfig, webpackConfig })
     },
   },
 })
