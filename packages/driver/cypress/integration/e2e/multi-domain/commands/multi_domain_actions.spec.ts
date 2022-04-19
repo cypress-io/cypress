@@ -207,11 +207,10 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('get', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('get', logs, 'foobar.com')
 
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('get')
         expect(consoleProps.Elements).to.equal(1)
@@ -230,11 +229,10 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { alias, aliasType, consoleProps, $el, crossOriginLog } = findCrossOriginLogs('get', logs, 'foobar.com')
+        const { alias, aliasType, consoleProps, $el } = findCrossOriginLogs('get', logs, 'foobar.com')
 
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(alias).to.equal('buttonAlias')
         expect(aliasType).to.equal('dom')
@@ -261,10 +259,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { alias, aliasType, consoleProps, $el, crossOriginLog } = findCrossOriginLogs('click', logs, 'foobar.com')
+        const { alias, aliasType, consoleProps, $el } = findCrossOriginLogs('click', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
@@ -315,10 +312,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('dblclick', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('dblclick', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('dblclick')
         expect(consoleProps.Elements).to.equal(1)
@@ -364,10 +360,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('rightclick', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('rightclick', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('rightclick')
         expect(consoleProps.Elements).to.equal(1)
@@ -413,10 +408,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { alias, aliasType, consoleProps, $el, crossOriginLog } = findCrossOriginLogs('type', logs, 'foobar.com')
+        const { alias, aliasType, consoleProps, $el } = findCrossOriginLogs('type', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
@@ -487,10 +481,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('submit', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('submit', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('submit')
         expect(consoleProps.Elements).to.equal(1)
@@ -521,10 +514,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('focus', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('focus', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('focus')
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
@@ -546,10 +538,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('blur', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('blur', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('blur')
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
@@ -571,10 +562,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('clear', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('clear', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('clear')
         expect(consoleProps.Elements).to.equal(1)
@@ -597,10 +587,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('check', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('check', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('check')
         expect(consoleProps.Elements).to.equal(1)
@@ -643,10 +632,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('uncheck', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('uncheck', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('uncheck')
         expect(consoleProps.Elements).to.equal(1)
@@ -689,10 +677,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('select', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('select', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('select')
         expect(consoleProps.Elements).to.equal(1)
@@ -738,10 +725,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('scrollIntoView', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('scrollIntoView', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('scrollIntoView')
 
@@ -759,10 +745,9 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('scrollTo', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('scrollTo', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('scrollTo')
         expect(consoleProps.X).to.equal(0)
@@ -779,10 +764,9 @@ context('cy.origin actions', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('trigger', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('trigger', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('trigger')
         expect(consoleProps['Event options']).to.have.property('bubbles').that.is.a('boolean')
@@ -811,10 +795,9 @@ context('cy.origin actions', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('selectFile', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('selectFile', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('selectFile')
         expect(consoleProps.Elements).to.equal(1)

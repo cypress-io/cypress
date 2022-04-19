@@ -112,7 +112,6 @@ context('cy.origin spies, stubs, and clock', () => {
       cy.shouldWithTimeout(() => {
         const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
 
-        expect(spyLog.crossOriginLog).to.be.true
         expect(spyLog.consoleProps.Command).to.equal('spy-1')
         expect(spyLog.callCount).to.be.a('number')
         expect(spyLog.functionName).to.equal('bar')
@@ -131,7 +130,6 @@ context('cy.origin spies, stubs, and clock', () => {
       cy.shouldWithTimeout(() => {
         const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
 
-        expect(stubLog.crossOriginLog).to.be.true
         expect(stubLog.consoleProps.Command).to.equal('stub-1')
         expect(stubLog.callCount).to.be.a('number')
         expect(stubLog.functionName).to.equal('bar')
@@ -148,7 +146,6 @@ context('cy.origin spies, stubs, and clock', () => {
       cy.shouldWithTimeout(() => {
         const clockLog = findCrossOriginLogs('clock', logs, 'foobar.com')
 
-        expect(clockLog.crossOriginLog).to.be.true
         expect(clockLog.name).to.equal('clock')
 
         const consoleProps = clockLog.consoleProps()
@@ -171,7 +168,6 @@ context('cy.origin spies, stubs, and clock', () => {
       cy.shouldWithTimeout(() => {
         const tickLog = findCrossOriginLogs('tick', logs, 'foobar.com')
 
-        expect(tickLog.crossOriginLog).to.be.true
         expect(tickLog.name).to.equal('tick')
 
         const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps

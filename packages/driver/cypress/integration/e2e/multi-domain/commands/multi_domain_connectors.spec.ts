@@ -69,10 +69,9 @@ context('cy.origin connectors', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('its', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('its', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('its')
         expect(consoleProps.Property).to.equal('.length')
@@ -104,10 +103,9 @@ context('cy.origin connectors', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, $el, crossOriginLog } = findCrossOriginLogs('invoke', logs, 'foobar.com')
+        const { consoleProps, $el } = findCrossOriginLogs('invoke', logs, 'foobar.com')
 
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(consoleProps.Command).to.equal('invoke')
         expect(consoleProps.Function).to.equal('.text()')

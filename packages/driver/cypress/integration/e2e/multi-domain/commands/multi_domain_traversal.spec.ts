@@ -139,9 +139,8 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('children', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('children', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('by-id')
         expect(consoleProps.Command).to.equal('children')
@@ -169,9 +168,8 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('closest', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('closest', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('by-id')
         expect(consoleProps.Command).to.equal('closest')
@@ -197,9 +195,8 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('eq', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('eq', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps['Applied To'].length).to.equal(3)
         expect(consoleProps['Applied To'][0]).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To'][0]).to.have.property('id').that.equals('input')
@@ -229,9 +226,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('filter', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('filter', logs, 'foobar.com')
 
         expect(consoleProps['Applied To'].length).to.equal(12)
         expect(consoleProps.Command).to.equal('filter')
@@ -259,9 +254,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('find', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('find', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('by-id')
@@ -292,9 +285,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('first', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('first', logs, 'foobar.com')
 
         expect(consoleProps['Applied To'].length).to.equal(3)
         expect(consoleProps['Applied To'][0]).to.have.property('tagName').that.equals('INPUT')
@@ -325,9 +316,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('last', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('last', logs, 'foobar.com')
 
         expect(consoleProps['Applied To'].length).to.equal(3)
         expect(consoleProps['Applied To'][0]).to.have.property('tagName').that.equals('INPUT')
@@ -358,9 +347,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('next', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('next', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('input')
@@ -386,9 +373,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('nextAll', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('nextAll', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('input')
@@ -417,9 +402,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('nextUntil', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('nextUntil', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('input')
@@ -445,9 +428,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('not', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('not', logs, 'foobar.com')
 
         expect(consoleProps['Applied To'].length).to.equal(3)
         expect(consoleProps['Applied To'][0]).to.have.property('tagName').that.equals('INPUT')
@@ -481,9 +462,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('parent', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('parent', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('by-id')
@@ -509,9 +488,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('parents', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('parents', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('by-id')
@@ -540,9 +517,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('parentsUntil', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('parentsUntil', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('by-id')
@@ -568,9 +543,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('prev', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('prev', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('age')
@@ -596,9 +569,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('prevAll', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('prevAll', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('age')
@@ -627,9 +598,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('prevUntil', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('prevUntil', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('age')
@@ -655,9 +624,7 @@ context('cy.origin traversal', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('siblings', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('siblings', logs, 'foobar.com')
 
         expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps['Applied To']).to.have.property('id').that.equals('input')

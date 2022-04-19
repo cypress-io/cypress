@@ -41,9 +41,8 @@ context('cy.origin window', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('window', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('window', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('window')
         expect(consoleProps.Yielded).to.be.null
       })
@@ -55,9 +54,8 @@ context('cy.origin window', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('document', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('document', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('document')
         expect(consoleProps.Yielded).to.be.null
       })
@@ -69,9 +67,8 @@ context('cy.origin window', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('title', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('title', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('title')
         expect(consoleProps.Yielded).to.equal('DOM Fixture')
       })

@@ -417,8 +417,5 @@ export const reifyLogFromSerialization = (logAttrs) => {
 
   reified.snapshots = snapshots
 
-  // Use this flag to help reify the log correctly when certain property types slightly differ.
-  reified.crossOriginLog = true
-
   return reified
 }

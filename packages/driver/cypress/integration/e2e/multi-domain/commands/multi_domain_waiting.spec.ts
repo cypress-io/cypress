@@ -29,9 +29,8 @@ context('cy.origin waiting', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('wait', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('wait', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('wait')
         expect(consoleProps).to.have.property('Waited For').to.equal('200ms before continuing')
       })

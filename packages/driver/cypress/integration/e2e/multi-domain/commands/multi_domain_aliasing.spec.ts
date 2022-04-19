@@ -30,11 +30,10 @@ context('cy.origin aliasing', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { alias, aliasType, consoleProps, $el, crossOriginLog } = findCrossOriginLogs('get', logs, 'foobar.com')
+        const { alias, aliasType, consoleProps, $el } = findCrossOriginLogs('get', logs, 'foobar.com')
 
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
-        expect(crossOriginLog).to.be.true
 
         expect(alias).to.equal('buttonAlias')
         expect(aliasType).to.equal('dom')

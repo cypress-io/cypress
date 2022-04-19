@@ -447,9 +447,8 @@ context('cy.origin navigation', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog, ...attrs } = findCrossOriginLogs('go', logs, 'foobar.com')
+        const { consoleProps, ...attrs } = findCrossOriginLogs('go', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(attrs.name).to.equal('go')
         expect(attrs.message).to.equal('back')
 
@@ -467,9 +466,8 @@ context('cy.origin navigation', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog, ...attrs } = findCrossOriginLogs('reload', logs, 'foobar.com')
+        const { consoleProps, ...attrs } = findCrossOriginLogs('reload', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(attrs.name).to.equal('reload')
         expect(attrs.message).to.equal('')
 
@@ -488,9 +486,8 @@ context('cy.origin navigation', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog, ...attrs } = findCrossOriginLogs('visit', logs, 'foobar.com')
+        const { consoleProps, ...attrs } = findCrossOriginLogs('visit', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(attrs.name).to.equal('visit')
         expect(attrs.message).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
 

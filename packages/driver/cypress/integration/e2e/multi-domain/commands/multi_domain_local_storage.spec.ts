@@ -42,9 +42,8 @@ context('cy.origin local storage', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('clearLocalStorage', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('clearLocalStorage', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('clearLocalStorage')
         expect(consoleProps.Yielded).to.be.null
       })

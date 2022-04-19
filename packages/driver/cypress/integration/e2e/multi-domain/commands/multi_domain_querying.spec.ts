@@ -55,9 +55,7 @@ context('cy.origin querying', () => {
           cy.state('document', undefined)
         }
 
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('contains', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('contains', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('contains')
         expect(consoleProps['Applied To']).to.be.undefined
@@ -82,9 +80,7 @@ context('cy.origin querying', () => {
           cy.state('document', undefined)
         }
 
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('within', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('within', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('within')
         expect(consoleProps.Yielded).to.have.property('tagName').that.equals('FORM')
@@ -98,9 +94,7 @@ context('cy.origin querying', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('root', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('root', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('root')
         expect(consoleProps.Yielded).to.have.property('tagName').that.equals('HTML')

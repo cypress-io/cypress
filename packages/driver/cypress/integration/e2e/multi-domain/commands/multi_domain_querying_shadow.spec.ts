@@ -36,9 +36,7 @@ context('cy.origin shadow dom', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('shadow', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('shadow', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('shadow')
         expect(consoleProps.Elements).to.equal(1)

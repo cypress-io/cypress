@@ -50,9 +50,7 @@ context('cy.origin network requests', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog, renderProps } = findCrossOriginLogs('request', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps, renderProps } = findCrossOriginLogs('request', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('request')
 

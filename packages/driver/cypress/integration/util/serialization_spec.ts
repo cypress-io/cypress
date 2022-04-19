@@ -372,7 +372,7 @@ describe('Log Serialization', () => {
       wallClockStartedAt: '2022-04-18T21:52:37.833Z',
     }
 
-    const { consoleProps, snapshots, $el, crossOriginLog, ...logAttrs } = reifyLogFromSerialization(mockPreprocessedLogAttrs)
+    const { consoleProps, snapshots, $el, ...logAttrs } = reifyLogFromSerialization(mockPreprocessedLogAttrs)
 
     expect(logAttrs).to.deep.equal({
       alias: undefined,
@@ -401,8 +401,6 @@ describe('Log Serialization', () => {
       visible: true,
       wallClockStartedAt: '2022-04-18T21:52:37.833Z',
     })
-
-    expect(crossOriginLog).to.be.true
 
     expect($el.jquery).to.be.ok
     expect($el.length).to.equal(1)

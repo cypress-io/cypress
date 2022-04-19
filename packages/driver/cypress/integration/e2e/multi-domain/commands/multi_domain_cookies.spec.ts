@@ -57,9 +57,7 @@ context('cy.origin cookies', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('getCookie', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('getCookie', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('getCookie')
         expect(consoleProps.Yielded).to.have.property('domain').that.includes('foobar.com')
@@ -84,9 +82,7 @@ context('cy.origin cookies', () => {
         // get the last 'getCookies' command, which is the one we care about for this test
         const allGetCookieLogs = findCrossOriginLogs('getCookies', logs, 'foobar.com')
 
-        const { crossOriginLog, consoleProps } = allGetCookieLogs.pop() as any
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = allGetCookieLogs.pop() as any
 
         expect(consoleProps.Command).to.equal('getCookies')
         expect(consoleProps['Num Cookies']).to.equal(1)
@@ -110,9 +106,7 @@ context('cy.origin cookies', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('setCookie', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('setCookie', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('setCookie')
         expect(consoleProps.Yielded).to.have.property('domain').that.includes('foobar.com')
@@ -133,9 +127,7 @@ context('cy.origin cookies', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('clearCookie', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('clearCookie', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('clearCookie')
         expect(consoleProps.Yielded).to.equal('null')
@@ -159,9 +151,7 @@ context('cy.origin cookies', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('clearCookies', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('clearCookies', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('clearCookies')
         expect(consoleProps['Num Cookies']).to.equal(2)

@@ -76,9 +76,7 @@ context('cy.origin misc', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('exec', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('exec', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('exec')
         expect(consoleProps['Shell Used']).to.be.undefined
@@ -100,9 +98,7 @@ context('cy.origin misc', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('focused', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('focused', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('focused')
         expect(consoleProps.Elements).to.equal(1)
@@ -123,9 +119,7 @@ context('cy.origin misc', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('wrap', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('wrap', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('wrap')
         expect(consoleProps.Yielded[0]).to.equal('foo')
@@ -146,9 +140,7 @@ context('cy.origin misc', () => {
           cy.state('document', undefined)
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('debug', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('debug', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('debug')
         expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
@@ -178,9 +170,7 @@ context('cy.origin misc', () => {
           return
         }
 
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('pause', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('pause', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('pause')
         expect(consoleProps.Yielded).to.be.undefined
@@ -193,9 +183,7 @@ context('cy.origin misc', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('task', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('task', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('task')
         expect(consoleProps.Yielded).to.equal('works')

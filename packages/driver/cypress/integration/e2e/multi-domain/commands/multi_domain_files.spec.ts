@@ -64,9 +64,7 @@ context('cy.origin files', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('readFile')
         expect(consoleProps['File Path']).to.include('cypress/fixtures/example.json')
@@ -87,9 +85,7 @@ context('cy.origin files', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('writeFile')
         expect(consoleProps['File Path']).to.equal('foo.json')

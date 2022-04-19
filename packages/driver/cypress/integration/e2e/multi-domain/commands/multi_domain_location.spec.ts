@@ -44,9 +44,8 @@ context('cy.origin location', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('hash', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('hash', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('hash')
       })
     })
@@ -57,9 +56,8 @@ context('cy.origin location', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('location', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('location', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('location')
 
         expect(consoleProps.Yielded).to.have.property('auth').that.is.a('string')
@@ -84,9 +82,8 @@ context('cy.origin location', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { crossOriginLog, consoleProps } = findCrossOriginLogs('url', logs, 'foobar.com')
+        const { consoleProps } = findCrossOriginLogs('url', logs, 'foobar.com')
 
-        expect(crossOriginLog).to.be.true
         expect(consoleProps.Command).to.equal('url')
 
         expect(consoleProps.Yielded).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')

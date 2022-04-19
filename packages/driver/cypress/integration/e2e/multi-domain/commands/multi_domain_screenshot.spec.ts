@@ -297,9 +297,7 @@ context('cy.origin screenshot', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('screenshot', logs, 'foobar.com')
-
-        expect(crossOriginLog).to.be.true
+        const { consoleProps } = findCrossOriginLogs('screenshot', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('screenshot')
 

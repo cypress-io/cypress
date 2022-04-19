@@ -42,9 +42,8 @@ context('cy.origin assertions', () => {
         expect(assertionLogs[0].consoleProps.Message).to.equal('expected <input> not to be checked')
         expect(assertionLogs[1].consoleProps.Message).to.equal('expected <input> not to be disabled')
 
-        assertionLogs.forEach(({ $el, crossOriginLog, consoleProps }) => {
+        assertionLogs.forEach(({ $el, consoleProps }) => {
           expect($el.jquery).to.be.ok
-          expect(crossOriginLog).to.be.true
 
           expect(consoleProps.Command).to.equal('assert')
           expect(consoleProps.subject[0]).to.have.property('tagName').that.equals('INPUT')
