@@ -5,12 +5,12 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
+    "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "tsc || echo 'built, with type errors'",
+    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
-    "postinstall": "yarn clean && yarn build",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
@@ -39,5 +39,8 @@
     "webpack": "npm:webpack@^5",
     "webpack-4": "npm:webpack@^4",
     "webpack-dev-server-3": "npm:webpack-dev-server@^3"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

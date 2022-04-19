@@ -6,16 +6,17 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
-import { InlineConfig, mergeConfig } from 'vite'
+import type { InlineConfig } from 'vite'
 import path from 'path'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressInspect } from './plugins/index'
+import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createViteDevServerConfig = async (config: ViteDevServerConfig) => {
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
   const { specs, cypressConfig, viteConfig: viteOverrides = {} } = config
   const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
@@ -60,12 +61,12 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig) => 
       },
     },
     plugins: [
-      Cypress(config),
-      await CypressInspect(),
+      Cypress(config, vite),
+      CypressInspect(config),
     ],
   }
 
-  const finalConfig = mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
+  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 
