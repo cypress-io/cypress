@@ -26,7 +26,6 @@
     "copy-webpack-plugin": "5.1.2",
     "css-loader": "2.1.1",
     "css-modules-typescript-loader": "4.0.1",
-    "execa": "^5.0.0",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "4.3.0",
     "html-webpack-plugin": "4.5.2",

@@ -28,7 +28,6 @@
     "browser-logos": "github:alrra/browser-logos",
     "chai-subset": "1.6.0",
     "classnames": "2.3.1",
-    "cypress-multi-reporters": "1.4.0",
     "file-loader": "4.3.0",
     "lodash": "^4.17.19",
     "mobx": "5.15.4",
@@ -36,7 +35,6 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "webpack": "4.41.6",
-    "webpack-cli": "3.3.11"
+    "webpack": "4.41.6"
   }
 }
