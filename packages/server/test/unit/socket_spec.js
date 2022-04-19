@@ -563,11 +563,21 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(cross:origin:release:html)', () => {
-      it('emits cross:origin:release:html on local bus', function (done) {
-        this.server.socket.localBus.once('cross:origin:release:html', ({ originPolicy }) => {
+    context('on(cross:origin:bridge:ready)', () => {
+      it('emits cross:origin:bridge:ready on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:bridge:ready', ({ originPolicy }) => {
           expect(originPolicy).to.equal('http://foobar.com')
 
+          done()
+        })
+
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+      })
+    })
+
+    context('on(cross:origin:release:html)', () => {
+      it('emits cross:origin:release:html on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:release:html', () => {
           done()
         })
 

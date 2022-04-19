@@ -154,6 +154,7 @@ describe('remote states', () => {
       this.eventEmitter.emit('cross:origin:bridge:ready', { originPolicy: 'https://google.com' })
 
       expect(this.remoteStates.isInOriginStack('https://google.com')).to.be.true
+      expect(this.remoteStates.get('https://google.com')).to.not.be.undefined
 
       this.remoteStates.reset()
 
@@ -203,6 +204,8 @@ describe('remote states', () => {
         },
       })
 
+      expect(this.remoteStates.get('https://staging.google.com')).to.deep.equal(state)
+
       expect(this.remoteStates.isPrimaryOrigin('https://staging.google.com')).to.be.true
     })
 
@@ -225,6 +228,8 @@ describe('remote states', () => {
           tld: 'com',
         },
       })
+
+      expect(this.remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
       expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
       expect(this.remoteStates.isPrimaryOrigin('https://staging.google.com')).to.be.false
