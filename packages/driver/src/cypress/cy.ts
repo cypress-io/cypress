@@ -474,10 +474,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   initialize ($autIframe) {
-    const signalStable = () => {
-      this.isStable(true, 'load')
-    }
-
     this.state('$autIframe', $autIframe)
 
     // dont need to worry about a try/catch here
@@ -536,17 +532,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           cy.state('autOrigin', remoteLocation.originPolicy)
           this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
-
-          signalStable()
         } catch (err: any) {
           // this catches errors thrown by user-registered event handlers
           // for `window:load`. this is used in the `catch` below so they
           // aren't mistaken as cross-origin errors
           err.isFromWindowLoadEvent = true
 
-          signalStable()
-
           throw err
+        } finally {
+          this.isStable(true, 'load')
         }
       } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
