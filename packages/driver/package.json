@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "cypress:open": "node ../../scripts/cypress open --spec [\"cypress/integration/**/*\", \"!cypress/integration/e2e/multi-domain/*\"]",
-    "cypress:run": "node ../../scripts/cypress run",
+    "cypress:open": "node ../../scripts/cypress open",
+    "cypress:run": "node ../../scripts/cypress run --spec [\"cypress/integration/**/*\", \"!cypress/integration/e2e/multi-domain/*\"]",
     "cypress:open-experimentalSessionAndOrigin": "node ../../scripts/cypress open --config experimentalSessionAndOrigin=true",
     "cypress:run-experimentalSessionAndOrigin": "node ../../scripts/cypress run --config experimentalSessionAndOrigin=true  --spec \"cypress/integration/e2e/multi-domain/**/*\"",
     "postinstall": "patch-package",
