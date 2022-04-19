@@ -3885,6 +3885,18 @@
   resolved "https://registry.yarnpkg.com/@ffprobe-installer/win32-x64/-/win32-x64-4.1.0.tgz#ed3e8a329eeb6c0625ac439e31ad9ec43001b33c"
   integrity sha512-gPW2FZxexzCAOhGch0JFkeSSln+wcL5d1JDlJwfSJVEAShHf9MmxiWq0NpHoCSzFvK5qwl0C58KG180eKvd3mA==
 
+"@floating-ui/core@^0.3.0":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-0.3.1.tgz#3dde0ad0724d4b730567c92f49f0950910e18871"
+  integrity sha512-ensKY7Ub59u16qsVIFEo2hwTCqZ/r9oZZFh51ivcLGHfUwTn8l1Xzng8RJUe91H/UP8PeqeBronAGx0qmzwk2g==
+
+"@floating-ui/dom@^0.1.10":
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-0.1.10.tgz#ce304136a52c71ef157826d2ebf52d68fa2deed5"
+  integrity sha512-4kAVoogvQm2N0XE0G6APQJuCNuErjOfPW8Ux7DFxh8+AfugWflwVJ5LDlHOwrwut7z/30NUvdtHzQ3zSip4EzQ==
+  dependencies:
+    "@floating-ui/core" "^0.3.0"
+
 "@fontsource/mulish@4.3.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@fontsource/mulish/-/mulish-4.3.0.tgz#cab651cc6f4cb4f532358e3a4958fdef610e9583"
@@ -22367,6 +22379,14 @@ flex-exec@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/flex-exec/-/flex-exec-1.0.0.tgz#06974b68532839d2a12c32debcdb12378200fdf0"
   integrity sha1-BpdLaFMoOdKhLDLevNsSN4IA/fA=
+
+floating-vue@2.0.0-beta.12:
+  version "2.0.0-beta.12"
+  resolved "https://registry.yarnpkg.com/floating-vue/-/floating-vue-2.0.0-beta.12.tgz#078dafc4657163e2b58ebc0fc1cc7ac23343db93"
+  integrity sha512-3PJLDkU+qGL1c57SYpyBWBbpIrkscnneIG15ctgHQApc3FvlLemzGP2Bu8Adxe34UKhgdsV3vJl/RGuQ6NAqEw==
+  dependencies:
+    "@floating-ui/dom" "^0.1.10"
+    vue-resize "^2.0.0-alpha.1"
 
 flora-colossus@^1.0.0:
   version "1.0.1"
@@ -43924,6 +43944,11 @@ vue-loader@^15.9.2:
     loader-utils "^1.1.0"
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
+
+vue-resize@^2.0.0-alpha.1:
+  version "2.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/vue-resize/-/vue-resize-2.0.0-alpha.1.tgz#43eeb79e74febe932b9b20c5c57e0ebc14e2df3a"
+  integrity sha512-7+iqOueLU7uc9NrMfrzbG8hwMqchfVfSzpVlCMeJQe4pyibqyoifDNbKTZvwxZKDvGkB+PdFeKvnGZMoEb8esg==
 
 vue-router@4, vue-router@^4.0.0, vue-router@^4.0.11:
   version "4.0.11"
