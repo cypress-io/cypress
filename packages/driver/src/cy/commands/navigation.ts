@@ -53,33 +53,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginResponse')?.href
 
   // Were we anticipating a cross origin page when we timed out?
-  if (anticipatedCrossOriginHref) {
-    // We remain in an anticipating state until either a load even happens or a timeout.
-    cy.isAnticipatingCrossOriginResponseFor(undefined)
-
-    // By default origins is just this location.
-    let originPolicies = [$Location.create(location.href).originPolicy]
-
-    const currentCommand = cy.queue.state('current')
-
-    if (currentCommand?.get('name') === 'origin') {
-      // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
-      originPolicies = [cy.state('latestActiveOriginPolicy')]
-    } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
-      // If this is a cross origin spec bridge and we're on the last command, we should have gotten a request on the origin of one of the parents.
-      originPolicies = cy.state('parentOriginPolicies')
-    }
-
-    $errUtils.throwErrByPath('navigation.cross_origin_load_timed_out', {
-      args: {
-        configFile: Cypress.config('configFile'),
-        ms,
-        crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
-        originPolicies,
-      },
-      onFail: log,
-    })
-  } else {
+  if (!anticipatedCrossOriginHref) {
     $errUtils.throwErrByPath('navigation.timed_out', {
       args: {
         configFile: Cypress.config('configFile'),
@@ -88,6 +62,32 @@ const timedOutWaitingForPageLoad = (ms, log) => {
       onFail: log,
     })
   }
+
+  // We remain in an anticipating state until either a load even happens or a timeout.
+  cy.isAnticipatingCrossOriginResponseFor(undefined)
+
+  // By default origins is just this location.
+  let originPolicies = [$Location.create(location.href).originPolicy]
+
+  const currentCommand = cy.queue.state('current')
+
+  if (currentCommand?.get('name') === 'origin') {
+    // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
+    originPolicies = [cy.state('latestActiveOriginPolicy')]
+  } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
+    // If this is a cross origin spec bridge and we're on the last command, we should have gotten a request on the origin of one of the parents.
+    originPolicies = cy.state('parentOriginPolicies')
+  }
+
+  $errUtils.throwErrByPath('navigation.cross_origin_load_timed_out', {
+    args: {
+      configFile: Cypress.config('configFile'),
+      ms,
+      crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
+      originPolicies,
+    },
+    onFail: log,
+  })
 }
 
 const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log, isCrossOriginSpecBridge = false }) => {
