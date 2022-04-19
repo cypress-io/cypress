@@ -59,6 +59,7 @@
           v-model="selector"
           autocapitalize="none"
           autocorrect="off"
+          spellcheck="false"
           data-cy="playground-selector"
           :style="{paddingLeft: leftOfInputText + 'ch', paddingRight: widthOfMatchesHelperText + 'px'}"
           class="border rounded-r-md font-medium h-full outline-none border-gray-200 w-full text-indigo-500 hocus-default overflow-ellipsis"
