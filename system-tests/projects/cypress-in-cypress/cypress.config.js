@@ -8,7 +8,7 @@ module.exports = {
       framework: 'react',
       bundler: 'webpack',
       webpackConfig: require('./webpack.config.js'),
-    }
+    },
   },
   e2e: {
     specPattern: 'cypress/e2e/**/*.spec.{js,ts}',

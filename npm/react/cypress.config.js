@@ -1,6 +1,3 @@
-// @ts-check
-const { devServer } = require('@cypress/webpack-dev-server')
-
 module.exports = {
   'viewportWidth': 400,
   'viewportHeight': 400,
@@ -18,7 +15,7 @@ module.exports = {
     ],
     devServer: {
       framework: 'react',
-      bundler: 'vite'
-    }
+      bundler: 'vite',
+    },
   },
 }
