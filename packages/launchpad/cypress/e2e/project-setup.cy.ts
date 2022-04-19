@@ -12,6 +12,11 @@ describe('Launchpad: Setup Project', () => {
   function scaffoldAndOpenProject (name: Parameters<typeof cy.scaffoldProject>[0], args?: Parameters<typeof cy.openProject>[1]) {
     cy.scaffoldProject(name)
     cy.openProject(name, args)
+
+    // Delete the fixtures folder so it scaffold correctly the example
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.removeFileInProject('cypress/fixtures')
+    })
   }
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {

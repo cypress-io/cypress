@@ -61,7 +61,6 @@ export function supportFileComponent (language: CodeLanguage['type'], framework:
   if (language === 'ts') {
     const registerMount = dedent`
       import { mount } from '${framework.mountModule}'
-      import type { MountReturn } from '${framework.mountModule}'
 
       // Augment the Cypress namespace to include type definitions for
       // your custom command.
