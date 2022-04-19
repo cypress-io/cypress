@@ -7,7 +7,7 @@ describe('Log Serialization', () => {
     // populate some items into the mockSnapshot that would mimic what the DOM might actually look like, along with our inner snapshot element
     const mockContainer = document.createElement('div')
     const mockInnerHeader = document.createElement('h1')
-    const mockTextNode = document.createTextNode('Super Serial-izer')
+    const mockTextNode = document.createTextNode('Mock Snapshot Header')
 
     mockInnerHeader.appendChild(mockTextNode)
     mockContainer.appendChild(mockInnerHeader)
@@ -48,7 +48,7 @@ describe('Log Serialization', () => {
     const mockLogAttrs = {
       $el: Cypress.$(mockClickedElement),
       alias: undefined,
-      chainerId: 'foobar.com:3500-3',
+      chainerId: 'mock-chainer-id',
       consoleProps: {
         ['Applied To']: mockClickedElement,
         Command: 'click',
@@ -89,7 +89,7 @@ describe('Log Serialization', () => {
       event: false,
       highlightAttr: 'data-cypress-el',
       hookId: 'r4',
-      id: 'log-http://foobar.com:3500-8',
+      id: 'mock-log-id',
       instrument: 'command',
       message: '',
       name: 'click',
@@ -102,7 +102,7 @@ describe('Log Serialization', () => {
       testId: 'r4',
       timeout: 4000,
       type: 'child',
-      url: 'http://www.foobar.com:3500/fixtures/dom.html',
+      url: 'http://www.foobar.com',
       viewportHeight: 660,
       viewportWidth: 1000,
       visible: true,
@@ -113,14 +113,14 @@ describe('Log Serialization', () => {
 
     expect(logAttrs).to.deep.equal({
       alias: undefined,
-      chainerId: 'foobar.com:3500-3',
+      chainerId: 'mock-chainer-id',
       coords: { top: 50, left: 50, topCenter: 100, leftCenter: 1000, x: 100, y: 50 },
       ended: true,
       err: undefined,
       event: false,
       highlightAttr: 'data-cypress-el',
       hookId: 'r4',
-      id: 'log-http://foobar.com:3500-8',
+      id: 'mock-log-id',
       instrument: 'command',
       message: '',
       name: 'click',
@@ -132,7 +132,7 @@ describe('Log Serialization', () => {
       testId: 'r4',
       timeout: 4000,
       type: 'child',
-      url: 'http://www.foobar.com:3500/fixtures/dom.html',
+      url: 'http://www.foobar.com',
       viewportHeight: 660,
       viewportWidth: 1000,
       visible: true,
@@ -216,7 +216,7 @@ describe('Log Serialization', () => {
             serializationKey: 'function',
             value: [{
               attributes: {},
-              innerHTML: `<div><h1>Super Serial-izer</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
+              innerHTML: `<div><h1>Mock Snapshot Header</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
               serializationKey: 'dom',
               tagName: 'BODY',
             }],
@@ -232,7 +232,7 @@ describe('Log Serialization', () => {
             serializationKey: 'function',
             value: [{
               attributes: {},
-              innerHTML: `<div><h1>Super Serial-izer</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
+              innerHTML: `<div><h1>Mock Snapshot Header</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
               serializationKey: 'dom',
               tagName: 'BODY',
             }],
@@ -256,7 +256,7 @@ describe('Log Serialization', () => {
         },
       ],
       alias: undefined,
-      chainerId: 'foobar.com:3500-3',
+      chainerId: 'mock-chainer-id',
       consoleProps: {
         ['Applied To']: {
           attributes: {
@@ -319,7 +319,7 @@ describe('Log Serialization', () => {
       event: false,
       highlightAttr: 'data-cypress-el',
       hookId: 'r4',
-      id: 'log-http://foobar.com:3500-8',
+      id: 'mock-log-id',
       instrument: 'command',
       message: '',
       name: 'click',
@@ -336,7 +336,7 @@ describe('Log Serialization', () => {
               serializationKey: 'function',
               value: [{
                 attributes: {},
-                innerHTML: `<div><h1>Super Serial-izer</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
+                innerHTML: `<div><h1>Mock Snapshot Header</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
                 serializationKey: 'dom',
                 tagName: 'BODY',
               }],
@@ -352,7 +352,7 @@ describe('Log Serialization', () => {
               serializationKey: 'function',
               value: [{
                 attributes: {},
-                innerHTML: `<div><h1>Super Serial-izer</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
+                innerHTML: `<div><h1>Mock Snapshot Header</h1><form id="button-inside-a"><button><span>click button</span></button></form></div>`,
                 serializationKey: 'dom',
                 tagName: 'BODY',
               }],
@@ -365,7 +365,7 @@ describe('Log Serialization', () => {
       testId: 'r4',
       timeout: 4000,
       type: 'child',
-      url: 'http://www.foobar.com:3500/fixtures/dom.html',
+      url: 'http://www.foobar.com',
       viewportHeight: 660,
       viewportWidth: 1000,
       visible: true,
@@ -376,14 +376,14 @@ describe('Log Serialization', () => {
 
     expect(logAttrs).to.deep.equal({
       alias: undefined,
-      chainerId: 'foobar.com:3500-3',
+      chainerId: 'mock-chainer-id',
       coords: { top: 50, left: 50, topCenter: 100, leftCenter: 1000, x: 100, y: 50 },
       ended: true,
       err: undefined,
       event: false,
       highlightAttr: 'data-cypress-el',
       hookId: 'r4',
-      id: 'log-http://foobar.com:3500-8',
+      id: 'mock-log-id',
       instrument: 'command',
       message: '',
       name: 'click',
@@ -395,7 +395,7 @@ describe('Log Serialization', () => {
       testId: 'r4',
       timeout: 4000,
       type: 'child',
-      url: 'http://www.foobar.com:3500/fixtures/dom.html',
+      url: 'http://www.foobar.com',
       viewportHeight: 660,
       viewportWidth: 1000,
       visible: true,
@@ -470,7 +470,7 @@ describe('Log Serialization', () => {
           foo: 'bar',
         })
 
-        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Super Serial-izer</h1><input type="text" data-cy="bar" value="foo"></div>`)
+        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Mock Snapshot Header</h1><input type="text" data-cy="bar" value="foo"></div>`)
       })
 
       it('reifies', () => {
@@ -480,7 +480,7 @@ describe('Log Serialization', () => {
           attributes: {
             foo: 'bar',
           },
-          innerHTML: `<div><h1>Super Serial-izer</h1><input type="text" data-cy="bar" value="foo"></div>`,
+          innerHTML: `<div><h1>Mock Snapshot Header</h1><input type="text" data-cy="bar" value="foo"></div>`,
         }
 
         const reifiedSnapshot = reifyDomElement(preprocessedSnapshot)
@@ -495,8 +495,8 @@ describe('Log Serialization', () => {
       it('preprocess', () => {
         const selectElement = document.createElement('select')
 
-        selectElement.id = 'strickland-propane'
-        selectElement.name = 'Strickland Propane Staff Members'
+        selectElement.id = 'metasyntactic-variables'
+        selectElement.name = 'Metasyntactic Variables'
 
         const options = ['Hank Hill', 'Buck Strickland', 'Donna', 'Old Donna'].map((val) => {
           const option = document.createElement('option')
@@ -516,7 +516,7 @@ describe('Log Serialization', () => {
 
         expect(preprocessedSnapshot).to.have.property('tagName').that.equals('BODY')
         expect(preprocessedSnapshot).to.have.property('serializationKey').that.equals('dom')
-        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Super Serial-izer</h1><select id="strickland-propane" name="Strickland Propane Staff Members"><option value="Hank Hill"></option><option value="Buck Strickland" selected="true"></option><option value="Donna"></option><option value="Old Donna"></option></select></div>`)
+        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Mock Snapshot Header</h1><select id="metasyntactic-variables" name="Metasyntactic Variables"><option value="Hank Hill"></option><option value="Buck Strickland" selected="true"></option><option value="Donna"></option><option value="Old Donna"></option></select></div>`)
       })
 
       it('reifies', () => {
@@ -524,13 +524,13 @@ describe('Log Serialization', () => {
           tagName: 'BODY',
           serializationKey: 'dom',
           attributes: {},
-          innerHTML: `<div><h1>Super Serial-izer</h1><select id="strickland-propane" name="Strickland Propane Staff Members"><option value="Hank Hill"></option><option value="Buck Strickland" selected="true"></option><option value="Donna"></option><option value="Old Donna"></option></select></div>`,
+          innerHTML: `<div><h1>Mock Snapshot Header</h1><select id="metasyntactic-variables" name="Metasyntactic Variables"><option value="Hank Hill"></option><option value="Buck Strickland" selected="true"></option><option value="Donna"></option><option value="Old Donna"></option></select></div>`,
         }
 
         const reifiedSnapshot = reifyDomElement(preprocessedSnapshot)
 
         expect(reifiedSnapshot).to.be.instanceOf(HTMLBodyElement)
-        expect(reifiedSnapshot.querySelector('select#strickland-propane option[selected]')).to.have.property('value').that.equals('Buck Strickland')
+        expect(reifiedSnapshot.querySelector('select#metasyntactic-variables option[selected]')).to.have.property('value').that.equals('Buck Strickland')
       })
     })
 
@@ -540,7 +540,7 @@ describe('Log Serialization', () => {
 
         textAreaElement.rows = 4
         textAreaElement.cols = 20
-        textAreaElement.value = 'Provide the community with propane and propane accessories'
+        textAreaElement.value = 'Generic variable names that function as placeholders'
 
         const snapshot = buildSnapshot(textAreaElement)
 
@@ -548,7 +548,7 @@ describe('Log Serialization', () => {
 
         expect(preprocessedSnapshot).to.have.property('tagName').that.equals('BODY')
         expect(preprocessedSnapshot).to.have.property('serializationKey').that.equals('dom')
-        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Super Serial-izer</h1><textarea rows="4" cols="20">Provide the community with propane and propane accessories</textarea></div>`)
+        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Mock Snapshot Header</h1><textarea rows="4" cols="20">Generic variable names that function as placeholders</textarea></div>`)
       })
 
       it('reifies', () => {
@@ -556,13 +556,13 @@ describe('Log Serialization', () => {
           tagName: 'BODY',
           serializationKey: 'dom',
           attributes: {},
-          innerHTML: `<div><h1>Super Serial-izer</h1><textarea rows="4" cols="20">Provide the community with propane and propane accessories</textarea></div>`,
+          innerHTML: `<div><h1>Mock Snapshot Header</h1><textarea rows="4" cols="20">Generic variable names that function as placeholders</textarea></div>`,
         }
 
         const reifiedSnapshot = reifyDomElement(preprocessedSnapshot)
 
         expect(reifiedSnapshot).to.be.instanceOf(HTMLBodyElement)
-        expect(reifiedSnapshot.querySelector('textarea[rows="4"]')).to.have.property('textContent').that.equals('Provide the community with propane and propane accessories')
+        expect(reifiedSnapshot.querySelector('textarea[rows="4"]')).to.have.property('textContent').that.equals('Generic variable names that function as placeholders')
       })
     })
 
@@ -570,7 +570,7 @@ describe('Log Serialization', () => {
       it('preprocess', () => {
         const formElement = document.createElement('form')
 
-        const radioInputs = ['Dale', 'Boomhauer', 'Bill'].map((val) => {
+        const radioInputs = ['foo', 'bar', 'baz'].map((val) => {
           const radioInput = document.createElement('input')
 
           radioInput.type = 'radio'
@@ -589,7 +589,7 @@ describe('Log Serialization', () => {
 
         expect(preprocessedSnapshot).to.have.property('tagName').that.equals('BODY')
         expect(preprocessedSnapshot).to.have.property('serializationKey').that.equals('dom')
-        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Super Serial-izer</h1><form><input type="radio" value="Dale"><input type="radio" value="Boomhauer" checked=""><input type="radio" value="Bill"></form></div>`)
+        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Mock Snapshot Header</h1><form><input type="radio" value="foo"><input type="radio" value="bar" checked=""><input type="radio" value="baz"></form></div>`)
       })
 
       it('reifies', () => {
@@ -597,13 +597,13 @@ describe('Log Serialization', () => {
           tagName: 'BODY',
           serializationKey: 'dom',
           attributes: {},
-          innerHTML: `<div><h1>Super Serial-izer</h1><form><input type="radio" value="Dale"><input type="radio" value="Boomhauer" checked=""><input type="radio" value="Bill"></form></div>`,
+          innerHTML: `<div><h1>Mock Snapshot Header</h1><form><input type="radio" value="foo"><input type="radio" value="bar" checked=""><input type="radio" value="baz"></form></div>`,
         }
 
         const reifiedSnapshot = reifyDomElement(preprocessedSnapshot)
 
         expect(reifiedSnapshot).to.be.instanceOf(HTMLBodyElement)
-        expect(reifiedSnapshot.querySelector('form input[value="Boomhauer"]')).to.have.property('checked').that.equals(true)
+        expect(reifiedSnapshot.querySelector('form input[value="bar"]')).to.have.property('checked').that.equals(true)
       })
     })
 
@@ -611,7 +611,7 @@ describe('Log Serialization', () => {
       it('preprocess', () => {
         const formElement = document.createElement('form')
 
-        const checkboxInputs = ['Dale', 'Boomhauer', 'Bill'].map((val) => {
+        const checkboxInputs = ['foo', 'bar', 'bar'].map((val) => {
           const checkboxInput = document.createElement('input')
 
           checkboxInput.type = 'checkbox'
@@ -630,7 +630,7 @@ describe('Log Serialization', () => {
 
         expect(preprocessedSnapshot).to.have.property('tagName').that.equals('BODY')
         expect(preprocessedSnapshot).to.have.property('serializationKey').that.equals('dom')
-        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Super Serial-izer</h1><form><input type="checkbox" value="Dale"><input type="checkbox" value="Boomhauer" checked=""><input type="checkbox" value="Bill"></form></div>`)
+        expect(preprocessedSnapshot).to.have.property('innerHTML').that.equals(`<div><h1>Mock Snapshot Header</h1><form><input type="checkbox" value="foo"><input type="checkbox" value="bar" checked=""><input type="checkbox" value="bar"></form></div>`)
       })
 
       it('reifies', () => {
@@ -638,13 +638,13 @@ describe('Log Serialization', () => {
           tagName: 'BODY',
           serializationKey: 'dom',
           attributes: {},
-          innerHTML: `"<div><h1>Super Serial-izer</h1><form><input type="checkbox" value="Dale"><input type="checkbox" value="Boomhauer" checked=""><input type="checkbox" value="Bill"></form></div>"`,
+          innerHTML: `"<div><h1>Mock Snapshot Header</h1><form><input type="checkbox" value="foo"><input type="checkbox" value="bar" checked=""><input type="checkbox" value="bar"></form></div>"`,
         }
 
         const reifiedSnapshot = reifyDomElement(preprocessedSnapshot)
 
         expect(reifiedSnapshot).to.be.instanceOf(HTMLBodyElement)
-        expect(reifiedSnapshot.querySelector('form input[value="Boomhauer"]')).to.have.property('checked').that.equals(true)
+        expect(reifiedSnapshot.querySelector('form input[value="bar"]')).to.have.property('checked').that.equals(true)
       })
     })
   })
