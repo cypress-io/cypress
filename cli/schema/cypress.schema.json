@@ -256,7 +256,7 @@
         "experimentalSessionAndOrigin": {
           "type": "boolean",
           "default": false,
-          "description": "Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands."
+          "description": "Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session."
         },
         "experimentalSourceRewriting": {
           "type": "boolean",

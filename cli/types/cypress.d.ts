@@ -2832,7 +2832,7 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands.
+     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
      * @default false
      */
     experimentalSessionAndOrigin: boolean
