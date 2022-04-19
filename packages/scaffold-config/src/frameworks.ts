@@ -205,7 +205,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
-    componentIndexHtml: componentIndexHtmlGenerator(),
+    componentIndexHtml: componentIndexHtmlGenerator('<div id="__next_css__DO_NOT_USE__"></div>'),
   },
   {
     type: 'vue2',
@@ -265,6 +265,6 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
-    componentIndexHtml: componentIndexHtmlGenerator('<div id="__next_css__DO_NOT_USE__"></div>'),
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const

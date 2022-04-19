@@ -23,8 +23,8 @@ describe('componentIndexHtmlGenerator', () => {
     expect(generator()).to.eq(expected)
   })
 
-  it('handles header and body modifiers', () => {
-    const generator = componentIndexHtmlGenerator('foobar', 'baz')
+  it('handles header modifier', () => {
+    const generator = componentIndexHtmlGenerator('foobar')
 
     const expected = dedent`
     <!DOCTYPE html>
@@ -37,7 +37,6 @@ describe('componentIndexHtmlGenerator', () => {
         foobar
       </head>
       <body>
-        baz
         <div data-cy-root></div>
       </body>
     </html>`

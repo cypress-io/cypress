@@ -1,6 +1,6 @@
 import dedent from 'dedent'
 
-const componentIndexHtmlGenerator = (headModifier: string = '', bodyModifier: string = '') => {
+const componentIndexHtmlGenerator = (headModifier: string = '') => {
   return () => {
     const template = dedent`
     <!DOCTYPE html>
@@ -13,14 +13,13 @@ const componentIndexHtmlGenerator = (headModifier: string = '', bodyModifier: st
         ${headModifier}
       </head>
       <body>
-        ${bodyModifier}
         <div data-cy-root></div>
       </body>
     </html>
   `
 
-    // If the framework returns an empty string for either of the modifiers,
-    // strip out the empty lines
+    // If the framework supplies an empty string for the modifier,
+    // strip out the empty line
     return template.replace(/\n {4}\n/g, '\n')
   }
 }
