@@ -262,14 +262,14 @@ export class CommandQueue extends Queue<Command> {
   // @ts-ignore
   run () {
     const next = () => {
-      // start at 0 index if one is not already set
-      let index = this.state('index') || this.state('index', 0)
-
       // bail if we've been told to abort in case
       // an old command continues to run after
       if (this.stopped) {
         return
       }
+
+      // start at 0 index if one is not already set
+      let index = this.state('index') || this.state('index', 0)
 
       const command = this.at(index)
 
