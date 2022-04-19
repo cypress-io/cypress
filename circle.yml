@@ -428,7 +428,7 @@ commands:
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-              if [[ <<parameters.experimentalSessionAndOrigin>> == true ]]
+              if <<parameters.experimentalSessionAndOrigin>>
               then
                 yarn cypress:run-experimentalSessionAndOrigin --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
               else
@@ -442,7 +442,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              if [[ <<parameters.experimentalSessionAndOrigin>> == true ]]
+              if <<parameters.experimentalSessionAndOrigin>>
               then
                 yarn cypress:run-experimentalSessionAndOrigin --browser <<parameters.browser>> --spec $TESTFILES
               else
