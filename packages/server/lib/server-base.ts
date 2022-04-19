@@ -166,8 +166,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   setupCrossOriginRequestHandling () {
     this._eventBus.on('cross:origin:delaying:html', (request) => {
-      this.socket.localBus.once('ready:for:origin', (args) => {
-        this._eventBus.emit('ready:for:origin', args)
+      this.socket.localBus.once('cross:origin:release:html', () => {
+        this._eventBus.emit('cross:origin:release:html')
       })
 
       this.socket.toDriver('cross:origin:delaying:html', request)

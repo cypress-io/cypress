@@ -1237,6 +1237,22 @@ export default {
         docsUrl: 'https://on.cypress.io/session-api',
       },
     },
+    cannot_visit_previous_origin (args) {
+      return {
+        message: stripIndent`\
+          ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
+
+          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed at the top-level.
+
+          \`<commands targeting ${args.attemptedUrl.origin} go here>\`
+
+          \`cy.origin('${args.previousUrl.originPolicy}', () => {\`
+          \`  <commands targeting ${args.previousUrl.origin} go here>\`
+          \`})\`
+
+          \`cy.visit('${args.originalUrl}')\``,
+      }
+    },
   },
 
   proxy: {
@@ -2105,15 +2121,15 @@ export default {
           ${args.isCrossOriginSpecBridge ?
           `\`cy.origin('${args.previousUrl.originPolicy}', () => {\`
           \`  cy.visit('${args.previousUrl}')\`
-          \`  <other commands targeting ${args.previousUrl.origin} go here>\`
+          \`  <commands targeting ${args.previousUrl.origin} go here>\`
           \`})\`` :
           `\`cy.visit('${args.previousUrl}')\`
-          \`<other commands targeting ${args.previousUrl.origin} go here>\``
+          \`<commands targeting ${args.previousUrl.origin} go here>\``
           }
 
           \`cy.origin('${args.attemptedUrl.originPolicy}', () => {\`
-          \`  cy.visit('${args.attemptedUrl}')\`
-          \`  <other commands targeting ${args.attemptedUrl.origin} go here>\`
+          \`  cy.visit('${args.originalUrl}')\`
+          \`  <commands targeting ${args.attemptedUrl.origin} go here>\`
           \`})\`
 
           The new URL is considered a different origin because the following parts of the URL are different:
