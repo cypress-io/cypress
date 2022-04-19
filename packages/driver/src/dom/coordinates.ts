@@ -25,6 +25,11 @@ const isAUTFrame = (win) => {
     // a cross-origin error, meaning this is the AUT
     // NOTE: this will need to be updated once we add support for
     // cross-origin iframes
+    if (err.name !== 'SecurityError') {
+      // re-throw any error that's not a cross-origin error
+      throw err
+    }
+
     return true
   }
 }
