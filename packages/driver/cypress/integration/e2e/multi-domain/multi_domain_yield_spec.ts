@@ -118,7 +118,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin<JQuery>('http://foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then((subject) => subject.text())
@@ -134,7 +134,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin<{ key: Function }>('http://foobar.com:3500', () => {
       cy.wrap({
         key: () => {
           return 'whoops'

@@ -1425,7 +1425,7 @@ declare namespace Cypress {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    origin(urlOrDomain: string, fn: () => void): Chainable
+    origin<T extends any>(urlOrDomain: string, fn: () => void): Chainable<T>
 
     /**
      * Enables running Cypress commands in a secondary origin.
@@ -1436,9 +1436,9 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    origin<T>(urlOrDomain: string, options: {
+    origin<T, S extends any>(urlOrDomain: string, options: {
       args: T
-    }, fn: (args: T) => void): Chainable
+    }, fn: (args: T) => void): Chainable<S>
 
     /**
      * Get the parent DOM element of a set of DOM elements.
