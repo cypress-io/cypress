@@ -16,7 +16,7 @@ context('cy.origin log', () => {
   })
 
   it('logs in primary and secondary origins', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin<string>('http://foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in cy.origin') {
