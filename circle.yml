@@ -1149,7 +1149,9 @@ jobs:
             # make sure our snapshots are compared correctly
             - run: yarn test-mocha-snapshot
             # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream
+            - run: yarn lerna run build-prod --stream --ignore \"@cypress/design-system\"
+            # only run @cypress/design-system after other packages are built
+            - run: yarn lerna run build-prod --scope \"@cypress/design-system\"
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
