@@ -13,7 +13,7 @@ import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousUrlVisited: LocationObject | undefined
+let previouslyVisitedLocation: LocationObject | undefined
 let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
@@ -30,7 +30,7 @@ const reset = (test: any = {}) => {
 
   // continuously reset this
   // before each test run!
-  previousUrlVisited = undefined
+  previouslyVisitedLocation = undefined
 
   // make sure we reset that we haven't
   // visited about blank again
@@ -90,7 +90,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   })
 }
 
-const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log, isCrossOriginSpecBridge = false }) => {
+const cannotVisitDifferentOrigin = ({ remote, existing, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
   const differences: string[] = []
 
   if (remote.protocol !== existing.protocol) {
@@ -109,7 +109,7 @@ const cannotVisitDifferentOrigin = ({ remote, existing, previousUrlVisited, log,
     onFail: log,
     args: {
       differences: differences.join(', '),
-      previousUrl: previousUrlVisited,
+      previousUrl: previouslyVisitedLocation,
       attemptedUrl: remote,
       isCrossOriginSpecBridge,
       experimentalSessionAndOrigin: Cypress.config('experimentalSessionAndOrigin'),
@@ -1024,13 +1024,13 @@ export default (Commands, Cypress, cy, state, config) => {
         const existingHash = remote.hash || ''
         const existingAuth = remote.auth || ''
 
-        if (previousUrlVisited && (remote.originPolicy !== existing.originPolicy)) {
+        if (previouslyVisitedLocation && (remote.originPolicy !== existing.originPolicy)) {
           // if we've already visited a new superDomain
           // then die else we'd be in a terrible endless loop
           // we also need to disable retries to prevent the endless loop
           $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
-          const params = { remote, existing, previousUrlVisited, log: options._log }
+          const params = { remote, existing, previouslyVisitedLocation, log: options._log }
 
           return cannotVisitDifferentOrigin(params)
         }
@@ -1114,7 +1114,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // then go ahead and change the iframe's src
           // and we're good to go
           if (remote.originPolicy === existing.originPolicy) {
-            previousUrlVisited = remote
+            previouslyVisitedLocation = remote
 
             url = $Location.fullyQualifyUrl(url)
 
@@ -1129,15 +1129,15 @@ export default (Commands, Cypress, cy, state, config) => {
           // origin which isn't allowed within a cy.origin block
           if (Cypress.isCrossOriginSpecBridge && win) {
             const existingAutOrigin = $Location.create(win.location.href)
-            const params = { remote, existing, previousUrlVisited: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true }
+            const params = { remote, existing, previouslyVisitedLocation: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true }
 
             return cannotVisitDifferentOrigin(params)
           }
 
           // if we've already visited a new origin
           // then die else we'd be in a terrible endless loop
-          if (previousUrlVisited) {
-            const params = { remote, existing, previousUrlVisited, log: options._log }
+          if (previouslyVisitedLocation) {
+            const params = { remote, existing, previouslyVisitedLocation, log: options._log }
 
             return cannotVisitDifferentOrigin(params)
           }
