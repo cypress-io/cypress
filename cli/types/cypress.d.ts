@@ -5761,7 +5761,8 @@ declare namespace Cypress {
   }
 
   interface LogConfig extends Timeoutable {
-    id: number
+    /** Unique id for the log, in the form of '<origin>-<number>' */
+    id: string
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */
@@ -5774,7 +5775,7 @@ declare namespace Cypress {
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean
-    /** Set to false if you want to control the finishing of the command in the log yourself */
+    /** Set to true to immediately finish the log  */
     end: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
