@@ -563,16 +563,15 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(ready:for:origin)', () => {
-      it('emits ready:for:origin on local bus', function (done) {
-        this.server.socket.localBus.once('ready:for:origin', ({ originPolicy, failed }) => {
+    context('on(cross:origin:release:html)', () => {
+      it('emits cross:origin:release:html on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:release:html', ({ originPolicy }) => {
           expect(originPolicy).to.equal('http://foobar.com')
-          expect(failed).to.be.false
 
           done()
         })
 
-        this.client.emit('backend:request', 'ready:for:origin', { originPolicy: 'http://foobar.com', failed: false }, () => {})
+        this.client.emit('backend:request', 'cross:origin:release:html', () => {})
       })
     })
 
@@ -585,7 +584,7 @@ describe('lib/socket', () => {
         })
 
         // add the origin before calling cross:origin:finished (otherwise we'll fail trying to remove the origin)
-        this.client.emit('backend:request', 'ready:for:origin', { originPolicy: 'http://foobar.com' }, () => {})
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
 
         this.client.emit('backend:request', 'cross:origin:finished', 'http://foobar.com', () => {})
       })
