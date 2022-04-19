@@ -125,7 +125,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   config: any
   Cypress: any
   Cookies: any
-  autoRun: boolean
 
   devices: {
     keyboard: Keyboard
@@ -208,7 +207,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
 
-  constructor (specWindow, Cypress, Cookies, state, config, autoRun = true) {
+  constructor (specWindow, Cypress, Cookies, state, config) {
     super()
 
     state('specWindow', specWindow)
@@ -219,7 +218,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
-    this.autoRun = autoRun
     initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
@@ -723,9 +721,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           cy.warnMixingPromisesAndCommands()
         }
 
-        if (cy.autoRun) {
-          cy.queue.run()
-        }
+        cy.queue.run()
       }
 
       return chain
