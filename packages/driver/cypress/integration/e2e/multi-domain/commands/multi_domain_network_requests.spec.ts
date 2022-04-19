@@ -50,7 +50,7 @@ context('cy.origin network requests', () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps, crossOriginLog } = findCrossOriginLogs('request', logs, 'foobar.com')
+        const { consoleProps, crossOriginLog, renderProps } = findCrossOriginLogs('request', logs, 'foobar.com')
 
         expect(crossOriginLog).to.be.true
 
@@ -67,6 +67,9 @@ context('cy.origin network requests', () => {
         expect(consoleProps.Yielded).to.have.property('duration').that.is.a('number')
         expect(consoleProps.Yielded).to.have.property('headers').that.is.a('object')
         expect(consoleProps.Yielded).to.have.property('status').that.equals(200)
+
+        expect(renderProps).to.have.property('indicator').that.equals('successful')
+        expect(renderProps).to.have.property('message').that.equals('GET 200 http://www.foobar.com:3500/fixtures/example.json')
       })
     })
   })
