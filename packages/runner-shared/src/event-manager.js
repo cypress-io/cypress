@@ -127,10 +127,7 @@ export const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
-        // these events are set up before Cypress is instantiated, so it's
-        // possible it's undefined when an event fires, but it's okay to
-        // ignore at that point
-        Cypress?.emit(event, ...args)
+        Cypress.emit(event, ...args)
       })
     })
 
