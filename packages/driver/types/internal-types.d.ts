@@ -86,6 +86,12 @@ declare namespace Cypress {
     (k: 'document', v?: Document): Document
     (k: 'window', v?: Window): Window
     (k: 'logGroupIds', v?: Array<InternalLogConfig['id']>): Array<InternalLogConfig['id']>
+    (k: 'autOrigin', v?: string): string
+    (k: 'originCommandBaseUrl', v?: string): string
+    (k: 'currentActiveOriginPolicy', v?: string): string
+    (k: 'latestActiveOriginPolicy', v?: string): string
+    (k: 'duringUserTestExecution', v?: boolean): boolean
+    (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
     (k: string, v?: any): any
     state: Cypress.state
   }
