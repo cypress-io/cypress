@@ -67,18 +67,13 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  async completeSetup () {
+  completeSetup () {
     debug('completeSetup')
-    // wait for the config to be initialized if it is not yet
-    // before returning. This should not penalize users but
-    // allow for tests, too fast for this last step to pass.
-    // NOTE: if the config is already initialized, this will be instant
-    await this.ctx.lifecycleManager.initializeConfig()
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
 
-    this.ctx.lifecycleManager.loadTestingType()
+    this.ctx.lifecycleManager.refreshLifecycle()
   }
 
   /// reset wizard status, useful for when changing to a new project

@@ -234,14 +234,6 @@ export class ProjectLifecycleManager {
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
 
-        if (this.ctx.coreData.scaffoldedFiles) {
-          this.ctx.coreData.scaffoldedFiles.filter((f) => {
-            if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
-              f.status = 'valid'
-            }
-          })
-        }
-
         this.ctx.emitter.toLaunchpad()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
@@ -312,6 +304,10 @@ export class ProjectLifecycleManager {
   refreshLifecycle () {
     if (this._projectRoot && this._configManager && this.readyToInitialize(this._projectRoot)) {
       this._configManager.resetLoadingState()
+
+      // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
+      this.ctx.emitter.toLaunchpad()
+
       this.initializeConfig()
       .then(() => {
         if (this._configManager) {
@@ -406,7 +402,7 @@ export class ProjectLifecycleManager {
    * @param projectRoot the project's root
    * @returns true if we can initialize and false if not
    */
-  readyToInitialize (projectRoot: string): boolean {
+  private readyToInitialize (projectRoot: string): boolean {
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
     const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
@@ -532,7 +528,7 @@ export class ProjectLifecycleManager {
     return this._configManager.getConfigFileContents()
   }
 
-  async loadCypressEnvFile () {
+  private async loadCypressEnvFile () {
     assert(this._configManager, 'Cannot load a cypress env file without a config manager')
 
     return this._configManager.loadCypressEnvFile()
