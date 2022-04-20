@@ -121,7 +121,7 @@ const ensureCorrectHighlightPositions = (sel) => {
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
     if (sel) {
-      // assert convering bounding-box of element
+      // assert converting bounding-box of element
       expectToBeEqual(dims.border, cy.$$(sel)[0].getBoundingClientRect(), 'border-box to match selector bounding-box')
     }
   })
@@ -136,7 +136,7 @@ const getAndPin = (sel) => {
 const clickAndPin = (sel, ...args) => {
   cy.get(sel).click(...args)
 
-  clickCommandLog('click', 'method')
+  clickCommandLog('click')
 }
 
 const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
