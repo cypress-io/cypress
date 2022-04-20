@@ -2,7 +2,7 @@
     "component": [
        {
            "status": "changes",
-           "description": "Merge this code with your existing config file",
+           "description": "Merge this code with your existing config file.",
            "file": {
                "id": "1",
                "relative": "cypress.config.ts",
@@ -92,7 +92,7 @@
         },
         {
             "status": "changes",
-            "description": "Merge this code with your existing config file",
+            "description": "Merge this code with your existing config file.",
             "file": {
                 "id": "3",
                 "relative": "cypress.config.ts",
