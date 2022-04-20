@@ -511,7 +511,7 @@ const normalizeOptions = (options) => {
   .extend({
     timeout: options.responseTimeout,
     isCrossOrigin: Cypress.isCrossOriginSpecBridge,
-    previousUrlVisited: options.previousUrlVisited,
+    alreadyVisitedUrl: options.alreadyVisitedUrl,
   })
   .value()
 }
