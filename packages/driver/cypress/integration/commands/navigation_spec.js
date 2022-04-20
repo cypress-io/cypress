@@ -2164,6 +2164,51 @@ describe('src/cy/commands/navigation', () => {
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')
       })
 
+      it('displays cross origin failures when navigating to a cross origin', { pageLoadTimeout: 3000 }, function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          if (Cypress.config('experimentalSessionAndOrigin')) {
+            // When the experimentalSessionAndOrigin feature is enabled, we will timeout and display this message.
+            expect(err.message).to.equal(stripIndent`\
+            Timed out after waiting \`3000ms\` for your remote page to load on origin(s):\n
+            - \`http://localhost:3500\`\n
+            A cross-origin request for \`http://www.foobar.com:3500/fixtures/multi-domain-secondary.html\` was detected.\n
+            A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:\n
+            \`cy.origin(\'http://foobar.com:3500\', () => {\`
+            \`  <commands targeting http://www.foobar.com:3500 go here>\`
+            \`})\`\n
+            If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.\n
+            Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.\n
+            When this \`load\` event occurs, Cypress will continue running commands.`)
+
+            expect(err.docsUrl).to.eq('https://on.cypress.io/origin')
+          } else {
+            // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
+            expect(err.message).to.equal(stripIndent`\
+            Cypress detected a cross origin error happened on page load:\n
+              > Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.\n
+            Before the page load, you were bound to the origin policy:\n
+              > http://localhost:3500\n
+            A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.\n
+            A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.\n
+            Cypress does not allow you to navigate to a different origin URL within a single test.\n
+            You may need to restructure some of your test code to avoid this problem.\n
+            Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.`)
+
+            expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
+          }
+
+          assertLogLength(this.logs, 6)
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.visit('/fixtures/multi-domain.html')
+        cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      })
+
       return null
     })
   })
