@@ -120,4 +120,8 @@ describe('FileRow', () => {
 
     cy.percySnapshot()
   })
+
+  it('has expected styles', () => {
+    cy.get('h2').should('have.class', 'font-semibold')
+  })
 })
