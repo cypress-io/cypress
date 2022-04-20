@@ -41,12 +41,30 @@
           "hookId": "r3",
           "id": "c1",
           "instrument": "command",
-          "message": "http://localhost:3000",
-          "name": "visit",
+          "message": "http://localhost:3000/create",
+          "alias": "createPost",
+          "aliasType": "route",
+          "name": "visit", 
           "state": "passed",
           "testId": "r3",
           "timeout": 4000,
           "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c3",
+          "alias": "createPost",
+          "aliasType": "route",
+          "instrument": "command",
+          "message": "@createPost, function(){}",
+          "name": "wait",
+          "state": "passed",
+          "type": "parent",
+          "referencesAlias": [{
+            "cardinal": 1,
+            "name": "createPost",
+            "ordinal": "1st"
+          }]
         },
         {
           "hookId": "r3",

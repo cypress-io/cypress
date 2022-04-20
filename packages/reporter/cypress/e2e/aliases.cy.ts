@@ -59,6 +59,7 @@ describe('aliases', () => {
     it('shows status and count if dupe', () => {
       addCommand(runner, {
         aliasType: 'route',
+        name: 'command',
         renderProps: {
           wentToOrigin: true,
           status: 'some status',
@@ -75,9 +76,9 @@ describe('aliases', () => {
       cy.contains('.command-number-column', '1')
       .closest('.command-wrapper')
       .find('.command-interceptions')
-      .should('have.text', 'some status no alias')
+      .should('contain.text', 'some status no alias')
       .parent().find('.command-interceptions-count')
-      .should('have.text', '2')
+      .should('contain.text', '2')
       .trigger('mouseover')
       .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with no aliascy.route() spy with no alias')
       .percySnapshot()
@@ -105,9 +106,9 @@ describe('aliases', () => {
       cy.contains('.command-number-column', '1')
       .closest('.command-wrapper')
       .find('.command-interceptions')
-      .should('have.text', 'some status myAlias')
+      .should('contains.text', 'some status myAlias')
       .parent().find('.command-interceptions-count')
-      .should('have.text', '2')
+      .should('contains.text', '2')
       .trigger('mouseover')
       .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with alias @firstAliascy.intercept() spy with alias @myAlias')
       .percySnapshot()

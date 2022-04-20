@@ -9,6 +9,7 @@
     }
 
     .hook-header {
+      font-family: $font-system;
       display: flex;
       width: 100%;
 
@@ -59,6 +60,8 @@
         }
 
         svg {
+          vertical-align: middle;
+
           path:nth-child(2) {
             fill: $gray-800;
           }

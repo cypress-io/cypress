@@ -12,12 +12,7 @@
   }
 
   .command {
-    min-height: 20px;
-  }
-
-  .command-scaled {
-    font-size: 85%;
-    line-height: 14px;
+    min-height: 28px;
   }
 
   // System Command Styles
@@ -57,8 +52,7 @@
     background-color: $reporter-section-background;
     color: $gray-500;
     display: flex;
-    min-height: 20px;
-    padding-top: 1px;
+    min-height: 28px;
     padding-right: 2px;
 
     &.command-is-interactive:hover {
@@ -85,71 +79,47 @@
 
     .command-alias,
     .command-interceptions {
-      border-radius: 10px;
-      color: $gray-500;
-      padding: 0 5px;
+      border-radius: 4px;
+      color: $white;
       display: inline-block;
+      font-family: $font-sans;
+      line-height: 16px;
+      max-width: 200px;
+      overflow: hidden;
+      padding: 0 5px;
+      text-overflow: ellipsis;
+      vertical-align: text-top;
+      white-space: nowrap;
 
       &.route {
         background-color: $teal-500;
       }
 
       &.dom {
-        background-color: $indigo-800;
+        background-color: $indigo-500;
       }
 
       &.agent,
       &.primitive {
-        background-color: $red-800;
-      }
-
-      &.show-count {
-        padding-right: 2px;
-        border-radius: 10px 0 0 10px;
-        max-width: 200px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        vertical-align: top;
-        height: 18px;
+        background-color: $red-500;
       }
     }
 
     // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
       white-space: nowrap;
-
+  
       > {
         display: inline-block;
       }
     }
 
-    .num-children,
-    .command-alias-count,
-    .command-interceptions-count {
-      border-radius: 5px;
-      font-size: 90%;
-      font-style: normal;
-      line-height: 1;
-      margin-left: 0;
-    }
-
-    .command-alias-count,
-    .command-interceptions-count {
-      background-color: $teal-500 !important;
-      color: $gray-500;
+    .command-alias-count {
+      padding-left: 2px;
     }
 
     .num-children.has-alias {
-      border-radius: 10px;
-      line-height: 1;
-      padding: 3px 5px 3px 5px;
-    }
-
-    .command-alias-count,
-    .command-interceptions-count {
-      border-radius: 0 10px 10px 0;
-      padding: 2px 5px;
+      margin-left: 2px;
     }
   }
 
@@ -157,8 +127,9 @@
     color: #5a5f7a;
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
-    max-height: 20px; // because some numbers are empty
+    max-height: 28px; // because some numbers are empty
     padding-top: 4px;
+    padding-bottom: 4px;
     text-align: right;
     width: 24px;
   }
@@ -166,18 +137,19 @@
   .command-pin-target.command-group {
     border-left: 1px dotted $gray-600;
     padding-left: 12px;
+    min-height: 28px;
 
     .command-group-block {
       border-left: 1px dotted $gray-600;
       width: 11px;
-      min-height: 20px;
+      min-height: 28px;
       min-width: 11px;
     }
   }
 
   .command-info {
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     margin-left: 0;
     overflow: hidden;
     width: 100%;
@@ -250,8 +222,8 @@
     color: $indigo-200;
 
     .command-number-column {
-      padding-top: 2px;
-      padding-bottom: 2px;
+      padding-top: 4px;
+      padding-bottom: 4px;
 
       .fa-circle {
         line-height: 18px;
@@ -262,26 +234,26 @@
         }
       }
     }
-  }
-
-  .command-progress {
-    height: 2px;
-
-    span {
-      animation-fill-mode: forwards;
-      animation-iteration-count: 1;
-      animation-name: progress-bar;
-      animation-timing-function: linear;
-      background: $indigo-500;
-      display: block;
-      float: right;
-      height: 100%;
-      transform-origin: right;
-      width: 100%;
-
-      @keyframes progress-bar {
-        100% {
-          transform: scaleX(0);
+    
+    .command-progress {
+      height: 2px;
+  
+      span {
+        animation-fill-mode: forwards;
+        animation-iteration-count: 1;
+        animation-name: progress-bar;
+        animation-timing-function: linear;
+        background: $indigo-500;
+        display: block;
+        float: right;
+        height: 100%;
+        transform-origin: right;
+        width: 100%;
+  
+        @keyframes progress-bar {
+          100% {
+            transform: scaleX(0);
+          }
         }
       }
     }
@@ -441,11 +413,13 @@
 
   .command-controls {
     display: flex;
+    padding-bottom: 4px;
     padding-right: 2px;
+    padding-top: 4px;
 
     svg {
       color: $gray-600;
-      vertical-align: top;
+      vertical-align: text-top;
     }
 
     .command-invisible {
@@ -456,9 +430,9 @@
 
     .command-alias,
     .command-interceptions {
-      font-family: $open-sans;
+      font-family: $font-sans;
       font-size: 10px;
-      line-height: 1.75;
+      line-height: 1.6;
       margin-left: 5px;
     }
 
@@ -491,8 +465,8 @@
     flex-shrink: 0;
     padding-left: 10px;
     padding-right: 5px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     width: 25px;
     display: flex;
 
@@ -517,7 +491,7 @@
     border-left: 2px solid $pinned;
 
     &,
-    &.command-is-interactive:hover {
+    &:hover {
       box-shadow: 0 1px 2px rgba($black, 0.2) inset;
     }
 
@@ -533,7 +507,7 @@
     border: 1px solid $gray-900;
     border-radius: 3px;
     box-shadow: inset 0 1px 1px rgba($white, 0.05);
-    min-height: 20px;
+    min-height: 28px;
     padding: 9px;
   }
 
@@ -541,8 +515,14 @@
   .num-children,
   .num-elements {
     background-color: $gray-600;
-    display: inline-block;
+    border-radius: 4px;
     color: $black;
+    display: inline-block;
+    font-family: $font-sans;
+    font-style: normal;
+    font-size: 10px;
+    line-height: 1.5;
+    padding: 0px 5px !important;
     vertical-align: text-top;
   }
 }

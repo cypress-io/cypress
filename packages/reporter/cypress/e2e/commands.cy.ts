@@ -246,11 +246,6 @@ describe('commands', () => {
     .should('have.text', '(xhr stub)')
   })
 
-  it('includes the scaled class when the message is over 100 chars', () => {
-    cy.contains('Lorem ipsum').closest('.command')
-    .should('have.class', 'command-scaled')
-  })
-
   it('does not render with the scaled class when the message is less than 100 chars', () => {
     cy.contains('#exists').closest('.command')
     .should('not.have.class', 'command-scaled')
