@@ -528,12 +528,6 @@ export class ProjectLifecycleManager {
     return this._configManager.getConfigFileContents()
   }
 
-  private async loadCypressEnvFile () {
-    assert(this._configManager, 'Cannot load a cypress env file without a config manager')
-
-    return this._configManager.loadCypressEnvFile()
-  }
-
   reinitializeCypress () {
     resetPluginHandlers()
     this.resetInternalState()
