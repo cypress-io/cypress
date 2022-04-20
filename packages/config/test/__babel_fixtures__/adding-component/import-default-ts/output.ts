@@ -1,4 +1,5 @@
-export default {
+import cy from "cypress";
+export default cy.defineConfig({
   e2e: {},
   component: {
     devServer: {
@@ -6,4 +7,4 @@ export default {
       framework: "react",
     },
   },
-};
+});

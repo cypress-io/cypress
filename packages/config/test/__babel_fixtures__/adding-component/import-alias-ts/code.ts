@@ -1,5 +1,5 @@
-import { defineConfig } from 'cypress'
+import { defineConfig as myDefineConfig } from 'cypress'
 
-export default defineConfig({
+export default myDefineConfig({
   e2e: {},
 })

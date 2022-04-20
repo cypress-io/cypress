@@ -1,5 +1,5 @@
-import { defineConfig } from "cypress";
-export default defineConfig({
+import { defineConfig as myDefineConfig } from "cypress";
+export default myDefineConfig({
   e2e: {},
   component: {
     devServer: {

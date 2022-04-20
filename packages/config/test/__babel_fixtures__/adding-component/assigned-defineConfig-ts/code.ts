@@ -1,4 +1,4 @@
-import {defineConfig} from 'cypress'
+import { defineConfig } from 'cypress'
 
 const myConfig = defineConfig({
   e2e: {}

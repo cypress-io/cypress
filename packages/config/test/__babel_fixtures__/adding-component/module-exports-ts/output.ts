@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   e2e: {},
   component: {
     devServer: {
