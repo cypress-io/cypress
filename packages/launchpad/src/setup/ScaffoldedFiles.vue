@@ -77,8 +77,8 @@ const props = defineProps<{
 }>()
 
 const files = computed(() => {
-  // some files are displayed in a particular order
-  const orderedFiles = [...props.gql.scaffoldedFiles].sort((fileA, fileB) => {
+  // sort the files according to scaffoldedFileOrder
+  const sortedFiles = props.gql.scaffoldedFiles.slice().sort((fileA, fileB) => {
     const indexA = scaffoldedFileOrder.findIndex((name) => fileA.file.relative.includes(name))
     const indexB = scaffoldedFileOrder.findIndex((name) => fileB.file.relative.includes(name))
 
@@ -91,11 +91,10 @@ const files = computed(() => {
       return -1
     }
 
-    // sort according to scaffoldedFileOrder
     return indexA - indexB
   })
 
-  return orderedFiles
+  return sortedFiles
 })
 
 const needsChanges = computed(() => props.gql.scaffoldedFiles?.some((f) => f.status === 'changes'))
