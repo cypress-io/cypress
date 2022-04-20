@@ -14,6 +14,8 @@ const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
 
+require('../lib/open_project')
+
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
 }
@@ -114,11 +116,11 @@ module.exports = {
     })
   },
 
-  openProject (options) {
-    // this code actually starts a project
-    // and is spawned from nodemon
-    require('../lib/open_project').open(options.project, options)
-  },
+  // openProject (options) {
+  //   // this code actually starts a project
+  //   // and is spawned from nodemon
+  //   require('../lib/open_project').open(options.project, options)
+  // },
 
   start (argv = []) {
     debug('starting cypress with argv %o', argv)
