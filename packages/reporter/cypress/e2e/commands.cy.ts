@@ -608,6 +608,7 @@ describe('commands', () => {
         name: 'get',
         message: '#my_element_nested',
         state: 'passed',
+        groupLevel: 2,
         group: nestedGroupId,
       })
 
@@ -615,6 +616,7 @@ describe('commands', () => {
         name: 'assert',
         type: 'child',
         message: 'has class named .omg',
+        groupLevel: 2,
         group: nestedGroupId,
       })
 

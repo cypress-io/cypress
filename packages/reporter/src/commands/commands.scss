@@ -234,26 +234,26 @@
         }
       }
     }
-    
-    .command-progress {
-      height: 2px;
-  
-      span {
-        animation-fill-mode: forwards;
-        animation-iteration-count: 1;
-        animation-name: progress-bar;
-        animation-timing-function: linear;
-        background: $indigo-500;
-        display: block;
-        float: right;
-        height: 100%;
-        transform-origin: right;
-        width: 100%;
-  
-        @keyframes progress-bar {
-          100% {
-            transform: scaleX(0);
-          }
+  }
+
+  .command-state-pending + .command-progress {
+    height: 2px;
+
+    span {
+      animation-fill-mode: forwards;
+      animation-iteration-count: 1;
+      animation-name: progress-bar;
+      animation-timing-function: linear;
+      background: $indigo-500;
+      display: block;
+      float: right;
+      height: 100%;
+      transform-origin: right;
+      width: 100%;
+
+      @keyframes progress-bar {
+        100% {
+          transform: scaleX(0);
         }
       }
     }
