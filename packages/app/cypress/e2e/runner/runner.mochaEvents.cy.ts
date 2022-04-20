@@ -2,7 +2,7 @@ import { runSpec } from './support/spec-loader'
 import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './runner.mochaEvents.snapshots'
 
-describe('src/cypress/runner', { retries: 0 }, () => {
+describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   describe('tests finish with correct state', () => {
     describe('hook failures', () => {
       it('fail in [before]', (done) => {

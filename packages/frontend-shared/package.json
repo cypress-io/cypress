@@ -18,8 +18,6 @@
   "dependencies": {},
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
-    "@cypress/vite-dev-server": "0.0.0-development",
-    "@cypress/vue": "0.0.0-development",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify/json": "1.1.368",
@@ -46,6 +44,7 @@
     "dayjs": "^1.9.3",
     "fake-uuid": "^1.0.0",
     "faker": "5.5.3",
+    "floating-vue": "2.0.0-beta.12",
     "fuzzysort": "^1.1.4",
     "graphql": "^15.5.1",
     "graphql-relay": "^0.9.0",

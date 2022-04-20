@@ -1,12 +1,11 @@
-const { devServer } = require('@cypress/webpack-dev-server')
-const webpackConfig = require('@vue/cli-service/webpack.config')
+const { defineConfig } = require('cypress')
 
-module.exports = {
+module.exports = defineConfig({
   component: {
-    devServer,
-    devServerConfig: {
-      webpackConfig,
+    devServer: {
+      framework: 'vue-cli',
+      bundler: 'webpack',
     },
     indexHtmlFile: 'cypress/support/custom-component-index.html',
   },
-}
+})

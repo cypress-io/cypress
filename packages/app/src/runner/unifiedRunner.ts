@@ -1,10 +1,9 @@
-import type { Ref } from 'vue'
-import { onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
-import { useRoute } from 'vue-router'
+import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } from 'vue'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { SpecFile } from '@packages/types/src'
+import { useRoute } from 'vue-router'
 import { getPathForPlatform } from '../paths'
 
 const initialized = ref(false)
@@ -22,33 +21,30 @@ export function useUnifiedRunner () {
 
   return {
     initialized: readonly(initialized),
-
-    watchSpec: (specs: Ref<ReadonlyArray<SpecFile>>) => {
+    watchSpecs: (specs: Ref<ReadonlyArray<SpecFile>>) => {
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-      watch(() => specs.value, (newVal) => {
-        const fileParam = getPathForPlatform(route.query.file as string)
+      watchEffect(() => {
+        const queryFile = getPathForPlatform(route.query.file as string)
 
-        if (!fileParam) {
+        if (!queryFile) {
           // no file param, we are not showing a file
           // so no action needed when specs list updates
           return
         }
 
-        const activeSpecInSpecsList = newVal.find((x) => x.relative === fileParam)
+        const activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)
 
-        if (!activeSpecInSpecsList) {
-          // the specs list no longer contains the spec being shown
-          // so set active state to null and let the UI handle it
+        if (activeSpecInSpecsList && specStore.activeSpec?.relative !== activeSpecInSpecsList.relative) {
+          specStore.setActiveSpec(activeSpecInSpecsList)
+        } else if (!activeSpecInSpecsList) {
           specStore.setActiveSpec(null)
         }
       })
 
-      return watch(() => getPathForPlatform(route.query.file as string), (queryParam) => {
-        const spec = specs.value.find((x) => x.relative === queryParam)
-
+      watch(() => getPathForPlatform(route.query.file as string), () => {
         if (selectorPlaygroundStore.show) {
           const autIframe = getAutIframeModel()
 
@@ -56,9 +52,7 @@ export function useUnifiedRunner () {
           selectorPlaygroundStore.setEnabled(false)
           selectorPlaygroundStore.setShow(false)
         }
-
-        specStore.setActiveSpec(spec ?? null)
-      }, { immediate: true, flush: 'post' })
+      }, { flush: 'post' })
     },
   }
 }

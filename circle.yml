@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - unify-1449-check-path-length-in-build
+        - chore/cutover-to-bundled-react-mount
 
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
@@ -47,7 +47,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ unify-1449-check-path-length-in-build, << pipeline.git.branch >> ]
+    - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -57,7 +57,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
+    - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
+    - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -452,6 +453,20 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  windows-install-chrome:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - run:
+          # TODO: How can we have preinstalled browsers on CircleCI?
+          name: 'Install Chrome on Windows'
+          command: |
+            # install with `--ignore-checksums` to avoid checksum error
+            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+
   run-new-ui-tests:
     parameters:
       package:
@@ -475,13 +490,8 @@ commands:
         default: ''
     steps:
       - restore_cached_workspace
-      - run:
-          # TODO: How can we have preinstalled browsers on CircleCI?
-          name: 'Install Chrome on Windows'
-          command: |
-            # install with `--ignore-checksums` to avoid checksum error
-            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
@@ -589,24 +599,26 @@ commands:
       - restore_cached_binary
       - run:
           name: "Cloning test project and checking out release branch: <<parameters.repo>>"
-          working_directory: ~/
+          working_directory: /tmp/<<parameters.repo>>
           command: |
-            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
+            cd ~/cypress/..
             # install some deps for get-next-version
             npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+            cd -
 
-            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
+            git checkout $NEXT_VERSION || true
       - when:
-            condition: <<parameters.pull_request_id>>
-            steps:
-              - run:
-                  name: Check out PR <<parameters.pull_request_id>>
-                  working_directory: /tmp/<<parameters.repo>>
-                  command: |
-                    git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
-                    git checkout pr-<<parameters.pull_request_id>>
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
 
   test-binary-against-rwa:
     description: |
@@ -821,6 +833,8 @@ commands:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
           command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
       - when:
           condition: <<parameters.folder>>
           steps:
@@ -1088,8 +1102,8 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
-            run-webpack-dev-server-fresh-integration-tests,
-            run-vite-dev-server-fresh-integration-tests
+            run-webpack-dev-server-integration-tests,
+            run-vite-dev-server-integration-tests
       - run:
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
@@ -1148,8 +1162,10 @@ jobs:
             - run: yarn test-scripts
             # make sure our snapshots are compared correctly
             - run: yarn test-mocha-snapshot
+            # run @cypress/design-system before other packages are built
+            - run: yarn lerna run build-prod --scope \"@cypress/design-system\"
             # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream
+            - run: yarn lerna run build-prod --stream --ignore \"@cypress/design-system\"
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1424,7 +1440,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-webpack-dev-server-fresh-integration-tests:
+  run-webpack-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1438,15 +1454,15 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server-fresh
-          working_directory: npm/webpack-dev-server-fresh
+            yarn cypress:run --record --parallel --group webpack-dev-server
+          working_directory: npm/webpack-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs      
 
-  run-vite-dev-server-fresh-integration-tests:
+  run-vite-dev-server-integration-tests:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
@@ -1460,8 +1476,8 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server-fresh
-          working_directory: npm/vite-dev-server-fresh
+            yarn cypress:run --record --parallel --group vite-dev-server
+          working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1535,7 +1551,7 @@ jobs:
           command: yarn workspace @cypress/webpack-dev-server test
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server-fresh test
+          command: yarn workspace @cypress/webpack-dev-server test
 
   npm-vite-dev-server:
     <<: *defaults
@@ -1543,7 +1559,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
+          command: yarn test
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
@@ -1568,14 +1584,6 @@ jobs:
       - run:
           name: Type Check
           command: yarn typecheck
-          working_directory: npm/vue
-      - run:
-          name: Run component tests
-          command: yarn test:ci:ct
-          working_directory: npm/vue
-      - run:
-          name: Run e2e tests
-          command: yarn test:ci:e2e
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1632,7 +1640,7 @@ jobs:
           command: yarn workspace @cypress/react build
       - run:
           name: Run tests
-          command: yarn test-ci
+          command: yarn test
           working_directory: npm/react
       - store_test_results:
           path: npm/react/test_results
@@ -1655,9 +1663,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn workspace create-cypress-tests build
-      - run:
-          name: Run unit test
-          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1714,7 +1719,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-check-path-length-in-build" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "chore/cutover-to-bundled-react-mount" && "$CIRCLE_BRANCH" != "unify-1036-windows-test-projects" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2257,11 +2262,11 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
-    - run-webpack-dev-server-fresh-integration-tests:
+    - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install
-    - run-vite-dev-server-fresh-integration-tests:
+    - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - system-tests-node-modules-install          
@@ -2466,8 +2471,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    # maybe run all unit tests?
-
     - create-build-artifacts:
         name: darwin-create-build-artifacts
         context:
@@ -2539,6 +2542,11 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
+    - test-binary-against-kitchensink-chrome:
+        name: windows-test-binary-against-kitchensink-chrome
+        executor: windows
+        requires:
+          - windows-create-build-artifacts
 
 workflows:
   linux:
