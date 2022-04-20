@@ -19,5 +19,3 @@ export {
 export { allowDestroy } from './allow-destroy'
 
 export { concatStream } from './concat-stream'
-
-export type { ParsedHost } from './types'
