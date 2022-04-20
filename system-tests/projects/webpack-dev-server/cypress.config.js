@@ -1,13 +1,10 @@
-const { devServer } = require('@cypress/webpack-dev-server')
+const { defineConfig } = require('cypress')
 
-module.exports = {
-  'component': {
+module.exports = defineConfig({
+  component: {
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      output: {
-        publicPath: '/',
-      },
+    devServer: {
+      bundler: 'webpack',
     },
   },
-}
+})

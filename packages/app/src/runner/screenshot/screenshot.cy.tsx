@@ -1,4 +1,4 @@
-import { mount } from '@cypress/vue'
+import { mount } from 'cypress/vue'
 import type { FunctionalComponent } from 'vue-demi'
 
 const styles = `

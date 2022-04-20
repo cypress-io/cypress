@@ -2,14 +2,14 @@ import ShikiHighlight, { initHighlighter } from './ShikiHighlight.vue'
 import code from '../../windi.config?raw'
 
 const devServerCode = `const { defineConfig } = require('cypress')
-const { devServer } = require('@cypress/vite-dev-server')
 
 module.exports = defineConfig({
   component: {
-    devServer,
-    devServerConfig: {
-      entryHtmlFile: 'cypress/component/support/entry.html'
+    devServer: {
+      bundler: 'vite',
+      framework: 'vue',
     },
+    indexHtmlFile: 'cypress/component/support/entry.html'
   },
 })`
 

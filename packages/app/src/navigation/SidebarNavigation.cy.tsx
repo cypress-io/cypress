@@ -7,7 +7,6 @@ function mountComponent (initialNavExpandedVal = true) {
         <div class={[initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
           <SidebarNavigation />
         </div>
-        <div id="tooltip-target"/>
       </div>
     )
   })
@@ -30,11 +29,11 @@ describe('SidebarNavigation', () => {
   it('shows tooltips on hover', () => {
     mountComponent(false)
     cy.get('[data-cy="sidebar-header"').realHover()
-    cy.contains('#tooltip-target > div', 'test-project').should('be.visible')
+    cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
     cy.get('[data-e2e-href="/runs"]').realHover()
-    cy.contains('#tooltip-target > div', 'Runs').should('be.visible')
+    cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
   })
 

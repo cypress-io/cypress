@@ -13,7 +13,7 @@
     "app-start": "ng serve",
     "app-build": "ng build",
     "test": "yarn cy:run",
-    "test-ci": "yarn cy:run",
+    "test-ci": "echo not testing in CI because process never exits",
     "postinstall": "patch-package"
   },
   "dependencies": {
@@ -38,7 +38,6 @@
     "@angular/platform-browser-dynamic": "11.2.13",
     "@angular/router": "11.2.13",
     "@cypress/code-coverage": "3.9.5",
-    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "5.7.0",
     "@types/cypress-image-snapshot": "3.1.5",
     "@types/node": "8.10.66",
@@ -49,7 +48,6 @@
     "cypress": "0.0.0-development",
     "cypress-image-snapshot": "4.0.1",
     "html-loader": "2.1.2",
-    "html-webpack-plugin": "5.3.1",
     "istanbul-instrumenter-loader": "3.0.1",
     "ng-inline-svg": "12.1.0",
     "ngx-build-plus": "11.0.0",

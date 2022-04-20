@@ -10,11 +10,6 @@ const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
 
-interface WizardGetCodeComponent {
-  chosenLanguage: 'js' | 'ts'
-  chosenFramework: typeof WIZARD_FRAMEWORKS[number]
-}
-
 export class WizardActions {
   constructor (private ctx: DataContext) {}
 
@@ -200,10 +195,7 @@ export class WizardActions {
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage),
       this.scaffoldSupport('commands', chosenLanguage),
-      this.getComponentIndexHtml({
-        chosenFramework,
-        chosenLanguage,
-      }),
+      this.scaffoldComponentIndexHtml(chosenFramework),
     ])
   }
 
@@ -325,62 +317,16 @@ export class WizardActions {
     return codeBlocks.join('\n')
   }
 
-  private async getComponentIndexHtml (opts: WizardGetCodeComponent): Promise<NexusGenObjects['ScaffoldedFile']> {
-    const [storybookInfo] = await Promise.all([
-      this.ctx.storybook.loadStorybookInfo(),
-      this.ensureDir('component'),
-    ])
-    const framework = opts.chosenFramework.type
-    let headModifier = ''
-    let bodyModifier = ''
-
-    if (framework === 'nextjs') {
-      headModifier += '<div id="__next_css__DO_NOT_USE__"></div>'
-    }
-
-    const previewHead = storybookInfo?.files.find(({ name }) => name === 'preview-head.html')
-
-    if (previewHead) {
-      headModifier += previewHead.content
-    }
-
-    const previewBody = storybookInfo?.files.find(({ name }) => name === 'preview-body.html')
-
-    if (previewBody) {
-      headModifier += previewBody.content
-    }
-
-    const template = this.getComponentTemplate({
-      headModifier,
-      bodyModifier,
-    })
+  private async scaffoldComponentIndexHtml (chosenFramework: typeof WIZARD_FRAMEWORKS[number]): Promise<NexusGenObjects['ScaffoldedFile']> {
+    await this.ensureDir('component')
 
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     return this.scaffoldFile(
       componentIndexHtmlPath,
-      template,
+      chosenFramework.componentIndexHtml(),
       'The HTML used as the wrapper for all component tests',
     )
-  }
-
-  private getComponentTemplate = (opts: { headModifier: string, bodyModifier: string }) => {
-    // TODO: Properly indent additions and strip newline if none
-    return dedent`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <title>Components App</title>
-          ${opts.headModifier}
-        </head>
-        <body>
-          ${opts.bodyModifier}
-          <div data-cy-root></div>
-        </body>
-      </html>`
   }
 
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {

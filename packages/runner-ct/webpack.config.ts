@@ -81,6 +81,7 @@ config.plugins = [
   // @ts-ignore
   ...config.plugins,
   new CopyWebpackPlugin([{
+    // @ts-ignore // There's a race condition in how these types are generated.
     from: cyIcons.getPathToFavicon('favicon.ico'),
   }]),
 ]

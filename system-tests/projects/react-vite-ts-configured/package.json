@@ -12,7 +12,6 @@
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "@types/react": "^17.0.33",
     "@types/react-dom": "^17.0.10",
     "@vitejs/plugin-react": "^1.0.7",
