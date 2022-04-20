@@ -78,7 +78,7 @@ const props = defineProps<{
 
 const files = computed(() => {
   // sort the files according to scaffoldedFileOrder
-  const sortedFiles = props.gql.scaffoldedFiles.slice().sort((fileA, fileB) => {
+  const sortedFiles = props.gql.scaffoldedFiles?.slice().sort((fileA, fileB) => {
     const indexA = scaffoldedFileOrder.findIndex((name) => fileA.file.relative.includes(name))
     const indexB = scaffoldedFileOrder.findIndex((name) => fileB.file.relative.includes(name))
 
