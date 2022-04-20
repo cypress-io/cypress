@@ -12,12 +12,18 @@
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
     />
-    <BaseError
-      v-if="query.data.value?.baseError"
-      :gql="query.data.value?.baseError"
-      :retry="resetErrorsAndLoadConfig"
-      class="h-full w-full top-0 left-0 absolute overflow-scroll"
-    />
+    <TransitionQuickFade>
+      <div
+        v-if="query.data.value?.baseError"
+        class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
+      >
+        <BaseError
+          :gql="query.data.value?.baseError"
+          :retry="resetErrorsAndLoadConfig"
+        />
+      </div>
+    </TransitionQuickFade>
+
     <main
       aria-labelledby="primary-heading"
       class="overflow-auto"
@@ -43,22 +49,39 @@
 <script lang="ts" setup>
 import { gql, useQuery, useMutation } from '@urql/vue'
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
+
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
-import { MainAppQueryDataDocument, Main_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 
 gql`
-query MainAppQueryData {
+fragment MainAppQueryData on Query {
     baseError {
-    ...BaseError
+      ...BaseError
   }
-}`
+}
+`
 
-const query = useQuery({ query: MainAppQueryDataDocument })
-const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
+gql`
+query MainAppQuery {
+  ...MainAppQueryData
+}
+`
+
+gql`
+mutation MainApp_ResetErrorsAndLoadConfig {
+  resetErrorsAndLoadConfig {
+    ...MainAppQueryData
+  }
+}
+`
+
+const query = useQuery({ query: MainAppQueryDocument })
+const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
 
 const resetErrorsAndLoadConfig = () => {
   if (!mutation.fetching.value) {
