@@ -2184,10 +2184,12 @@ describe('src/cy/commands/navigation', () => {
 
             expect(err.docsUrl).to.eq('https://on.cypress.io/origin')
           } else {
+            const error = Cypress.isBrowser('firefox') ? 'Permission denied to access property "document" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
+
             // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
             expect(err.message).to.equal(stripIndent`\
             Cypress detected a cross origin error happened on page load:\n
-              > Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.\n
+              > ${error}\n
             Before the page load, you were bound to the origin policy:\n
               > http://localhost:3500\n
             A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.\n
