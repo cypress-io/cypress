@@ -335,14 +335,11 @@ let gettingFrameTree
 const _updateFrameTree = (client) => async () => {
   debug('update frame tree')
 
-  gettingFrameTree = new Promise<void>(async (resolve) => {
-    frameTree = (await client.send('Page.getFrameTree')).frameTree
-
+  gettingFrameTree = client.send('Page.getFrameTree').then((tree) => {
     debug('frame tree updated')
 
+    frameTree = tree
     gettingFrameTree = null
-
-    resolve()
   })
 }
 
