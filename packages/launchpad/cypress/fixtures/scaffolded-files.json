@@ -58,32 +58,47 @@
    ],
    "e2e": [
         {
-            "status": "changes",
-            "description": "Merge this code with your existing config file",
-            "file": {
-                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress.config.ts",
-                "contents": "import { defineConfig } from 'cypress'\n\nexport default defineConfig({\n  e2e: {\n    setupNodeEvents(on, config) {\n      // implement node event listeners here\n    },\n  },\n})\n"
-            }
-        },
-        {
             "status": "valid",
             "description": "The support file that is bundled and loaded before each E2E spec.",
             "file": {
-                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/e2e.ts"
+                "id": "2",
+                "relative": "cypress/support/e2e.ts",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/e2e.ts",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".ts"
             }
         },
         {
-            "status": "valid",
-            "description": "A support file that is useful for creating custom Cypress commands and overwriting existing ones.",
+            "status": "changes",
+            "description": "Merge this code with your existing config file",
             "file": {
-                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/commands.ts"
+                "id": "1",
+                "relative": "cypress.config.ts",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress.config.ts",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".ts"
             }
         },
         {
             "status": "skipped",
             "description": "File already exists",
             "file": {
-                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/fixtures/example.json"
+                "id": "4",
+                "relative": "cypress/fixtures/example.json",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/fixtures/example.json",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".json"
+            }
+        },
+        {
+            "status": "valid",
+            "description": "A support file that is useful for creating custom Cypress commands and overwriting existing ones.",
+            "file": {
+                "id": "3",
+                "relative": "cypress/support/commands.ts",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/commands.ts",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".ts"
             }
         }
    ]
