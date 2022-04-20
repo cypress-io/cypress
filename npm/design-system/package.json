@@ -40,8 +40,6 @@
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
-    "@cypress/react": "0.0.0-development",
-    "@cypress/vite-dev-server": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "@react-types/button": "^3.3.1",
     "@react-types/shared": "^3.5.0",

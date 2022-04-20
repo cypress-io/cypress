@@ -55,7 +55,9 @@ export function useEventManager () {
 
   const startSpecWatcher = () => {
     return watch(() => specStore.activeSpec, () => {
-      runSpec()
+      if (specStore.activeSpec) {
+        runSpec()
+      }
     }, { immediate: true, flush: 'post' })
   }
 

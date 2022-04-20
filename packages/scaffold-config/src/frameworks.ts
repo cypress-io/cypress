@@ -2,6 +2,7 @@ import path from 'path'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
+import componentIndexHtmlGenerator from './component-index-template'
 import { defineConfigAvailable } from '@packages/data-context/src/sources/migration/codegen'
 import semver from 'semver'
 import resolveFrom from 'resolve-from'
@@ -65,8 +66,10 @@ interface CreateCypressConfig {
 }
 
 export function createCypressConfig (config: CreateCypressConfig): string {
+  const isDefineConfigAvailable = defineConfigAvailable(config.projectRoot)
+
   if (config.language === 'ts') {
-    if (defineConfigAvailable(config.projectRoot)) {
+    if (isDefineConfigAvailable) {
       return dedent`
         import { defineConfig } from 'cypress'
 
@@ -89,6 +92,20 @@ export function createCypressConfig (config: CreateCypressConfig): string {
           }
         }
       }`
+  }
+
+  if (isDefineConfigAvailable) {
+    return dedent`
+      const { defineConfig } = require('cypress')
+
+      module.exports = defineConfig({
+        component: {
+          devServer: {
+            framework: '${config.framework}',
+            bundler: '${config.bundler}'
+          }
+        }
+      })`
   }
 
   return dedent`
@@ -122,6 +139,8 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vueclivue2',
@@ -142,6 +161,8 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vueclivue3',
@@ -162,11 +183,13 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'nextjs',
     category: 'template',
-    configFramework: 'nextjs',
+    configFramework: 'next',
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
@@ -181,10 +204,12 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator('<div id="__next_css__DO_NOT_USE__"></div>'),
   },
   {
     type: 'nuxtjs',
-    configFramework: 'nuxtjs',
+    configFramework: 'nuxt',
     category: 'template',
     name: 'Nuxt.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
@@ -200,6 +225,8 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vue2',
@@ -219,6 +246,8 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vue3',
@@ -238,6 +267,8 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'react',
@@ -257,5 +288,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    supportStatus: 'full',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const
