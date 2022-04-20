@@ -7,7 +7,7 @@ index 0a00c69..1707682 100755
  /// <reference types="jquery"/>
  
 -interface ScrollToOptions {
-+interface ScrollToOptions extends JQuery.EffectsOptions<any> {
++interface ScrollToOptions<TElement> extends JQuery.EffectsOptions<TElement> {
      /**
      * Which axis must be scrolled, use 'x', 'y', 'xy' or 'yx'.
      */
