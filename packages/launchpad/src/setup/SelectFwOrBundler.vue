@@ -32,7 +32,7 @@
       <span class="text-gray-800 inline-block">
         {{ selectedOptionName }}
       </span>
-      <AlphaLabel v-if="selectedFrameworkOptionObject?.alpha" />
+      <AlphaLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'alpha'" />
       <span
         v-if="isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -45,7 +45,7 @@
       <span class="text-gray-800 inline-block">
         {{ itemValue.name }}
       </span>
-      <AlphaLabel v-if="itemValue.alpha" />
+      <AlphaLabel v-if="itemValue.supportStatus === 'alpha'" />
       <span
         v-if="itemValue.isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -73,7 +73,7 @@ interface RootOption {
 
 interface FrameworkOption extends RootOption {
   type: FrontendFrameworkEnum
-  alpha: boolean
+  supportStatus?: 'alpha' | 'beta'
 }
 
 interface BundlerOption extends RootOption {

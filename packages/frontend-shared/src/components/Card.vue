@@ -12,6 +12,7 @@
     <div
       v-if="title === t('testingType.component.name')"
       class="ribbon absolute top-0 right-0 text-teal-600"
+      aria-hidden="true"
     >
       {{ t('versions.beta') }}
     </div>
@@ -50,6 +51,12 @@
       {{ description }}
     </p>
     <slot name="footer" />
+    <div
+      v-if="title === t('testingType.component.name')"
+      class="sr-only"
+    >
+      Support is in {{ t('versions.beta') }}
+    </div>
   </div>
 </template>
 

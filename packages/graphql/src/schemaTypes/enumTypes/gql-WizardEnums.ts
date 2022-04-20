@@ -18,6 +18,11 @@ export const FrontendFrameworkEnum = enumType({
   members: WIZARD_FRAMEWORKS.map((t) => t.type),
 })
 
+export const SupportStatusEnum = enumType({
+  name: 'SupportStatusEnum',
+  members: ['alpha', 'beta'],
+})
+
 export const CodeLanguageEnum = enumType({
   name: 'CodeLanguageEnum',
   members: CODE_LANGUAGES.map((t) => t.type),

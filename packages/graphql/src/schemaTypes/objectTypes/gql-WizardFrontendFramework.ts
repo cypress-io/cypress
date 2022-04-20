@@ -1,5 +1,5 @@
 import { WizardBundler } from './gql-WizardBundler'
-import { FrontendFrameworkEnum } from '../enumTypes/gql-WizardEnums'
+import { FrontendFrameworkEnum, SupportStatusEnum } from '../enumTypes/gql-WizardEnums'
 import { objectType } from 'nexus'
 
 export const WizardFrontendFramework = objectType({
@@ -31,8 +31,9 @@ export const WizardFrontendFramework = objectType({
       description: 'The display name of the framework',
     })
 
-    t.nonNull.boolean('alpha', {
-      description: 'Whether the framework is in alpha or not',
+    t.field('supportStatus', {
+      description: 'Current support status of the framework',
+      type: SupportStatusEnum,
     })
 
     t.nonNull.list.nonNull.field('supportedBundlers', {

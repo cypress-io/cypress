@@ -29,8 +29,8 @@ export const allBundlers = testBundlers.map((bundler, idx) => {
 })
 
 const testFrameworks = [
-  { name: 'Create React App (v5)', type: 'reactscripts', supportedBundlers: [testBundlerWebpack], category: 'framework', alpha: true },
-  { name: 'Vue.js (v3)', type: 'vue3', supportedBundlers: [testBundlerVite, testBundlerWebpack], category: 'library', alpha: false },
+  { name: 'Create React App (v5)', type: 'reactscripts', supportedBundlers: [testBundlerWebpack], category: 'framework', supportStatus: 'alpha' },
+  { name: 'Vue.js (v3)', type: 'vue3', supportedBundlers: [testBundlerVite, testBundlerWebpack], category: 'library', supportStatus: undefined },
 ] as const
 
 export const stubWizard: MaybeResolver<Wizard> = {
@@ -52,10 +52,10 @@ export const stubWizard: MaybeResolver<Wizard> = {
     },
   ],
   allBundlers,
-  frameworks: testFrameworks.map(({ name, type, supportedBundlers, category, alpha }, idx) => {
+  frameworks: testFrameworks.map(({ name, type, supportedBundlers, category, supportStatus }, idx) => {
     return {
       ...testNodeId('WizardFrontendFramework'),
-      alpha,
+      supportStatus,
       name,
       category,
       type,
