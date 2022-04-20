@@ -1,6 +1,6 @@
 <template>
   <Popover
-    :key="`${popoverKey}`"
+    :key="`${props.disabled}`"
     class="bg-white rounded border-1px border-gray-100 h-32px relative"
     #="{ open, close }"
   >
@@ -53,7 +53,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
@@ -61,19 +60,15 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 const props = withDefaults(defineProps<{
   variant?: 'panel'
   align?: 'left' | 'right'
+
+  // The disabled prop is used as the Popover key so that changes to the prop
+  // cause the Popover component to mount again. This re-mounting ensures that
+  // the PopoverPanel is closed if an enabled dropdown later becomes disabled.
   disabled?: boolean
 }>(), {
   variant: undefined,
   align: 'right',
   disabled: false,
-})
-
-const popoverKey = ref(false)
-
-// Watch the disabled prop to ensure that any open popovers are closed
-// if the dropdown button is subsequently disabled
-watch(() => props.disabled, () => {
-  popoverKey.value = !popoverKey.value
 })
 
 </script>
