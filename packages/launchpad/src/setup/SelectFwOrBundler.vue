@@ -73,7 +73,7 @@ interface RootOption {
 
 interface FrameworkOption extends RootOption {
   type: FrontendFrameworkEnum
-  supportStatus: 'alpha' | 'beta' | null
+  supportStatus: 'alpha' | 'beta' | 'full'
 }
 
 interface BundlerOption extends RootOption {

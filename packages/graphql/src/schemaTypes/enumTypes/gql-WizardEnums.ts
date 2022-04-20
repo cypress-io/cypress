@@ -20,7 +20,7 @@ export const FrontendFrameworkEnum = enumType({
 
 export const SupportStatusEnum = enumType({
   name: 'SupportStatusEnum',
-  members: ['alpha', 'beta'],
+  members: ['alpha', 'beta', 'full'],
 })
 
 export const CodeLanguageEnum = enumType({

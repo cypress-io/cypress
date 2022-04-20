@@ -30,7 +30,7 @@ export const allBundlers = testBundlers.map((bundler, idx) => {
 
 const testFrameworks = [
   { name: 'Create React App (v5)', type: 'reactscripts', supportedBundlers: [testBundlerWebpack], category: 'framework', supportStatus: 'alpha' },
-  { name: 'Vue.js (v3)', type: 'vue3', supportedBundlers: [testBundlerVite, testBundlerWebpack], category: 'library', supportStatus: undefined },
+  { name: 'Vue.js (v3)', type: 'vue3', supportedBundlers: [testBundlerVite, testBundlerWebpack], category: 'library', supportStatus: 'full' },
 ] as const
 
 export const stubWizard: MaybeResolver<Wizard> = {

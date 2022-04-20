@@ -31,7 +31,7 @@ export const WizardFrontendFramework = objectType({
       description: 'The display name of the framework',
     })
 
-    t.field('supportStatus', {
+    t.nonNull.field('supportStatus', {
       description: 'Current support status of the framework',
       type: SupportStatusEnum,
     })
