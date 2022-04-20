@@ -1,6 +1,6 @@
-const { devServer } = require('@cypress/vite-dev-server')
+const { defineConfig } = require('cypress')
 
-module.exports = {
+module.exports = defineConfig({
   viewportWidth: 1024,
   viewportHeight: 800,
   video: false,
@@ -14,6 +14,9 @@ module.exports = {
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
     ],
-    devServer,
+    devServer: {
+      framework: 'react',
+      bundler: 'vite',
+    },
   },
-}
+})

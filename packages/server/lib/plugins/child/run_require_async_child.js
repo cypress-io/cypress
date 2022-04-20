@@ -73,11 +73,11 @@ function run (ipc, file, projectRoot) {
 
     if (devServer && typeof devServer === 'object') {
       if (devServer.bundler === 'webpack') {
-        return { devServer: require('@cypress/webpack-dev-server-fresh').devServer, objApi: true }
+        return { devServer: require('@cypress/webpack-dev-server').devServer, objApi: true }
       }
 
       if (devServer.bundler === 'vite') {
-        return { devServer: require('@cypress/vite-dev-server-fresh').devServer, objApi: true }
+        return { devServer: require('@cypress/vite-dev-server').devServer, objApi: true }
       }
     }
 
@@ -184,6 +184,8 @@ function run (ipc, file, projectRoot) {
                   devServerEvents,
                 })
               }
+
+              devServerOpts.cypressConfig = config
 
               return devServer(devServerOpts, result.component && result.component.devServerConfig)
             })

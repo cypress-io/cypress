@@ -4,14 +4,14 @@ import faker from 'faker'
 import { defaultMessages } from '@cy/i18n'
 
 const content = `import { defineConfig } from 'cypress'
-import { devServer } from '@cypress/vite-dev-server'
 
 export default defineConfig({
   component: {
-    devServer,
-    devServerConfig: {
-      entryHtmlFile: 'cypress/component/support/entry.html'
+    devServer: {
+      bundler: 'vite',
+      framework: 'vue',
     },
+    indexHtmlFile: 'cypress/component/support/entry.html'
   },
 })`
 
@@ -23,7 +23,7 @@ const changesRequiredDescription = messages.changesRequiredDescription.replace('
 describe('FileRow', () => {
   it('renders each status', () => {
     cy.mount(() => (
-      <div class="p-5 w-full">
+      <div class="w-full p-5">
         <FileRow
           status="valid"
           content={content}
@@ -67,7 +67,7 @@ describe('FileRow', () => {
 
   it('opens on click', () => {
     cy.mount(() => (
-      <div class="p-5 w-full">
+      <div class="w-full p-5">
         <FileRow
           status="valid"
           content={content}
@@ -101,7 +101,7 @@ describe('FileRow', () => {
     const lorem = faker.lorem.paragraphs(3)
 
     cy.mount(() => (
-      <div class="p-5 w-full">
+      <div class="w-full p-5">
         <FileRow
           status="changes"
           content={content}

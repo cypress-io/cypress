@@ -641,7 +641,6 @@
       "troubleRendering": "if you're having trouble rendering your components properly."
     },
     "snapshot": {
-      "toggleHighlights": "Toggle highlights",
       "highlightsLabel": "Highlights",
       "testsRunningError": "Cannot show Snapshot while tests are running",
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
@@ -673,5 +672,9 @@
   },
   "warnings": {
     "retry": "Try again"
+  },
+  "versions": {
+    "alpha": "Alpha",
+    "beta": "Beta"
   }
 }
