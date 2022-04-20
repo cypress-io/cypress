@@ -14,7 +14,7 @@ interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeo
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    submit (subject, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    submit (subject: JQuery<HTMLFormElement>, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalSubmitOptions = _.defaults({}, userOptions, {
         log: true,
         $el: subject,

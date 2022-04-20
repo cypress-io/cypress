@@ -94,7 +94,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    ng (type, selector, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    ng (type: string, selector: string, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       // what about requirejs / browserify?
       // we need to intelligently check to see if we're using those
       // and if angular is available through them.  throw a very specific

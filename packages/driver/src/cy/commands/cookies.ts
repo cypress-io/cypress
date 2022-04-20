@@ -81,25 +81,25 @@ function cookieValidatesSecurePrefix (options) {
 
 interface InternalGetCookieOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
-  cookie?: any
+  cookie?: Cypress.Cookie
 }
 
 interface InternalGetCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
-  cookies?: any
+  cookies?: Cypress.Cookie[]
 }
 
 interface InternalSetCookieOptions extends Partial<Cypress.SetCookieOptions> {
   _log?: Log
   name: string
-  cookie?: any
+  cookie?: Cypress.Cookie
 }
 
 type InternalClearCookieOptions = InternalGetCookieOptions
 
 interface InternalClearCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
-  cookies?: any
+  cookies?: Cypress.Cookie[]
   domain?: any
 }
 
