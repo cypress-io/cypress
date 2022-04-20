@@ -62,7 +62,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
   const { loadConfig, getNextJsBaseWebpackConfig } = getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
-  const runWebpackSpan = await getRunWebpackSpan()
+  const runWebpackSpan = getRunWebpackSpan(devServerConfig)
   const webpackConfig = await getNextJsBaseWebpackConfig(
     devServerConfig.cypressConfig.projectRoot,
     {
@@ -138,17 +138,21 @@ function findPagesDir (projectRoot: string) {
 // 'next/dist/telemetry/trace/trace' only exists since v10.0.9
 // and our peerDeps support back to v8 so try-catch this import
 // Starting from 12.0 trace is now located in 'next/dist/trace/trace'
-async function getRunWebpackSpan (): Promise<{ runWebpackSpan?: any }> {
+function getRunWebpackSpan (devServerConfig: WebpackDevServerConfig): { runWebpackSpan?: any } {
   let trace: (name: string) => any
 
   try {
     try {
-      trace = await import('next/dist/telemetry/trace/trace').then((m) => m.trace)
+      const traceImportPath = require.resolve('next/dist/telemetry/trace/trace', { paths: [devServerConfig.cypressConfig.projectRoot] })
+
+      trace = require(traceImportPath).trace
 
       return { runWebpackSpan: trace('cypress') }
     } catch (_) {
       // @ts-ignore
-      trace = await import('next/dist/trace/trace').then((m) => m.trace)
+      const traceImportPath = require.resolve('next/dist/trace/trace', { paths: [devServerConfig.cypressConfig.projectRoot] })
+
+      trace = require(traceImportPath).trace
 
       return { runWebpackSpan: trace('cypress') }
     }

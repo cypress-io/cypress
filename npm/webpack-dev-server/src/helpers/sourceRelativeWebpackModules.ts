@@ -178,7 +178,7 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, framewor
     debug('WebpackDevServer: Falling back to bundled version')
 
     webpackDevServerJsonPath = require.resolve('webpack-dev-server/package.json', {
-      paths: [cypressWebpackPath],
+      paths: [__dirname],
     })
   }
 
