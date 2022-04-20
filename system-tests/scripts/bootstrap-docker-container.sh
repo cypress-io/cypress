@@ -41,6 +41,7 @@ npx npm@latest install --unsafe-perm --allow-root --force file:$CLI_PATH
 PATH=$PATH:./node_modules/.bin
 
 cypress install
+cypress verify
 
 # run command passed in argv and store exit code
 set +e
