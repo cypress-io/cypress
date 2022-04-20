@@ -610,11 +610,7 @@
     },
     "configFiles": {
       "title": "Configuration Files",
-      "description": "We added the following files to your project:",
-      "status": {
-        "skipped": "File already exists",
-        "error": "Error writing file"
-      }
+      "description": "We added the following files to your project:"
     },
     "chooseBrowser": {
       "title": "Choose a Browser",
