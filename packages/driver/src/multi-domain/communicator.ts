@@ -32,7 +32,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   onMessage ({ data, source }) {
     // check if message is cross origin and if so, feed the message into
     // the cross origin bus with args and strip prefix
-    if (data?.event?.includes(CROSS_ORIGIN_PREFIX)) {
+    if (data?.event?.startsWith(CROSS_ORIGIN_PREFIX)) {
       const messageName = data.event.replace(CROSS_ORIGIN_PREFIX, '')
 
       // NOTE: need a special case here for 'bridge:ready'
