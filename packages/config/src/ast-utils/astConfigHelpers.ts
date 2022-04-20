@@ -27,11 +27,11 @@ export interface ASTComponentDefinitionConfig {
  */
 export function addComponentDefinition (config: ASTComponentDefinitionConfig): t.ObjectProperty {
   const properties: Parameters<typeof t['objectExpression']>[0] = [
-    t.objectProperty(t.identifier('bundler'), t.identifier(config.bundler)),
+    t.objectProperty(t.identifier('bundler'), t.stringLiteral(config.bundler)),
   ]
 
   if (config.framework) {
-    properties.push(t.objectProperty(t.identifier('framework'), t.identifier(config.framework)))
+    properties.push(t.objectProperty(t.identifier('framework'), t.stringLiteral(config.framework)))
   }
 
   return t.objectProperty(t.identifier('component'), t.objectExpression([

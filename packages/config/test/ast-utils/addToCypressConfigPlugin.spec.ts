@@ -1,44 +1,16 @@
 import pluginTester from 'babel-plugin-tester'
-import * as t from '@babel/types'
 import path from 'path'
 
 import { addToCypressConfigPlugin } from '../../src/ast-utils/addToCypressConfigPlugin'
-
-function setupNodeEvents () {
-  return t.objectMethod(
-    'method',
-    t.identifier('setupNodeEvents'),
-    [],
-    t.blockStatement([]),
-  )
-}
+import { addComponentDefinition } from '../../src/ast-utils/astConfigHelpers'
 
 pluginTester({
-  plugin: addToCypressConfigPlugin(
-    t.objectProperty(
-      t.identifier('e2e'),
-      t.objectExpression([setupNodeEvents()]),
-    ),
-  ),
-  fixtures: path.join(__dirname, '..', '__fixtures__', 'adding-e2e'),
-})
-
-pluginTester({
-  plugin: addToCypressConfigPlugin(
-    t.objectProperty(
-      t.identifier('e2e'),
-      t.objectExpression([setupNodeEvents()]),
-    ),
-  ),
-  fixtures: path.join(__dirname, '..', '__fixtures__', 'adding-component'),
-})
-
-pluginTester({
-  plugin: addToCypressConfigPlugin(
-    t.objectProperty(
-      t.identifier('projectId'),
-      t.identifier('abc1234'),
-    ),
-  ),
-  fixtures: path.join(__dirname, '..', '__fixtures__', 'adding-projectId'),
+  pluginName: 'addToCypressConfigPlugin: component',
+  plugin: () => {
+    return addToCypressConfigPlugin(
+      addComponentDefinition({ testingType: 'component', framework: 'react', bundler: 'webpack' }),
+      { shouldThrow: false },
+    )
+  },
+  fixtures: path.join(__dirname, '..', '__babel_fixtures__', 'adding-component'),
 })

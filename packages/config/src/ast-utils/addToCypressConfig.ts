@@ -3,9 +3,12 @@ import * as babel from '@babel/core'
 import fs from 'fs-extra'
 import dedent from 'dedent'
 import path from 'path'
+import debugLib from 'debug'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
 import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
+
+const debug = debugLib('cypress:config:addToCypressConfig')
 
 /**
  * Adds to the Cypress config, using the Babel AST utils.
@@ -36,17 +39,22 @@ import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig 
  *      ...createConfigFn()
  *    }
  */
-export async function addToCypressConfig (code: string, toAdd: t.ObjectProperty) {
-  return babel.transformAsync(code, {
-    babelrc: false,
-    parserOpts: {
-      errorRecovery: true,
-      strictMode: false,
-    },
-    plugins: [
-      addToCypressConfigPlugin(toAdd),
-    ],
-  })
+export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
+  try {
+    return await babel.transformAsync(code, {
+      babelrc: false,
+      parserOpts: {
+        errorRecovery: true,
+        strictMode: false,
+      },
+      plugins: [
+        addToCypressConfigPlugin(toAdd),
+      ],
+    })
+  } catch (e) {
+    debug(`Error adding properties to %s: %s`, filePath, e.stack)
+    throw new Error(`Unable to automerge with the config file`)
+  }
 }
 
 export interface AddProjectIdToCypressConfigOptions {
@@ -57,7 +65,7 @@ export interface AddProjectIdToCypressConfigOptions {
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
     let result = await fs.readFile(options.filePath, 'utf8')
-    const { code: toPrint } = await addToCypressConfig(result, t.objectProperty(
+    const { code: toPrint } = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
       t.identifier(options.projectId),
     ))
@@ -80,8 +88,8 @@ export interface AddTestingTypeToCypressConfigFile {
   error?: Error
 }
 
-export interface AddTestingTypeToCypressConfigOptions extends AddProjectIdToCypressConfigOptions {
-  outputType: 'ts' | 'js' | 'esm'
+export interface AddTestingTypeToCypressConfigOptions {
+  filePath: string
   info: ASTComponentDefinitionConfig | {
     testingType: 'e2e'
   }
@@ -93,18 +101,20 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
 
     try {
       result = await fs.readFile(options.filePath, 'utf8')
-    } catch {
-      //
+    } catch (e) {
+      // If we can't find the file, or it's an empty file, let's create a new one
     }
 
+    const pathExt = path.extname(options.filePath)
+
     // If for some reason they have deleted the contents of the file, we want to recover
-    // gracefully by adding some default code to use as the AST here, based on the outputType
+    // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
-      result = getEmptyCodeBlock(options.outputType)
+      result = getEmptyCodeBlock(pathExt)
     }
 
     const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
-    const { code: toPrint } = await addToCypressConfig(result, toAdd)
+    const { code: toPrint } = await addToCypressConfig(options.filePath, result, toAdd)
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 
@@ -121,21 +131,21 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock (outputType: 'js' | 'ts' | 'esm') {
-  if (outputType === 'js') {
+function getEmptyCodeBlock (outputType: string) {
+  if (outputType === 'ts' || outputType === 'esm') {
     return dedent`
-    const { defineConfig } = require('cypress')
+      import { defineConfig } from 'cypress'
 
-    module.exports = defineConfig({
-      
-    })
-  `
+      export default defineConfig({
+        
+      })
+    `
   }
 
   return dedent`
-    import { defineConfig } from 'cypress'
+    const { defineConfig } = require('cypress')
 
-    export default defineConfig({
+    module.exports = defineConfig({
       
     })
   `

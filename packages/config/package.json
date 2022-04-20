@@ -11,8 +11,9 @@
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "test": "yarn test-unit",
+    "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register test/**/*.spec.ts --exit"
+    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit"
   },
   "dependencies": {
     "@babel/core": "^7",

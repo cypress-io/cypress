@@ -1,3 +1,3 @@
 export default {
-  e2e: {},
+  e2e: {}
 }

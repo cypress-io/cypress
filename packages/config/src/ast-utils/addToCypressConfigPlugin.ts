@@ -1,5 +1,13 @@
-import type { ParserOptions, PluginItem, Visitor } from '@babel/core'
+import type { NodePath, ParserOptions, PluginItem, Visitor } from '@babel/core'
+import generate from '@babel/generator'
 import * as t from '@babel/types'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:config:addToCypressConfigPlugin')
+
+interface AddToCypressConfigPluginOptions {
+  shouldThrow?: boolean
+}
 
 /**
  * Standardizes our approach to writing values into the existing
@@ -9,7 +17,26 @@ import * as t from '@babel/types'
  * @param toAdd k/v Object Property to append to the current object
  * @returns
  */
-export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
+export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCypressConfigPluginOptions = {}): PluginItem {
+  debug(`adding %s`, toAdd)
+  const { shouldThrow = true } = opts
+
+  function canAddKey (path: NodePath<any>, props: t.ObjectExpression['properties'], toAdd: t.ObjectProperty) {
+    for (const prop of props) {
+      if (t.isObjectProperty(prop) && t.isNodesEquivalent(prop['key'], toAdd['key'])) {
+        if (shouldThrow) {
+          throw new Error(`Cannot add, the existing config has a ${generate(prop['key']).code} property`)
+        } else {
+          path.stop()
+
+          return false
+        }
+      }
+    }
+
+    return true
+  }
+
   /**
    * Based on the import syntax, we look for the "defineConfig" identifier, and whether it
    * has been reassigned
@@ -51,13 +78,17 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
       // Skip "import type" for the purpose of finding the defineConfig identifier,
       // and skip if we see a non "cypress" import, since that's the only one we care about finding
       if (path.node.importKind === 'type' || path.node.source.value !== 'cypress') {
+        debug(`Skipping non-cypress import declaration %s`, path)
+
         return
       }
 
       for (const specifier of path.node.specifiers) {
         if (specifier.type === 'ImportNamespaceSpecifier' || specifier.type === 'ImportDefaultSpecifier') {
+          debug(`Adding %s specifier [%s, %s]`, specifier.type, specifier.local.name, 'defineConfig')
           defineConfigIdentifiers.push([specifier.local.name, 'defineConfig'])
         } else {
+          debug(`Adding import specifier %s`, specifier.local.name)
           defineConfigIdentifiers.push(specifier.local.name)
         }
       }
@@ -68,7 +99,7 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
         return
       }
 
-      const cyImportDeclarations = path.node.declarations.filter((d) => {
+      const cyRequireDeclaration = path.node.declarations.filter((d) => {
         return (
           t.isCallExpression(d.init) &&
           t.isIdentifier(d.init.callee) &&
@@ -78,23 +109,28 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
         )
       })
 
-      for (const variableDeclaration of cyImportDeclarations) {
+      for (const variableDeclaration of cyRequireDeclaration) {
         if (t.isIdentifier(variableDeclaration.id)) {
+          debug(`Cypress require declaration [%s, 'defineConfig']`, variableDeclaration.id.name)
           defineConfigIdentifiers.push([variableDeclaration.id.name, 'defineConfig'])
         } else if (t.isObjectPattern(variableDeclaration.id)) {
           for (const prop of variableDeclaration.id.properties) {
             if (t.isObjectProperty(prop) && t.isIdentifier(prop.key) && t.isIdentifier(prop.value)) {
               if (prop.key.name === 'defineConfig') {
+                debug(`Adding destructured object prop`, prop.value.name)
                 defineConfigIdentifiers.push(prop.value.name)
               }
             }
           }
+        } else {
+          debug(`Skipping variableDeclaration %s`, variableDeclaration.id.type)
         }
       }
     },
     CallExpression (path) {
       if (getDefineConfigExpression(path.node)) {
         seenConfigIdentifierCall = true
+        debug(`Seen identifier call %s`, path)
       }
     },
   }
@@ -119,10 +155,11 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
       Program: {
         enter (path) {
           path.traverse(nestedVisitor)
+          debug(`Finished initial traversal, seenConfigIdentifierCall: %s - %o`, seenConfigIdentifierCall, defineConfigIdentifiers)
         },
         exit () {
-          if (!didAdd) {
-            throw new Error('Unable to add the properties to the file')
+          if (!didAdd && shouldThrow) {
+            throw new Error(`Unable to add properties`)
           }
         },
       },
@@ -131,8 +168,11 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
           const defineConfigExpression = getDefineConfigExpression(path.node)
 
           if (defineConfigExpression) {
-            defineConfigExpression.properties.push(toAdd)
-            didAdd = true
+            if (canAddKey(path, defineConfigExpression.properties, toAdd)) {
+              defineConfigExpression.properties.push(toAdd)
+              didAdd = true
+              debug(`Added to defineConfig expression`)
+            }
           }
         }
       },
@@ -145,8 +185,10 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
 
         // export default {}
         if (t.isObjectExpression(path.node.declaration)) {
-          path.node.declaration.properties.push(toAdd)
-          didAdd = true
+          if (canAddKey(path, path.node.declaration.properties, toAdd)) {
+            path.node.declaration.properties.push(toAdd)
+            didAdd = true
+          }
         } else if (t.isExpression(path.node.declaration)) {
           path.node.declaration = spreadResult(path.node.declaration, toAdd)
           didAdd = true
@@ -161,8 +203,10 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty): PluginItem {
 
         if (t.isMemberExpression(path.node.left) && isModuleExports(path.node.left)) {
           if (t.isObjectExpression(path.node.right)) {
-            path.node.right.properties.push(toAdd)
-            didAdd = true
+            if (canAddKey(path, path.node.right.properties, toAdd)) {
+              path.node.right.properties.push(toAdd)
+              didAdd = true
+            }
           } else if (t.isExpression(path.node.right)) {
             path.node.right = spreadResult(path.node.right, toAdd)
             didAdd = true
