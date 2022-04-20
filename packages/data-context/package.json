@@ -41,7 +41,6 @@
     "node-machine-id": "1.1.12",
     "p-defer": "^3.0.0",
     "parse-glob": "3.0.4",
-    "prettier": "2.5.1",
     "randexp": "0.5.3",
     "randomstring": "1.1.5",
     "resolve-from": "^5.0.0",
@@ -70,6 +69,7 @@
     "@types/prettier": "2.4.3",
     "@types/stringify-object": "^3.0.0",
     "mocha": "7.0.1",
+    "prettier": "2.5.1",
     "rimraf": "3.0.2",
     "tslint": "^6.1.3"
   },
