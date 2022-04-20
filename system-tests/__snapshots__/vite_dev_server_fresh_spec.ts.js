@@ -1,4 +1,4 @@
-exports['@cypress/vite-dev-server-fresh / react / runs specs in vite 2.8.6'] = `
+exports['@cypress/vite-dev-server / react / runs specs in vite 2.8.6'] = `
 
 ====================================================================================================
 
@@ -153,7 +153,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 `
 
-exports['@cypress/vite-dev-server-fresh / react / runs specs in vite 2.9.1'] = `
+exports['@cypress/vite-dev-server / react / runs specs in vite 2.9.1'] = `
 
 ====================================================================================================
 

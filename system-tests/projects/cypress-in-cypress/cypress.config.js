@@ -1,14 +1,13 @@
-const { devServer } = require('@cypress/react/plugins/load-webpack')
-
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config.js'),
     },
   },
   e2e: {
