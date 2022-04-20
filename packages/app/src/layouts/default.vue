@@ -12,7 +12,12 @@
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
     />
-
+    <BaseError
+      v-if="query.data.value?.baseError"
+      :gql="query.data.value?.baseError"
+      :retry="resetErrorsAndLoadConfig"
+      class="h-full w-full top-0 left-0 absolute overflow-scroll"
+    />
     <main
       aria-labelledby="primary-heading"
       class="overflow-auto"
@@ -36,10 +41,30 @@
 </template>
 
 <script lang="ts" setup>
+import { gql, useQuery, useMutation } from '@urql/vue'
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
+import BaseError from '@cy/gql-components/error/BaseError.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+
+import { MainAppQueryDataDocument, Main_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+
+gql`
+query MainAppQueryData {
+    baseError {
+    ...BaseError
+  }
+}`
+
+const query = useQuery({ query: MainAppQueryDataDocument })
+const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
+
+const resetErrorsAndLoadConfig = () => {
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({})
+  }
+}
 
 const currentRoute = useRoute()
 
