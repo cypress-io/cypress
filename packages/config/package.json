@@ -4,7 +4,7 @@
   "description": "Config contains the configuration types and validation function used in the cypress electron application.",
   "private": true,
   "main": "index.js",
-  "browser": "src/index.ts",
+  "browser": "src/browser.ts",
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
