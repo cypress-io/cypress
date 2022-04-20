@@ -1263,7 +1263,7 @@ jobs:
       # using `machine` gives us a Linux VM that can run Docker
       image: ubuntu-2004:202111-02
       docker_layer_caching: true
-    resource_class: medium
+    resource_class: large
     steps:
       - run-binary-system-tests
 
