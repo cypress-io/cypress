@@ -17,7 +17,7 @@ describe('devServer', function () {
   it('creates a new devServer webpack4, webpackDevServer3', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
-        sourceRelativeWebpackModules: () => {
+        sourceDefaultWebpackDependencies: () => {
           return createModuleMatrixResult({
             webpack: 4,
             webpackDevServer: 3,
@@ -38,7 +38,7 @@ describe('devServer', function () {
   it('creates a new devServer webpack4, webpackDevServer4', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
-        sourceRelativeWebpackModules: () => {
+        sourceDefaultWebpackDependencies: () => {
           return createModuleMatrixResult({
             webpack: 4,
             webpackDevServer: 4,
@@ -59,7 +59,7 @@ describe('devServer', function () {
   it('creates a new devServer webpack5, webpackDevServer4', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
-        sourceRelativeWebpackModules: () => {
+        sourceDefaultWebpackDependencies: () => {
           return createModuleMatrixResult({
             webpack: 5,
             webpackDevServer: 4,

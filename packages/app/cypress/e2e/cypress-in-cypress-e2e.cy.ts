@@ -174,8 +174,20 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('switch spec')
     cy.contains('withWait.spec').click()
 
-    cy.wait(5000)
-    cy.get('.passed > .num').should('contain', 4)
+    cy.get('.passed > .num', { timeout: 10000 }).should('contain', 4)
     cy.get('.failed > .num').should('not.contain', 1)
+  })
+
+  it('executes a test, navigates back to the spec list, creates a new spec, and runs the new spec', () => {
+    cy.visitApp()
+    cy.contains('dom-content.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.contains('a', 'Specs').click()
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `describe('Simple Test', () => { it('true is true', () => { expect(true).to.be.true }) })`)
+    }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
+
+    cy.contains('new-file.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'expected true to be true')
   })
 })

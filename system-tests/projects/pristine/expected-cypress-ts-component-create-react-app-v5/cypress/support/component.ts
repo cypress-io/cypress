@@ -20,7 +20,6 @@ import './commands'
 // require('./commands')
 
 import { mount } from 'cypress/react'
-import type { MountReturn } from 'cypress/react'
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
