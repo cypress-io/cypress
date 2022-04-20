@@ -715,7 +715,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           cy.warnMixingPromisesAndCommands()
         }
 
-        cy.queue.run()
+        cy.queue.run().then(() => {
+          const onQueueEnd = cy.state('onQueueEnd')
+
+          if (onQueueEnd) {
+            onQueueEnd()
+          }
+        })
       }
 
       return chain

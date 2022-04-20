@@ -101,6 +101,16 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     syncConfigToCurrentOrigin(config)
     syncEnvToCurrentOrigin(env)
 
+    cy.state('onQueueEnd', () => {
+      queueFinished = true
+      setRunnableStateToPassed()
+      Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
+        subject: cy.state('subject'),
+      }, {
+        syncGlobals: true,
+      })
+    })
+
     cy.state('onFail', (err) => {
       setRunnableStateToPassed()
       if (queueFinished) {
@@ -155,16 +165,5 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
       return
     }
-
-    cy.queue.run()
-    .then(() => {
-      queueFinished = true
-      setRunnableStateToPassed()
-      Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
-        subject: cy.state('subject'),
-      }, {
-        syncGlobals: true,
-      })
-    })
   })
 }

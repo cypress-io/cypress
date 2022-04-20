@@ -91,6 +91,7 @@ declare namespace Cypress {
     (k: 'currentActiveOriginPolicy', v?: string): string
     (k: 'latestActiveOriginPolicy', v?: string): string
     (k: 'duringUserTestExecution', v?: boolean): boolean
+    (k: 'onQueueEnd', v?: () => void): () => void
     (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
     (k: string, v?: any): any
     state: Cypress.state
