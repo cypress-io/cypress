@@ -18,7 +18,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       const log = ($el) => {
-        if (options.log) {
+        if (options._log) {
           options._log!.set({ $el })
         }
 

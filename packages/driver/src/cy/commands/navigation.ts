@@ -973,7 +973,7 @@ export default (Commands, Cypress, cy, state, config) => {
             }
           }
 
-          if (options.log) {
+          if (options._log) {
             let message = options._log!.get('message')
 
             if (redirects && redirects.length) {

@@ -78,7 +78,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // pause on the very next one
             state('onPaused', null)
 
-            if (options.log) {
+            if (options._log) {
               options._log!.end()
             }
           }
