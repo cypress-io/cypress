@@ -7,7 +7,7 @@
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run --spec \"cypress/integration/*/*\",\"cypress/integration/*/!(multi-domain)/**/*\"",
     "cypress:open-experimentalSessionAndOrigin": "node ../../scripts/cypress open --config experimentalSessionAndOrigin=true",
-    "cypress:run-experimentalSessionAndOrigin": "node ../../scripts/cypress run --config experimentalSessionAndOrigin=true  --spec \"cypress/integration/e2e/multi-domain/**/*\"",
+    "cypress:run-experimentalSessionAndOrigin": "node ../../scripts/cypress run --config experimentalSessionAndOrigin=true",
     "postinstall": "patch-package",
     "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in the pluginsFile.\n\tChanges to the server will be watched and reloaded automatically.`))'"
   },

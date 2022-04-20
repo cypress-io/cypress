@@ -31,45 +31,4 @@ describe('stability', () => {
       })
     })
   })
-
-  context('#page loading', () => {
-    beforeEach(function () {
-      this.logs = []
-
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'page load') {
-          this.lastLog = log
-          this.logs.push(log)
-        }
-      })
-
-      return null
-    })
-
-    it('does not wait for stability at the end of the command queue when not stable with experimentalSessionAndOrigin', (done) => {
-      const onLoad = cy.spy()
-
-      cy
-      .visit('/fixtures/generic.html')
-      .then((win) => {
-        cy.on('window:load', onLoad)
-
-        cy.on('command:queue:end', () => {
-          expect(onLoad).not.have.been.called
-          done()
-        })
-
-        cy.on('command:queue:before:end', () => {
-          // force us to become unstable immediately
-          // else the beforeunload event fires at the end
-          // of the tick which is too late
-          cy.isStable(false, 'testing')
-
-          win.location.href = '/timeout?ms=100'
-        })
-
-        return null
-      })
-    })
-  })
 })

@@ -1409,10 +1409,11 @@ describe('src/cy/commands/navigation', () => {
       it('throws when attempting to visit a 2nd domain on different port', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
+          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
 
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+          ${experimentalMessage}
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
           \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://localhost:3501', () => {\`
@@ -1441,10 +1442,11 @@ describe('src/cy/commands/navigation', () => {
       it('throws when attempting to visit a 2nd domain on different protocol', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
+          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
 
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+          ${experimentalMessage}
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
           \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('https://localhost:3500', () => {\`
@@ -1473,10 +1475,11 @@ describe('src/cy/commands/navigation', () => {
       it('throws when attempting to visit a 2nd domain on different superdomain', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
+          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
 
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+          ${experimentalMessage}
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
           \`<other commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://google.com:3500', () => {\`
@@ -1505,10 +1508,11 @@ describe('src/cy/commands/navigation', () => {
       it('throws attempting to visit 2 unique ip addresses', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
+          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
 
           expect(err.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+          ${experimentalMessage}
           \`cy.visit('http://127.0.0.1:3500/fixtures/generic.html')\`
           \`<other commands targeting http://127.0.0.1:3500 go here>\`\n
           \`cy.origin('http://126.0.0.1:3500', () => {\`
@@ -2284,15 +2288,28 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('waits for stability at the end of the command queue when not stable', (done) => {
+    it('tests waiting on stability at the end of the command queue', (done) => {
       cy
       .visit('/fixtures/generic.html')
       .then((win) => {
-        cy.on('window:load', () => {
+        // We do not wait if the experimentalSessionAndOrigin feature is enabled
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          const onLoad = cy.spy()
+
+          cy.on('window:load', onLoad)
+
           cy.on('command:queue:end', () => {
+            expect(onLoad).not.have.been.called
             done()
           })
-        })
+        } else {
+          // We do wait if the experimentalSessionAndOrigin feature is not enabled
+          cy.on('window:load', () => {
+            cy.on('command:queue:end', () => {
+              done()
+            })
+          })
+        }
 
         cy.on('command:queue:before:end', () => {
         // force us to become unstable immediately
