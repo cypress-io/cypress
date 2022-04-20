@@ -64,7 +64,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
 
     const preprocessedData = preprocessForSerialization<any>(data)
 
-    // if user defined arguments are passed in, do NOT sanitize it.
+    // if user defined arguments are passed in, do NOT sanitize them.
     if (data?.args) {
       preprocessedData.args = data.args
     }
@@ -83,7 +83,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
 
     const preprocessedData = preprocessForSerialization<any>(data)
 
-    // if user defined arguments are passed in, do NOT sanitize it.
+    // if user defined arguments are passed in, do NOT sanitize them.
     if (data?.args) {
       preprocessedData.args = data.args
     }
