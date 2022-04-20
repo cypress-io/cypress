@@ -11,6 +11,13 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ({}),
     })
 
+    t.field('baseErrorChange', {
+      type: Query,
+      description: 'Triggered when the base error state changes',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('baseErrorChange'),
+      resolve: (source, args, ctx) => ({}),
+    })
+
     t.field('devChange', {
       type: DevState,
       description: 'Issued for internal development changes',

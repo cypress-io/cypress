@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useMutation } from '@urql/vue'
+import { gql, useQuery, useMutation, useSubscription } from '@urql/vue'
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
@@ -56,7 +56,7 @@ import BaseError from '@cy/gql-components/error/BaseError.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
-import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument, CheckBaseErrorDocument } from '../generated/graphql'
 
 gql`
 fragment MainAppQueryData on Query {
@@ -79,6 +79,16 @@ mutation MainApp_ResetErrorsAndLoadConfig {
   }
 }
 `
+
+gql`
+subscription CheckBaseError {
+  baseErrorChange {
+    ...MainAppQueryData
+  }
+}
+`
+
+useSubscription({ query: CheckBaseErrorDocument })
 
 const query = useQuery({ query: MainAppQueryDocument })
 const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
