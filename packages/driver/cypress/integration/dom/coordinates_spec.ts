@@ -238,15 +238,18 @@ describe('src/dom/coordinates', () => {
     }
 
     it('returns true if parent is a window and not an iframe', () => {
-      const win = getWindowLikeObject()
+      const win = cy.state('window')
 
       expect(isAUTFrame(win)).to.be.true
     })
 
-    it('returns true if parent is a window and getting its frameElement property throws an error', () => {
+    it('returns true if parent is a window and getting its frameElement property throws a cross-origin error', () => {
       const win = getWindowLikeObject()
+      const err = new Error('cross-origin error')
 
-      cy.stub($elements, 'getNativeProp').throws('cross-origin error')
+      err.name = 'SecurityError'
+
+      cy.stub($elements, 'getNativeProp').throws(err)
 
       expect(isAUTFrame(win)).to.be.true
     })
