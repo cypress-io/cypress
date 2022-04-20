@@ -3,36 +3,55 @@
            "status": "changes",
            "description": "Merge this code with your existing config file",
            "file": {
+               "id": "1",
+               "relative": "cypress.config.ts",
                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress.config.ts",
-               "contents": "import { defineConfig } from 'cypress'\n\nexport default defineConfig({\n  component: {\n    devServer: {\n      framework: 'vue-cli',\n      bundler: 'webpack'\n    }\n  }\n})"
+               "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+               "fileExtension": ".ts"
            }
        },
        {
            "status": "valid",
            "description": "An example fixture for data imported into your Cypress tests, such as `cy.intercept()`.",
            "file": {
-               "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/fixtures/example.json"
+                "id": "2",
+                "relative": "cypress/fixtures/example.json",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/fixtures/example.json",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".json"
            }
        },
        {
            "status": "valid",
            "description": "The support file that is bundled and loaded before each component testing spec.",
            "file": {
-               "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/component.ts"
+                "id": "3",
+                "relative": "cypress/support/component.ts",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/component.ts",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".ts"
            }
        },
        {
            "status": "valid",
            "description": "A support file that is useful for creating custom Cypress commands and overwriting existing ones.",
            "file": {
-               "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/commands.ts"
+                "id": "4",
+                "relative": "cypress/support/commands.ts",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/commands.ts",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".ts"
            }
        },
        {
            "status": "valid",
            "description": "The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.",
            "file": {
-               "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/component-index.html"
+                "id": "5",
+                "relative": "cypress/support/component-index.html",
+                "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/component-index.html",
+                "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                "fileExtension": ".html"
            }
        }
    ]
