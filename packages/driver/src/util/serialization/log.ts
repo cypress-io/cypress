@@ -330,6 +330,10 @@ export const preprocessSnapshotForSerialization = (snapshot) => {
   try {
     const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot, true)
 
+    if (!preprocessedSnapshot.body.get) {
+      return null
+    }
+
     preprocessedSnapshot.styles = cy.getStyles(snapshot)
 
     return preprocessedSnapshot
