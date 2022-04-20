@@ -36,7 +36,7 @@ export function cloudProjectBySlug (slug: string, context: DataContext, info: Gr
     fieldName: 'cloudProjectsBySlugs',
     context,
     rootValue: {
-      // requestPolicy: 'cache-and-network',
+      requestPolicy: 'cache-and-network',
     },
   })
 }
