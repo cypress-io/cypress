@@ -36,6 +36,7 @@ import LaunchpadHeader from './LaunchpadHeader.vue'
 import type { ScaffoldedFilesFragment } from '../generated/graphql'
 import { ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
+import { scaffoldedFileOrder } from '../utils/scaffoldedFileOrder'
 
 const { t } = useI18n()
 
@@ -75,7 +76,12 @@ const props = defineProps<{
   gql: ScaffoldedFilesFragment
 }>()
 
-const files = computed(() => props.gql.scaffoldedFiles)
+const files = computed(() => {
+  const orderedFiles = Cypress._.sortBy((props.gql.scaffoldedFiles),
+    ({ file }) => scaffoldedFileOrder.findIndex((order) => file.relative.includes(order)))
+
+  return orderedFiles
+})
 
 const needsChanges = computed(() => props.gql.scaffoldedFiles?.some((f) => f.status === 'changes'))
 
