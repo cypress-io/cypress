@@ -57,8 +57,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
     - equal: [ 'lmiller1990/windows-binary-debug-bild', << pipeline.git.branch >> ]
-
-          value: << pipeline.git.branch >>
     - matches:
           pattern: "win*"
           value: << pipeline.git.branch >>
