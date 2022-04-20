@@ -1045,7 +1045,7 @@ describe('Server', () => {
           })
         })
 
-        it('doesn\'t set a remote state or buffer the response when a url has already been visited and the origins don\t match', function () {
+        it('doesn\'t set a remote state or buffer the response when a url has already been visited and the origins don\'t match', function () {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
@@ -1080,7 +1080,7 @@ describe('Server', () => {
           })
         })
 
-        it('doesn\'t set a remote state or buffer the response when the request is from within cy.origin and the origins don\t match', function () {
+        it('doesn\'t set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {

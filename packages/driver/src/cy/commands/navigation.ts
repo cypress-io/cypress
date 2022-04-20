@@ -511,7 +511,7 @@ const normalizeOptions = (options) => {
   .extend({
     timeout: options.responseTimeout,
     isCrossOrigin: Cypress.isCrossOriginSpecBridge,
-    alreadyVisitedUrl: options.alreadyVisitedUrl,
+    hasAlreadyVisitedUrl: options.hasAlreadyVisitedUrl,
   })
   .value()
 }
@@ -851,7 +851,7 @@ export default (Commands, Cypress, cy, state, config) => {
         onLoad () {},
       })
 
-      options.alreadyVisitedUrl = !!previousUrlVisited
+      options.hasAlreadyVisitedUrl = !!previousUrlVisited
 
       if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
         $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(options.qs) } })
