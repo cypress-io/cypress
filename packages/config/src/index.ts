@@ -4,6 +4,8 @@ import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, test
 import type { BreakingOption, BreakingOptionErrorKey } from './options'
 import type { TestingType } from '@packages/types'
 
+export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypressConfig } from './ast-utils/addToCypressConfig'
+
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
 

@@ -141,6 +141,7 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCy
     name: 'addToCypressConfigPlugin',
     manipulateOptions (t, parserOpts: ParserOptions) {
       parserOpts.errorRecovery = true
+      parserOpts.plugins ??= []
       if (
         parserOpts.plugins.some(
           (p: any) => (Array.isArray(p) ? p[0] : p) === 'typescript',

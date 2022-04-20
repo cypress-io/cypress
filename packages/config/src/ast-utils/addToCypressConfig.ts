@@ -41,7 +41,7 @@ const debug = debugLib('cypress:config:addToCypressConfig')
  */
 export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
   try {
-    return await babel.transformAsync(code, {
+    const result = await babel.transformAsync(code, {
       babelrc: false,
       parserOpts: {
         errorRecovery: true,
@@ -51,6 +51,13 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
         addToCypressConfigPlugin(toAdd),
       ],
     })
+    const transformedCode = result?.code
+
+    if (!transformedCode) {
+      throw new Error(`Unable to transform code`)
+    }
+
+    return transformedCode
   } catch (e) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
     throw new Error(`Unable to automerge with the config file`)
@@ -62,10 +69,10 @@ export interface AddProjectIdToCypressConfigOptions {
   projectId: string
 }
 
-export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
+export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions): Promise<AddToCypressConfigResult> {
   try {
     let result = await fs.readFile(options.filePath, 'utf8')
-    const { code: toPrint } = await addToCypressConfig(options.filePath, result, t.objectProperty(
+    const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
       t.identifier(options.projectId),
     ))
@@ -83,7 +90,7 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
   }
 }
 
-export interface AddTestingTypeToCypressConfigFile {
+export interface AddToCypressConfigResult {
   result: 'ADDED' | 'NEEDS_MERGE'
   error?: Error
 }
@@ -95,9 +102,9 @@ export interface AddTestingTypeToCypressConfigOptions {
   }
 }
 
-export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddTestingTypeToCypressConfigFile> {
+export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
   try {
-    let result: string
+    let result: string | undefined = undefined
 
     try {
       result = await fs.readFile(options.filePath, 'utf8')
@@ -114,7 +121,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     }
 
     const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
-    const { code: toPrint } = await addToCypressConfig(options.filePath, result, toAdd)
+    const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 
