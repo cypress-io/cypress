@@ -77,8 +77,23 @@ const props = defineProps<{
 }>()
 
 const files = computed(() => {
-  const orderedFiles = Cypress._.sortBy((props.gql.scaffoldedFiles),
-    ({ file }) => scaffoldedFileOrder.findIndex((order) => file.relative.includes(order)))
+  // we have an explicit order for displaying certain files
+  const orderedFiles = [...props.gql.scaffoldedFiles].sort((fileA, fileB) => {
+    const indexA = scaffoldedFileOrder.findIndex((name) => fileA.file.relative.includes(name))
+    const indexB = scaffoldedFileOrder.findIndex((name) => fileB.file.relative.includes(name))
+
+    // any files w/o an explicit order go last
+    if (indexA === -1) {
+      return 1
+    }
+
+    if (indexB === -1) {
+      return -1
+    }
+
+    // sort according to scaffoldedFileOrder
+    return indexA - indexB
+  })
 
   return orderedFiles
 })

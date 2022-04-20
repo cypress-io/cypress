@@ -45,10 +45,21 @@
            }
        },
        {
+        "status": "valid",
+        "description": "Rando file.",
+        "file": {
+             "id": "5",
+             "relative": "randomFile.ts",
+             "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/randomFile.ts",
+             "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+             "fileExtension": ".ts"
+        }
+    },
+       {
            "status": "valid",
            "description": "The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.",
            "file": {
-                "id": "5",
+                "id": "6",
                 "relative": "cypress/support/component-index.html",
                 "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/component-index.html",
                 "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
@@ -61,7 +72,7 @@
             "status": "valid",
             "description": "The support file that is bundled and loaded before each E2E spec.",
             "file": {
-                "id": "2",
+                "id": "1",
                 "relative": "cypress/support/e2e.ts",
                 "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/e2e.ts",
                 "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
@@ -69,10 +80,21 @@
             }
         },
         {
+            "status": "valid",
+            "description": "Rando file.",
+            "file": {
+                 "id": "2",
+                 "relative": "randomFile.ts",
+                 "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/randomFile.ts",
+                 "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                 "fileExtension": ".ts"
+            }
+        },
+        {
             "status": "changes",
             "description": "Merge this code with your existing config file",
             "file": {
-                "id": "1",
+                "id": "3",
                 "relative": "cypress.config.ts",
                 "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress.config.ts",
                 "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
@@ -94,7 +116,7 @@
             "status": "valid",
             "description": "A support file that is useful for creating custom Cypress commands and overwriting existing ones.",
             "file": {
-                "id": "3",
+                "id": "5",
                 "relative": "cypress/support/commands.ts",
                 "absolute": "/Users/rachel/Documents/GitHub/cypress/packages/launchpad/cypress/support/commands.ts",
                 "contents": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",

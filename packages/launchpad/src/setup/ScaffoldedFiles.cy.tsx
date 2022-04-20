@@ -24,7 +24,7 @@ import { scaffoldedFileOrder } from '../utils/scaffoldedFileOrder'
 
     it(`shows scaffolded files in a custom order`, () => {
       const typeToExclude = (testingType === 'e2e') ? 'component' : 'e2e'
-      const expectedFileOrder = scaffoldedFileOrder.filter((file) => !file.includes(typeToExclude))
+      const expectedFileOrder = [...scaffoldedFileOrder, 'randomFile.ts'].filter((file) => !file.includes(typeToExclude))
 
       cy.get('h2').each((header, i) => {
         expect(header.text(), `file index ${i}`).to.include(expectedFileOrder[i])
