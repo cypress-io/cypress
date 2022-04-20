@@ -139,6 +139,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -160,6 +161,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -181,6 +183,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -201,6 +204,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator('<div id="__next_css__DO_NOT_USE__"></div>'),
   },
   {
@@ -221,6 +225,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -241,6 +246,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -261,6 +267,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -281,6 +288,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
+    supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const

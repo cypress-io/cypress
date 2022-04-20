@@ -668,5 +668,9 @@
   },
   "warnings": {
     "retry": "Try again"
+  },
+  "versions": {
+    "alpha": "Alpha",
+    "beta": "Beta"
   }
 }

@@ -76,6 +76,7 @@ fragment EnvironmentSetup on Wizard {
   }
   frameworks {
     id
+    supportStatus
     name
     isDetected
     type
