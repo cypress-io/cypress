@@ -25,7 +25,6 @@ describe('Sidebar Navigation', () => {
   context('as e2e testing type', () => {
     beforeEach(() => {
       cy.scaffoldProject('todos')
-      cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
@@ -51,6 +50,7 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
@@ -65,6 +65,7 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
@@ -113,20 +114,20 @@ describe('Sidebar Navigation', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
       cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'todos')
+      cy.contains('.v-popper--some-open--tooltip', 'todos')
       cy.percySnapshot()
       cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
       cy.get('[data-e2e-href="/runs"]').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'Runs')
+      cy.contains('.v-popper--some-open--tooltip', 'Runs')
       cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
 
       cy.get('[data-e2e-href="/specs"]').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'Specs')
+      cy.contains('.v-popper--some-open--tooltip', 'Specs')
       cy.get('[data-e2e-href="/specs"]').trigger('mouseout')
 
       cy.get('[data-e2e-href="/settings"]').trigger('mouseenter')
-      cy.contains('#tooltip-target > div', 'Settings')
+      cy.contains('.v-popper--some-open--tooltip', 'Settings')
       cy.get('[data-e2e-href="/settings"]').trigger('mouseout')
     })
 
@@ -339,41 +340,6 @@ describe('Sidebar Navigation', () => {
         expect(ctx.coreData.app.relaunchBrowser).eq(true)
         expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
-      })
-    })
-
-    it('shows dropdown to reconfigure project when clicking switch testing type', () => {
-      cy.scaffoldProject('pristine-with-ct-testing')
-      cy.openProject('pristine-with-ct-testing')
-      cy.startAppServer('component')
-      cy.visitApp()
-
-      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
-      cy.findByRole('dialog', {
-        name: 'Choose a testing type',
-      }).should('be.visible')
-
-      cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Running')
-      }).click()
-
-      cy.findByRole('dialog', {
-        name: 'Choose a testing type',
-      }).should('not.exist')
-
-      cy.get('@switchTestingType').click()
-      cy.findByRole('dialog', {
-        name: 'Choose a testing type',
-      }).should('be.visible')
-
-      cy.get('[data-cy-testingtype="e2e"]').within(() => {
-        cy.contains('Not Configured')
-      })
-
-      cy.get('[data-cy-testingtype="component"]').within(() => {
-        cy.get('[data-cy=status-badge-menu]').click()
-        cy.get('[data-cy="Choose a Browser"]').should('not.exist')
-        cy.get('[data-cy="Reconfigure"]').should('exist')
       })
     })
   })

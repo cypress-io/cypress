@@ -410,8 +410,9 @@
       }
     },
     "footer": {
-      "text": "You can reconfigure the settings for this project if you're experiencing issues with your Cypress configuration.",
-      "button": "Reconfigure Project"
+      "text": "You can reconfigure the {testingType} testing settings for this project if you're experiencing issues with your Cypress configuration.",
+      "button": "Configuration Guide",
+      "buttonLink": "https://docs.cypress.io/guides/references/configuration"
     }
   },
   "runs": {
@@ -636,7 +637,6 @@
       "troubleRendering": "if you're having trouble rendering your components properly."
     },
     "snapshot": {
-      "toggleHighlights": "Toggle highlights",
       "highlightsLabel": "Highlights",
       "testsRunningError": "Cannot show Snapshot while tests are running",
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
@@ -668,5 +668,9 @@
   },
   "warnings": {
     "retry": "Try again"
+  },
+  "versions": {
+    "alpha": "Alpha",
+    "beta": "Beta"
   }
 }

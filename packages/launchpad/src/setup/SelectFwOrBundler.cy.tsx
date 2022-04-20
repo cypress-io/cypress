@@ -5,16 +5,16 @@ const manyOptions: Readonly<Option[]> = [
   {
     name: 'Vue.js',
     id: 'vue',
-    isSelected: false,
     type: 'vue2',
     isDetected: true,
+    supportStatus: 'full',
   },
   {
     name: 'React.js',
     description: '(detected)',
     id: 'react',
-    isSelected: false,
     type: 'react',
+    supportStatus: 'alpha',
   },
 ] as const
 
@@ -62,8 +62,8 @@ describe('<SelectFwOrBundler />', () => {
           {
             name: 'VueJs',
             id: 'vue',
-            isSelected: false,
-            type: 'vuecli4vue3',
+            type: 'vueclivue3',
+            supportStatus: 'full',
           },
         ]}
       />

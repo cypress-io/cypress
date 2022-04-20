@@ -8,15 +8,15 @@
     "build": "rimraf dist && yarn rollup -c rollup.config.js",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
-    "test": "yarn cy:run",
+    "test": "echo \"Tests for @cypress/vue2 are run from system-tests\"",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
-    "@cypress/mount-utils": "file:../mount-utils",
     "@vue/test-utils": "^1.1.3"
   },
   "devDependencies": {
+    "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",

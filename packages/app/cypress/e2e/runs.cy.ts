@@ -255,7 +255,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="selectProject"] button').click()
       cy.findByText('Mock Project').click()
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
-      cy.get('[data-cy="runs"]')
+      cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
   })
 

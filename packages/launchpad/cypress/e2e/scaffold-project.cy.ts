@@ -1,4 +1,4 @@
-import type { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import type { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
@@ -21,13 +21,21 @@ import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tas
 //
 // To update your expected files, just delete the `expected-cypress` and re-run the test,
 // or modify them by hand.
-function scaffoldAndOpenE2EProject (
-  name: Parameters<typeof cy.scaffoldProject>[0],
-  language: 'js' | 'ts',
-  args?: Parameters<typeof cy.openProject>[1],
-) {
-  cy.scaffoldProject(name)
-  cy.openProject(name, args)
+function scaffoldAndOpenE2EProject (opts: {
+  name: Parameters<typeof cy.scaffoldProject>[0]
+  language: 'js' | 'ts'
+  args?: Parameters<typeof cy.openProject>[1]
+  removeFixturesFolder?: boolean
+}) {
+  cy.scaffoldProject(opts.name)
+  cy.openProject(opts.name, opts.args)
+
+  if (opts.removeFixturesFolder) {
+    // Delete the fixtures folder so it scaffold correctly the example
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.removeFileInProject('cypress/fixtures')
+    })
+  }
 
   cy.visitLaunchpad()
 
@@ -35,21 +43,29 @@ function scaffoldAndOpenE2EProject (
   cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
   cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('E2E Testing').click()
-  cy.contains(language === 'js' ? 'JavaScript' : 'TypeScript').click()
+  cy.contains(opts.language === 'js' ? 'JavaScript' : 'TypeScript').click()
   cy.contains('Next').click()
   cy.contains('We added the following files to your project.')
   cy.contains('Continue').click()
 }
 
-function scaffoldAndOpenCTProject (
-  name: Parameters<typeof cy.scaffoldProject>[0],
-  language: 'js' | 'ts',
-  framework: typeof FRONTEND_FRAMEWORKS[number]['name'],
-  bundler?: typeof FRONTEND_FRAMEWORKS[number]['supportedBundlers'][number]['name'],
-  args?: Parameters<typeof cy.openProject>[1],
-) {
-  cy.scaffoldProject(name)
-  cy.openProject(name, args)
+function scaffoldAndOpenCTProject (opts: {
+  name: Parameters<typeof cy.scaffoldProject>[0]
+  language: 'js' | 'ts'
+  framework: typeof WIZARD_FRAMEWORKS[number]['name']
+  bundler?: typeof WIZARD_FRAMEWORKS[number]['supportedBundlers'][number]['name']
+  args?: Parameters<typeof cy.openProject>[1]
+  removeFixturesFolder?: boolean
+}) {
+  cy.scaffoldProject(opts.name)
+  cy.openProject(opts.name, opts.args)
+
+  if (opts.removeFixturesFolder) {
+    // Delete the fixtures folder so it scaffold correctly the example
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.removeFileInProject('cypress/fixtures')
+    })
+  }
 
   cy.visitLaunchpad()
 
@@ -57,12 +73,13 @@ function scaffoldAndOpenCTProject (
   cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
   cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('Component Testing').click()
-  cy.contains(language === 'js' ? 'JavaScript' : 'TypeScript').click()
+  cy.contains(opts.language === 'js' ? 'JavaScript' : 'TypeScript').click()
 
-  cy.contains('Pick a framework').click()
-  cy.contains(framework).click()
-  if (bundler) {
-    cy.contains(bundler).click()
+  cy.contains('React.js(detected)').click()
+  cy.contains(opts.framework).click()
+  if (opts.bundler) {
+    cy.contains('Webpack(detected)').click()
+    cy.contains(opts.bundler).click()
   }
 
   cy.contains('Next Step').click()
@@ -71,13 +88,14 @@ function scaffoldAndOpenCTProject (
   cy.contains('Continue').click()
 }
 
-function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string) {
+function assertScaffoldedFilesAreCorrect (opts: { language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string, customDirectory?: string}) {
   cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
     cy.task<SnapshotScaffoldTestResult>('snapshotCypressDirectory', {
       currentProject,
-      testingType,
-      language,
-      ctFramework,
+      testingType: opts.testingType,
+      language: opts.language,
+      ctFramework: opts.ctFramework,
+      customDirectory: opts.customDirectory,
     })
     .then((result) => {
       if (result.status === 'ok') {
@@ -94,22 +112,44 @@ function assertScaffoldedFilesAreCorrect (language: 'js' | 'ts', testingType: Cy
 
 describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
   it('scaffolds E2E for a JS project', () => {
-    scaffoldAndOpenE2EProject('pristine', 'js')
-    assertScaffoldedFilesAreCorrect('js', 'e2e')
+    const language = 'js'
+
+    scaffoldAndOpenE2EProject({ name: 'pristine', language, removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'e2e' })
   })
 
   it('scaffolds E2E for a TS project', () => {
-    scaffoldAndOpenE2EProject('pristine', 'ts')
-    assertScaffoldedFilesAreCorrect('ts', 'e2e')
+    const language = 'ts'
+
+    scaffoldAndOpenE2EProject({ name: 'pristine', language, removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'e2e' })
+  })
+
+  it('scaffolds E2E and skip fixtures for a JS project', () => {
+    const language = 'js'
+
+    scaffoldAndOpenE2EProject({ name: 'pristine', language, removeFixturesFolder: false })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'e2e', customDirectory: 'without-fixtures' })
   })
 
   it('scaffolds CT for a JS project', () => {
-    scaffoldAndOpenCTProject('pristine', 'js', 'Create React App (v5)')
-    assertScaffoldedFilesAreCorrect('js', 'component', 'Create React App (v5)')
+    const language = 'js'
+
+    scaffoldAndOpenCTProject({ name: 'pristine', language, framework: 'Create React App', removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)' })
   })
 
   it('scaffolds CT for a TS project', () => {
-    scaffoldAndOpenCTProject('pristine', 'ts', 'Create React App (v5)')
-    assertScaffoldedFilesAreCorrect('ts', 'component', 'Create React App (v5)')
+    const language = 'ts'
+
+    scaffoldAndOpenCTProject({ name: 'pristine', language, framework: 'Create React App', removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)' })
+  })
+
+  it('scaffolds CT and skip fixtures for a JS project', () => {
+    const language = 'js'
+
+    scaffoldAndOpenCTProject({ name: 'pristine', language, framework: 'Create React App', removeFixturesFolder: false })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)', customDirectory: 'without-fixtures' })
   })
 })

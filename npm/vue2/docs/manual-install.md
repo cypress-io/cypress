@@ -2,10 +2,10 @@
 
 > _Not Recommended_: All of this is done automatically with Vue CLI
 
-1. Install `cypress` and `@cypress/vue`
+1. Install `cypress` and `@cypress/vue2`
 
 ```sh
-npm install -D cypress @cypress/vue
+npm install -D cypress @cypress/vue2
 ```
 
 2. Include this plugin from your project's `cypress/plugin/index.js` file
@@ -22,7 +22,7 @@ module.exports = (on, config) => {
 3. Include the support file from your project's `cypress/support/index.js` file
 
 ```js
-import '@cypress/vue/dist/support'
+import '@cypress/vue2/dist/support'
 ```
 
 4. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For exampled to have them located in `src` folder use:
