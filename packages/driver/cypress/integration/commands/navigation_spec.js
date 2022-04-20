@@ -1410,9 +1410,22 @@ describe('src/cy/commands/navigation', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(err.message).to.include('`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.')
-          expect(err.message).to.include('The new URL is considered a different origin because the following parts of the URL are different:')
-          expect(err.message).to.include('> port')
+          expect(err.message).to.equal(stripIndent`\
+          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
+          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
+          \`<other commands targeting http://localhost:3500 go here>\`\n
+          \`cy.origin('http://localhost:3501', () => {\`
+          \`  cy.visit('http://localhost:3501/fixtures/generic.html')\`
+          \`  <other commands targeting http://localhost:3501 go here>\`
+          \`})\`\n
+          The new URL is considered a different origin because the following parts of the URL are different:\n
+            > port\n
+          You may only \`cy.visit()\` same-origin URLs within a single test.\n
+          The previous URL you visited was:\n
+            > 'http://localhost:3500'\n
+          You're attempting to visit this URL:\n
+            > 'http://localhost:3501'`)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
           assertLogLength(this.logs, 2)
@@ -1429,9 +1442,22 @@ describe('src/cy/commands/navigation', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(err.message).to.include('`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.')
-          expect(err.message).to.include('The new URL is considered a different origin because the following parts of the URL are different:')
-          expect(err.message).to.include('> protocol')
+          expect(err.message).to.equal(stripIndent`\
+          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
+          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
+          \`<other commands targeting http://localhost:3500 go here>\`\n
+          \`cy.origin('https://localhost:3500', () => {\`
+          \`  cy.visit('https://localhost:3500/fixtures/generic.html')\`
+          \`  <other commands targeting https://localhost:3500 go here>\`
+          \`})\`\n
+          The new URL is considered a different origin because the following parts of the URL are different:\n
+            > protocol\n
+          You may only \`cy.visit()\` same-origin URLs within a single test.\n
+          The previous URL you visited was:\n
+            > 'http://localhost:3500'\n
+          You're attempting to visit this URL:\n
+            > 'https://localhost:3500'`)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
           assertLogLength(this.logs, 2)
