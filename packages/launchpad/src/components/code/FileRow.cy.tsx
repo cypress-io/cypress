@@ -56,7 +56,6 @@ describe('FileRow', () => {
     ))
 
     cy.get('pre.shiki').should('exist')
-    cy.get('h2').should('have.class', 'font-semibold')
 
     cy.contains('cypress/integration/support.ts')
     cy.contains('cypress/integration/command.js')
