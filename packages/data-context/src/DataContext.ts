@@ -338,8 +338,8 @@ export class DataContext {
     } else {
       this.update((coreData) => {
         coreData.baseError = { title, cypressError }
-        this.emitter.baseErrorChange()
       })
+      this.emitter.baseErrorChange()
 
       this.emitter.toLaunchpad()
     }
