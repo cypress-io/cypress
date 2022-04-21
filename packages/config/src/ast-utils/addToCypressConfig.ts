@@ -1,5 +1,6 @@
 import * as t from '@babel/types'
 import * as babel from '@babel/core'
+import generate from '@babel/generator'
 import fs from 'fs-extra'
 import dedent from 'dedent'
 import path from 'path'
@@ -80,7 +81,7 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 
     return {
-      result: 'ADDED',
+      result: 'MERGED',
     }
   } catch (e) {
     return {
@@ -91,8 +92,9 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
 }
 
 export interface AddToCypressConfigResult {
-  result: 'ADDED' | 'NEEDS_MERGE'
+  result: 'ADDED' | 'MERGED' | 'NEEDS_MERGE'
   error?: Error
+  codeToMerge?: string
 }
 
 export interface AddTestingTypeToCypressConfigOptions {
@@ -103,8 +105,11 @@ export interface AddTestingTypeToCypressConfigOptions {
 }
 
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
+  const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
+
   try {
     let result: string | undefined = undefined
+    let resultStatus: 'ADDED' | 'MERGED' = 'MERGED'
 
     try {
       result = await fs.readFile(options.filePath, 'utf8')
@@ -117,21 +122,22 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     // If for some reason they have deleted the contents of the file, we want to recover
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
+      resultStatus = 'ADDED'
       result = getEmptyCodeBlock(pathExt)
     }
 
-    const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 
     return {
-      result: 'ADDED',
+      result: resultStatus,
     }
   } catch (e) {
     return {
       result: 'NEEDS_MERGE',
       error: e,
+      codeToMerge: generate(toAdd).code,
     }
   }
 }

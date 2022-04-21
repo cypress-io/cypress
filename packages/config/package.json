@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@babel/core": "^7",
+    "@babel/generator": "^7",
     "@babel/plugin-syntax-typescript": "^7",
     "@babel/plugin-transform-typescript": "^7",
     "@babel/types": "^7",

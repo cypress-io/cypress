@@ -1,14 +1,14 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { CODE_LANGUAGES } from '@packages/types'
 import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
 import assert from 'assert'
-import dedent from 'dedent'
 import path from 'path'
 import Debug from 'debug'
+import fs from 'fs-extra'
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
+import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -230,53 +230,46 @@ export class WizardActions {
     }
   }
 
-  private configCode (testingType: 'e2e' | 'component', language: CodeLanguageEnum) {
-    if (testingType === 'component') {
-      const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
-
-      const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
-
-      assert(chosenFramework && chosenLanguage && chosenBundler && this.ctx.currentProject)
-
-      return chosenFramework.createCypressConfig({
-        language: chosenLanguage.type,
-        bundler: chosenBundler.type,
-        framework: chosenFramework.configFramework,
-        projectRoot: this.ctx.currentProject,
-      })
-    }
-
-    return this.wizardGetConfigCodeE2E(language)
-  }
-
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
 
-    if (this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
-      const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
-      const foundLanguage = ext === '.ts' ? 'ts' : 'js'
-      const configCode = this.configCode(testingType, foundLanguage)
+    if (!this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
+      this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
+    }
 
+    const configFilePath = this.ctx.lifecycleManager.configFilePath
+    const testingTypeInfo: AddTestingTypeToCypressConfigOptions['info'] = testingType === 'e2e' ? {
+      testingType: 'e2e',
+    } : {
+      testingType: 'component',
+      bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
+      framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
+    }
+
+    const result = await addTestingTypeToCypressConfig({
+      filePath: configFilePath,
+      info: testingTypeInfo,
+    })
+
+    if (result.result === 'ADDED' || result.result === 'MERGED') {
       return {
-        status: 'changes',
-        description: 'Merge this code with your existing config file',
+        status: 'valid',
+        description: result.result === 'ADDED' ? 'Config file added' : `Added ${testingType} to config file`,
         file: {
-          absolute: this.ctx.lifecycleManager.configFilePath,
-          contents: configCode,
+          absolute: configFilePath,
+          contents: await fs.readFile(configFilePath, 'utf8'),
         },
       }
     }
 
-    const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
-
-    // only do this if config file doesn't exist
-    this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
-
-    return this.scaffoldFile(
-      this.ctx.lifecycleManager.configFilePath,
-      configCode,
-      'Created a new config file',
-    )
+    return {
+      status: 'changes',
+      description: 'Merge this code with your existing config file',
+      file: {
+        absolute: this.ctx.lifecycleManager.configFilePath,
+        contents: result.codeToMerge ?? '',
+      },
+    }
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
@@ -304,22 +297,7 @@ export class WizardActions {
     }
   }
 
-  private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
-    const codeBlocks: string[] = []
-
-    codeBlocks.push(lang === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
-    codeBlocks.push('')
-    codeBlocks.push(lang === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`  ${E2E_SCAFFOLD_BODY.replace(/\n/g, '\n  ')}`)
-
-    codeBlocks.push('})\n')
-
-    return codeBlocks.join('\n')
-  }
-
   private async scaffoldComponentIndexHtml (chosenFramework: typeof WIZARD_FRAMEWORKS[number]): Promise<NexusGenObjects['ScaffoldedFile']> {
-    await this.ensureDir('component')
-
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     return this.scaffoldFile(
@@ -369,14 +347,6 @@ export class WizardActions {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
 }
-
-const E2E_SCAFFOLD_BODY = dedent`
-  e2e: {
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
-    },
-  },
-`
 
 const FIXTURE_DATA = {
   'name': 'Using fixtures to represent data',
