@@ -147,6 +147,7 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
@@ -171,6 +172,7 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
@@ -221,6 +223,7 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
