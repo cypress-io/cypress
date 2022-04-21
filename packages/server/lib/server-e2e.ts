@@ -291,11 +291,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
                 details.totalTime = Date.now() - startTime
 
-                // TODO: think about moving this logic back into the
-                // frontend so that the driver can be in control of
-                // when the server should cache the request buffer
-                // and set the domain vs not
-                if (isOk && details.isHtml) {
+                // buffer the response and set the remote state if this is a successful html response that is for the same
+                // origin if the user has already visited an origin or if this is a request from within cy.origin
+                // TODO: think about moving this logic back into the frontend so that the driver can be in control
+                // of when to buffer and set the remote state
+                if (isOk && details.isHtml &&
+                  !((options.hasAlreadyVisitedUrl || options.isCrossOrigin) && !cors.urlOriginsMatch(previousRemoteState.origin, newUrl))) {
                   // if we're not handling a local file set the remote state
                   if (!handlingLocalFile) {
                     this.remoteStates.set(newUrl as string, options)
@@ -320,6 +321,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                   // the same reasons listed above
                   restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
                 }
+
+                details.isPrimaryOrigin = this.remoteStates.isPrimaryOrigin(newUrl!)
 
                 return resolve(details)
               })

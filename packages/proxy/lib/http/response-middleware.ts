@@ -238,10 +238,10 @@ const MaybeDelayForCrossOrigin: ResponseMiddleware = function () {
 
   // delay the response if this is a cross-origin (and not returning to a previous origin) html request from the AUT iframe
   if (this.config.experimentalSessionAndOrigin && isCrossOrigin && !isPreviousOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
-    this.debug('is cross-origin, delay until ready:for:origin event')
+    this.debug('is cross-origin, delay until cross:origin:release:html event')
 
-    this.serverBus.once('ready:for:origin', ({ failed }) => {
-      this.debug(`received ready:for:origin${failed ? ' failed' : ''}, let the response proceed`)
+    this.serverBus.once('cross:origin:release:html', () => {
+      this.debug(`received cross:origin:release:html, let the response proceed`)
 
       this.next()
     })

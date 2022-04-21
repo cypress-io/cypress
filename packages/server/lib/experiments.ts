@@ -71,7 +71,7 @@ const _summaries: StringValues = {
 const _names: StringValues = {
   experimentalFetchPolyfill: 'Fetch Polyfill',
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
-  experimentalSessionAndOrigin: 'Login Flows',
+  experimentalSessionAndOrigin: 'Cross-origin and Session',
   experimentalSourceRewriting: 'Improved Source Rewriting',
   experimentalStudio: 'Studio',
 }
