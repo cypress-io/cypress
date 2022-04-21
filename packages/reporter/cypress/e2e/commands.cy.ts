@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-describe('commands', () => {
+describe('commands', { viewportHeight: 1000 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
@@ -128,7 +128,7 @@ describe('commands', () => {
     })
 
     addCommand(runner, {
-      id: 1291,
+      id: 1293,
       name: 'log',
       message: 'do something else',
       state: 'passed',
@@ -443,11 +443,14 @@ describe('commands', () => {
       cy.contains('GET --- /dup').closest('.command').find('.command-child-container')
       .should('be.visible')
       .find('.command').should('have.length', 3)
+
+      cy.percySnapshot()
     })
   })
 
   context('clicking command', () => {
     it('pins the command', () => {
+      cy.spy(runner, 'emit')
       cy.get('.command:nth-child(2)')
       .should('contain', '#exists')
       .trigger('mouseover')
@@ -456,6 +459,9 @@ describe('commands', () => {
       .find('.command-wrapper')
       .should('have.class', 'command-is-pinned')
       .find('.command-pin')
+
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 2)
+      cy.percySnapshot()
     })
 
     it('shows a tooltip', () => {
@@ -503,6 +509,7 @@ describe('commands', () => {
   })
 
   context('command group', () => {
+    const fakeIdForTest = 100000000001
     let groupId
 
     beforeEach(() => {
@@ -512,6 +519,7 @@ describe('commands', () => {
       })
 
       groupId = addCommand(runner, {
+        id: fakeIdForTest,
         name: 'within',
         type: 'child',
       })
@@ -523,120 +531,206 @@ describe('commands', () => {
       })
     })
 
-    it('group is open by default when all nested command have passed', () => {
-      addCommand(runner, {
-        name: 'log',
-        message: 'chained log example',
+    context('clicking group', () => {
+      it('group is open by default when all nested command have passed', () => {
+        addCommand(runner, {
+          name: 'log',
+          message: 'chained log example',
+        })
+
+        cy.contains('chained log example') // ensure test content has loaded
+
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
+        .click()
+
+        cy.get('.command-name-within')
+        .should('not.have.class', 'command-expander-is-open')
+
+        cy.get('.command-name-within')
+        .find('.num-children')
+        .should('have.text', '1')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', '1 log currently hidden')
+        .percySnapshot()
       })
 
-      cy.contains('chained log example') // ensure test content has loaded
+      it('group is closed by default when last nested command failed', () => {
+        addCommand(runner, {
+          name: 'log',
+          message: 'chained log example',
+          state: 'failed',
+          group: groupId,
+        })
 
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
-      .click()
+        cy.contains('chained log example') // ensure test content has loaded
 
-      cy.get('.command-name-within')
-      .should('not.have.class', 'command-expander-is-open')
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
 
-      cy.get('.command-name-within')
-      .find('.num-children')
-      .should('have.text', '1')
-      .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', '1 log currently hidden')
-      .percySnapshot()
+        cy.get('.command-name-within')
+        .find('.num-children')
+        .should('not.exist')
+        .percySnapshot()
+      })
+
+      it('clicking opens and closes the group', () => {
+        cy.get('.command-name-within')
+        .find('.num-children')
+        .should('not.exist')
+
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
+        .click()
+
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .should('not.have.class', 'command-expander-is-open')
+        .closest('.command')
+        .find('.num-children')
+        .should('exist')
+        .should('have.text', '1')
+
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .should('not.have.class', 'command-expander-is-open')
+        .click()
+        .should('have.class', 'command-expander-is-open')
+
+        cy.get('.command-name-within')
+        .find('.num-children')
+        .should('not.exist')
+      })
+
+      it('displays with nested logs', () => {
+        const nestedGroupId = addCommand(runner, {
+          name: 'nested-within',
+          state: 'passed',
+          type: 'child',
+          group: groupId,
+        })
+
+        addCommand(runner, {
+          name: 'get',
+          message: '#my_element_nested',
+          state: 'passed',
+          groupLevel: 2,
+          group: nestedGroupId,
+        })
+
+        addCommand(runner, {
+          name: 'assert',
+          type: 'child',
+          message: 'has class named .omg',
+          groupLevel: 2,
+          group: nestedGroupId,
+        })
+
+        addCommand(runner, {
+          name: 'log',
+          message: 'chained log example',
+          state: 'passed',
+          group: groupId,
+        })
+
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
+
+        cy.get('.command-name-nested-within')
+        .find('.command-expander')
+        .should('have.class', 'command-expander-is-open')
+        .click()
+
+        cy.get('.command-name-nested-within')
+        .find('.command-expander')
+        .should('not.have.class', 'command-expander-is-open')
+
+        cy.get('.command-name-nested-within')
+        .find('.num-children')
+        .should('have.text', '2')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', '2 logs currently hidden')
+
+        cy.get('.command-name-within')
+        .find('.command-expander')
+        .eq(0)
+        .click()
+
+        cy.get('.command-name-within')
+        .find('.num-children')
+        .should('have.text', '5')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', '5 logs currently hidden')
+
+        cy.percySnapshot()
+      })
     })
 
-    it('group is closed by default when last nested command failed', () => {
-      addCommand(runner, {
-        name: 'log',
-        message: 'chained log example',
-        state: 'failed',
-        group: groupId,
+    context('pinning group', () => {
+      it('pins the command', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.command-name-within')
+        .find('.command-pin-target')
+        .eq(0)
+        .trigger('mouseover')
+        .click()
+        .closest('.command')
+        .find('.command-wrapper')
+        .should('have.class', 'command-is-pinned')
+        .find('.command-pin')
+
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', fakeIdForTest)
+        cy.percySnapshot()
       })
 
-      cy.contains('chained log example') // ensure test content has loaded
-
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
-
-      cy.get('.command-name-within')
-      .find('.num-children')
-      .should('not.exist')
-      .percySnapshot()
-    })
-
-    it('clicking opens and closes the group', () => {
-      cy.get('.command-name-within')
-      .find('.num-children')
-      .should('not.exist')
-
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
-      .click()
-
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('not.have.class', 'command-expander-is-open')
-      .closest('.command')
-      .find('.num-children')
-      .should('exist')
-      .should('have.text', '1')
-
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('not.have.class', 'command-expander-is-open')
-      .click()
-      .should('have.class', 'command-expander-is-open')
-
-      cy.get('.command-name-within')
-      .find('.num-children')
-      .should('not.exist')
-    })
-
-    it('displays with nested logs', () => {
-      const nestedGroupId = addCommand(runner, {
-        name: 'within2',
-        state: 'passed',
-        type: 'child',
-        group: groupId,
+      it('shows a tooltip', () => {
+        cy.get('.command-name-within').click()
+        cy.get('.cy-tooltip').should('have.text', 'Printed output to your console')
       })
 
-      addCommand(runner, {
-        name: 'get',
-        message: '#my_element_nested',
-        state: 'passed',
-        groupLevel: 2,
-        group: nestedGroupId,
+      it('tooltip disappears after 1500ms', () => {
+        cy.clock()
+        cy.get('.command-name-within').click()
+        cy.tick(1500)
+        cy.get('.cy-tooltip').should('not.exist')
       })
 
-      addCommand(runner, {
-        name: 'assert',
-        type: 'child',
-        message: 'has class named .omg',
-        groupLevel: 2,
-        group: nestedGroupId,
+      it('prints to console', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.command-name-within').click('top')
+
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', fakeIdForTest)
       })
 
-      addCommand(runner, {
-        name: 'log',
-        message: 'chained log example',
-        state: 'passed',
-        group: groupId,
+      it('shows the snapshot', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.command-name-within').click('top')
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', fakeIdForTest)
       })
 
-      cy.get('.command-name-within')
-      .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
+      it('unpins after clicking again, does not re-print to the console', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').click('top')
+        // @ts-ignore
+        cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
+      })
 
-      cy.get('.command-name-within2')
-      .find('.command-expander')
-      .should('have.class', 'command-expander-is-open')
-      .click()
+      it('unpins after clicking another command, pins that one', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.command-name-within').click('top')
+        cy.contains('#doesnt-exist').click()
+        cy.get('.command-name-within')
+        .find('.command-wrapper')
+        .should('not.have.class', 'command-is-pinned')
 
-      cy.percySnapshot()
+        cy.contains('#doesnt-exist').closest('.command-wrapper')
+        .should('have.class', 'command-is-pinned')
+      })
     })
   })
 

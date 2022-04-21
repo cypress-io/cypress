@@ -453,6 +453,7 @@ describe('aliases', () => {
         .closest('.command-wrapper')
         .find('.command-alias')
         .should('have.class', 'dom')
+        .percySnapshot()
       })
 
       it('render without a count', () => {
@@ -542,6 +543,7 @@ describe('aliases', () => {
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
         })
+        .percySnapshot()
       })
 
       it('render without counts in event commands when collapsed', () => {
@@ -651,6 +653,7 @@ describe('aliases', () => {
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
         })
+        .percySnapshot()
       })
     })
   })
