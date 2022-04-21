@@ -332,7 +332,7 @@ async function initialize () {
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
-    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+    const store = initializeMobxStore(window.__CYPRESS_TESTING_TYPE__)
 
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
@@ -370,15 +370,15 @@ async function executeSpec (spec: SpecFile) {
 
   UnifiedReporterAPI.setupReporter()
 
-  if (window.UnifiedRunner.config.testingType === 'e2e') {
+  if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
     return runSpecE2E(spec)
   }
 
-  if (window.UnifiedRunner.config.testingType === 'component') {
+  if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
     return runSpecCT(spec)
   }
 
-  throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')
+  throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
 }
 
 function getAutomationElementId (): AutomationElementId {

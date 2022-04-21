@@ -48,9 +48,42 @@ subscription SpecPageContainer_specsChange {
 }
 `
 
-useSubscription({ query: SpecPageContainer_SpecsChangeDocument })
+gql`
+subscription Runner_ConfigChange {
+  configChange {
+    id
+    ...SpecRunner_Config
+  }
+}
+`
 
 const isRunMode = window.__CYPRESS_MODE__ === 'run'
+
+// subscriptions are used to trigger live updates without
+// reloading the page.
+// this is only useful in open mode - in run mode, we don't
+// use GraphQL, so we pause the
+// subscriptions so they never execute.
+const shouldPauseSubscriptions = isRunMode && window.top === window
+
+let initialLoad = true
+
+useSubscription({
+  query: SpecPageContainer_SpecsChangeDocument,
+  pause: shouldPauseSubscriptions,
+}, () => {
+  // if the `config` changed, we want to reload the entire
+  // page and re-execute the current test with the latest config
+  // values
+  // subscriptions trigger on the initial page load,
+  // so we do not want to trigger `window.location.reload` on the
+  // first load, or we get stuck in an infinite loop.
+  if (!initialLoad) {
+    window.location.reload()
+  }
+
+  initialLoad = false
+})
 
 // in run mode, we are not using GraphQL or urql
 // for performance - run mode does not need the
@@ -59,8 +92,10 @@ const isRunMode = window.__CYPRESS_MODE__ === 'run'
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  pause: isRunMode && window.top === window,
+  pause: shouldPauseSubscriptions,
 })
+
+// useSubscription({ query: Runner_ConfigChangeDocument })
 
 // because we are not using GraphQL in run mode, and we still need
 // way to get the specs, we simply attach them to window when

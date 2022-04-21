@@ -267,6 +267,7 @@ export class ProjectLifecycleManager {
         }
 
         this._pendingInitialize?.resolve(finalConfig)
+        this.ctx.emitter.configChange()
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
     })

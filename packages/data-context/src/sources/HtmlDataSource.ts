@@ -42,7 +42,12 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
-    const cfg = this.ctx._apis.projectApi.getConfig() ?? {} as any
+    const projectBaseConfig = this.ctx._apis.projectApi.getConfig() as any
+
+    let cfg = await this.ctx.project.getConfig()
+
+    cfg.browser = this.ctx._apis.projectApi.getCurrentBrowser()
+    cfg.remote = projectBaseConfig?.remote ?? {}
 
     return {
       projectName: this.ctx.lifecycleManager.projectTitle,

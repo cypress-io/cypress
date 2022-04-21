@@ -1267,6 +1267,9 @@ type Subscription {
   """
   cloudViewerChange: Query
 
+  """Issued when cypress.config.js is re-executed due to a change"""
+  configChange: CurrentProject
+
   """Issued for internal development changes"""
   devChange: DevState
 
