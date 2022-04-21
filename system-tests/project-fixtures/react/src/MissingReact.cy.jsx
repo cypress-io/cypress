@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress/react'
 import { MissingReact } from './MissingReact'
 
 it('is missing React', () => {

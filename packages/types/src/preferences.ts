@@ -2,7 +2,7 @@ import type { Editor } from '.'
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
-  isSpecsListOpen: true,
+  isSpecsListOpen: false,
   isSideNavigationOpen: true,
 }
 

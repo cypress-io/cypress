@@ -1282,6 +1282,12 @@ type Subscription {
   specsChange: CurrentProject
 }
 
+enum SupportStatusEnum {
+  alpha
+  beta
+  full
+}
+
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
@@ -1406,6 +1412,9 @@ type WizardFrontendFramework implements Node {
 
   """The display name of the framework"""
   name: String!
+
+  """Current support status of the framework"""
+  supportStatus: SupportStatusEnum!
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!

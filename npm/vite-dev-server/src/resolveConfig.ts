@@ -6,15 +6,19 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
-import { mergeConfig } from 'vite'
+import type { InlineConfig } from 'vite'
+import path from 'path'
+
 import { configFiles } from './constants'
+import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressInspect } from './plugins/index'
-import type { StartDevServer } from './types'
+import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: StartDevServer) => {
-  const root = options.config.projectRoot || resolve(process.cwd())
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
+  const { specs, cypressConfig, viteConfig: viteOverrides = {} } = config
+  const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
@@ -31,23 +35,38 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     Falling back to Vite\'s defaults.`)
   }
 
-  const config = {
+  // Vite caches its output in the .vite directory in the node_modules where vite lives.
+  // So we want to find that node_modules path and ensure it's added to the "allow" list
+  const vitePathNodeModules = path.dirname(path.dirname(require.resolve(`vite/package.json`, {
+    paths: [root],
+  })))
+
+  const viteBaseConfig: InlineConfig = {
     root,
-    base: `/${options.config.namespace}/src/`,
+    base: `${cypressConfig.devServerPublicPathRoute}/`,
     configFile,
     optimizeDeps: {
       entries: [
-        ...options.specs.map((s) => relative(root, s.relative)),
-        options.config.supportFile ?? resolve(root, options.config.supportFile),
+        ...specs.map((s) => relative(root, s.relative)),
+        ...(cypressConfig.supportFile ? [resolve(root, cypressConfig.supportFile)] : []),
       ].filter((v) => v != null),
     },
+    server: {
+      fs: {
+        allow: [
+          root,
+          vitePathNodeModules,
+          cypressConfig.cypressBinaryRoot,
+        ],
+      },
+    },
     plugins: [
-      Cypress(options),
-      await CypressInspect(),
+      Cypress(config, vite),
+      CypressInspect(config),
     ],
   }
 
-  const finalConfig = mergeConfig(config, viteOverrides)
+  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 
