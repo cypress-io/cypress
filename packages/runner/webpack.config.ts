@@ -85,7 +85,7 @@ mainConfig.resolve = {
 
 // @ts-ignore
 const crossOriginConfig: webpack.Configuration = {
-  mode: 'development',
+  mode: 'production',
   ...getSimpleConfig(),
   entry: {
     cypress_cross_origin_runner: [path.resolve(__dirname, 'src/multi-domain.js')],
