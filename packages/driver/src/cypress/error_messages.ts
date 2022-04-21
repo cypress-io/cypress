@@ -1242,7 +1242,7 @@ export default {
         message: stripIndent`\
           ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
 
-          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed at the top-level.
+          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed outside of the ${cmd('origin')} block.
 
           \`<commands targeting ${args.attemptedUrl.origin} go here>\`
 

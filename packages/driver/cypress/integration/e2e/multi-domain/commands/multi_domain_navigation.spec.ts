@@ -330,7 +330,7 @@ context('cy.origin navigation', () => {
       cy.on('fail', (e) => {
         expect(e.message).to.equal(stripIndent`
             \`cy.visit()\` failed because you are attempting to visit a URL from a previous origin inside of \`cy.origin()\`.\n
-            Instead of placing the \`cy.visit()\` inside of \`cy.origin()\`, the \`cy.visit()\` should be placed at the top-level.\n
+            Instead of placing the \`cy.visit()\` inside of \`cy.origin()\`, the \`cy.visit()\` should be placed outside of the \`cy.origin()\` block.\n
             \`<commands targeting http://localhost:3500 go here>\`\n
             \`cy.origin('http://foobar.com:3500', () => {\`
             \`  <commands targeting http://foobar.com:3500 go here>\`
@@ -351,7 +351,7 @@ context('cy.origin navigation', () => {
       cy.on('fail', (e) => {
         expect(e.message).to.equal(stripIndent`
             \`cy.visit()\` failed because you are attempting to visit a URL from a previous origin inside of \`cy.origin()\`.\n
-            Instead of placing the \`cy.visit()\` inside of \`cy.origin()\`, the \`cy.visit()\` should be placed at the top-level.\n
+            Instead of placing the \`cy.visit()\` inside of \`cy.origin()\`, the \`cy.visit()\` should be placed outside of the \`cy.origin()\` block.\n
             \`<commands targeting http://localhost:3500 go here>\`\n
             \`cy.origin('http://foobar.com:3500', () => {\`
             \`  <commands targeting http://foobar.com:3500 go here>\`
