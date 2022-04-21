@@ -142,14 +142,16 @@ export class WizardActions {
   async scaffoldTestingType () {
     const { currentTestingType, wizard: { chosenLanguage } } = this.ctx.coreData
 
-    // TODO: tgriesser, clean this up as part of UNIFY-1256
-    if (!currentTestingType || !chosenLanguage) {
-      return
-    }
+    assert(currentTestingType && chosenLanguage, 'currentTestingType & chosenLanguage are required')
 
     switch (currentTestingType) {
       case 'e2e': {
-        this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
+        const scaffoldedFiles = await this.scaffoldE2E()
+
+        this.ctx.update((d) => {
+          d.scaffoldedFiles = scaffoldedFiles
+        })
+
         this.ctx.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
@@ -158,11 +160,14 @@ export class WizardActions {
       case 'component': {
         const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
 
-        if (!chosenBundler || !chosenFramework) {
-          return
-        }
+        assert(chosenBundler && chosenFramework, 'chosenBundler & chosenFramework are required')
 
-        this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
+        const scaffoldedFiles = await this.scaffoldComponent()
+
+        this.ctx.update((d) => {
+          d.scaffoldedFiles = scaffoldedFiles
+        })
+
         this.ctx.lifecycleManager.refreshMetaState()
         this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 

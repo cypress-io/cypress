@@ -17,15 +17,17 @@
   },
   "dependencies": {
     "@babel/core": "^7",
-    "@babel/generator": "^7",
+    "@babel/parser": "^7",
     "@babel/plugin-syntax-typescript": "^7",
     "@babel/plugin-transform-typescript": "^7",
+    "@babel/traverse": "^7",
     "@babel/types": "^7",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
     "debug": "^4.3.2",
     "fs-extra": "^9.1.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "recast": "0.20.4"
   },
   "devDependencies": {
     "@packages/root": "0.0.0-development",

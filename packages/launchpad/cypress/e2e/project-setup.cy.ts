@@ -724,6 +724,13 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Nuxt.js').click()
       cy.findByRole('button', { name: 'Next Step' }).should('not.be.disabled').click()
+      cy.intercept('POST', 'mutation-InstallDependencies_scaffoldFiles', (req) => {
+        req.continue((res) => {
+          // Force the response to have "changes", in the situation where we can't deal with it
+          res.body.data.scaffoldTestingType.scaffoldedFiles[0].status = 'changes'
+        })
+      })
+
       cy.findByRole('button', { name: 'Skip' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
       cy.findByText('Learn more.').click()

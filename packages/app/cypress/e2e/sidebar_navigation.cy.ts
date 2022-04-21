@@ -1,5 +1,8 @@
 import type { SinonStub } from 'sinon'
 
+// Clears animations of the frame between specs
+Cypress.config('experimentalSessionSupport', true)
+
 describe('Sidebar Navigation', () => {
   context('as e2e testing type with localSettings', () => {
     it('use saved state for nav size', () => {
@@ -74,7 +77,6 @@ describe('Sidebar Navigation', () => {
       }).click()
 
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
-      cy.wait(100)
       cy.get('@title').should('not.be.visible')
 
       cy.reload()
@@ -259,13 +261,13 @@ describe('Sidebar Navigation', () => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
       })
 
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
-        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
-        .trigger('mousemove', { clientX: 400 })
-        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
-      })
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 450)
 
-      cy.withCtx((ctx, o) => {
+      cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', { clientX: 400 })
+      .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+      cy.withRetryableCtx((ctx, o) => {
         expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
       })
     })

@@ -1,7 +1,7 @@
 import type { NodePath, ParserOptions, PluginObj, Visitor } from '@babel/core'
-import generate from '@babel/generator'
 import * as t from '@babel/types'
 import debugLib from 'debug'
+import { print } from 'recast'
 
 const debug = debugLib('cypress:config:addToCypressConfigPlugin')
 
@@ -25,7 +25,7 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCy
     for (const prop of props) {
       if (t.isObjectProperty(prop) && t.isNodesEquivalent(prop['key'], toAdd['key'])) {
         if (shouldThrow) {
-          throw new Error(`Cannot add, the existing config has a ${generate(prop['key']).code} property`)
+          throw new Error(`Cannot add, the existing config has a ${print(prop['key']).code} property`)
         } else {
           path.stop()
 
