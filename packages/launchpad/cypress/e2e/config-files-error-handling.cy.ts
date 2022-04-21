@@ -253,14 +253,6 @@ describe('setupNodeEvents', () => {
     cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is now invalid when set from the root of the config object')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { baseUrl: 'http://localhost:3000', e2e: { supportFile: false } }`)
-    })
-
-    cy.findByRole('button', { name: 'Try again' }).click()
-    cy.get('h1').should('contain', 'Error Loading Config')
-    cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is now invalid when set from the root of the config object')
-
-    cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)
     })
 
