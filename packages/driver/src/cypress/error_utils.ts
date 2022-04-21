@@ -565,7 +565,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
   })
 }
 
-const isUnsupportedPluginError = (originalFile, errMessage) => {
+const getUnsupportedPlugin = (originalFile, errMessage) => {
   const pluginsErrors = {
     '@cypress/code-coverage': 'glob pattern string required',
   }
@@ -588,13 +588,13 @@ export default {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
+  getUnsupportedPlugin,
   getUserInvocationStack,
   getUserInvocationStackFromError,
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,
   isSpecError,
-  isUnsupportedPluginError,
   logError,
   makeErrFromObj,
   mergeErrProps,
