@@ -31,7 +31,7 @@ const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
 const imageMarkdown = /!\[.*?\]\(.*?\)/g
 const doubleslashRe = /\\\\/g
-const escapedDoubleslashRe = /__doulbe_slash__/g
+const escapedDoubleslashRe = /__double_slash__/g
 
 type CreateFunc = ((specWindow, state, assertFn) => ({
   chai: Chai.ChaiStatic
@@ -106,7 +106,7 @@ chai.use((chai, u) => {
     return
   })
 
-  const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__doulbe_slash__')
+  const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__double_slash__')
   const restoreDoubleSlash = (str: string) => str.replace(escapedDoubleslashRe, '\\\\')
 
   // remove any single quotes between our **,
