@@ -113,7 +113,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
       resultStatus = 'ADDED'
-      result = getEmptyCodeBlock(pathExt)
+      result = getEmptyCodeBlock(pathExt as OutputExtension)
     }
 
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
@@ -132,10 +132,12 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
   }
 }
 
+type OutputExtension = '.ts' | '.mjs' | '.js'
+
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock (outputType: string) {
-  if (outputType === 'ts' || outputType === 'esm') {
+function getEmptyCodeBlock (outputType: OutputExtension) {
+  if (outputType === '.ts' || outputType === '.mjs') {
     return dedent`
       import { defineConfig } from 'cypress'
 

@@ -300,6 +300,8 @@ export class WizardActions {
   private async scaffoldComponentIndexHtml (chosenFramework: typeof WIZARD_FRAMEWORKS[number]): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
+    await this.ensureDir('support')
+
     return this.scaffoldFile(
       componentIndexHtmlPath,
       chosenFramework.componentIndexHtml(),
@@ -343,7 +345,7 @@ export class WizardActions {
     }
   }
 
-  private ensureDir (type: 'component' | 'e2e' | 'fixtures') {
+  private ensureDir (type: 'e2e' | 'fixtures' | 'support') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
 }

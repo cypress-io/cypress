@@ -45,8 +45,8 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
     const toMerge = {
       component: {
         devServer: {
+          framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
           bundler: '${config.bundler}',
-          framework: ${config.framework ? `'${config.framework}'` : 'undefined'}
         },
       },
     }
