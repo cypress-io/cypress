@@ -4,6 +4,7 @@ const http = require('http')
 const socket = require('@packages/socket')
 const Promise = require('bluebird')
 const mockRequire = require('mock-require')
+const client = require('../../app/client')
 
 const browser = {
   cookies: {
@@ -25,9 +26,7 @@ const browser = {
   windows: {
     getLastFocused () {},
   },
-  runtime: {
-
-  },
+  runtime: {},
   tabs: {
     query () {},
     executeScript () {},
@@ -116,98 +115,80 @@ describe('app/background', () => {
     this.httpSrv = http.createServer()
     this.server = socket.server(this.httpSrv, { path: '/__socket.io' })
 
-    this.onConnect = (callback) => {
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
-
-      client.on('connect', _.once(() => {
-        callback(client)
-      }))
+    const ws = {
+      on: sinon.stub(),
+      emit: sinon.stub(),
     }
 
-    this.stubEmit = (callback) => {
-      this.onConnect((client) => {
-        client.emit = _.once(callback)
-      })
+    sinon.stub(client, 'connect').returns(ws)
+
+    browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox' }),
+
+    this.connect = async () => {
+      const ws = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+
+      await ws.on.withArgs('connect').args[0][1]()
+
+      return ws
     }
 
     this.httpSrv.listen(PORT, done)
   })
 
-  afterEach(function (done) {
+  afterEach(async function () {
     this.server.close()
 
     this.httpSrv.close(() => {
-      done()
     })
   })
 
   context('.connect', () => {
-    it('can connect', function (done) {
+    it('can connect', async function () {
       this.server.on('connection', () => {
-        return done()
       })
 
-      return background.connect(`http://localhost:${PORT}`, '/__socket.io')
+      background.connect(`http://localhost:${PORT}`, '/__socket.io')
     })
 
-    it('emits \'automation:client:connected\'', (done) => {
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+    it('emits \'automation:client:connected\'', async function () {
+      const ws = await this.connect()
 
-      sinon.spy(client, 'emit')
-
-      return client.on('connect', _.once(() => {
-        expect(client.emit).to.be.calledWith('automation:client:connected')
-
-        return done()
-      }))
+      expect(ws.emit).to.be.calledWith('automation:client:connected')
     })
 
-    it('listens to cookie changes', (done) => {
+    it('listens to cookie changes', async function () {
       const addListener = sinon.stub(browser.cookies.onChanged, 'addListener')
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
-      return client.on('connect', _.once(() => {
-        expect(addListener).to.be.calledOnce
+      await this.connect()
 
-        return done()
-      }))
+      expect(addListener).to.be.calledOnce
     })
   })
 
   context('cookies', () => {
-    it('onChanged does not emit when cause is overwrite', function (done) {
+    it('onChanged does not emit when cause is overwrite', async function () {
       const addListener = sinon.stub(browser.cookies.onChanged, 'addListener')
+      const ws = await this.connect()
+      const fn = addListener.getCall(0).args[0]
 
-      this.onConnect((client) => {
-        sinon.spy(client, 'emit')
+      fn({ cause: 'overwrite' })
 
-        const fn = addListener.getCall(0).args[0]
-
-        fn({ cause: 'overwrite' })
-
-        expect(client.emit).not.to.be.calledWith('automation:push:request')
-
-        done()
-      })
+      expect(ws.emit).not.to.be.calledWith('automation:push:request')
     })
 
-    it('onChanged emits automation:push:request change:cookie', function (done) {
+    it('onChanged emits automation:push:request change:cookie', async function () {
       const info = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' } }
 
-      sinon.stub(browser.cookies.onChanged, 'addListener').yieldsAsync(info)
+      sinon.stub(browser.cookies.onChanged, 'addListener').yields(info)
 
-      this.stubEmit((req, msg, data) => {
-        expect(req).to.eq('automation:push:request')
-        expect(msg).to.eq('change:cookie')
-        expect(data).to.deep.eq(info)
+      const ws = await this.connect()
 
-        done()
-      })
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'change:cookie', info)
     })
   })
 
   context('downloads', () => {
-    it('onCreated emits automation:push:request create:download', function (done) {
+    it('onCreated emits automation:push:request create:download', async function () {
       const downloadItem = {
         id: '1',
         filename: '/path/to/download.csv',
@@ -215,23 +196,19 @@ describe('app/background', () => {
         url: 'http://localhost:1234/download.csv',
       }
 
-      sinon.stub(browser.downloads.onCreated, 'addListener').yieldsAsync(downloadItem)
+      sinon.stub(browser.downloads.onCreated, 'addListener').yields(downloadItem)
 
-      this.stubEmit((req, msg, data) => {
-        expect(req).to.eq('automation:push:request')
-        expect(msg).to.eq('create:download')
-        expect(data).to.deep.eq({
-          id: `${downloadItem.id}`,
-          filePath: downloadItem.filename,
-          mime: downloadItem.mime,
-          url: downloadItem.url,
-        })
+      const ws = await this.connect()
 
-        done()
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'create:download', {
+        id: `${downloadItem.id}`,
+        filePath: downloadItem.filename,
+        mime: downloadItem.mime,
+        url: downloadItem.url,
       })
     })
 
-    it('onChanged emits automation:push:request complete:download', function (done) {
+    it('onChanged emits automation:push:request complete:download', async function () {
       const downloadDelta = {
         id: '1',
         state: {
@@ -239,34 +216,29 @@ describe('app/background', () => {
         },
       }
 
-      sinon.stub(browser.downloads.onChanged, 'addListener').yieldsAsync(downloadDelta)
+      sinon.stub(browser.downloads.onChanged, 'addListener').yields(downloadDelta)
 
-      this.stubEmit((req, msg, data) => {
-        expect(req).to.eq('automation:push:request')
-        expect(msg).to.eq('complete:download')
-        expect(data).to.deep.eq({ id: `${downloadDelta.id}` })
+      const ws = await this.connect()
 
-        done()
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'complete:download', {
+        id: `${downloadDelta.id}`,
       })
     })
 
-    it('onChanged does not emit if state does not exist', function (done) {
+    it('onChanged does not emit if state does not exist', async function () {
       const downloadDelta = {
         id: '1',
       }
       const addListener = sinon.stub(browser.downloads.onChanged, 'addListener')
 
-      this.onConnect((client) => {
-        sinon.spy(client, 'emit')
-        addListener.getCall(0).args[0](downloadDelta)
+      const ws = await this.connect()
 
-        expect(client.emit).not.to.be.calledWith('automation:push:request')
+      addListener.getCall(0).args[0](downloadDelta)
 
-        done()
-      })
+      expect(ws.emit).not.to.be.calledWith('automation:push:request')
     })
 
-    it('onChanged does not emit if state.current is not "complete"', function (done) {
+    it('onChanged does not emit if state.current is not "complete"', async function () {
       const downloadDelta = {
         id: '1',
         state: {
@@ -275,64 +247,56 @@ describe('app/background', () => {
       }
       const addListener = sinon.stub(browser.downloads.onChanged, 'addListener')
 
-      this.onConnect((client) => {
-        sinon.spy(client, 'emit')
+      const ws = await this.connect()
 
-        addListener.getCall(0).args[0](downloadDelta)
+      addListener.getCall(0).args[0](downloadDelta)
 
-        expect(client.emit).not.to.be.calledWith('automation:push:request')
-
-        done()
-      })
+      expect(ws.emit).not.to.be.calledWith('automation:push:request')
     })
 
-    it('does not add downloads listener if in chrome-like browser', function (done) {
-      global.window.chrome = {}
+    it('does not add downloads listener if in non-Firefox browser', async function () {
+      browser.runtime.getBrowserInfo = undefined
 
       const onCreated = sinon.stub(browser.downloads.onCreated, 'addListener')
       const onChanged = sinon.stub(browser.downloads.onChanged, 'addListener')
 
-      this.onConnect(() => {
-        expect(onCreated).not.to.be.called
-        expect(onChanged).not.to.be.called
+      await this.connect()
 
-        done()
-      })
+      expect(onCreated).not.to.be.called
+      expect(onChanged).not.to.be.called
     })
   })
 
   context('add header to aut iframe requests', () => {
-    it('does not add header if it is the top frame', function (done) {
+    it('does not add header if it is the top frame', async function () {
       const details = {
         parentFrameId: -1,
       }
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      this.onConnect(() => {
-        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+      await this.connect()
 
-        expect(result).to.be.undefined
-        done()
-      })
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
     })
 
-    it('does not add header if it is a nested frame', function (done) {
+    it('does not add header if it is a nested frame', async function () {
       const details = {
         parentFrameId: 12345,
       }
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      this.onConnect(() => {
-        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+      await this.connect()
 
-        expect(result).to.be.undefined
-        done()
-      })
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
     })
 
-    it('does not add header if it is not a sub frame request', function (done) {
+    it('does not add header if it is not a sub frame request', async function () {
       const details = {
         parentFrameId: 0,
         type: 'stylesheet',
@@ -340,15 +304,14 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      this.onConnect(() => {
-        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+      await this.connect()
 
-        expect(result).to.be.undefined
-        done()
-      })
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.be.undefined
     })
 
-    it('does not add header if it is a spec frame request', function (done) {
+    it('does not add header if it is a spec frame request', async function () {
       const details = {
         parentFrameId: 0,
         type: 'sub_frame',
@@ -357,15 +320,13 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      this.onConnect(() => {
-        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+      await this.connect()
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-        expect(result).to.be.undefined
-        done()
-      })
+      expect(result).to.be.undefined
     })
 
-    it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', function (done) {
+    it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
       const details = {
         parentFrameId: 0,
         type: 'sub_frame',
@@ -377,36 +338,30 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      this.onConnect(() => {
-        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+      await this.connect()
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-        expect(result).to.deep.equal({
-          requestHeaders: [
-            {
-              name: 'X-Foo',
-              value: 'Bar',
-            },
-            {
-              name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
-            },
-          ],
-        })
-
-        done()
+      expect(result).to.deep.equal({
+        requestHeaders: [
+          {
+            name: 'X-Foo',
+            value: 'Bar',
+          },
+          {
+            name: 'X-Cypress-Is-AUT-Frame',
+            value: 'true',
+          },
+        ],
       })
     })
 
-    it('does not add before-headers listener if in chrome-like browser', function (done) {
-      global.window.chrome = {}
+    it('does not add before-headers listener if in non-Firefox browser', async function () {
+      browser.runtime.getBrowserInfo = undefined
 
       const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      this.onConnect(() => {
-        expect(onBeforeSendHeaders).not.to.be.called
-
-        done()
-      })
+      await this.connect()
+      expect(onBeforeSendHeaders).not.to.be.called
     })
   })
 
@@ -527,6 +482,9 @@ describe('app/background', () => {
   context('integration', () => {
     beforeEach(function (done) {
       done = _.once(done)
+
+      client.connect.restore()
+
       this.server.on('connection', (socket1) => {
         this.socket = socket1
 

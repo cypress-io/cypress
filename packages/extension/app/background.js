@@ -1,4 +1,4 @@
-/* global window */
+const get = require('lodash/get')
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
@@ -19,9 +19,17 @@ const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
-const connect = function (host, path, extraOpts) {
-  const isChromeLike = !!window.chrome && !window.browser
+const checkIfFirefox = async () => {
+  if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
+    return false
+  }
 
+  const { name } = await browser.runtime.getBrowserInfo()
+
+  return name === 'Firefox'
+}
+
+const connect = function (host, path, extraOpts) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -122,10 +130,12 @@ const connect = function (host, path, extraOpts) {
     }
   })
 
-  ws.on('connect', () => {
+  ws.on('connect', async () => {
+    const isFirefox = await checkIfFirefox()
+
     listenToCookieChanges()
-    // chrome-like browsers use CDP instead
-    if (!isChromeLike) {
+    // Non-Firefox browsers use CDP for these instead
+    if (isFirefox) {
       listenToDownloads()
       listenToOnBeforeHeaders()
     }
