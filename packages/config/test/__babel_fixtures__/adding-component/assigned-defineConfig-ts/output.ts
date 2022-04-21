@@ -3,8 +3,8 @@ const myConfig = defineConfig({
   e2e: {},
   component: {
     devServer: {
-      bundler: "webpack",
       framework: "react",
+      bundler: "webpack",
     },
   },
 });
