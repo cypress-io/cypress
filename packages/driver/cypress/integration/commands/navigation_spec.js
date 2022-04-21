@@ -1414,10 +1414,10 @@ describe('src/cy/commands/navigation', () => {
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
-          \`<other commands targeting http://localhost:3500 go here>\`\n
+          \`<commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://localhost:3501', () => {\`
           \`  cy.visit('http://localhost:3501/fixtures/generic.html')\`
-          \`  <other commands targeting http://localhost:3501 go here>\`
+          \`  <commands targeting http://localhost:3501 go here>\`
           \`})\`\n
           The new URL is considered a different origin because the following parts of the URL are different:\n
             > port\n
@@ -1446,18 +1446,18 @@ describe('src/cy/commands/navigation', () => {
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
-          \`<other commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('https://localhost:3500', () => {\`
-          \`  cy.visit('https://localhost:3500/fixtures/generic.html')\`
-          \`  <other commands targeting https://localhost:3500 go here>\`
+          \`<commands targeting http://localhost:3500 go here>\`\n
+          \`cy.origin('https://localhost:3502', () => {\`
+          \`  cy.visit('https://localhost:3502/fixtures/generic.html')\`
+          \`  <commands targeting https://localhost:3502 go here>\`
           \`})\`\n
           The new URL is considered a different origin because the following parts of the URL are different:\n
-            > protocol\n
+            > protocol, port\n
           You may only \`cy.visit()\` same-origin URLs within a single test.\n
           The previous URL you visited was:\n
             > 'http://localhost:3500'\n
           You're attempting to visit this URL:\n
-            > 'https://localhost:3500'`)
+            > 'https://localhost:3502'`)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
           assertLogLength(this.logs, 2)
@@ -1467,7 +1467,7 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
-        cy.visit('https://localhost:3500/fixtures/generic.html')
+        cy.visit('https://localhost:3502/fixtures/generic.html')
       })
 
       it('throws when attempting to visit a 2nd domain on different superdomain', function (done) {
@@ -1478,10 +1478,10 @@ describe('src/cy/commands/navigation', () => {
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
-          \`<other commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('http://google.com:3500', () => {\`
-          \`  cy.visit('http://google.com:3500/fixtures/generic.html')\`
-          \`  <other commands targeting http://google.com:3500 go here>\`
+          \`<commands targeting http://localhost:3500 go here>\`\n
+          \`cy.origin('http://foobar.com:3500', () => {\`
+          \`  cy.visit('http://www.foobar.com:3500/fixtures/generic.html')\`
+          \`  <commands targeting http://www.foobar.com:3500 go here>\`
           \`})\`\n
           The new URL is considered a different origin because the following parts of the URL are different:\n
             > superdomain\n
@@ -1489,7 +1489,7 @@ describe('src/cy/commands/navigation', () => {
           The previous URL you visited was:\n
             > 'http://localhost:3500'\n
           You're attempting to visit this URL:\n
-            > 'http://google.com:3500'`)
+            > 'http://www.foobar.com:3500'`)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
           assertLogLength(this.logs, 2)
@@ -1499,7 +1499,7 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
-        cy.visit('http://google.com:3500/fixtures/generic.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
       })
 
       it('throws attempting to visit 2 unique ip addresses', function (done) {
@@ -1510,10 +1510,10 @@ describe('src/cy/commands/navigation', () => {
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
           \`cy.visit('http://127.0.0.1:3500/fixtures/generic.html')\`
-          \`<other commands targeting http://127.0.0.1:3500 go here>\`\n
-          \`cy.origin('http://126.0.0.1:3500', () => {\`
-          \`  cy.visit('http://126.0.0.1:3500/fixtures/generic.html')\`
-          \`  <other commands targeting http://126.0.0.1:3500 go here>\`
+          \`<commands targeting http://127.0.0.1:3500 go here>\`\n
+          \`cy.origin('http://0.0.0.0:3500', () => {\`
+          \`  cy.visit('http://0.0.0.0:3500/fixtures/generic.html')\`
+          \`  <commands targeting http://0.0.0.0:3500 go here>\`
           \`})\`\n
           The new URL is considered a different origin because the following parts of the URL are different:\n
             > superdomain\n
@@ -1521,7 +1521,7 @@ describe('src/cy/commands/navigation', () => {
           The previous URL you visited was:\n
             > 'http://127.0.0.1:3500'\n
           You're attempting to visit this URL:\n
-            > 'http://126.0.0.1:3500'`)
+            > 'http://0.0.0.0:3500'`)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
           assertLogLength(this.logs, 2)
@@ -1532,22 +1532,7 @@ describe('src/cy/commands/navigation', () => {
 
         cy
         .visit('http://127.0.0.1:3500/fixtures/generic.html')
-        .visit('http://126.0.0.1:3500/fixtures/generic.html')
-      })
-
-      it('does not call resolve:url when throws attempting to visit a 2nd domain', (done) => {
-        const backend = cy.spy(Cypress, 'backend')
-
-        cy.on('fail', (err) => {
-          expect(backend).to.be.calledWithMatch('resolve:url', 'http://localhost:3500/fixtures/generic.html')
-          expect(backend).not.to.be.calledWithMatch('resolve:url', 'http://google.com:3500/fixtures/generic.html')
-
-          done()
-        })
-
-        cy
-        .visit('http://localhost:3500/fixtures/generic.html')
-        .visit('http://google.com:3500/fixtures/generic.html')
+        .visit('http://0.0.0.0:3500/fixtures/generic.html')
       })
 
       it('displays loading_network_failed when _resolveUrl throws', function (done) {

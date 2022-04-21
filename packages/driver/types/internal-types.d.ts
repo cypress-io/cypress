@@ -23,7 +23,8 @@ declare namespace Cypress {
   }
 
   interface Backend {
-    (task: 'ready:for:origin', args: { originPolicy?: string , failed?: boolean}): boolean
+    (task: 'cross:origin:release:html'): boolean
+    (task: 'cross:origin:bridge:ready', args: { originPolicy?: string }): boolean
     (task: 'cross:origin:finished', originPolicy: string): boolean
   }
 

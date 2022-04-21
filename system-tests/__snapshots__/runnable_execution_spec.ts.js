@@ -38,11 +38,11 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
 In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:
 
 \`cy.visit('http://localhost:4545/')\`
-\`<other commands targeting http://localhost:4545 go here>\`
+\`<commands targeting http://localhost:4545 go here>\`
 
 \`cy.origin('http://localhost:5656', () => {\`
 \`  cy.visit('http://localhost:5656/')\`
-\`  <other commands targeting http://localhost:5656 go here>\`
+\`  <commands targeting http://localhost:5656 go here>\`
 \`})\`
 
 The new URL is considered a different origin because the following parts of the URL are different:
@@ -69,11 +69,11 @@ https://on.cypress.io/cannot-visit-different-origin-domain
 In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:
 
 \`cy.visit('http://localhost:4545/')\`
-\`<other commands targeting http://localhost:4545 go here>\`
+\`<commands targeting http://localhost:4545 go here>\`
 
 \`cy.origin('http://localhost:5656', () => {\`
 \`  cy.visit('http://localhost:5656/')\`
-\`  <other commands targeting http://localhost:5656 go here>\`
+\`  <commands targeting http://localhost:5656 go here>\`
 \`})\`
 
 The new URL is considered a different origin because the following parts of the URL are different:
