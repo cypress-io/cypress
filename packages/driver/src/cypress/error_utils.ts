@@ -565,6 +565,20 @@ const logError = (Cypress, handlerType, err, handled = false) => {
   })
 }
 
+const isUnsupportedPluginError = (originalFile, errMessage) => {
+  const pluginsErrors = {
+    '@cypress/code-coverage': 'glob pattern string required',
+  }
+
+  const unsupportedPluginFound = Object.keys(pluginsErrors).find((plugin) => originalFile.includes(plugin))
+
+  if (unsupportedPluginFound && pluginsErrors[unsupportedPluginFound] && errMessage.includes(pluginsErrors[unsupportedPluginFound])) {
+    return unsupportedPluginFound
+  }
+
+  return null
+}
+
 export default {
   stackWithReplacedProps,
   appendErrMsg,
@@ -580,6 +594,7 @@ export default {
   isChaiValidationErr,
   isCypressErr,
   isSpecError,
+  isUnsupportedPluginError,
   logError,
   makeErrFromObj,
   mergeErrProps,

@@ -1869,7 +1869,13 @@ export default {
       docsUrl: 'https://on.cypress.io/cross-origin-script-error',
     },
     error_in_hook (obj) {
-      let msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
+      let msg
+
+      if (obj.unsupportedPlugin) {
+        msg = `Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version\n\nBecause this error occurred during a \`${obj.hookName}\` hook we are skipping `
+      } else {
+        msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
+      }
 
       const t = obj.parentTitle
 
