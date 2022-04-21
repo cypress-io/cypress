@@ -834,9 +834,10 @@ describe('http/response-middleware', function () {
             ['SameSite=Invalid', output],
             ['SameSite=None', output],
             ['', output],
-            // When there's Secure and no SameSite, it ends up as
+            // When Secure is first or there's no SameSite, it ends up as
             // "Secure; SameSite=None" instead of "Secure" being second
             ['Secure', flippedOutput || output],
+            ['Secure; SameSite=None', flippedOutput || output],
           ]
         }
 
@@ -847,12 +848,12 @@ describe('http/response-middleware', function () {
         describe('not Firefox', function () {
           makeScenarios('SameSite=None; Secure', 'Secure; SameSite=None').forEach(([input, output]) => {
             it(`${input} -> ${output}`, async function () {
-              const { appendStub, ctx } = prepareContextWithCookie(`cookie=value${input ? '; ' : ''}${input}`)
+              const { appendStub, ctx } = prepareContextWithCookie(`insecure=true; cookie=value${input ? '; ' : ''}${input}`)
 
               await testMiddleware([CopyCookiesFromIncomingRes], ctx)
 
               expect(appendStub).to.be.calledOnce
-              expect(appendStub).to.be.calledWith('Set-Cookie', `cookie=value; ${output}`)
+              expect(appendStub).to.be.calledWith('Set-Cookie', `insecure=true; cookie=value; ${output}`)
             })
           })
         })
@@ -860,7 +861,7 @@ describe('http/response-middleware', function () {
         describe('Firefox + non-localhost', function () {
           makeScenarios('SameSite=None; Secure', 'Secure; SameSite=None').forEach(([input, output]) => {
             it(`${input} -> ${output}`, async function () {
-              const { appendStub, ctx } = prepareContextWithCookie(`cookie=value${input ? '; ' : ''}${input}`, {
+              const { appendStub, ctx } = prepareContextWithCookie(`insecure=true; cookie=value${input ? '; ' : ''}${input}`, {
                 req: { proxiedUrl: 'https://foobar.com' },
                 ...withFirefox,
               })
@@ -868,7 +869,7 @@ describe('http/response-middleware', function () {
               await testMiddleware([CopyCookiesFromIncomingRes], ctx)
 
               expect(appendStub).to.be.calledOnce
-              expect(appendStub).to.be.calledWith('Set-Cookie', `cookie=value; ${output}`)
+              expect(appendStub).to.be.calledWith('Set-Cookie', `insecure=true; cookie=value; ${output}`)
             })
           })
         })
@@ -876,7 +877,7 @@ describe('http/response-middleware', function () {
         describe('Firefox + https://localhost', function () {
           makeScenarios('SameSite=None; Secure', 'Secure; SameSite=None').forEach(([input, output]) => {
             it(`${input} -> ${output}`, async function () {
-              const { appendStub, ctx } = prepareContextWithCookie(`cookie=value${input ? '; ' : ''}${input}`, {
+              const { appendStub, ctx } = prepareContextWithCookie(`insecure=true; cookie=value${input ? '; ' : ''}${input}`, {
                 req: { proxiedUrl: 'https://localhost:3500' },
                 ...withFirefox,
               })
@@ -884,7 +885,7 @@ describe('http/response-middleware', function () {
               await testMiddleware([CopyCookiesFromIncomingRes], ctx)
 
               expect(appendStub).to.be.calledOnce
-              expect(appendStub).to.be.calledWith('Set-Cookie', `cookie=value; ${output}`)
+              expect(appendStub).to.be.calledWith('Set-Cookie', `insecure=true; cookie=value; ${output}`)
             })
           })
         })
@@ -892,12 +893,12 @@ describe('http/response-middleware', function () {
         describe('Firefox + http://localhost', function () {
           makeScenarios('SameSite=None').forEach(([input, output]) => {
             it(`${input} -> ${output}`, async function () {
-              const { appendStub, ctx } = prepareContextWithCookie(`cookie=value${input ? '; ' : ''}${input}`, withFirefox)
+              const { appendStub, ctx } = prepareContextWithCookie(`insecure=true; cookie=value${input ? '; ' : ''}${input}`, withFirefox)
 
               await testMiddleware([CopyCookiesFromIncomingRes], ctx)
 
               expect(appendStub).to.be.calledOnce
-              expect(appendStub).to.be.calledWith('Set-Cookie', `cookie=value; ${output}`)
+              expect(appendStub).to.be.calledWith('Set-Cookie', `insecure=true; cookie=value; ${output}`)
             })
           })
         })

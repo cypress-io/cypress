@@ -413,7 +413,7 @@ interface EnsureSameSiteNoneProps {
 }
 
 const cookieSameSiteRegex = /SameSite=(\w+)/i
-const cookieSecureRegex = /Secure/i
+const cookieSecureRegex = /(^|\W)Secure(\W|$)/i
 const cookieSecureSemicolonRegex = /;\s*Secure/i
 
 const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSiteNoneProps) => {
