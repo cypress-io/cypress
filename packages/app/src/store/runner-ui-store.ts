@@ -35,7 +35,7 @@ export const useRunnerUiStore = defineStore({
     return {
       showChooseExternalEditorModal: false,
       autoScrollingEnabled: true,
-      isSpecsListOpen: true,
+      isSpecsListOpen: false,
       specListWidth: runnerConstants.defaultSpecListWidth,
       reporterWidth: runnerConstants.defaultReporterWidth,
       automationStatus: automation.CONNECTING,
