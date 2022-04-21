@@ -74,6 +74,7 @@ describe('Sidebar Navigation', () => {
       }).click()
 
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.wait(100)
       cy.get('@title').should('not.be.visible')
 
       cy.reload()
