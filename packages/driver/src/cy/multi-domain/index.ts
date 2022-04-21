@@ -43,11 +43,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     }
 
     // If we haven't seen a cy.origin and cleared the timeout within 300ms,
-    // go ahead and inform the server 'ready:for:origin' failed and to release the
-    // response. This typically happens during a redirect where the user does
+    // go ahead and inform the server to release the response.
+    // This typically happens during a redirect where the user does
     // not have a cy.origin for the intermediary origin.
     timeoutId = setTimeout(() => {
-      Cypress.backend('ready:for:origin', { failed: true })
+      Cypress.backend('cross:origin:release:html')
     }, 300)
   })
 
@@ -94,7 +94,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const validator = new Validator({
         log,
         onFailure: () => {
-          Cypress.backend('ready:for:origin', { failed: true })
+          Cypress.backend('cross:origin:release:html')
         },
       })
 
@@ -163,7 +163,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           // lets the proxy know to allow the response for the secondary
           // origin html through, so the page will finish loading
-          Cypress.backend('ready:for:origin', { originPolicy: location.originPolicy })
+          Cypress.backend('cross:origin:release:html')
 
           if (err) {
             if (err?.name === 'ReferenceError') {
@@ -202,13 +202,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
 
         // fired once the spec bridge is set up and ready to receive messages
-        communicator.once('bridge:ready', (_data, specBridgeOriginPolicy) => {
+        communicator.once('bridge:ready', async (_data, specBridgeOriginPolicy) => {
           if (specBridgeOriginPolicy === originPolicy) {
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
             communicator.toSpecBridge(originPolicy, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
             })
+
+            await Cypress.backend('cross:origin:bridge:ready', { originPolicy })
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin
@@ -237,7 +239,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               })
             } catch (err: any) {
               // Release the request if 'run:origin:fn' fails
-              Cypress.backend('ready:for:origin', { failed: true })
+              Cypress.backend('cross:origin:release:html')
 
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
