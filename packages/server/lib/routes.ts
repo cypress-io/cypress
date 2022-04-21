@@ -49,9 +49,6 @@ export const createCommonRoutes = ({
 
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
-      // ensure the remote state gets cleaned up from any previous tests/runs
-      remoteStates.reset()
-
       iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
@@ -68,9 +65,6 @@ export const createCommonRoutes = ({
 
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
-
-    // ensure the remote state gets cleaned up from any previous tests/runs
-    remoteStates.reset()
 
     runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
       config,

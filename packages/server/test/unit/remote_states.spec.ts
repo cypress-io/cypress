@@ -78,6 +78,44 @@ describe('remote states', () => {
     })
   })
 
+  context('#getPrimary', () => {
+    it('returns the primary when there is only the primary in remote states', function () {
+      const state = this.remoteStates.getPrimary()
+
+      expect(state).to.deep.equal({
+        auth: undefined,
+        origin: 'http://localhost:3500',
+        strategy: 'http',
+        domainName: 'localhost',
+        fileServer: null,
+        props: {
+          port: '3500',
+          domain: '',
+          tld: 'localhost',
+        },
+      })
+    })
+
+    it('returns the primary when there are multiple remote states', function () {
+      this.remoteStates.set('https://staging.google.com/foo/bar', { isCrossOrigin: true })
+
+      const state = this.remoteStates.getPrimary()
+
+      expect(state).to.deep.equal({
+        auth: undefined,
+        origin: 'http://localhost:3500',
+        strategy: 'http',
+        domainName: 'localhost',
+        fileServer: null,
+        props: {
+          port: '3500',
+          domain: '',
+          tld: 'localhost',
+        },
+      })
+    })
+  })
+
   context('#isInOriginStack', () => {
     it('returns true when the requested url is in the origin stack', function () {
       const isInOriginStack = this.remoteStates.isInOriginStack('http://localhost:3500')
