@@ -195,7 +195,7 @@ fragment SelectCloudProjectModal on Query {
 gql`
 mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
   setProjectIdInConfigFile(projectId: $projectId) {
-    currentProject {
+    currentProject{
       id
       projectId
       cloudProject {

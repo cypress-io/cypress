@@ -9,8 +9,8 @@ import type { ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
+import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
-import { addProjectIdToCypressConfig } from '@packages/config'
 
 export interface ProjectApiShape {
   /**
@@ -274,16 +274,9 @@ export class ProjectActions {
   }
 
   async setProjectIdInConfigFile (projectId: string) {
-    const result = await addProjectIdToCypressConfig({
-      filePath: this.ctx.lifecycleManager.configFilePath,
-      projectId,
-    })
-
-    if (result.result === 'ADDED') {
-      return projectId
-    }
-
-    return null
+    return insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
+      return Error(id)
+    } })
   }
 
   async clearLatestProjectCache () {

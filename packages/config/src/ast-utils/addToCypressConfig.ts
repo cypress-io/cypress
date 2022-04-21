@@ -60,7 +60,7 @@ export interface AddProjectIdToCypressConfigOptions {
   projectId: string
 }
 
-export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions): Promise<AddToCypressConfigResult> {
+export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
     let result = await fs.readFile(options.filePath, 'utf8')
     const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
