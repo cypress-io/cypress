@@ -202,11 +202,8 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
@@ -370,11 +367,8 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
@@ -432,11 +426,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
@@ -449,7 +440,7 @@ describe('Launchpad: Setup Project', () => {
           'cypress/support/commands.ts',
         ])
 
-        cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
+        cy.findByRole('button', { name: 'Continue' })
       })
 
       it('can skip setup CT testing for a project', () => {
@@ -491,11 +482,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
@@ -508,7 +496,7 @@ describe('Launchpad: Setup Project', () => {
           'cypress/support/commands.ts',
         ])
 
-        cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
+        cy.findByRole('button', { name: 'Continue' })
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {

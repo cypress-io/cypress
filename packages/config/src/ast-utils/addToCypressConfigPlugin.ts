@@ -1,4 +1,4 @@
-import type { NodePath, ParserOptions, PluginItem, Visitor } from '@babel/core'
+import type { NodePath, ParserOptions, PluginObj, Visitor } from '@babel/core'
 import generate from '@babel/generator'
 import * as t from '@babel/types'
 import debugLib from 'debug'
@@ -17,7 +17,7 @@ interface AddToCypressConfigPluginOptions {
  * @param toAdd k/v Object Property to append to the current object
  * @returns
  */
-export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCypressConfigPluginOptions = {}): PluginItem {
+export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCypressConfigPluginOptions = {}): PluginObj<any> {
   debug(`adding %s`, toAdd)
   const { shouldThrow = true } = opts
 

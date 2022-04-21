@@ -1,12 +1,27 @@
 import * as t from '@babel/types'
+import { parse, visit } from 'recast'
+import dedent from 'dedent'
+import assert from 'assert'
 
 /**
  * AST definition Node for:
  *
- * e2e: {}
+ * e2e: {
+ *   setupNodeEvents(on, config) {
+ *     // implement node event listeners here
+ *   }
+ * }
  */
 export function addE2EDefinition (): t.ObjectProperty {
-  return t.objectProperty(t.identifier('e2e'), t.objectExpression([]))
+  return extractProperty(`
+    const toMerge = {
+      e2e: {
+        setupNodeEvents(on, config) {
+          // implement node event listeners here
+        },
+      }
+    }
+  `)
 }
 
 export interface ASTComponentDefinitionConfig {
@@ -26,15 +41,42 @@ export interface ASTComponentDefinitionConfig {
  * }
  */
 export function addComponentDefinition (config: ASTComponentDefinitionConfig): t.ObjectProperty {
-  const properties: Parameters<typeof t['objectExpression']>[0] = [
-    t.objectProperty(t.identifier('bundler'), t.stringLiteral(config.bundler)),
-  ]
+  return extractProperty(`
+    const toMerge = {
+      component: {
+        devServer: {
+          bundler: '${config.bundler}',
+          framework: ${config.framework ? `'${config.framework}'` : 'undefined'}
+        },
+      },
+    }
+  `)
+}
 
-  if (config.framework) {
-    properties.push(t.objectProperty(t.identifier('framework'), t.stringLiteral(config.framework)))
-  }
+function extractProperty (str: string) {
+  const toParse = parse(dedent(str), {
+    parser: require('recast/parsers/typescript'),
+  })
 
-  return t.objectProperty(t.identifier('component'), t.objectExpression([
-    t.objectProperty(t.identifier('devServer'), t.objectExpression(properties)),
-  ]))
+  let complete = false
+  let toAdd: t.ObjectProperty | undefined
+
+  visit(toParse, {
+    visitObjectExpression (path) {
+      if (complete) return false
+
+      if (path.node.properties.length > 1 || !t.isObjectProperty(path.node.properties[0])) {
+        throw new Error(`Can only parse an expression with a single property`)
+      }
+
+      toAdd = path.node.properties[0]
+      complete = true
+
+      return false
+    },
+  })
+
+  assert(toAdd, `Missing property to merge into config from string: ${str}`)
+
+  return toAdd
 }

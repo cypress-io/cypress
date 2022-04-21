@@ -1,10 +1,10 @@
 import * as t from '@babel/types'
-import * as babel from '@babel/core'
-import generate from '@babel/generator'
+import traverse from '@babel/traverse'
 import fs from 'fs-extra'
 import dedent from 'dedent'
 import path from 'path'
 import debugLib from 'debug'
+import { parse, print } from 'recast'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
 import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
@@ -42,23 +42,13 @@ const debug = debugLib('cypress:config:addToCypressConfig')
  */
 export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
   try {
-    const result = await babel.transformAsync(code, {
-      babelrc: false,
-      parserOpts: {
-        errorRecovery: true,
-        strictMode: false,
-      },
-      plugins: [
-        addToCypressConfigPlugin(toAdd),
-      ],
+    const ast = parse(code, {
+      parser: require('recast/parsers/typescript'),
     })
-    const transformedCode = result?.code
 
-    if (!transformedCode) {
-      throw new Error(`Unable to transform code`)
-    }
+    traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
 
-    return transformedCode
+    return print(ast).code
   } catch (e) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
     throw new Error(`Unable to automerge with the config file`)
@@ -137,7 +127,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     return {
       result: 'NEEDS_MERGE',
       error: e,
-      codeToMerge: generate(toAdd).code,
+      codeToMerge: print(toAdd).code,
     }
   }
 }
