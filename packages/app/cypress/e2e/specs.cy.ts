@@ -566,7 +566,7 @@ describe('App: Specs', () => {
           .should('have.attr', 'href', 'https://on.cypress.io/mount')
 
           cy.log('should not contain the link if you navigate away and back')
-
+          cy.get('body').type('f')
           cy.get('[data-testid=spec-file-item]').first().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
 
