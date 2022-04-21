@@ -21,7 +21,7 @@ const messages = defaultMessages.setupPage.configFile
 const changesRequiredDescription = messages.changesRequiredDescription.replace('{0}', '')
 
 describe('FileRow', () => {
-  it('renders each status', () => {
+  it('renders each status, the expected files, and expected styles', () => {
     cy.mount(() => (
       <div class="w-full p-5">
         <FileRow
@@ -56,6 +56,7 @@ describe('FileRow', () => {
     ))
 
     cy.get('pre.shiki').should('exist')
+    cy.get('h2').should('have.class', 'font-semibold')
 
     cy.contains('cypress/integration/support.ts')
     cy.contains('cypress/integration/command.js')
@@ -119,9 +120,5 @@ describe('FileRow', () => {
     cy.get('pre').should('exist')
 
     cy.percySnapshot()
-  })
-
-  it('has expected styles', () => {
-    cy.get('h2').should('have.class', 'font-semibold')
   })
 })
