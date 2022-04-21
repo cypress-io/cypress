@@ -180,8 +180,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
     })
 
-    cy.get('.command')
-    // .should('have.length', 25)
+    cy.get('.command').should('have.length', 27)
 
     cy.percySnapshot()
   })
