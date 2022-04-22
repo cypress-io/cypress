@@ -171,6 +171,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   it('stops correctly running spec while switching specs', () => {
     cy.visitApp()
     cy.contains('withFailure.spec').click()
+    cy.get('body').type('f')
     cy.contains('switch spec')
     cy.contains('withWait.spec').click()
 

@@ -134,7 +134,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="select-browser"]').click()
+    cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
     cy.findByRole('list').within(() =>
       ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
 
@@ -157,5 +157,24 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.contains('The viewport determines').should('be.visible')
     cy.get('[data-cy="viewport"] button').focus().type('{enter}')
     cy.contains('The viewport determines').should('be.hidden')
+  })
+
+  it('disables browser dropdown button when isRunning is true', () => {
+    const autStore = useAutStore()
+
+    autStore.setIsRunning(true)
+
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (ctx) => {
+        ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
+      },
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="select-browser"] > button').should('be.disabled')
+
+    cy.percySnapshot()
   })
 })

@@ -206,7 +206,7 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
+preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? false)
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
 
