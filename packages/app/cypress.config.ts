@@ -17,8 +17,8 @@ export default defineConfig({
   },
   experimentalInteractiveRunEvents: true,
   component: {
-    viewportWidth: 800,
-    viewportHeight: 850,
+    viewportWidth: 809,
+    viewportHeight: 851,
     supportFile: 'cypress/component/support/index.ts',
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     devServer: {

@@ -25,10 +25,12 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useSubscription } from '@urql/vue'
-import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument, Runner_ConfigChangeDocument } from '../../generated/graphql'
+import { gql, useQuery, useSubscription, SubscriptionHandlerArg } from '@urql/vue'
+import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument, Runner_ConfigChangeDocument, Runner_ConfigChangeSubscription } from '../../generated/graphql'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
+import { useEventManager } from '../../runner/useEventManager'
+import { useSpecStore } from '../../store'
 
 gql`
 query SpecPageContainer {
@@ -52,7 +54,7 @@ gql`
 subscription Runner_ConfigChange {
   configChange {
     id
-    ...SpecRunner_Config
+    serveConfig
   }
 }
 `
@@ -83,19 +85,40 @@ const query = useQuery({
 
 let initialLoad = true
 
-useSubscription({ query: Runner_ConfigChangeDocument }, () => {
-  // if the `config` changed, we want to reload the entire
-  // page and re-execute the current test with the latest config
-  // values
-  // subscriptions trigger on the initial page load,
-  // so we do not want to trigger `window.location.reload` on the
-  // first load, or we get stuck in an infinite loop.
-  if (!initialLoad) {
-    window.location.reload()
+const specStore = useSpecStore()
+
+// When cypress.config.js is changed,
+// we respond by updating the runner with the latest config
+// and re-running the current spec with the new config values.
+const configChangeHandler: SubscriptionHandlerArg<any, any> = (
+  _prev: Runner_ConfigChangeSubscription | undefined,
+  next: Runner_ConfigChangeSubscription,
+) => {
+  if (!next.configChange?.serveConfig) {
+    throw Error(`Did not get expected serveConfig from subscription`)
+  }
+
+  if (!initialLoad && specStore.activeSpec) {
+    try {
+      // Update the config used by the runner with the new one.
+      window.__CYPRESS_CONFIG__ = next.configChange.serveConfig
+
+      const eventManager = useEventManager()
+
+      eventManager.runSpec()
+    } catch (e) {
+      // eventManager may not be defined, for example if the spec
+      // is still loading.
+      // In that case, just do nothing - the spec will be executed soon.
+      // This only happens when re-executing a spec after
+      // cypress.config.js was changed.
+    }
   }
 
   initialLoad = false
-})
+}
+
+useSubscription({ query: Runner_ConfigChangeDocument }, configChangeHandler)
 
 // because we are not using GraphQL in run mode, and we still need
 // way to get the specs, we simply attach them to window when
