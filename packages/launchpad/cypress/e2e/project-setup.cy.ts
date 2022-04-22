@@ -1,11 +1,30 @@
-function verifyFiles (relativePaths: string[]) {
-  cy.withCtx(async (ctx, o) => {
-    for (const relativePath of o.relativePaths) {
-      const stats = await ctx.file.checkIfFileExists(relativePath)
+function verifyScaffoldedFiles (testingType: string) {
+  const expectedFileOrder = (testingType === 'e2e') ? [
+    'cypress.config.',
+    'support/e2e.',
+    'support/commands.',
+    'fixtures/example.',
+  ] : [
+    'cypress.config.',
+    'support/component.',
+    'support/commands.',
+    'support/component-index.',
+    'fixtures/example.',
+  ]
+
+  cy.get('[data-cy="collapsible-header"] h2')
+  .should(($elements) => expect($elements).to.have.length(expectedFileOrder.length)) // assert number of files
+  .each(($el, i) => {
+    const relativePath = $el.text()
+
+    expect(relativePath, `file index ${i}`).to.include(expectedFileOrder[i]) // assert file order
+
+    cy.withCtx(async (ctx, o) => { // assert file exists
+      const stats = await ctx.file.checkIfFileExists(o.relativePath)
 
       expect(stats).to.not.be.null.and.not.be.undefined
-    }
-  }, { relativePaths })
+    }, { relativePath })
+  })
 }
 
 describe('Launchpad: Setup Project', () => {
@@ -212,12 +231,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles([
-          'cypress.config.js',
-          'cypress/support/e2e.js',
-          'cypress/support/commands.js',
-          'cypress/fixtures/example.json',
-        ])
+        verifyScaffoldedFiles('e2e')
       })
 
       it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
@@ -239,12 +253,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles([
-          'cypress.config.js',
-          'cypress/support/e2e.js',
-          'cypress/support/commands.js',
-          'cypress/fixtures/example.json',
-        ])
+        verifyScaffoldedFiles('e2e')
       })
 
       it('shows the configuration setup page when opened via cli with --component flag', () => {
@@ -302,12 +311,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles([
-          'cypress.config.js',
-          'cypress/support/e2e.js',
-          'cypress/support/commands.js',
-          'cypress/fixtures/example.json',
-        ])
+        verifyScaffoldedFiles('e2e')
 
         cy.findByRole('button', { name: 'Continue' })
         .should('not.have.disabled')
@@ -343,12 +347,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles([
-          'cypress.config.ts',
-          'cypress/support/e2e.ts',
-          'cypress/support/commands.ts',
-          'cypress/fixtures/example.json',
-        ])
+        verifyScaffoldedFiles('e2e')
       })
 
       it('can setup e2e testing for a project selecting TS when CT is configured and config file is JS', () => {
@@ -380,12 +379,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles([
-          'cypress.config.js',
-          'cypress/support/e2e.ts',
-          'cypress/support/commands.ts',
-          'cypress/fixtures/example.json',
-        ])
+        verifyScaffoldedFiles('e2e')
       })
 
       it('can setup CT testing for a project selecting TS when E2E is configured and config file is JS', () => {
@@ -442,12 +436,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.ts')
         })
 
-        verifyFiles([
-          'cypress.config.js',
-          'cypress/support/component-index.html',
-          'cypress/support/component.ts',
-          'cypress/support/commands.ts',
-        ])
+        verifyScaffoldedFiles('component')
 
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
       })
@@ -501,12 +490,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.ts')
         })
 
-        verifyFiles([
-          'cypress.config.js',
-          'cypress/support/component-index.html',
-          'cypress/support/component.ts',
-          'cypress/support/commands.ts',
-        ])
+        verifyScaffoldedFiles('component')
 
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
       })
@@ -679,7 +663,7 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles(['cypress.config.ts', 'cypress/support/component-index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
+        verifyScaffoldedFiles('component')
 
         cy.findByRole('button', { name: 'Continue' }).click()
 
