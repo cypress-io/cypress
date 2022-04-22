@@ -124,10 +124,12 @@ describe('app/background', () => {
 
     browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox' }),
 
-    this.connect = async () => {
+    this.connect = async (options = {}) => {
       const ws = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
-      await ws.on.withArgs('connect').args[0][1]()
+      // skip 'connect' and 'automation:client:connected' and trigger
+      // the handler that kicks everything off
+      await ws.on.withArgs('automation:config').args[0][1](options)
 
       return ws
     }
@@ -135,23 +137,19 @@ describe('app/background', () => {
     this.httpSrv.listen(PORT, done)
   })
 
-  afterEach(async function () {
+  afterEach(function (done) {
     this.server.close()
 
     this.httpSrv.close(() => {
+      done()
     })
   })
 
   context('.connect', () => {
-    it('can connect', async function () {
-      this.server.on('connection', () => {
-      })
-
-      background.connect(`http://localhost:${PORT}`, '/__socket.io')
-    })
-
     it('emits \'automation:client:connected\'', async function () {
-      const ws = await this.connect()
+      const ws = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+
+      await ws.on.withArgs('connect').args[0][1]()
 
       expect(ws.emit).to.be.calledWith('automation:client:connected')
     })
@@ -268,6 +266,18 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
+    const withExperimentalFlagOn = {
+      experimentalSessionAndOrigin: true,
+    }
+
+    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', async function () {
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect()
+
+      expect(browser.webRequest.onBeforeSendHeaders.addListener).not.to.be.called
+    })
+
     it('does not add header if it is the top frame', async function () {
       const details = {
         parentFrameId: -1,
@@ -275,7 +285,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect(withExperimentalFlagOn)
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -289,7 +299,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect(withExperimentalFlagOn)
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -304,7 +314,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect(withExperimentalFlagOn)
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -320,7 +330,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect(withExperimentalFlagOn)
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.be.undefined
@@ -338,7 +348,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect(withExperimentalFlagOn)
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.deep.equal({
@@ -360,7 +370,8 @@ describe('app/background', () => {
 
       const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect(withExperimentalFlagOn)
+
       expect(onBeforeSendHeaders).not.to.be.called
     })
   })

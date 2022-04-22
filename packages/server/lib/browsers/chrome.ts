@@ -660,8 +660,11 @@ export = {
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
-    await this._handlePausedRequests(criClient)
-    _listenForFrameTreeChanges(criClient)
+
+    if (options.experimentalSessionAndOrigin) {
+      await this._handlePausedRequests(criClient)
+      _listenForFrameTreeChanges(criClient)
+    }
 
     // return the launched browser process
     // with additional method to close the remote connection

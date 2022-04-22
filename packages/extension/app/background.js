@@ -130,16 +130,21 @@ const connect = function (host, path, extraOpts) {
     }
   })
 
-  ws.on('connect', async () => {
+  ws.on('automation:config', async (config) => {
     const isFirefox = await checkIfFirefox()
 
     listenToCookieChanges()
     // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
       listenToDownloads()
-      listenToOnBeforeHeaders()
-    }
 
+      if (config.experimentalSessionAndOrigin) {
+        listenToOnBeforeHeaders()
+      }
+    }
+  })
+
+  ws.on('connect', () => {
     ws.emit('automation:client:connected')
   })
 

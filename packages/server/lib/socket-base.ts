@@ -71,6 +71,7 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   protected testsDir: string | null
@@ -78,6 +79,7 @@ export class SocketBase {
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
+    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.testsDir = null
     this.localBus = new EventEmitter()
@@ -203,6 +205,11 @@ export class SocketBase {
         automationClient = socket
 
         debug('automation:client connected')
+
+        // only send the necessary config
+        automationClient.emit('automation:config', {
+          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
+        })
 
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
