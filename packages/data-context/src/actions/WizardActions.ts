@@ -174,14 +174,15 @@ export class WizardActions {
   }
 
   private async scaffoldE2E () {
-    const scaffolded = await Promise.all([
+    // Order of the scaffoldedFiles is intentional, confirm before changing
+    const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
 
-    return scaffolded
+    return scaffoldedFiles
   }
 
   private async scaffoldComponent () {
@@ -190,12 +191,13 @@ export class WizardActions {
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
 
+    // Order of the scaffoldedFiles is intentional, confirm before changing
     const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('component'),
-      this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage),
       this.scaffoldSupport('commands', chosenLanguage),
       this.scaffoldComponentIndexHtml(chosenFramework),
+      this.scaffoldFixtures(),
     ])
 
     return scaffoldedFiles
