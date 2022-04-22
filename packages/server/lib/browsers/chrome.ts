@@ -258,7 +258,16 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl, onError)
+    return CriClient.create({
+      target: wsUrl,
+      onError,
+      onReconnect (client) {
+        // if the client disconnects (e.g. due to a computer sleeping), update
+        // the frame tree on reconnect in cases there were changes while
+        // the client was disconnected
+        _updateFrameTree(client)()
+      },
+    })
   })
 }
 

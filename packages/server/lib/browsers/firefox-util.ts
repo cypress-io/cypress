@@ -103,7 +103,10 @@ const attachToTabMemory = Bluebird.method((tab) => {
 
 async function setupRemote (remotePort, automation, options) {
   const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
-  const criClient = await CriClient.create(wsUrl, options.onError)
+  const criClient = await CriClient.create({
+    target: wsUrl,
+    onError: options.onError,
+  })
   const cdpAutomation = new CdpAutomation({
     sendDebuggerCommandFn: criClient.send,
     onFn: criClient.on,
