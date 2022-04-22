@@ -123,12 +123,6 @@ module.exports = {
     })
   },
 
-  // openProject (options) {
-  //   // this code actually starts a project
-  //   // and is spawned from nodemon
-  //   require('../lib/open_project').open(options.project, options)
-  // },
-
   start (argv = []) {
     debug('starting cypress with argv %o', argv)
 
