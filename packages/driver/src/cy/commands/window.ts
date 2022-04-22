@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 const viewports = {
   'macbook-16': '1536x960',
@@ -34,6 +35,24 @@ type CurrentViewport = Pick<Cypress.Config, 'viewportWidth' | 'viewportHeight'>
 // config. there was a bug where re-running tests without a hard
 // refresh would cause viewport to hang
 let currentViewport: CurrentViewport | null = null
+
+interface InternalTitleOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+}
+
+interface InternalWindowOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  error?: any
+}
+
+interface InternalDocumentOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  error?: any
+}
+
+interface InternalViewportOptions extends Partial<Cypress.Loggable> {
+  _log?: Log
+}
 
 export default (Commands, Cypress, cy, state) => {
   const defaultViewport: CurrentViewport = _.pick(Cypress.config() as Cypress.Config, 'viewportWidth', 'viewportHeight')
@@ -78,11 +97,8 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    title (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, { log: true })
+    title (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalTitleOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
         options._log = Cypress.log({ timeout: options.timeout })
@@ -101,11 +117,8 @@ export default (Commands, Cypress, cy, state) => {
       return resolveTitle()
     },
 
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    window (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, { log: true })
+    window (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalWindowOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
         options._log = Cypress.log({ timeout: options.timeout })
@@ -144,11 +157,8 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    document (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, { log: true })
+    document (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalDocumentOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
         options._log = Cypress.log({ timeout: options.timeout })
@@ -188,15 +198,12 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    // TODO: any -> Partial<Cypress.Loggable>
-    viewport (presetOrWidth, heightOrOrientation, options: any = {}) {
-      const userOptions = options
-
+    viewport (presetOrWidth, heightOrOrientation, userOptions: Partial<Cypress.Loggable> = {}) {
       if (_.isObject(heightOrOrientation)) {
-        options = heightOrOrientation
+        userOptions = heightOrOrientation
       }
 
-      options = _.defaults({}, userOptions, { log: true })
+      const options: InternalViewportOptions = _.defaults({}, userOptions, { log: true })
 
       let height
       let width
@@ -208,10 +215,6 @@ export default (Commands, Cypress, cy, state) => {
         const isPreset = typeof presetOrWidth === 'string'
 
         options._log = Cypress.log({
-          // TODO: timeout below should be removed
-          // because cy.viewport option doesn't support `timeout`
-          // @see https://docs.cypress.io/api/commands/viewport#Arguments
-          timeout: options.timeout,
           consoleProps () {
             const obj: Record<string, string | number> = {}
 

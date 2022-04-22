@@ -8,6 +8,7 @@ import $Screenshot from '../../cypress/screenshot'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
+import type { Log } from '../../cypress/log'
 
 const getViewportHeight = (state) => {
   // TODO this doesn't seem correct
@@ -410,6 +411,10 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
   .finally(after)
 }
 
+interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
+  _log?: Log
+}
+
 export default function (Commands, Cypress, cy, state, config) {
   // failure screenshot when not interactive
   Cypress.on('runnable:after:run:async', (test, runnable) => {
@@ -440,10 +445,7 @@ export default function (Commands, Cypress, cy, state, config) {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window', 'document'] }, {
-    // TODO: any -> Partial<Loggable & Timeoutable & ScreenshotOptions>
-    screenshot (subject, name, options: any = {}) {
-      let userOptions = options
-
+    screenshot (subject, name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> = {}) {
       if (_.isObject(name)) {
         userOptions = name
         name = null
@@ -452,7 +454,7 @@ export default function (Commands, Cypress, cy, state, config) {
       // make sure when we capture the entire test runner
       // we are not limited to "within" subject
       // https://github.com/cypress-io/cypress/issues/14253
-      if (options.capture !== 'runner') {
+      if (userOptions.capture !== 'runner') {
         const withinSubject = state('withinSubject')
 
         if (withinSubject && $dom.isElement(withinSubject)) {
@@ -463,7 +465,7 @@ export default function (Commands, Cypress, cy, state, config) {
       // TODO: handle hook titles
       const runnable = state('runnable')
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalScreenshotOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })

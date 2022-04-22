@@ -219,7 +219,7 @@ const defaults = function (state: Cypress.State, config, obj) {
   return obj
 }
 
-class Log {
+export class Log {
   cy: any
   state: Cypress.State
   config: any

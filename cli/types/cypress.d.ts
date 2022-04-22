@@ -2519,7 +2519,7 @@ declare namespace Cypress {
     action: 'select' | 'drag-drop'
   }
 
-  interface BlurOptions extends Loggable, Forceable { }
+  interface BlurOptions extends Loggable, Timeoutable, Forceable { }
 
   interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number

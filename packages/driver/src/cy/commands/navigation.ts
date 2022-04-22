@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { LogUtils } from '../../cypress/log'
+import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
 
@@ -410,6 +410,10 @@ type InvalidContentTypeError = Error & {
   invalidContentType: boolean
 }
 
+interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
+  _log?: Log
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   reset()
 
@@ -693,13 +697,10 @@ export default (Commands, Cypress, cy, state, config) => {
       return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
     },
 
-    // TODO: Change the type of `any` to `Partial<Cypress.VisitOptions>`.
-    visit (url, options: any = {}) {
-      if (options.url && url) {
-        $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: options.url, url } })
+    visit (url, userOptions: Partial<Cypress.VisitOptions> = {}) {
+      if (userOptions.url && url) {
+        $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: userOptions.url, url } })
       }
-
-      let userOptions = options
 
       if (_.isObject(url) && _.isEqual(userOptions, {})) {
         // options specified as only argument
@@ -717,7 +718,7 @@ export default (Commands, Cypress, cy, state, config) => {
         consoleProps['Options'] = _.pick(userOptions, VISIT_OPTS)
       }
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalVisitOptions = _.defaults({}, userOptions, {
         auth: null,
         failOnStatusCode: true,
         retryOnNetworkFailure: true,
@@ -972,14 +973,14 @@ export default (Commands, Cypress, cy, state, config) => {
             }
           }
 
-          if (options.log) {
-            let message = options._log.get('message')
+          if (options._log) {
+            let message = options._log!.get('message')
 
             if (redirects && redirects.length) {
               message = [message].concat(redirects).join(' -> ')
             }
 
-            options._log.set({ message })
+            options._log!.set({ message })
           }
 
           consoleProps['Resolved Url'] = url

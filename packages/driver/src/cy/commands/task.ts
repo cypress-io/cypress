@@ -4,14 +4,16 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
+import type { Log } from '../../cypress/log'
+
+interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+}
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    task (task, arg, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalTaskOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('taskTimeout'),
       })
