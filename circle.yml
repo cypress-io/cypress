@@ -237,7 +237,7 @@ commands:
           name: Save system tests node_modules cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
           paths:
-            - /tmp/cy-system-tests-node-modules
+            - /tmp/cy-system-tests-node-moduless
       - run: touch /tmp/system_tests_node_modules_installed
       - save_cache:
           name: Save system tests node_modules cache state key
