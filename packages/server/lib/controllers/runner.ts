@@ -69,7 +69,7 @@ export const runner = {
     // }
     // TODO: Find out what the problem.
     if (options.testingType === 'e2e') {
-      config.remote = remoteStates.current()
+      config.remote = remoteStates.getPrimary()
     }
 
     config.version = pkg.version
