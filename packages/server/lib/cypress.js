@@ -1,8 +1,8 @@
 require('./environment')
 
 // We require project-base here, as waiting to require it in
-// the Electron process for the first can cause the process to hang
-// during smoke test execution. This occurs with with Electron
+// the Electron process for the first time can cause the process
+// to hang during smoke test execution. This occurs with Electron
 // version v15.4.0 and after.
 //
 // TODO: Investigate need/removal of this with future major versions
