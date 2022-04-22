@@ -510,7 +510,8 @@ export async function open (browser: Browser, url, options: any = {}, automation
   })
 
   try {
-    await firefoxUtil.setup({ automation,
+    await firefoxUtil.setup({
+      automation,
       extensions: launchOptions.extensions,
       url,
       foxdriverPort,
