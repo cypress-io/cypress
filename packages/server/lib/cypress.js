@@ -1,5 +1,14 @@
 require('./environment')
 
+// We require project-base here, as waiting to require it in
+// the Electron process for the first can cause the process to hang
+// during smoke test execution. This occurs with with Electron
+// version v15.4.0 and after.
+//
+// TODO: Investigate need/removal of this with future major versions
+// of Electron when upgraded: https://github.com/cypress-io/cypress/pull/19090
+require('@packages/server/lib/project-base')
+
 // we are not requiring everything up front
 // to optimize how quickly electron boots while
 // in dev or linux production. the reasoning is
@@ -13,8 +22,6 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-
-require('../lib/open_project')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
