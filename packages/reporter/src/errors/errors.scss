@@ -69,6 +69,7 @@ $code-border-radius: 4px;
     background-color: $err-background;
     clear: both;
     color: $err-text;
+    font-family: $monospace;
     margin-bottom: 0;
     margin-top: 5px;
     white-space: pre-wrap;
@@ -121,6 +122,7 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-stack-expander {
+    align-items: center;
     border-top: 1px solid rgba($red-400, 0.1);
     display: flex;
 

@@ -764,6 +764,39 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
   })
 
+  context('test error', () => {
+    // this is a unique error permutation currently only observed in cy.session() where an error
+    // message should be presented during the session validation of a saves/restored session and the
+    // session command will attempt to recreate a valid session.
+    it('renders error instead of command', () => {
+      // font-family: $font-system;
+      cy.fixture('command_error').then((_commandErr) => {
+        addCommand(runner, {
+          id: 10,
+          number: 7,
+          name: 'validate',
+          displayMessage: 'mock session validation',
+          state: 'failed',
+          showError: true,
+          err: _commandErr,
+          type: 'parent',
+        })
+
+        addCommand(runner, {
+          id: 11,
+          name: 'recreate session',
+          message: 'mock recreate session cmd',
+          state: 'success',
+          type: 'parent',
+        })
+      })
+
+      cy.contains('CommandError')
+      cy.contains('recreate session')
+      cy.percySnapshot()
+    })
+  })
+
   // FIXME: When studio support is re-introduced we can enable these tests.
   context.skip('studio commands', () => {
     beforeEach(() => {

@@ -453,6 +453,8 @@
   }
 
   .runnable-loading {
+    font-family: $font-system;
+  
     .runnable-loading-animation {
       display: flex;
       margin: 3.5rem auto 1.5rem;
