@@ -1205,15 +1205,15 @@ export default {
     },
     unsupported: {
       route: {
-        message: `${cmd('route')} has been deprecated and use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        message: `${cmd('route')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
       server: {
-        message: `${cmd('server')} has been deprecated and use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        message: `${cmd('server')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
       Server: {
-        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        message: `\`Cypress.Server.*\` has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
       Cookies_preserveOnce: {
