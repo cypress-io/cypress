@@ -36,7 +36,6 @@ import LaunchpadHeader from './LaunchpadHeader.vue'
 import type { ScaffoldedFilesFragment } from '../generated/graphql'
 import { ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
-import { scaffoldedFileOrder } from '../utils/scaffoldedFileOrder'
 
 const { t } = useI18n()
 
@@ -76,26 +75,7 @@ const props = defineProps<{
   gql: ScaffoldedFilesFragment
 }>()
 
-const files = computed(() => {
-  // sort the files according to scaffoldedFileOrder
-  const sortedFiles = props.gql.scaffoldedFiles?.slice().sort((fileA, fileB) => {
-    const indexA = scaffoldedFileOrder.findIndex((name) => fileA.file.relative.includes(name))
-    const indexB = scaffoldedFileOrder.findIndex((name) => fileB.file.relative.includes(name))
-
-    // any files w/o an explicit order go last
-    if (indexA === -1) {
-      return 1
-    }
-
-    if (indexB === -1) {
-      return -1
-    }
-
-    return indexA - indexB
-  })
-
-  return sortedFiles
-})
+const files = computed(() => props.gql.scaffoldedFiles)
 
 const needsChanges = computed(() => props.gql.scaffoldedFiles?.some((f) => f.status === 'changes'))
 
