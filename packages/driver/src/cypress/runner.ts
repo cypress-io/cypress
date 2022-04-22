@@ -987,7 +987,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       hookName = getHookName(runnable)
       const test = getTest() || getTestFromHookOrFindTest(runnable)
 
-      const unsupportedPlugin = runnable.invocationDetails && runnable.invocationDetails.originalFile ? $errUtils.getUnsupportedPlugin(runnable.invocationDetails.originalFile, runnable.err.message) : null
+      const unsupportedPlugin = runnable.invocationDetails && runnable.invocationDetails.originalFile && runnable.err && runnable.err.message ? $errUtils.getUnsupportedPlugin(runnable.invocationDetails.originalFile, runnable.err.message) : null
 
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
