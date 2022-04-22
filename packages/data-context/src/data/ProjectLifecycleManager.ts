@@ -270,7 +270,7 @@ export class ProjectLifecycleManager {
    *  2. The last browser selected in `open` mode (by name and channel) for this project.
    *  3. The first browser found.
    */
-  async setInitialActiveBrowser () {
+  private async setInitialActiveBrowser () {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
@@ -493,12 +493,6 @@ export class ProjectLifecycleManager {
     }
   }
 
-  loadTestingType () {
-    assert(this._configManager, 'Cannot load a testing type without a config manager')
-
-    this._configManager.loadTestingType()
-  }
-
   private resetInternalState () {
     if (this._configManager) {
       this._configManager.destroy()
@@ -688,6 +682,12 @@ export class ProjectLifecycleManager {
     const legacyConfigFileExist = await this.checkIfLegacyConfigFileExist()
 
     return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
+  }
+
+  async initializeOpenMode (testingType: TestingType | null) {
+    if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
+      this.setAndLoadCurrentTestingType(testingType)
+    }
   }
 
   async initializeRunMode (testingType: TestingType | null) {
