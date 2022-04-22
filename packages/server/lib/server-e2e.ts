@@ -121,7 +121,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
           // once we open set the domain to root by default
           // which prevents a situation where navigating
           // to http sites redirects to /__/ cypress
-          this.remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
           return resolve([port, warning])
         })
@@ -159,8 +159,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     const request = this.request
 
     let handlingLocalFile = false
-    const previousRemoteState = this.remoteStates.current()
-    const previousRemoteStateIsPrimary = this.remoteStates.isPrimaryOrigin(previousRemoteState.origin)
+    const previousRemoteState = this._remoteStates.current()
+    const previousRemoteStateIsPrimary = this._remoteStates.isPrimaryOrigin(previousRemoteState.origin)
 
     // nuke any hashes from our url since
     // those those are client only and do
@@ -209,7 +209,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
         options.headers['x-cypress-authorization'] = this._fileServer.token
 
-        const state = this.remoteStates.set(urlStr, options)
+        const state = this._remoteStates.set(urlStr, options)
 
         urlFile = url.resolve(state.fileServer as string, urlStr)
         urlStr = url.resolve(state.origin as string, urlStr)
@@ -299,7 +299,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                   !((options.hasAlreadyVisitedUrl || options.isCrossOrigin) && !cors.urlOriginsMatch(previousRemoteState.origin, newUrl))) {
                   // if we're not handling a local file set the remote state
                   if (!handlingLocalFile) {
-                    this.remoteStates.set(newUrl as string, options)
+                    this._remoteStates.set(newUrl as string, options)
                   }
 
                   const responseBufferStream = new stream.PassThrough({
@@ -322,7 +322,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                   restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
                 }
 
-                details.isPrimaryOrigin = this.remoteStates.isPrimaryOrigin(newUrl!)
+                details.isPrimaryOrigin = this._remoteStates.isPrimaryOrigin(newUrl!)
 
                 return resolve(details)
               })
@@ -334,7 +334,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
-        this.remoteStates.set(previousRemoteState, { isCrossOrigin: !previousRemoteStateIsPrimary })
+        this._remoteStates.set(previousRemoteState, { isCrossOrigin: !previousRemoteStateIsPrimary })
       }
 
       // if they're POSTing an object, querystringify their POST body
