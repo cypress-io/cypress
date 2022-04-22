@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
 import { initGitRepoForTestProject } from './cypress/tasks/git'
 
@@ -17,25 +18,22 @@ export default defineConfig({
   },
   experimentalInteractiveRunEvents: true,
   component: {
-    viewportWidth: 809,
-    viewportHeight: 851,
+    viewportWidth: 800,
+    viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
-    devServer: {
-      bundler: 'vite',
-      framework: 'vue',
-      viteConfig: {
-        optimizeDeps: {
-          include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'p-defer',
-            'just-my-luck',
-            'combine-properties',
-            'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
-          ],
-        },
+    devServer,
+    devServerConfig: {
+      optimizeDeps: {
+        include: [
+          '@headlessui/vue',
+          'vue3-file-selector',
+          'p-defer',
+          'just-my-luck',
+          'combine-properties',
+          'faker',
+          '@packages/ui-components/cypress/support/customPercyCommand',
+        ],
       },
     },
   },
