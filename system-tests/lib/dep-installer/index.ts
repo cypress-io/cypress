@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import path from 'path'
-import cachedir from 'cachedir'
 import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
@@ -210,6 +209,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     // 3. Delete cached workspace packages since the pkg manager will create a fresh symlink during install.
     await removeWorkspacePackages(workspaceDeps)
+    await fs.remove(tmpNodeModulesDir)
 
     // 4. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
