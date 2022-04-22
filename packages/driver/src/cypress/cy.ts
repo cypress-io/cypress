@@ -715,12 +715,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           cy.warnMixingPromisesAndCommands()
         }
 
-        cy.queue.run().then(() => {
+        cy.queue.run()
+        .then(() => {
           const onQueueEnd = cy.state('onQueueEnd')
 
           if (onQueueEnd) {
             onQueueEnd()
           }
+        })
+        .catch(() => {
+          // errors from the queue are propagated to cy.fail by the queue itself
+          // and can be safely ignored here. omitting this catch causes
+          // unhandled rejections to be logged because Bluebird sees a promise
+          // chain with no catch handler
         })
       }
 
