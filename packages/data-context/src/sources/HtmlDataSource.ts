@@ -50,6 +50,8 @@ export class HtmlDataSource {
       'proxyServer',
       'proxyUrl',
       'remote',
+      'testingType',
+      'componentTesting',
       'reporterUrl',
       'xhrUrl',
     ]
