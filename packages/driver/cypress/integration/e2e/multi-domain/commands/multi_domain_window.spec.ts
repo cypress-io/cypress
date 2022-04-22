@@ -1,3 +1,5 @@
+import { findCrossOriginLogs } from '../../../../support/utils'
+
 context('cy.origin window', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
@@ -19,6 +21,57 @@ context('cy.origin window', () => {
   it('.title()', () => {
     cy.origin('http://foobar.com:3500', () => {
       cy.title().should('include', 'DOM Fixture')
+    })
+  })
+
+  context('#consoleProps', () => {
+    let logs: Map<string, any>
+
+    beforeEach(() => {
+      logs = new Map()
+
+      cy.on('log:changed', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+    })
+
+    it('.window()', () => {
+      cy.origin('http://foobar.com:3500', () => {
+        cy.window()
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps } = findCrossOriginLogs('window', logs, 'foobar.com')
+
+        expect(consoleProps.Command).to.equal('window')
+        expect(consoleProps.Yielded).to.be.null
+      })
+    })
+
+    it('.document()', () => {
+      cy.origin('http://foobar.com:3500', () => {
+        cy.document()
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps } = findCrossOriginLogs('document', logs, 'foobar.com')
+
+        expect(consoleProps.Command).to.equal('document')
+        expect(consoleProps.Yielded).to.be.null
+      })
+    })
+
+    it('.title()', () => {
+      cy.origin('http://foobar.com:3500', () => {
+        cy.title()
+      })
+
+      cy.shouldWithTimeout(() => {
+        const { consoleProps } = findCrossOriginLogs('title', logs, 'foobar.com')
+
+        expect(consoleProps.Command).to.equal('title')
+        expect(consoleProps.Yielded).to.equal('DOM Fixture')
+      })
     })
   })
 })

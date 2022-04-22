@@ -3028,7 +3028,7 @@ describe('Routes', () => {
         })
 
         this.server._eventBus.on('cross:origin:delaying:html', () => {
-          this.server._eventBus.emit('ready:for:origin', { originPolicy: 'http://foobar.com' })
+          this.server._eventBus.emit('cross:origin:release:html')
         })
 
         return this.rp({

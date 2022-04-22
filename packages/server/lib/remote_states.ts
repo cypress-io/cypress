@@ -147,14 +147,8 @@ export class RemoteStates {
   }
 
   addEventListeners (eventEmitter: EventEmitter) {
-    eventEmitter.on('ready:for:origin', ({ originPolicy, failed }) => {
-      if (failed) {
-        debug('received ready:for:origin failed, don\'t add origin to remote states')
-
-        return
-      }
-
-      debug(`received ready:for:origin, add origin ${originPolicy} to remote states`)
+    eventEmitter.on('cross:origin:bridge:ready', ({ originPolicy }) => {
+      debug(`received cross:origin:bridge:ready, add origin ${originPolicy} to remote states`)
 
       const existingOrigin = this.remoteStates.get(originPolicy)
 

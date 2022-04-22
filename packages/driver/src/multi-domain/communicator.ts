@@ -3,10 +3,13 @@ import { EventEmitter } from 'events'
 import { preprocessConfig, preprocessEnv } from '../util/config'
 import { preprocessForSerialization, reifySerializedError } from '../util/serialization'
 import { $Location } from '../cypress/location'
+import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSnapshotForSerialization, reifySnapshotFromSerialization } from '../util/serialization/log'
 
 const debug = debugFn('cypress:driver:multi-origin')
 
 const CROSS_ORIGIN_PREFIX = 'cross:origin:'
+const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}log:added`, `${CROSS_ORIGIN_PREFIX}log:changed`]
+const FINAL_SNAPSHOT_EVENT = `${CROSS_ORIGIN_PREFIX}final:snapshot:generated`
 
 /**
  * Primary Origin communicator. Responsible for sending/receiving events throughout
@@ -40,6 +43,16 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       // communicate back to the iframe
       if (messageName === 'bridge:ready' && source) {
         this.crossOriginDriverWindows[data.originPolicy] = source as Window
+      }
+
+      // reify any logs coming back from the cross-origin spec bridges to serialize snapshot/consoleProp DOM elements as well as select functions.
+      if (LOG_EVENTS.includes(data?.event)) {
+        data.data = reifyLogFromSerialization(data.data as any)
+      }
+
+      // reify the final snapshot coming back from the secondary domain if requested by the runner.
+      if (FINAL_SNAPSHOT_EVENT === data?.event) {
+        data.data = reifySnapshotFromSerialization(data.data as any)
       }
 
       if (data?.data?.err) {
@@ -171,13 +184,24 @@ export class SpecBridgeCommunicator extends EventEmitter {
    */
   toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
     const { originPolicy } = $Location.create(window.location.href)
+    const eventName = `${CROSS_ORIGIN_PREFIX}${event}`
+
+    // Preprocess logs before sending through postMessage() to attempt to serialize some DOM nodes and functions.
+    if (LOG_EVENTS.includes(eventName)) {
+      data = preprocessLogForSerialization(data as any)
+    }
+
+    // If requested by the runner, preprocess the final snapshot before sending through postMessage() to attempt to serialize the DOM body of the snapshot.
+    if (FINAL_SNAPSHOT_EVENT === eventName) {
+      data = preprocessSnapshotForSerialization(data as any)
+    }
 
     debug('<= to Primary ', event, data, originPolicy)
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
       window.top?.postMessage({
-        event: `${CROSS_ORIGIN_PREFIX}${event}`,
+        event: eventName,
         data,
         originPolicy,
       }, '*')

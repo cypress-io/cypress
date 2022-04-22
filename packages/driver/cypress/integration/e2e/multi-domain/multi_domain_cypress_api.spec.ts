@@ -206,7 +206,7 @@ describe('cy.origin Cypress API', () => {
   context('not supported', () => {
     it('throws an error when a user attempts to configure Cypress.Server.defaults() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
+        expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
         done()
       })

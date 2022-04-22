@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import structuredClonePonyfill from 'core-js-pure/actual/structured-clone'
-import $stackUtils from '../cypress/stack_utils'
-import $errUtils from '../cypress/error_utils'
+import $stackUtils from '../../cypress/stack_utils'
+import $errUtils from '../../cypress/error_utils'
 
 export const UNSERIALIZABLE = '__cypress_unserializable_value'
 
@@ -10,7 +10,7 @@ export const UNSERIALIZABLE = '__cypress_unserializable_value'
 // @ts-ignore
 const structuredCloneRef = window?.structuredClone || structuredClonePonyfill
 
-const isSerializableInCurrentBrowser = (value: any) => {
+export const isSerializableInCurrentBrowser = (value: any) => {
   try {
     structuredCloneRef(value)
 
@@ -21,6 +21,12 @@ const isSerializableInCurrentBrowser = (value: any) => {
        * to determine whether or not a value can be serialized through postMessage. Since the ponyfill deems Errors
        * as clone-able, but postMessage does not in Firefox, we must make sure we do NOT attempt to send native errors through firefox
        */
+      return false
+    }
+
+    // In some instances of structuredClone, Bluebird promises are considered serializable, but can be very deep objects
+    // For ours needs, we really do NOT want to serialize these
+    if (value instanceof Cypress.Promise) {
       return false
     }
 
@@ -106,7 +112,8 @@ export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: 
 // Even if native errors can be serialized through postMessage, many properties are omitted on structuredClone(), including prototypical hierarchy
 // because of this, we preprocess native errors to objects and postprocess them once they come back to the primary origin
 
-  if (_.isArray(valueToSanitize)) {
+  // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays. This is important for commands like .selectFile() using buffer streams
+  if (_.isArray(valueToSanitize) || _.isTypedArray(valueToSanitize)) {
     return _.map(valueToSanitize, preprocessForSerialization) as unknown as T
   }
 

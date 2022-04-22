@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS
@@ -76,6 +77,30 @@ function cookieValidatesHostPrefix (options) {
 }
 function cookieValidatesSecurePrefix (options) {
   return options.secure === false
+}
+
+interface InternalGetCookieOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  cookie?: Cypress.Cookie
+}
+
+interface InternalGetCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  cookies?: Cypress.Cookie[]
+}
+
+interface InternalSetCookieOptions extends Partial<Cypress.SetCookieOptions> {
+  _log?: Log
+  name: string
+  cookie?: Cypress.Cookie
+}
+
+type InternalClearCookieOptions = InternalGetCookieOptions
+
+interface InternalClearCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  cookies?: Cypress.Cookie[]
+  domain?: any
 }
 
 export default function (Commands, Cypress, cy, state, config) {
@@ -164,11 +189,8 @@ export default function (Commands, Cypress, cy, state, config) {
   })
 
   return Commands.addAll({
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    getCookie (name, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    getCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalGetCookieOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -211,11 +233,8 @@ export default function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    getCookies (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    getCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalGetCookiesOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -250,11 +269,8 @@ export default function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.SetCookieOptions>`
-    setCookie (name, value, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    setCookie (name, value, userOptions: Partial<Cypress.SetCookieOptions> = {}) {
+      const options: InternalSetCookieOptions = _.defaults({}, userOptions, {
         name,
         value,
         path: '/',
@@ -332,11 +348,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }).catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    clearCookie (name, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    clearCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalClearCookieOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -382,11 +395,8 @@ export default function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    clearCookies (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    clearCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalClearCookiesOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -396,12 +406,12 @@ export default function (Commands, Cypress, cy, state, config) {
           message: '',
           timeout: options.timeout,
           consoleProps () {
-            let c
+            const c = options.cookies
             const obj = {}
 
             obj['Yielded'] = 'null'
 
-            if ((c = options.cookies) && c.length) {
+            if (c && c.length) {
               obj['Cleared Cookies'] = c
               obj['Num Cookies'] = c.length
             } else {
