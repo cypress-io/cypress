@@ -32,7 +32,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('falls back to browsers[0] if preferences and cliBrowser do not exist', async () => {
-      lifecycleManager.setInitialActiveBrowser()
+      await lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
     })
@@ -42,7 +42,7 @@ describe('ProjectLifecycleManager', () => {
 
       ctx.coreData.cliBrowser = 'electron'
 
-      lifecycleManager.setInitialActiveBrowser()
+      await lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.cliBrowser).to.eq('electron')
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
@@ -51,7 +51,7 @@ describe('ProjectLifecycleManager', () => {
     it('uses lastBrowser if available', async () => {
       ctx.project.getProjectPreferences = sinon.stub().resolves({ lastBrowser: { name: 'chrome', channel: 'beta' } })
 
-      lifecycleManager.setInitialActiveBrowser()
+      await lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.activeBrowser).to.include({ name: 'chrome', displayName: 'Chrome Beta' })
     })
@@ -59,7 +59,7 @@ describe('ProjectLifecycleManager', () => {
     it('falls back to browsers[0] if lastBrowser does not exist', async () => {
       ctx.project.getProjectPreferences = sinon.stub().resolves({ lastBrowser: { name: 'chrome', channel: 'dev' } })
 
-      lifecycleManager.setInitialActiveBrowser()
+      await lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
     })
