@@ -125,7 +125,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   config: any
   Cypress: any
   Cookies: any
-  autoRun: boolean
 
   devices: {
     keyboard: Keyboard
@@ -208,7 +207,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
 
-  constructor (specWindow, Cypress, Cookies, state, config, autoRun = true) {
+  constructor (specWindow, Cypress, Cookies, state, config) {
     super()
 
     state('specWindow', specWindow)
@@ -219,7 +218,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
-    this.autoRun = autoRun
     initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
@@ -339,7 +337,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
 
-    const snapshots = createSnapshots(jquery.$$, state)
+    const snapshots = createSnapshots(this.$$, state)
 
     this.createSnapshot = snapshots.createSnapshot
     this.detachDom = snapshots.detachDom
@@ -476,10 +474,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   initialize ($autIframe) {
-    const signalStable = () => {
-      this.isStable(true, 'load')
-    }
-
     this.state('$autIframe', $autIframe)
 
     // dont need to worry about a try/catch here
@@ -538,17 +532,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           cy.state('autOrigin', remoteLocation.originPolicy)
           this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
-
-          signalStable()
         } catch (err: any) {
           // this catches errors thrown by user-registered event handlers
           // for `window:load`. this is used in the `catch` below so they
           // aren't mistaken as cross-origin errors
           err.isFromWindowLoadEvent = true
 
-          signalStable()
-
           throw err
+        } finally {
+          this.isStable(true, 'load')
         }
       } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
@@ -723,9 +715,20 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           cy.warnMixingPromisesAndCommands()
         }
 
-        if (cy.autoRun) {
-          cy.queue.run()
-        }
+        cy.queue.run()
+        .then(() => {
+          const onQueueEnd = cy.state('onQueueEnd')
+
+          if (onQueueEnd) {
+            onQueueEnd()
+          }
+        })
+        .catch(() => {
+          // errors from the queue are propagated to cy.fail by the queue itself
+          // and can be safely ignored here. omitting this catch causes
+          // unhandled rejections to be logged because Bluebird sees a promise
+          // chain with no catch handler
+        })
       }
 
       return chain

@@ -258,7 +258,16 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl, onError)
+    return CriClient.create({
+      target: wsUrl,
+      onError,
+      onReconnect (client) {
+        // if the client disconnects (e.g. due to a computer sleeping), update
+        // the frame tree on reconnect in cases there were changes while
+        // the client was disconnected
+        _updateFrameTree(client)()
+      },
+    })
   })
 }
 
@@ -336,13 +345,16 @@ const _updateFrameTree = (client) => async () => {
   debug('update frame tree')
 
   gettingFrameTree = new Promise<void>(async (resolve) => {
-    frameTree = (await client.send('Page.getFrameTree')).frameTree
+    try {
+      frameTree = (await client.send('Page.getFrameTree')).frameTree
+      debug('frame tree updated')
+    } catch (err) {
+      debug('failed to update frame tree:', err.stack)
+    } finally {
+      gettingFrameTree = null
 
-    debug('frame tree updated')
-
-    gettingFrameTree = null
-
-    resolve()
+      resolve()
+    }
   })
 }
 
@@ -648,8 +660,11 @@ export = {
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
-    await this._handlePausedRequests(criClient)
-    _listenForFrameTreeChanges(criClient)
+
+    if (options.experimentalSessionAndOrigin) {
+      await this._handlePausedRequests(criClient)
+      _listenForFrameTreeChanges(criClient)
+    }
 
     // return the launched browser process
     // with additional method to close the remote connection

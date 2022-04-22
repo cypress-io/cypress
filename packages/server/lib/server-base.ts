@@ -118,7 +118,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
   protected _eventBus: EventEmitter
-  protected remoteStates: RemoteStates
+  protected _remoteStates: RemoteStates
 
   constructor () {
     this.isListening = false
@@ -130,7 +130,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._baseUrl = null
     this._fileServer = null
 
-    this.remoteStates = new RemoteStates(() => {
+    this._remoteStates = new RemoteStates(() => {
       return {
         serverPort: this._port(),
         fileServerPort: this._fileServer?.port(),
@@ -162,6 +162,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
+  }
+
+  get remoteStates () {
+    return this._remoteStates
   }
 
   setupCrossOriginRequestHandling () {
@@ -212,7 +216,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       clientCertificates.loadClientCertificateConfig(config)
 
-      this.createNetworkProxy({ config, getCurrentBrowser, remoteStates: this.remoteStates, shouldCorrelatePreRequests })
+      this.createNetworkProxy({ config, getCurrentBrowser, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
 
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
@@ -223,7 +227,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       const routeOptions: InitializeRoutes = {
         config,
         specsStore,
-        remoteStates: this.remoteStates,
+        remoteStates: this._remoteStates,
         nodeProxy: this.nodeProxy,
         networkProxy: this._networkProxy!,
         onError,
@@ -234,7 +238,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
 
       this.setupCrossOriginRequestHandling()
-      this.remoteStates.addEventListeners(this.socket.localBus)
+      this._remoteStates.addEventListeners(this.socket.localBus)
 
       const runnerSpecificRouter = testingType === 'e2e'
         ? createRoutesE2E(routeOptions)
@@ -331,7 +335,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
-      this.remoteStates.reset()
+      this._remoteStates.reset()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -466,7 +470,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const baseUrl = this._baseUrl ?? '<root>'
 
-    return this.remoteStates.set(baseUrl)
+    return this._remoteStates.set(baseUrl)
   }
 
   _close () {

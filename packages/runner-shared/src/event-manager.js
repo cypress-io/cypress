@@ -127,10 +127,7 @@ export const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
-        // these events are set up before Cypress is instantiated, so it's
-        // possible it's undefined when an event fires, but it's okay to
-        // ignore at that point
-        Cypress?.emit(event, ...args)
+        Cypress.emit(event, ...args)
       })
     })
 
@@ -325,7 +322,7 @@ export const eventManager = {
     // The window.top should not change between test reloads, and we only need to bind the message event once
     // Forward all message events to the current instance of the multi-origin communicator
     window.top?.addEventListener('message', ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+      Cypress.primaryOriginCommunicator.onMessage({ data, source })
     }, false)
   },
 

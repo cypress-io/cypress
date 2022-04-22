@@ -91,7 +91,7 @@ describe('src/cypress/log', function () {
       expect(LogUtils.countLogsByTests(tests)).to.equal(6)
     })
 
-    it('returns zero if there are no agents routes or commands', () => {
+    it('returns zero if there are no agents, routes, or commands', () => {
       const tests = {
         a: {
           notAThing: true,

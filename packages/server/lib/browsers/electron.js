@@ -265,7 +265,9 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      this._listenToOnBeforeHeaders(win)
+      if (options.experimentalSessionAndOrigin) {
+        this._listenToOnBeforeHeaders(win)
+      }
 
       return this._handleDownloads(win, options.downloadsFolder, automation)
     })

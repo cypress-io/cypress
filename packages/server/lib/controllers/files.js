@@ -39,7 +39,7 @@ module.exports = {
 
         const iframeOptions = {
           title: this.getTitle(test),
-          domain: remoteStates.current().domainName,
+          domain: remoteStates.getPrimary().domainName,
           scripts: JSON.stringify(allFilesToSend),
         }
 

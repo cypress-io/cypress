@@ -60,6 +60,14 @@ export class RemoteStates {
     return _.cloneDeep(state)
   }
 
+  getPrimary () {
+    const state = Array.from(this.remoteStates.entries())[0][1]
+
+    debug('getting primary remote state: %o', state)
+
+    return state
+  }
+
   isInOriginStack (url: string): boolean {
     return this.originStack.includes(cors.getOriginPolicy(url))
   }
@@ -78,8 +86,8 @@ export class RemoteStates {
 
     const stateArray = Array.from(this.remoteStates.entries())
 
+    // reset the remoteStates and originStack to the primary
     this.remoteStates = new Map([stateArray[0]])
-
     this.originStack = [stateArray[0][0]]
   }
 

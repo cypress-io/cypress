@@ -13,7 +13,7 @@ import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousUrlVisited: LocationObject | undefined
+let previouslyVisitedLocation: LocationObject | undefined
 let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
@@ -30,7 +30,7 @@ const reset = (test: any = {}) => {
 
   // continuously reset this
   // before each test run!
-  previousUrlVisited = undefined
+  previouslyVisitedLocation = undefined
 
   // make sure we reset that we haven't
   // visited about blank again
@@ -53,33 +53,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   const anticipatedCrossOriginHref = cy.state('anticipatingCrossOriginResponse')?.href
 
   // Were we anticipating a cross origin page when we timed out?
-  if (anticipatedCrossOriginHref) {
-    // We remain in an anticipating state until either a load even happens or a timeout.
-    cy.isAnticipatingCrossOriginResponseFor(undefined)
-
-    // By default origins is just this location.
-    let originPolicies = [$Location.create(location.href).originPolicy]
-
-    const currentCommand = cy.queue.state('current')
-
-    if (currentCommand?.get('name') === 'origin') {
-      // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
-      originPolicies = [cy.state('latestActiveOriginPolicy')]
-    } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
-      // If this is a cross origin spec bridge and we're on the last command, we should have gotten a request on the origin of one of the parents.
-      originPolicies = cy.state('parentOriginPolicies')
-    }
-
-    $errUtils.throwErrByPath('navigation.cross_origin_load_timed_out', {
-      args: {
-        configFile: Cypress.config('configFile'),
-        ms,
-        crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
-        originPolicies,
-      },
-      onFail: log,
-    })
-  } else {
+  if (!anticipatedCrossOriginHref) {
     $errUtils.throwErrByPath('navigation.timed_out', {
       args: {
         configFile: Cypress.config('configFile'),
@@ -88,9 +62,35 @@ const timedOutWaitingForPageLoad = (ms, log) => {
       onFail: log,
     })
   }
+
+  // We remain in an anticipating state until either a load even happens or a timeout.
+  cy.isAnticipatingCrossOriginResponseFor(undefined)
+
+  // By default origins is just this location.
+  let originPolicies = [$Location.create(location.href).originPolicy]
+
+  const currentCommand = cy.queue.state('current')
+
+  if (currentCommand?.get('name') === 'origin') {
+    // If the current command is a cy.origin command, we should have gotten a request on the origin it expects.
+    originPolicies = [cy.state('latestActiveOriginPolicy')]
+  } else if (Cypress.isCrossOriginSpecBridge && cy.queue.isOnLastCommand()) {
+    // If this is a cross origin spec bridge and we're on the last command, we should have gotten a request on the origin of one of the parents.
+    originPolicies = cy.state('parentOriginPolicies')
+  }
+
+  $errUtils.throwErrByPath('navigation.cross_origin_load_timed_out', {
+    args: {
+      configFile: Cypress.config('configFile'),
+      ms,
+      crossOriginUrl: $Location.create(anticipatedCrossOriginHref),
+      originPolicies,
+    },
+    onFail: log,
+  })
 }
 
-const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previousUrlVisited, log, isCrossOriginSpecBridge = false }) => {
+const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
   const differences: string[] = []
 
   if (remote.protocol !== existing.protocol) {
@@ -109,7 +109,7 @@ const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previousUrl
     onFail: log,
     args: {
       differences: differences.join(', '),
-      previousUrl: previousUrlVisited,
+      previousUrl: previouslyVisitedLocation,
       attemptedUrl: remote,
       originalUrl,
       isCrossOriginSpecBridge,
@@ -123,12 +123,12 @@ const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previousUrl
   $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
 }
 
-const cannotVisitPreviousOrigin = ({ remote, originalUrl, previousUrlVisited, log }) => {
+const cannotVisitPreviousOrigin = ({ remote, originalUrl, previouslyVisitedLocation, log }) => {
   const errOpts = {
     onFail: log,
     args: {
       attemptedUrl: remote,
-      previousUrl: previousUrlVisited,
+      previousUrl: previouslyVisitedLocation,
       originalUrl,
     },
     errProps: {
@@ -434,9 +434,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       }
 
       const onCrossOriginFailure = (err) => {
-        options._log.set('message', '--page loaded--').snapshot().end()
-        options._log.set('state', 'failed')
-        options._log.set('error', err)
+        options._log.set('message', '--page loaded--').snapshot().error(err)
 
         resolve()
       }
@@ -526,6 +524,7 @@ type InvalidContentTypeError = Error & {
 
 interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
   _log?: Log
+  hasAlreadyVisitedUrl: boolean
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -852,7 +851,7 @@ export default (Commands, Cypress, cy, state, config) => {
         onLoad () {},
       })
 
-      options.hasAlreadyVisitedUrl = !!previousUrlVisited
+      options.hasAlreadyVisitedUrl = !!previouslyVisitedLocation
 
       if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
         $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(options.qs) } })
@@ -1125,7 +1124,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // if the origin currently matches
           // then go ahead and change the iframe's src
           if (remote.originPolicy === existing.originPolicy) {
-            previousUrlVisited = remote
+            previouslyVisitedLocation = remote
 
             url = $Location.fullyQualifyUrl(url)
 
@@ -1138,10 +1137,10 @@ export default (Commands, Cypress, cy, state, config) => {
           // if we've already cy.visit'ed in the test and we are visiting a new origin,
           // throw an error, else we'd be in a endless loop,
           // we also need to disable retries to prevent the endless loop
-          if (previousUrlVisited) {
+          if (previouslyVisitedLocation) {
             $utils.getTestFromRunnable(state('runnable'))._retries = 0
 
-            const params = { remote, existing, originalUrl, previousUrlVisited, log: options._log }
+            const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }
 
             return cannotVisitDifferentOrigin(params)
           }
@@ -1151,7 +1150,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // origin which isn't allowed within a cy.origin block
           if (Cypress.isCrossOriginSpecBridge) {
             const existingAutOrigin = win ? $Location.create(win.location.href) : $Location.create(Cypress.state('currentActiveOriginPolicy'))
-            const params = { remote, existing, originalUrl, previousUrlVisited: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true, isPrimaryOrigin }
+            const params = { remote, existing, originalUrl, previouslyVisitedLocation: existingAutOrigin, log: options._log, isCrossOriginSpecBridge: true, isPrimaryOrigin }
 
             return isPrimaryOrigin ? cannotVisitPreviousOrigin(params) : cannotVisitDifferentOrigin(params)
           }
@@ -1238,6 +1237,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // not a network failure, and we should throw the original error
           if (err.isCallbackError || err.isCrossOrigin) {
             delete err.isCallbackError
+            delete err.isCrossOrigin
             throw err
           }
 

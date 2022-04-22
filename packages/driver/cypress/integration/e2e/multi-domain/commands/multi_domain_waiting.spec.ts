@@ -8,7 +8,11 @@ context('cy.origin waiting', () => {
 
   it('.wait()', () => {
     cy.origin('http://foobar.com:3500', () => {
-      cy.wait(500)
+      const delay = cy.spy(Cypress.Promise, 'delay')
+
+      cy.wait(50).then(() => {
+        expect(delay).to.be.calledWith(50, 'wait')
+      })
     })
   })
 

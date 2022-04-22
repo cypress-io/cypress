@@ -139,7 +139,14 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = async (target: websocketUrl, onAsynchronousError: Function): Promise<CRIWrapper> => {
+interface CriClientOptions {
+  target: websocketUrl
+  onError: Function
+  onReconnect?: (client: CRIWrapper) => void
+}
+
+export const create = async (options: CriClientOptions): Promise<CRIWrapper> => {
+  const { target, onError, onReconnect } = options
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
   const enableCommands: CRI.Command[] = []
   let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
@@ -180,8 +187,12 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
       })
 
       enqueuedCommands = []
+
+      if (onReconnect) {
+        onReconnect(client)
+      }
     } catch (err) {
-      onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
+      onError(errors.get('CDP_COULD_NOT_RECONNECT', err))
     }
   }
 
@@ -285,9 +296,6 @@ export const create = async (target: websocketUrl, onAsynchronousError: Function
 
       return cri.close()
     },
-
-    // @ts-ignore
-    reconnect,
   }
 
   return client

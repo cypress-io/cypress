@@ -56,15 +56,6 @@ declare namespace Cypress {
     password: string
   }
 
-  interface RemoteState {
-    auth?: Auth
-    domainName: string
-    strategy: 'file' | 'http'
-    origin: string
-    fileServer: string | null
-    props: Record<string, any>
-  }
-
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -1430,7 +1421,7 @@ declare namespace Cypress {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    origin(urlOrDomain: string, fn: () => void): Chainable
+    origin<T extends any>(urlOrDomain: string, fn: () => void): Chainable<T>
 
     /**
      * Enables running Cypress commands in a secondary origin.
@@ -1441,9 +1432,9 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    origin<T>(urlOrDomain: string, options: {
+    origin<T, S extends any>(urlOrDomain: string, options: {
       args: T
-    }, fn: (args: T) => void): Chainable
+    }, fn: (args: T) => void): Chainable<S>
 
     /**
      * Get the parent DOM element of a set of DOM elements.
@@ -2846,7 +2837,7 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands.
+     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
      * @default false
      */
     experimentalSessionAndOrigin: boolean
@@ -2981,7 +2972,6 @@ declare namespace Cypress {
     projectName: string
     projectRoot: string
     proxyUrl: string
-    remote: RemoteState
     report: boolean
     reporterRoute: string
     reporterUrl: string
@@ -5766,7 +5756,8 @@ declare namespace Cypress {
   }
 
   interface LogConfig extends Timeoutable {
-    id: number
+    /** Unique id for the log, in the form of '<origin>-<number>' */
+    id: string
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */
@@ -5779,7 +5770,7 @@ declare namespace Cypress {
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean
-    /** Set to false if you want to control the finishing of the command in the log yourself */
+    /** Set to true to immediately finish the log  */
     end: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike

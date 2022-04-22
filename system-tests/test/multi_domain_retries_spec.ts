@@ -38,8 +38,9 @@ describe('e2e cy.origin retries', () => {
       const res = await exec()
 
       // verify that retrying tests with cy.origin doesn't cause serialization problems to spec bridges on test:before:run:async
-      expect(res.stdout).to.not.contain('TypeError')
-      expect(res.stdout).to.not.contain('Cannot set property message of  which has only a getter')
+      expect(res.stdout).not.to.contain('TypeError')
+      expect(res.stdout).not.to.contain('Cannot set property message')
+      expect(res.stdout).not.to.contain('which has only a getter')
 
       expect(res.stdout).to.contain('AssertionError')
       expect(res.stdout).to.contain('expected true to be false')
