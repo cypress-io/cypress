@@ -6,10 +6,12 @@ import '../config/lodash'
 
 import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
+import { $Location } from '../cypress/location'
 import $Commands from '../cypress/commands'
 import { create as createLog } from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { handleOriginFn } from './domain_fn'
+import { FINAL_SNAPSHOT_NAME } from '../cy/snapshots'
 import { handleLogs } from './events/logs'
 import { handleSocketEvents } from './events/socket'
 import { handleSpecWindowEvents } from './events/spec_window'
@@ -28,6 +30,18 @@ const createCypress = () => {
   Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
     // eventually, setup will get called again on rerun and cy will get re-created
     setup(config, env)
+  })
+
+  Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
+    const currentAutOriginPolicy = cy.state('autOrigin')
+    const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
+
+    if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
+      // if true, this is the correct specbridge to take the snapshot and send it back
+      const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
+
+      Cypress.specBridgeCommunicator.toPrimary('final:snapshot:generated', finalSnapshot)
+    }
   })
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')

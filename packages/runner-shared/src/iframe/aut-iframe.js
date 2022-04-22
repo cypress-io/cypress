@@ -69,6 +69,40 @@ export class AutIframe {
     return Cypress.cy.detachDom(this._contents())
   }
 
+  /**
+   * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
+   * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
+   * Otherwise, if top and the AUT match origins, the method returns true.
+   * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
+   */
+  doesAUTMatchTopOriginPolicy = () => {
+    const Cypress = eventManager.getCypress()
+
+    if (!Cypress) return
+
+    try {
+      const { href: currentHref } = this.$iframe[0].contentWindow.document.location
+      const locationTop = Cypress.Location.create(window.location.href)
+      const locationAUT = Cypress.Location.create(currentHref)
+
+      return locationTop.originPolicy === locationAUT.originPolicy || locationAUT.originPolicy === 'about://blank'
+    } catch (err) {
+      if (err.name === 'SecurityError') {
+        return false
+      }
+
+      throw err
+    }
+  }
+
+  /**
+   * Removes the src attribute from the AUT iframe, resulting in 'about:blank' being loaded into the iframe
+   * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src for more details
+   */
+  removeSrcAttribute = () => {
+    this.$iframe.removeAttr('src')
+  }
+
   visitBlank = ({ type } = { type: null }) => {
     return new Promise((resolve) => {
       this.$iframe[0].src = 'about:blank'
@@ -91,6 +125,23 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
+    if (!this.doesAUTMatchTopOriginPolicy()) {
+      /**
+       * A load event fires here when the src is removed (as does an unload event).
+       * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).
+       * This doesn't resort in a log message being generated for a new page.
+       * In the event-manager code, we stop adding logs from other domains once the spec is finished.
+       */
+      this.$iframe.one('load', () => {
+        this.restoreDom(snapshot)
+      })
+
+      // The iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. NOTE: This should only be done ONCE.
+      this.removeSrcAttribute()
+
+      return
+    }
+
     const Cypress = eventManager.getCypress()
     const { headStyles, bodyStyles } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
