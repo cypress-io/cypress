@@ -161,7 +161,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
-  const cacheNodeModulesDir = path.join('tmp', 'cy-system-tests-node-modules', project, 'node_modules')
+  const cacheNodeModulesDir = path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules')
   const tmpNodeModulesDir = path.join(projectPath(project), 'node_modules')
 
   async function removeWorkspacePackages (packages: string[]): Promise<void> {
@@ -209,7 +209,6 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     // 3. Delete cached workspace packages since the pkg manager will create a fresh symlink during install.
     await removeWorkspacePackages(workspaceDeps)
-    await fs.remove(tmpNodeModulesDir)
 
     // 4. Fix relative paths in temp dir's lockfile.
     const lockFilePath = path.join(projectDir, lockFilename)
