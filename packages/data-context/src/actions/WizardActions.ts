@@ -280,12 +280,14 @@ export class WizardActions {
     // only do this if config file doesn't exist
     this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
 
-    const adjective = (testingType === 'e2e') ? 'E2E' : 'component testing'
+    const description = (testingType === 'e2e')
+      ? 'The Cypress config file for E2E testing.'
+      : 'The Cypress config file where the component testing dev server is configured.'
 
     return this.scaffoldFile(
       this.ctx.lifecycleManager.configFilePath,
       configCode,
-      `The Cypress config file where the ${adjective} dev server is configured.`,
+      description,
     )
   }
 
