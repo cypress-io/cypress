@@ -1,8 +1,5 @@
 import type { SinonStub } from 'sinon'
 
-// Clears animations of the frame between specs
-Cypress.config('experimentalSessionSupport', true)
-
 describe('Sidebar Navigation', () => {
   context('as e2e testing type with localSettings', () => {
     it('use saved state for nav size', () => {
@@ -31,6 +28,7 @@ describe('Sidebar Navigation', () => {
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
+      cy.contains('todos')
     })
 
     it('expands the left nav bar by default', () => {
@@ -53,7 +51,6 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
@@ -68,7 +65,6 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
