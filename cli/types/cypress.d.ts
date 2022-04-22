@@ -10,10 +10,13 @@ declare namespace Cypress {
   type PrevSubject = keyof PrevSubjectMap
   type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
+  interface JQueryWithSelector<TElement = HTMLElement> extends JQuery<TElement> {
+    selector?: string | null
+  }
 
   interface PrevSubjectMap<O = unknown> {
     optional: O
-    element: JQuery
+    element: JQueryWithSelector
     document: Document
     window: Window
   }
@@ -467,16 +470,18 @@ declare namespace Cypress {
     Commands: {
       add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
       add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
+      add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: true | S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+          name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void
       add<T extends keyof Chainable, S extends PrevSubject>(
           name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
       ): void
       addAll<T extends keyof Chainable>(fns: CommandFns): void
       addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
+      addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: CommandFnsWithSubject<S>): void
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-          options: CommandOptions & { prevSubject: true | S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+          options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
       ): void
       addAll<T extends keyof Chainable, S extends PrevSubject>(
           options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
