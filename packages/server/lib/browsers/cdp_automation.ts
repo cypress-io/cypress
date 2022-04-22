@@ -205,7 +205,7 @@ export class CdpAutomation {
     })
   }
 
-  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
 
