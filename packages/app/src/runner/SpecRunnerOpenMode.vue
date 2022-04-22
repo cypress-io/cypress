@@ -179,16 +179,8 @@ const reporterWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
 })
 
-// we must update preferences before calling useRunnerStyle, to make sure that values from GQL
-// will be available during the initial calculation that useRunnerStyle does
-
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
-
-const {
-  viewportStyle,
-  windowWidth,
-} = useRunnerStyle()
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
@@ -201,6 +193,14 @@ preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.a
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? false)
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
+
+// we must update preferences before calling useRunnerStyle, to make sure that values from GQL
+// will be available during the initial calculation that useRunnerStyle does
+
+const {
+  viewportStyle,
+  windowWidth,
+} = useRunnerStyle()
 
 let fileToOpen: FileDetails
 
