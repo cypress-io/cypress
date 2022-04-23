@@ -773,7 +773,7 @@ describe('errors', () => {
 
   it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
       done()
     })
 
@@ -784,7 +784,7 @@ describe('errors', () => {
     Cypress.config('experimentalSessionSupport', true)
 
     cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0. Please see the migration guide for updating.')
+      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
       done()
     })
 
