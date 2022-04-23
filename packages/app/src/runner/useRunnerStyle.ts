@@ -13,19 +13,27 @@ const collapsedNavBarWidth = 64
 
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
+const isSpecsListOpen = ref<boolean>(false)
 
 export const useRunnerStyle = () => {
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
   // using the runner store for initial values, it will take care of setting defaults if needed
-  const { isSpecsListOpen, reporterWidth: uiStoreReporterWidth, specListWidth: uiStoreSpecListWidth } = useRunnerUiStore()
+  const runnerUiStore = useRunnerUiStore()
+
+  const { isSpecsListOpen: uiStoreIsSpecsListOpen, reporterWidth: uiStoreReporterWidth, specListWidth: uiStoreSpecListWidth } = runnerUiStore
 
   reporterWidth.value = uiStoreReporterWidth
   specListWidth.value = uiStoreSpecListWidth
+  isSpecsListOpen.value = uiStoreIsSpecsListOpen
+
+  runnerUiStore.$subscribe((mutation, state) => {
+    isSpecsListOpen.value = state.isSpecsListOpen
+  })
 
   const containerWidth = computed(() => {
     const miscBorders = 4
-    let nonAutWidth = reporterWidth.value + (isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
+    let nonAutWidth = reporterWidth.value + (isSpecsListOpen.value ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
     if (window.__CYPRESS_MODE__ !== 'run') {
       nonAutWidth += collapsedNavBarWidth
