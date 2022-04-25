@@ -14,7 +14,7 @@ const debug = debugLib('cypress:config:addToCypressConfig')
 /**
  * Adds to the Cypress config, using the Babel AST utils.
  *
- * Injects the at the top of the config definition, based on the common patterns of:
+ * Injects the export at the top of the config definition, based on the common patterns of:
  *
  * export default { ...
  *
