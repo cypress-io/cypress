@@ -29,7 +29,6 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - feature-multidomain
         - unify-1449-beta-slug-length
 
 # usually we don't build Mac app - it takes a long time
@@ -39,7 +38,6 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
     - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -50,7 +48,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
     - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -1658,7 +1655,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-beta-slug-length" && "$CIRCLE_BRANCH" != "feature-multidomain" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1449-beta-slug-length" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
