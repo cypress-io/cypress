@@ -96,6 +96,7 @@ declare namespace Cypress {
     (k: 'duringUserTestExecution', v?: boolean): boolean
     (k: 'onQueueEnd', v?: () => void): () => void
     (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
+    (k: 'specWindow', v?: Window): Window
     (k: string, v?: any): any
     state: Cypress.state
   }

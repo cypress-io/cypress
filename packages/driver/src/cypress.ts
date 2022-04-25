@@ -90,7 +90,7 @@ class $Cypress {
   browser: any
   platform: any
   testingType: any
-  state: any
+  state!: Cypress.State
   originalConfig: any
   config: any
   env: any
@@ -210,7 +210,7 @@ class $Cypress {
 
     _.extend(this, browserInfo(config))
 
-    this.state = $SetterGetter.create({})
+    this.state = $SetterGetter.create({}) as unknown as Cypress.State
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
@@ -223,7 +223,7 @@ class $Cypress {
             errProperty,
           })
 
-          throw new this.state('specWindow').Error(errMsg)
+          throw new (this.state('specWindow').Error)(errMsg)
         })
       }
 
@@ -239,7 +239,7 @@ class $Cypress {
           ? errResult
           : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
-        throw new this.state('specWindow').Error(errMsg)
+        throw new (this.state('specWindow').Error)(errMsg)
       })
     })
 
