@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress/react'
 import { FileTree } from './FileTree'
 import { mountAndSnapshot } from 'util/testing'
 

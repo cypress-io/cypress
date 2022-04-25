@@ -13,6 +13,8 @@ describe('Reporter Header', () => {
         expect(location.hash).to.contain('dom-content.spec')
       })
 
+      cy.get('body').type('f')
+
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
       cy.get('[data-selected-spec="false"]').should('have.length', '6')
     })
@@ -21,6 +23,8 @@ describe('Reporter Header', () => {
       cy.location().should((location) => {
         expect(location.hash).to.contain('dom-content.spec')
       })
+
+      cy.get('body').type('f')
 
       cy.get('input').type('dom', { force: true })
 

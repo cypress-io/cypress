@@ -115,18 +115,18 @@ describe('specChange subscription', () => {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -147,6 +147,7 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
@@ -171,6 +172,7 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
@@ -221,6 +223,7 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
@@ -230,18 +233,18 @@ module.exports = {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -332,18 +335,18 @@ module.exports = {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
