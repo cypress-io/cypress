@@ -894,6 +894,12 @@ export default {
     retry_timed_out ({ ms }) {
       return `Timed out retrying after ${ms}ms: `
     },
+    cross_origin_command ({ commandOrigin, autOrigin }) {
+      return stripIndent`\
+        The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autOrigin}\`.
+
+        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`
+    },
   },
 
   mocha: {
@@ -984,6 +990,29 @@ export default {
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
 
         If so, increase \`redirectionLimit\` value in configuration.`
+    },
+    cross_origin_load_timed_out ({ ms, configFile, crossOriginUrl, originPolicies }) {
+      return {
+        message: stripIndent`\
+          Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
+
+          - ${originPolicies.map((originPolicy) => `\`${originPolicy}\``).join('\n       -')}
+
+          A cross-origin request for \`${crossOriginUrl.href}\` was detected.
+
+          A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
+
+          \`cy.origin('${crossOriginUrl.originPolicy}', () => {\`
+          \`  <commands targeting ${crossOriginUrl.origin} go here>\`
+          \`})\`
+
+          If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
+
+          Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
+
+          When this \`load\` event occurs, Cypress will continue running commands.`,
+        docsUrl: 'https://on.cypress.io/origin',
+      }
     },
   },
 
@@ -1103,6 +1132,127 @@ export default {
 
   ng: {
     no_global: `Angular global (\`window.angular\`) was not found in your window. You cannot use ${cmd('ng')} methods without angular.`,
+  },
+
+  origin: {
+    docsUrl: 'https://on.cypress.io/origin',
+    experiment_not_enabled: {
+      message: `${cmd('origin')} requires enabling the experimentalSessionAndOrigin flag`,
+    },
+    invalid_url_argument: {
+      message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
+    },
+    invalid_options_argument: {
+      message: `${cmd('origin')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
+    },
+    extraneous_options_argument ({ extraneousKeys, validOptionKeys }) {
+      return stripIndent`\
+        ${cmd('origin')} detected extraneous keys in your options configuration.
+
+        The extraneous keys detected were:
+
+          > \`${extraneousKeys}\`
+
+        Valid keys include the following:
+
+          > \`${validOptionKeys}\`
+      `
+    },
+    invalid_fn_argument: {
+      message: `${cmd('origin')} requires the last argument to be a function. You passed: \`{{arg}}\``,
+    },
+    run_origin_fn_errored: {
+      message: stripIndent`
+      {{error}}
+
+      This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`,
+    },
+    ran_origin_fn_reference_error: {
+      message: stripIndent`
+        {{error}}
+
+        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.`,
+    },
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('origin')} failed because you are mixing up async and sync code.
+
+        In your callback function you invoked one or more cy commands but then returned a synchronous value.
+
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+
+        The value you synchronously returned was: \`{{value}}\``,
+    },
+    failed_to_serialize_object: {
+      message: stripIndent`\
+      ${cmd('origin')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
+
+      To properly serialize this subject, remove or serialize any unsupported properties.`,
+    },
+    failed_to_serialize_function: {
+      message: stripIndent`\
+      ${cmd('origin')} could not serialize the subject due to functions not being supported by the structured clone algorithm.`,
+    },
+    failed_to_serialize_symbol: {
+      message: stripIndent`\
+      ${cmd('origin')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
+    },
+    failed_to_serialize_or_map_thrown_value: {
+      message: stripIndent`\
+      ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
+    },
+    unsupported: {
+      route: {
+        message: `${cmd('route')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+      server: {
+        message: `${cmd('server')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+      Server: {
+        message: `\`Cypress.Server.*\` has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+      Cookies_preserveOnce: {
+        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      origin: {
+        message: `${cmd('origin')} use is not currently supported in the ${cmd('origin')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
+        docsUrl: 'https://on.cypress.io/github-issue/20718',
+      },
+      intercept: {
+        message: `${cmd('intercept')} use is not supported in the ${cmd('origin')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
+        docsUrl: 'https://on.cypress.io/github-issue/20720',
+      },
+      session: {
+        message: `${cmd('session')} use is not supported in the ${cmd('origin')} callback. Consider using it outside of the callback instead. Otherwise, please 👍 the following issue and leave a comment with your use-case:`,
+        docsUrl: 'https://on.cypress.io/github-issue/20721',
+      },
+      Cypress_session: {
+        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using them outside of the callback instead.`,
+        docsUrl: 'https://on.cypress.io/session-api',
+      },
+    },
+    cannot_visit_previous_origin (args) {
+      return {
+        message: stripIndent`\
+          ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
+
+          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed outside of the ${cmd('origin')} block.
+
+          \`<commands targeting ${args.attemptedUrl.origin} go here>\`
+
+          \`cy.origin('${args.previousUrl.originPolicy}', () => {\`
+          \`  <commands targeting ${args.previousUrl.origin} go here>\`
+          \`})\`
+
+          \`cy.visit('${args.originalUrl}')\``,
+      }
+    },
   },
 
   proxy: {
@@ -1503,9 +1653,18 @@ export default {
     validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}',
     },
-    experimentNotEnabled: {
-      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
-      docsUrl: 'https://on.cypress.io/session',
+    experimentNotEnabled (experimentalSessionSupport) {
+      if (experimentalSessionSupport) {
+        return {
+          message: stripIndent`
+          ${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.`,
+        }
+      }
+
+      return {
+        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag`,
+        docsUrl: 'https://on.cypress.io/session',
+      }
     },
     session: {
       duplicateId: {
@@ -1951,26 +2110,42 @@ export default {
         \`url\` from the \`url\` parameter: {{url}}`,
       docsUrl: 'https://on.cypress.io/visit',
     },
-    cannot_visit_different_origin: {
-      message: stripIndent`\
-        ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
+    cannot_visit_different_origin (args) {
+      return {
+        message: stripIndent`\
+          ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-        The new URL is considered a different origin because the following parts of the URL are different:
+          ${args.experimentalSessionAndOrigin ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:` }
 
-          > {{differences}}
+          ${args.isCrossOriginSpecBridge ?
+          `\`cy.origin('${args.previousUrl.originPolicy}', () => {\`
+          \`  cy.visit('${args.previousUrl}')\`
+          \`  <commands targeting ${args.previousUrl.origin} go here>\`
+          \`})\`` :
+          `\`cy.visit('${args.previousUrl}')\`
+          \`<commands targeting ${args.previousUrl.origin} go here>\``
+          }
 
-        You may only ${cmd('visit')} same-origin URLs within a single test.
+          \`cy.origin('${args.attemptedUrl.originPolicy}', () => {\`
+          \`  cy.visit('${args.originalUrl}')\`
+          \`  <commands targeting ${args.attemptedUrl.origin} go here>\`
+          \`})\`
 
-        The previous URL you visited was:
+          The new URL is considered a different origin because the following parts of the URL are different:
 
-          > '{{previousUrl}}'
+            > {{differences}}
 
-        You're attempting to visit this URL:
+          You may only ${cmd('visit')} same-origin URLs within ${args.isCrossOriginSpecBridge ? cmd('origin') : 'a single test'}.
 
-          > '{{attemptedUrl}}'
+          The previous URL you visited was:
 
-        You may need to restructure some of your test code to avoid this problem.`,
-      docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
+            > '${args.previousUrl.origin}'
+
+          You're attempting to visit this URL:
+
+            > '${args.attemptedUrl.origin}'`,
+        docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
+      }
     },
     loading_network_failed: stripIndent`\
       ${cmd('visit')} failed trying to load:

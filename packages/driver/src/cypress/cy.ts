@@ -2,7 +2,6 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
-import { registerFetch } from 'unfetch'
 
 import $dom from '../dom'
 import $utils from './utils'
@@ -26,12 +25,12 @@ import { create as createTimer, ITimer } from '../cy/timers'
 import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
 import { create as createRetries, IRetries } from '../cy/retries'
 import { create as createStability, IStability } from '../cy/stability'
-import $selection from '../dom/selection'
 import { create as createSnapshots, ISnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
+import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 
@@ -69,9 +68,13 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   curCy = cy
 
-  // prevent overriding top.onerror twice when loading more than one
-  // instance of test runner.
-  if (top.__alreadySetErrorHandlers__) {
+  try {
+    // prevent overriding top.onerror twice when loading more than one
+    // instance of test runner.
+    if (top.__alreadySetErrorHandlers__) {
+      return
+    }
+  } catch (err) {
     return
   }
 
@@ -122,6 +125,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   config: any
   Cypress: any
   Cookies: any
+
   devices: {
     keyboard: Keyboard
     mouse: Mouse
@@ -133,12 +137,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
+  isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
+  whenStableOrAnticipatingCrossOriginResponse: IStability['whenStableOrAnticipatingCrossOriginResponse']
 
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
 
   retry: IRetries['retry']
 
+  $$: IJQuery['$$']
   getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
 
   getRemoteLocation: ILocation['getRemoteLocation']
@@ -195,6 +202,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
+  overrides: IOverrides
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
@@ -215,7 +223,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.testConfigOverride = new TestConfigOverride()
 
     // bind methods
-    this.$$ = this.$$.bind(this)
     this.isCy = this.isCy.bind(this)
     this.fail = this.fail.bind(this)
     this.isStopped = this.isStopped.bind(this)
@@ -238,10 +245,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.timeout = timeouts.timeout
     this.clearTimeout = timeouts.clearTimeout
 
-    const statility = createStability(Cypress, state)
+    const stability = createStability(Cypress, state)
 
-    this.isStable = statility.isStable
-    this.whenStable = statility.whenStable
+    this.isStable = stability.isStable
+    this.whenStable = stability.whenStable
+    this.isAnticipatingCrossOriginResponseFor = stability.isAnticipatingCrossOriginResponseFor
+    this.whenStableOrAnticipatingCrossOriginResponse = stability.whenStableOrAnticipatingCrossOriginResponse
 
     const assertions = createAssertions(Cypress, this)
 
@@ -258,6 +267,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     const jquery = createJQuery(state)
 
+    this.$$ = jquery.$$
     this.getRemotejQueryInstance = jquery.getRemotejQueryInstance
 
     const location = createLocation(state)
@@ -336,7 +346,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
-    this.queue = new CommandQueue(state, this.timeout, this.whenStable, this.cleanup, this.fail, this.isCy)
+    this.overrides = createOverrides(state, config, focused, snapshots)
+
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy)
 
     setTopOnError(Cypress, this)
 
@@ -344,14 +356,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     specWindow.cy = this
 
     extendEvents(this)
-  }
 
-  $$ (selector, context) {
-    if (context == null) {
-      context = this.state('document')
-    }
-
-    return $dom.query(selector, context)
+    Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
+      this.enqueue(attrs)
+    })
   }
 
   isCy (val) {
@@ -363,6 +371,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   fail (err, options: { async?: boolean } = {}) {
+    // if an onFail handler is provided, call this in its place (currently used for cross-origin support)
+    if (this.state('onFail')) {
+      return this.state('onFail')(err)
+    }
+
     // this means the error has already been through this handler and caught
     // again. but we don't need to run it through again, so we can re-throw
     // it and it will fail the test as-is
@@ -496,7 +509,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // if setting these props failed then we know we're in a cross origin failure
       try {
-        setWindowDocumentProps(getContentWindow($autIframe), this.state)
+        const autWindow = getContentWindow($autIframe)
+
+        setWindowDocumentProps(autWindow, this.state)
 
         // we may need to update the url now
         this.urlNavigationEvent('load')
@@ -505,19 +520,55 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // because they would have been automatically applied during
         // onBeforeAppWindowLoad, but in the case where we visited
         // about:blank in a visit, we do need these
-        this.contentWindowListeners(getContentWindow($autIframe))
+        this.contentWindowListeners(autWindow)
 
-        this.Cypress.action('app:window:load', this.state('window'))
+        // stability is signalled after the window:load event to give event
+        // listeners time to be invoked prior to moving on, but not if
+        // there is a cross-origin error and the cy.origin API is
+        // not utilized
+        try {
+          this.Cypress.action('app:window:load', this.state('window'))
+          const remoteLocation = this.getRemoteLocation()
 
-        // we are now stable again which is purposefully
-        // the last event we call here, to give our event
-        // listeners time to be invoked prior to moving on
-        return this.isStable(true, 'load')
-      } catch (err) {
+          cy.state('autOrigin', remoteLocation.originPolicy)
+          this.Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url: remoteLocation.href })
+        } catch (err: any) {
+          // this catches errors thrown by user-registered event handlers
+          // for `window:load`. this is used in the `catch` below so they
+          // aren't mistaken as cross-origin errors
+          err.isFromWindowLoadEvent = true
+
+          throw err
+        } finally {
+          this.isStable(true, 'load')
+        }
+      } catch (err: any) {
+        if (err.isFromWindowLoadEvent) {
+          delete err.isFromWindowLoadEvent
+
+          // the user's window:load handler threw an error, so propagate that
+          // and fail the test
+          const r = this.state('reject')
+
+          if (r) {
+            return r(err)
+          }
+        }
+
+        // we failed setting the remote window props which
+        // means the page navigated to a different origin
+
+        // With cross-origin support, this is an expected error that may or may
+        // not be bad, we will rely on the page load timeout to throw if we
+        // don't end up where we expect to be.
+        if (this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
+          return
+        }
+
         let e = err
 
         // we failed setting the remote window props
-        // which means we're in a cross domain failure
+        // which means we're in a cross origin failure
         // check first to see if you have a callback function
         // defined and let the page load change the error
         const onpl = this.state('onPageLoadErr')
@@ -526,12 +577,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           e = onpl(e)
         }
 
-        // and now reject with it
-        const r = this.state('reject')
+        this.Cypress.emit('internal:window:load', {
+          type: 'cross:origin:failure',
+          error: e,
+        })
 
-        if (r) {
-          return r(e)
-        }
+        // need async:true since this is outside the command queue promise
+        // chain and cy.fail needs to know to use the reference to the
+        // last command to reject it
+        this.fail(e, { async: true })
       }
     })
   }
@@ -662,6 +716,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         cy.queue.run()
+        .then(() => {
+          const onQueueEnd = cy.state('onQueueEnd')
+
+          if (onQueueEnd) {
+            onQueueEnd()
+          }
+        })
+        .catch(() => {
+          // errors from the queue are propagated to cy.fail by the queue itself
+          // and can be safely ignored here. omitting this catch causes
+          // unhandled rejections to be logged because Bluebird sees a promise
+          // chain with no catch handler
+        })
       }
 
       return chain
@@ -774,7 +841,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.contentWindowListeners(contentWindow)
 
-    this.wrapNativeMethods(contentWindow)
+    this.overrides.wrapNativeMethods(contentWindow)
 
     this.onBeforeWindowLoad()
   }
@@ -835,13 +902,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // reset the promise again
     this.state('promise', undefined)
-
     this.state('hookId', hookId)
-
     this.state('runnable', runnable)
-
     this.state('test', $utils.getTestFromRunnable(runnable))
-
     this.state('ctx', runnable.ctx)
 
     const { fn } = runnable
@@ -971,66 +1034,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  private wrapNativeMethods (contentWindow) {
-    try {
-      // return null to trick contentWindow into thinking
-      // its not been iframed if modifyObstructiveCode is true
-      if (this.config('modifyObstructiveCode')) {
-        Object.defineProperty(contentWindow, 'frameElement', {
-          get () {
-            return null
-          },
-        })
-      }
-
-      const cy = this
-
-      contentWindow.HTMLElement.prototype.focus = function (focusOption) {
-        return cy.interceptFocus(this, contentWindow, focusOption)
-      }
-
-      contentWindow.HTMLElement.prototype.blur = function () {
-        return cy.interceptBlur(this)
-      }
-
-      contentWindow.SVGElement.prototype.focus = function (focusOption) {
-        return cy.interceptFocus(this, contentWindow, focusOption)
-      }
-
-      contentWindow.SVGElement.prototype.blur = function () {
-        return cy.interceptBlur(this)
-      }
-
-      contentWindow.HTMLInputElement.prototype.select = function () {
-        return $selection.interceptSelect.call(this)
-      }
-
-      contentWindow.document.hasFocus = function () {
-        return cy.documentHasFocus.call(this)
-      }
-
-      const cssModificationSpy = function (original, ...args) {
-        cy.onCssModified(this.href)
-
-        return original.apply(this, args)
-      }
-
-      const { insertRule } = contentWindow.CSSStyleSheet.prototype
-      const { deleteRule } = contentWindow.CSSStyleSheet.prototype
-
-      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
-      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-
-      if (this.config('experimentalFetchPolyfill')) {
-        // drop "fetch" polyfill that replaces it with XMLHttpRequest
-        // from the app iframe that we wrap for network stubbing
-        contentWindow.fetch = registerFetch(contentWindow)
-        // flag the polyfill to test this experimental feature easier
-        this.state('fetchPolyfilled', true)
-      }
-    } catch (error) { } // eslint-disable-line no-empty
-  }
-
   private warnMixingPromisesAndCommands () {
     const title = this.state('runnable').fullTitle()
 
@@ -1101,6 +1104,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       onSubmit (e) {
         return cy.Cypress.action('app:form:submitted', e)
       },
+      onLoad () {},
       onBeforeUnload (e) {
         cy.isStable(false, 'beforeunload')
 
@@ -1137,7 +1141,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
   }
 
-  private enqueue (obj) {
+  private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to

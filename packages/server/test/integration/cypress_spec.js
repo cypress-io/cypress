@@ -1052,6 +1052,9 @@ describe('lib/cypress', () => {
             setUserAgent: sinon.stub(),
             on: sinon.stub(),
             removeListener: sinon.stub(),
+            webRequest: {
+              onBeforeSendHeaders () {},
+            },
           },
         }
 

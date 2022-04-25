@@ -35,11 +35,10 @@ export class ServerCt extends ServerBase<SocketCt> {
         .then((httpsProxy) => {
           this._httpsProxy = httpsProxy
 
-          // once we open set the domain
-          // to root by default
+          // once we open set the domain to root by default
           // which prevents a situation where navigating
           // to http sites redirects to /__/ cypress
-          this._onDomainSet(baseUrl)
+          this._remoteStates.set(baseUrl)
 
           return resolve([port])
         })

@@ -95,3 +95,11 @@
     width: 100%;
   }
 }
+
+.spec-bridge-iframe {
+  border: none;
+  height: 100%;
+  position: fixed;
+  visibility: hidden;
+  width: 100%;
+}

@@ -56,19 +56,6 @@ declare namespace Cypress {
     password: string
   }
 
-  interface RemoteState {
-    auth?: {
-      username: string
-      password: string
-    }
-    domainName: string
-    strategy: 'file' | 'http'
-    origin: string
-    fileServer: string
-    props: Record<string, any>
-    visiting: string
-  }
-
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -639,7 +626,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: (action: string, ...args: any[]) => void
+    action: (action: string, ...args: any[]) => any[] | void
 
     /**
      * Load  files
@@ -1064,7 +1051,7 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalSessionSupport` config option is enabled.
+      * Only available if the `experimentalSessionAndOrigin` config option is enabled.
       *
       * @see https://on.cypress.io/session
       */
@@ -1425,6 +1412,29 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     off: Actions
+
+    /**
+     * Enables running Cypress commands in a secondary origin.
+     * @see https://on.cypress.io/origin
+     * @example
+     *    cy.origin('example.com', () => {
+     *      cy.get('h1').should('equal', 'Example Domain')
+     *    })
+     */
+    origin<T extends any>(urlOrDomain: string, fn: () => void): Chainable<T>
+
+    /**
+     * Enables running Cypress commands in a secondary origin.
+     * @see https://on.cypress.io/origin
+     * @example
+     *    cy.origin('example.com', { args: { key: 'value', foo: 'foo' } }, ({ key, foo }) => {
+     *      expect(key).to.equal('value')
+     *      expect(foo).to.equal('foo')
+     *    })
+     */
+    origin<T, S extends any>(urlOrDomain: string, options: {
+      args: T
+    }, fn: (args: T) => void): Chainable<S>
 
     /**
      * Get the parent DOM element of a set of DOM elements.
@@ -2822,15 +2832,15 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
-     * Enable experimental session support. See https://on.cypress.io/session
-     * @default false
-     */
-    experimentalSessionSupport: boolean
-    /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
      */
     experimentalInteractiveRunEvents: boolean
+    /**
+     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
+     * @default false
+     */
+    experimentalSessionAndOrigin: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
@@ -2962,7 +2972,6 @@ declare namespace Cypress {
     projectName: string
     projectRoot: string
     proxyUrl: string
-    remote: RemoteState
     report: boolean
     reporterRoute: string
     reporterUrl: string
@@ -5452,6 +5461,21 @@ declare namespace Cypress {
     (action: 'task', tasks: Tasks): void
   }
 
+  interface CodeFrame {
+    frame: string
+    language: string
+    line: number
+    column: number
+    absoluteFile: string
+    originalFile: string
+    relativeFile: string
+  }
+
+  interface CypressError extends Error {
+    docsUrl?: string
+    codeFrame?: CodeFrame
+  }
+
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -5557,7 +5581,7 @@ declare namespace Cypress {
      *  This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'fail', fn: (error: Error, mocha: Mocha.Runnable) => void): Cypress
+    (action: 'fail', fn: (error: CypressError, mocha: Mocha.Runnable) => void): Cypress
     /**
      * Fires whenever the viewport changes via a `cy.viewport()` or naturally when
      * Cypress resets the viewport to the default between tests. Useful for debugging purposes.
@@ -5591,6 +5615,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'command:end', fn: (command: CommandQueue) => void): Cypress
+    /**
+     * Fires when a command is skipped, namely the `should` command.
+     * Useful for debugging and understanding how commands are handled.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'skipped:command:end', fn: (command: CommandQueue) => void): Cypress
     /**
      * Fires whenever a command begins its retrying routines.
      * This is called on the trailing edge after Cypress has internally
@@ -5681,10 +5711,13 @@ declare namespace Cypress {
   }
 
   interface EnqueuedCommand {
+    id: string
     name: string
     args: any[]
     type: string
     chainerId: string
+    injected: boolean
+    userInvocationStack?: string
     fn(...args: any[]): any
   }
 
@@ -5723,6 +5756,8 @@ declare namespace Cypress {
   }
 
   interface LogConfig extends Timeoutable {
+    /** Unique id for the log, in the form of '<origin>-<number>' */
+    id: string
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */
@@ -5735,6 +5770,8 @@ declare namespace Cypress {
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean
+    /** Set to true to immediately finish the log  */
+    end: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }

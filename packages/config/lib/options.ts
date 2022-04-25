@@ -153,11 +153,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalSessionSupport',
+    name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -501,6 +501,10 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'experimentalRunEvents',
     errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalSessionSupport',
+    errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalShadowDomSupport',

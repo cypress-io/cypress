@@ -102,8 +102,6 @@ export const Iframes = namedObserver('Iframes', ({
 
   useEffect(() => {
     eventManager.on('visit:failed', autIframe.current.showVisitFailure)
-    eventManager.on('before:screenshot', autIframe.current.beforeScreenshot)
-    eventManager.on('after:screenshot', autIframe.current.afterScreenshot)
     eventManager.on('script:error', _setScriptError)
 
     // TODO: need to take headless mode into account
@@ -135,6 +133,8 @@ export const Iframes = namedObserver('Iframes', ({
       restoreDom: autIframe.current.restoreDom,
       highlightEl: autIframe.current.highlightEl,
       detachDom: autIframe.current.detachDom,
+      isAUTSameOrigin: autIframe.current.doesAUTMatchTopOriginPolicy,
+      removeSrc: autIframe.current.removeSrcAttribute,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={eventManager}
