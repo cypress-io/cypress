@@ -200,7 +200,7 @@ commands:
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-test-2-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
