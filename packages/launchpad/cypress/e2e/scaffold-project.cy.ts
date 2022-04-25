@@ -45,7 +45,7 @@ function scaffoldAndOpenE2EProject (opts: {
   cy.contains('E2E Testing').click()
   cy.contains(opts.language === 'js' ? 'JavaScript' : 'TypeScript').click()
   cy.contains('Next').click()
-  cy.contains('We added the following files to your project.')
+  cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
 }
 
@@ -84,7 +84,7 @@ function scaffoldAndOpenCTProject (opts: {
 
   cy.contains('Next Step').click()
   cy.contains('Skip').click()
-  cy.contains('We added the following files to your project.')
+  cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
 }
 

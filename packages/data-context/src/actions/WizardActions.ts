@@ -174,14 +174,15 @@ export class WizardActions {
   }
 
   private async scaffoldE2E () {
-    const scaffolded = await Promise.all([
+    // Order of the scaffoldedFiles is intentional, confirm before changing
+    const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
 
-    return scaffolded
+    return scaffoldedFiles
   }
 
   private async scaffoldComponent () {
@@ -190,13 +191,16 @@ export class WizardActions {
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
 
-    return await Promise.all([
+    // Order of the scaffoldedFiles is intentional, confirm before changing
+    const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('component'),
-      this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage),
       this.scaffoldSupport('commands', chosenLanguage),
       this.scaffoldComponentIndexHtml(chosenFramework),
+      this.scaffoldFixtures(),
     ])
+
+    return scaffoldedFiles
   }
 
   private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
@@ -207,14 +211,18 @@ export class WizardActions {
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
 
     let fileContent: string | undefined
+    let description: string = ''
 
     if (fileName === 'commands') {
       fileContent = commandsFileBody(language)
+      description = 'A support file that is useful for creating custom Cypress commands and overwriting existing ones.'
     } else if (fileName === 'e2e') {
       fileContent = supportFileE2E(language)
+      description = 'The support file that is bundled and loaded before each E2E spec.'
     } else if (fileName === 'component') {
       assert(this.ctx.coreData.wizard.chosenFramework)
       fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+      description = 'The support file that is bundled and loaded before each component testing spec.'
     }
 
     assert(fileContent)
@@ -223,7 +231,7 @@ export class WizardActions {
 
     return {
       status: 'valid',
-      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress api`,
+      description,
       file: {
         absolute: supportFile,
       },
@@ -259,7 +267,7 @@ export class WizardActions {
 
       return {
         status: 'changes',
-        description: 'Merge this code with your existing config file',
+        description: 'Merge this code with your existing config file.',
         file: {
           absolute: this.ctx.lifecycleManager.configFilePath,
           contents: configCode,
@@ -272,10 +280,14 @@ export class WizardActions {
     // only do this if config file doesn't exist
     this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
 
+    const description = (testingType === 'e2e')
+      ? 'The Cypress config file for E2E testing.'
+      : 'The Cypress config file where the component testing dev server is configured.'
+
     return this.scaffoldFile(
       this.ctx.lifecycleManager.configFilePath,
       configCode,
-      'Created a new config file',
+      description,
     )
   }
 
@@ -289,7 +301,7 @@ export class WizardActions {
 
       return {
         status: 'skipped',
-        description: 'Fixtures folder already exists',
+        description: 'An example fixture for data imported into your Cypress tests, such as `cy.intercept()`.',
         file: {
           absolute: exampleScaffoldPath,
           contents: '// Skipped',
@@ -325,7 +337,7 @@ export class WizardActions {
     return this.scaffoldFile(
       componentIndexHtmlPath,
       chosenFramework.componentIndexHtml(),
-      'The HTML used as the wrapper for all component tests',
+      'The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.',
     )
   }
 
