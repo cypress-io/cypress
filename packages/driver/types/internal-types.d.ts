@@ -100,6 +100,8 @@ declare namespace Cypress {
     (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
     (k: 'specWindow', v?: Window): Window
     (k: 'runnable', v?: CypressRunnable): CypressRunnable
+    (k: 'isStable', v?: boolean): boolean
+    (k: 'whenStable', v?: null | (() => Promise)): () => Promise
     (k: string, v?: any): any
     state: Cypress.state
     reset: () => Record<string, any>
