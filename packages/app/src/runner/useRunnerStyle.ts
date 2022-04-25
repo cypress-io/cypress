@@ -33,13 +33,16 @@ export const useRunnerStyle = () => {
 
   const containerWidth = computed(() => {
     const miscBorders = 4
+    const containerMinimum = 100
     let nonAutWidth = reporterWidth.value + (isSpecsListOpen.value ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
     if (window.__CYPRESS_MODE__ !== 'run') {
       nonAutWidth += collapsedNavBarWidth
     }
 
-    return windowWidth.value - nonAutWidth
+    const containerWidth = windowWidth.value - nonAutWidth
+
+    return containerWidth < containerMinimum ? containerMinimum : containerWidth
   })
 
   const screenshotStore = useScreenshotStore()
@@ -77,12 +80,17 @@ export const useRunnerStyle = () => {
     return style
   })
 
+  const autMainDivStyle = computed(() => {
+    return `height: calc(100% - ${autStore.specRunnerHeaderHeight}px)`
+  })
+
   watchEffect(() => {
     autStore.setScale(scale.value)
   })
 
   return {
     viewportStyle,
+    autMainDivStyle,
     windowWidth: computed(() => {
       if (window.__CYPRESS_MODE__ === 'run') {
         return windowWidth.value
