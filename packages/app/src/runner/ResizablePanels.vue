@@ -151,7 +151,15 @@ const maxPanel2Width = computed(() => {
 })
 
 const panel3width = computed(() => {
-  return props.maxTotalWidth - panel1Width.value - panel2Width.value
+  const panel3SpaceAvailable = props.maxTotalWidth - panel1Width.value - panel2Width.value
+
+  // minimumWithMargin - if panel 3 would end up below the minimum allowed size
+  // due to window resizing, forcing the minimum width will create a horizontal scroll
+  // so that on small windows users _can_ recover the AUT, just like Cy 9.x.
+  // Doubling it is arbitrary here but gives a nicer experience.
+  const minimumWithBuffer = props.minPanel3Width * 2
+
+  return panel3SpaceAvailable < props.minPanel3Width ? minimumWithBuffer : panel3SpaceAvailable
 })
 
 function handleResizeEnd (panel: DraggablePanel) {
