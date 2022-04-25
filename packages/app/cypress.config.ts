@@ -22,8 +22,8 @@ export default defineConfig({
     supportFile: 'cypress/component/support/index.ts',
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     devServer: {
-      // bundler: 'vite',
-      // framework: 'vue',
+      bundler: 'vite',
+      framework: 'vue',
       viteConfig: {
         optimizeDeps: {
           include: [
