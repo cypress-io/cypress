@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full w-full"
+    class="flex h-full w-100vw overflow-x-auto"
     :class="{'select-none': panel1IsDragging || panel2IsDragging}"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
@@ -8,7 +8,7 @@
     <div
       v-show="showPanel1"
       data-cy="specs-list-panel"
-      class="h-full flex-shrink-0 z-10 relative"
+      class="h-full flex-shrink-0 z-20 relative"
       :style="{width: `${panel1Width}px`}"
     >
       <slot
