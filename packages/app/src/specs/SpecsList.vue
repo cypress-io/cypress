@@ -115,6 +115,7 @@
       class="mt-56px"
       @clear="handleClear"
     />
+    <div>{{JSON.stringify(specs)}}</div>
   </div>
 </template>
 
@@ -172,6 +173,20 @@ fragment SpecsList on Spec {
 }
 `
 
+
+gql`
+fragment CloudSpecs_123 on CloudProject{
+  specs(specPaths: ["cypress/e2e/practice/practice.cy.js"]) {
+      specPath
+      averageDuration
+      recentRuns {
+        id
+        status
+      }
+  }
+}
+`
+
 gql`
 fragment Specs_SpecsList on Query {
   currentProject {
@@ -184,6 +199,9 @@ fragment Specs_SpecsList on Query {
     }
     config
     ...SpecPatternModal
+    cloudProject{
+      ...CloudSpecs_123
+    }
   }
 }
 `
@@ -229,13 +247,23 @@ function handleClear () {
 }
 
 const specs = computed(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
+  const specs2 = cachedSpecs.value.map((x) => {
+    const s = makeFuzzyFoundSpec(x)
+    // console.log(JSON.stringify(props.gql.currentProject.cloudProject))
+    // console.log(s)
+    const runInfo = props.gql.currentProject.cloudProject.specs.find(ss=>ss.specPath === s.name)
+    // console.log(runInfo)
+    return {
+      ...s,
+      runInfo
+    }
+  })
 
   if (!debouncedSearchString.value) {
-    return specs
+    return specs2
   }
 
-  return fuzzySortSpecs(specs, debouncedSearchString.value)
+  return fuzzySortSpecs(specs2, debouncedSearchString.value)
 })
 
 const collapsible = computed(() => {

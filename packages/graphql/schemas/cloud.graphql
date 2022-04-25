@@ -140,6 +140,11 @@ type CloudProject implements Node {
   Unique identifier for a Project
   """
   slug: String!
+
+  """
+  List of specs in the project.
+  """
+  specs(specPaths: [String!]): [CloudProjectSpecs]
 }
 
 type CloudProjectConnection {
@@ -185,6 +190,13 @@ union CloudProjectResult =
     CloudProject
   | CloudProjectNotFound
   | CloudProjectUnauthorized
+
+type CloudProjectSpecs {
+  averageDuration: Float
+  recentRuns: [CloudRun]
+  specHash: String
+  specPath: String
+}
 
 """
 Unauthorized access
