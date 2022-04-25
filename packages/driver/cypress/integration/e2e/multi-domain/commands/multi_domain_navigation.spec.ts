@@ -22,9 +22,18 @@ context('cy.origin navigation', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
-      cy.get(':checkbox[name="colors"][value="blue"]').check().should('be.checked')
+      cy.window().then((localWindow) => {
+        // Define a custom property on window that we can assert the presence of.
+        // After reloading, this property should not exit.
+        // @ts-ignore
+        localWindow.cy_testCustomValue = true
+      })
+
+      cy.window().should('have.prop', 'cy_testCustomValue', true)
+
       cy.reload()
-      cy.get(':checkbox[name="colors"][value="blue"]').should('not.be.checked')
+
+      cy.window().should('not.have.prop', 'cy_testCustomValue', true)
     })
   })
 
