@@ -469,108 +469,110 @@ describe('App: Specs', () => {
     viewportHeight: 768,
     viewportWidth: 1024,
   }, () => {
-    beforeEach(() => {
-      cy.scaffoldProject('no-specs')
-      cy.openProject('no-specs')
-      cy.startAppServer('component')
-      cy.visitApp()
-
-      cy.findAllByTestId('card').eq(0).as('EmptyCard')
-    })
-
-    it('shows create new empty spec card', () => {
-      cy.get('@EmptyCard')
-      .within(() => {
-        cy.findByRole('button', {
-          name: 'Create new empty spec',
-        }).should('be.visible')
-        .and('not.be.disabled')
-      })
-    })
-
-    context('create empty card', () => {
+    context('project with default spec pattern', () => {
       beforeEach(() => {
-        cy.get('@EmptyCard').click()
+        cy.scaffoldProject('no-specs')
+        cy.openProject('no-specs')
+        cy.startAppServer('component')
+        cy.visitApp()
 
-        cy.findByRole('dialog', {
-          name: 'Enter the path for your new spec',
-        }).as('CreateEmptySpecDialog')
-
-        cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+        cy.findAllByTestId('card').eq(0).as('EmptyCard')
       })
 
-      it('shows dialog that can be dismissed with Close (x) button press', () => {
-        cy.get('@DialogCloseButton').click()
-        cy.findByRole('dialog', {
-          name: 'Enter the path for your new spec',
-        }).should('not.exist')
+      it('shows create new empty spec card', () => {
+        cy.get('@EmptyCard')
+        .within(() => {
+          cy.findByRole('button', {
+            name: 'Create new empty spec',
+          }).should('be.visible')
+          .and('not.be.disabled')
+        })
       })
 
-      it('shows success modal when empty spec is created', () => {
-        cy.get('@CreateEmptySpecDialog').within(() => {
-          cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
+      context('create empty card', () => {
+        beforeEach(() => {
+          cy.get('@EmptyCard').click()
 
-          cy.findByRole('button', { name: 'Create Spec' }).click()
+          cy.findByRole('dialog', {
+            name: 'Enter the path for your new spec',
+          }).as('CreateEmptySpecDialog')
+
+          cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
         })
 
-        cy.findByRole('dialog', {
-          name: defaultMessages.createSpec.successPage.header,
-        }).as('SuccessDialog').within(() => {
-          cy.contains(getPathForPlatform('cypress/my-empty-spec.cy.js')).should('be.visible')
-          cy.findByRole('button', { name: 'Close' }).should('be.visible')
-
-          cy.findByRole('link', { name: 'Okay, run the spec' })
-          .should('have.attr', 'href', `#/specs/runner?file=cypress/my-empty-spec.cy.js`)
-
-          cy.findByRole('button', { name: 'Create another spec' }).click()
+        it('shows dialog that can be dismissed with Close (x) button press', () => {
+          cy.get('@DialogCloseButton').click()
+          cy.findByRole('dialog', {
+            name: 'Enter the path for your new spec',
+          }).should('not.exist')
         })
 
-        // 'Create a new spec' dialog presents with options when user indicates they want to create
-        // another spec.
-        cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
-      })
+        it('shows success modal when empty spec is created', () => {
+          cy.get('@CreateEmptySpecDialog').within(() => {
+            cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-      it('navigates to spec runner when selected', () => {
-        cy.get('@CreateEmptySpecDialog').within(() => {
-          cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
+            cy.findByRole('button', { name: 'Create Spec' }).click()
+          })
 
-          cy.findByRole('button', { name: 'Create Spec' }).click()
+          cy.findByRole('dialog', {
+            name: defaultMessages.createSpec.successPage.header,
+          }).as('SuccessDialog').within(() => {
+            cy.contains(getPathForPlatform('cypress/my-empty-spec.cy.js')).should('be.visible')
+            cy.findByRole('button', { name: 'Close' }).should('be.visible')
+
+            cy.findByRole('link', { name: 'Okay, run the spec' })
+            .should('have.attr', 'href', `#/specs/runner?file=cypress/my-empty-spec.cy.js`)
+
+            cy.findByRole('button', { name: 'Create another spec' }).click()
+          })
+
+          // 'Create a new spec' dialog presents with options when user indicates they want to create
+          // another spec.
+          cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
         })
 
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
-          cy.findByRole('link', {
-            name: 'Okay, run the spec',
-          }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
+        it('navigates to spec runner when selected', () => {
+          cy.get('@CreateEmptySpecDialog').within(() => {
+            cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
+
+            cy.findByRole('button', { name: 'Create Spec' }).click()
+          })
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
+            cy.findByRole('link', {
+              name: 'Okay, run the spec',
+            }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
+          })
+
+          cy.get('#main-pane').should('be.visible')
+
+          cy.location().its('href').should('contain', '#/specs/runner?file=cypress/my-empty-spec.cy.js')
         })
 
-        cy.get('#main-pane').should('be.visible')
+        it('displays alert with docs link on new spec', () => {
+          cy.get('@CreateEmptySpecDialog').within(() => {
+            cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-        cy.location().its('href').should('contain', '#/specs/runner?file=cypress/my-empty-spec.cy.js')
-      })
+            cy.findByRole('button', { name: 'Create Spec' }).click()
+          })
 
-      it('displays alert with docs link on new spec', () => {
-        cy.get('@CreateEmptySpecDialog').within(() => {
-          cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
+            cy.findByRole('link', {
+              name: 'Okay, run the spec',
+            }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
+          })
 
-          cy.findByRole('button', { name: 'Create Spec' }).click()
+          cy.contains('Review the docs')
+          .should('have.attr', 'href', 'https://on.cypress.io/mount')
+
+          cy.log('should not contain the link if you navigate away and back')
+          cy.get('body').type('f')
+          cy.get('[data-testid=spec-file-item]').first().click()
+          cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
+
+          cy.get('[data-testid=spec-file-item]').last().click()
+          cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
         })
-
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
-          cy.findByRole('link', {
-            name: 'Okay, run the spec',
-          }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
-        })
-
-        cy.contains('Review the docs')
-        .should('have.attr', 'href', 'https://on.cypress.io/mount')
-
-        cy.log('should not contain the link if you navigate away and back')
-        cy.get('body').type('f')
-        cy.get('[data-testid=spec-file-item]').first().click()
-        cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
-
-        cy.get('[data-testid=spec-file-item]').last().click()
-        cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
       })
     })
 
