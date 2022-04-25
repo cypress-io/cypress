@@ -34,6 +34,8 @@ import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 
+import type { ICypress } from '../cypress'
+
 const debugErrors = debugFn('cypress:driver:errors')
 
 const returnedFalse = (result) => {
@@ -121,9 +123,9 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
-  state: any
+  state: Cypress.State
   config: any
-  Cypress: any
+  Cypress: ICypress
   Cookies: any
 
   devices: {
@@ -207,7 +209,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
 
-  constructor (specWindow, Cypress, Cookies, state, config) {
+  constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies, state: Cypress.State, config) {
     super()
 
     state('specWindow', specWindow)

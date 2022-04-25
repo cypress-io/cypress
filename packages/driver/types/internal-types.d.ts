@@ -82,6 +82,8 @@ declare namespace Cypress {
 
   // Extend Cypress.state properties here
   interface State {
+    (): Record<string, any>
+    (v: Record<string, any>): Record<string, any>
     (k: 'activeSessions', v?: Cypress.Commands.Sessions.ActiveSessions):  ActiveSessionsSessionData | undefined
     (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
     (k: 'routes', v?: RouteMap): RouteMap
@@ -99,6 +101,7 @@ declare namespace Cypress {
     (k: 'specWindow', v?: Window): Window
     (k: string, v?: any): any
     state: Cypress.state
+    reset: () => Record<string, any>
   }
 
   interface InternalConfig {
@@ -119,3 +122,7 @@ type AliasedRequest = {
 
 // utility types
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+interface SpecWindow extends Window {
+  cy: $Cy
+}

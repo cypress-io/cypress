@@ -304,7 +304,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow, scripts) {
+  onSpecWindow (specWindow: Window, scripts) {
     // create cy and expose globally
     this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
@@ -765,3 +765,5 @@ class $Cypress {
 $Cypress.$ = $
 $Cypress.utils = $utils
 export default $Cypress
+
+export type ICypress = ReturnType<typeof $Cypress.create>
