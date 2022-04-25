@@ -3,6 +3,8 @@ import Promise from 'bluebird'
 
 import $dom from '../dom'
 import $errUtils from '../cypress/error_utils'
+import type { ICypress } from '../cypress'
+import type { $Cy } from '../cypress/cy'
 
 // TODO
 // bTagOpen + bTagClosed
@@ -77,7 +79,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   return obj
 }
 
-export const create = (Cypress, cy) => {
+export const create = (Cypress: ICypress, cy: $Cy) => {
   const getUpcomingAssertions = () => {
     const index = cy.state('index') + 1
 
@@ -347,6 +349,8 @@ export const create = (Cypress, cy) => {
         if (_.isFunction(onRetry)) {
           return cy.retry(onRetry, options)
         }
+
+        return
       }
 
       // bail if we have no assertions and apply
