@@ -7,7 +7,7 @@ import type { TimeoutID } from '../lib/types'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
-interface RenderProps {
+export interface RenderProps {
   message?: string
   indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
   interceptions?: Array<{

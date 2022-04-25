@@ -49,6 +49,7 @@
   }
 
   .command-wrapper {
+    border-left: 2px solid $reporter-section-background;
     background-color: $reporter-section-background;
     color: $gray-500;
     display: flex;
@@ -83,10 +84,12 @@
       color: $white;
       display: inline-block;
       font-family: $font-sans;
+      font-size: 10px;
+      margin-left: 5px;
       line-height: 16px;
       max-width: 200px;
       overflow: hidden;
-      padding: 0 5px;
+      padding: 0 4px;
       text-overflow: ellipsis;
       vertical-align: text-top;
       white-space: nowrap;
@@ -103,6 +106,12 @@
       &.primitive {
         background-color: $red-500;
       }
+
+      &.has-multiple-aliases,
+      &.has-multiple-interceptions {
+        border-radius: 4px 0 0 4px;
+        padding: 0 2px 0 4px;
+      }
     }
 
     // ensures alias & number of children commands don't break if reporter width is narrow
@@ -114,8 +123,27 @@
       }
     }
 
-    .command-alias-count {
-      padding-left: 2px;
+    .command-alias-count,
+    .command-interceptions-count {
+      border-radius: 0 4px 4px 0;
+      color: $white;
+      display: inline-block;
+      line-height: 16px;
+      padding: 0 4px;
+      vertical-align: text-top;
+
+      &.route {
+        background-color: $teal-400;
+      }
+
+      &.dom {
+        background-color: $indigo-400;
+      }
+
+      &.agent,
+      &.primitive {
+        background-color: $red-400;
+      }
     }
 
     .num-children.has-alias {
@@ -268,13 +296,18 @@
       background: rgba($red-400, 0.3);
     }
 
-    .command-number-column {
+    .command-number-column,
+    .command-method,
+    .command-message {
       color: $err-header-text;
     }
 
-    .command-group,
-    .command-group-block {
+    .command-group {
       border-color: $err-header-text;
+
+      .command-group-block {
+        border-color: $err-header-text;
+      }
     }
   }
 
@@ -385,15 +418,6 @@
     overflow-wrap: anywhere;
   }
 
-  .command-children {
-    &:hover {
-      .command-group,
-      .command-group-block {
-        border-left: 1px dotted $gray-400;
-      }
-    }
-  }
-
   .command-message-text {
     font-size: 12px;
     white-space: initial;
@@ -426,14 +450,6 @@
       display: inline-block;
       margin-left: 5px;
       margin-right: 0;
-    }
-
-    .command-alias,
-    .command-interceptions {
-      font-family: $font-sans;
-      font-size: 10px;
-      line-height: 1.6;
-      margin-left: 5px;
     }
 
     label {
