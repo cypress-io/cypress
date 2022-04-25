@@ -1342,19 +1342,23 @@ export const AllCypressErrors = {
   },
 
   CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: (configFilePath: string, setupNodeEvents: any) => {
+    const re = /.?(cypress\.config.*)/
+    const configFile = configFilePath.match(re)?.[1] ?? `configFile`
+
     const code = errPartial`
       {
         component: {
-          devServer (cypressDevServerConfig, devServerConfig) {
-            ${fmt.comment(`// start dev server here`)
+          devServer: {
+            framework: 'create-react-app', ${fmt.comment('// Your framework')}
+            bundler: 'webpack // ${fmt.comment('// Your dev server')}
           }
         }
       }`
 
     return errTemplate`\
-      Your ${fmt.highlightSecondary(`configFile`)} is invalid: ${fmt.path(configFilePath)}
+      Your ${fmt.highlightSecondary(configFile)} is invalid: ${fmt.path(configFilePath)}
 
-      The ${fmt.highlight(`component.devServer()`)} must be a function with the following signature:
+      The ${fmt.highlight(`component.devServer()`)} must be an object with a supported ${fmt.highlight('framework')} and ${fmt.highlight('bundler')}.
 
       ${fmt.code(code)}
 
