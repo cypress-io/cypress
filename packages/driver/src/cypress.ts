@@ -29,7 +29,7 @@ import $SetterGetter from './cypress/setter_getter'
 import $utils from './cypress/utils'
 
 import { $Chainer } from './cypress/chainer'
-import { $Cookies } from './cypress/cookies'
+import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
 import { $Location } from './cypress/location'
 import ProxyLogging from './cypress/proxy-logging'
@@ -95,7 +95,7 @@ class $Cypress {
   config: any
   env: any
   getTestRetries: any
-  Cookies: any
+  Cookies!: ICookies
   ProxyLogging: any
   _onInitialize: any
   isCy: any

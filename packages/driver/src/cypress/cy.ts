@@ -35,6 +35,7 @@ import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 
 import type { ICypress } from '../cypress'
+import type { ICookies } from './cookies'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -126,7 +127,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   state: Cypress.State
   config: any
   Cypress: ICypress
-  Cookies: any
+  Cookies: ICookies
 
   devices: {
     keyboard: Keyboard
@@ -209,7 +210,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
 
-  constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies, state: Cypress.State, config) {
+  constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: Cypress.State, config: ICypress['config']) {
     super()
 
     state('specWindow', specWindow)
