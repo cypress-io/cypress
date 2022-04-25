@@ -7,17 +7,9 @@ import { Queue } from '../util/queue'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
+import type $Command from './command'
 
 const debugErrors = Debug('cypress:driver:errors')
-
-interface Command {
-  get(key: string): any
-  get(): any
-  set(key: string, value: any): any
-  set(options: any): any
-  attributes: object
-  finishLogs(): void
-}
 
 const __stackReplacementMarker = (fn, ctx, args) => {
   return fn.apply(ctx, args)
@@ -60,7 +52,7 @@ const commandRunningFailed = (Cypress, state, err) => {
   })
 }
 
-export class CommandQueue extends Queue<Command> {
+export class CommandQueue extends Queue<$Command> {
   state: any
   timeout: any
   stability: any
@@ -96,7 +88,7 @@ export class CommandQueue extends Queue<Command> {
     return _.invokeMap(this.get(), 'get', 'name')
   }
 
-  insert (index: number, command: Command) {
+  insert (index: number, command: $Command) {
     super.insert(index, command)
 
     const prev = this.at(index - 1)
@@ -118,7 +110,7 @@ export class CommandQueue extends Queue<Command> {
   find (attrs) {
     const matchesAttrs = _.matches(attrs)
 
-    return _.find(this.get(), (command: Command) => {
+    return _.find(this.get(), (command: $Command) => {
       return matchesAttrs(command.attributes)
     })
   }
@@ -131,7 +123,7 @@ export class CommandQueue extends Queue<Command> {
     return this.state('index') === this.length
   }
 
-  private runCommand (command: Command) {
+  private runCommand (command: $Command) {
     // bail here prior to creating a new promise
     // because we could have stopped / canceled
     // prior to ever making it through our first
