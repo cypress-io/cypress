@@ -17,7 +17,9 @@
       :max-total-width="windowWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
-      :min-panel3-width="340"
+      :min-panel1-width="minSpecsListWidth"
+      :min-panel2-width="minReporterWidth"
+      :min-panel3-width="minAUTWidth"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -66,7 +68,8 @@
         </HideDuringScreenshotOrRunMode>
 
         <RemoveClassesDuringScreenshotting
-          class="h-full bg-gray-100 p-16px"
+          class="bg-gray-100 p-16px"
+          :style="autMainDivStyle"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -179,8 +182,9 @@ const reporterWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
 })
 
-preferences.update('reporterWidth', reporterWidthPreferences.value)
-preferences.update('specListWidth', specsListWidthPreferences.value)
+const isSpecsListOpenPreferences = computed(() => {
+  return props.gql.localSettings.preferences.isSpecsListOpen ?? false
+})
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
@@ -190,7 +194,7 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? false)
+preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
 
@@ -200,7 +204,34 @@ preferences.update('specListWidth', specsListWidthPreferences.value)
 const {
   viewportStyle,
   windowWidth,
+  autMainDivStyle,
 } = useRunnerStyle()
+
+const autSpaceAvailable = computed(() => windowWidth.value - (isSpecsListOpenPreferences.value ? specsListWidthPreferences.value : 0) - reporterWidthPreferences.value - 64)
+
+const minAUTWidth = computed(() => {
+  const defaultMinimum = 340
+
+  const isWindowTooSmall = (autSpaceAvailable.value <= defaultMinimum) || (autSpaceAvailable.value <= ((windowWidth.value - 64) / 3))
+
+  return isWindowTooSmall ? 100 : defaultMinimum
+})
+
+const minSpecsListWidth = computed(() => {
+  const defaultMinimum = 200
+
+  const isWindowTooSmall = (autSpaceAvailable.value <= defaultMinimum) || (autSpaceAvailable.value <= ((windowWidth.value - 64) / 3))
+
+  return isWindowTooSmall ? 50 : defaultMinimum
+})
+
+const minReporterWidth = computed(() => {
+  const defaultMinimum = 220
+
+  const isWindowTooSmall = (autSpaceAvailable.value <= defaultMinimum) || (autSpaceAvailable.value <= ((windowWidth.value - 64) / 3))
+
+  return isWindowTooSmall ? 50 : defaultMinimum
+})
 
 let fileToOpen: FileDetails
 
