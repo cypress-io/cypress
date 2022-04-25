@@ -2,9 +2,7 @@ import _ from 'lodash'
 import utils from './utils'
 
 export class $Command {
-  // `attributes` is initiated at reset(), but ts cannot detect it.
-  // @ts-ignore
-  attributes: Record<string, any>
+  attributes!: Record<string, any>
 
   constructor (attrs: any = {}) {
     this.reset()
