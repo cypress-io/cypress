@@ -1001,6 +1001,11 @@ describe('visual error templates', () => {
         default: [{ configFile: '/path/to/configFile.json' }],
       }
     },
+    EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],

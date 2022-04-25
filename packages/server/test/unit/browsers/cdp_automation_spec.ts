@@ -1,5 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
+import { Automation } from '../../../lib/automation'
 import {
   CdpAutomation,
   _cookieMatches,
@@ -67,11 +68,18 @@ context('lib/browsers/cdp_automation', () => {
   })
 
   context('.CdpAutomation', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn)
+      this.automation = new CdpAutomation({
+        sendDebuggerCommandFn: this.sendDebuggerCommand,
+        onFn: this.onFn,
+        automation: {} as Automation,
+        experimentalSessionAndOrigin: false,
+      })
+
+      await this.automation.enable()
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))

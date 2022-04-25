@@ -8,6 +8,7 @@ import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
+import type { Protocol } from 'devtools-protocol'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -257,7 +258,16 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl, onError)
+    return CriClient.create({
+      target: wsUrl,
+      onError,
+      onReconnect (client) {
+        // if the client disconnects (e.g. due to a computer sleeping), update
+        // the frame tree on reconnect in cases there were changes while
+        // the client was disconnected
+        _updateFrameTree(client)()
+      },
+    })
   })
 }
 
@@ -295,8 +305,6 @@ const _navigateUsingCRI = async function (client, url) {
 }
 
 const _handleDownloads = async function (client, dir, automation) {
-  await client.send('Page.enable')
-
   client.on('Page.downloadWillBegin', (data) => {
     const downloadItem = {
       id: data.guid,
@@ -329,10 +337,126 @@ const _handleDownloads = async function (client, dir, automation) {
   })
 }
 
-const _setAutomation = (client, automation) => {
-  return automation.use(
-    new CdpAutomation(client.send, client.on, automation),
-  )
+let frameTree
+let gettingFrameTree
+
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+const _updateFrameTree = (client) => async () => {
+  debug('update frame tree')
+
+  gettingFrameTree = new Promise<void>(async (resolve) => {
+    try {
+      frameTree = (await client.send('Page.getFrameTree')).frameTree
+      debug('frame tree updated')
+    } catch (err) {
+      debug('failed to update frame tree:', err.stack)
+    } finally {
+      gettingFrameTree = null
+
+      resolve()
+    }
+  })
+}
+
+// we can't get the frame tree during the Fetch.requestPaused event, because
+// the CDP is tied up during that event and can't be utilized. so we maintain
+// a reference to it that's updated when it's likely to have been changed
+const _listenForFrameTreeChanges = (client) => {
+  debug('listen for frame tree changes')
+
+  client.on('Page.frameAttached', _updateFrameTree(client))
+  client.on('Page.frameDetached', _updateFrameTree(client))
+}
+
+const _continueRequest = (client, params, header?) => {
+  const details: Protocol.Fetch.ContinueRequestRequest = {
+    requestId: params.requestId,
+  }
+
+  if (header) {
+    // headers are received as an object but need to be an array
+    // to modify them
+    const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
+
+    details.headers = [
+      ...currentHeaders,
+      header,
+    ]
+  }
+
+  debug('continueRequest: %o', details)
+
+  client.send('Fetch.continueRequest', details).catch((err) => {
+    // swallow this error so it doesn't crash Cypress.
+    // an "Invalid InterceptionId" error can randomly happen in the driver tests
+    // when testing the redirection loop limit, when a redirect request happens
+    // to be sent after the test has moved on. this shouldn't crash Cypress, in
+    // any case, and likely wouldn't happen for standard user tests, since they
+    // will properly fail and not move on like the driver tests
+    debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+  })
+}
+
+interface HasFrame {
+  frame: Protocol.Page.Frame
+}
+
+const _isAUTFrame = async (frameId: string) => {
+  debug('need frame tree')
+
+  // the request could come in while in the middle of geting the frame tree,
+  // which is asynchronous, so wait for it to be fetched
+  if (gettingFrameTree) {
+    debug('awaiting frame tree')
+
+    await gettingFrameTree
+  }
+
+  const frame = _.find(frameTree?.childFrames || [], ({ frame }) => {
+    return frame?.name?.startsWith('Your App:')
+  }) as HasFrame | undefined
+
+  if (frame) {
+    return frame.frame.id === frameId
+  }
+
+  return false
+}
+
+const _handlePausedRequests = async (client) => {
+  await client.send('Fetch.enable')
+
+  // adds a header to the request to mark it as a request for the AUT frame
+  // itself, so the proxy can utilize that for injection purposes
+  client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+    if (
+      // is a script, stylesheet, image, etc
+      params.resourceType !== 'Document'
+      || !(await _isAUTFrame(params.frameId))
+    ) {
+      return _continueRequest(client, params)
+    }
+
+    debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
+
+    _continueRequest(client, params, {
+      name: 'X-Cypress-Is-AUT-Frame',
+      value: 'true',
+    })
+  })
+}
+
+const _setAutomation = async (client, automation, options) => {
+  const cdpAutomation = new CdpAutomation({
+    sendDebuggerCommandFn: client.send,
+    onFn: client.on,
+    automation,
+    experimentalSessionAndOrigin: options.experimentalSessionAndOrigin,
+  })
+
+  await cdpAutomation.enable()
+
+  return automation.use(cdpAutomation)
 }
 
 export = {
@@ -353,6 +477,8 @@ export = {
   _navigateUsingCRI,
 
   _handleDownloads,
+
+  _handlePausedRequests,
 
   _setAutomation,
 
@@ -514,7 +640,7 @@ export = {
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
 
-    this._setAutomation(criClient, automation)
+    await this._setAutomation(criClient, automation, options)
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
@@ -529,9 +655,16 @@ export = {
       originalBrowserKill.apply(launchedBrowser, args)
     }
 
+    await criClient.send('Page.enable')
+
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
+
+    if (options.experimentalSessionAndOrigin) {
+      await this._handlePausedRequests(criClient)
+      _listenForFrameTreeChanges(criClient)
+    }
 
     // return the launched browser process
     // with additional method to close the remote connection

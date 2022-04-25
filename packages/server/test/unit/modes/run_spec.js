@@ -810,21 +810,6 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('passes exit from config to waitForTestsToFinishRunning', function () {
-      this.projectInstance.getConfig.restore()
-      sinon.stub(this.projectInstance, 'getConfig').resolves({
-        proxyUrl: 'http://localhost:12345',
-        exit: false,
-      })
-
-      return runMode.run()
-      .then(() => {
-        expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
-          exit: false,
-        })
-      })
-    })
-
     it('passes headed to openProject.launch', () => {
       const browser = { name: 'electron', family: 'chromium' }
 

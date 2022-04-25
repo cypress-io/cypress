@@ -72,6 +72,20 @@ export const assertLogLength = (logs, expectedLength) => {
   expect(logs.length).to.eq(expectedLength, `received ${logs.length} logs when we expected ${expectedLength}: [${receivedLogs}]`)
 }
 
+export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) => {
+  const matchedLogs = Array.from(logMap.values()).filter((log) => {
+    const props = log.get()
+
+    let consoleProps = _.isFunction(props?.consoleProps) ? props.consoleProps() : props?.consoleProps
+
+    return consoleProps.Command === consolePropCommand && props.id.includes(matchingOrigin)
+  })
+
+  const logAttrs = matchedLogs.map((log) => log.get())
+
+  return logAttrs.length === 1 ? logAttrs[0] : logAttrs
+}
+
 export const attachListeners = (listenerArr) => {
   return (els) => {
     _.each(els, (el, elName) => {
@@ -92,6 +106,10 @@ const getAllFn = (...aliases) => {
       return cy.now('get', alias)
     }),
   )
+}
+
+const shouldWithTimeout = (cb, timeout = 250) => {
+  cy.wrap({}, { timeout }).should(cb)
 }
 
 export const keyEvents = [
@@ -119,6 +137,8 @@ export const expectCaret = (start, end) => {
 }
 
 Cypress.Commands.add('getAll', getAllFn)
+
+Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 
 const chaiSubset = require('chai-subset')
 

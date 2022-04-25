@@ -1,16 +1,17 @@
-exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
+exports['config/lib/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "blacklistHosts",
   "experimentalComponentTesting",
   "experimentalGetCookiesSameSite",
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
+  "experimentalSessionSupport",
   "experimentalShadowDomSupport",
   "firefoxGcInterval",
   "nodeVersion",
   "nodeVersion"
 ]
 
-exports['src/index .getDefaultValues returns list of public config keys 1'] = {
+exports['config/lib/index .getDefaultValues returns list of public config keys 1'] = {
   "animationDistanceThreshold": 5,
   "baseUrl": null,
   "blockHosts": null,
@@ -23,10 +24,9 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "e2e": {},
   "env": {},
   "execTimeout": 60000,
-  "exit": true,
   "experimentalFetchPolyfill": false,
   "experimentalInteractiveRunEvents": false,
-  "experimentalSessionSupport": false,
+  "experimentalSessionAndOrigin": false,
   "experimentalSourceRewriting": false,
   "experimentalStudio": false,
   "fileServerFolder": "",
@@ -87,7 +87,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "xhrRoute": "/xhrs/"
 }
 
-exports['src/index .getPublicConfigKeys returns list of public config keys 1'] = [
+exports['config/lib/index .getPublicConfigKeys returns list of public config keys 1'] = [
   "animationDistanceThreshold",
   "baseUrl",
   "blockHosts",
@@ -100,10 +100,9 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "e2e",
   "env",
   "execTimeout",
-  "exit",
   "experimentalFetchPolyfill",
   "experimentalInteractiveRunEvents",
-  "experimentalSessionSupport",
+  "experimentalSessionAndOrigin",
   "experimentalSourceRewriting",
   "experimentalStudio",
   "fileServerFolder",

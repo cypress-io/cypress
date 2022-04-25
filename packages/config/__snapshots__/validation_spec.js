@@ -13,7 +13,108 @@ exports['browsers list with a string'] = {
   "list": "browsers"
 }
 
-exports['src/validation .isValidBrowser passes valid browsers and forms error messages for invalid ones isValidBrowser 1'] = {
+exports['not one of the strings error message'] = {
+  "key": "test",
+  "value": "nope",
+  "type": "one of these values: \"foo\", \"bar\""
+}
+
+exports['number instead of string'] = {
+  "key": "test",
+  "value": 42,
+  "type": "one of these values: \"foo\", \"bar\""
+}
+
+exports['null instead of string'] = {
+  "key": "test",
+  "value": null,
+  "type": "one of these values: \"foo\", \"bar\""
+}
+
+exports['not one of the numbers error message'] = {
+  "key": "test",
+  "value": 4,
+  "type": "one of these values: 1, 2, 3"
+}
+
+exports['string instead of a number'] = {
+  "key": "test",
+  "value": "foo",
+  "type": "one of these values: 1, 2, 3"
+}
+
+exports['null instead of a number'] = {
+  "key": "test",
+  "value": null,
+  "type": "one of these values: 1, 2, 3"
+}
+
+exports['not string or array'] = {
+  "key": "mockConfigKey",
+  "value": null,
+  "type": "a string or an array of strings"
+}
+
+exports['array of non-strings'] = {
+  "key": "mockConfigKey",
+  "value": [
+    1,
+    2,
+    3
+  ],
+  "type": "a string or an array of strings"
+}
+
+exports['invalid retry value'] = {
+  "key": "mockConfigKey",
+  "value": "1",
+  "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
+}
+
+exports['invalid retry object'] = {
+  "key": "mockConfigKey",
+  "value": {
+    "fakeMode": 1
+  },
+  "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
+}
+
+exports['missing https protocol'] = {
+  "key": "clientCertificates[0].url",
+  "value": "http://url.com",
+  "type": "an https protocol"
+}
+
+exports['invalid url'] = {
+  "key": "clientCertificates[0].url",
+  "value": "not *",
+  "type": "a valid URL"
+}
+
+exports['not qualified url'] = {
+  "key": "mockConfigKey",
+  "value": "url.com",
+  "type": "a fully qualified URL (starting with `http://` or `https://`)"
+}
+
+exports['empty string'] = {
+  "key": "mockConfigKey",
+  "value": "",
+  "type": "a fully qualified URL (starting with `http://` or `https://`)"
+}
+
+exports['config/lib/validation .isValidClientCertificatesSet returns error message for certs not passed as an array array 1'] = {
+  "key": "mockConfigKey",
+  "value": "1",
+  "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
+}
+
+exports['config/lib/validation .isValidClientCertificatesSet returns error message for certs object without url 1'] = {
+  "key": "clientCertificates[0].url",
+  "type": "a URL matcher"
+}
+
+exports['config/lib/validation .isValidBrowser passes valid browsers and forms error messages for invalid ones isValidBrowser 1'] = {
   "name": "isValidBrowser",
   "behavior": [
     {
@@ -82,145 +183,44 @@ exports['src/validation .isValidBrowser passes valid browsers and forms error me
   ]
 }
 
-exports['not one of the strings error message'] = {
-  "key": "test",
-  "value": "nope",
-  "type": "one of these values: \"foo\", \"bar\""
-}
-
-exports['number instead of string'] = {
-  "key": "test",
-  "value": 42,
-  "type": "one of these values: \"foo\", \"bar\""
-}
-
-exports['null instead of string'] = {
-  "key": "test",
-  "value": null,
-  "type": "one of these values: \"foo\", \"bar\""
-}
-
-exports['not one of the numbers error message'] = {
-  "key": "test",
-  "value": 4,
-  "type": "one of these values: 1, 2, 3"
-}
-
-exports['string instead of a number'] = {
-  "key": "test",
-  "value": "foo",
-  "type": "one of these values: 1, 2, 3"
-}
-
-exports['null instead of a number'] = {
-  "key": "test",
-  "value": null,
-  "type": "one of these values: 1, 2, 3"
-}
-
-exports['src/validation .isStringOrFalse returns error message when value is neither string nor false 1'] = {
-  "key": "mockConfigKey",
-  "value": null,
-  "type": "a string or false"
-}
-
-exports['src/validation .isBoolean returns error message when value is a not a string 1'] = {
-  "key": "mockConfigKey",
-  "value": 1,
-  "type": "a string"
-}
-
-exports['src/validation .isString returns error message when value is a not a string 1'] = {
-  "key": "mockConfigKey",
-  "value": 1,
-  "type": "a string"
-}
-
-exports['src/validation .isArray returns error message when value is a non-array 1'] = {
-  "key": "mockConfigKey",
-  "value": 1,
-  "type": "an array"
-}
-
-exports['not string or array'] = {
-  "key": "mockConfigKey",
-  "value": null,
-  "type": "a string or an array of strings"
-}
-
-exports['array of non-strings'] = {
-  "key": "mockConfigKey",
-  "value": [
-    1,
-    2,
-    3
-  ],
-  "type": "a string or an array of strings"
-}
-
-exports['src/validation .isNumberOrFalse returns error message when value is a not number or false 1'] = {
-  "key": "mockConfigKey",
-  "value": null,
-  "type": "a number or false"
-}
-
-exports['src/validation .isPlainObject returns error message when value is a not an object 1'] = {
+exports['config/lib/validation .isPlainObject returns error message when value is a not an object 1'] = {
   "key": "mockConfigKey",
   "value": 1,
   "type": "a plain object"
 }
 
-exports['src/validation .isNumber returns error message when value is a not a number 1'] = {
+exports['config/lib/validation .isNumber returns error message when value is a not a number 1'] = {
   "key": "mockConfigKey",
   "value": "string",
   "type": "a number"
 }
 
-exports['invalid retry value'] = {
+exports['config/lib/validation .isNumberOrFalse returns error message when value is a not number or false 1'] = {
   "key": "mockConfigKey",
-  "value": "1",
-  "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
+  "value": null,
+  "type": "a number or false"
 }
 
-exports['invalid retry object'] = {
+exports['config/lib/validation .isBoolean returns error message when value is a not a string 1'] = {
   "key": "mockConfigKey",
-  "value": {
-    "fakeMode": 1
-  },
-  "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
+  "value": 1,
+  "type": "a string"
 }
 
-exports['src/validation .isValidClientCertificatesSet returns error message for certs not passed as an array array 1'] = {
+exports['config/lib/validation .isString returns error message when value is a not a string 1'] = {
   "key": "mockConfigKey",
-  "value": "1",
-  "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
+  "value": 1,
+  "type": "a string"
 }
 
-exports['src/validation .isValidClientCertificatesSet returns error message for certs object without url 1'] = {
-  "key": "clientCertificates[0].url",
-  "type": "a URL matcher"
-}
-
-exports['missing https protocol'] = {
-  "key": "clientCertificates[0].url",
-  "value": "http://url.com",
-  "type": "an https protocol"
-}
-
-exports['invalid url'] = {
-  "key": "clientCertificates[0].url",
-  "value": "not *",
-  "type": "a valid URL"
-}
-
-exports['not qualified url'] = {
+exports['config/lib/validation .isArray returns error message when value is a non-array 1'] = {
   "key": "mockConfigKey",
-  "value": "url.com",
-  "type": "a fully qualified URL (starting with `http://` or `https://`)"
+  "value": 1,
+  "type": "an array"
 }
 
-exports['empty string'] = {
+exports['config/lib/validation .isStringOrFalse returns error message when value is neither string nor false 1'] = {
   "key": "mockConfigKey",
-  "value": "",
-  "type": "a fully qualified URL (starting with `http://` or `https://`)"
+  "value": null,
+  "type": "a string or false"
 }

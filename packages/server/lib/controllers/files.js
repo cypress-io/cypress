@@ -22,7 +22,7 @@ module.exports = {
     })
   },
 
-  handleIframe (req, res, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, config, remoteStates, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
@@ -39,7 +39,7 @@ module.exports = {
 
         const iframeOptions = {
           title: this.getTitle(test),
-          domain: getRemoteState().domainName,
+          domain: remoteStates.getPrimary().domainName,
           scripts: JSON.stringify(allFilesToSend),
         }
 
@@ -48,6 +48,20 @@ module.exports = {
         return res.render(iframePath, iframeOptions)
       })
     })
+  },
+
+  handleCrossOriginIframe (req, res) {
+    const iframePath = cwd('lib', 'html', 'multi-domain-iframe.html')
+    const domain = req.hostname
+
+    const iframeOptions = {
+      domain,
+      title: `Cypress for ${domain}`,
+    }
+
+    debug('cross origin iframe with options %o', iframeOptions)
+
+    res.render(iframePath, iframeOptions)
   },
 
   getSpecs (spec, config, extraOptions = {}) {
