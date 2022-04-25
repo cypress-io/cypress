@@ -1350,7 +1350,7 @@ export const AllCypressErrors = {
         component: {
           devServer: {
             framework: 'create-react-app', ${fmt.comment('// Your framework')}
-            bundler: 'webpack // ${fmt.comment('// Your dev server')}
+            bundler: 'webpack' // ${fmt.comment('// Your dev server')}
           }
         }
       }`
@@ -1358,7 +1358,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       Your ${fmt.highlightSecondary(configFile)} is invalid: ${fmt.path(configFilePath)}
 
-      The ${fmt.highlight(`component.devServer()`)} must be an object with a supported ${fmt.highlight('framework')} and ${fmt.highlight('bundler')}.
+      The ${fmt.highlight(`component.devServer`)} must be an object with a supported ${fmt.highlight('framework')} and ${fmt.highlight('bundler')}.
 
       ${fmt.code(code)}
 
