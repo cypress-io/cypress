@@ -17,7 +17,9 @@ if (supportFile) {
   let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
 
   if (CypressInstance.config('platform') === 'win32') {
-    supportRelativeToProjectRoot = supportFile.replace(projectRoot.replaceAll('/', '\\'), '')
+    const platformProjectRoot = projectRoot.replaceAll('/', '\\')
+
+    supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
   }
 
   // We need a slash before /cypress/supportFile.js, this happens by default
