@@ -99,6 +99,7 @@ declare namespace Cypress {
     (k: 'onQueueEnd', v?: () => void): () => void
     (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
     (k: 'specWindow', v?: Window): Window
+    (k: 'runnable', v?: CypressRunnable): CypressRunnable
     (k: string, v?: any): any
     state: Cypress.state
     reset: () => Record<string, any>
@@ -125,4 +126,11 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 interface SpecWindow extends Window {
   cy: $Cy
+}
+
+interface CypressRunnable extends Mocha.Runnable {
+  type: null | 'hook' | 'suite' | 'test'
+  hookId: any
+  id: any
+  err: any
 }
