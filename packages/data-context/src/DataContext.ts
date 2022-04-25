@@ -20,7 +20,6 @@ import {
   ProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
-  StorybookDataSource,
   CloudDataSource,
   EnvDataSource,
   HtmlDataSource,
@@ -168,11 +167,6 @@ export class DataContext {
   @cached
   get wizard () {
     return new WizardDataSource(this)
-  }
-
-  @cached
-  get storybook () {
-    return new StorybookDataSource(this)
   }
 
   get wizardData () {

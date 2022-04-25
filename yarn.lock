@@ -8568,11 +8568,6 @@
     "@storybook/client-api" "^6.1.21"
     "@storybook/react" "^6.1.21"
 
-"@storybook/testing-vue3@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@storybook/testing-vue3/-/testing-vue3-0.0.1.tgz#da9db7d9d85419989e7d5cd71f6f6ee9d260fb60"
-  integrity sha512-a4FqoDr5aUeA0BRcbTXkcjIELezB1iWCZuut97L+mvGje65Adg6JciaukTlcCBjex7FAohP/ZUXcRMNlwnmInA==
-
 "@storybook/theming@6.2.7":
   version "6.2.7"
   resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-6.2.7.tgz#7dbbcde537099b1fe65ec63a517fd54a3dd587f5"
