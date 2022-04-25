@@ -12,7 +12,9 @@ interface AddToCypressConfigPluginOptions {
 /**
  * Standardizes our approach to writing values into the existing
  * Cypress config file. Attempts to handle the pragmatic cases,
- * finding the
+ * finding the typical patterns we'd expect to see for `defineConfig`
+ * import & usage, falling back to adding spread object properties
+ * on `module.exports` or `export default`
  *
  * @param toAdd k/v Object Property to append to the current object
  * @returns
