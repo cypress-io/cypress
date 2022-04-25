@@ -354,7 +354,7 @@ export default function (Commands, Cypress, cy, state, config) {
               // After Firefox 98,
               // it sends a click event automatically if the element is a <button>
               // it does not if the element is an <input>
-              (!isFirefoxBefore98 && $elements.isInput(event.target))
+              (!isFirefoxBefore98 && event.target && $elements.isInput(event.target))
             ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
