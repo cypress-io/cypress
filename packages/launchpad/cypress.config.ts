@@ -20,8 +20,8 @@ export default defineConfig({
   component: {
     supportFile: 'cypress/component/support/index.ts',
     devServer: {
-      // bundler: 'vite',
-      // framework: 'vue',
+      bundler: 'vite',
+      framework: 'vue',
       viteConfig: {
         optimizeDeps: {
           include: [
