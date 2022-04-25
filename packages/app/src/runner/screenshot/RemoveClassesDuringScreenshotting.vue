@@ -1,5 +1,8 @@
 <template>
-  <div :class="classes">
+  <div
+    :class="classes"
+    :style="attrs.style as string"
+  >
     <slot />
   </div>
 </template>
