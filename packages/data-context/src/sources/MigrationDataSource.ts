@@ -18,6 +18,7 @@ import _ from 'lodash'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
+import path from 'path'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -71,6 +72,32 @@ export class MigrationDataSource {
       // so, we can keep the cloud history
       migratePreExtension: this.shouldMigratePreExtension,
     }
+  }
+
+  get legacyConfigFile () {
+    if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
+      return this.ctx.modeOptions.configFile
+    }
+
+    return 'cypress.json'
+  }
+
+  legacyConfigFileExists (): boolean {
+    // If we aren't in a current project we definitely don't have a legacy config file
+    if (!this.ctx.currentProject) {
+      return false
+    }
+
+    const configFilePath = path.isAbsolute(this.legacyConfigFile) ? this.legacyConfigFile : path.join(this.ctx.currentProject, this.legacyConfigFile)
+    const legacyConfigFileExists = this.ctx.fs.existsSync(configFilePath)
+
+    return Boolean(legacyConfigFileExists)
+  }
+
+  needsCypressJsonMigration (): boolean {
+    const legacyConfigFileExists = this.legacyConfigFileExists()
+
+    return this.ctx.lifecycleManager.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExists)
   }
 
   async getComponentTestingMigrationStatus () {
@@ -203,7 +230,7 @@ export class MigrationDataSource {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
+    return this.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
   }
 
   private checkAndUpdateDuplicatedSpecs (specs: MigrationFile[]) {

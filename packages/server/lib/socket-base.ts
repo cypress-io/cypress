@@ -320,8 +320,6 @@ export class SocketBase {
         return socket.join('runner')
       })
 
-      socket.on('graphql:request', handleGraphQLSocketRequest)
-
       // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {
@@ -548,6 +546,10 @@ export class SocketBase {
       })
 
       callbacks.onSocketConnection(socket)
+    })
+
+    io.of('/data-context').on('connection', (socket: Socket) => {
+      socket.on('graphql:request', handleGraphQLSocketRequest)
     })
 
     return io

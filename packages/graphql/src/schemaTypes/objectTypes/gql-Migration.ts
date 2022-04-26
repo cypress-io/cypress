@@ -202,7 +202,7 @@ export const Migration = objectType({
     t.nonNull.string('configFileNameBefore', {
       description: 'the name of the config file to be migrated',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.legacyConfigFile
+        return ctx.migration.legacyConfigFile
       },
     })
 
