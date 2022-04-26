@@ -28,14 +28,14 @@ export const mutation = mutationType({
     t.field('resetErrorsAndLoadConfig', {
       type: Query,
       description: 'Resets errors and attempts to reload the config',
-      resolve: (_, args, ctx) => {
+      resolve: async (_, args, ctx) => {
         ctx.update((d) => {
           d.baseError = null
           d.warnings = []
         })
 
         // Wait for the project config to be reloaded
-        ctx.lifecycleManager.refreshLifecycle()
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },
@@ -582,7 +582,7 @@ export const mutation = mutationType({
         await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
 
         // Wait for the project config to be reloaded
-        ctx.lifecycleManager.refreshLifecycle()
+        await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
       },

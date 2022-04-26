@@ -67,13 +67,13 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  completeSetup () {
+  async completeSetup () {
     debug('completeSetup')
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
 
-    this.ctx.lifecycleManager.refreshLifecycle()
+    await this.ctx.lifecycleManager.refreshLifecycle()
   }
 
   /// reset wizard status, useful for when changing to a new project

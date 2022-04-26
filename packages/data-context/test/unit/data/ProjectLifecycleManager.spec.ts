@@ -68,7 +68,7 @@ describe('ProjectLifecycleManager', () => {
 
   context('#refreshLifecycle', () => {
     it('executes refreshLifecycleAsync with no errors', () => {
-      const refreshLifecycleAsyncStub = sinon.stub(lifecycleManager, 'refreshLifeCycleAsync').resolves()
+      const refreshLifecycleAsyncStub = sinon.stub(lifecycleManager, 'refreshLifecycleAsync').resolves()
 
       lifecycleManager.refreshLifecycle()
 
@@ -76,7 +76,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('executes refreshLifecycleAsync and handles errors', (done) => {
-      const refreshLifecycleAsyncStub = sinon.stub(lifecycleManager, 'refreshLifeCycleAsync').rejects()
+      const refreshLifecycleAsyncStub = sinon.stub(lifecycleManager, 'refreshLifecycleAsync').rejects()
 
       sinon.stub(lifecycleManager, 'onLoadError').callsFake(() => {
         expect(refreshLifecycleAsyncStub).to.have.been.called
@@ -87,7 +87,7 @@ describe('ProjectLifecycleManager', () => {
     })
   })
 
-  context('#refreshLifeCycleAsync', () => {
+  context('#refreshLifecycleAsync', () => {
     it('resets the loading state, notifies launchpad, initializes config, and loads the testing type if ready and configured', async () => {
       lifecycleManager._projectRoot = 'root'
       lifecycleManager._currentTestingType = 'e2e'
@@ -102,7 +102,7 @@ describe('ProjectLifecycleManager', () => {
       const initialConfigStub = sinon.stub(lifecycleManager, 'initializeConfig').resolves()
       const isTestingTypeConfiguredStub = sinon.stub(lifecycleManager, 'isTestingTypeConfigured').returns(true)
 
-      await lifecycleManager.refreshLifeCycleAsync()
+      await lifecycleManager.refreshLifecycleAsync()
 
       expect(readyToInitializeStub).to.have.been.calledWith('root')
       expect(lifecycleManager._configManager.resetLoadingState).to.have.been.called
@@ -125,7 +125,7 @@ describe('ProjectLifecycleManager', () => {
       const initialConfigStub = sinon.stub(lifecycleManager, 'initializeConfig').resolves()
       const setAndLoadCurrentTestingTypeStub = sinon.stub(lifecycleManager, 'setAndLoadCurrentTestingType')
 
-      await lifecycleManager.refreshLifeCycleAsync()
+      await lifecycleManager.refreshLifecycleAsync()
 
       expect(readyToInitializeStub).to.have.been.calledWith('root')
       expect(lifecycleManager._configManager.resetLoadingState).to.have.been.called
@@ -148,7 +148,7 @@ describe('ProjectLifecycleManager', () => {
       const isTestingTypeConfiguredStub = sinon.stub(lifecycleManager, 'isTestingTypeConfigured').returns(true)
       const setAndLoadCurrentTestingTypeStub = sinon.stub(lifecycleManager, 'setAndLoadCurrentTestingType')
 
-      await lifecycleManager.refreshLifeCycleAsync()
+      await lifecycleManager.refreshLifecycleAsync()
 
       expect(readyToInitializeStub).to.have.been.calledWith('root')
       expect(lifecycleManager._configManager.resetLoadingState).not.to.have.been.called

@@ -242,7 +242,7 @@ export class ProjectLifecycleManager {
 
         this._pendingInitialize?.resolve(finalConfig)
       },
-      refreshLifecycle: () => this.refreshLifecycle(),
+      refreshLifecycle: async () => await this.refreshLifecycle(),
     })
   }
 
@@ -283,28 +283,22 @@ export class ProjectLifecycleManager {
     }
   }
 
-  /**
-   * Kicks off the refresh of the configuration lifecycle and returns immediately. Internally, it handles all errors on behalf of the callers.
-   * These errors will be emitted to the client
-   */
-  refreshLifecycle (): void {
-    this.refreshLifeCycleAsync().catch(this.onLoadError)
-  }
+  async refreshLifecycle (): Promise<void> {
+    if (!this._projectRoot || !this._configManager || !this.readyToInitialize(this._projectRoot)) {
+      return
+    }
 
-  private async refreshLifeCycleAsync (): Promise<void> {
-    if (this._projectRoot && this._configManager && this.readyToInitialize(this._projectRoot)) {
-      this._configManager.resetLoadingState()
+    this._configManager.resetLoadingState()
 
-      // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
-      this.ctx.emitter.toLaunchpad()
+    // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
+    this.ctx.emitter.toLaunchpad()
 
-      await this.initializeConfig()
+    await this.initializeConfig()
 
-      if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-        this._configManager.loadTestingType()
-      } else {
-        this.setAndLoadCurrentTestingType(null)
-      }
+    if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+      this._configManager.loadTestingType()
+    } else {
+      this.setAndLoadCurrentTestingType(null)
     }
   }
 

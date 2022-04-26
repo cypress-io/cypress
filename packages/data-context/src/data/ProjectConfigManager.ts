@@ -26,7 +26,7 @@ type ProjectConfigManagerOptions = {
   onError: (cypressError: CypressError, title?: string | undefined) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
-  refreshLifecycle: () => void
+  refreshLifecycle: () => Promise<void>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
@@ -142,7 +142,7 @@ export class ProjectConfigManager {
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.options.refreshLifecycle()
+      this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
       this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
     }
@@ -310,7 +310,7 @@ export class ProjectConfigManager {
 
     w.on('all', (evt) => {
       debug(`changed ${file}: ${evt}`)
-      this.options.refreshLifecycle()
+      this.options.refreshLifecycle().catch(this.onLoadError)
     })
 
     w.on('error', (err) => {

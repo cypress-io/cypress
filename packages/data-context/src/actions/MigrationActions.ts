@@ -293,7 +293,7 @@ export class MigrationActions {
 
   async finishReconfigurationWizard () {
     this.ctx.lifecycleManager.refreshMetaState()
-    this.ctx.lifecycleManager.refreshLifecycle()
+    await this.ctx.lifecycleManager.refreshLifecycle()
   }
 
   async nextStep () {
