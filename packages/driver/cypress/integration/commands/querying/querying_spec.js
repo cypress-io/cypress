@@ -1224,6 +1224,12 @@ describe('src/cy/commands/querying', () => {
       cy.contains(/\'/)
     })
 
+    // https://github.com/cypress-io/cypress/issues/19116
+    it('handles backslashes', () => {
+      $('<div id="backslashes">"&lt;OE_D]dQ\\</div>').appendTo(cy.$$('body'))
+      cy.get('#backslashes').contains('"<OE_D]dQ\\')
+    })
+
     describe('should(\'not.exist\')', () => {
       it('returns null when no content exists', () => {
         cy.contains('alksjdflkasjdflkajsdf').should('not.exist').then(($el) => {
