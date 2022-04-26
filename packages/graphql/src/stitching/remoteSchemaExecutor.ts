@@ -23,15 +23,25 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
 
   const requestPolicy: RequestPolicy | undefined = rootValue?.requestPolicy ?? null
 
-  const executorResult = await context.cloud.executeRemoteGraphQL({
-    operationType,
-    document,
-    variables,
-    query: print(document),
-    requestPolicy,
-  })
+  try {
+    const executorResult = await context.cloud.executeRemoteGraphQL({
+      operationType,
+      document,
+      variables,
+      query: print(document),
+      requestPolicy,
+    })
 
-  context.debug('executorResult %o', executorResult)
+    context.debug('executorResult %o', executorResult)
 
-  return executorResult
+    return executorResult
+  } catch (error) {
+    if (error.networkError?.message === 'Unauthorized') {
+      await context.actions.auth.logout()
+
+      return { data: null }
+    }
+
+    throw error
+  }
 }

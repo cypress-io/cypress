@@ -12,9 +12,6 @@ Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-e
 Require stack:
 - lib/reporter.js
 - lib/project-base.ts
-- lib/open_project.ts
-- lib/makeDataContext.ts
-- lib/modes/index.ts
 - lib/cypress.js
 - index.js
 - 
