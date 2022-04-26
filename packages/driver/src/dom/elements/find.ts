@@ -4,7 +4,8 @@ import $document from '../document'
 import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
-import { normalizeWhitespaces, escapeQuotes } from './utils'
+import { normalizeWhitespaces } from './utils'
+import { escapeQuotes, escapeBackslashes } from '../../util/escape'
 
 /**
  * Find Parents relative to an initial element
@@ -228,7 +229,9 @@ export const getContainsSelector = (text, filter = '', options: {
 } = {}) => {
   const $expr = $.expr[':']
 
-  const escapedText = escapeQuotes(text)
+  const escapedText = escapeQuotes(
+    escapeBackslashes(text),
+  )
 
   // they may have written the filter as
   // comma separated dom els, so we want to search all
