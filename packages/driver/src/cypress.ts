@@ -109,6 +109,7 @@ class $Cypress {
   primaryOriginCommunicator: PrimaryOriginCommunicator
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
+  on: any
 
   // attach to $Cypress to access
   // all of the constructors
