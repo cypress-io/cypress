@@ -28,7 +28,7 @@ export const mutation = mutationType({
     t.field('resetErrorsAndLoadConfig', {
       type: Query,
       description: 'Resets errors and attempts to reload the config',
-      resolve: async (_, args, ctx) => {
+      resolve: (_, args, ctx) => {
         ctx.update((d) => {
           d.baseError = null
           d.warnings = []
@@ -135,7 +135,7 @@ export const mutation = mutationType({
 
     t.field('completeSetup', {
       type: 'Query',
-      resolve: async (_, args, ctx) => {
+      resolve: (_, args, ctx) => {
         ctx.actions.wizard.completeSetup()
 
         return {}

@@ -158,19 +158,4 @@ describe('ProjectLifecycleManager', () => {
       expect(setAndLoadCurrentTestingTypeStub).not.to.have.been.called
     })
   })
-
-  // if (this._projectRoot && this._configManager && this.readyToInitialize(this._projectRoot)) {
-  //   this._configManager.resetLoadingState()
-
-  //   // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
-  //   this.ctx.emitter.toLaunchpad()
-
-  //   await this.initializeConfig()
-
-  //   if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-  //     this._configManager.loadTestingType()
-  //   } else {
-  //     this.setAndLoadCurrentTestingType(null)
-  //   }
-  // }
 })
