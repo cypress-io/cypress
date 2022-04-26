@@ -34,7 +34,7 @@ import type { IncomingHttpHeaders, Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
@@ -238,7 +238,7 @@ export class DataContext {
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
       d.servers.appSocketServer?.disconnectSockets(true)
-      d.servers.appSocketServer = socketServer
+      d.servers.appSocketServer = socketServer?.of('/data-context')
     })
   }
 
@@ -249,7 +249,7 @@ export class DataContext {
     })
   }
 
-  setGqlSocketServer (socketServer: SocketIOServer | undefined) {
+  setGqlSocketServer (socketServer: SocketIONamespace | undefined) {
     this.update((d) => {
       d.servers.gqlSocketServer?.disconnectSockets(true)
       d.servers.gqlSocketServer = socketServer
