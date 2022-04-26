@@ -276,7 +276,7 @@ export class MigrationActions {
       throw Error(`Need current project before starting migration!`)
     }
 
-    const result = await supportFilesForMigration(this.ctx.currentProject, this.ctx.migration.migrationOptions)
+    const result = await supportFilesForMigration(this.ctx.currentProject)
 
     const beforeRelative = result.before.relative
     const afterRelative = result.after.relative

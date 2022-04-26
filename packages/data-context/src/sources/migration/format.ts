@@ -7,7 +7,7 @@ export type FilePart = {
   highlight: boolean
 }
 
-export function formatMigrationFile (file: string, regexp: RegExp, options: MigrationTransformOptions): FilePart[] {
+export function formatMigrationFile (file: string, regexp: RegExp, options: MigrationTransformOptions = { migratePreExtension: true }): FilePart[] {
   const match = regexp.exec(file)
 
   if (!match?.groups) {

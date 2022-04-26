@@ -30,7 +30,7 @@ export type MigrationTransformOptions = {
   migratePreExtension: boolean
 }
 
-export function substitute (part: FilePart, options: MigrationTransformOptions): FilePart {
+export function substitute (part: FilePart, options: MigrationTransformOptions = { migratePreExtension: true }): FilePart {
   // nothing to substitute, just a regular
   // part of the file
   if (!('group' in part)) {

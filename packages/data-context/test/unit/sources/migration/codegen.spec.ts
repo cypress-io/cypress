@@ -28,6 +28,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -46,6 +47,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -64,6 +66,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -78,6 +81,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -92,6 +96,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -116,6 +121,8 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
+
     })
 
     snapshot(generatedConfig)
@@ -130,6 +137,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -148,6 +156,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -163,6 +172,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
+      hasProjectId: false,
     })
 
     snapshot(generatedConfig)
@@ -178,6 +188,41 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
+      hasProjectId: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should add custom specPattern if project has projectId', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-defaults-with-projectId')
+    const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
+      hasProjectId: true,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should not add custom specPattern if project has projectId and integrationFolder', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-defaults-with-projectId')
+    const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
+
+    config['integrationFolder'] = 'cypress/custom/e2e/**/*.{js,ts,tsx,jsx}'
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
+      hasProjectId: true,
     })
 
     snapshot(generatedConfig)

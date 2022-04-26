@@ -139,7 +139,7 @@ export class MigrationDataSource {
     }
 
     try {
-      const supportFiles = await supportFilesForMigration(this.ctx.currentProject, this.migrationOptions)
+      const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
 
       debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
 
