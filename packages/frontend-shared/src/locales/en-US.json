@@ -245,7 +245,8 @@
       "startButton": "Install",
       "waitForInstall": "Waiting for you to install the dependencies...",
       "installed": "installed",
-      "pendingInstall": "pending installation"
+      "pendingInstall": "pending installation",
+      "installationAlertSuccess": "You've successfully installed all required dependencies."
     },
     "step": {
       "continue": "Continue",
@@ -606,7 +607,8 @@
     },
     "installDependencies": {
       "title": "Install Dev Dependencies",
-      "description": "Paste the command below into your terminal to install the required packages."
+      "description": "Based on your previous selection, the following dependencies are required.",
+      "pasteCommand": "Paste this command into your terminal to install the following packages:"
     },
     "configFiles": {
       "title": "Configuration Files",

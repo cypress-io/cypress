@@ -1,10 +1,18 @@
 <template>
-  <TerminalPrompt
+  <div
     v-if="props.gql.wizard.installDependenciesCommand"
-    class="m-24px"
-    :command="props.gql.wizard.installDependenciesCommand"
-    :project-folder-name="projectFolder"
-  />
+  >
+    <p
+      class="pt-24px pr-24px pl-24px -mb-12px text-gray-800 font-500 text-16px"
+    >
+      {{ t('setupWizard.installDependencies.pasteCommand') }}
+    </p>
+    <TerminalPrompt
+      class="m-24px"
+      :command="props.gql.wizard.installDependenciesCommand"
+      :project-folder-name="projectFolder"
+    />
+  </div>
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
       <li

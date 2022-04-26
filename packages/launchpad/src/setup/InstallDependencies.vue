@@ -8,6 +8,19 @@
     :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
     :skip-fn="!canNavigateForward ? confirmInstalled : undefined"
   >
+    <template
+      v-if="canNavigateForward && showSuccessAlert"
+      #accessory
+    >
+      <Alert
+        v-model="showSuccessAlert"
+        class="w-full"
+        :icon="CircleCheck"
+        :title="t('setupPage.install.installationAlertSuccess')"
+        status="success"
+        dismissible
+      />
+    </template>
     <ManualInstall :gql="props.gql" />
   </WizardLayout>
 </template>
@@ -16,8 +29,11 @@
 import { ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
+import Alert from '@cy/components/Alert.vue'
 import { gql } from '@urql/core'
 import type { InstallDependenciesFragment } from '../generated/graphql'
+import CircleCheck from '~icons/cy/circle-check_x16.svg'
+
 import {
   InstallDependencies_ScaffoldFilesDocument,
   Wizard_InstalledPackagesDocument,
@@ -75,6 +91,7 @@ const intervalQueryTrigger = useIntervalFn(async () => {
 })
 
 const canNavigateForward = ref(false)
+const showSuccessAlert = ref(true)
 
 const props = defineProps<{
   gql: InstallDependenciesFragment
