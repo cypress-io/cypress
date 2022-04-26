@@ -77,6 +77,23 @@ describe('App: Settings', () => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
       })
     })
+
+    it('shows the recordKey when coming from a run', { retries: 0 }, () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        return obj.result
+      })
+
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+      cy.get('.spec-list-container').scrollTo('bottom')
+      cy.contains('test1.js').click()
+      cy.get(`[href='#/settings']`).click()
+      cy.contains('Dashboard Settings').click()
+      cy.contains('Record Key')
+    })
   })
 
   describe('Project Settings', () => {
