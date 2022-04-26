@@ -78,19 +78,17 @@
       <slot name="stack" />
     </div>
     <div class="w-full gap-16px inline-flex">
-      <slot name="footer">
-        <Button
-          v-if="props.retry"
-          size="lg"
-          variant="primary"
-          data-testid="error-retry-button"
-          :prefix-icon="RestartIcon"
-          prefix-icon-class="icon-dark-white"
-          @click="retry"
-        >
-          {{ t('launchpadErrors.generic.retryButton') }}
-        </Button>
-      </slot>
+      <Button
+        v-if="props.retry"
+        size="lg"
+        variant="primary"
+        data-testid="error-retry-button"
+        :prefix-icon="RestartIcon"
+        prefix-icon-class="icon-dark-white"
+        @click="retry"
+      >
+        {{ t('launchpadErrors.generic.retryButton') }}
+      </Button>
     </div>
   </div>
 </template>

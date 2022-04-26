@@ -1,6 +1,5 @@
 import { codeFrameColumns } from '@babel/code-frame'
 import BaseError from './BaseError.vue'
-import Button from '@cy/components/Button.vue'
 import { BaseErrorFragmentDoc } from '../generated/graphql-test'
 import dedent from 'dedent'
 
@@ -8,13 +7,11 @@ import dedent from 'dedent'
 const headerSelector = '[data-testid=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = '[data-testid=error-retry-button]'
-const customFooterSelector = '[data-testid=custom-error-footer]'
 
 // Constants
 const messages = cy.i18n.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
-const customFooterText = `Yikes, try again!`
 const customStack = 'some err message\n  at fn (foo.js:1:1)'
 
 describe('<BaseError />', () => {
@@ -98,7 +95,6 @@ describe('<BaseError />', () => {
         <BaseError
           gql={gqlVal}
           v-slots={{
-            footer: () => <Button size="lg" data-testid="custom-error-footer">{ customFooterText }</Button>,
             header: () => <>{customHeaderMessage}</>,
             message: () => <>{customMessage}</> }}
         />),
@@ -106,8 +102,6 @@ describe('<BaseError />', () => {
     .get('body')
     .should('contain.text', customHeaderMessage)
     .and('contain.text', customMessage)
-    .get(customFooterSelector)
-    .should('contain.text', customFooterText)
   })
 
   it('renders the header, message, and footer slots', () => {
