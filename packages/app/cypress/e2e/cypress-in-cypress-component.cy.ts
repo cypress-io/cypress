@@ -7,11 +7,11 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
-    cy.openProject('cypress-in-cypress')
-    cy.startAppServer('component')
   })
 
   it('test component', () => {
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
     cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.location().should((location) => {
@@ -58,6 +58,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
   })
 
   it('navigation between specs and other parts of the app works', () => {
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
     cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -78,6 +80,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
   })
 
   it('redirects to the specs list with error if a spec is not found', () => {
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
     cy.visitApp()
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'src/DoesNotExist.spec.js'
@@ -101,6 +105,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     const goodFilePath = 'src/TestComponent.spec.jsx'
 
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
     cy.visitApp(`/specs/runner?file=${goodFilePath}`)
 
     cy.contains('renders the test component').should('be.visible')
@@ -119,6 +125,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
   })
 
   it('browser picker in runner calls mutation with current spec path', () => {
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
     cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -155,5 +163,34 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     cy.get('#unified-runner').should('have.css', 'width', '333px')
     cy.get('#unified-runner').should('have.css', 'height', '333px')
+  })
+
+  it('restarts dev server on config change', () => {
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
+    cy.visitApp()
+
+    cy.withCtx(async (ctx, { testState, sinon }) => {
+      sinon.stub(ctx._apis.projectApi.getDevServer(), 'close')
+      const devServerReady =
+        new Promise((res) => {
+          ctx._apis.projectApi.getDevServer().emitter.on('dev-server:compile:success', (err) => res(true))
+        })
+
+      testState.originalCypressConfig = await ctx.file.readFileInProject('cypress.config.js')
+      const newCypressConfig = testState.originalCypressConfig.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
+
+      await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
+      await devServerReady
+    })
+
+    cy.contains('TestComponent.spec').click()
+    cy.get('.failed > .num').should('contain', 1)
+
+    cy.withCtx(async (ctx, { testState }) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', testState.originalCypressConfig)
+    })
+
+    cy.get('.passed > .num').should('contain', 1)
   })
 })

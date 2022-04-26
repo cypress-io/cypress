@@ -219,6 +219,27 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toLaunchpad()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
+        if (this._currentTestingType && finalConfig.specPattern) {
+          await this.ctx.actions.project.setSpecsFoundBySpecPattern({
+            path: this.projectRoot,
+            testingType: this._currentTestingType,
+            specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
+            excludeSpecPattern: finalConfig.excludeSpecPattern,
+            additionalIgnorePattern: finalConfig.additionalIgnorePattern,
+          })
+        }
+
+        if (this._currentTestingType === 'component') {
+          this.ctx._apis.projectApi.getDevServer().close()
+          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+
+          if (!devServerOptions?.port) {
+            this.ctx.onError(getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions))
+          }
+
+          finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+        }
+
         this._cachedFullConfig = finalConfig
 
         // This happens automatically with openProjectCreate in run mode
@@ -229,16 +250,6 @@ export class ProjectLifecycleManager {
         }
 
         await this.setInitialActiveBrowser()
-
-        if (this._currentTestingType && finalConfig.specPattern) {
-          await this.ctx.actions.project.setSpecsFoundBySpecPattern({
-            path: this.projectRoot,
-            testingType: this._currentTestingType,
-            specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
-            excludeSpecPattern: finalConfig.excludeSpecPattern,
-            additionalIgnorePattern: finalConfig.additionalIgnorePattern,
-          })
-        }
 
         this._pendingInitialize?.resolve(finalConfig)
       },
