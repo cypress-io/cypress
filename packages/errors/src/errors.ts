@@ -1341,7 +1341,7 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
-  CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: (configFilePath: string, setupNodeEvents: any) => {
+  CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: (configFilePath: string, setupNodeEvents: any) => {
     const re = /.?(cypress\.config.*)/
     const configFile = configFilePath.match(re)?.[1] ?? `configFile`
 
