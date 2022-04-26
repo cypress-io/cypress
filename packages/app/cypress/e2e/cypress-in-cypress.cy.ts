@@ -100,6 +100,17 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.contains('%)').should('not.exist')
       }
 
+      const assertAll4CornersAreVisible = () => {
+        ['top-left', 'top-right', 'bottom-right', 'bottom-left'].forEach((position: string) => {
+          cy.get('.aut-iframe')
+          .then(($aut) => {
+            cy.wrap($aut.contents().find('body'))
+            .get(`[data-cy="${position}"]`)
+            .should('be.visible')
+          })
+        })
+      }
+
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
@@ -113,6 +124,26 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="spec-item"]').first().click()
       // Let runner stabilize
       cy.get('#unified-reporter').should('be.visible')
+      cy.get('.aut-iframe').then(($aut) => {
+        // console.log($aut[0].contentWindow?.document.body)
+        $aut.contents().find('body').append(`
+        <div
+        data-cy="top-left"
+        style="background: blue; position: absolute; top: 0; left: 0; width: 20px; height: 20px"
+      />
+      <div
+        data-cy="top-right"
+        style="background: blue; position: absolute; top: 0; right: 0; width: 20px; height: 20px"
+      />
+      <div
+        data-cy="bottom-right"
+        style="background: blue; position: absolute; bottom: 0; right: 0; width: 20px; height: 20px"
+        />
+      <div
+        data-cy="bottom-left"
+        style="background: blue; position: absolute; bottom: 0; left: 0; width: 20px; height: 20px"
+      />`)
+      })
 
       // validate that the width we set in `withCtx` above is the starting point
       cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
@@ -143,6 +174,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
             assertNoScaleShown()
           }
 
+          assertAll4CornersAreVisible()
           cy.percySnapshot(`panel 2 at ${ position } px`)
         })
       })
