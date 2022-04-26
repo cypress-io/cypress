@@ -33,6 +33,7 @@ export interface StateFunc {
   (k: 'assertUsed', v?: boolean): boolean
   (k: 'currentAssertionUserInvocationStack', v?: any): any
   (k: 'responses', v?: XHRResponse[]): XHRResponse[]
+  (k: 'aliases', v?: Record<string, any>): Record<string, any>
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>
