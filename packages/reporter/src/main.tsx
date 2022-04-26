@@ -116,7 +116,7 @@ class Reporter extends Component<SingleReporterProps> {
     })()
 
     action('set:specs:list', () => {
-      appState.setSpecsList(isSpecsListOpen ?? true)
+      appState.setSpecsList(isSpecsListOpen ?? false)
     })()
 
     this.props.events.init({

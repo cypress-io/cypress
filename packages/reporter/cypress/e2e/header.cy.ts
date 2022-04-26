@@ -36,7 +36,7 @@ describe('header', () => {
   describe('tests button', () => {
     it('displays tooltip on mouseover', () => {
       cy.get('.toggle-specs-wrapper').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'Collapse Specs List F')
+      cy.get('.cy-tooltip').should('have.text', 'Expand Specs List F')
     })
 
     it('emits save state on click', () => {

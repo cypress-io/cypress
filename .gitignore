@@ -80,8 +80,8 @@ system-tests/lib/fixtureDirs.ts
 /npm/design-system/cypress/videos
 /npm/design-system/.babel-cache
 
-# from npm/webpack-dev-server-fresh
-/npm/webpack-dev-server-fresh/cypress/videos
+# from npm/webpack-dev-server
+/npm/webpack-dev-server/cypress/videos
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots

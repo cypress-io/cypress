@@ -8,7 +8,7 @@
     "prebuild": "yarn postinstall && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
     "dtslint": "dtslint types",
-    "postinstall": "node ./scripts/post-install.js",
+    "postinstall": "patch-package && node ./scripts/post-install.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect-brk $(yarn bin mocha)",
@@ -140,5 +140,10 @@
     "./mount-utils": {
       "require": "./mount-utils/dist/index.js"
     }
+  },
+  "workspaces": {
+    "nohoist": [
+      "@types/*"
+    ]
   }
 }

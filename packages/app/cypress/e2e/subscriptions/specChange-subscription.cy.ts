@@ -16,7 +16,7 @@ describe('specChange subscription', () => {
     describe('specs list', () => {
       it('responds to specChange event for an added file', () => {
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -27,7 +27,7 @@ describe('specChange subscription', () => {
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 5)
+        .should('have.length', 7)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -37,7 +37,7 @@ describe('specChange subscription', () => {
 
       it('responds to specChange event for a removed file', () => {
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -48,7 +48,7 @@ describe('specChange subscription', () => {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 3)
+        .should('have.length', 5)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -63,6 +63,8 @@ describe('specChange subscription', () => {
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-content.spec.js'),
             getPathForPlatform('cypress/e2e/dom-list.spec.js'),
+            getPathForPlatform('cypress/e2e/withFailure.spec.js'),
+            getPathForPlatform('cypress/e2e/withWait.spec.js'),
           ],
         })
 
@@ -86,6 +88,8 @@ describe('specChange subscription', () => {
             getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-content.spec.js'),
+            getPathForPlatform('cypress/e2e/withFailure.spec.js'),
+            getPathForPlatform('cypress/e2e/withWait.spec.js'),
           ],
         })
 
@@ -103,7 +107,7 @@ describe('specChange subscription', () => {
 
       it('responds to a cypress.config.js file change', () => {
         cy.get('[data-cy="spec-item-link"]')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -111,18 +115,18 @@ describe('specChange subscription', () => {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -131,7 +135,7 @@ module.exports = {
 }`)
         })
 
-        cy.get('[data-cy="spec-item-link"]')
+        cy.get('[data-cy="spec-item-link"]', { timeout: 7500 })
         .should('have.length', 2)
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -143,8 +147,9 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -155,7 +160,7 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 5)
+        .should('have.length', 7)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -167,8 +172,9 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -179,7 +185,7 @@ module.exports = {
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 3)
+        .should('have.length', 5)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -196,6 +202,8 @@ module.exports = {
             getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-list.spec.js'),
+            getPathForPlatform('cypress/e2e/withFailure.spec.js'),
+            getPathForPlatform('cypress/e2e/withWait.spec.js'),
           ],
         })
 
@@ -215,8 +223,9 @@ module.exports = {
         cy.contains('dom-content.spec').click()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+        cy.get('body').type('f')
         cy.get('[data-testid="spec-file-item"]')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -224,18 +233,18 @@ module.exports = {
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -244,7 +253,7 @@ module.exports = {
 }`)
         })
 
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-testid="spec-file-item"]', { timeout: 7500 })
         .should('have.length', 2)
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')
@@ -259,14 +268,14 @@ module.exports = {
         cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '4 Matches')
+        .should('contain', '6 Matches')
 
         cy.withCtx(async (ctx, o) => {
           await ctx.actions.file.writeFileInProject(o.path, '')
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '5 Matches')
+        .should('contain', '7 Matches')
       })
 
       it('responds to specChange event for a removed file', () => {
@@ -276,14 +285,14 @@ module.exports = {
         cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '4 Matches')
+        .should('contain', '6 Matches')
 
         cy.withCtx(async (ctx, o) => {
           await ctx.actions.file.removeFileInProject(o.path)
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '3 Matches')
+        .should('contain', '5 Matches')
       })
 
       it('handles removing the last file', () => {
@@ -299,6 +308,8 @@ module.exports = {
             getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
             getPathForPlatform('cypress/e2e/dom-container.spec.js'),
             getPathForPlatform('cypress/e2e/dom-content.spec.js'),
+            getPathForPlatform('cypress/e2e/withFailure.spec.js'),
+            getPathForPlatform('cypress/e2e/withWait.spec.js'),
           ],
         })
 
@@ -320,22 +331,22 @@ module.exports = {
         cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
         cy.get('[data-cy="file-match-indicator"]')
-        .should('contain', '4 Matches')
+        .should('contain', '6 Matches')
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
-`const { devServer } = require('@cypress/react/plugins/load-webpack')
-    
+`   
 module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: false,
-    devServer,
-    devServerConfig: {
-      webpackFilename: 'webpack.config.js',
-    },
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig: require('./webpack.config')
+    }
   },
   e2e: {
     specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
@@ -344,7 +355,7 @@ module.exports = {
 }`)
         })
 
-        cy.get('[data-cy="file-match-indicator"]')
+        cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
         .should('contain', '2 Matches')
       })
     })

@@ -46,12 +46,11 @@ export interface InjectedConfigApi {
   cypressVersion: string
   validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
-  updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
+  updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>, testingType: TestingType): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
 }
 
 export interface ProjectMetaState {
-  hasFrontendFramework: 'nuxt' | 'react' | 'react-scripts' | 'vue' | 'next' | false
   hasTypescript: boolean
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
@@ -62,7 +61,6 @@ export interface ProjectMetaState {
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
-  hasFrontendFramework: false,
   hasTypescript: false,
   hasLegacyCypressJson: false,
   allFoundConfigFiles: [],
@@ -508,12 +506,6 @@ export class ProjectLifecycleManager {
     this._configManager.loadTestingType()
   }
 
-  scaffoldFilesIfNecessary () {
-    if (this._currentTestingType && this._projectMetaState.hasValidConfigFile && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-    }
-  }
-
   private resetInternalState () {
     if (this._configManager) {
       this._configManager.destroy()
@@ -597,13 +589,6 @@ export class ProjectLifecycleManager {
 
       if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
         metaState.hasTypescript = true
-      }
-
-      for (const framework of ['next', 'nuxt', 'react-scripts', 'react', 'vue'] as const) {
-        if (packageJson.dependencies?.[framework] || packageJson.devDependencies?.[framework]) {
-          metaState.hasFrontendFramework = framework
-          break
-        }
       }
     } catch {
       // No need to handle

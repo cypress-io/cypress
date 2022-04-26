@@ -2,7 +2,6 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
-import prettier from 'prettier'
 import type { TestingType } from '@packages/types'
 import { formatMigrationFile } from './format'
 import { substitute } from './autoRename'
@@ -147,7 +146,7 @@ async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot:
 // project's node_modules, we don't want to include
 // defineConfig(/***/) in their cypress.config.js,
 // since it won't exist.
-function defineConfigAvailable (projectRoot: string) {
+export function defineConfigAvailable (projectRoot: string) {
   try {
     const cypress = require.resolve('cypress', {
       paths: [projectRoot],
@@ -173,6 +172,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
         `import { defineConfig } from 'cypress'
   
         export default defineConfig({${globalString}${e2eString}${componentString}})`,
+        options.projectRoot,
       )
     }
 
@@ -180,14 +180,15 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
       `const { defineConfig } = require('cypress')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
+      options.projectRoot,
     )
   }
 
   if (options.hasTypescript) {
-    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
+    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`, options.projectRoot)
   }
 
-  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`)
+  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`, options.projectRoot)
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>) {
@@ -306,21 +307,25 @@ export interface SpecToMove {
 }
 
 export async function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
-  await Promise.all(specs.map(async (spec) => {
+  await Promise.all(specs.map((spec) => {
     const from = path.join(projectRoot, spec.from)
     const to = path.join(projectRoot, spec.to)
 
-    if (from !== to) {
-      await fs.move(from, to)
+    if (from === to) {
+      return
     }
+
+    return fs.move(from, to)
   }))
 }
 
 export async function cleanUpIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
+  const e2ePath = path.join(projectRoot, 'cypress', 'e2e')
 
   try {
-    fs.rmSync(integrationPath, { recursive: true })
+    await fs.copy(integrationPath, e2ePath, { recursive: true })
+    await fs.remove(integrationPath)
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
@@ -444,11 +449,18 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
-export function formatConfig (config: string) {
-  return prettier.format(config, {
-    semi: false,
-    singleQuote: true,
-    endOfLine: 'lf',
-    parser: 'babel',
-  })
+export function formatConfig (config: string, projectRoot: string): string {
+  try {
+    const prettierPath = require.resolve('prettier', { paths: [projectRoot] })
+    const prettier = require(prettierPath)
+
+    return prettier.format(config, {
+      semi: false,
+      singleQuote: true,
+      endOfLine: 'lf',
+      parser: 'babel',
+    })
+  } catch (e) {
+    return config
+  }
 }

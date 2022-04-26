@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-module.exports = defineConfig({
+export default defineConfig({
   component: {
     devServer: {
       framework: 'react',
@@ -23,4 +23,7 @@ module.exports = defineConfig({
       },
     },
   },
+  // These tests should run quickly / fail quickly,
+  // since we intentionally causing error states for testing
+  defaultCommandTimeout: 1000
 })

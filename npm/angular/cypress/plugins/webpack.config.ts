@@ -97,8 +97,8 @@ module.exports = {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'test'),
     }),
     new webpack.ContextReplacementPlugin(
-      /\@angular(\\|\/)core(\\|\/)f?esm5/,
-      path.join(__dirname, './src'),
+      /angular(\\|\/)core(\\|\/)(@angular|fesm2015)/,
+      path.join(__dirname, '..', '..', 'src'),
     ),
   ],
   performance: {
