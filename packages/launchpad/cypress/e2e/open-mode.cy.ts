@@ -146,7 +146,7 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('no-support-file')
     cy.openProject('no-support-file', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('Error Loading Config')
+    cy.contains('Cypress configuration error')
     cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
   })

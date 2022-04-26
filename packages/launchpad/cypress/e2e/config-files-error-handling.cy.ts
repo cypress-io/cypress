@@ -112,7 +112,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-function-sync-error')
     cy.openProject('plugins-function-sync-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     expectStackToBe('open')
   })
 
@@ -120,7 +120,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-invalid-browser')
     cy.openProject('config-with-invalid-browser', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     expectStackToBe('closed')
   })
 
@@ -128,7 +128,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-function-sync-error')
     cy.openProject('plugins-function-sync-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     expectStackToBe('open')
   })
 
@@ -136,7 +136,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-ts-syntax-error')
     cy.openProject('config-with-ts-syntax-error')
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     cy.percySnapshot()
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'module.exports = { e2e: { supportFile: false } }')
@@ -151,7 +151,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-import-error')
     cy.openProject('config-with-import-error')
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:3:23')
@@ -161,7 +161,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-ts-module-error')
     cy.openProject('config-with-ts-module-error')
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:9')
@@ -174,7 +174,7 @@ describe('setupNodeEvents', () => {
     cy.openProject('config-update-non-migrated-value')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     cy.percySnapshot()
   })
 
@@ -183,7 +183,7 @@ describe('setupNodeEvents', () => {
     cy.openProject('config-update-non-migrated-value-clone')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     cy.percySnapshot()
 
     cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
@@ -194,7 +194,7 @@ describe('setupNodeEvents', () => {
     cy.openProject('config-update-non-migrated-value-e2e')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('h1').should('contain', 'Cypress configuration error')
     cy.percySnapshot()
   })
 

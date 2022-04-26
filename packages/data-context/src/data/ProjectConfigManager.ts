@@ -288,7 +288,7 @@ export class ProjectConfigManager {
 
   onLoadError = (error: any) => {
     this.closeWatchers()
-    this.options.onError(error, 'Error Loading Config')
+    this.options.onError(error, 'Cypress configuration error')
   }
 
   private watchFiles (paths: string[]) {

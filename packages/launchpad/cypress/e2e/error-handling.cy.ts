@@ -23,7 +23,7 @@ describe('Error handling', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', 'Error Loading Config')
+    .should('not.contain.text', 'Cypress configuration error')
   })
 
   it('it handles a configuration file error', () => {
@@ -43,7 +43,7 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', 'Error Loading Config')
+    .should('contain.text', 'Cypress configuration error')
     .and('contain.text', 'Error thrown from Config')
 
     cy.get('[data-cy="collapsible-header"]')
@@ -59,6 +59,6 @@ describe('Error handling', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', 'Error Loading Config')
+    .should('not.contain.text', 'Cypress configuration error')
   })
 })
