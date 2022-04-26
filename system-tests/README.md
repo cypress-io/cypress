@@ -25,7 +25,7 @@ yarn test test/go_spec.js --browser chrome --no-exit
 To debug the Cypress process under test, you can pass `--cypress-inspect-brk`:
 
 ```sh
-yarn test test/go_spec.js --browser chrome --no-exit
+yarn test test/go_spec.js --browser chrome --no-exit --cypress-inspect-brk
 ```
 
 ## Developing Tests

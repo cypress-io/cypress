@@ -11,6 +11,7 @@ import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
+import * as cors from '@packages/network/lib/cors'
 
 const $ = $Cypress.$
 const ws = client.connect({
@@ -128,6 +129,10 @@ export const eventManager = {
       ws.on(event, (...args) => {
         Cypress.emit(event, ...args)
       })
+    })
+
+    ws.on('cross:origin:delaying:html', (request) => {
+      Cypress.primaryOriginCommunicator.emit('delaying:html', request)
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -313,6 +318,14 @@ export const eventManager = {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    // The window.top should not change between test reloads, and we only need to bind the message event once
+    // Forward all message events to the current instance of the multi-origin communicator
+    if (!window.top) throw new Error('missing window.top in event-manager')
+
+    window.top.addEventListener('message', ({ data, source }) => {
+      Cypress.primaryOriginCommunicator.onMessage({ data, source })
+    }, false)
   },
 
   start (config) {
@@ -438,7 +451,7 @@ export const eventManager = {
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
-    Cypress.on('before:screenshot', (config, cb) => {
+    const handleBeforeScreenshot = (config, cb) => {
       const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
         cb()
@@ -455,11 +468,15 @@ export const eventManager = {
       }
 
       if (!wait) beforeThenCb()
-    })
+    }
 
-    Cypress.on('after:screenshot', (config) => {
+    Cypress.on('before:screenshot', handleBeforeScreenshot)
+
+    const handleAfterScreenshot = (config) => {
       localBus.emit('after:screenshot', config)
-    })
+    }
+
+    Cypress.on('after:screenshot', handleAfterScreenshot)
 
     _.each(driverToReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
@@ -499,6 +516,90 @@ export const eventManager = {
       if (studioRecorder.isOpen && test.state !== 'passed') {
         studioRecorder.testFailed()
       }
+    })
+
+    Cypress.on('test:before:run', (...args) => {
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
+    })
+
+    Cypress.on('test:before:run:async', (...args) => {
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
+    })
+
+    // Inform all spec bridges that the primary origin has begun to unload.
+    Cypress.on('window:before:unload', () => {
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+    })
+
+    Cypress.primaryOriginCommunicator.on('window:load', ({ url }, originPolicy) => {
+      // Sync stable if the expected origin has loaded.
+      // Only listen to window load events from the most recent secondary origin, This prevents nondeterminism in the case where we redirect to an already
+      // established spec bridge, but one that is not the current or next cy.origin command.
+      if (cy.state('latestActiveOriginPolicy') === originPolicy) {
+        // We remain in an anticipating state until either a load even happens or a timeout.
+        cy.state('autOrigin', cy.state('autOrigin', cors.getOriginPolicy(url)))
+        cy.isAnticipatingCrossOriginResponseFor(undefined)
+        cy.isStable(true, 'load')
+        // Prints out the newly loaded URL
+        Cypress.emit('internal:window:load', { type: 'cross:origin', url })
+        // Re-broadcast to any other specBridges.
+        Cypress.primaryOriginCommunicator.toAllSpecBridges('window:load', { url })
+      }
+    })
+
+    Cypress.primaryOriginCommunicator.on('before:unload', () => {
+      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+      // Unstable is unstable regardless of where it initiated from.
+      cy.state('isStable', false)
+      // Re-broadcast to any other specBridges.
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload')
+    })
+
+    Cypress.primaryOriginCommunicator.on('expect:origin', (originPolicy) => {
+      localBus.emit('expect:origin', originPolicy)
+    })
+
+    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, originPolicy) => {
+      const callback = () => {
+        Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'viewport:changed:end')
+      }
+
+      Cypress.primaryOriginCommunicator.emit('sync:viewport', viewport)
+      localBus.emit('viewport:changed', viewport, callback)
+    })
+
+    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, originPolicy) => {
+      const callback = () => {
+        Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'before:screenshot:end')
+      }
+
+      handleBeforeScreenshot(config, callback)
+    })
+
+    Cypress.primaryOriginCommunicator.on('url:changed', ({ url }) => {
+      localBus.emit('url:changed', url)
+    })
+
+    Cypress.primaryOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
+
+    const crossOriginLogs = {}
+
+    Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
+      // If the test is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
+      if (Cypress.state('test')?.final) return
+
+      // Create a new local log representation of the cross origin log.
+      // It will be attached to the current command.
+      // We also keep a reference to it to update it in the future.
+      crossOriginLogs[attrs.id] = Cypress.log(attrs)
+    })
+
+    Cypress.primaryOriginCommunicator.on('log:changed', (attrs) => {
+      // Retrieve the referenced log and update it.
+      const log = crossOriginLogs[attrs.id]
+
+      // this will trigger a log changed event for the log itself.
+      log?.set(attrs)
     })
   },
 
@@ -544,6 +645,7 @@ export const eventManager = {
       // but we want to be aggressive here
       // and force GC early and often
       Cypress.removeAllListeners()
+      Cypress.primaryOriginCommunicator.removeAllListeners()
 
       localBus.emit('restart')
     })
@@ -590,6 +692,11 @@ export const eventManager = {
 
   notifyRunningSpec (specFile) {
     ws.emit('spec:changed', specFile)
+  },
+
+  notifyCrossOriginBridgeReady (originPolicy) {
+    // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
+    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, originPolicy)
   },
 
   focusTests () {

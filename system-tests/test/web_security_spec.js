@@ -40,7 +40,7 @@ const onServer = function (app) {
 
   app.get('/cors', (req, res) => {
     res.send(`<script>
-      fetch('https://127.0.0.2:44665/cross_origin')
+      fetch('https://www.foo.com:44665/cross_origin')
       .then((res) => res.text())
       .then(text => {
         if (text.includes('cross origin')) document.write('success!')
@@ -63,6 +63,8 @@ describe('e2e web security', () => {
     settings: {
       hosts: {
         '*.foo.com': '127.0.0.1',
+        '*.bar.com': '127.0.0.1',
+        '*.foobar.com': '127.0.0.1',
       },
     },
   })
@@ -70,6 +72,10 @@ describe('e2e web security', () => {
   context('when enabled', () => {
     systemTests.it('fails', {
       spec: 'web_security_spec.js',
+      config: {
+        experimentalSessionAndOrigin: true,
+        pageLoadTimeout: 5000,
+      },
       snapshot: true,
       expectedExitCode: 4,
     })
@@ -80,6 +86,7 @@ describe('e2e web security', () => {
       spec: 'web_security_spec.js',
       config: {
         chromeWebSecurity: false,
+        experimentalSessionAndOrigin: true,
       },
       snapshot: true,
       browser: ['chrome', 'electron'],

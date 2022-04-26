@@ -47,6 +47,7 @@ describe('lib/socket', () => {
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(() => {
         this.options = {
@@ -109,6 +110,8 @@ describe('lib/socket', () => {
         let chrome
 
         before(() => {
+          global.window = {}
+
           chrome = global.chrome = {
             cookies: {
               set () {},
@@ -132,6 +135,11 @@ describe('lib/socket', () => {
             tabs: {
               query () {},
               executeScript () {},
+            },
+            webRequest: {
+              onBeforeSendHeaders: {
+                addListener () {},
+              },
             },
           }
 
@@ -554,6 +562,43 @@ describe('lib/socket', () => {
         })
       })
     })
+
+    context('on(cross:origin:bridge:ready)', () => {
+      it('emits cross:origin:bridge:ready on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:bridge:ready', ({ originPolicy }) => {
+          expect(originPolicy).to.equal('http://foobar.com')
+
+          done()
+        })
+
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+      })
+    })
+
+    context('on(cross:origin:release:html)', () => {
+      it('emits cross:origin:release:html on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:release:html', () => {
+          done()
+        })
+
+        this.client.emit('backend:request', 'cross:origin:release:html', () => {})
+      })
+    })
+
+    context('on(cross:origin:finished)', () => {
+      it('emits cross:origin:finished on local bus', function (done) {
+        this.server.socket.localBus.once('cross:origin:finished', (originPolicy) => {
+          expect(originPolicy).to.equal('http://foobar.com')
+
+          done()
+        })
+
+        // add the origin before calling cross:origin:finished (otherwise we'll fail trying to remove the origin)
+        this.client.emit('backend:request', 'cross:origin:bridge:ready', { originPolicy: 'http://foobar.com' }, () => {})
+
+        this.client.emit('backend:request', 'cross:origin:finished', 'http://foobar.com', () => {})
+      })
+    })
   })
 
   context('unit', () => {
@@ -578,6 +623,7 @@ describe('lib/socket', () => {
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)

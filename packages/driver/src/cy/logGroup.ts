@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { $Command } from '../cypress/command'
 import $errUtils from '../cypress/error_utils'
 

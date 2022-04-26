@@ -3,18 +3,8 @@ const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/connectors', () => {
   describe('with jquery', () => {
-    before(() => {
-      cy
-      .visit('/fixtures/jquery.html')
-      .then(function (win) {
-        this.body = win.document.body.outerHTML
-      })
-    })
-
     beforeEach(function () {
-      const doc = cy.state('document')
-
-      $(doc.body).empty().html(this.body)
+      cy.visit('/fixtures/jquery.html')
     })
 
     context('#spread', () => {
@@ -90,7 +80,8 @@ describe('src/cy/commands/connectors', () => {
 
       it('does not insert a mocha callback', () => {
         cy.noop().then(() => {
-          expect(cy.queue.length).to.eq(2)
+          // queue: visit -> noop -> then
+          expect(cy.queue.length).to.eq(3)
         })
       })
 
@@ -1803,18 +1794,8 @@ describe('src/cy/commands/connectors', () => {
   })
 
   describe('without jquery', () => {
-    before(() => {
-      cy
-      .visit('/fixtures/dom.html')
-      .then(function (win) {
-        this.body = win.document.body.outerHTML
-      })
-    })
-
-    beforeEach(function () {
-      const doc = cy.state('document')
-
-      $(doc.body).empty().html(this.body)
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
     })
 
     context('#each', () => {

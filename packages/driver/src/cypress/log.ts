@@ -49,7 +49,7 @@ export const LogUtils = {
         return value()
       }
 
-      if (_.isFunction(value)) {
+      if (_.isFunction(value) || _.isSymbol(value)) {
         return value.toString()
       }
 
@@ -92,14 +92,12 @@ export const LogUtils = {
 
     return _
     .chain(tests)
-    .flatMap((test) => {
-      return [test, test.prevAttempts]
-    })
-    .flatMap<{id: number}>((tests) => {
-      return [].concat(tests.agents, tests.routes, tests.commands)
-    }).compact()
-    .union([{ id: 0 }])
-    .map('id')
+    .flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
+    .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
+    .compact()
+    .union([{ id: '0' }])
+    // id is a string in the form of 'log-origin-#', grab the number off the end.
+    .map(({ id }) => parseInt((id.match(/\d*$/) || ['0'])[0]))
     .max()
     .value()
   },
@@ -107,6 +105,10 @@ export const LogUtils = {
   // TODO: fix this
   setCounter: (num) => {
     return counter = num
+  },
+
+  getCounter: () => {
+    return counter
   },
 }
 
@@ -178,8 +180,10 @@ const defaults = function (state: Cypress.State, config, obj) {
     return t._currentRetry || 0
   }
 
+  counter++
+
   _.defaults(obj, {
-    id: (counter += 1),
+    id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
     instrument: 'command',
     url: state('url'),
@@ -440,7 +444,7 @@ export class Log {
     this.obj = {
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
-      visible: $el.length === $el.filter(':visible').length,
+      visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
     }
 
     return this.set(this.obj, { silent: true })
@@ -501,8 +505,11 @@ export class Log {
 
       consoleObj[key] = _this.get('name')
 
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
+      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
+
       // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleProps.apply(this, args))
+      _.extend(consoleObj, consoleObjDefaults)
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el

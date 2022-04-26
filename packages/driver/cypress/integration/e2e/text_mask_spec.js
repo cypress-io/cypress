@@ -1,8 +1,11 @@
 let changed = 0
 
 describe('src/cy/commands/actions/type text_mask_spec', () => {
-  before(() => {
+  beforeEach(() => {
     cy.visit('/fixtures/text-mask.html')
+
+    // reset number of change events before test
+    changed = 0
 
     // count the number of change events
     return cy.get('input').then(($els) => {
@@ -10,11 +13,6 @@ describe('src/cy/commands/actions/type text_mask_spec', () => {
         return changed++
       })
     })
-  })
-
-  beforeEach(() => {
-    // reset number of change events before test
-    changed = 0
   })
 
   context('#type', () => {

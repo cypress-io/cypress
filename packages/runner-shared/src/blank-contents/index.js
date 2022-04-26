@@ -211,7 +211,7 @@ export const sessionLifecycle = () => {
     <div class='container'>
       ${svg_cy}
       <br/>
-      <p class="warn">Because <code><b>experimentalSessionSupport</b></code> is enabled, Cypress navigates to the default blank page <span class="em">before each test</span> to ensure test reliability.</p>
+      <p class="warn">Because <code><b>experimentalSessionAndOrigin</b></code> is enabled, Cypress navigates to the default blank page <span class="em">before each test</span> to ensure test reliability.</p>
       <p>This is the default blank page.</p>
       <p>To test your web application:</p>
       <ul>

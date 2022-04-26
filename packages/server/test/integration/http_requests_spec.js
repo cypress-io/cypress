@@ -173,7 +173,7 @@ describe('Routes', () => {
               await this.server.startWebsockets(automationStub, config, {})
 
               if (initialUrl) {
-                this.server._onDomainSet(initialUrl)
+                this.server.remoteStates.set(initialUrl)
               }
 
               this.srv = this.server.getHttpServer()
@@ -223,7 +223,7 @@ describe('Routes', () => {
 
     // this tests a situation where we open our browser in another browser
     // without proxy mode set
-    it('redirects to config.clientRoute without a _remoteOrigin and without a proxy', function () {
+    it('redirects to config.clientRoute without a remote origin and without a proxy', function () {
       return this.rp({
         url: this.proxy,
         proxy: null,
@@ -235,10 +235,10 @@ describe('Routes', () => {
       })
     })
 
-    it('does not redirect with _remoteOrigin set', function () {
+    it('does not redirect with remote origin set', function () {
       return this.setup('http://www.github.com')
       .then(() => {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, '<html></html>', {
           'Content-Type': 'text/html',
@@ -1318,7 +1318,7 @@ describe('Routes', () => {
       })
 
       it('basic 200 html response', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/html',
@@ -1344,7 +1344,7 @@ describe('Routes', () => {
       })
 
       it('unzips, injects, and then rezips initial content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
         .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
@@ -1371,7 +1371,7 @@ describe('Routes', () => {
       })
 
       it('unzips, injects, and then rezips regular http content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
         .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
@@ -1398,7 +1398,7 @@ describe('Routes', () => {
       })
 
       it('does not inject on regular gzip\'d content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
         .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
@@ -1477,7 +1477,7 @@ describe('Routes', () => {
       })
 
       it('strips unsupported deflate and br encoding', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/accept')
         .matchHeader('accept-encoding', 'gzip')
         .reply(200, '<html>accept</html>')
@@ -1497,7 +1497,7 @@ describe('Routes', () => {
       })
 
       it('removes accept-encoding when nothing is supported', function () {
-        nock(this.server._remoteOrigin, {
+        nock(this.server.remoteStates.current().origin, {
           badheaders: ['accept-encoding'],
         })
         .get('/accept')
@@ -1524,7 +1524,7 @@ describe('Routes', () => {
       })
 
       it('sends back a 304', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/assets/app.js')
         .reply(304)
 
@@ -1546,7 +1546,7 @@ describe('Routes', () => {
       })
 
       it('passes the location header through', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo')
         .reply(302, undefined, {
           'Location': '/',
@@ -1573,7 +1573,7 @@ describe('Routes', () => {
       // this fixes improper url merge where we took query params
       // and added them needlessly
       it('doesnt redirect with query params or hashes which werent in location header', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo?bar=baz')
         .reply(302, undefined, {
           'Location': '/css',
@@ -1594,7 +1594,7 @@ describe('Routes', () => {
       })
 
       it('does redirect with query params if location header includes them', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo?bar=baz')
         .reply(302, undefined, {
           'Location': '/css?q=search',
@@ -1619,7 +1619,7 @@ describe('Routes', () => {
       })
 
       it('does redirect with query params to external domain if location header includes them', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo?bar=baz')
         .reply(302, undefined, {
           'Location': 'https://www.google.com/search?q=cypress',
@@ -1644,7 +1644,7 @@ describe('Routes', () => {
       })
 
       it('sets cookies and removes __cypress.initial when initial is originally false', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/css')
         .reply(302, undefined, {
           'Set-Cookie': 'foo=bar; Path=/',
@@ -1670,7 +1670,7 @@ describe('Routes', () => {
         it(`handles direct for status code: ${code}`, function () {
           return this.setup('http://auth.example.com')
           .then(() => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/login')
             .reply(code, undefined, {
               Location: 'http://app.example.com/users/1',
@@ -1698,7 +1698,7 @@ describe('Routes', () => {
       })
 
       it('passes through status code + content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/index.html')
         .reply(500, 'server error', {
           'Content-Type': 'text/html',
@@ -1827,7 +1827,7 @@ describe('Routes', () => {
       })
 
       it('transparently proxies decoding gzip failures', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/index.html')
         .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
           'Content-Type': 'text/html',
@@ -1872,7 +1872,7 @@ describe('Routes', () => {
 
       describe('when initial is true', () => {
         it('sets back to false', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.html')
           .reply(200, 'OK', {
             'Content-Type': 'text/html',
@@ -1894,7 +1894,7 @@ describe('Routes', () => {
 
       describe('when initial is false', () => {
         it('does not reset initial or remoteHost', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.html')
           .reply(200, 'OK', {
             'Content-Type': 'text/html',
@@ -1916,7 +1916,7 @@ describe('Routes', () => {
       })
 
       it('sends with Transfer-Encoding: chunked without Content-Length', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, Buffer.from('foo'), {
           'Content-Type': 'text/html',
@@ -1938,7 +1938,7 @@ describe('Routes', () => {
       })
 
       it('does not have Content-Length', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, 'foo', {
           'Content-Type': 'text/html',
@@ -1961,7 +1961,7 @@ describe('Routes', () => {
       })
 
       it('forwards cookies from incoming responses', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, 'OK', {
           'set-cookie': 'userId=123',
@@ -1981,7 +1981,7 @@ describe('Routes', () => {
       })
 
       it('appends to previous cookies from incoming responses', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(200, '<html></html>', {
           'set-cookie': 'userId=123; Path=/',
@@ -2006,7 +2006,7 @@ describe('Routes', () => {
       })
 
       it('appends cookies on redirects', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/login')
         .reply(302, undefined, {
           'location': '/dashboard',
@@ -2032,7 +2032,7 @@ describe('Routes', () => {
       })
 
       it('passes invalid cookies', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/invalid')
         .reply(200, 'OK', {
           'set-cookie': [
@@ -2055,7 +2055,7 @@ describe('Routes', () => {
       })
 
       it('forwards other headers from incoming responses', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/auth')
         .reply(200, 'OK', {
           'x-token': 'abc-123',
@@ -2075,7 +2075,7 @@ describe('Routes', () => {
       })
 
       it('forwards headers to outgoing requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .matchHeader('x-custom', 'value')
         .reply(200, 'hello from bar!', {
@@ -2097,7 +2097,7 @@ describe('Routes', () => {
       })
 
       it('omits x-frame-options', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2113,7 +2113,7 @@ describe('Routes', () => {
       })
 
       it('omits content-security-policy', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2134,7 +2134,7 @@ describe('Routes', () => {
       })
 
       it('omits content-security-policy-report-only', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2155,7 +2155,7 @@ describe('Routes', () => {
       })
 
       it('omits document-domain from Feature-Policy header', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
           'Content-Type': 'text/html',
@@ -2180,7 +2180,7 @@ describe('Routes', () => {
       it('does not modify host origin header', function () {
         return this.setup('http://foobar.com')
         .then(() => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/css')
           .matchHeader('host', 'foobar.com')
           .reply(200)
@@ -2198,7 +2198,7 @@ describe('Routes', () => {
       })
 
       it('does not cache when initial response', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/html',
@@ -2218,7 +2218,7 @@ describe('Routes', () => {
       })
 
       it('does cache requesting resource without injection', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/')
         .reply(200, 'hello from bar!', {
           'Content-Type': 'text/plain',
@@ -2234,7 +2234,7 @@ describe('Routes', () => {
       })
 
       it('forwards origin header', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo')
         .matchHeader('host', 'localhost:8080')
         .matchHeader('origin', 'http://localhost:8080')
@@ -2326,10 +2326,12 @@ describe('Routes', () => {
 
           const base64 = Buffer.from(`${username}:${password}`).toString('base64')
 
-          this.server._remoteAuth = {
-            username,
-            password,
-          }
+          this.server.remoteStates.set('http://localhost:8080', {
+            auth: {
+              username,
+              password,
+            },
+          })
 
           nock('http://localhost:8080')
           .get('/index')
@@ -2358,10 +2360,12 @@ describe('Routes', () => {
         it('does not modify existing auth headers when matching origin', function () {
           const existing = 'Basic asdf'
 
-          this.server._remoteAuth = {
-            username: 'u',
-            password: 'p',
-          }
+          this.server.remoteStates.set('http://localhost:8080', {
+            auth: {
+              username: 'u',
+              password: 'p',
+            },
+          })
 
           nock('http://localhost:8080')
           .get('/index')
@@ -2388,10 +2392,12 @@ describe('Routes', () => {
 
             const base64 = Buffer.from(`${username}:${password}`).toString('base64')
 
-            this.server._remoteAuth = {
-              username,
-              password,
-            }
+            this.server.remoteStates.set('http://beta.something.com', {
+              auth: {
+                username,
+                password,
+              },
+            })
 
             nock(/.*\.something.com/)
             .get('/index')
@@ -2428,7 +2434,7 @@ describe('Routes', () => {
           this.setup('http://localhost:8881'),
         ])
         .spread((size, bytes, setup) => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/javascript-logo.png')
           .replyWithFile(200, image, {
             'Content-Type': 'image/png',
@@ -2460,7 +2466,7 @@ describe('Routes', () => {
           this.setup('http://localhost:8881'),
         ])
         .spread((size, bytes, setup) => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/javascript-logo.png')
           .replyWithFile(200, zipped, {
             'Content-Type': 'image/png',
@@ -2499,7 +2505,7 @@ describe('Routes', () => {
           this.setup('http://localhost:8881'),
         ])
         .spread((size, bytes, setup) => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/font.woff')
           .replyWithFile(200, font, {
             'Content-Type': 'application/font-woff; charset=utf-8',
@@ -2531,7 +2537,7 @@ describe('Routes', () => {
         // if this test finishes without timing out we know its all good
         const contents = removeWhitespace(Fixtures.get('server/err_response.html'))
 
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, contents, {
           'Content-Type': 'text/html; charset=utf-8',
@@ -2555,7 +2561,7 @@ describe('Routes', () => {
       })
 
       it('injects when head has attributes', async function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
@@ -2576,7 +2582,7 @@ describe('Routes', () => {
       })
 
       it('injects even when head tag is missing', async function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
@@ -2598,7 +2604,7 @@ describe('Routes', () => {
       })
 
       it('injects when head is capitalized', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<HTML> <HEAD>hello from bar!</HEAD> </HTML>', {
           'Content-Type': 'text/html',
@@ -2618,7 +2624,7 @@ describe('Routes', () => {
       })
 
       it('injects when head missing but has <header>', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <body><nav>some nav</nav><header>header</header></body> </html>', {
           'Content-Type': 'text/html',
@@ -2640,7 +2646,7 @@ describe('Routes', () => {
       })
 
       it('injects when body is capitalized', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<HTML> <BODY>hello from bar!</BODY> </HTML>', {
           'Content-Type': 'text/html',
@@ -2660,7 +2666,7 @@ describe('Routes', () => {
       })
 
       it('injects when both head + body are missing', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<HTML>hello from bar!</HTML>', {
           'Content-Type': 'text/html',
@@ -2682,7 +2688,7 @@ describe('Routes', () => {
       })
 
       it('injects even when html + head + body are missing', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<div>hello from bar!</div>', {
           'Content-Type': 'text/html',
@@ -2704,7 +2710,7 @@ describe('Routes', () => {
       })
 
       it('injects after DOCTYPE declaration when no other content', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<!DOCTYPE>', {
           'Content-Type': 'text/html',
@@ -2724,7 +2730,7 @@ describe('Routes', () => {
       })
 
       it('injects superdomain even when head tag is missing', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
@@ -2745,14 +2751,14 @@ describe('Routes', () => {
       })
 
       it('injects content after following redirect', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(302, undefined, {
           // redirect us to google.com!
           'Location': 'http://www.google.com/foo',
         })
 
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/foo')
         .reply(200, '<html> <head prefix="og: foo"> <title>foo</title> </head> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
@@ -2782,7 +2788,7 @@ describe('Routes', () => {
       it('injects performantly on a huge amount of elements over http', function () {
         Fixtures.scaffold()
 
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/elements.html')
         .replyWithFile(200, Fixtures.projectPath('e2e/elements.html'), {
           'Content-Type': 'text/html',
@@ -2824,7 +2830,7 @@ describe('Routes', () => {
       })
 
       it('does not inject when not initial and not html', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/plain',
@@ -2969,7 +2975,7 @@ describe('Routes', () => {
       })
 
       it('injects document.domain on other http requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/html',
@@ -3014,8 +3020,36 @@ describe('Routes', () => {
         })
       })
 
+      it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
+        nock('http://www.foobar.com')
+        .get('/')
+        .reply(200, '<html><head></head><body>hi</body></html>', {
+          'Content-Type': 'text/html',
+        })
+
+        this.server._eventBus.on('cross:origin:delaying:html', () => {
+          this.server._eventBus.emit('cross:origin:release:html')
+        })
+
+        return this.rp({
+          url: 'http://www.foobar.com',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'X-Cypress-Is-AUT-Frame': 'true',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+        })
+      })
+
       it('does not inject document.domain on non http requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/json')
         .reply(200, {
           foo: '<html><head></head></html>',
@@ -3035,7 +3069,7 @@ describe('Routes', () => {
         })
       })
 
-      it('does not inject document.domain on http requests which do not match current superDomain', function () {
+      it('does not inject document.domain on http requests which do not match current superDomain and are not the AUT iframe', function () {
         nock('http://www.foobar.com')
         .get('/')
         .reply(200, '<html><head></head><body>hi</body></html>', {
@@ -3057,7 +3091,7 @@ describe('Routes', () => {
       })
 
       it('does not inject anything when not text/html response content-type even when __cypress.initial=true', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/json')
         .reply(200, { foo: 'bar' })
 
@@ -3078,7 +3112,7 @@ describe('Routes', () => {
       })
 
       it('does not inject into x-requested-with request headers', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/html',
@@ -3103,7 +3137,7 @@ describe('Routes', () => {
 
       return ['text/html', 'application/xhtml+xml', 'text/plain, application/xhtml+xml', '', null].forEach((type) => {
         it(`does not inject unless both text/html and application/xhtml+xml is requested: tried to accept: ${type}`, function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/iframe')
           .reply(200, '<html><head></head></html>', {
             'Content-Type': 'text/html',
@@ -3139,7 +3173,7 @@ describe('Routes', () => {
         it('replaces obstructive code in HTML files', function () {
           const html = '<html><body><script>if (top !== self) { }</script></body></html>'
 
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/index.html')
           .reply(200, html, {
             'Content-Type': 'text/html',
@@ -3161,7 +3195,7 @@ describe('Routes', () => {
         })
 
         it('replaces obstructive code in JS files', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
             'Content-Type': 'application/javascript',
@@ -3184,7 +3218,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/index.html')
             .reply(200, resp, {
               'Content-Type': 'text/html',
@@ -3212,7 +3246,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/index.js')
             .reply(200, resp, {
               'Content-Type': 'application/javascript',
@@ -3238,7 +3272,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/app.js')
             // remove the last 8 characters which
             // truncates the CRC checksum and size check
@@ -3265,7 +3299,7 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response)
           .then((resp) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/index.html')
             // remove the last 8 characters which
             // truncates the CRC checksum and size check
@@ -3291,7 +3325,7 @@ describe('Routes', () => {
         })
 
         it('ECONNRESETs bad gzip responses when not injecting', function (done) {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .delayBody(100)
           .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
@@ -3311,7 +3345,7 @@ describe('Routes', () => {
         })
 
         it('ECONNRESETs bad gzip responses when injecting', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/index.html')
           .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
             'Content-Type': 'text/html',
@@ -3335,7 +3369,7 @@ describe('Routes', () => {
         it('does not die rewriting a huge JS file', function () {
           return getHugeJsFile()
           .then((hugeJsFile) => {
-            nock(this.server._remoteOrigin)
+            nock(this.server.remoteStates.current().origin)
             .get('/app.js')
             .reply(200, hugeJsFile, {
               'Content-Type': 'application/javascript',
@@ -3368,7 +3402,7 @@ describe('Routes', () => {
         it('can turn off security rewriting for HTML', function () {
           const html = '<html><body><script>if (top !== self) { }</script></body></html>'
 
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/index.html')
           .reply(200, html, {
             'Content-Type': 'text/html',
@@ -3390,7 +3424,7 @@ describe('Routes', () => {
         })
 
         it('does not replaces obstructive code in JS files', function () {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
             'Content-Type': 'application/javascript',
@@ -3414,7 +3448,7 @@ describe('Routes', () => {
       })
 
       it('does not rewrite html when initial', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html><body><a href=\'http://www.google.com\'>google</a></body></html>', {
           'Content-Type': 'text/html',
@@ -3439,7 +3473,7 @@ describe('Routes', () => {
       })
 
       it('does not rewrite html when not initial', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, '<html><body><a href=\'http://www.google.com\'>google</a></body></html>', {
           'Content-Type': 'text/html',
@@ -3648,7 +3682,7 @@ describe('Routes', () => {
       beforeEach(function () {
         return this.setup('http://getbootstrap.com')
         .then(() => {
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/components')
           .reply(200, 'content page', {
             'Content-Type': 'text/html',
@@ -3662,7 +3696,7 @@ describe('Routes', () => {
       })
 
       it('proxies http requests', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/assets/css/application.css')
         .reply(200, 'html { color: #333 }', {
           'Content-Type': 'text/css',
@@ -3683,7 +3717,7 @@ describe('Routes', () => {
         .then(() => {
           // make an initial request to set the
           // session proxy!
-          nock(this.server._remoteOrigin)
+          nock(this.server.remoteStates.current().origin)
           .get('/css')
           .reply(200, 'css content page', {
             'Content-Type': 'text/html',
@@ -3697,7 +3731,7 @@ describe('Routes', () => {
       })
 
       it('proxies to the remote session', function () {
-        nock(this.server._remoteOrigin)
+        nock(this.server.remoteStates.current().origin)
         .get('/assets/css/application.css')
         .reply(200, 'html { color: #333 }', {
           'Content-Type': 'text/css',
@@ -4010,7 +4044,7 @@ describe('Routes', () => {
     })
 
     it('processes POST + redirect on remote proxy', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/login', {
         username: 'brian@cypress.io',
         password: 'foobar',
@@ -4040,7 +4074,7 @@ describe('Routes', () => {
     // this happens on a real form submit because beforeunload fires
     // and initial=true gets set
     it('processes POST + redirect on remote initial', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/login', {
         username: 'brian@cypress.io',
         password: 'foobar',
@@ -4069,7 +4103,7 @@ describe('Routes', () => {
     })
 
     it('does not alter request headers', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .matchHeader('x-csrf-token', 'abc-123')
       .post('/login', {
         username: 'brian@cypress.io',
@@ -4096,7 +4130,7 @@ describe('Routes', () => {
     })
 
     it('does not fail on a big cookie', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/login')
       .reply(200)
 
@@ -4117,7 +4151,7 @@ describe('Routes', () => {
     })
 
     it('hands back 201 status codes', function () {
-      nock(this.server._remoteOrigin)
+      nock(this.server.remoteStates.current().origin)
       .post('/companies/validate', {
         payload: { name: 'Brian' },
       })

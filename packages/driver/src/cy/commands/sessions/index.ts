@@ -108,8 +108,12 @@ export default function (Commands, Cypress, cy) {
   }
 
   function throwIfNoSessionSupport () {
-    if (!Cypress.config('experimentalSessionSupport')) {
-      $errUtils.throwErrByPath('sessions.experimentNotEnabled')
+    if (!Cypress.config('experimentalSessionAndOrigin')) {
+      $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
+        args: {
+          experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
+        },
+      })
     }
   }
 
@@ -311,7 +315,7 @@ export default function (Commands, Cypress, cy) {
 
     registerSessionHooks () {
       Cypress.on('test:before:run:async', () => {
-        if (Cypress.config('experimentalSessionSupport')) {
+        if (Cypress.config('experimentalSessionAndOrigin')) {
           currentTestRegisteredSessions.clear()
 
           return navigateAboutBlank(false)

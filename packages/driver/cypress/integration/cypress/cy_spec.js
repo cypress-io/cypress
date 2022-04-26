@@ -1,20 +1,8 @@
 const { $ } = Cypress
 
 describe('driver/src/cypress/cy', () => {
-  let body
-
-  before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then((win) => {
-      body = win.document.body.outerHTML
-    })
-  })
-
   beforeEach(() => {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(body)
+    cy.visit('/fixtures/dom.html')
   })
 
   // https://github.com/cypress-io/cypress/issues/7731

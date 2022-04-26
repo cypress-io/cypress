@@ -60,6 +60,12 @@ export default (Commands, Cypress, cy, state) => {
   // currentViewport could already be set due to previous runs
   currentViewport = currentViewport || defaultViewport
 
+  // sync the global viewport state when the viewport has changed in the primary or secondary
+  Cypress.primaryOriginCommunicator.on('sync:viewport', (viewport) => {
+    currentViewport = viewport
+    state(viewport)
+  })
+
   Cypress.on('test:before:run:async', () => {
     // if we have viewportDefaults it means
     // something has changed the default and we

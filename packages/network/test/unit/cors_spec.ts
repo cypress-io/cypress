@@ -261,4 +261,16 @@ describe('lib/cors', () => {
       isNotMatch('http://foo.example.com/', 'http://foo.bar.example.com')
     })
   })
+
+  context('.getOriginPolicy', () => {
+    it('ports', () => {
+      expect(cors.getOriginPolicy('https://example.com')).to.equal('https://example.com')
+      expect(cors.getOriginPolicy('http://example.com:8080')).to.equal('http://example.com:8080')
+    })
+
+    it('subdomain', () => {
+      expect(cors.getOriginPolicy('http://www.example.com')).to.equal('http://example.com')
+      expect(cors.getOriginPolicy('http://www.app.herokuapp.com:8080')).to.equal('http://app.herokuapp.com:8080')
+    })
+  })
 })

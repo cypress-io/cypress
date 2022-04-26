@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <script>
+    const sessionStorage = window.sessionStorage;
+
+    // If there is a new token, set it. This is clearly not secure and no one should setup real auth this way
+    const queryString = location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const newToken = urlParams.get('token')
+
+
+    if (newToken) {
+      sessionStorage.setItem('cypressAuthToken', decodeURIComponent(newToken));
+      urlParams.delete('token')
+      const newSearchParams = urlParams.toString()
+
+      let newLocation = `${location.origin}${location.pathname}`
+
+      if(newSearchParams){
+        newLocation = `${newLocation}?${newSearchParams}`
+      }
+
+      if(location.hash){
+        newLocation = `${newLocation}${location.hash}`
+      }
+
+      location.replace(newLocation)
+    }
+
+    const cypressAuthToken = sessionStorage.getItem('cypressAuthToken');
+
+    // If a token doesn't exist we aren't logged in
+    if (!cypressAuthToken){
+      // Add Message
+      const tag = document.createElement("p");
+      const text = document.createTextNode("You are not logged in");
+      tag.appendChild(text)
+      const body = document.body
+      body.appendChild(tag)
+
+      // Add Login button that redirects to the idp
+      const loginBtn = document.createElement("button");
+      loginBtn.innerHTML = "Login IDP"
+      loginBtn.dataset.cy = "login-idp"
+      loginBtn.onclick = function () {
+        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginBtn);
+
+      // Add Login button that redirects to the idp
+      const loginFoobarBtn = document.createElement("button");
+      loginFoobarBtn.innerHTML = "Login Foobar"
+      loginFoobarBtn.dataset.cy = "login-foobar"
+      loginFoobarBtn.onclick = function () {
+        window.location.href = `http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginFoobarBtn);
+
+      // Add Login button that redirects to the idp
+      const loginWithApprovalBtn = document.createElement("button");
+      loginWithApprovalBtn.innerHTML = "Login With Approval"
+      loginWithApprovalBtn.dataset.cy = "login-with-approval"
+      loginWithApprovalBtn.onclick = function () {
+        window.location.href = `http://wwww.foobar.com:3500/fixtures/auth/approval.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginWithApprovalBtn);
+
+    } else {
+      const token = JSON.parse(cypressAuthToken)
+      // If the token exists, hooray, give them a logout button to destroy the token and refresh.
+      const tag = document.createElement("p");
+      const text = document.createTextNode(`Welcome ${token.body.username}`);
+      tag.dataset.cy = "welcome"
+      tag.appendChild(text)
+      const body = document.body
+      body.appendChild(tag)
+
+      // Add log out button
+      const btn = document.createElement("button");
+      btn.innerHTML = "Logout";
+      btn.dataset.cy = "logout"
+      btn.onclick = function () {
+        sessionStorage.removeItem('cypressAuthToken');
+        location.reload()
+      };
+      document.body.appendChild(btn);
+    }
+
+  </script>
+</body>
+</html>
