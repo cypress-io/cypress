@@ -48,7 +48,6 @@
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,errors,electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,runner-shared,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
-    "pretest-e2e": "yarn ensure-deps",
     "test-integration": "lerna exec yarn test-integration --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
     "test-npm-package-release-script": "npx lerna exec --scope \"@cypress/*\" -- npx --no-install semantic-release --dry-run",
     "test-system": "yarn workspace @tooling/system-tests test",
