@@ -2,13 +2,14 @@ import $ from 'jquery'
 
 import $dom from '../dom'
 import $utils from '../cypress/utils'
+import type { StateFunc } from '../cypress/state'
 
 const remoteJQueryisNotSameAsGlobal = (remoteJQuery) => {
   return remoteJQuery && (remoteJQuery !== $)
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (state) => ({
+export const create = (state: StateFunc) => ({
   $$ (selector, context) {
     if (context == null) {
       context = state('document')

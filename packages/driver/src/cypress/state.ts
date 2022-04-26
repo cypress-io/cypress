@@ -28,6 +28,7 @@ export interface StateFunc {
   (k: 'index', v?: number): number
   (k: 'current', v?: $Command): $Command
   (k: 'canceld', v?: boolean): boolean
+  (k: 'error', v?: Error): Error
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>

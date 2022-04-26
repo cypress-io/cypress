@@ -2,9 +2,12 @@ import $ from 'jquery'
 import _ from 'lodash'
 import $dom from '../dom'
 import $elements from '../dom/elements'
-import $Keyboard, { ModifiersEventOptions } from './keyboard'
+import $Keyboard, { Keyboard, ModifiersEventOptions } from './keyboard'
 import $selection from '../dom/selection'
 import debugFn from 'debug'
+import type { StateFunc } from '../cypress/state'
+import type { IFocused } from './focused'
+import type { ICypress } from '../cypress'
 
 const debug = debugFn('cypress:driver:mouse')
 
@@ -47,7 +50,7 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
   relatedTarget: HTMLElement | null
 }
 
-export const create = (state, keyboard, focused, Cypress) => {
+export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
