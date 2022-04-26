@@ -27,7 +27,19 @@ export default function (Commands, Cypress, cy) {
   const sessions = new SessionsManager(Cypress, cy)
 
   Cypress.on('run:start', () => {
-    sessions.registerSessionHooks()
+    Cypress.on('test:before:run:async', () => {
+      if (Cypress.config('experimentalSessionAndOrigin')) {
+        this.currentTestRegisteredSessions.clear()
+
+        return navigateAboutBlank(false)
+        .then(() => this.clearCurrentSessionData())
+        .then(() => {
+          return this.Cypress.backend('reset:rendered:html:origins')
+        })
+      }
+
+      return
+    })
   })
 
   Commands.addAll({

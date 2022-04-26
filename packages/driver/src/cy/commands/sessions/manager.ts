@@ -5,7 +5,6 @@ import {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
   getPostMessageLocalStorage,
-  navigateAboutBlank,
 } from './utils'
 
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
@@ -43,21 +42,17 @@ export default class SessionsManager {
   }
 
   async mapOrigins (origins: string) {
-    const currentOrigin = $Location.create(window.location.href).origin
+    let renderedOrigins
 
-    return _.uniq(
-      _.flatten(await this.Cypress.Promise.map(
-        ([] as string[]).concat(origins), async (v) => {
-          if (v === '*') {
-            return _.keys(await this.Cypress.backend('get:rendered:html:origins')).concat([currentOrigin])
-          }
+    if (origins === '*') {
+      renderedOrigins = await this.getAllHtmlOrigins()
+    } else if (origins === 'currentOrigin') {
+      renderedOrigins = [$Location.create(window.location.href).origin]
+    } else {
+      renderedOrigins = [$Location.create(origins).origin]
+    }
 
-          if (v === 'currentOrigin') return currentOrigin
-
-          return $Location.create(v).origin
-        },
-      )),
-    ) as string[]
+    return _.uniq(renderedOrigins) as string[]
   }
 
   async _setStorageOnOrigins (originOptions) {
@@ -96,10 +91,10 @@ export default class SessionsManager {
 
   async getAllHtmlOrigins () {
     const currentOrigin = $Location.create(window.location.href).origin
+    const storedOrigins = await this.Cypress.backend('get:rendered:html:origins')
+    const origins = [..._.keys(storedOrigins), currentOrigin]
 
-    const origins = _.uniq([..._.keys(await Cypress.backend('get:rendered:html:origins')), currentOrigin]) as string[]
-
-    return origins
+    return _.uniq(origins)
   }
 
   defineSession (options = {} as any): SessionData {
@@ -171,16 +166,15 @@ export default class SessionsManager {
   }
 
   async getCurrentSessionData () {
-    const storage = await this.getStorage({ origin: '*' })
+    const [storage, cookies] = await Promise.all([
+      this.getStorage({ origin: '*' }),
+      this.getCookies(),
+    ])
 
-    const cookies: Array<Cypress.Cookie> = await this.getCookies()
-
-    const ses = {
+    return {
       ...storage,
       cookies,
     }
-
-    return ses
   }
 
   getSession (id: string) {
@@ -188,13 +182,13 @@ export default class SessionsManager {
   }
 
   /**
-     * 1) if we only need currentOrigin localStorage, access sync
-     * 2) if cross-origin http, we need to load in iframe from our proxy that will intercept all http reqs at /__cypress/automation/*
-     *      and postMessage() the localStorage value to us
-     * 3) if cross-origin https, since we pass-thru https connections in the proxy, we need to
-     *      send a message telling our proxy server to intercept the next req to the https domain,
-     *      then follow 2)
-     */
+    * 1) if we only need currentOrigin localStorage, access sync
+    * 2) if cross-origin http, we need to load in iframe from our proxy that will intercept all http reqs at /__cypress/automation/*
+    *      and postMessage() the localStorage value to us
+    * 3) if cross-origin https, since we pass-thru https connections in the proxy, we need to
+    *      send a message telling our proxy server to intercept the next req to the https domain,
+    *      then follow 2)
+    */
   async getStorage (options = {}) {
     const specWindow = this.cy.state('specWindow')
 
@@ -210,9 +204,6 @@ export default class SessionsManager {
 
     const origins = await this.mapOrigins(opts.origin)
 
-    const getResults = () => {
-      return results
-    }
     const results = {
       localStorage: [] as any[],
       sessionStorage: [] as any[],
@@ -238,7 +229,7 @@ export default class SessionsManager {
     }
 
     if (_.isEmpty(origins)) {
-      return getResults()
+      return results
     }
 
     if (currentOrigin.startsWith('https:')) {
@@ -251,7 +242,7 @@ export default class SessionsManager {
       pushValue(val[0], val[1])
     })
 
-    return getResults()
+    return results
   }
 
   async clearStorage () {
@@ -295,22 +286,6 @@ export default class SessionsManager {
     await this._setStorageOnOrigins(storageOptions)
   }
 
-  registerSessionHooks () {
-    this.Cypress.on('test:before:run:async', () => {
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        this.currentTestRegisteredSessions.clear()
-
-        return navigateAboutBlank(false)
-        .then(() => this.clearCurrentSessionData())
-        .then(() => {
-          return this.Cypress.backend('reset:rendered:html:origins')
-        })
-      }
-
-      return
-    })
-  }
-
   publicAPI () {
     return {
       clearAllSavedSessions: this.clearAllSavedSessions,
@@ -323,7 +298,6 @@ export default class SessionsManager {
       getCurrentSessionData: this.getCurrentSessionData,
       getSession: this.getSession,
       getStorage: this.getStorage,
-      registerSessionHooks: this.registerSessionHooks,
       setCookies: this.setCookies,
       setSessionData: this.setSessionData,
       setStorage: this.setStorage,
