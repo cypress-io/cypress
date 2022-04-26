@@ -11,6 +11,15 @@ import {
 
 type SessionData = Cypress.Commands.Session.SessionData
 
+/**
+ * Session data should be cleared with spec browser launch.
+ *
+ * Rules for clearing session data:
+ *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
+ *  - if user relaunches the browser or launches a new spec, session data SHOULD be cleared
+ *  - session data SHOULD be cleared between specs in run mode
+ */
+
 export default function (Commands, Cypress, cy) {
   function throwIfNoSessionSupport () {
     if (!Cypress.config('experimentalSessionAndOrigin')) {
@@ -29,12 +38,12 @@ export default function (Commands, Cypress, cy) {
   Cypress.on('run:start', () => {
     Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        this.currentTestRegisteredSessions.clear()
+        sessions.currentTestRegisteredSessions.clear()
 
         return navigateAboutBlank(false)
-        .then(() => this.clearCurrentSessionData())
+        .then(() => sessions.clearCurrentSessionData())
         .then(() => {
-          return this.Cypress.backend('reset:rendered:html:origins')
+          return Cypress.backend('reset:rendered:html:origins')
         })
       }
 
