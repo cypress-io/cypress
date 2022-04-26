@@ -3,7 +3,7 @@ import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub, GraphQLRequestInfo } from '@packages/data-context'
 import pDefer from 'p-defer'
 import cors from 'cors'
-import { SocketIOServer } from '@packages/socket'
+import { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import { graphqlHTTP } from 'express-graphql'
 import serverDestroy from 'server-destroy'
@@ -21,7 +21,7 @@ const debug = debugLib(`cypress-verbose:graphql:operation`)
 
 const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
-let gqlSocketServer: SocketIOServer
+let gqlSocketServer: SocketIONamespace
 let gqlServer: Server
 
 globalPubSub.on('reset:data-context', (ctx) => {
@@ -108,10 +108,12 @@ export async function makeGraphQLServer () {
 
   serverDestroy(srv)
 
-  gqlSocketServer = new SocketIOServer(srv, {
+  const socketSrv = new SocketIOServer(srv, {
     path: '/__launchpad/socket',
     transports: ['websocket'],
   })
+
+  gqlSocketServer = socketSrv.of('/data-context')
 
   graphqlWS(srv, '/__launchpad/graphql-ws')
 
