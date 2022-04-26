@@ -31,7 +31,7 @@ export const pubSubExchange = (io: Socket): Exchange => {
     }
 
     // Handles the refresh of the GraphQL operation
-    io.on('graphql-refresh', (refreshOnly?: RefreshOnlyInfo) => {
+    io.on('graphql-refetch', (refreshOnly?: RefreshOnlyInfo) => {
       if (refreshOnly?.operation) {
         const fieldHeader = `${refreshOnly.operation}.${refreshOnly.field}`
         const toRefresh = Array.from(watchedOperations.values()).find((o) => getOperationName(o.query) === refreshOnly.operation)

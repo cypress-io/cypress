@@ -13,13 +13,15 @@ const supportFile = CypressInstance.config('supportFile')
 const projectRoot = CypressInstance.config('projectRoot')
 const devServerPublicPathRoute = CypressInstance.config('devServerPublicPathRoute')
 
-let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
-
-if (CypressInstance.config('platform') === 'win32') {
-  supportRelativeToProjectRoot = supportFile.replace(projectRoot.replaceAll('/', '\\'))
-}
-
 if (supportFile) {
+  let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
+
+  if (CypressInstance.config('platform') === 'win32') {
+    const platformProjectRoot = projectRoot.replaceAll('/', '\\')
+
+    supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
+  }
+
   // We need a slash before /cypress/supportFile.js, this happens by default
   // with the current string replacement logic.
   importsToLoad.push(() => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`))
