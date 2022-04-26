@@ -3,6 +3,8 @@ import $dom from '../dom'
 import $utils from '../cypress/utils'
 import $errUtils from '../cypress/error_utils'
 import $elements from '../dom/elements'
+import type { StateFunc } from '../cypress/state'
+import type { $Cy } from '../cypress/cy'
 
 const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft bottom bottomRight'.split(' ')
 
@@ -14,7 +16,7 @@ const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft botto
 
 let returnFalse = () => false
 
-export const create = (state, expect) => {
+export const create = (state: StateFunc, expect: $Cy['expect']) => {
   // TODO: we should probably normalize all subjects
   // into an array and loop through each and verify
   // each element in the array is valid. as it stands
