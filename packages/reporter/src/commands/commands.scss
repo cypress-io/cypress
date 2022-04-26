@@ -162,6 +162,12 @@
     width: 24px;
   }
 
+  // when no children, add padding to act as the .command-expander-column's width
+  // to prevent adding another element to the page
+  .command-number-column + span.command-pin-target {
+    margin-left: 24px;
+  }
+
   .command-pin-target.command-group {
     border-left: 1px dotted $gray-600;
     padding-left: 12px;

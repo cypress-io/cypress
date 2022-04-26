@@ -66,9 +66,11 @@ const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
       {(!model._isPending() && isPinned) && <PinIcon className='command-pin' />}
       {(!model._isPending() && !isPinned) && model.number}
     </div>
-    <div className='command-expander-column' onClick={() => model.toggleOpen()}>
-      {model.hasChildren && <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />}
-    </div>
+    {model.hasChildren && (
+      <div className='command-expander-column' onClick={() => model.toggleOpen()}>
+        <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+      </div>
+    )}
   </>
 ))
 
