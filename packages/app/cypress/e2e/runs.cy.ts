@@ -522,7 +522,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays a list of recorded runs if a run has been recorded and remove them if user has been removed of project', () => {
-      cy.remoteGraphQLIntercept(async (obj) => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.result.data?.cloudProjectsBySlugs && obj.callCount > 1) {
           for (let proj of obj.result.data.cloudProjectsBySlugs) {
             proj.__typename = 'CloudProjectUnauthorized'
