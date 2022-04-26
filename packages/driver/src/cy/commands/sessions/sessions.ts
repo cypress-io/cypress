@@ -8,14 +8,13 @@ import {
   navigateAboutBlank,
 } from './utils'
 
-const currentTestRegisteredSessions = new Map()
-
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
 
 export default class SessionsManager {
   Cypress
   cy
+  currentTestRegisteredSessions = new Map()
 
   constructor (Cypress, cy) {
     this.Cypress = Cypress

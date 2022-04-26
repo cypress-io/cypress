@@ -9,8 +9,6 @@ import {
   navigateAboutBlank,
 } from './utils'
 
-const currentTestRegisteredSessions = new Map()
-
 type SessionData = Cypress.Commands.Session.SessionData
 
 export default function (Commands, Cypress, cy) {
@@ -72,17 +70,18 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession: SessionData = getActiveSession(id)
+      let existingSession: SessionData = sessions.getActiveSession(id)
+      const isRegisteredSessionForTest = sessions.currentTestRegisteredSessions.has(id)
 
       if (!setup) {
-        if (!existingSession || !currentTestRegisteredSessions.has(id)) {
+        if (!existingSession || !isRegisteredSessionForTest) {
           $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
         }
       } else {
         const isUniqSessionDefinition = !existingSession || existingSession.setup.toString().trim() !== setup.toString().trim()
 
         if (isUniqSessionDefinition) {
-          if (currentTestRegisteredSessions.has(id)) {
+          if (isRegisteredSessionForTest) {
             $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id: existingSession.id } })
           }
 
@@ -92,7 +91,7 @@ export default function (Commands, Cypress, cy) {
             validate: options.validate,
           })
 
-          currentTestRegisteredSessions.set(id, true)
+          sessions.currentTestRegisteredSessions.set(id, true)
         }
       }
 
