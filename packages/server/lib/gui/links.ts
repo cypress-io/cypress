@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { shell } from 'electron'
 import { URL, URLSearchParams } from 'url'
 
 // NOTE: in order for query params to be passed through on links
@@ -12,7 +11,7 @@ interface OpenExternalOptions {
 
 export const openExternal = (opts: OpenExternalOptions | string) => {
   if (_.isString(opts)) {
-    return shell.openExternal(opts)
+    return require('electron').shell.openExternal(opts)
   }
 
   const url = new URL(opts.url)
@@ -26,5 +25,5 @@ export const openExternal = (opts: OpenExternalOptions | string) => {
     url.search = new URLSearchParams(opts.params).toString()
   }
 
-  return shell.openExternal(url.href)
+  return require('electron').shell.openExternal(url.href)
 }

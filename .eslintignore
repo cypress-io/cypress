@@ -74,6 +74,8 @@ npm/cypress-schematic/src/**/*.js
 /npm/vue2/**/*.vue
 
 packages/data-context/test/unit/codegen/files
+packages/config/test/__fixtures__/**/*
+packages/config/test/__babel_fixtures__/**/*
 
 # community templates we test against, no need to lint
 system-tests/projects/cra-4/**/*

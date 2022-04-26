@@ -1102,7 +1102,7 @@ describe('visual error templates', () => {
         default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
-    CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
+    CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: () => {
       return {
         default: ['/path/to/config.ts', {}],
       }

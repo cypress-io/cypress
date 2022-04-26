@@ -20,7 +20,6 @@ import {
   ProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
-  StorybookDataSource,
   CloudDataSource,
   EnvDataSource,
   HtmlDataSource,
@@ -168,11 +167,6 @@ export class DataContext {
   @cached
   get wizard () {
     return new WizardDataSource(this)
-  }
-
-  @cached
-  get storybook () {
-    return new StorybookDataSource(this)
   }
 
   get wizardData () {
@@ -406,9 +400,7 @@ export class DataContext {
       await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
-      if (this.coreData.currentProject && this.coreData.currentTestingType && await this.lifecycleManager.waitForInitializeSuccess()) {
-        this.lifecycleManager.setAndLoadCurrentTestingType(this.coreData.currentTestingType)
-      }
+      await this.lifecycleManager.initializeOpenMode(this.coreData.currentTestingType)
     } else {
       throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
@@ -433,6 +425,6 @@ export class DataContext {
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    return Promise.all(toAwait)
+    await Promise.all(toAwait)
   }
 }
