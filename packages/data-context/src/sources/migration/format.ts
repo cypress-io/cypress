@@ -1,4 +1,5 @@
 import dedent from 'dedent'
+import type { MigrationTransformOptions } from './autoRename'
 
 export type FilePart = {
   text: string
@@ -6,7 +7,7 @@ export type FilePart = {
   highlight: boolean
 }
 
-export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
+export function formatMigrationFile (file: string, regexp: RegExp, options: MigrationTransformOptions): FilePart[] {
   const match = regexp.exec(file)
 
   if (!match?.groups) {
@@ -52,7 +53,7 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   },
   {
     text: preExtension || '', // user/cypress/integration/file.spec.tsx -> .spec.
-    highlight: true,
+    highlight: options.migratePreExtension,
     group: 'preExtension',
   }, {
     text: extension || '', // user/cypress/integration/file.spec.tsx -> tsx

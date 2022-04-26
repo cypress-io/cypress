@@ -61,6 +61,18 @@ export class MigrationDataSource {
     return this.ctx.coreData.migration.legacyConfigForMigration
   }
 
+  get shouldMigratePreExtension () {
+    return !this.legacyConfig.projectId
+  }
+
+  get migrationOptions () {
+    return {
+      // If the configFile has projectId, we do not want to change the preExtension
+      // so, we can keep the cloud history
+      migratePreExtension: this.shouldMigratePreExtension,
+    }
+  }
+
   async getComponentTestingMigrationStatus () {
     debug('getComponentTestingMigrationStatus: start')
     if (!this.legacyConfig || !this.ctx.currentProject) {
@@ -127,7 +139,7 @@ export class MigrationDataSource {
     }
 
     try {
-      const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
+      const supportFiles = await supportFilesForMigration(this.ctx.currentProject, this.migrationOptions)
 
       debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
 
@@ -146,13 +158,13 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, this.legacyConfig)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map((s) => applyMigrationTransform(s, this.migrationOptions)).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(this.legacyConfig, 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
+      canBeAutomaticallyMigrated.push(...specs.component.map((s) => applyMigrationTransform(s)).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
     return this.checkAndUpdateDuplicatedSpecs(canBeAutomaticallyMigrated)
@@ -171,6 +183,7 @@ export class MigrationDataSource {
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
       hasTypescript,
+      hasProjectId: Boolean(this.legacyConfig.projectId),
     })
   }
 

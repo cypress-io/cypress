@@ -5,7 +5,7 @@ import globby from 'globby'
 import prettier from 'prettier'
 import type { TestingType } from '@packages/types'
 import { formatMigrationFile } from './format'
-import { substitute } from './autoRename'
+import { MigrationTransformOptions, substitute } from './autoRename'
 import { supportFileRegexps } from './regexps'
 import type { MigrationFile } from '../MigrationDataSource'
 import { toPosix } from '../../util'
@@ -40,6 +40,7 @@ export interface CreateConfigOptions {
   hasComponentTesting: boolean
   projectRoot: string
   hasTypescript: boolean
+  hasProjectId: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
@@ -195,11 +196,15 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+  if (createConfigOptions.hasProjectId) {
+    options.specPattern = 'cypresedffs/e2e/**/*.{js,ts,tsx,jsx}'
+  }
+
   if (!createConfigOptions.hasPluginsFile || !pluginPath) {
     return dedent`
       e2e: {
         setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
-      }
+      },
     `
   }
 
@@ -277,7 +282,7 @@ export async function getDefaultLegacySupportFile (projectRoot: string) {
   return defaultSupportFile
 }
 
-export async function supportFilesForMigration (projectRoot: string): Promise<MigrationFile> {
+export async function supportFilesForMigration (projectRoot: string, options: MigrationTransformOptions): Promise<MigrationFile> {
   debug('Checking for support files in %s', projectRoot)
   const defaultOldSupportFile = await getDefaultLegacySupportFile(projectRoot)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
@@ -285,13 +290,14 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Mi
   const afterParts = formatMigrationFile(
     defaultOldSupportFile,
     new RegExp(supportFileRegexps.e2e.beforeRegexp),
-  ).map(substitute)
+    options,
+  ).map((part) => substitute(part, options))
 
   return {
     testingType: 'e2e',
     before: {
       relative: defaultOldSupportFile,
-      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp), options),
     },
     after: {
       relative: defaultNewSupportFile,

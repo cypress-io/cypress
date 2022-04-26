@@ -279,5 +279,12 @@ export const Migration = objectType({
         return ctx.lifecycleManager.metaState.hasTypescript
       },
     })
+
+    t.boolean('shouldMigratePreExtension', {
+      description: 'whether the pre extension info should be displayed',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.shouldMigratePreExtension
+      },
+    })
   },
 })
