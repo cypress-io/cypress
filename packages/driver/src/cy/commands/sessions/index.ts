@@ -2,7 +2,7 @@ import _ from 'lodash'
 import stringifyStable from 'json-stable-stringify'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
-import SessionsManager from './sessions'
+import SessionsManager from './manager'
 import {
   getSessionDetails,
   getConsoleProps,
@@ -16,7 +16,7 @@ export default function (Commands, Cypress, cy) {
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
         args: {
-          // determine if using removed <9.6.0 experimental session opt-in flag to
+          // determine if using experimental session opt-in flag (removed in 9.6.0) to
           // generate a coherent error message
           experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
         },

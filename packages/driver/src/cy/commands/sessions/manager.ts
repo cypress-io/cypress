@@ -37,8 +37,9 @@ export default class SessionsManager {
 
   clearActiveSessions () {
     const curSessions = this.cy.state('activeSessions') || {}
+    const clearedSessions: ActiveSessions = _.mapValues(curSessions, (v) => ({ ...v, hydrated: false }))
 
-    this.cy.state('activeSessions', _.mapValues(curSessions, (v) => ({ ...v, hydrated: false })))
+    this.cy.state('activeSessions', clearedSessions)
   }
 
   async mapOrigins (origins: string) {
@@ -157,12 +158,12 @@ export default class SessionsManager {
     await this.setCookies(data.cookies)
   }
 
-  async getCookies () {
+  async getCookies (): Promise<Array<Cypress.Cookie>> {
     return this.Cypress.automation('get:cookies', {})
   }
 
-  setCookies (data) {
-    return this.Cypress.automation('set:cookies', data)
+  setCookies (cookies: Array<Cypress.Cookie>) {
+    return this.Cypress.automation('set:cookies', cookies)
   }
 
   async clearCookies () {
@@ -172,9 +173,7 @@ export default class SessionsManager {
   async getCurrentSessionData () {
     const storage = await this.getStorage({ origin: '*' })
 
-    let cookies = [] as any[]
-
-    cookies = await this.Cypress.automation('get:cookies', {})
+    const cookies: Array<Cypress.Cookie> = await this.getCookies()
 
     const ses = {
       ...storage,
@@ -184,7 +183,7 @@ export default class SessionsManager {
     return ses
   }
 
-  getSession (id) {
+  getSession (id: string) {
     return this.Cypress.backend('get:session', id)
   }
 
@@ -299,7 +298,7 @@ export default class SessionsManager {
   registerSessionHooks () {
     this.Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        currentTestRegisteredSessions.clear()
+        this.currentTestRegisteredSessions.clear()
 
         return navigateAboutBlank(false)
         .then(() => this.clearCurrentSessionData())
