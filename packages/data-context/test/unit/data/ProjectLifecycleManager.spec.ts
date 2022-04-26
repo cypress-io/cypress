@@ -1,18 +1,13 @@
-import chai, { expect } from 'chai'
+import { expect } from 'chai'
 import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
-
-chai.use(sinonChai)
 
 describe('ProjectLifecycleManager', () => {
   let ctx: DataContext
-  let lifecycleManager: any
 
   beforeEach(() => {
     ctx = createTestDataContext('open')
-    lifecycleManager = ctx.lifecycleManager as any
   })
 
   context('#setInitialActiveBrowser', () => {
@@ -33,7 +28,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('falls back to browsers[0] if preferences and cliBrowser do not exist', async () => {
-      await lifecycleManager.setInitialActiveBrowser()
+      await ctx.lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
     })
@@ -43,7 +38,7 @@ describe('ProjectLifecycleManager', () => {
 
       ctx.coreData.cliBrowser = 'electron'
 
-      await lifecycleManager.setInitialActiveBrowser()
+      await ctx.lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.cliBrowser).to.eq('electron')
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
@@ -52,7 +47,7 @@ describe('ProjectLifecycleManager', () => {
     it('uses lastBrowser if available', async () => {
       ctx.project.getProjectPreferences = sinon.stub().resolves({ lastBrowser: { name: 'chrome', channel: 'beta' } })
 
-      await lifecycleManager.setInitialActiveBrowser()
+      await ctx.lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.activeBrowser).to.include({ name: 'chrome', displayName: 'Chrome Beta' })
     })
@@ -60,102 +55,9 @@ describe('ProjectLifecycleManager', () => {
     it('falls back to browsers[0] if lastBrowser does not exist', async () => {
       ctx.project.getProjectPreferences = sinon.stub().resolves({ lastBrowser: { name: 'chrome', channel: 'dev' } })
 
-      await lifecycleManager.setInitialActiveBrowser()
+      await ctx.lifecycleManager.setInitialActiveBrowser()
 
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
-    })
-  })
-
-  context('#refreshLifecycle', () => {
-    it('executes refreshLifecycleAsync with no errors', () => {
-      const refreshLifecycleAsyncStub = sinon.stub(lifecycleManager, 'refreshLifecycleAsync').resolves()
-
-      lifecycleManager.refreshLifecycle()
-
-      expect(refreshLifecycleAsyncStub).to.have.been.called
-    })
-
-    it('executes refreshLifecycleAsync and handles errors', (done) => {
-      const refreshLifecycleAsyncStub = sinon.stub(lifecycleManager, 'refreshLifecycleAsync').rejects()
-
-      sinon.stub(lifecycleManager, 'onLoadError').callsFake(() => {
-        expect(refreshLifecycleAsyncStub).to.have.been.called
-        done()
-      })
-
-      lifecycleManager.refreshLifecycle()
-    })
-  })
-
-  context('#refreshLifecycleAsync', () => {
-    it('resets the loading state, notifies launchpad, initializes config, and loads the testing type if ready and configured', async () => {
-      lifecycleManager._projectRoot = 'root'
-      lifecycleManager._currentTestingType = 'e2e'
-      lifecycleManager._configManager = {
-        resetLoadingState: sinon.stub(),
-        loadTestingType: sinon.stub(),
-        destroy: sinon.stub(),
-      }
-
-      const readyToInitializeStub = sinon.stub(lifecycleManager, 'readyToInitialize').returns(true)
-      const toLaunchpadStub = sinon.stub(ctx.emitter, 'toLaunchpad')
-      const initialConfigStub = sinon.stub(lifecycleManager, 'initializeConfig').resolves()
-      const isTestingTypeConfiguredStub = sinon.stub(lifecycleManager, 'isTestingTypeConfigured').returns(true)
-
-      await lifecycleManager.refreshLifecycleAsync()
-
-      expect(readyToInitializeStub).to.have.been.calledWith('root')
-      expect(lifecycleManager._configManager.resetLoadingState).to.have.been.called
-      expect(toLaunchpadStub).to.have.been.called
-      expect(initialConfigStub).to.have.been.called
-      expect(isTestingTypeConfiguredStub).to.have.been.calledWith('e2e')
-      expect(lifecycleManager._configManager.loadTestingType).to.have.been.called
-    })
-
-    it('resets the loading state, notifies launchpad, initializes config, and clears the current testing type if there is no testing type', async () => {
-      lifecycleManager._projectRoot = 'root'
-      lifecycleManager._configManager = {
-        resetLoadingState: sinon.stub(),
-        loadTestingType: sinon.stub(),
-        destroy: sinon.stub(),
-      }
-
-      const readyToInitializeStub = sinon.stub(lifecycleManager, 'readyToInitialize').returns(true)
-      const toLaunchpadStub = sinon.stub(ctx.emitter, 'toLaunchpad')
-      const initialConfigStub = sinon.stub(lifecycleManager, 'initializeConfig').resolves()
-      const setAndLoadCurrentTestingTypeStub = sinon.stub(lifecycleManager, 'setAndLoadCurrentTestingType')
-
-      await lifecycleManager.refreshLifecycleAsync()
-
-      expect(readyToInitializeStub).to.have.been.calledWith('root')
-      expect(lifecycleManager._configManager.resetLoadingState).to.have.been.called
-      expect(toLaunchpadStub).to.have.been.called
-      expect(initialConfigStub).to.have.been.called
-      expect(setAndLoadCurrentTestingTypeStub).to.have.been.calledWith(null)
-    })
-
-    it('does nothing if not ready to initialize', async () => {
-      lifecycleManager._projectRoot = 'root'
-      lifecycleManager._configManager = {
-        resetLoadingState: sinon.stub(),
-        loadTestingType: sinon.stub(),
-        destroy: sinon.stub(),
-      }
-
-      const readyToInitializeStub = sinon.stub(lifecycleManager, 'readyToInitialize').returns(false)
-      const toLaunchpadStub = sinon.stub(ctx.emitter, 'toLaunchpad')
-      const initialConfigStub = sinon.stub(lifecycleManager, 'initializeConfig').resolves()
-      const isTestingTypeConfiguredStub = sinon.stub(lifecycleManager, 'isTestingTypeConfigured').returns(true)
-      const setAndLoadCurrentTestingTypeStub = sinon.stub(lifecycleManager, 'setAndLoadCurrentTestingType')
-
-      await lifecycleManager.refreshLifecycleAsync()
-
-      expect(readyToInitializeStub).to.have.been.calledWith('root')
-      expect(lifecycleManager._configManager.resetLoadingState).not.to.have.been.called
-      expect(toLaunchpadStub).not.to.have.been.called
-      expect(initialConfigStub).not.to.have.been.called
-      expect(isTestingTypeConfiguredStub).not.to.have.been.called
-      expect(setAndLoadCurrentTestingTypeStub).not.to.have.been.called
     })
   })
 })

@@ -55,7 +55,7 @@ function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
-    const oldConfigStats = await ctx.migration.legacyConfigFileExists()
+    const oldConfigStats = ctx.migration.legacyConfigFileExists()
 
     expect(oldConfigStats).to.be.false
 

@@ -135,8 +135,8 @@ export const mutation = mutationType({
 
     t.field('completeSetup', {
       type: 'Query',
-      resolve: (_, args, ctx) => {
-        ctx.actions.wizard.completeSetup()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.wizard.completeSetup()
 
         return {}
       },
@@ -155,7 +155,7 @@ export const mutation = mutationType({
 
     t.field('clearCurrentTestingType', {
       type: 'Query',
-      resolve: async (_, args, ctx) => {
+      resolve: (_, args, ctx) => {
         ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}

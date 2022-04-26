@@ -18,6 +18,7 @@ import _ from 'lodash'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
+import path from 'path'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -69,14 +70,20 @@ export class MigrationDataSource {
     return 'cypress.json'
   }
 
-  async legacyConfigFileExists (): Promise<boolean> {
-    const legacyConfigFileExists = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
+  legacyConfigFileExists (): boolean {
+    // If we aren't in a current project we definitely don't have a legacy config file
+    if (!this.ctx.currentProject) {
+      return false
+    }
+
+    const configFilePath = path.isAbsolute(this.legacyConfigFile) ? this.legacyConfigFile : path.join(this.ctx.currentProject, this.legacyConfigFile)
+    const legacyConfigFileExists = this.ctx.fs.existsSync(configFilePath)
 
     return Boolean(legacyConfigFileExists)
   }
 
-  async needsCypressJsonMigration (): Promise<boolean> {
-    const legacyConfigFileExists = await this.legacyConfigFileExists()
+  needsCypressJsonMigration (): boolean {
+    const legacyConfigFileExists = this.legacyConfigFileExists()
 
     return this.ctx.lifecycleManager.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExists)
   }

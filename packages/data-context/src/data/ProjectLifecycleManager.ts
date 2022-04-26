@@ -252,7 +252,7 @@ export class ProjectLifecycleManager {
    *  2. The last browser selected in `open` mode (by name and channel) for this project.
    *  3. The first browser found.
    */
-  private async setInitialActiveBrowser () {
+  async setInitialActiveBrowser () {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
@@ -540,7 +540,7 @@ export class ProjectLifecycleManager {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
-      hasLegacyCypressJson: fs.existsSync(this._pathToFile(this.ctx.migration.legacyConfigFile)),
+      hasLegacyCypressJson: this.ctx.migration.legacyConfigFileExists(),
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 

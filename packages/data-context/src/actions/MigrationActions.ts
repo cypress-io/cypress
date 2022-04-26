@@ -134,7 +134,7 @@ export class MigrationActions {
 
     await this.initializeFlags()
 
-    const legacyConfigFileExist = await this.ctx.migration.legacyConfigFileExists()
+    const legacyConfigFileExist = this.ctx.migration.legacyConfigFileExists()
     const filteredSteps = await getStepsForMigration(this.ctx.currentProject, legacyConfigForMigration, Boolean(legacyConfigFileExist))
 
     this.ctx.update((coreData) => {
