@@ -1,9 +1,15 @@
-const SessionsManager = require('@packages/driver/src/cy/commands/sessions/manager').default
+const SessionsManager = require('../../../../src/cy/commands/sessions/manager').default
+const $Cypress = require('../../../../src/cypress').default
 
 describe('src/cy/commands/sessions/manager.ts', () => {
+  let CypressInstance
+  let baseUrl
+
+  beforeEach(function () {
   // @ts-ignore
-  const CypressInstance = Cypress.$Cypress.create({})
-  const baseUrl = Cypress.config('baseUrl')
+    CypressInstance = new $Cypress()
+    baseUrl = Cypress.config('baseUrl')
+  })
 
   it('creates SessionsManager instance', () => {
     const sessions = new SessionsManager(CypressInstance, () => {})
