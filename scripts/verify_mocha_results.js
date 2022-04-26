@@ -30,16 +30,18 @@ const total = { tests: 0, failures: 0, skipped: 0 }
 
 console.log(`Looking for reports in ${REPORTS_PATH}`)
 
-// some env is ok to print out. this is based off of what Circle also doesn't mask in stdout:
+// some env is ok in reports. this is based off of what Circle doesn't mask in stdout:
 // https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
-function isWhitelistedEnv(value) {
-  return ['true', 'false', 'TRUE', 'FALSE'].includes(value) || value.length < 4
+function isWhitelistedEnv (key, value) {
+  return ['true', 'false', 'TRUE', 'FALSE'].includes(value)
+    || ['nodejs_version', 'CF_DOMAIN'].includes(key)
+    || value.length < 4
 }
 
-async function checkReportFile(filename, circleEnv) {
+async function checkReportFile (filename, circleEnv) {
   console.log(`Checking that ${filename} contains a valid report...`)
 
-  let xml, result
+  let xml; let result
 
   try {
     xml = await fse.readFile(path.join(REPORTS_PATH, filename))
@@ -54,6 +56,7 @@ async function checkReportFile(filename, circleEnv) {
   }
 
   const { name, time, tests, failures, skipped } = result
+
   console.log(`Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tFailing: ${failures}\tSkipped: ${skipped}\tTotal time: ${time}`)
 
   la(tests > 0, 'Expected the total number of tests to be >0, but it was', tests, 'instead.')
@@ -63,7 +66,8 @@ async function checkReportFile(filename, circleEnv) {
     const value = circleEnv[key]
 
     if (!isWhitelistedEnv(key, value) && xml.includes(value)) {
-      throw new Error(`Report contained the value of ${key}, which is a CI environment variable. This means that a failing test is printing environment variables. Test reports will not be persisted for this job.`)
+      await fse.rm(REPORTS_PATH, { recursive: true, force: true })
+      throw new Error(`Report contained the value of ${key}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
     }
   }
 
@@ -72,7 +76,7 @@ async function checkReportFile(filename, circleEnv) {
   total.skipped += skipped
 }
 
-async function checkReportFiles(filenames) {
+async function checkReportFiles (filenames) {
   let circleEnv
 
   try {
@@ -80,6 +84,7 @@ async function checkReportFiles(filenames) {
   } catch (err) {
     // set SKIP_CIRCLE_ENV to bypass, for local development
     if (!process.env.SKIP_CIRCLE_ENV) throw err
+
     circleEnv = {}
   }
 
@@ -105,7 +110,7 @@ async function checkReportFiles(filenames) {
       la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
     }
 
-    await checkReportFiles(files)
+    await checkReportFiles(filenames)
   } catch (err) {
     throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
   }
