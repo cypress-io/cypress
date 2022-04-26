@@ -176,12 +176,11 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
       )
     }
 
-    return formatConfig(
-      `const { defineConfig } = require('cypress')
+    return formatConfig(dedent`
+      const { defineConfig } = require('cypress')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
-      options.projectRoot,
-    )
+    options.projectRoot)
   }
 
   if (options.hasTypescript) {
