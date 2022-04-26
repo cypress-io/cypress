@@ -217,7 +217,7 @@ commands:
             - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
       - run:
           name: Send root honeycomb event for this CI build
-          command: cd system-tests/scripts && node ./send-root-honecomb-event.js
+          command: cd system-tests/scripts && node ./send-root-honeycomb-event.js
       - run:
           name: Bail if specific cache exists
           command: |
