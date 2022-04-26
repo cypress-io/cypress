@@ -124,7 +124,6 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "execa": "4.0.0",
     "filesize": "4.1.2",
-    "find-package-json": "1.2.0",
     "fs-extra": "9.1.0",
     "gift": "0.10.2",
     "glob": "7.1.6",
