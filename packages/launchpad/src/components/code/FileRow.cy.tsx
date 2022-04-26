@@ -21,7 +21,7 @@ const messages = defaultMessages.setupPage.configFile
 const changesRequiredDescription = messages.changesRequiredDescription.replace('{0}', '')
 
 describe('FileRow', () => {
-  it('renders each status', () => {
+  it('renders each status, the expected files, and expected styles', () => {
     cy.mount(() => (
       <div class="w-full p-5">
         <FileRow
