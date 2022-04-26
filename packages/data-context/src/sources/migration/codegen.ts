@@ -461,6 +461,61 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
+function formatWithBundledBabel (config: string) {
+  const ast = parse(config)
+
+  let { code } = generate(ast, {}, config)
+  // By default babel generates imports like this:
+  // const {
+  //   defineConfig
+  // } = require('cypress');
+  // So we replace them with a one-liner, since we know this will never
+  // be more than one import.
+  //
+  // Babel also adds empty lines, for example:
+  //
+  // export default defineConfig({
+  //   component: {
+  //   },
+  //               <===== empty line
+  //   e2e: {
+  //
+  //   }
+  // })
+  // Which we don't want, so we change those to single carriage returns.
+  const replacers = [
+    {
+      from: dedent`
+      const {
+        defineConfig
+      } = require('cypress');`,
+      to: dedent`
+      const { defineConfig } = require('cypress');`,
+    },
+    {
+
+      from: dedent`
+      import {
+        defineConfig
+      } from 'cypress';`,
+      to: dedent`
+      import { defineConfig } from 'cypress';`,
+    },
+    {
+      from: `,\n\n`,
+      to: `,\n`,
+    },
+  ]
+
+  for (const rep of replacers) {
+    if (code.includes(rep.from)) {
+      code = code.replaceAll(rep.from, rep.to)
+    }
+  }
+
+  return code
+}
+
 export function formatConfig (config: string, projectRoot: string): string {
   try {
     const prettierPath = require.resolve('prettier', { paths: [projectRoot] })
@@ -476,41 +531,8 @@ export function formatConfig (config: string, projectRoot: string): string {
     // If they do not have prettier
     // We do a basic format using babel, which we
     // bundle as part of the binary.
-    const ast = parse(config)
-
-    const { code } = generate(ast, {}, config)
-    // By default babel generates imports like this:
-    // const {
-    //   defineConfig
-    // } = require('cypress');
-    // So we replace them with a one-liner, since we know this will never
-    // be more than one import.
-    const replacers = [
-      {
-        from: dedent`
-        const {
-          defineConfig
-        } = require('cypress');`,
-        to: dedent`
-        const { defineConfig } = require('cypress');`,
-      },
-      {
-
-        from: dedent`
-        import {
-          defineConfig
-        } from 'cypress';`,
-        to: dedent`
-        import { defineConfig } from 'cypress';`,
-      },
-    ]
-
-    for (const rep of replacers) {
-      if (code.includes(rep.from)) {
-        return code.replace(rep.from, rep.to)
-      }
-    }
-
-    return code
+    // We don't ship a fully fledged formatter like
+    // prettier, since it's massively bloats the bundle.
+    return formatWithBundledBabel(config)
   }
 }
