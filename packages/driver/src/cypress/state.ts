@@ -29,6 +29,8 @@ export interface StateFunc {
   (k: 'current', v?: $Command): $Command
   (k: 'canceld', v?: boolean): boolean
   (k: 'error', v?: Error): Error
+  (k: 'assertUsed', v?: boolean): boolean
+  (k: 'currentAssertionUserInvocationStack', v?: any): any
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>
