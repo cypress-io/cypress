@@ -242,7 +242,7 @@ export class ProjectLifecycleManager {
 
         this._pendingInitialize?.resolve(finalConfig)
       },
-      refreshLifecycle: async () => await this.refreshLifecycle(),
+      refreshLifecycle: async () => this.refreshLifecycle(),
     })
   }
 
