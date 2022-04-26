@@ -60,6 +60,11 @@ const setRequest = (state, xhr, alias) => {
   return state('requests', requests)
 }
 
+export interface XHRResponse {
+  xhr: any
+  alias: any
+}
+
 const setResponse = (state, xhr) => {
   const obj = _.find(state('requests'), { xhr })
 

@@ -2,6 +2,7 @@
 import _ from 'lodash'
 
 import $errUtils from '../cypress/error_utils'
+import type { StateFunc } from '../cypress/state'
 
 const validAliasApiRe = /^(\d+|all)$/
 
@@ -26,7 +27,7 @@ const xhrNotWaitedOnByIndex = (state, alias, index, prop) => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (state) => ({
+export const create = (state: StateFunc) => ({
   getIndexedXhrByAlias (alias, index) {
     let prop
     let str

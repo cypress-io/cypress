@@ -3,6 +3,7 @@
 
 import type { RouteMap } from '../cy/net-stubbing/types'
 import type { $Command } from './command'
+import type { XHRResponse } from '../cy/commands/xhr'
 
 export interface StateFunc {
   (): Record<string, any>
@@ -31,6 +32,7 @@ export interface StateFunc {
   (k: 'error', v?: Error): Error
   (k: 'assertUsed', v?: boolean): boolean
   (k: 'currentAssertionUserInvocationStack', v?: any): any
+  (k: 'responses', v?: XHRResponse[]): XHRResponse[]
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>
