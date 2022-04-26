@@ -2,6 +2,7 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
+import prettier from 'prettier'
 import type { TestingType } from '@packages/types'
 import { formatMigrationFile } from './format'
 import { substitute } from './autoRename'
@@ -173,7 +174,6 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
         `import { defineConfig } from 'cypress'
   
         export default defineConfig({${globalString}${e2eString}${componentString}})`,
-        options.projectRoot,
       )
     }
 
@@ -181,15 +181,14 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
       `const { defineConfig } = require('cypress')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
-      options.projectRoot,
     )
   }
 
   if (options.hasTypescript) {
-    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`, options.projectRoot)
+    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 
-  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`, options.projectRoot)
+  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`)
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>) {
@@ -434,7 +433,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
 }
 
 export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? Boolean(cfg.projectId) ? '**/*.{js,ts,tsx,jsx}' : '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
@@ -454,11 +453,8 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
-export function formatConfig (config: string, projectRoot: string): string {
+export function formatConfig (config: string): string {
   try {
-    const prettierPath = require.resolve('prettier', { paths: [projectRoot] })
-    const prettier = require(prettierPath)
-
     return prettier.format(config, {
       semi: false,
       singleQuote: true,
