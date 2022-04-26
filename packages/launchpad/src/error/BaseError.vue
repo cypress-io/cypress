@@ -13,6 +13,23 @@
           {{ baseError.title }}
         </slot>
       </h1>
+
+      <div
+        v-if="props.retry"
+        class="w-full gap-16px inline-flex"
+      >
+        <Button
+          size="lg"
+          variant="primary"
+          data-testid="error-retry-button"
+          :prefix-icon="RestartIcon"
+          prefix-icon-class="icon-dark-white"
+          @click="retry"
+        >
+          {{ t('launchpadErrors.generic.retryButton') }}
+        </Button>
+      </div>
+
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
 
       <slot name="message">
@@ -76,19 +93,7 @@
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
 
       <slot name="stack" />
-    </div>
-    <div class="w-full gap-16px inline-flex">
-      <Button
-        v-if="props.retry"
-        size="lg"
-        variant="primary"
-        data-testid="error-retry-button"
-        :prefix-icon="RestartIcon"
-        prefix-icon-class="icon-dark-white"
-        @click="retry"
-      >
-        {{ t('launchpadErrors.generic.retryButton') }}
-      </Button>
+      <!-- rachel todo: add margin below stack -->
     </div>
   </div>
 </template>
