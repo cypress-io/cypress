@@ -230,7 +230,6 @@ export class ProjectLifecycleManager {
         }
 
         if (this._currentTestingType === 'component') {
-          this.ctx._apis.projectApi.getDevServer().close()
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
           if (!devServerOptions?.port) {
@@ -307,6 +306,12 @@ export class ProjectLifecycleManager {
     await this.initializeConfig()
 
     if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+      if (this._currentTestingType === 'component') {
+        // Since we refresh the dev-server on config changes, we need to close it and clean up it's listeners
+        // before we can start a new one. This needs to happen before we have registered the events of the child process
+        this.ctx._apis.projectApi.getDevServer().close()
+      }
+
       this._configManager.loadTestingType()
     } else {
       this.setAndLoadCurrentTestingType(null)
