@@ -73,7 +73,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * a re-query of data on the frontend
    */
   toApp () {
-    this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refresh')
+    this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refetch')
   }
 
   /**
@@ -81,7 +81,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * typically used to trigger a re-query of data on the frontend
    */
   toLaunchpad () {
-    this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refresh')
+    this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refetch')
   }
 
   /**
@@ -91,7 +91,7 @@ export class DataEmitterActions extends DataEmitterEvents {
   notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
     const server = target === 'app' ? this.ctx.coreData.servers.appSocketNamespace : this.ctx.coreData.servers.gqlSocketServer
 
-    server?.emit('graphql-refresh', {
+    server?.emit('graphql-refetch', {
       field,
       operation,
       variables,

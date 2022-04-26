@@ -78,9 +78,13 @@ describe('App: Settings', () => {
       })
     })
 
-    it('shows the recordKey when coming from a run', { retries: 0 }, () => {
+    it('shows deferred remote cloud data after navigating from a run', { retries: 0 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        // Simulate a timeout so we don't resolve immediately, previously visiting the test runner
+        // and then leaving would cause this to fail, because it removed the event listeners
+        // for graphql-refetch. By namespacing the socket layer, we avoid the events of the
+        // runner from impacting the cloud behavior
+        await new Promise((resolve) => setTimeout(resolve, 500))
 
         return obj.result
       })
@@ -89,9 +93,14 @@ describe('App: Settings', () => {
       cy.loginUser()
       cy.visitApp()
       cy.get('.spec-list-container').scrollTo('bottom')
+      // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
+      // Wait for the test to pass, so the test is completed
+      cy.get('.passed > .num').should('contain', 1)
       cy.get(`[href='#/settings']`).click()
       cy.contains('Dashboard Settings').click()
+      // Assert the data is not there before it arrives
+      cy.contains('Record Key').should('not.exist')
       cy.contains('Record Key')
     })
   })
