@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
-const { promises } = require('fs')
-
-const fs = promises
+const fs = require('fs').promises
 
 async function loadInternalTaskData () {
   const filename = process.env.CIRCLE_INTERNAL_CONFIG
@@ -47,6 +45,7 @@ async function readCircleEnv () {
 
 module.exports = {
   readCircleEnv,
+  _checkCanaries: checkCanaries,
 }
 
 if (require.main === module) {

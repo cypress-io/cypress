@@ -8,7 +8,7 @@
 // usage: yarn verify:mocha:results <N>
 
 const Bluebird = require('bluebird')
-const fse = Bluebird.promisifyAll(require('fs-extra'))
+const fs = require('fs').promises
 const la = require('lazy-ass')
 const path = require('path')
 const { readCircleEnv } = require('./circle-env')
@@ -44,7 +44,7 @@ async function checkReportFile (filename, circleEnv) {
   let xml; let result
 
   try {
-    xml = await fse.readFile(path.join(REPORTS_PATH, filename))
+    xml = await fs.readFile(path.join(REPORTS_PATH, filename))
   } catch (err) {
     throw new Error(`Unable to read the report in ${filename}: ${err.message}`)
   }
@@ -66,7 +66,7 @@ async function checkReportFile (filename, circleEnv) {
     const value = circleEnv[key]
 
     if (!isWhitelistedEnv(key, value) && xml.includes(value)) {
-      await fse.rm(REPORTS_PATH, { recursive: true, force: true })
+      await fs.rm(REPORTS_PATH, { recursive: true, force: true })
       throw new Error(`Report contained the value of ${key}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
     }
   }
@@ -94,9 +94,9 @@ async function checkReportFiles (filenames) {
   console.log(`Total tests ran: ${total.tests}\tTotal failing: ${total.failures}\tTotal skipped: ${total.skipped}`)
 }
 
-(async () => {
+async function verifyMochaResults () {
   try {
-    const filenames = await fse.readdir(REPORTS_PATH)
+    const filenames = await fs.readdir(REPORTS_PATH)
 
     const resultCount = filenames.length
 
@@ -114,4 +114,8 @@ async function checkReportFiles (filenames) {
   } catch (err) {
     throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
   }
-})()
+}
+
+if (require.main === module) verifyMochaResults()
+
+module.exports = { verifyMochaResults }
