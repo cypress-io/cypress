@@ -27,6 +27,7 @@ import {
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
+import type { StateFunc } from '../../cypress/state'
 import isValidDomain from 'is-valid-domain'
 import isValidHostname from 'is-valid-hostname'
 
@@ -170,7 +171,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
   return { isValid: true }
 }
 
-export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
+export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc) {
   const { emitNetEvent } = registerEvents(Cypress, cy)
 
   function addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
@@ -227,7 +228,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     state('routes')[routeId] = {
       log: Cypress.log(getRouteMatcherLogConfig(matcher, !!handler, alias, staticResponse)),
       options: matcher,
-      handler,
+      handler: handler!,
       hitCount: 0,
       requests: {},
       command: state('current'),

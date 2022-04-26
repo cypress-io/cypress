@@ -8,6 +8,7 @@ import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCu
 import { $Location } from '../../cypress/location'
 import { LogUtils } from '../../cypress/log'
 import logGroup from '../logGroup'
+import type { StateFunc } from '../../cypress/state'
 
 const reHttp = /^https?:\/\//
 
@@ -22,7 +23,7 @@ const normalizeOrigin = (urlOrDomain) => {
   return $Location.normalize(origin)
 }
 
-export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
+export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) {
   let timeoutId
 
   const communicator = Cypress.primaryOriginCommunicator

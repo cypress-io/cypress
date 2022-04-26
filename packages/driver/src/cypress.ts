@@ -33,6 +33,7 @@ import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
 import { $Location } from './cypress/location'
 import ProxyLogging from './cypress/proxy-logging'
+import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
@@ -90,7 +91,7 @@ class $Cypress {
   browser: any
   platform: any
   testingType: any
-  state!: Cypress.State
+  state!: StateFunc
   originalConfig: any
   config: any
   env: any
@@ -210,7 +211,7 @@ class $Cypress {
 
     _.extend(this, browserInfo(config))
 
-    this.state = $SetterGetter.create({}) as unknown as Cypress.State
+    this.state = $SetterGetter.create({}) as unknown as StateFunc
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {

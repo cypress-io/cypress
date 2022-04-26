@@ -1,8 +1,9 @@
 import Promise from 'bluebird'
 import type { ICypress } from '../cypress'
+import type { StateFunc } from '../cypress/state'
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (Cypress: ICypress, state: Cypress.State) => ({
+export const create = (Cypress: ICypress, state: StateFunc) => ({
   isStable: (stable: boolean = true, event: string) => {
     if (state('isStable') === stable) {
       return
