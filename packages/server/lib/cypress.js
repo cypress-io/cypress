@@ -1,5 +1,14 @@
 require('./environment')
 
+// We require project-base here, as waiting to require it in
+// the Electron process for the first time can cause the process
+// to hang during smoke test execution. This occurs with Electron
+// version v15.4.0 and after.
+//
+// TODO: Investigate need/removal of this with future major versions
+// of Electron when upgraded: https://github.com/cypress-io/cypress/pull/19090
+require('@packages/server/lib/project-base')
+
 // we are not requiring everything up front
 // to optimize how quickly electron boots while
 // in dev or linux production. the reasoning is
@@ -112,12 +121,6 @@ module.exports = {
         return cypressElectron.open(serverMain, args, fn)
       })
     })
-  },
-
-  openProject (options) {
-    // this code actually starts a project
-    // and is spawned from nodemon
-    require('../lib/open_project').open(options.project, options)
   },
 
   start (argv = []) {
