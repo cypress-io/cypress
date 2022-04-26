@@ -61,6 +61,26 @@ export class MigrationDataSource {
     return this.ctx.coreData.migration.legacyConfigForMigration
   }
 
+  get legacyConfigFile () {
+    if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
+      return this.ctx.modeOptions.configFile
+    }
+
+    return 'cypress.json'
+  }
+
+  async legacyConfigFileExists (): Promise<boolean> {
+    const legacyConfigFileExists = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
+
+    return Boolean(legacyConfigFileExists)
+  }
+
+  async needsCypressJsonMigration (): Promise<boolean> {
+    const legacyConfigFileExists = await this.legacyConfigFileExists()
+
+    return this.ctx.lifecycleManager.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExists)
+  }
+
   async getComponentTestingMigrationStatus () {
     debug('getComponentTestingMigrationStatus: start')
     if (!this.legacyConfig || !this.ctx.currentProject) {
@@ -190,7 +210,7 @@ export class MigrationDataSource {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
+    return this.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
   }
 
   private checkAndUpdateDuplicatedSpecs (specs: MigrationFile[]) {

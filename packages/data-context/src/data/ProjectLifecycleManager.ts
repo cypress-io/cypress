@@ -115,18 +115,6 @@ export class ProjectLifecycleManager {
     return Object.freeze(this._projectMetaState)
   }
 
-  get legacyJsonPath () {
-    return path.join(this.configFilePath, this.legacyConfigFile)
-  }
-
-  get legacyConfigFile () {
-    if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
-      return this.ctx.modeOptions.configFile
-    }
-
-    return 'cypress.json'
-  }
-
   get configFile () {
     return this.ctx.modeOptions.configFile ?? (this._configManager?.configFilePath && path.basename(this._configManager.configFilePath)) ?? 'cypress.config.js'
   }
@@ -186,12 +174,6 @@ export class ProjectLifecycleManager {
 
   get fileExtensionToUse () {
     return this.metaState.hasTypescript ? 'ts' : 'js'
-  }
-
-  async checkIfLegacyConfigFileExist () {
-    const legacyConfigFileExist = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
-
-    return Boolean(legacyConfigFileExist)
   }
 
   clearCurrentProject () {
@@ -301,24 +283,28 @@ export class ProjectLifecycleManager {
     }
   }
 
-  refreshLifecycle () {
+  /**
+   * Kicks off the refresh of the configuration lifecycle and returns immediately. Internally, it handles all errors on behalf of the callers.
+   * These errors will be emitted to the client
+   */
+  refreshLifecycle (): void {
+    this.refreshLifeCycleAsync().catch(this.onLoadError)
+  }
+
+  private async refreshLifeCycleAsync (): Promise<void> {
     if (this._projectRoot && this._configManager && this.readyToInitialize(this._projectRoot)) {
       this._configManager.resetLoadingState()
 
       // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
       this.ctx.emitter.toLaunchpad()
 
-      this.initializeConfig()
-      .then(() => {
-        if (this._configManager) {
-          if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-            this._configManager.loadTestingType()
-          } else {
-            this.setAndLoadCurrentTestingType(null)
-          }
-        }
-      })
-      .catch(this.onLoadError)
+      await this.initializeConfig()
+
+      if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+        this._configManager.loadTestingType()
+      } else {
+        this.setAndLoadCurrentTestingType(null)
+      }
     }
   }
 
@@ -405,7 +391,7 @@ export class ProjectLifecycleManager {
   private readyToInitialize (projectRoot: string): boolean {
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
-    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
+    const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
       this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
@@ -560,7 +546,7 @@ export class ProjectLifecycleManager {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
-      hasLegacyCypressJson: fs.existsSync(this._pathToFile(this.legacyConfigFile)),
+      hasLegacyCypressJson: fs.existsSync(this._pathToFile(this.ctx.migration.legacyConfigFile)),
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 
@@ -676,12 +662,6 @@ export class ProjectLifecycleManager {
     }
 
     return true
-  }
-
-  async needsCypressJsonMigration () {
-    const legacyConfigFileExist = await this.checkIfLegacyConfigFileExist()
-
-    return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
   async initializeOpenMode (testingType: TestingType | null) {
