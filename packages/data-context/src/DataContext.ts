@@ -238,7 +238,9 @@ export class DataContext {
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
       d.servers.appSocketServer?.disconnectSockets(true)
-      d.servers.appSocketServer = socketServer?.of('/data-context')
+      d.servers.appSocketNamespace?.disconnectSockets(true)
+      d.servers.appSocketServer = socketServer
+      d.servers.appSocketNamespace = socketServer?.of('/data-context')
     })
   }
 

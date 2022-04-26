@@ -3,7 +3,7 @@ import type { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-conf
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
-import type { SocketIONamespace } from '@packages/socket'
+import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
@@ -114,7 +114,8 @@ export interface CoreDataShape {
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
-    appSocketServer?: Maybe<SocketIONamespace>
+    appSocketServer?: Maybe<SocketIOServer>
+    appSocketNamespace?: Maybe<SocketIONamespace>
     gqlServer?: Maybe<Server>
     gqlServerPort?: Maybe<number>
     gqlSocketServer?: Maybe<SocketIONamespace>

@@ -72,15 +72,15 @@ export class DataEmitterActions extends DataEmitterEvents {
    * Broadcasts a signal to the "app" via Socket.io, typically used to trigger
    * a re-query of data on the frontend
    */
-  toApp (...args: any[]) {
-    this.ctx.coreData.servers.appSocketServer?.emit('graphql-refresh')
+  toApp () {
+    this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refresh')
   }
 
   /**
    * Broadcasts a signal to the "launchpad" (Electron GUI) via Socket.io,
    * typically used to trigger a re-query of data on the frontend
    */
-  toLaunchpad (...args: any[]) {
+  toLaunchpad () {
     this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refresh')
   }
 
@@ -89,7 +89,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * source, and respond with the data before the initial hit was able to resolve
    */
   notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
-    const server = target === 'app' ? this.ctx.coreData.servers.appSocketServer : this.ctx.coreData.servers.gqlSocketServer
+    const server = target === 'app' ? this.ctx.coreData.servers.appSocketNamespace : this.ctx.coreData.servers.gqlSocketServer
 
     server?.emit('graphql-refresh', {
       field,
