@@ -1002,6 +1002,9 @@ jobs:
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
+      - run:
+          name: Check env canaries
+          command: node ./scripts/circle-env.js --check-canaries
       - build-and-persist
       - store-npm-logs
 
@@ -2053,6 +2056,7 @@ linux-workflow: &linux-workflow
   jobs:
     - node_modules_install
     - build:
+        context: test-runner:env-canary
         requires:
           - node_modules_install
     - lint:
@@ -2356,6 +2360,7 @@ mac-workflow: &mac-workflow
 
     - build:
         name: darwin-build
+        context: test-runner:env-canary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
@@ -2396,6 +2401,7 @@ windows-workflow: &windows-workflow
 
     - build:
         name: windows-build
+        context: test-runner:env-canary
         executor: windows
         resource_class: windows.medium
         requires:
