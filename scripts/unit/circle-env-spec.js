@@ -6,7 +6,10 @@ const { _checkCanaries } = require('../circle-env')
 describe('circle-env', () => {
   let cachedEnv = { ...process.env }
 
-  afterEach(() => Object.assign(process.env, cachedEnv))
+  afterEach(() => {
+    sinon.restore()
+    Object.assign(process.env, cachedEnv)
+  })
 
   beforeEach(() => {
     process.env.CI = 'true'

@@ -6,7 +6,10 @@ const { verifyMochaResults } = require('../verify-mocha-results')
 describe('verify-mocha-results', () => {
   let cachedEnv = { ...process.env }
 
-  afterEach(() => Object.assign(process.env, cachedEnv))
+  afterEach(() => {
+    sinon.restore()
+    Object.assign(process.env, cachedEnv)
+  })
 
   beforeEach(() => {
     process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
