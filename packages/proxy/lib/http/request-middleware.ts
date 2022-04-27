@@ -18,6 +18,16 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
+const ExtractIsAUTFrameHeader: RequestMiddleware = async function () {
+  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+
+  if (this.req.headers['x-cypress-is-aut-frame']) {
+    delete this.req.headers['x-cypress-is-aut-frame']
+  }
+
+  this.next()
+}
+
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   if (!this.shouldCorrelatePreRequests()) {
     return this.next()
@@ -71,7 +81,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = 'full'
+    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }
@@ -131,9 +141,10 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
 }
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
-  const remoteState = this.getRemoteState()
+  // get the remote state for the proxied url
+  const remoteState = this.remoteStates.get(this.req.proxiedUrl)
 
-  if (remoteState.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
+  if (remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
     const { auth } = remoteState
     const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 
@@ -154,12 +165,12 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   const requestBodyBuffered = !!this.req.body
 
-  const { strategy, origin, fileServer } = this.getRemoteState()
+  const { strategy, origin, fileServer } = this.remoteStates.current()
 
   if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
     this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
 
-    requestOptions.url = requestOptions.url.replace(origin, fileServer)
+    requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
   }
 
   if (requestBodyBuffered) {
@@ -193,6 +204,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
+  ExtractIsAUTFrameHeader,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,

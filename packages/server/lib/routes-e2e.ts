@@ -7,6 +7,7 @@ import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
 import reporter from './controllers/reporter'
 import client from './controllers/client'
+import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes-e2e')
@@ -121,6 +122,12 @@ export const createRoutesE2E = ({
     debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
 
     res.sendFile(file, { etag: false })
+  })
+
+  routesE2E.get('/__cypress/multi-domain-iframes', (req, res) => {
+    debug('handling cross-origin iframe for domain: %s', req.hostname)
+
+    files.handleCrossOriginIframe(req, res)
   })
 
   return routesE2E

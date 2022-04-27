@@ -2,17 +2,12 @@ import _ from 'lodash'
 import * as uri from './uri'
 import debugModule from 'debug'
 import _parseDomain, { ParsedDomain } from '@cypress/parse-domain'
+import type { ParsedHost } from './types'
 
 const debug = debugModule('cypress:network:cors')
 
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
-
-type ParsedHost = {
-  port?: string
-  tld?: string
-  domain?: string
-}
 
 export function getSuperDomain (url) {
   const parsed = parseUrlIntoDomainTldPort(url)
@@ -66,6 +61,16 @@ export function parseUrlIntoDomainTldPort (str) {
   return obj
 }
 
+export function getDomainNameFromUrl (url: string) {
+  const parsedHost = parseUrlIntoDomainTldPort(url)
+
+  return getDomainNameFromParsedHost(parsedHost)
+}
+
+export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
+  return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
+}
+
 export function urlMatchesOriginPolicyProps (urlStr, props) {
   // take a shortcut here in the case
   // where remoteHostAndPort is null
@@ -79,9 +84,26 @@ export function urlMatchesOriginPolicyProps (urlStr, props) {
   return _.isEqual(parsedUrl, props)
 }
 
+export function urlOriginsMatch (url1, url2) {
+  if (!url1 || !url2) return false
+
+  const parsedUrl1 = parseUrlIntoDomainTldPort(url1)
+  const parsedUrl2 = parseUrlIntoDomainTldPort(url2)
+
+  return _.isEqual(parsedUrl1, parsedUrl2)
+}
+
 export function urlMatchesOriginProtectionSpace (urlStr, origin) {
   const normalizedUrl = uri.addDefaultPort(urlStr).format()
   const normalizedOrigin = uri.addDefaultPort(origin).format()
 
   return _.startsWith(normalizedUrl, normalizedOrigin)
+}
+
+export function getOriginPolicy (url: string) {
+  const { port, protocol } = new URL(url)
+
+  // origin policy is comprised of:
+  // protocol + superdomain + port (subdomain is not factored in)
+  return _.compact([`${protocol}//${getSuperDomain(url)}`, port]).join(':')
 }

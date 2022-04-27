@@ -3,24 +3,14 @@ const { assertLogLength } = require('../../support/utils')
 const { _, $, Promise } = Cypress
 
 describe('src/cy/commands/xhr', () => {
-  before(() => {
+  beforeEach(function () {
     cy
     .visit('/fixtures/jquery.html')
     .then(function (win) {
       const h = $(win.document.head)
 
       h.find('script').remove()
-
-      this.head = h.prop('outerHTML')
-      this.body = win.document.body.outerHTML
     })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.head).empty().html(this.head)
-    $(doc.body).empty().html(this.body)
   })
 
   context('#startXhrServer', () => {

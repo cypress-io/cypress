@@ -69,11 +69,11 @@ mainConfig.resolve = {
 }
 
 // @ts-ignore
-const injectionConfig: webpack.Configuration = {
-  ...getSimpleConfig(),
+const crossOriginConfig: webpack.Configuration = {
   mode: 'production',
+  ...getSimpleConfig(),
   entry: {
-    injection: [path.resolve(__dirname, 'injection/index.js')],
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/multi-domain.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -81,4 +81,35 @@ const injectionConfig: webpack.Configuration = {
   },
 }
 
-export default [mainConfig, injectionConfig]
+// @ts-ignore
+const mainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection: [path.resolve(__dirname, 'injection/main.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
+const crossOriginInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection_cross_origin: [path.resolve(__dirname, 'injection/multi-domain.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [
+  mainConfig,
+  mainInjectionConfig,
+  crossOriginConfig,
+  crossOriginInjectionConfig,
+]

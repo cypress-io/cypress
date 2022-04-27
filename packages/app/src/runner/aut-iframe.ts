@@ -82,6 +82,40 @@ export class AutIframe {
     return Cypress.cy.detachDom(this._contents())
   }
 
+  /**
+   * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
+   * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
+   * Otherwise, if top and the AUT match origins, the method returns true.
+   * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
+   */
+  doesAUTMatchTopOriginPolicy = () => {
+    const Cypress = this.eventManager.getCypress()
+
+    if (!Cypress) return true
+
+    try {
+      const { href: currentHref } = (this.$iframe as any)[0].contentWindow.document.location
+      const locationTop = Cypress.Location.create(window.location.href)
+      const locationAUT = Cypress.Location.create(currentHref)
+
+      return locationTop.originPolicy === locationAUT.originPolicy || locationAUT.originPolicy === 'about://blank'
+    } catch (err) {
+      if (err.name === 'SecurityError') {
+        return false
+      }
+
+      throw err
+    }
+  }
+
+  /**
+   * Removes the src attribute from the AUT iframe, resulting in 'about:blank' being loaded into the iframe
+   * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src for more details
+   */
+  removeSrcAttribute = () => {
+    this.$iframe?.removeAttr('src')
+  }
+
   visitBlank = ({ type }: { type?: 'session' | 'session-lifecycle' }) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
@@ -108,6 +142,23 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
+    if (!this.doesAUTMatchTopOriginPolicy()) {
+      /**
+       * A load event fires here when the src is removed (as does an unload event).
+       * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).
+       * This doesn't resort in a log message being generated for a new page.
+       * In the event-manager code, we stop adding logs from other domains once the spec is finished.
+       */
+      this.$iframe?.one('load', () => {
+        this.restoreDom(snapshot)
+      })
+
+      // The iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. NOTE: This should only be done ONCE.
+      this.removeSrcAttribute()
+
+      return
+    }
+
     const Cypress = this.eventManager.getCypress()
     const { headStyles = undefined, bodyStyles = undefined } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
@@ -423,40 +474,6 @@ export class AutIframe {
       Elements: $el.length,
       Yielded: Cypress.dom.getElements($el),
     })
-  }
-
-  beforeScreenshot = (config) => {
-    // could fail if iframe is cross-origin, so fail gracefully
-    try {
-      if (config.disableTimersAndAnimations) {
-        this.dom.addCssAnimationDisabler(this._body())
-      }
-
-      _.each(config.blackout, (selector) => {
-        this.dom.addBlackout(this._body(), selector)
-      })
-    } catch (err) {
-      /* eslint-disable no-console */
-      console.error('Failed to modify app this.dom:')
-      console.error(err)
-      /* eslint-disable no-console */
-    }
-  }
-
-  afterScreenshot = (config) => {
-    // could fail if iframe is cross-origin, so fail gracefully
-    try {
-      if (config.disableTimersAndAnimations) {
-        this.dom.removeCssAnimationDisabler(this._body())
-      }
-
-      this.dom.removeBlackouts(this._body())
-    } catch (err) {
-      /* eslint-disable no-console */
-      console.error('Failed to modify app this.dom:')
-      console.error(err)
-      /* eslint-disable no-console */
-    }
   }
 
   startStudio = () => {

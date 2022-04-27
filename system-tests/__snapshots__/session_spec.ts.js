@@ -5,10 +5,11 @@ exports['e2e sessions / session tests'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (session.cy.js)                                                            │
-  │ Searched:   cypress/e2e/session.cy.js                                                          │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (session.cy.js)                                                          │
+  │ Searched:     cypress/cypress/e2e/session.cy.js                                                │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -118,20 +119,22 @@ exports['e2e sessions / session tests'] = `
       ✓ clears only secure context data - 2/2
 
   errors
-    ✓ throws error when experimentalSessionSupport not enabled
+    ✓ throws error when experimentalSessionAndOrigin not enabled
+    ✓ throws error when experimentalSessionSupport is enabled through test config
+    ✓ throws error when experimentalSessionSupport is enabled through Cypress.config
     ✓ throws if session has not been defined during current test
     ✓ throws if multiple session calls with same name but different options
 
 
-  54 passing
+  56 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        55                                                                               │
-  │ Passing:      54                                                                               │
+  │ Tests:        57                                                                               │
+  │ Passing:      56                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -149,9 +152,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session.cy.js                            XX:XX       55       54        -        1        - │
+  │ ✔  session.cy.js                            XX:XX       57       56        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       55       54        -        1        -  
+    ✔  All specs passed!                        XX:XX       57       56        -        1        -  
 
 
 `
@@ -163,10 +166,11 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (session_persist_spec_1.js, session_persist_spec_2.js)                     │
-  │ Searched:   cypress/e2e/session_persist_spec_1.js, cypress/e2e/session_persist_spec_2.js       │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        2 found (session_persist_spec_1.js, session_persist_spec_2.js)                   │
+  │ Searched:     cypress/e2e/session_persist_spec_1.js, cypress/e2e/session_persist_spec_2.js     │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

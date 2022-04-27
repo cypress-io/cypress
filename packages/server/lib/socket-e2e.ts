@@ -16,7 +16,7 @@ export class SocketE2E extends SocketBase {
   private testFilePath: string | null
 
   constructor (config: Record<string, any>) {
-    super()
+    super(config)
 
     this.testFilePath = null
 

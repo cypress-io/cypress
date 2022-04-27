@@ -991,6 +991,11 @@ describe('visual error templates', () => {
         default: [{ configFile: '/path/to/cypress.config.js' }],
       }
     },
+    EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],

@@ -13,10 +13,10 @@
 /// <reference path="../../cli/types/cypress-global-vars.d.ts" />
 /// <reference path="../../cli/types/cypress-type-helpers.d.ts" />
 
+/// <reference path="../driver/types/remote-state.d.ts" />
+
 // types for the `server` package
 export namespace CyServer {
-  export type getRemoteState = () => Cypress.RemoteState
-
   // TODO: pull this from main types
   export interface Config {
     blockHosts: string | string[]

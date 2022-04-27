@@ -532,7 +532,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     return {
       ...this._cfg,
-      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      remote: this._server?.remoteStates.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],

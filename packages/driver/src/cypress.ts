@@ -37,6 +37,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
+import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './multi-domain/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -107,6 +108,9 @@ class $Cypress {
   emit: any
   emitThen: any
   emitMap: any
+  primaryOriginCommunicator: PrimaryOriginCommunicator
+  specBridgeCommunicator: SpecBridgeCommunicator
+  isCrossOriginSpecBridge: boolean
 
   // attach to $Cypress to access
   // all of the constructors
@@ -144,7 +148,7 @@ class $Cypress {
   static $: any
   static utils: any
 
-  constructor (config = {}) {
+  constructor () {
     this.cy = null
     this.chai = null
     this.mocha = null
@@ -153,43 +157,23 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
+    this.specBridgeCommunicator = new SpecBridgeCommunicator()
+    this.isCrossOriginSpecBridge = false
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
 
     _.extend(this.$, $)
-
-    this.setConfig(config)
   }
 
-  setConfig (config: Record<string, any> = {}) {
-    // config.remote
-    // {
-    //   origin: "http://localhost:2020"
-    //   domainName: "localhost"
-    //   props: null
-    //   strategy: "file"
-    // }
-
-    // -- or --
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   domainName: "google.com"
-    //   strategy: "http"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    let d = config.remote ? config.remote.domainName : undefined
+  configure (config: Cypress.ObjectLike = {}) {
+    const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
     // off this feature in testing
-    if (d && config.testingType === 'e2e') {
-      document.domain = d
+    if (domainName && config.testingType === 'e2e') {
+      document.domain = domainName
     }
 
     // a few static props for the host OS, browser
@@ -210,6 +194,9 @@ class $Cypress {
     // slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
+    // true if this Cypress belongs to a cross origin spec bridge
+    this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
+
     // enable long stack traces when
     // we not are running headlessly
     // for debuggability but disable
@@ -224,14 +211,14 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (!window.top!.__cySkipValidateConfig) {
+      if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
@@ -276,7 +263,7 @@ class $Cypress {
       return null
     }
 
-    this.Cookies = $Cookies.create(config.namespace, d)
+    this.Cookies = $Cookies.create(config.namespace, domainName)
 
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
@@ -630,6 +617,9 @@ class $Cypress {
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 
+      case 'cy:skipped:command:end':
+        return this.emit('skipped:command:end', ...args)
+
       case 'cy:command:retry':
         return this.emit('command:retry', ...args)
 
@@ -641,6 +631,9 @@ class $Cypress {
 
       case 'cy:command:queue:end':
         return this.emit('command:queue:end')
+
+      case 'cy:enqueue:command':
+        return this.emit('enqueue:command', ...args)
 
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
@@ -684,6 +677,11 @@ class $Cypress {
         return this.emit('form:submitted', args[0])
 
       case 'app:window:load':
+        this.emit('internal:window:load', {
+          type: 'same:origin',
+          window: args[0],
+        })
+
         return this.emit('window:load', args[0])
 
       case 'app:window:before:unload':
@@ -798,7 +796,11 @@ class $Cypress {
   }
 
   static create (config) {
-    return new $Cypress(config)
+    const cypress = new $Cypress()
+
+    cypress.configure(config)
+
+    return cypress
   }
 }
 

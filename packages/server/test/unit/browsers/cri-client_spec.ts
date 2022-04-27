@@ -45,7 +45,12 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = () => criClient.create(DEBUGGER_URL, onError)
+    getClient = () => {
+      return criClient.create({
+        target: DEBUGGER_URL,
+        onError,
+      })
+    }
   })
 
   context('.create', function () {

@@ -16,23 +16,18 @@
     "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
-  "dependencies": {
-    "fs-extra": "9.1.0"
-  },
   "devDependencies": {
     "@cypress/design-system": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
-    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",
     "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/driver": "0.0.0-development",
     "@packages/icons": "0.0.0-development",
+    "@packages/network": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
-    "@reach/dialog": "0.10.5",
-    "@reach/visually-hidden": "0.10.4",
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "chai": "4.2.0",
@@ -45,7 +40,6 @@
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
     "jquery": "3.1.1",
-    "jsdom": "14.1.0",
     "lodash": "^4.17.21",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
@@ -56,7 +50,6 @@
     "react-dom": "16.8.6",
     "rimraf": "3.0.2",
     "sinon": "7.5.0",
-    "sinon-chai": "3.3.0",
     "snap-shot-core": "10.2.1",
     "webpack": "^4.44.2",
     "webpack-cli": "3.3.2"

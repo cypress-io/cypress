@@ -56,7 +56,7 @@ const _getAutomation = async function (win, options, parent) {
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, options.experimentalSessionAndOrigin)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -195,7 +195,9 @@ module.exports = {
       win.maximize()
     }
 
-    return this._launch(win, url, automation, preferences)
+    return this._launch(win, url, automation, preferences).tap(async () => {
+      automation.use(await _getAutomation(win, preferences, automation))
+    })
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -275,6 +277,11 @@ module.exports = {
     })
     .then(() => {
       return win.loadURL(url)
+    })
+    .then(() => {
+      if (options.experimentalSessionAndOrigin) {
+        this._listenToOnBeforeHeaders(win)
+      }
     })
     .return(win)
   },
@@ -358,6 +365,35 @@ module.exports = {
     return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
+    })
+  },
+
+  _listenToOnBeforeHeaders (win) {
+    // true if the frame only has a single parent, false otherwise
+    const isFirstLevelIFrame = (frame) => (!!frame?.parent && !frame.parent.parent)
+
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
+      if (
+        // isn't an iframe
+        details.resourceType !== 'subFrame'
+        // the top-level frame or a nested frame
+        || !isFirstLevelIFrame(details.frame)
+        // is the spec frame, not the AUT
+        || details.url.includes('__cypress')
+      ) {
+        cb({})
+
+        return
+      }
+
+      cb({
+        requestHeaders: {
+          ...details.requestHeaders,
+          'X-Cypress-Is-AUT-Frame': 'true',
+        },
+      })
     })
   },
 

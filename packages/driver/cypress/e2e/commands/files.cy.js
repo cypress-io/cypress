@@ -161,6 +161,8 @@ describe('src/cy/commands/files', () => {
       defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
+        cy.visit('/fixtures/empty.html')
+
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
