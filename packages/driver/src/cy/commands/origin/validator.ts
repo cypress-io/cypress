@@ -1,5 +1,5 @@
-import $utils from '../../cypress/utils'
-import $errUtils from '../../cypress/error_utils'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
 import { difference, isPlainObject, isString } from 'lodash'
 
 const validOptionKeys = Object.freeze(['args'])

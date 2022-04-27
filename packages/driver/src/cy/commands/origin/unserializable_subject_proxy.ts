@@ -1,4 +1,4 @@
-import $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../../cypress/error_utils'
 
 // These properties are required to avoid failing prior to attempting to use the subject.
 // If Symbol.toStringTag is passed through to the target we will not properly fail the 'cy.invoke' command.

@@ -1,13 +1,13 @@
 import Bluebird from 'bluebird'
-import $errUtils from '../../cypress/error_utils'
-import $stackUtils from '../../cypress/stack_utils'
+import $errUtils from '../../../cypress/error_utils'
+import $stackUtils from '../../../cypress/stack_utils'
 import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
-import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../util/config'
-import { $Location } from '../../cypress/location'
-import { LogUtils } from '../../cypress/log'
-import logGroup from '../logGroup'
+import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../../util/config'
+import { $Location } from '../../../cypress/location'
+import { LogUtils } from '../../../cypress/log'
+import logGroup from '../../logGroup'
 
 const reHttp = /^https?:\/\//
 
