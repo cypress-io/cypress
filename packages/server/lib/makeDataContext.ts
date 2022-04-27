@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
+import type { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
@@ -149,16 +149,16 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         })
       },
       showItemInFolder (folder: string) {
-        electron.shell.showItemInFolder(folder)
+        require('electron').shell.showItemInFolder(folder)
       },
       showOpenDialog (props: OpenDialogOptions) {
-        return electron.dialog.showOpenDialog(props)
+        return require('electron').dialog.showOpenDialog(props)
       },
       showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
-        return electron.dialog.showSaveDialog(window, props)
+        return require('electron').dialog.showSaveDialog(window, props)
       },
       copyTextToClipboard (text: string) {
-        electron.clipboard.writeText(text)
+        require('electron').clipboard.writeText(text)
       },
       isMainWindowFocused () {
         return Windows.isMainWindowFocused()

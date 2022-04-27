@@ -2,6 +2,7 @@
 // created by autobarrel, do not modify directly
 
 export * from './commandFile'
+export * from './component-index-template'
 export * from './dependencies'
 export * from './detect'
 export * from './frameworks'
