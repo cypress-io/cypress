@@ -3,7 +3,6 @@ import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
 import type { TestingType } from '@packages/types'
-import prettier from 'prettier'
 import { formatMigrationFile } from './format'
 import { substitute } from './autoRename'
 import { supportFileRegexps } from './regexps'
@@ -450,6 +449,8 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
 
 export function formatConfig (config: string): string {
   try {
+    const prettier = require('prettier') as typeof import('prettier')
+
     return prettier.format(config, {
       semi: false,
       singleQuote: true,

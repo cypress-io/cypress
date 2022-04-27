@@ -5,7 +5,6 @@ import dedent from 'dedent'
 import path from 'path'
 import debugLib from 'debug'
 import { parse, print } from 'recast'
-import prettier from 'prettier'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
 import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
@@ -159,6 +158,8 @@ function getEmptyCodeBlock (outputType: OutputExtension) {
 
 function maybeFormatWithPrettier (code: string, filePath: string) {
   try {
+    const prettier = require('prettier') as typeof import('prettier')
+
     return prettier.format(code, {
       filepath: filePath,
     })
