@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import fs from 'fs-extra'
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import { detect } from '../../src'
+import { detectFramework, detectLanguage } from '../../src'
 import Fixtures from '@tooling/system-tests'
 import path from 'path'
 
@@ -52,12 +52,12 @@ function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFak
   }
 }
 
-describe('detect', () => {
+describe('detectFramework', () => {
   it('Create React App v4', async () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('reactscripts')
   })
@@ -66,7 +66,7 @@ describe('detect', () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '4.0.0' }])
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('reactscripts')
   })
@@ -79,7 +79,7 @@ describe('detect', () => {
       { devDependency: 'webpack', version: '5.0.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('react')
     expect(actual.bundler.type).to.eq('webpack')
@@ -93,7 +93,7 @@ describe('detect', () => {
       { dependency: 'vue', version: '2.5.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('vueclivue2')
     expect(actual.bundler.type).to.eq('webpack')
@@ -107,7 +107,7 @@ describe('detect', () => {
       { dependency: 'vue', version: '3.2.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('vueclivue3')
     expect(actual.bundler.type).to.eq('webpack')
@@ -121,7 +121,7 @@ describe('detect', () => {
       { dependency: 'vue', version: '3.2.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('vueclivue3')
     expect(actual.bundler.type).to.eq('webpack')
@@ -135,7 +135,7 @@ describe('detect', () => {
       { dependency: 'react', version: '17.0.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('react')
     expect(actual.bundler.type).to.eq('vite')
@@ -149,7 +149,7 @@ describe('detect', () => {
       { dependency: 'react', version: '17.0.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('react')
     expect(actual.bundler.type).to.eq('vite')
@@ -163,7 +163,7 @@ describe('detect', () => {
       { dependency: 'vue', version: '3.0.0' },
     ])
 
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework.type).to.eq('vue3')
     expect(actual.bundler.type).to.eq('vite')
@@ -178,7 +178,7 @@ describe('detect', () => {
         { dependency: 'next', version: v },
       ])
 
-      const actual = detect(projectPath)
+      const actual = detectFramework(projectPath)
 
       expect(actual.framework.type).to.eq('nextjs')
       expect(actual.bundler.type).to.eq('webpack')
@@ -193,9 +193,46 @@ describe('detect', () => {
     // monorepo like situations where there can be multiple levels of
     // node_modules above the projectPath.
     fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
-    const actual = detect(projectPath)
+    const actual = detectFramework(projectPath)
 
     expect(actual.framework).to.be.undefined
     expect(actual.bundler).to.be.undefined
+  })
+})
+
+describe('detectLanguage', () => {
+  it('existing project with `cypress.config.ts`', async () => {
+    const projectRoot = await scaffoldMigrationProject('config-with-ts')
+    const actual = detectLanguage(projectRoot)
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('existing project with `cypress.config.js`', async () => {
+    const projectRoot = await scaffoldMigrationProject('config-with-js')
+    const actual = detectLanguage(projectRoot)
+
+    expect(actual).to.eq('js')
+  })
+
+  it('pristine project with typescript in package.json', async () => {
+    const projectRoot = await scaffoldMigrationProject('pristine-yarn')
+    const actual = detectLanguage(projectRoot)
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('pristine project with root level tsconfig.json', async () => {
+    const projectRoot = await scaffoldMigrationProject('pristine-npm')
+    const actual = detectLanguage(projectRoot)
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('pre-migration project with tsconfig.json in cypress directory', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration')
+    const actual = detectLanguage(projectRoot)
+
+    expect(actual).to.eq('ts')
   })
 })

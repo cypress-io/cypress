@@ -1,5 +1,5 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
+import { detectFramework, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -100,7 +100,7 @@ export class WizardActions {
     debug('detectedLanguage %s', this.data.detectedLanguage)
     this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
-    const detected = detect(this.ctx.currentProject)
+    const detected = detectFramework(this.ctx.currentProject)
 
     debug('detected %o', detected)
 
