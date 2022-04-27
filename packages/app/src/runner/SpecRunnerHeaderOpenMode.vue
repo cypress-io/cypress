@@ -3,7 +3,6 @@
     id="spec-runner-header"
     ref="autHeaderEl"
     class="min-h-64px text-14px"
-    :style="{ width: `${props.width}px` }"
   >
     <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <div
