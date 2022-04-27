@@ -125,6 +125,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
+    // Set the clock to ensure that our percy snapshots always have the same relative time frame
+    //
+    // With this value they are:
+    //
+    // 8.7.0 - Released 7 months ago
+    // 8.6.0 - Released last year
+    cy.clock(Date.UTC(2022, 4, 26), ['Date'])
+
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         if (result.currentProject) {
