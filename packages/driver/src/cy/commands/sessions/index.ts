@@ -209,7 +209,7 @@ export default function (Commands, Cypress, cy) {
      * 1) if we only need currentOrigin localStorage, access sync
      * 2) if cross-origin http, we need to load in iframe from our proxy that will intercept all http reqs at /__cypress/automation/*
      *      and postMessage() the localStorage value to us
-     * 3) if cross-origin https, since we pass-thru https conntections in the proxy, we need to
+     * 3) if cross-origin https, since we pass-thru https connections in the proxy, we need to
      *      send a message telling our proxy server to intercept the next req to the https domain,
      *      then follow 2)
      */
@@ -638,7 +638,7 @@ export default function (Commands, Cypress, cy) {
 
           // we have a saved session on the server AND setup matches
           if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
-            _.extend(existingSession, serverStoredSession)
+            _.extend(existingSession, _.omit(serverStoredSession, 'setup'))
             existingSession.hydrated = true
           } else {
             onValidationError = throwValidationError
