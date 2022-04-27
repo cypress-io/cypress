@@ -6,6 +6,18 @@ const { verifyMochaResults } = require('../verify-mocha-results')
 describe('verify-mocha-results', () => {
   let cachedEnv = { ...process.env }
 
+  if (process.platform === 'win32') {
+    // skip the rest of the tests
+    return it('fails on windows', async () => {
+      try {
+        await verifyMochaResults()
+        throw new Error('should not reach')
+      } catch (err) {
+        expect(err.message).to.equal('verifyMochaResults not supported on Windows')
+      }
+    })
+  }
+
   afterEach(() => {
     sinon.restore()
     Object.assign(process.env, cachedEnv)
