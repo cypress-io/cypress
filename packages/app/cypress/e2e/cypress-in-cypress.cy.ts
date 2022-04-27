@@ -101,11 +101,15 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       }
 
       const assertAll4CornersAreVisible = () => {
-        ['top-left', 'top-right', 'bottom-right', 'bottom-left'].forEach((position: string) => {
+        const cornerHelpers = ['top-left', 'top-right', 'bottom-right', 'bottom-left']
+
+        cornerHelpers.forEach((position: string) => {
           cy.get('.aut-iframe')
-          .then(($aut) => {
-            cy.wrap($aut.contents().find('body'))
-            .get(`[data-cy="${position}"]`)
+          .should((iframe) => expect(iframe.contents().find('body')).to.exist)
+          .then((iframe) => cy.wrap(iframe.contents().find('body')))
+
+          .within(($aut) => {
+            cy.get(`[data-cy="${position}"]`)
             .should('be.visible')
           })
         })
@@ -124,8 +128,12 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="spec-item"]').first().click()
       // Let runner stabilize
       cy.get('#unified-reporter').should('be.visible')
-      cy.get('.aut-iframe').then(($aut) => {
-        // console.log($aut[0].contentWindow?.document.body)
+
+      cy.get('.aut-iframe')
+      .should(($aut) => expect($aut.contents().find('body')).to.exist)
+
+      cy.get('.aut-iframe')
+      .then(($aut) => {
         $aut.contents().find('body').append(`
         <div
         data-cy="top-left"
