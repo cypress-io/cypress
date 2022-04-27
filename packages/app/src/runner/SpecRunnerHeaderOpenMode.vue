@@ -177,7 +177,6 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
-  width: number
 }>()
 
 const showAlert = ref(false)
