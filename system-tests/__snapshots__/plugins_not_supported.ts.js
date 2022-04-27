@@ -53,9 +53,11 @@ Common situations why this would fail:
 
   2) Blank Contents
        "after all" hook: mergeUnitTestCoverage for "renders the visit failure page":
-     TypeError: glob pattern string required
+     TypeError: Cypress detected that the current version of \`@cypress/code-coverage\` is not supported. Update it to the latest version
 
-Cypress detected that the current version of \`@cypress/code-coverage\` is not supported. Update it to the latest version
+The following error was caught:
+
+> glob pattern string required
 
 Because this error occurred during a \`after all\` hook we are skipping all of the remaining tests.
       [stack trace lines]

@@ -1871,8 +1871,15 @@ export default {
     error_in_hook (obj) {
       let msg
 
-      if (obj.unsupportedPlugin) {
-        msg = `Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version\n\nBecause this error occurred during a \`${obj.hookName}\` hook we are skipping `
+      if (obj.unsupportedPlugin && obj.errMessage) {
+        msg = `${stripIndent`\
+          Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version
+          
+          The following error was caught:
+          
+          > ${obj.errMessage}
+          
+          Because this error occurred during a \`${obj.hookName}\` hook we are skipping` } `
       } else {
         msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
       }
