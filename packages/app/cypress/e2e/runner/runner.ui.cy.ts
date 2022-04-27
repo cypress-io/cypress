@@ -270,7 +270,7 @@ describe('src/cypress/runner', () => {
         failCount: 1,
       })
 
-      cy.get('.command-number:contains(25)').should('be.visible')
+      cy.get('.command-number-column:contains(25)').should('be.visible')
     })
 
     it('file with empty suites only displays no tests found', () => {
