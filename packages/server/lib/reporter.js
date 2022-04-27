@@ -292,6 +292,7 @@ class Reporter {
 
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
+      reporterOption: this.reporterOptions,
     })
 
     if (this.reporterName === 'spec') {
