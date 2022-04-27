@@ -49,7 +49,8 @@
           />
         </HideDuringScreenshot>
         <RemoveClassesDuringScreenshotting
-          class="h-full bg-gray-100 p-16px"
+          class="bg-gray-100 p-16px"
+          :style="autMainDivStyle"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -106,6 +107,7 @@ const runnerUiStore = useRunnerUiStore()
 const {
   viewportStyle,
   windowWidth,
+  autMainDivStyle,
 } = useRunnerStyle()
 
 const {
