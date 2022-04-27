@@ -142,25 +142,9 @@ describe('packagesToInstall', () => {
     expect(actual).to.eq('npm install -D nuxt@2 vue@2')
   })
 
-  it('pristine-with-e2e-testing-and-storybook', async () => {
-    const ctx = createTestDataContext()
-
-    const projectPath = await scaffoldMigrationProject('pristine-with-e2e-testing-and-storybook')
-
-    ctx.update((coreData) => {
-      coreData.currentProject = projectPath
-      coreData.wizard.chosenFramework = findFramework('react')
-      coreData.wizard.chosenBundler = findBundler('webpack')
-    })
-
-    const actual = ctx.wizard.installDependenciesCommand()
-
-    expect(actual).to.eq('npm install -D webpack react')
-  })
-
   it('framework and bundler are undefined', async () => {
     const ctx = createTestDataContext()
-    const projectPath = await scaffoldMigrationProject('pristine-with-e2e-testing-and-storybook')
+    const projectPath = await scaffoldMigrationProject('pristine-with-e2e-testing')
 
     ctx.update((coreData) => {
     // this should never happen!

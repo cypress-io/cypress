@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-module.exports = defineConfig({
+export default defineConfig({
   component: {
     devServer: {
       framework: 'react',

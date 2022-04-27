@@ -134,7 +134,7 @@ export class MigrationActions {
 
     await this.initializeFlags()
 
-    const legacyConfigFileExist = await this.ctx.lifecycleManager.checkIfLegacyConfigFileExist()
+    const legacyConfigFileExist = this.ctx.migration.legacyConfigFileExists()
     const filteredSteps = await getStepsForMigration(this.ctx.currentProject, legacyConfigForMigration, Boolean(legacyConfigFileExist))
 
     this.ctx.update((coreData) => {
@@ -203,7 +203,7 @@ export class MigrationActions {
   }
 
   get configFileNameAfterMigration () {
-    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
+    return this.ctx.migration.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
   }
 
   async createConfigFile () {
@@ -215,7 +215,7 @@ export class MigrationActions {
       throw error
     })
 
-    await this.ctx.actions.file.removeFileInProject(this.ctx.lifecycleManager.legacyConfigFile).catch((error) => {
+    await this.ctx.actions.file.removeFileInProject(this.ctx.migration.legacyConfigFile).catch((error) => {
       throw error
     })
 
@@ -324,10 +324,10 @@ export class MigrationActions {
   }
 
   async assertSuccessfulConfigMigration (migratedConfigFile: string = 'cypress.config.js') {
-    const actual = formatConfig(await this.ctx.file.readFileInProject(migratedConfigFile))
+    const actual = formatConfig(await this.ctx.file.readFileInProject(migratedConfigFile), migratedConfigFile)
 
     const configExtension = path.extname(migratedConfigFile)
-    const expected = formatConfig(await this.ctx.file.readFileInProject(`expected-cypress.config${configExtension}`))
+    const expected = formatConfig(await this.ctx.file.readFileInProject(`expected-cypress.config${configExtension}`), migratedConfigFile)
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)
