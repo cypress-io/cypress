@@ -217,6 +217,9 @@ const start = (onMessage, utmCode) => {
       authCallback = cb
     })
   })
+  .catch((err: Error) => {
+    sendMessage('AUTH_ERROR_DURING_LOGIN', err.message)
+  })
   .finally(() => {
     _internal.stopServer()
   })
