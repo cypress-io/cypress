@@ -100,21 +100,6 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.contains('%)').should('not.exist')
       }
 
-      const assertAll4CornersAreVisible = () => {
-        const cornerHelpers = ['top-left', 'top-right', 'bottom-right', 'bottom-left']
-
-        cornerHelpers.forEach((position: string) => {
-          cy.get('.aut-iframe')
-          .should((iframe) => expect(iframe.contents().find('body')).to.exist)
-          .then((iframe) => cy.wrap(iframe.contents().find('body')))
-
-          .within(($aut) => {
-            cy.get(`[data-cy="${position}"]`)
-            .should('be.visible')
-          })
-        })
-      }
-
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
@@ -129,33 +114,15 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // Let runner stabilize
       cy.get('#unified-reporter').should('be.visible')
 
-      cy.get('.aut-iframe')
-      .should(($aut) => expect($aut.contents().find('body')).to.exist)
-
-      cy.get('.aut-iframe')
-      .then(($aut) => {
-        $aut.contents().find('body').append(`
-        <div
-        data-cy="top-left"
-        style="background: blue; position: absolute; top: 0; left: 0; width: 20px; height: 20px"
-      />
-      <div
-        data-cy="top-right"
-        style="background: blue; position: absolute; top: 0; right: 0; width: 20px; height: 20px"
-      />
-      <div
-        data-cy="bottom-right"
-        style="background: blue; position: absolute; bottom: 0; right: 0; width: 20px; height: 20px"
-        />
-      <div
-        data-cy="bottom-left"
-        style="background: blue; position: absolute; bottom: 0; left: 0; width: 20px; height: 20px"
-      />`)
-      })
-
       // validate that the width we set in `withCtx` above is the starting point
       cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
       cy.percySnapshot('initial state')
+
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      .click({ force: true })
+
+      // this tooltip text confirms specs list is open
+      cy.contains('Collapse Specs List')
 
       // we will move the right-hand handle of the Reporter
       // to these positions from the left of the screen
@@ -182,7 +149,6 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
             assertNoScaleShown()
           }
 
-          assertAll4CornersAreVisible()
           cy.percySnapshot(`panel 2 at ${ position } px`)
         })
       })
@@ -195,7 +161,11 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // make sure the reporter is narrow enough (should be, but don't want to depend on leftover state from above)
       dragHandleToClientX('panel2', 400).then(() => {
         // but we have to also collapse the Specs List to remove any reason to scale horizontally
-        cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs').click()
+        cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+        .click({ force: true })
+
+        // this tooltip text confirms specs list is closed
+        cy.contains('Expand Specs List')
 
         assertNoScaleShown()
         cy.percySnapshot('tall viewport')
