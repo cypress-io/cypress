@@ -220,7 +220,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
-    supportStatus: 'full',
+    supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
