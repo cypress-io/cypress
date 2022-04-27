@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
+import * as Windows from './gui/windows'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -158,6 +159,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       copyTextToClipboard (text: string) {
         electron.clipboard.writeText(text)
+      },
+      isMainWindowFocused () {
+        return Windows.isMainWindowFocused()
+      },
+      focusMainWindow () {
+        return Windows.focusMainWindow()
       },
     },
     localSettingsApi: {

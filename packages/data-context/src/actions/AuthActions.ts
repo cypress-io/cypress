@@ -65,14 +65,12 @@ export class AuthActions {
       this.authApi.logIn(onMessage, 'launchpad').then(resolve, reject)
     })
 
-    const windows = require('./gui/windows')
-    const originalIsMainWindowFocused = windows.isMainWindowFocused()
-
-    const isFocusSupported = this.ctx.coreData.activeBrowser
+    const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()
+    const isBrowserFocusSupported = this.ctx.coreData.activeBrowser
       && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
 
-    if (originalIsMainWindowFocused || !isFocusSupported) {
-      windows.focusMainWindow()
+    if (isMainWindowFocused || !isBrowserFocusSupported) {
+      this.ctx._apis.electronApi.focusMainWindow()
     } else {
       await this.ctx.actions.browser.focusActiveBrowserWindow()
     }
