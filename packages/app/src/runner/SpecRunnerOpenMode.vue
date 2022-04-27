@@ -17,9 +17,9 @@
       :max-total-width="windowWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
-      :min-panel1-width="minSpecsListWidth"
-      :min-panel2-width="minReporterWidth"
-      :min-panel3-width="minAUTWidth"
+      :min-panel1-width="minWidths.specsList"
+      :min-panel2-width="minWidths.reporter"
+      :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -207,30 +207,16 @@ const {
   autMainDivStyle,
 } = useRunnerStyle()
 
-const autSpaceAvailable = computed(() => windowWidth.value - (isSpecsListOpenPreferences.value ? specsListWidthPreferences.value : 0) - reporterWidthPreferences.value - 64)
+const minWidths = computed(() => {
+  const absoluteAutMinimum = 100
+  const preferredMinimum = 200
+  const isWindowTooSmall = windowWidth.value < 700 || (reporterWidthPreferences.value + (isSpecsListOpenPreferences.value ? specsListWidthPreferences.value : 0) + 64 + preferredMinimum) > windowWidth.value
 
-const minAUTWidth = computed(() => {
-  const defaultMinimum = 340
-
-  const isWindowTooSmall = (autSpaceAvailable.value <= defaultMinimum) || (autSpaceAvailable.value <= ((windowWidth.value - 64) / 3))
-
-  return isWindowTooSmall ? 100 : defaultMinimum
-})
-
-const minSpecsListWidth = computed(() => {
-  const defaultMinimum = 200
-
-  const isWindowTooSmall = (autSpaceAvailable.value <= defaultMinimum) || (autSpaceAvailable.value <= ((windowWidth.value - 64) / 3))
-
-  return isWindowTooSmall ? 50 : defaultMinimum
-})
-
-const minReporterWidth = computed(() => {
-  const defaultMinimum = 220
-
-  const isWindowTooSmall = (autSpaceAvailable.value <= defaultMinimum) || (autSpaceAvailable.value <= ((windowWidth.value - 64) / 3))
-
-  return isWindowTooSmall ? 50 : defaultMinimum
+  return {
+    aut: isWindowTooSmall ? absoluteAutMinimum : preferredMinimum,
+    specsList: isWindowTooSmall ? 50 : preferredMinimum,
+    reporter: isWindowTooSmall ? 50 : preferredMinimum,
+  }
 })
 
 let fileToOpen: FileDetails
