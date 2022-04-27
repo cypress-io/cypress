@@ -3,6 +3,10 @@
     id="main-pane"
     class="flex border-gray-900"
   >
+    <!-- <div class="bg-white z-30 absolute">
+      {{ minWidths }}
+      {{ windowWidth }}
+    </div> -->
     <AutomationElement />
     <AutomationDisconnected
       v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
@@ -14,8 +18,8 @@
     <ResizablePanels
       v-else
       class="w-[calc(100vw-64px)]"
-      :offset-left="64"
-      :max-total-width="windowWidth - 64"
+      :offset-left="collapsedNavBarWidth"
+      :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
       :min-panel1-width="minWidths.specsList"
@@ -119,6 +123,15 @@ import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
+import { runnerConstants } from './runner-constants'
+
+const {
+  preferredMinimumPanelWidth,
+  absoluteAutMinimum,
+  absoluteSpecListMinimum,
+  absoluteReporterMinimum,
+  collapsedNavBarWidth,
+} = runnerConstants
 
 gql`
 fragment SpecRunner_Preferences on Query {
@@ -207,15 +220,26 @@ const {
   autMainDivStyle,
 } = useRunnerStyle()
 
+function getMinimum (absoluteMinimum: number, doesContentFit: boolean) {
+  // windowWidth.value / 6 is arbitrary here, it just happens to work nicely to give us
+  // some flexibility in proportion to the window
+  return doesContentFit ? Math.min(absoluteMinimum, windowWidth.value / 6) : preferredMinimumPanelWidth
+}
+
 const minWidths = computed(() => {
-  const absoluteAutMinimum = 100
-  const preferredMinimum = 200
-  const isWindowTooSmall = windowWidth.value < 700 || (reporterWidthPreferences.value + (isSpecsListOpenPreferences.value ? specsListWidthPreferences.value : 0) + 64 + preferredMinimum) > windowWidth.value
+  const isWindowTooSmall = windowWidth.value < (preferredMinimumPanelWidth * 3 + collapsedNavBarWidth)
+  let contentWidth = reporterWidthPreferences.value + collapsedNavBarWidth + preferredMinimumPanelWidth
+
+  if (isSpecsListOpenPreferences.value) {
+    contentWidth += specsListWidthPreferences.value
+  }
+
+  const doesContentFit = contentWidth > windowWidth.value || isWindowTooSmall
 
   return {
-    aut: isWindowTooSmall ? absoluteAutMinimum : preferredMinimum,
-    specsList: isWindowTooSmall ? 50 : preferredMinimum,
-    reporter: isWindowTooSmall ? 50 : preferredMinimum,
+    aut: getMinimum(absoluteAutMinimum, doesContentFit),
+    specsList: getMinimum(absoluteSpecListMinimum, doesContentFit),
+    reporter: getMinimum(absoluteReporterMinimum, doesContentFit),
   }
 })
 
