@@ -1,9 +1,7 @@
 const { _, $ } = Cypress
 const { Promise } = Cypress
 const {
-  getCommandLogWithText,
-  findReactInstance,
-  withMutableReporterState,
+  clickCommandLog,
   attachKeyListeners,
   keyEvents,
   trimInnerText,
@@ -3027,23 +3025,14 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('can print table of keys on click', () => {
       cy.get('input:first').type('foo')
 
+      const spyTableName = cy.spy(top.console, 'group')
+      const spyTableData = cy.spy(top.console, 'table')
+
+      clickCommandLog('foo', 'message-text')
       .then(() => {
-        return withMutableReporterState(() => {
-          const spyTableName = cy.spy(top.console, 'group')
-          const spyTableData = cy.spy(top.console, 'table')
-
-          const commandLogEl = getCommandLogWithText('foo', 'message-text')
-
-          const reactCommandInstance = findReactInstance(commandLogEl[0])
-
-          reactCommandInstance.props.appState.isRunning = false
-
-          $(commandLogEl).find('.command-wrapper').click()
-
-          expect(spyTableName.firstCall).calledWith('Mouse Events')
-          expect(spyTableName.secondCall).calledWith('Keyboard Events')
-          expect(spyTableData).calledTwice
-        })
+        expect(spyTableName.firstCall).calledWith('Mouse Events')
+        expect(spyTableName.secondCall).calledWith('Keyboard Events')
+        expect(spyTableData).calledTwice
       })
     })
   })
