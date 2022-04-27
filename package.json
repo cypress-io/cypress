@@ -77,7 +77,7 @@
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "2.88.10",
     "@cypress/request-promise": "4.2.6",
-    "@percy/cli": "1.0.0-beta.48",
+    "@percy/cli": "1.1.0",
     "@percy/cypress": "^3.1.1",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
