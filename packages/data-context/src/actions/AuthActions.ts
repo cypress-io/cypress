@@ -9,6 +9,8 @@ export interface AuthApiShape {
 }
 
 export class AuthActions {
+  private cancelActiveLogin: (() => void) | null = null
+
   constructor (private ctx: DataContext) {}
 
   async getUser () {
@@ -58,9 +60,7 @@ export class AuthActions {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
       // if a reset occurs
-      this.ctx.update((coreData) => {
-        coreData.cancelActiveLogin = () => resolve(null)
-      })
+      this.cancelActiveLogin = () => resolve(null)
 
       // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
       this.authApi.logIn(onMessage, 'launchpad').then(resolve, reject)
@@ -86,7 +86,7 @@ export class AuthActions {
     this.setAuthenticatedUser(user)
 
     this.ctx.update((coreData) => {
-      coreData.cancelActiveLogin = null
+      this.cancelActiveLogin = null
     })
 
     this.resetAuthState()
@@ -98,12 +98,9 @@ export class AuthActions {
 
     // if a login mutation is still in progress, we
     // forcefully resolve it so that the mutation does not persist
-    if (this.ctx.coreData.cancelActiveLogin) {
-      this.ctx.coreData.cancelActiveLogin()
-
-      this.ctx.update((coreData) => {
-        coreData.cancelActiveLogin = null
-      })
+    if (this.cancelActiveLogin) {
+      this.cancelActiveLogin()
+      this.cancelActiveLogin = null
     }
 
     this.ctx.update((coreData) => {
