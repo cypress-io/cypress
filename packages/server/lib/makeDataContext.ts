@@ -28,7 +28,6 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
-import * as Windows from './gui/windows'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -148,6 +147,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           ctx.logTraceError(e)
         })
       },
+      // All of the below instances of JIT requiring electron/gui/windows can be removed
+      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
       showItemInFolder (folder: string) {
         require('electron').shell.showItemInFolder(folder)
       },
@@ -161,10 +162,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         require('electron').clipboard.writeText(text)
       },
       isMainWindowFocused () {
-        return Windows.isMainWindowFocused()
+        return require('./gui/windows').isMainWindowFocused()
       },
       focusMainWindow () {
-        return Windows.focusMainWindow()
+        return require('./gui/windows').focusMainWindow()
       },
     },
     localSettingsApi: {
