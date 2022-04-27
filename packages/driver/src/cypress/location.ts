@@ -16,6 +16,23 @@ const reFile = /^file:\/\//
 const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 const reQueryParam = /\?[^/]+/
 
+export interface LocationObject {
+  auth: string
+  authObj?: Cypress.Auth
+  hash: string
+  href: string
+  host: string
+  hostname: string
+  origin: string
+  pathname: string
+  port: number
+  protocol: string
+  search: string
+  originPolicy: string
+  superDomain: string
+  toString: () => string
+}
+
 export class $Location {
   remote: UrlParse
 
@@ -89,13 +106,7 @@ export class $Location {
   }
 
   getOriginPolicy () {
-    // origin policy is comprised of
-    // protocol + superdomain
-    // and subdomain is not factored in
-    return _.compact([
-      `${this.getProtocol()}//${this.getSuperDomain()}`,
-      this.getPort(),
-    ]).join(':')
+    return cors.getOriginPolicy(this.remote.href)
   }
 
   getSuperDomain () {
@@ -106,7 +117,7 @@ export class $Location {
     return this.remote.toString()
   }
 
-  getObject () {
+  getObject (): LocationObject {
     return {
       auth: this.getAuth(),
       authObj: this.getAuthObj(),
@@ -249,7 +260,7 @@ export class $Location {
     return new URL(to, from).toString()
   }
 
-  static create (remote) {
+  static create (remote): LocationObject {
     const location = new $Location(remote)
 
     return location.getObject()

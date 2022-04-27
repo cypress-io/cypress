@@ -1,7 +1,6 @@
 import { watch } from 'vue'
-import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '.'
+import { addCrossOriginIframe, getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '.'
 import { useAutStore, useSpecStore } from '../store'
-import { useScreenshotStore } from '../store/screenshot-store'
 import { empty, getReporterElement, getRunnerElement } from './utils'
 
 export function useEventManager () {
@@ -20,24 +19,9 @@ export function useEventManager () {
   }
 
   function initializeRunnerLifecycleEvents () {
-    const screenshotStore = useScreenshotStore()
-
     // these events do not use GraphQL
     eventManager.on('restart', () => {
       runSpec()
-    })
-
-    eventManager.on('before:screenshot', (payload) => {
-      if (payload.appOnly) {
-        screenshotStore.setScreenshotting(true)
-      }
-
-      getAutIframeModel().beforeScreenshot(payload)
-    })
-
-    eventManager.on('after:screenshot', (config) => {
-      screenshotStore.setScreenshotting(false)
-      getAutIframeModel().afterScreenshot(config)
     })
 
     eventManager.on('script:error', (err) => {
@@ -51,6 +35,8 @@ export function useEventManager () {
     eventManager.on('visit:blank', ({ type }) => {
       getAutIframeModel().visitBlank({ type })
     })
+
+    eventManager.on('expect:origin', addCrossOriginIframe)
   }
 
   const startSpecWatcher = () => {

@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
+import EventEmitter from 'events'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
@@ -80,11 +81,15 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
+  localBus: EventEmitter
 
-  constructor () {
+  constructor (config: Record<string, any>) {
+    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
+    this.localBus = new EventEmitter()
   }
 
   protected ensureProp = ensureProp
@@ -220,6 +225,11 @@ export class SocketBase {
         automationClient = socket
 
         debug('automation:client connected')
+
+        // only send the necessary config
+        automationClient.emit('automation:config', {
+          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
+        })
 
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
@@ -456,6 +466,12 @@ export class SocketBase {
 
               return
             }
+            case 'cross:origin:bridge:ready':
+              return this.localBus.emit('cross:origin:bridge:ready', args[0])
+            case 'cross:origin:release:html':
+              return this.localBus.emit('cross:origin:release:html')
+            case 'cross:origin:finished':
+              return this.localBus.emit('cross:origin:finished', args[0])
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

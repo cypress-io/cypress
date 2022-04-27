@@ -13,6 +13,7 @@ import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
+import type { RemoteStates } from './remote_states'
 
 const debug = Debug('cypress:server:routes')
 
@@ -22,7 +23,7 @@ export interface InitializeRoutes {
   getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
-  getRemoteState: () => Cypress.RemoteState
+  remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
   exit?: boolean
@@ -34,7 +35,7 @@ export const createCommonRoutes = ({
   testingType,
   getSpec,
   getCurrentBrowser,
-  getRemoteState,
+  remoteStates,
   nodeProxy,
   exit,
 }: InitializeRoutes) => {
@@ -60,7 +61,7 @@ export const createCommonRoutes = ({
   router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
-    runner.handle(req, res)
+    runner.handle(testingType, req, res)
   })
 
   router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
@@ -69,7 +70,7 @@ export const createCommonRoutes = ({
 
   router.get(`/${namespace}/iframes/*`, (req, res) => {
     if (testingType === 'e2e') {
-      iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
+      iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
     if (testingType === 'component') {

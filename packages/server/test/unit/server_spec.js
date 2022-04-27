@@ -355,7 +355,7 @@ describe.skip('lib/server', () => {
     })
 
     it('calls proxy.ws with hostname + port', function () {
-      this.server._onDomainSet('https://www.google.com')
+      this.server.remoteStates.set('https://www.google.com')
 
       const req = {
         connection: {
@@ -394,92 +394,6 @@ describe.skip('lib/server', () => {
       this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(this.socket.end).to.be.called
-    })
-  })
-
-  context('#_onDomainSet', () => {
-    beforeEach(function () {
-      this.server = new ServerE2E()
-    })
-
-    it('sets port to 443 when omitted and https:', function () {
-      const ret = this.server._onDomainSet('https://staging.google.com/foo/bar')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'https://staging.google.com',
-        strategy: 'http',
-        domainName: 'google.com',
-        visiting: undefined,
-        fileServer: null,
-        props: {
-          port: '443',
-          domain: 'google',
-          tld: 'com',
-        },
-      })
-    })
-
-    it('sets port to 80 when omitted and http:', function () {
-      const ret = this.server._onDomainSet('http://staging.google.com/foo/bar')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'http://staging.google.com',
-        strategy: 'http',
-        domainName: 'google.com',
-        visiting: undefined,
-        fileServer: null,
-        props: {
-          port: '80',
-          domain: 'google',
-          tld: 'com',
-        },
-      })
-    })
-
-    it('sets host + port to localhost', function () {
-      const ret = this.server._onDomainSet('http://localhost:4200/a/b?q=1#asdf')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'http://localhost:4200',
-        strategy: 'http',
-        domainName: 'localhost',
-        visiting: undefined,
-        fileServer: null,
-        props: {
-          port: '4200',
-          domain: '',
-          tld: 'localhost',
-        },
-      })
-    })
-
-    it('sets <root> when not http url', function () {
-      this.server._server = {
-        address () {
-          return { port: 9999 }
-        },
-      }
-
-      this.server._fileServer = {
-        port () {
-          return 9998
-        },
-      }
-
-      const ret = this.server._onDomainSet('/index.html')
-
-      expect(ret).to.deep.eq({
-        auth: undefined,
-        origin: 'http://localhost:9999',
-        strategy: 'file',
-        domainName: 'localhost',
-        fileServer: 'http://localhost:9998',
-        props: null,
-        visiting: undefined,
-      })
     })
   })
 })

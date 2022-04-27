@@ -85,7 +85,7 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
-    subject // $ExpectType unknown
+    subject // $ExpectType any
     arg // $ExpectType string
     return
   })
@@ -115,11 +115,11 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
-    subject // $ExpectType JQuery<HTMLElement>
+    subject // $ExpectType JQueryWithSelector<HTMLElement>
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
-    subject // $ExpectType JQuery<HTMLElement>
+    subject // $ExpectType JQueryWithSelector<HTMLElement>
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
@@ -128,7 +128,7 @@ namespace CypressCommandsTests {
     } else if (subject instanceof Document) {
       subject // $ExpectType Document
     } else {
-      subject // $ExpectType JQuery<HTMLElement>
+      subject // $ExpectType JQueryWithSelector<HTMLElement>
     }
     arg // $ExpectType string
   })
@@ -138,7 +138,7 @@ namespace CypressCommandsTests {
     } else if (subject instanceof Document) {
       subject // $ExpectType Document
     } else if (subject) {
-      subject // $ExpectType JQuery<HTMLElement>
+      subject // $ExpectType JQueryWithSelector<HTMLElement>
     } else {
       subject // $ExpectType void
     }
@@ -175,7 +175,7 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.addAll({ prevSubject: true }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType unknown
+      subject // $ExpectType any
       arg // $ExpectType any
       return
     },
@@ -217,13 +217,13 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.addAll({ prevSubject: 'element' }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType JQuery<HTMLElement>
+      subject // $ExpectType JQueryWithSelector<HTMLElement>
       arg // $ExpectType any
     }
   })
   Cypress.Commands.addAll({ prevSubject: ['element'] }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType JQuery<HTMLElement>
+      subject // $ExpectType JQueryWithSelector<HTMLElement>
       arg // $ExpectType any
     }
   })
@@ -234,7 +234,7 @@ namespace CypressCommandsTests {
       } else if (subject instanceof Document) {
         subject // $ExpectType Document
       } else {
-        subject // $ExpectType JQuery<HTMLElement>
+        subject // $ExpectType JQueryWithSelector<HTMLElement>
       }
       arg // $ExpectType any
     }
@@ -246,7 +246,7 @@ namespace CypressCommandsTests {
       } else if (subject instanceof Document) {
         subject // $ExpectType Document
       } else if (subject) {
-        subject // $ExpectType JQuery<HTMLElement>
+        subject // $ExpectType JQueryWithSelector<HTMLElement>
       } else {
         subject // $ExpectType void
       }
@@ -273,7 +273,7 @@ namespace CypressCommandsTests {
     originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
   })
   Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
-    element // $ExpectType JQuery<HTMLElement>
+    element // $ExpectType JQueryWithSelector<HTMLElement>
     text // $ExpectType string
 
     if (options && options.sensitive) {
@@ -903,7 +903,6 @@ namespace CypressTaskTests {
 }
 
 namespace CypressSessionsTests {
-  Cypress.config('experimentalSessionSupport') // $ExpectType boolean
   cy.session('user')
   cy.session('user', () => {})
   cy.session({ name: 'bob' }, () => {})
@@ -937,4 +936,22 @@ namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     delay: 500 // $ExpectError
   })
+}
+
+namespace CypressOriginTests {
+  cy.origin('example.com', () => {})
+  cy.origin('example.com', { args: {}}, (value: object) => {})
+  cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
+  cy.origin('example.com', { args: [1, 'value', true ] }, (value: Array<(number | string | boolean)>) => {})
+  cy.origin('example.com', { args : 'value'}, (value: string) => {})
+  cy.origin('example.com', { args: 1 }, (value: number) => {})
+  cy.origin('example.com', { args: true }, (value: boolean) => {})
+
+  cy.origin() // $ExpectError
+  cy.origin('example.com') // $ExpectError
+  cy.origin(true) // $ExpectError
+  cy.origin('example.com', {}) // $ExpectError
+  cy.origin('example.com', {}, {}) // $ExpectError
+  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
+  cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
 }

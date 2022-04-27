@@ -38,6 +38,8 @@ linuxWorkflowExcludeFilters: &linux-workflow-exclude-filters
     or:
     - false
     # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
+        - feature-multidomain
+        - unify-1449-beta-slug-length
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -48,6 +50,8 @@ macWorkflowFilters: &mac-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
+    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -59,6 +63,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
     - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
+    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
+    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -416,6 +422,10 @@ commands:
         description: chrome channel to install
         type: string
         default: ''
+      experimentalSessionAndOrigin:
+        description: experimental flag to apply
+        type: boolean
+        default: false
     steps:
       - restore_cached_workspace
       - when:
@@ -433,8 +443,13 @@ commands:
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
-              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              if <<parameters.experimentalSessionAndOrigin>>; then
+                CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+                yarn cypress:run-experimentalSessionAndOrigin --record --parallel --group 5x-driver-<<parameters.browser>>-experimentalSessionAndOrigin --browser <<parameters.browser>>
+              else
+                CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+                yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              fi
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -443,7 +458,11 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              if <<parameters.experimentalSessionAndOrigin>>; then
+                yarn cypress:run-experimentalSessionAndOrigin --browser <<parameters.browser>> --spec $TESTFILES
+              else
+                yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              fi
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -1415,6 +1434,44 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
+  driver-integration-tests-chrome-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: chrome
+          install-chrome-channel: stable
+          experimentalSessionAndOrigin: true
+
+  driver-integration-tests-chrome-beta-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: chrome:beta
+          install-chrome-channel: beta
+          experimentalSessionAndOrigin: true
+
+  driver-integration-tests-firefox-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: firefox
+          experimentalSessionAndOrigin: true
+
+  driver-integration-tests-electron-experimentalSessionAndOrigin:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: electron
+          experimentalSessionAndOrigin: true
+
   reporter-integration-tests:
     <<: *defaults
     parallelism: 3
@@ -1719,7 +1776,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "chore/cutover-to-bundled-react-mount" && "$CIRCLE_BRANCH" != "unify-1036-windows-test-projects" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "chore/cutover-to-bundled-react-mount" && "$CIRCLE_BRANCH" != "unify-1036-windows-test-projects" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "unify-1449-beta-slug-length" && "$CIRCLE_BRANCH" != "feature-multidomain" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2242,6 +2299,22 @@ linux-workflow: &linux-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
+    - driver-integration-tests-chrome-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-chrome-beta-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-electron-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - run-frontend-shared-component-tests-chrome:
         context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2346,6 +2419,10 @@ linux-workflow: &linux-workflow
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
+          - driver-integration-tests-firefox-experimentalSessionAndOrigin
+          - driver-integration-tests-chrome-experimentalSessionAndOrigin
+          - driver-integration-tests-chrome-beta-experimentalSessionAndOrigin
+          - driver-integration-tests-electron-experimentalSessionAndOrigin
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron

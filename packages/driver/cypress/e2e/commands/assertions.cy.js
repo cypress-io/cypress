@@ -35,20 +35,10 @@ const captureCommands = () => {
 }
 
 describe('src/cy/commands/assertions', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/jquery.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   let testCommands
 
   beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/jquery.html')
 
     testCommands = captureCommands()
   })
@@ -70,6 +60,7 @@ describe('src/cy/commands/assertions', () => {
       .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
       .then((obj) => {
         expect(testCommands()).to.eql([
+          { name: 'visit', snapshots: 1, retries: 0 },
           { name: 'noop', snapshots: 0, retries: 0 },
           { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
@@ -204,6 +195,7 @@ describe('src/cy/commands/assertions', () => {
         })
         .then(() => {
           expect(testCommands()).to.eql([
+            { name: 'visit', snapshots: 1, retries: 0 },
             // cy.get() has 2 snapshots, 1 for itself, and 1
             // for the .should(...) assertion.
 
@@ -2997,11 +2989,10 @@ describe('src/cy/commands/assertions', () => {
     // should be taken.
     it('only snapshots once when failing to find DOM elements and not retrying', (done) => {
       cy.on('fail', (err) => {
-        expect(testCommands()).to.eql([{
-          name: 'get',
-          snapshots: 1,
-          retries: 0,
-        }])
+        expect(testCommands()).to.eql([
+          { name: 'visit', snapshots: 1, retries: 0 },
+          { name: 'get', snapshots: 1, retries: 0 },
+        ])
 
         done()
       })

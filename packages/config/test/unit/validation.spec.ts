@@ -3,7 +3,7 @@ import { expect } from 'chai'
 
 import * as validation from '../../src/validation'
 
-describe('src/validation', () => {
+describe('config/lib/validation', () => {
   const mockKey = 'mockConfigKey'
 
   describe('.isValidClientCertificatesSet', () => {

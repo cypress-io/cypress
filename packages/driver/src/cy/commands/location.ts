@@ -2,15 +2,21 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 const { throwErrByPath } = $errUtils
+
+interface InternalUrlOptions extends Partial<Cypress.UrlOptions> {
+  _log?: Log
+}
+
+interface InternalHashOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+}
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    // TODO: change the type of `any` to `Partial<Cypress.UrlOptions>`
-    url (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, { log: true })
+    url (userOptions: Partial<Cypress.UrlOptions> = {}) {
+      const options: InternalUrlOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log !== false) {
         options._log = Cypress.log({
@@ -38,11 +44,8 @@ export default (Commands, Cypress, cy) => {
       return resolveHref()
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    hash (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, { log: true })
+    hash (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalHashOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log !== false) {
         options._log = Cypress.log({

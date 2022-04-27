@@ -100,6 +100,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
+    autIframe.doesAUTMatchTopOriginPolicy,
     getEventManager(),
     {
       recorder: getEventManager().studioRecorder,
@@ -186,6 +187,30 @@ export async function teardown () {
 }
 
 /**
+ * Add a cross origin iframe for multi-domain
+ */
+export function addCrossOriginIframe (location) {
+  const id = `Spec Bridge: ${location.originPolicy}`
+
+  // if it already exists, don't add another one
+  if (document.getElementById(id)) {
+    getEventManager().notifyCrossOriginBridgeReady(location.originPolicy)
+
+    return
+  }
+
+  addIframe({
+    id,
+    // the cross origin iframe is added to the document body instead of the
+    // container since it needs to match the size of the top window for screenshots
+    $container: document.body,
+    className: 'spec-bridge-iframe',
+    // TODO: verify window.UnifiedRunner.config.namespace
+    src: `${location.originPolicy}/${window.UnifiedRunner.config.namespace}/multi-domain-iframes`,
+  })
+}
+
+/**
  * Set up a spec by creating a fresh AUT and initializing
  * Cypress on it.
  *
@@ -228,15 +253,17 @@ function runSpecCT (spec: SpecFile) {
 }
 
 /**
- * Create a Spec IFrame. Used for loading the spec to execute in E2E
+ * Create an IFrame. If the Iframe is the spec iframe,
+ * this function is used for loading the spec to execute in E2E
  */
-function createSpecIFrame (specSrc: string) {
-  const el = document.createElement('iframe')
+function addIframe ({ $container, id, src, className }) {
+  const $addedIframe = document.createElement('iframe')
 
-  el.id = `Your Spec: '${specSrc}'`,
-  el.className = 'spec-iframe'
+  $addedIframe.id = id,
+  $addedIframe.className = className
 
-  return el
+  $container.appendChild($addedIframe)
+  $addedIframe.setAttribute('src', src)
 }
 
 // this is how the Cypress driver knows which spec to run.
@@ -282,17 +309,30 @@ function runSpecE2E (spec: SpecFile) {
 
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  // Remove the spec bridge iframe
+  document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
+    el.remove()
+  })
+
   autIframe.showInitialBlankContentsE2E()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
 
-  const $specIframe = createSpecIFrame(specSrc)
+  // FIXME: BILL Determine where to call client with to force browser repaint
+  /**
+   * call the clientWidth to force the browser to repaint for viewport changes
+   * otherwise firefox may fail when changing the viewport in between origins
+   * this.refs.container.clientWidth
+   */
 
   // append to document, so the iframe will execute the spec
-  $container.appendChild($specIframe)
-
-  $specIframe.src = specSrc
+  addIframe({
+    $container,
+    src: specSrc,
+    id: `Your Spec: '${specSrc}'`,
+    className: 'spec-iframe',
+  })
 
   // initialize Cypress (driver) with the AUT!
   getEventManager().initialize($autIframe, config)

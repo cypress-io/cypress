@@ -104,7 +104,7 @@ const maybeDebugCdpMessages = (cri) => {
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number): Promise<CRIWrapper.Client> => {
+export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number, onReconnect?: (client: CRIWrapper.Client) => void): Promise<CRIWrapper.Client> => {
   const subscriptions: {eventName: CRIWrapper.EventName, cb: Function}[] = []
   const enableCommands: CRIWrapper.Command[] = []
   let enqueuedCommands: {command: CRIWrapper.Command, params: any, p: DeferredPromise }[] = []
@@ -147,6 +147,10 @@ export const create = async (target: string, onAsynchronousError: Function, host
       })
 
       enqueuedCommands = []
+
+      if (onReconnect) {
+        onReconnect(client)
+      }
     } catch (err) {
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
@@ -228,9 +232,6 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return cri.close()
     },
-
-    // @ts-ignore
-    reconnect,
   }
 
   return client

@@ -34,6 +34,7 @@ export class IframeModel {
     private detachDom: () => AutSnapshot,
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,
+    private isAUTSameOrigin: () => boolean,
     private eventManager: EventManager,
     private studio: {
       selectorPlaygroundModel: any
@@ -247,6 +248,35 @@ export class IframeModel {
 
   _storeOriginalState () {
     const autStore = useAutStore()
+
+    if (!this.isAUTSameOrigin()) {
+      const Cypress = this.eventManager.getCypress()
+
+      /**
+       * This only happens if the AUT ends in a cross origin state that the primary doesn't have access to.
+       * In this case, the final snapshot request from the primary is sent out to the cross-origin spec bridges.
+       * The spec bridge that matches the origin policy will take a snapshot and send it back to the primary for the runner to store in originalState.
+       */
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', autStore.url || '')
+      Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
+        // todo(lachlan): UNIFY-1318 - find correct default, if they are even needed, for required fields ($el, coords...)
+        // @ts-ignore
+        this.originalState = {
+          body: finalSnapshot.body,
+          htmlAttrs: finalSnapshot.htmlAttrs,
+          snapshot: finalSnapshot,
+          snapshots: [],
+          url: autStore.url || '',
+          // TODO: use same attr for both runner and runner-ct states.
+          // these refer to the same thing - the viewport dimensions.
+          viewportWidth: autStore.viewportWidth,
+          viewportHeight: autStore.viewportHeight,
+        }
+      })
+
+      return
+    }
+
     const finalSnapshot = this.detachDom()
 
     if (!finalSnapshot) return

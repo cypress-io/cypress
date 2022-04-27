@@ -1,0 +1,58 @@
+diff --git a/node_modules/@types/jquery.scrollto/index.d.ts b/node_modules/@types/jquery.scrollto/index.d.ts
+index 0a00c69..126a3d0 100755
+--- a/node_modules/@types/jquery.scrollto/index.d.ts
++++ b/node_modules/@types/jquery.scrollto/index.d.ts
+@@ -6,7 +6,7 @@
+ 
+ /// <reference types="jquery"/>
+ 
+-interface ScrollToOptions {
++interface JQueryScrollToOptions<TElement> extends JQuery.EffectsOptions<TElement> {
+     /**
+     * Which axis must be scrolled, use 'x', 'y', 'xy' or 'yx'.
+     */
+@@ -48,7 +48,7 @@ interface ScrollToOptions {
+     onAfterFirst?: (() => void) | undefined;
+ }
+ 
+-interface JQuery {
++interface JQuery<TElement> {
+     /**
+     * Scroll the matched elements
+     */
+@@ -60,7 +60,7 @@ interface JQuery {
+         * @param duration The OVERALL length of the animation
+         * @param settings Set of settings.
+         */
+-        (target: any, duration?: number, settings?: ScrollToOptions): JQuery;
++        (target: any, duration?: number, settings?: JQueryScrollToOptions<TElement>): JQuery;
+         /**
+         * Scroll the matched elements
+         *
+@@ -76,7 +76,7 @@ interface JQuery {
+         * @param settings Set of settings.
+         * @param onAfter The onAfter callback.
+         */
+-        (target: any, settings: ScrollToOptions, onAfter?: Function): JQuery;
++        (target: any, settings: JQueryScrollToOptions<TElement>, onAfter?: Function): JQuery;
+ 
+     };
+ 
+@@ -94,7 +94,7 @@ interface JQueryStatic {
+         * @param duration The OVERALL length of the animation
+         * @param settings Set of settings.
+         */
+-        (target: any, duration?: number, settings?: ScrollToOptions): JQuery;
++        (target: any, duration?: number, settings?: JQueryScrollToOptions<any>): JQuery;
+         /**
+         * Scroll window
+         *
+@@ -110,7 +110,7 @@ interface JQueryStatic {
+         * @param settings Set of settings.
+         * @param onAfter The onAfter callback.
+         */
+-        (target: any, settings: ScrollToOptions, onAfter?: Function): JQuery;
++        (target: any, settings: JQueryScrollToOptions<any>, onAfter?: Function): JQuery;
+ 
+     };
+ 

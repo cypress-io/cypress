@@ -44,6 +44,7 @@ describe('Web Sockets', () => {
         SocketCtor: SocketE2E,
         createRoutes,
         testingType: 'e2e',
+        getCurrentBrowser: () => null,
       })
       .then(async () => {
         const automationStub = {
@@ -77,7 +78,7 @@ describe('Web Sockets', () => {
     it('sends back ECONNRESET when error upgrading', function (done) {
       const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
 
-      this.server._onDomainSet(`http://localhost:${otherPort}`)
+      this.server.remoteStates.set(`http://localhost:${otherPort}`)
 
       const client = new ws(`ws://localhost:${otherPort}`, {
         agent,
@@ -121,7 +122,7 @@ describe('Web Sockets', () => {
       // force node into legit proxy mode like a browser
       const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
 
-      this.server._onDomainSet(`http://localhost:${wsPort}`)
+      this.server.remoteStates.set(`http://localhost:${wsPort}`)
 
       this.ws.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -152,7 +153,7 @@ describe('Web Sockets', () => {
         rejectUnauthorized: false,
       })
 
-      this.server._onDomainSet(`https://localhost:${wssPort}`)
+      this.server.remoteStates.set(`https://localhost:${wssPort}`)
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -192,7 +193,7 @@ describe('Web Sockets', () => {
         rejectUnauthorized: false,
       })
 
-      this.server._onDomainSet(`https://foobar.com:${wssPort}`)
+      this.server.remoteStates.set(`https://foobar.com:${wssPort}`)
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -309,13 +310,13 @@ describe('Web Sockets', () => {
 
     context('when http superDomain has been set', () => {
       return testSocketIo(`http://localhost:${otherPort}`, function () {
-        return this.server._onDomainSet(`http://localhost:${otherPort}`)
+        return this.server.remoteStates.set(`http://localhost:${otherPort}`)
       })
     })
 
     context('when https superDomain has been set', () => {
       return testSocketIo(`http://localhost:${wssPort}`, function () {
-        return this.server._onDomainSet(`http://localhost:${wssPort}`)
+        return this.server.remoteStates.set(`http://localhost:${wssPort}`)
       })
     })
   })

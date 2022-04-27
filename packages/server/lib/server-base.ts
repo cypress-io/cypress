@@ -2,6 +2,7 @@ import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
+import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import express, { Express } from 'express'
 import http from 'http'
@@ -20,7 +21,6 @@ import Request from './request'
 import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
-import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
@@ -31,9 +31,7 @@ import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
-
-const DEFAULT_DOMAIN_NAME = 'localhost'
-const fullyQualifiedRe = /^https?:\/\//
+import { RemoteStates } from './remote_states'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -119,23 +117,25 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: WebSocketServer
-
-  protected _remoteAuth: unknown
-  protected _remoteProps: unknown
-  protected _remoteOrigin: unknown
-  protected _remoteStrategy: unknown
-  protected _remoteVisitingUrl: unknown
-  protected _remoteDomainName: unknown
-  protected _remoteFileServer: unknown
+  protected _eventBus: EventEmitter
+  protected _remoteStates: RemoteStates
 
   constructor () {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
+    this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
     this._fileServer = null
+
+    this._remoteStates = new RemoteStates(() => {
+      return {
+        serverPort: this._port(),
+        fileServerPort: this._fileServer?.port(),
+      }
+    })
   }
 
   ensureProp = ensureProp
@@ -162,6 +162,20 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
+  }
+
+  get remoteStates () {
+    return this._remoteStates
+  }
+
+  setupCrossOriginRequestHandling () {
+    this._eventBus.on('cross:origin:delaying:html', (request) => {
+      this.socket.localBus.once('cross:origin:release:html', () => {
+        this._eventBus.emit('cross:origin:release:html')
+      })
+
+      this.socket.toDriver('cross:origin:delaying:html', request)
+    })
   }
 
   abstract createServer (
@@ -198,11 +212,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    const getRemoteState = () => {
-      return this._getRemoteState()
-    }
-
-    this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+    this.createNetworkProxy({ config, getCurrentBrowser, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
 
     if (config.experimentalSourceRewriting) {
       createInitialWorkers()
@@ -212,7 +222,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const routeOptions: InitializeRoutes = {
       config,
-      getRemoteState,
+      remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
       networkProxy: this._networkProxy!,
       onError,
@@ -221,6 +231,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       testingType,
       exit,
     }
+
+    this.setupCrossOriginRequestHandling()
+    this._remoteStates.addEventListeners(this.socket.localBus)
 
     const runnerSpecificRouter = testingType === 'e2e'
       ? createRoutesE2E(routeOptions)
@@ -292,7 +305,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState, shouldCorrelatePreRequests) {
+  createNetworkProxy ({ config, getCurrentBrowser, remoteStates, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -302,11 +315,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy = new NetworkProxy({
       config,
       shouldCorrelatePreRequests,
-      getRemoteState,
+      getCurrentBrowser,
+      remoteStates,
       getFileServerToken,
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,
+      serverBus: this._eventBus,
     })
   }
 
@@ -318,6 +333,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
+      this._remoteStates.reset()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -350,7 +366,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return svr
   }
 
-  _port () {
+  _port = () => {
     return (this.server.address() as AddressInfo).port
   }
 
@@ -401,88 +417,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this._callRequestListeners(server, listeners, req, res)
     })
-  }
-
-  _getRemoteState (): Cypress.RemoteState {
-    // {
-    //   origin: "http://localhost:2020"
-    //   fileServer:
-    //   strategy: "file"
-    //   domainName: "localhost"
-    //   props: null
-    // }
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   strategy: "http"
-    //   domainName: "google.com"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    const props = _.extend({}, {
-      auth: this._remoteAuth,
-      props: this._remoteProps,
-      origin: this._remoteOrigin,
-      strategy: this._remoteStrategy,
-      visiting: this._remoteVisitingUrl,
-      domainName: this._remoteDomainName,
-      fileServer: this._remoteFileServer,
-    }) as Cypress.RemoteState
-
-    debug('Getting remote state: %o', props)
-
-    return props
-  }
-
-  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
-    const l = (type, val) => {
-      return debug('Setting', type, val)
-    }
-
-    this._remoteAuth = options.auth
-
-    l('remoteAuth', this._remoteAuth)
-
-    // if this isn't a fully qualified url
-    // or if this came to us as <root> in our tests
-    // then we know to go back to our default domain
-    // which is the localhost server
-    if ((fullyQualifiedUrl === '<root>') || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
-      this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`
-      this._remoteStrategy = 'file'
-      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
-      this._remoteDomainName = DEFAULT_DOMAIN_NAME
-      this._remoteProps = null
-
-      l('remoteOrigin', this._remoteOrigin)
-      l('remoteStrategy', this._remoteStrategy)
-      l('remoteHostAndPort', this._remoteProps)
-      l('remoteDocDomain', this._remoteDomainName)
-      l('remoteFileServer', this._remoteFileServer)
-    } else {
-      this._remoteOrigin = origin(fullyQualifiedUrl)
-
-      this._remoteStrategy = 'http'
-
-      this._remoteFileServer = null
-
-      // set an object with port, tld, and domain properties
-      // as the remoteHostAndPort
-      this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
-
-      // @ts-ignore
-      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
-
-      l('remoteOrigin', this._remoteOrigin)
-      l('remoteHostAndPort', this._remoteProps)
-      l('remoteDocDomain', this._remoteDomainName)
-    }
-
-    return this._getRemoteState()
   }
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
@@ -537,7 +471,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const baseUrl = this._baseUrl ?? '<root>'
 
-    return this._onDomainSet(baseUrl)
+    return this._remoteStates.set(baseUrl)
   }
 
   _close () {

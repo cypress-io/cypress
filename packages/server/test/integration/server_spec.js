@@ -87,6 +87,7 @@ describe('Server', () => {
               SocketCtor: SocketE2E,
               createRoutes,
               testingType: 'e2e',
+              getCurrentBrowser: () => null,
             })
             .spread(async (port) => {
               const automationStub = {
@@ -95,7 +96,7 @@ describe('Server', () => {
 
               await this.server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
-                this.server._onDomainSet(initialUrl)
+                this.server.remoteStates.set(initialUrl)
               }
 
               this.srv = this.server.getHttpServer()
@@ -143,6 +144,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -174,6 +176,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: false,
             contentType: 'application/json',
             url: 'http://localhost:2000/assets/foo.json',
@@ -194,6 +197,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -211,6 +215,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -242,6 +247,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/sub/',
@@ -257,11 +263,10 @@ describe('Server', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://localhost:2000',
               strategy: 'file',
-              visiting: false,
               domainName: 'localhost',
               fileServer: this.fileServer,
               props: null,
@@ -275,6 +280,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/does-not-exist',
@@ -302,6 +308,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -384,6 +391,7 @@ describe('Server', () => {
             }).then((obj) => {
               expectToEqDetails(obj, {
                 isOkStatusCode: true,
+                isPrimaryOrigin: true,
                 isHtml: true,
                 contentType: 'text/html',
                 url: `http://localhost:${this.httpPort}/${path}/100`,
@@ -430,6 +438,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://getbootstrap.com/',
@@ -464,6 +473,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: false,
             isHtml: false,
             contentType: 'application/json',
             url: 'http://getbootstrap.com/user.json',
@@ -508,6 +518,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: undefined,
             url: 'http://example.com/',
@@ -529,6 +540,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: false,
             isHtml: false,
             contentType: undefined,
             url: 'http://example.com/',
@@ -562,6 +574,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://espn.go.com/',
@@ -583,11 +596,10 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</head>content</html>')
 
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://espn.go.com',
               strategy: 'http',
-              visiting: false,
               domainName: 'go.com',
               fileServer: null,
               props: {
@@ -626,6 +638,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://espn.go.com/',
@@ -645,6 +658,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://espn.go.com/',
@@ -699,6 +713,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: false,
+            isPrimaryOrigin: false,
             isHtml: false,
             contentType: undefined,
             url: 'http://espn.com/',
@@ -713,6 +728,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://espn.go.com/',
@@ -748,6 +764,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
+            isPrimaryOrigin: false,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://mlb.mlb.com/',
@@ -781,6 +798,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://getbootstrap.com/',
@@ -821,6 +839,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://google.com/foo',
@@ -877,6 +896,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://google.com/index',
@@ -892,11 +912,10 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth,
             origin: 'http://google.com',
             strategy: 'http',
-            visiting: false,
             domainName: 'google.com',
             fileServer: null,
             props: {
@@ -904,6 +923,244 @@ describe('Server', () => {
               tld: 'com',
               port: '80',
             },
+          })
+        })
+      })
+
+      context('cross-origin', () => {
+        it('adds a remote state and buffers the response when the request is from within cy.origin and the origins match', function () {
+          nock('http://www.cypress.io/')
+          .get('/')
+          .reply(200, '<html>content</html>', {
+            'Content-Type': 'text/html',
+          })
+
+          expect(this.server.remoteStates.current()).to.deep.eq({
+            auth: undefined,
+            props: null,
+            origin: 'http://localhost:2000',
+            strategy: 'file',
+            domainName: 'localhost',
+            fileServer: this.fileServer,
+          })
+
+          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+
+          expect(this.server.remoteStates.current()).to.deep.eq({
+            auth: undefined,
+            props: {
+              domain: 'cypress',
+              port: '80',
+              tld: 'io',
+            },
+            origin: 'http://cypress.io',
+            strategy: 'http',
+            domainName: 'cypress.io',
+            fileServer: null,
+          })
+
+          expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.true
+
+          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isCrossOrigin: true })
+          .then((obj = {}) => {
+            expectToEqDetails(obj, {
+              isOkStatusCode: true,
+              isPrimaryOrigin: false,
+              isHtml: true,
+              contentType: 'text/html',
+              url: 'http://www.cypress.io/',
+              originalUrl: 'http://www.cypress.io/',
+              status: 200,
+              statusText: 'OK',
+              cookies: [],
+              redirects: [],
+            })
+
+            // Verify the cross origin request was buffered
+            const buffer = this.buffers.take('http://www.cypress.io/')
+
+            expect(buffer).to.not.be.empty
+            expect(buffer.isCrossOrigin).to.be.true
+
+            // Verify the secondary remote state is returned
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: undefined,
+              props: {
+                domain: 'cypress',
+                port: '80',
+                tld: 'io',
+              },
+              origin: 'http://www.cypress.io',
+              strategy: 'http',
+              domainName: 'cypress.io',
+              fileServer: null,
+            })
+
+            this.server.socket.localBus.emit('cross:origin:finished', 'http://cypress.io')
+
+            expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.false
+
+            // Verify the primary remote state is now returned
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: undefined,
+              props: null,
+              origin: 'http://localhost:2000',
+              strategy: 'file',
+              domainName: 'localhost',
+              fileServer: this.fileServer,
+            })
+          })
+        })
+
+        it('adds a remote state and buffers the response when a url has already been visited and the origins match', function () {
+          nock('http://localhost:3500/')
+          .get('/')
+          .reply(200, '<html>content</html>', {
+            'Content-Type': 'text/html',
+          })
+
+          // this will be the current origin
+          this.server.remoteStates.set('http://localhost:3500/')
+
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { hasAlreadyVisitedUrl: true })
+          .then((obj = {}) => {
+            // Verify the cross origin request was buffered
+            const buffer = this.buffers.take('http://localhost:3500/')
+
+            expect(buffer).to.not.be.empty
+
+            // Verify the secondary remote state is returned
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: undefined,
+              props: {
+                domain: '',
+                port: '3500',
+                tld: 'localhost',
+              },
+              origin: 'http://localhost:3500',
+              strategy: 'http',
+              domainName: 'localhost',
+              fileServer: null,
+            })
+          })
+        })
+
+        it('doesn\'t set a remote state or buffer the response when a url has already been visited and the origins don\'t match', function () {
+          nock('http://localhost:3500/')
+          .get('/')
+          .reply(200, '<html>content</html>', {
+            'Content-Type': 'text/html',
+          })
+
+          this.server.remoteStates.set('http://localhost:3500/')
+
+          // this will be the current origin
+          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { hasAlreadyVisitedUrl: true })
+          .then(() => {
+            // Verify the remote state was not updated
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: undefined,
+              props: {
+                domain: 'cypress',
+                port: '80',
+                tld: 'io',
+              },
+              origin: 'http://cypress.io',
+              strategy: 'http',
+              domainName: 'cypress.io',
+              fileServer: null,
+            })
+
+            // Verify the cross origin request was not buffered
+            const buffer = this.buffers.take('http://localhost:3500/')
+
+            expect(buffer).to.be.empty
+          })
+        })
+
+        it('doesn\'t set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
+          nock('http://localhost:3500/')
+          .get('/')
+          .reply(200, '<html>content</html>', {
+            'Content-Type': 'text/html',
+          })
+
+          this.server.remoteStates.set('http://localhost:3500/')
+
+          // this will be the current origin
+          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { isCrossOrigin: true })
+          .then(() => {
+            // Verify the remote state was not updated
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: undefined,
+              props: {
+                domain: 'cypress',
+                port: '80',
+                tld: 'io',
+              },
+              origin: 'http://cypress.io',
+              strategy: 'http',
+              domainName: 'cypress.io',
+              fileServer: null,
+            })
+
+            // Verify the cross origin request was not buffered
+            const buffer = this.buffers.take('http://localhost:3500/')
+
+            expect(buffer).to.be.empty
+          })
+        })
+
+        it('doesn\'t override existing remote state on cross:origin:bridge:ready', function () {
+          nock('http://www.cypress.io/')
+          .get('/')
+          .reply(200, '<html>content</html>', {
+            'Content-Type': 'text/html',
+          })
+
+          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+
+          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isCrossOrigin: true, auth: { username: 'u', password: 'p' } })
+          .then(() => {
+            // Verify the secondary remote state is returned
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: {
+                username: 'u',
+                password: 'p',
+              },
+              props: {
+                domain: 'cypress',
+                port: '80',
+                tld: 'io',
+              },
+              origin: 'http://www.cypress.io',
+              strategy: 'http',
+              domainName: 'cypress.io',
+              fileServer: null,
+            })
+
+            this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+
+            // Verify the existing secondary remote state is not overridden
+            expect(this.server.remoteStates.current()).to.deep.eq({
+              auth: {
+                username: 'u',
+                password: 'p',
+              },
+              props: {
+                domain: 'cypress',
+                port: '80',
+                tld: 'io',
+              },
+              origin: 'http://www.cypress.io',
+              strategy: 'http',
+              domainName: 'cypress.io',
+              fileServer: null,
+            })
           })
         })
       })
@@ -934,6 +1191,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -954,6 +1212,7 @@ describe('Server', () => {
         }).then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://www.google.com/',
@@ -969,11 +1228,10 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://www.google.com',
             strategy: 'http',
-            visiting: false,
             domainName: 'google.com',
             fileServer: null,
             props: {
@@ -987,6 +1245,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1004,11 +1263,10 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1031,6 +1289,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://www.google.com/',
@@ -1051,11 +1310,10 @@ describe('Server', () => {
             expect(res.body).to.include('</script></head><body>google</body></html>')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://www.google.com',
             strategy: 'http',
-            visiting: false,
             domainName: 'google.com',
             fileServer: null,
             props: {
@@ -1069,6 +1327,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1090,11 +1349,10 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1104,6 +1362,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://www.google.com/',
@@ -1124,11 +1383,10 @@ describe('Server', () => {
               expect(res.body).to.include('</script></head><body>google</body></html>')
             })
           }).then(() => {
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://www.google.com',
               strategy: 'http',
-              visiting: false,
               domainName: 'google.com',
               fileServer: null,
               props: {
@@ -1148,6 +1406,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'https://www.foobar.com:8443/',
@@ -1168,11 +1427,10 @@ describe('Server', () => {
             expect(res.body).to.include('</script></head><body>https server</body></html>')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'https://www.foobar.com:8443',
             strategy: 'http',
-            visiting: false,
             domainName: 'foobar.com',
             fileServer: null,
             props: {
@@ -1186,6 +1444,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1207,11 +1466,10 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1221,6 +1479,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'https://www.foobar.com:8443/',
@@ -1241,11 +1500,10 @@ describe('Server', () => {
               expect(res.body).to.include('</script></head><body>https server</body></html>')
             })
           }).then(() => {
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'https://www.foobar.com:8443',
               strategy: 'http',
-              visiting: false,
               fileServer: null,
               domainName: 'foobar.com',
               props: {
@@ -1265,6 +1523,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
+            isPrimaryOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: s3StaticHtmlUrl,
@@ -1293,11 +1552,10 @@ describe('Server', () => {
             expect(res.body).to.include('Cypress')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'https://s3.amazonaws.com',
             strategy: 'http',
-            visiting: false,
             domainName: 's3.amazonaws.com',
             fileServer: null,
             props: {
@@ -1311,6 +1569,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1332,11 +1591,10 @@ describe('Server', () => {
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server._getRemoteState()).to.deep.eq({
+          expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
-            visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
             props: null,
@@ -1346,6 +1604,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
+              isPrimaryOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: s3StaticHtmlUrl,
@@ -1372,11 +1631,10 @@ describe('Server', () => {
               expect(res.body).to.include('Cypress')
             })
           }).then(() => {
-            expect(this.server._getRemoteState()).to.deep.eq({
+            expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'https://s3.amazonaws.com',
               strategy: 'http',
-              visiting: false,
               fileServer: null,
               domainName: 's3.amazonaws.com',
               props: {

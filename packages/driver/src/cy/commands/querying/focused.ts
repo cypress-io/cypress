@@ -2,14 +2,17 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
+import type { Log } from '../../../cypress/log'
+
+interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
+  _log?: Log
+  verify: boolean
+}
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    focused (options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    focused (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalFocusedOptions = _.defaults({}, userOptions, {
         verify: true,
         log: true,
       })
@@ -23,7 +26,7 @@ export default (Commands, Cypress, cy, state) => {
           return
         }
 
-        options._log.set({
+        options._log!.set({
           $el,
           consoleProps () {
             const ret = $el ? $dom.getElements($el) : '--nothing--'
