@@ -83,7 +83,11 @@ function scaffoldAndOpenCTProject (opts: {
   }
 
   cy.contains('Next Step').click()
+
+  cy.contains('Install Dev Dependencies').should('be.visible')
+  cy.contains('button', 'Waiting for you to install the dependencies...').should('be.disabled')
   cy.contains('Skip').click()
+
   cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
 }

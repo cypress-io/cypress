@@ -1,19 +1,19 @@
 <template>
   <WizardLayout
-    :next="canNavigateForward ? t('setupPage.step.continue') : t('setupPage.install.waitForInstall')"
-    :can-navigate-forward="canNavigateForward"
+    :next="allDependenciesInstalled ? t('setupPage.step.continue') : t('setupPage.install.waitForInstall')"
+    :can-navigate-forward="allDependenciesInstalled"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
     class="max-w-640px relative"
-    :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
-    :skip-fn="!canNavigateForward ? confirmInstalled : undefined"
+    :main-button-variant="allDependenciesInstalled ? 'primary' : 'pending'"
+    :skip-fn="!allDependenciesInstalled ? confirmInstalled : undefined"
   >
     <template
-      v-if="canNavigateForward && showSuccessAlert"
+      v-if="allDependenciesInstalled && !successAlertDismissed"
       #accessory
     >
       <Alert
-        v-model="showSuccessAlert"
+        v-model="successAlertDismissed"
         class="w-full"
         :icon="CircleCheck"
         :title="t('setupPage.install.installationAlertSuccess')"
@@ -69,7 +69,7 @@ fragment Wizard_InstalledPackages_Data on Query {
 `
 
 gql`
-query Wizard_InstalledPackages{
+query Wizard_InstalledPackages {
   ...Wizard_InstalledPackages_Data
 }`
 
@@ -77,26 +77,30 @@ const queryInstalled = useQuery({
   query: Wizard_InstalledPackagesDocument,
 })
 
-const intervalQueryTrigger = useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
-
-  const allDepsSatisified = res.data.value?.wizard?.packagesToInstall?.every((pkg) => pkg.satisfied)
-
-  if (allDepsSatisified) {
-    intervalQueryTrigger.pause()
-    canNavigateForward.value = true
-  }
-}, 1000, {
-  immediate: true,
-})
-
-const canNavigateForward = ref(false)
-const showSuccessAlert = ref(true)
-
 const props = defineProps<{
   gql: InstallDependenciesFragment
   backFn: () => void
 }>()
+
+const checkForInstalledDependencies = (wizard) => {
+  return wizard?.packagesToInstall?.every((pkg) => pkg.satisfied) || false
+}
+
+const allDependenciesInstalled = ref(checkForInstalledDependencies(props.gql.wizard))
+const successAlertDismissed = ref(false)
+
+if (!allDependenciesInstalled.value) {
+  const intervalQueryTrigger = useIntervalFn(async () => {
+    const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
+
+    if (checkForInstalledDependencies(res.data.value?.wizard)) {
+      intervalQueryTrigger.pause()
+      allDependenciesInstalled.value = true
+    }
+  }, 1000, {
+    immediateCallback: true,
+  })
+}
 
 const { t } = useI18n()
 const mutation = useMutation(InstallDependencies_ScaffoldFilesDocument)
