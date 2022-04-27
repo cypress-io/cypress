@@ -173,7 +173,6 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
         `import { defineConfig } from 'cypress'
   
         export default defineConfig({${globalString}${e2eString}${componentString}})`,
-        options.projectRoot,
       )
     }
 
@@ -181,15 +180,14 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
       `const { defineConfig } = require('cypress')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
-      options.projectRoot,
     )
   }
 
   if (options.hasTypescript) {
-    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`, options.projectRoot)
+    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 
-  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`, options.projectRoot)
+  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`)
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>) {
@@ -454,10 +452,9 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
-export function formatConfig (config: string, projectRoot: string): string {
+export function formatConfig (config: string): string {
   try {
-    const prettierPath = require.resolve('prettier', { paths: [projectRoot] })
-    const prettier = require(prettierPath)
+    const prettier = require('prettier') as typeof import('prettier')
 
     return prettier.format(config, {
       semi: false,
