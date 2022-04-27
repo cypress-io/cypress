@@ -2,7 +2,7 @@ const { assertLogLength } = require('../../../support/utils')
 
 describe('cy.origin Cypress API', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
@@ -229,7 +229,7 @@ describe('cy.origin Cypress API', () => {
       })
     })
 
-    it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of multi-domain', (done) => {
+    it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using them outside of the callback instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session-api')

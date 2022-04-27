@@ -1,6 +1,6 @@
 describe('cy.origin - uncaught errors', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="errors-link"]').click()
   })
 

@@ -11,7 +11,7 @@ context('cy.origin log', () => {
       logs.push(log)
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()
   })
 

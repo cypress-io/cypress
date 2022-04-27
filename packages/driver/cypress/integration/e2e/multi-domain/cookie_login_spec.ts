@@ -7,7 +7,7 @@ describe('cy.origin - cookie login', () => {
 
   it('works in a session', () => {
     cy.session('ZJohnson', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('ZJohnson')
@@ -25,7 +25,7 @@ describe('cy.origin - cookie login', () => {
 
   describe('SameSite handling', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login"]').click()
     })
 

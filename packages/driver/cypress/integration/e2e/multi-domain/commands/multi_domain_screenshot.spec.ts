@@ -16,7 +16,7 @@ context('cy.origin screenshot', () => {
 
       cy.viewport(600, 200)
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="screenshots-link"]').click()
     })
 
@@ -74,7 +74,7 @@ context('cy.origin screenshot', () => {
         duration: 100,
       }
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="screenshots-link"]').click()
     })
 
@@ -287,7 +287,7 @@ context('cy.origin screenshot', () => {
         logs.set(attrs.id, log)
       })
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="screenshots-link"]').click()
     })
 

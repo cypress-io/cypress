@@ -21,7 +21,7 @@ describe('navigation events', () => {
       logs.push(log)
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
@@ -32,7 +32,7 @@ describe('navigation events', () => {
           const listener = () => {
             cy.location().should((loc) => {
               expect(loc.host).to.equal('www.foobar.com:3500')
-              expect(loc.pathname).to.equal('/fixtures/multi-domain-secondary.html')
+              expect(loc.pathname).to.equal('/fixtures/secondary-origin.html')
               expect(loc.hash).to.equal('#hashChange')
             })
 
@@ -92,7 +92,7 @@ describe('navigation events', () => {
           const listener = (win) => {
             times++
             expect(win.location.host).to.equal('www.foobar.com:3500')
-            expect(win.location.pathname).to.equal('/fixtures/multi-domain-secondary.html')
+            expect(win.location.pathname).to.equal('/fixtures/secondary-origin.html')
 
             if (times === 2) {
               cy.removeListener('window:load', listener)
@@ -129,13 +129,13 @@ describe('navigation events', () => {
             times++
             if (times === 1) {
               expect(win.location.host).to.equal('www.foobar.com:3500')
-              expect(win.location.pathname).to.equal('/fixtures/multi-domain-secondary.html')
+              expect(win.location.pathname).to.equal('/fixtures/secondary-origin.html')
             }
 
             if (times === 2) {
               cy.removeListener('window:load', listener)
               expect(win.location.host).to.equal('www.foobar.com:3500')
-              expect(win.location.pathname).to.equal('/fixtures/multi-domain.html')
+              expect(win.location.pathname).to.equal('/fixtures/primary-origin.html')
               resolve()
             }
           }
@@ -144,7 +144,7 @@ describe('navigation events', () => {
         })
 
         cy.get('a[data-cy="cross-origin-page"]').click()
-        cy.get('a[data-cy="cross-origin-secondary-link').invoke('text').should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.get('a[data-cy="cross-origin-secondary-link').invoke('text').should('equal', 'http://www.foobar.com:3500/fixtures/secondary-origin.html')
         cy.wrap(afterWindowLoad).then(() => {
           return logs.map((log) => ({ name: log.get('name'), message: log.get('message') }))
         })
@@ -154,7 +154,7 @@ describe('navigation events', () => {
         assertLogLength(secondaryLogs, 13)
         expect(secondaryLogs[5].get('name')).to.eq('page load')
         expect(secondaryLogs[6].get('name')).to.eq('new url')
-        expect(secondaryLogs[6].get('message')).to.eq('http://www.foobar.com:3500/fixtures/multi-domain.html')
+        expect(secondaryLogs[6].get('message')).to.eq('http://www.foobar.com:3500/fixtures/primary-origin.html')
       })
     })
   })
@@ -164,7 +164,7 @@ describe('navigation events', () => {
       cy.origin('http://foobar.com:3500', () => {
         const afterUrlChanged = new Promise<void>((resolve) => {
           cy.once('url:changed', (url) => {
-            expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+            expect(url).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
             resolve()
           })
         })
@@ -181,12 +181,12 @@ describe('navigation events', () => {
           const listener = (url) => {
             times++
             if (times === 1) {
-              expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+              expect(url).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
             }
 
             if (times === 2) {
               cy.removeListener('url:changed', listener)
-              expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain.html')
+              expect(url).to.equal('http://www.foobar.com:3500/fixtures/primary-origin.html')
               resolve()
             }
           }
@@ -212,7 +212,7 @@ describe('navigation events', () => {
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('event timing', () => {
   it('does not timeout when receiving a delaying:html event after cy.origin has started, but before the spec bridge is ready', () => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
@@ -221,7 +221,7 @@ describe('event timing', () => {
 
     // This command is run from localhost against the cross-origin aut. Updating href is one of the few allowed commands. See https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#location
     cy.window().then((win) => {
-      win.location.href = 'http://www.idp.com:3500/fixtures/multi-domain.html'
+      win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
     })
 
     cy.origin('http://idp.com:3500', () => {

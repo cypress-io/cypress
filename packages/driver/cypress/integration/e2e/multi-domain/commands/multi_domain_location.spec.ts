@@ -2,7 +2,7 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 
 context('cy.origin location', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
@@ -15,7 +15,7 @@ context('cy.origin location', () => {
   it('.location()', () => {
     cy.origin('http://foobar.com:3500', () => {
       cy.location().should((location) => {
-        expect(location.href).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(location.href).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
         expect(location.origin).to.equal('http://www.foobar.com:3500')
       })
     })
@@ -23,7 +23,7 @@ context('cy.origin location', () => {
 
   it('.url()', () => {
     cy.origin('http://foobar.com:3500', () => {
-      cy.url().should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+      cy.url().should('equal', 'http://www.foobar.com:3500/fixtures/secondary-origin.html')
     })
   })
 
@@ -86,7 +86,7 @@ context('cy.origin location', () => {
 
         expect(consoleProps.Command).to.equal('url')
 
-        expect(consoleProps.Yielded).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(consoleProps.Yielded).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
       })
     })
   })

@@ -1,6 +1,6 @@
 describe('cy.origin', () => {
   it('window:before:load event', () => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.on('window:before:load', (win: {testPrimaryOriginBeforeLoad: boolean}) => {
       win.testPrimaryOriginBeforeLoad = true
     })
@@ -20,7 +20,7 @@ describe('cy.origin', () => {
       .should('equal', 'Window Before Load Called')
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
 
     cy.window().its('testPrimaryOriginBeforeLoad').should('be.true')
     cy.window().its('testSecondaryWindowBeforeLoad').should('be.undefined')
@@ -28,7 +28,7 @@ describe('cy.origin', () => {
 
   describe('post window load events', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
@@ -57,7 +57,7 @@ describe('cy.origin', () => {
           })
         })
 
-        cy.visit('/fixtures/multi-domain.html')
+        cy.visit('/fixtures/primary-origin.html')
 
         cy.wrap(afterWindowBeforeUnload)
       })
@@ -72,7 +72,7 @@ describe('cy.origin', () => {
           })
         })
 
-        cy.visit('/fixtures/multi-domain.html')
+        cy.visit('/fixtures/primary-origin.html')
 
         cy.wrap(afterWindowUnload)
       })

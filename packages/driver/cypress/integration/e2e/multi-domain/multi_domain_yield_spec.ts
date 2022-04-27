@@ -10,7 +10,7 @@ describe('cy.origin yields', () => {
       logs.push(log)
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 

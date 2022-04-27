@@ -2,7 +2,7 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 
 context('cy.origin spies, stubs, and clock', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 

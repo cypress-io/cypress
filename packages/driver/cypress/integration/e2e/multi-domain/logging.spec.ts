@@ -8,7 +8,7 @@ describe('cy.origin logging', () => {
       logs.push(attrs)
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
@@ -45,7 +45,7 @@ describe('cy.origin logging', () => {
       done()
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     // @ts-ignore
@@ -67,7 +67,7 @@ describe('cy.origin logging', () => {
       done()
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     const options = { args: { div: Cypress.$('div') } }
@@ -98,7 +98,7 @@ describe('cy.origin logging', () => {
       done()
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
@@ -130,7 +130,7 @@ describe('cy.origin logging', () => {
       done()
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {

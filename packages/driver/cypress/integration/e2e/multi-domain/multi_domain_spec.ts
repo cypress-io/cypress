@@ -8,7 +8,7 @@ describe('cy.origin', () => {
       expect(primaryViewport).to.deep.equal(expectedViewport)
     })
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', { args: expectedViewport }, (expectedViewport) => {
@@ -20,7 +20,7 @@ describe('cy.origin', () => {
 
   context('withBeforeEach', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 

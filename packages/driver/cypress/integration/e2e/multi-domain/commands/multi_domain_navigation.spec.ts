@@ -3,14 +3,14 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 
 context('cy.origin navigation', () => {
   it('.go()', () => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
 
       cy.go('back')
-      cy.location('pathname').should('include', 'multi-domain-secondary.html')
+      cy.location('pathname').should('include', 'secondary-origin.html')
 
       cy.go('forward')
       cy.location('pathname').should('include', 'dom.html')
@@ -18,7 +18,7 @@ context('cy.origin navigation', () => {
   })
 
   it('.reload()', () => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
@@ -38,7 +38,7 @@ context('cy.origin navigation', () => {
       cy.on('window:before:load', primaryCyBeforeLoadSpy)
       cy.on('window:load', primaryCyLoadSpy)
 
-      cy.visit('/fixtures/multi-domain.html', {
+      cy.visit('/fixtures/primary-origin.html', {
         onBeforeLoad: primaryVisitBeforeLoadSpy,
         onLoad: primaryVisitLoadSpy,
       }).then(() => {
@@ -75,10 +75,10 @@ context('cy.origin navigation', () => {
     })
 
     it('supports visiting primary first', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
@@ -86,7 +86,7 @@ context('cy.origin navigation', () => {
 
     it('supports skipping visiting primary first', () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
@@ -94,10 +94,10 @@ context('cy.origin navigation', () => {
 
     // TODO: we don't support nested cy.origin yet...
     it.skip('supports nesting a third origin', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
 
@@ -108,7 +108,7 @@ context('cy.origin navigation', () => {
     })
 
     it('supports navigating to secondary through button and then visiting', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
@@ -149,12 +149,12 @@ context('cy.origin navigation', () => {
     })
 
     it('supports hash change within secondary', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html#hashchange')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html#hashchange')
 
         cy.location('hash').should('equal', '#hashchange')
       })
@@ -162,14 +162,14 @@ context('cy.origin navigation', () => {
 
     it('navigates back to primary', () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
-      cy.get('a[data-cy="cross-origin-secondary-link"]').should('have.text', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
-      cy.location('href').should('equal', 'http://localhost:3500/fixtures/multi-domain.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').should('have.text', 'http://www.foobar.com:3500/fixtures/secondary-origin.html')
+      cy.location('href').should('equal', 'http://localhost:3500/fixtures/primary-origin.html')
     })
 
     it('errors when visiting a new origin within origin', (done) => {
@@ -178,7 +178,7 @@ context('cy.origin navigation', () => {
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           You likely forgot to use \`cy.origin()\`:\n
           \`cy.origin('http://foobar.com:3500', () => {\`
-          \`  cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')\`
+          \`  cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')\`
           \`  <commands targeting http://www.foobar.com:3500 go here>\`
           \`})\`\n
           \`cy.origin('http://idp.com:3500', () => {\`
@@ -196,7 +196,7 @@ context('cy.origin navigation', () => {
         done()
       })
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
@@ -211,7 +211,7 @@ context('cy.origin navigation', () => {
         expect(e.message).to.equal(stripIndent`\
           \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
           In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
-          \`cy.visit('http://localhost:3500/fixtures/multi-domain.html')\`
+          \`cy.visit('http://localhost:3500/fixtures/primary-origin.html')\`
           \`<commands targeting http://localhost:3500 go here>\`\n
           \`cy.origin('http://foobar.com:3500', () => {\`
           \`  cy.visit('http://www.foobar.com:3500/fixtures/dom.html')\`
@@ -228,17 +228,17 @@ context('cy.origin navigation', () => {
         done()
       })
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       // this call should error since we can't visit a cross-origin
       cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
     })
 
     it('supports the query string option', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html', { qs: { foo: 'bar' } })
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html', { qs: { foo: 'bar' } })
 
         cy.location('search').should('equal', '?foo=bar')
       })
@@ -264,10 +264,10 @@ context('cy.origin navigation', () => {
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
       window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
@@ -276,17 +276,17 @@ context('cy.origin navigation', () => {
     it('succeeds when the secondary is already defined but the AUT is still on the primary', () => {
       // setup the secondary to be on the secondary origin
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
 
       // update the AUT to be on the primary origin
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       // verify there aren't any issues when the AUT is on primary but the spec bridge is on secondary (cross-origin)
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
@@ -302,9 +302,9 @@ context('cy.origin navigation', () => {
 
         cy.on('window:load', secondaryCyLoadSpy)
 
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html').then(() => {
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html').then(() => {
           expect(secondaryCyLoadSpy).to.have.been.calledOnce
-          expect(secondaryCyLoadSpy.args[0][0].location.href).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+          expect(secondaryCyLoadSpy.args[0][0].location.href).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
         })
       })
 
@@ -314,16 +314,16 @@ context('cy.origin navigation', () => {
     })
 
     it('supports redirecting from primary to secondary in cy.origin', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/secondary-origin.html')
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
     it('supports redirecting from secondary to primary outside of cy.origin', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.visit('http://www.foobar.com:3500/redirect?href=http://localhost:3500/fixtures/generic.html')
     })
 
@@ -341,7 +341,7 @@ context('cy.origin navigation', () => {
         done()
       })
 
-      cy.visit('http://localhost:3500/fixtures/multi-domain.html')
+      cy.visit('http://localhost:3500/fixtures/primary-origin.html')
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('/redirect?href=http://localhost:3500/fixtures/generic.html')
@@ -362,7 +362,7 @@ context('cy.origin navigation', () => {
         done()
       })
 
-      cy.visit('http://localhost:3500/fixtures/multi-domain.html')
+      cy.visit('http://localhost:3500/fixtures/primary-origin.html')
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://localhost:3500/fixtures/generic.html')
@@ -374,7 +374,7 @@ context('cy.origin navigation', () => {
         expect(e.message).to.equal(stripIndent`\
             \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
             You likely forgot to use \`cy.origin()\`:\n
-            \`cy.visit('http://localhost:3500/fixtures/multi-domain.html')\`
+            \`cy.visit('http://localhost:3500/fixtures/primary-origin.html')\`
             \`<commands targeting http://localhost:3500 go here>\`\n
             \`cy.origin('http://foobar.com:3500', () => {\`
             \`  cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/generic.html')\`
@@ -391,7 +391,7 @@ context('cy.origin navigation', () => {
         done()
       })
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.visit('http://localhost:3500/redirect?href=http://www.foobar.com:3500/fixtures/generic.html')
     })
 
@@ -415,7 +415,7 @@ context('cy.origin navigation', () => {
 
       // attaches the auth options for the foobar origin even from another origin
       cy.origin('http://www.idp.com:3500', () => {
-        cy.visit('/fixtures/multi-domain.html')
+        cy.visit('/fixtures/primary-origin.html')
 
         cy.window().then((win) => {
           win.location.href = 'http://www.foobar.com:3500/basic_auth'
@@ -426,7 +426,7 @@ context('cy.origin navigation', () => {
         cy.get('body').should('have.text', 'basic auth worked')
       })
 
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       // attaches the auth options for the foobar origin from the top-level
       cy.window().then((win) => {
@@ -449,7 +449,7 @@ context('cy.origin navigation', () => {
       })
 
       cy.window().then((win) => {
-        win.location.href = 'http://www.foobar.com:3500/fixtures/multi-domain.html'
+        win.location.href = 'http://www.foobar.com:3500/fixtures/primary-origin.html'
       })
 
       cy.origin('http://foobar.com:3500', () => {
@@ -460,33 +460,33 @@ context('cy.origin navigation', () => {
     })
 
     it('succeeds when visiting local file server first', { baseUrl: undefined }, () => {
-      cy.visit('cypress/fixtures/multi-domain.html')
+      cy.visit('cypress/fixtures/primary-origin.html')
 
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('/fixtures/multi-domain-secondary.html')
+        cy.visit('/fixtures/secondary-origin.html')
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
     })
 
     it('handles visit failures', { baseUrl: undefined }, (done) => {
       cy.on('fail', (e) => {
-        expect(e.message).to.include('failed trying to load:\n\nhttp://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(e.message).to.include('failed trying to load:\n\nhttp://www.foobar.com:3500/fixtures/secondary-origin.html')
         expect(e.message).to.include('500: Internal Server Error')
 
         done()
       })
 
-      cy.intercept('*/multi-domain-secondary.html', { statusCode: 500 })
+      cy.intercept('*/secondary-origin.html', { statusCode: 500 })
 
-      cy.visit('cypress/fixtures/multi-domain.html')
+      cy.visit('cypress/fixtures/primary-origin.html')
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('fixtures/multi-domain-secondary.html')
+        cy.visit('fixtures/secondary-origin.html')
       })
     })
   })
 
   it('supports navigating through changing the window.location.href', () => {
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
@@ -510,7 +510,7 @@ context('cy.origin navigation', () => {
     })
 
     it('.go()', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
@@ -531,7 +531,7 @@ context('cy.origin navigation', () => {
     })
 
     it('.reload()', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="dom-link"]').click()
 
       cy.origin('http://foobar.com:3500', () => {
@@ -550,10 +550,10 @@ context('cy.origin navigation', () => {
     })
 
     it('visit()', () => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
 
       cy.origin('http://foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        cy.visit('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
       })
@@ -562,12 +562,12 @@ context('cy.origin navigation', () => {
         const { consoleProps, ...attrs } = findCrossOriginLogs('visit', logs, 'foobar.com')
 
         expect(attrs.name).to.equal('visit')
-        expect(attrs.message).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(attrs.message).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
         expect(consoleProps.Command).to.equal('visit')
         expect(consoleProps).to.have.property('Cookies Set').that.is.an('object')
         expect(consoleProps).to.have.property('Redirects').that.is.an('object')
-        expect(consoleProps).to.have.property('Resolved Url').that.equals('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        expect(consoleProps).to.have.property('Resolved Url').that.equals('http://www.foobar.com:3500/fixtures/secondary-origin.html')
       })
     })
   })

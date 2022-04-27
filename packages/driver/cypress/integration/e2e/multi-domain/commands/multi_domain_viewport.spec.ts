@@ -5,7 +5,7 @@ context('cy.origin viewport', () => {
     // change the viewport in the primary first
     cy.viewport(320, 480)
 
-    cy.visit('/fixtures/multi-domain.html')
+    cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
     cy.origin('http://foobar.com:3500', () => {
@@ -27,7 +27,7 @@ context('cy.origin viewport', () => {
 
   context('with out pre-set viewport', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/multi-domain.html')
+      cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
@@ -135,7 +135,7 @@ context('cy.origin viewport', () => {
           cy.viewport(320, 480)
 
           cy.window().then((win) => {
-            win.location.href = 'http://localhost:3500/fixtures/multi-domain.html'
+            win.location.href = 'http://localhost:3500/fixtures/primary-origin.html'
           })
         })
 
@@ -160,7 +160,7 @@ context('cy.origin viewport', () => {
         })
 
         cy.window().then((win) => {
-          win.location.href = 'http://www.idp.com:3500/fixtures/multi-domain.html'
+          win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
         })
 
         cy.origin('http://idp.com:3500', () => {
