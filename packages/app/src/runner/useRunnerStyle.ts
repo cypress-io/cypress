@@ -3,13 +3,14 @@ import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
 import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { runnerConstants } from './runner-constants'
 
 export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
 
 export type DraggablePanel = Exclude<ResizablePanelName, 'panel3'>
 
+const { collapsedNavBarWidth } = runnerConstants
 const autMargin = 16
-const collapsedNavBarWidth = 64
 
 // using local state to track the widths during active resizing,
 // so that we only save to GQL when the resizing has ended
