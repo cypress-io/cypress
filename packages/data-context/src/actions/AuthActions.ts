@@ -3,7 +3,7 @@ import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthStateShape) => void): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void, utmCode: string, onLoginFlowComplete: () => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
   resetAuthState(): void
 }
@@ -44,6 +44,28 @@ export class AuthActions {
   }
 
   async login () {
+    const windows = require('./gui/windows')
+    const originalIsMainWindowFocused = windows.isMainWindowFocused()
+    const onLoginFlowComplete = async () => {
+      const isFocusSupported = this.ctx.coreData.activeBrowser && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
+
+      if (originalIsMainWindowFocused || !isFocusSupported) {
+        windows.focusMainWindow()
+      } else {
+        await this.ctx.actions.browser.focusActiveBrowserWindow()
+      }
+    }
+
+    const onMessage = (authState: AuthStateShape) => {
+      this.ctx.update((coreData) => {
+        coreData.authState = authState
+      })
+
+      // Ensure auth state changes during the login lifecycle
+      // are propagated to the clients
+      this.ctx.emitter.authChange()
+    }
+
     const loginPromise = new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
@@ -52,15 +74,7 @@ export class AuthActions {
         coreData.cancelActiveLogin = () => resolve(null)
       })
 
-      this.authApi.logIn((authState) => {
-        this.ctx.update((coreData) => {
-          coreData.authState = authState
-        })
-
-        // Ensure auth state changes during the login lifecycle
-        // are propagated to the clients
-        this.ctx.emitter.authChange()
-      }).then(resolve, reject)
+      this.authApi.logIn(onMessage, 'launchpad', onLoginFlowComplete).then(resolve, reject)
     })
 
     const user = await loginPromise

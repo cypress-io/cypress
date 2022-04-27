@@ -71,20 +71,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage) {
-        const windows = require('./gui/windows')
-        const originalIsMainWindowFocused = windows.isMainWindowFocused()
-        const onLoginFlowComplete = async () => {
-          const isFocusSupported = await ctx.browser.isFocusSupported(ctx.coreData.activeBrowser)
-
-          if (originalIsMainWindowFocused || !isFocusSupported) {
-            windows.focusMainWindow()
-          } else {
-            await ctx.actions.browser.focusActiveBrowserWindow()
-          }
-        }
-
-        return auth.start(onMessage, 'launchpad', onLoginFlowComplete)
+      logIn (onMessage, utmCode, onLoginFlowComplete) {
+        return auth.start(onMessage, utmCode, onLoginFlowComplete)
       },
       logOut () {
         return user.logOut()
@@ -119,7 +107,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cache.removeAllProjectPreferences()
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        cache.insertProjectPreferences(projectTitle, preferences)
+        return cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
