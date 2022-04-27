@@ -199,6 +199,7 @@ describe('setupNodeEvents', () => {
   })
 
   it('handles deprecated config fields in setupNodeEvents', () => {
+    cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -227,5 +228,36 @@ describe('setupNodeEvents', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('h1').should('contain', 'Choose a Browser')
+  })
+
+  it('handles multiple config errors and then recovers', () => {
+    cy.scaffoldProject('pristine')
+    cy.openProject('pristine')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { baseUrl: 'htt://ocalhost:3000', e2e: { supportFile: false } }`)
+    })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('[data-cy="alert-body"]').should('contain', 'Expected baseUrl to be a fully qualified URL')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { baseUrl: 'http://ocalhost:3000', e2e: { supportFile: false } }`)
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is now invalid when set from the root of the config object')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)
+    })
+
+    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
 })

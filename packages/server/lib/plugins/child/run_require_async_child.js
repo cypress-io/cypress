@@ -82,7 +82,7 @@ function run (ipc, file, projectRoot) {
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
-      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', file, config),
+      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
     ))
 
     return false
