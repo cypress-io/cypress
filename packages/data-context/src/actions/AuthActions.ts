@@ -62,6 +62,7 @@ export class AuthActions {
         coreData.cancelActiveLogin = () => resolve(null)
       })
 
+      // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
       this.authApi.logIn(onMessage, 'launchpad').then(resolve, reject)
     })
 
