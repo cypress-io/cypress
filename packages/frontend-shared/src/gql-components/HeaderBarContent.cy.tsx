@@ -20,7 +20,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('not.exist')
     })
 
@@ -28,7 +28,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
     .within(() => {
-      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      cy.get('[data-cy="unsupported-browser-tooltip-trigger"]')
       .should('exist')
     })
 
@@ -125,6 +125,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
+    // Set the clock to ensure that our percy snapshots always have the same relative time frame
+    //
+    // With this value they are:
+    //
+    // 8.7.0 - Released 7 months ago
+    // 8.6.0 - Released last year
+    cy.clock(Date.UTC(2022, 4, 26), ['Date'])
+
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         if (result.currentProject) {
@@ -172,12 +180,56 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
-  it('displays the active project name', () => {
+  it('displays the active project name and testing type', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.contains('test-project').should('be.visible')
+    cy.contains('e2e testing', { matchCase: false }).should('be.visible')
+  })
+
+  it('displays the branch name', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        if (!result.currentProject) {
+          return
+        }
+
+        result.currentProject.branch = 'develop'
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.contains('develop').should('be.visible')
+  })
+
+  it('truncates the branch name if it is long', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        if (!result.currentProject) {
+          return
+        }
+
+        result.currentProject.branch = 'application-program/hard-drive-parse'
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
+
+    cy.percySnapshot()
+
+    cy.get('.truncate').realHover()
+    cy.get('.v-popper__popper--shown').contains('application-program/hard-drive-parse')
   })
 
   it('the login modal reaches "opening browser" status', () => {

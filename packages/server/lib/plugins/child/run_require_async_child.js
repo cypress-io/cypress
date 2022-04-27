@@ -73,16 +73,16 @@ function run (ipc, file, projectRoot) {
 
     if (devServer && typeof devServer === 'object') {
       if (devServer.bundler === 'webpack') {
-        return { devServer: require('@cypress/webpack-dev-server-fresh').devServer, objApi: true }
+        return { devServer: require('@cypress/webpack-dev-server').devServer, objApi: true }
       }
 
       if (devServer.bundler === 'vite') {
-        return { devServer: require('@cypress/vite-dev-server-fresh').devServer, objApi: true }
+        return { devServer: require('@cypress/vite-dev-server').devServer, objApi: true }
       }
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
-      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', file, config),
+      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
     ))
 
     return false
@@ -184,6 +184,8 @@ function run (ipc, file, projectRoot) {
                   devServerEvents,
                 })
               }
+
+              devServerOpts.cypressConfig = config
 
               return devServer(devServerOpts, result.component && result.component.devServerConfig)
             })

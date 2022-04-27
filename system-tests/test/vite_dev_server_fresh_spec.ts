@@ -1,6 +1,6 @@
 import systemTests from '../lib/system-tests'
 
-describe('@cypress/vite-dev-server-fresh', function () {
+describe('@cypress/vite-dev-server', function () {
   systemTests.setup()
 
   describe('react', () => {

@@ -1,7 +1,7 @@
 <template>
-  <RemovePositioningDuringScreenshot
+  <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900 border-l-1"
+    class="flex border-gray-900"
   >
     <AutomationElement />
     <AutomationDisconnected
@@ -14,7 +14,7 @@
       v-else
       :max-total-width="windowWidth"
       :initial-panel1-width="0"
-      :initial-panel2-width="reporterWidth"
+      :initial-panel2-width="runnerUiStore.reporterWidth"
       :show-panel1="false"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -57,7 +57,7 @@
           <div
             v-show="!autStore.scriptError"
             :id="RUNNER_ID"
-            class="origin-top-left viewport"
+            class="origin-top viewport"
             :style="viewportStyle"
           />
         </RemoveClassesDuringScreenshotting>
@@ -68,7 +68,7 @@
         <ScreenshotHelperPixels />
       </template>
     </ResizablePanels>
-  </RemovePositioningDuringScreenshot>
+  </AdjustRunnerStyleDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -79,7 +79,7 @@ import { useAutStore, useRunnerUiStore } from '../store'
 import SnapshotControls from './SnapshotControls.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
-import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
+import AdjustRunnerStyleDuringScreenshot from './screenshot/AdjustRunnerStyleDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ScriptError from './ScriptError.vue'
@@ -105,7 +105,6 @@ const runnerUiStore = useRunnerUiStore()
 const {
   viewportStyle,
   windowWidth,
-  reporterWidth,
 } = useRunnerStyle()
 
 const {

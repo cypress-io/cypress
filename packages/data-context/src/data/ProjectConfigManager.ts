@@ -26,7 +26,7 @@ type ProjectConfigManagerOptions = {
   onError: (cypressError: CypressError, title?: string | undefined) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
-  refreshLifecycle: () => Promise<boolean>
+  refreshLifecycle: () => Promise<void>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
@@ -222,7 +222,7 @@ export class ProjectConfigManager {
     const cypressEnv = await this.loadCypressEnvFile()
     const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.ctx.modeOptions)
 
-    const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
+    const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
 
     await this.options.onFinalConfigLoaded(finalConfig)
 
@@ -332,7 +332,7 @@ export class ProjectConfigManager {
     return w
   }
 
-  private validateConfigRoot (config: Cypress.ConfigOptions) {
+  private validateConfigRoot (config: Cypress.ConfigOptions, testingType: TestingType) {
     return validateNoBreakingConfigRoot(
       config,
       (type, obj) => {
@@ -341,6 +341,7 @@ export class ProjectConfigManager {
       (type, obj) => {
         throw getError(type, obj)
       },
+      testingType,
     )
   }
 
@@ -359,7 +360,7 @@ export class ProjectConfigManager {
 
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
-    this.validateConfigRoot(configFileContents)
+    this.validateConfigRoot(configFileContents, this._testingType)
 
     const testingTypeOverrides = configFileContents[this._testingType] ?? {}
     const optionsOverrides = options.config?.[this._testingType] ?? {}

@@ -186,11 +186,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
-    name: 'exit',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -548,10 +543,6 @@ export const additionalOptionsToResolveConfig = [
  */
 export const breakingOptions: Array<BreakingOption> = [
   {
-    name: 'blacklistHosts',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'blockHosts',
-  }, {
     name: 'componentFolder',
     errorKey: 'COMPONENT_FOLDER_REMOVED',
     isWarning: false,
@@ -570,8 +561,17 @@ export const breakingOptions: Array<BreakingOption> = [
     newName: 'excludeSpecPattern',
     isWarning: false,
   }, {
+    name: 'pluginsFile',
+    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+    isWarning: false,
+  }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+    isWarning: false,
+  }, {
+    name: 'blacklistHosts',
+    errorKey: 'RENAMED_CONFIG_OPTION',
+    newName: 'blockHosts',
     isWarning: false,
   }, {
     name: 'experimentalGetCookiesSameSite',
@@ -608,9 +608,6 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
-  }, {
-    name: 'pluginsFile',
-    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
   },
 ]
 

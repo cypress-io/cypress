@@ -9,9 +9,18 @@ describe('example vite test', function () {
   })
 
   systemTests.it(`should load the support file`, {
-    project: 'vite-ct',
+    project: 'vite-ct-function-api',
     testingType: 'component',
     spec: 'src/support.cy.ts',
     expectedExitCode: 0,
+    browser: 'electron',
+  })
+
+  systemTests.it(`should load the support file`, {
+    project: 'vite-ct-object-api',
+    testingType: 'component',
+    spec: 'src/support.cy.ts',
+    expectedExitCode: 0,
+    browser: 'electron',
   })
 })

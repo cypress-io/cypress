@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress/react'
 
 import { SearchInput } from './SearchInput'
 import { mountAndSnapshot } from 'util/testing'

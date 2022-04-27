@@ -6,8 +6,8 @@ describe('App: Specs', () => {
   describe('Testing Type: E2E', () => {
     context('js project with default spec pattern', () => {
       beforeEach(() => {
-        cy.scaffoldProject('no-specs-no-storybook')
-        cy.openProject('no-specs-no-storybook')
+        cy.scaffoldProject('no-specs')
+        cy.openProject('no-specs')
         cy.startAppServer('e2e')
         cy.visitApp()
 
@@ -193,14 +193,14 @@ describe('App: Specs', () => {
 
     context('ts project with default spec pattern', () => {
       beforeEach(() => {
-        cy.scaffoldProject('no-specs-no-storybook')
-        cy.openProject('no-specs-no-storybook')
+        cy.scaffoldProject('no-specs')
+        cy.openProject('no-specs')
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('tsconfig.json', '{}')
         })
 
-        cy.openProject('no-specs-no-storybook')
+        cy.openProject('no-specs')
 
         cy.startAppServer('e2e')
         cy.visitApp()
@@ -469,10 +469,10 @@ describe('App: Specs', () => {
     viewportHeight: 768,
     viewportWidth: 1024,
   }, () => {
-    context('project without storybook', () => {
+    context('project with default spec pattern', () => {
       beforeEach(() => {
-        cy.scaffoldProject('no-specs-no-storybook')
-        cy.openProject('no-specs-no-storybook')
+        cy.scaffoldProject('no-specs')
+        cy.openProject('no-specs')
         cy.startAppServer('component')
         cy.visitApp()
 
@@ -566,7 +566,7 @@ describe('App: Specs', () => {
           .should('have.attr', 'href', 'https://on.cypress.io/mount')
 
           cy.log('should not contain the link if you navigate away and back')
-
+          cy.get('body').type('f')
           cy.get('[data-testid=spec-file-item]').first().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
 

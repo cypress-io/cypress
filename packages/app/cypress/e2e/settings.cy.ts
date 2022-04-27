@@ -27,19 +27,6 @@ describe('App: Settings', () => {
     cy.get('button').contains('Log In')
   })
 
-  it('can reconfigure a project', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp('settings')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.project, 'reconfigureProject')
-    })
-
-    cy.findByText('Reconfigure Project').click()
-    cy.withRetryableCtx((ctx) => {
-      expect(ctx.actions.project.reconfigureProject).to.have.been.called
-    })
-  })
-
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
       cy.withCtx(async (ctx, o) => {
@@ -89,6 +76,32 @@ describe('App: Settings', () => {
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
       })
+    })
+
+    it('shows deferred remote cloud data after navigating from a run', { retries: 0 }, () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        // Simulate a timeout so we don't resolve immediately, previously visiting the test runner
+        // and then leaving would cause this to fail, because it removed the event listeners
+        // for graphql-refetch. By namespacing the socket layer, we avoid the events of the
+        // runner from impacting the cloud behavior
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        return obj.result
+      })
+
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+      cy.get('.spec-list-container').scrollTo('bottom')
+      // Visit the test to trigger the ws.off() for the TR websockets
+      cy.contains('test1.js').click()
+      // Wait for the test to pass, so the test is completed
+      cy.get('.passed > .num').should('contain', 1)
+      cy.get(`[href='#/settings']`).click()
+      cy.contains('Dashboard Settings').click()
+      // Assert the data is not there before it arrives
+      cy.contains('Record Key').should('not.exist')
+      cy.contains('Record Key')
     })
   })
 
@@ -207,14 +220,14 @@ describe('App: Settings', () => {
       })
 
       cy.get('[data-cy="config-code"]').within(() => {
-        cy.get('.bg-teal-100').contains('tests/_fixtures')
-        cy.get('.bg-teal-100').contains('abc123')
-        cy.get('.bg-teal-100').contains('tests/**/*')
-        cy.get('.bg-teal-100').contains('tests/_support/spec_helper.js')
-        cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
-        cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
-        cy.get('.bg-yellow-100').contains('INTERNAL_GRAPHQL_PORT')
-        cy.get('.bg-red-50').contains('4455')
+        cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
+        cy.get('[data-cy-config="config"]').contains('abc123')
+        cy.get('[data-cy-config="config"]').contains('tests/**/*')
+        cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
+        cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('[data-cy-config="cli"]').contains('4455')
       })
     })
 
@@ -230,6 +243,35 @@ describe('App: Settings', () => {
       cy.findByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
+      })
+    })
+
+    it('highlights values set via config file, envFile, env, or CLI in the appropriate color with default specPattern', () => {
+      cy.scaffoldProject('config-with-js')
+      cy.openProject('config-with-js')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="config-legend"]').within(() => {
+        cy.get('.bg-gray-50').contains('default')
+        cy.get('.bg-teal-100').contains('config')
+        cy.get('.bg-yellow-100').contains('env')
+        cy.get('.bg-red-50').contains('cli')
+      })
+
+      cy.get('[data-cy="config-code"]').within(() => {
+        cy.get('[data-cy-config="default"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
+        cy.get('[data-cy-config="config"]').contains('500')
+        cy.get('[data-cy-config="config"]').contains('10000')
+        cy.get('[data-cy-config="config"]').contains('false')
+        cy.get('[data-cy-config="config"]').contains('20')
+        cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('[data-cy-config="cli"]').contains('4455')
       })
     })
   })

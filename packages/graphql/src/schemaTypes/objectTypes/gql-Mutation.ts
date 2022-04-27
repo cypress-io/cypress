@@ -8,6 +8,7 @@ import { CurrentProject } from './gql-CurrentProject'
 import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
+import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 export const mutation = mutationType({
   definition (t) {
@@ -154,7 +155,7 @@ export const mutation = mutationType({
 
     t.field('clearCurrentTestingType', {
       type: 'Query',
-      resolve: async (_, args, ctx) => {
+      resolve: (_, args, ctx) => {
         ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}
@@ -173,10 +174,6 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType
           && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           await ctx.actions.wizard.initialize()
-
-          if (ctx.wizardData.chosenLanguage === 'ts') {
-            ctx.lifecycleManager.scaffoldFilesIfNecessary()
-          }
         }
 
         return {}
@@ -202,11 +199,11 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         if (args.input.framework) {
-          ctx.actions.wizard.setFramework(args.input.framework)
+          ctx.actions.wizard.setFramework(WIZARD_FRAMEWORKS.find((x) => x.type === args.input.framework) ?? null)
         }
 
         if (args.input.bundler) {
-          ctx.actions.wizard.setBundler(args.input.bundler)
+          ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
         }
 
         if (args.input.codeLanguage) {
@@ -258,7 +255,6 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
-      slowLogThreshold: false,
       description: 'Auth with Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
@@ -279,7 +275,6 @@ export const mutation = mutationType({
 
     t.field('launchOpenProject', {
       type: CurrentProject,
-      slowLogThreshold: false,
       description: 'Launches project from open_project global singleton',
       args: {
         specPath: stringArg(),
@@ -352,7 +347,7 @@ export const mutation = mutationType({
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
 
-        return ctx.appData
+        return {}
       },
     })
 
@@ -559,7 +554,6 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
-      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         await ctx.actions.migration.createConfigFile()
         await ctx.actions.migration.nextStep()
@@ -634,7 +628,7 @@ export const mutation = mutationType({
           await ctx.actions.project.reconfigureProject()
         }
 
-        return true
+        return {}
       },
     })
 

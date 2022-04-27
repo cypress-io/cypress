@@ -55,7 +55,7 @@ function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
-    const oldConfigStats = await ctx.lifecycleManager.checkIfLegacyConfigFileExist()
+    const oldConfigStats = ctx.migration.legacyConfigFileExists()
 
     expect(oldConfigStats).to.be.false
 
@@ -104,7 +104,7 @@ describe('Opening unmigrated project', () => {
   })
 })
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 }, defaultCommandTimeout: 7000 }, () => {
+describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -232,6 +232,14 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       cy.contains('cypress/e2e/foo.cy.ts')
       cy.contains('cypress/component/button.cy.js')
 
+      cy.get('[data-cy="migrate-before"]').within(() => {
+        cy.get('.text-red-500').should('contain', 'spec')
+      })
+
+      cy.get('[data-cy="migrate-after"]').within(() => {
+        cy.get('.text-jade-500').should('contain', 'cy')
+      })
+
       cy.findByText('change').click()
 
       cy.get('[data-cy=migration-button-proceed]').click()
@@ -241,6 +249,17 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       cy.findByText('Rename folder only.').click()
 
       cy.findByText('Save Changes').click()
+
+      cy.percySnapshot()
+
+      cy.get('[data-cy="migrate-before"]').within(() => {
+        cy.get('.text-red-500').should('not.contain', 'spec')
+      })
+
+      cy.get('[data-cy="migrate-after"]').within(() => {
+        cy.get('.text-jade-500').should('not.contain', 'cy')
+        cy.get('.text-jade-500').should('not.contain', 'spec')
+      })
 
       cy.findByText('Rename the folder for me').click()
 
@@ -965,6 +984,53 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.waitForWizard()
+  })
+
+  it('completes journey for migration-e2e-with-extra-files', () => {
+    startMigrationFor('migration-e2e-with-extra-files')
+    // defaults, rename all the things
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+
+    cy.withCtx(async (ctx) => {
+      const files = ['cypress/e2e/foo.cy.js', 'cypress/e2e/example.json']
+
+      for (const file of files) {
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(file))
+
+        expect(stats, `file ${file}`).to.not.be.null
+      }
+    })
+
+    renameSupport('ts')
+    migrateAndVerifyConfig()
+    checkOutcome()
   })
 })
 

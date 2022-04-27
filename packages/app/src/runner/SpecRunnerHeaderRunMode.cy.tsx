@@ -62,4 +62,22 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       cy.percySnapshot()
     })
   })
+
+  it('disables browser dropdown button when specs are running', () => {
+    cy.window().then((win) => {
+      win.__CYPRESS_BROWSER__ = browser
+      win.__CYPRESS_TESTING_TYPE__ = 'e2e'
+      const autStore = useAutStore()
+      const eventManager = createEventManager()
+
+      autStore.updateUrl('http://localhost:4000')
+      autStore.setIsRunning(true)
+
+      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager} width={800}/>)
+
+      cy.get('[data-cy="select-browser"] > button').should('be.disabled')
+
+      cy.percySnapshot()
+    })
+  })
 })

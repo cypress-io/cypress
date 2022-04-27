@@ -1,6 +1,7 @@
 <template>
   <div
     id="spec-runner-header"
+    ref="autHeaderEl"
     class="min-h-64px text-14px"
     :style="{ width: `${props.width}px` }"
   >
@@ -43,6 +44,7 @@
       <SpecRunnerDropdown
         v-if="selectedBrowser?.displayName"
         data-cy="select-browser"
+        :disabled="autStore.isRunning"
       >
         <template #heading>
           <img
@@ -130,15 +132,15 @@
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAutStore, useSpecStore } from '../store'
+import { useAutStore, useSpecStore, useSelectorPlaygroundStore } from '../store'
+import { useAutHeader } from './useAutHeader'
 import { gql } from '@urql/vue'
+import { useI18n } from 'vue-i18n'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
-import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
-import { useI18n } from 'vue-i18n'
+import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
@@ -179,6 +181,8 @@ const props = defineProps<{
 }>()
 
 const showAlert = ref(false)
+
+const { autHeaderEl } = useAutHeader()
 
 watchEffect(() => {
   showAlert.value = route.params.shouldShowTroubleRenderingAlert === 'true'
