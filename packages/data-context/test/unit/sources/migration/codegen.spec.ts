@@ -214,7 +214,7 @@ describe('cypress.config.js generation', () => {
     const projectRoot = getSystemTestProject('migration-e2e-defaults-with-projectId')
     const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
 
-    config['integrationFolder'] = 'cypress/custom/e2e/**/*.{js,ts,tsx,jsx}'
+    config['integrationFolder'] = 'cypress/custom/e2e'
 
     const generatedConfig = await createConfigString(config, {
       hasE2ESpec: true,

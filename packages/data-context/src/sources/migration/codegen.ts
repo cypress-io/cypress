@@ -434,7 +434,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
 }
 
 export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? Boolean(cfg.projectId) ? '**/*.{js,ts,tsx,jsx}' : '**/*.cy.{js,jsx,ts,tsx}'
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? (cfg.projectId ? '**/*.{js,ts,tsx,jsx}' : '**/*.cy.{js,jsx,ts,tsx}')
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
