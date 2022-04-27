@@ -7,15 +7,15 @@ exports['e2e cy.origin errors / captures the stack trace correctly for errors in
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (multi_domain_error_spec.ts)                                             │
-  │ Searched:     cypress/integration/multi_domain_error_spec.ts                                   │
+  │ Specs:        1 found (cy_origin_error_spec.ts)                                                │
+  │ Searched:     cypress/integration/cy_origin_error_spec.ts                                      │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  multi_domain_error_spec.ts                                                      (1 of 1)
+  Running:  cy_origin_error_spec.ts                                                         (1 of 1)
 
 
   cy.origin
@@ -44,20 +44,20 @@ exports['e2e cy.origin errors / captures the stack trace correctly for errors in
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     multi_domain_error_spec.ts                                                       │
+  │ Spec Ran:     cy_origin_error_spec.ts                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/multi_domain_error_spec.ts/cy.origin -- tries t     (1280x720)
-     o find an element that doesn't exist and fails (failed).png                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/cy_origin_error_spec.ts/cy.origin -- tries to f     (1280x720)
+     ind an element that doesn't exist and fails (failed).png                                       
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/multi_domain_error_spec.ts.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cy_origin_error_spec.ts.mp4         (X second)
 
 
 ====================================================================================================
@@ -67,7 +67,7 @@ exports['e2e cy.origin errors / captures the stack trace correctly for errors in
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  multi_domain_error_spec.ts               XX:XX        1        -        1        -        - │
+  │ ✖  cy_origin_error_spec.ts                  XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 

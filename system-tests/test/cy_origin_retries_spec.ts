@@ -6,8 +6,8 @@ const e2ePath = Fixtures.projectPath('e2e')
 
 const PORT = 3500
 const onServer = function (app) {
-  app.get('/multi_domain_secondary.html', (_, res) => {
-    res.sendFile(path.join(e2ePath, `multi_domain_secondary.html`))
+  app.get('/secondary_origin.html', (_, res) => {
+    res.sendFile(path.join(e2ePath, `secondary_origin.html`))
   })
 }
 
@@ -27,7 +27,7 @@ describe('e2e cy.origin retries', () => {
   systemTests.it('Appropriately displays test retry errors without other side effects', {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
-    spec: 'multi_domain_retries_spec.ts',
+    spec: 'cy_origin_retries_spec.ts',
     snapshot: true,
     expectedExitCode: 1,
     config: {

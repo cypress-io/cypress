@@ -1,6 +1,6 @@
 describe('cy.origin', () => {
   beforeEach(() => {
-    cy.visit('/multi_domain.html')
+    cy.visit('/primary_origin.html')
     cy.get('a[data-cy="cross_origin_secondary_link"]').click()
   })
 
