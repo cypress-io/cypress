@@ -11,6 +11,8 @@ export type DraggablePanel = Exclude<ResizablePanelName, 'panel3'>
 const autMargin = 16
 const collapsedNavBarWidth = 64
 
+// using local state to track the widths during active resizing,
+// so that we only save to GQL when the resizing has ended
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
 
@@ -18,17 +20,19 @@ export const useRunnerStyle = () => {
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
   // using the runner store for initial values, it will take care of setting defaults if needed
-  const runnerUiStore = useRunnerUiStore()
+  const runnerUIStore = useRunnerUiStore()
+  const screenshotStore = useScreenshotStore()
+  const autStore = useAutStore()
 
-  const { reporterWidth: uiStoreReporterWidth, specListWidth: uiStoreSpecListWidth } = runnerUiStore
+  const { reporterWidth: initialReporterWidth, specListWidth: initialSpecsListWidth } = runnerUIStore
 
-  reporterWidth.value = uiStoreReporterWidth
-  specListWidth.value = uiStoreSpecListWidth
+  reporterWidth.value = initialReporterWidth
+  specListWidth.value = initialSpecsListWidth
 
   const containerWidth = computed(() => {
     const miscBorders = 4
-    const containerMinimum = 100
-    let nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders
+    const containerMinimum = 50
+    let nonAutWidth = reporterWidth.value + (runnerUIStore.isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
     if (window.__CYPRESS_MODE__ !== 'run') {
       nonAutWidth += collapsedNavBarWidth
@@ -36,11 +40,10 @@ export const useRunnerStyle = () => {
 
     const containerWidth = windowWidth.value - nonAutWidth
 
-    return containerWidth < containerMinimum ? containerMinimum : containerWidth
-  })
+    const newContainerWidth = containerWidth < containerMinimum ? containerMinimum : containerWidth
 
-  const screenshotStore = useScreenshotStore()
-  const autStore = useAutStore()
+    return newContainerWidth
+  })
 
   const containerHeight = computed(() => {
     const nonAutHeight = autStore.specRunnerHeaderHeight + (autMargin * 2)

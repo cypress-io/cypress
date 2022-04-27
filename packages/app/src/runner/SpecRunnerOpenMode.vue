@@ -13,8 +13,9 @@
     />
     <ResizablePanels
       v-else
+      class="w-[calc(100vw-64px)]"
       :offset-left="64"
-      :max-total-width="windowWidth"
+      :max-total-width="windowWidth - 64"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
       :min-panel1-width="minWidths.specsList"
@@ -56,14 +57,13 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3="{width}">
+      <template #panel3>
         <HideDuringScreenshotOrRunMode class="bg-white">
           <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width"
           />
         </HideDuringScreenshotOrRunMode>
 
@@ -198,7 +198,7 @@ preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
 
-// we must update preferences before calling useRunnerStyle, to make sure that values from GQL
+// 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
 // will be available during the initial calculation that useRunnerStyle does
 
 const {

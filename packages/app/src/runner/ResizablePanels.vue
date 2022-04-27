@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full w-100vw overflow-x-auto"
+    class="flex h-full overflow-x-auto"
     :class="{'select-none': panel1IsDragging || panel2IsDragging}"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
@@ -156,8 +156,7 @@ const panel3width = computed(() => {
   // minimumWithMargin - if panel 3 would end up below the minimum allowed size
   // due to window resizing, forcing the minimum width will create a horizontal scroll
   // so that on small windows users _can_ recover the AUT, just like Cy 9.x.
-  // Doubling it is arbitrary here but gives a nicer experience.
-  const minimumWithBuffer = props.minPanel3Width * 2
+  const minimumWithBuffer = props.minPanel3Width
 
   return panel3SpaceAvailable < props.minPanel3Width ? minimumWithBuffer : panel3SpaceAvailable
 })

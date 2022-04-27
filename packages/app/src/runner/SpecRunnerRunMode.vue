@@ -12,6 +12,7 @@
     />
     <ResizablePanels
       v-else
+      class="w-full"
       :max-total-width="windowWidth"
       :initial-panel1-width="0"
       :initial-panel2-width="runnerUiStore.reporterWidth"
