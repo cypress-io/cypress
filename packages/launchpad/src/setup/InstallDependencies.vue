@@ -9,11 +9,11 @@
     :skip-fn="!allDependenciesInstalled ? confirmInstalled : undefined"
   >
     <template
-      v-if="allDependenciesInstalled && !successAlertDismissed"
+      v-if="allDependenciesInstalled && showSuccessAlert"
       #accessory
     >
       <Alert
-        v-model="successAlertDismissed"
+        v-model="showSuccessAlert"
         class="w-full"
         :icon="CircleCheck"
         :title="t('setupPage.install.installationAlertSuccess')"
@@ -87,7 +87,7 @@ const checkForInstalledDependencies = (wizard) => {
 }
 
 const allDependenciesInstalled = ref(checkForInstalledDependencies(props.gql.wizard))
-const successAlertDismissed = ref(false)
+const showSuccessAlert = ref(true)
 
 if (!allDependenciesInstalled.value) {
   const intervalQueryTrigger = useIntervalFn(async () => {
@@ -97,9 +97,7 @@ if (!allDependenciesInstalled.value) {
       intervalQueryTrigger.pause()
       allDependenciesInstalled.value = true
     }
-  }, 1000, {
-    immediateCallback: true,
-  })
+  }, 1000)
 }
 
 const { t } = useI18n()
