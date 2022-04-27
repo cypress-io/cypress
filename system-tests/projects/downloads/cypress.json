@@ -1,5 +1,6 @@
 {
   "fixturesFolder": false,
   "pluginsFile": false,
-  "supportFile": false
+  "supportFile": false,
+  "experimentalSessionAndOrigin": true
 }

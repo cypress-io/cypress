@@ -4,5 +4,6 @@
   "viewportWidth": 500,
   "viewportHeight": 800,
   "componentFolder": "cypress/components",
-  "pluginsFile": "cypress/plugins.js"
+  "pluginsFile": "cypress/plugins.js",
+  "experimentalSessionAndOrigin": true
 }

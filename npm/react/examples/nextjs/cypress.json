@@ -7,5 +7,6 @@
   "componentFolder": "cypress/components",
   "env": {
     "coverage": true
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

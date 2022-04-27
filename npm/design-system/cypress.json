@@ -12,5 +12,6 @@
     "**/__image_snapshots__/*"
   ],
   "componentFolder": "src",
-  "fixturesFolder": false
+  "fixturesFolder": false,
+  "experimentalSessionAndOrigin": true
 }

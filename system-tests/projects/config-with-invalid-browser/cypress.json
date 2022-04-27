@@ -8,5 +8,6 @@
       "path": "/path/to",
       "majorVersion": 123
     }
-  ]
+  ],
+  "experimentalSessionAndOrigin": true
 }

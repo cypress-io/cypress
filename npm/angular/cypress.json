@@ -7,5 +7,6 @@
   "component": {
     "componentFolder": "src/app",
     "testFiles": "**/*cy-spec.ts"
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

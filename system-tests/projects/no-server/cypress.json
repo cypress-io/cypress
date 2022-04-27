@@ -2,5 +2,6 @@
   "cypress": {
     "integrationFolder": "my-tests",
     "fileServerFolder": "dev"
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

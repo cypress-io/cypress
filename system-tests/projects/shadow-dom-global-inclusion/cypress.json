@@ -1,5 +1,6 @@
 {
   "includeShadowDom": true,
   "pluginsFile": false,
-  "supportFile": false
+  "supportFile": false,
+  "experimentalSessionAndOrigin": true
 }

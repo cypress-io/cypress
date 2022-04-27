@@ -8,5 +8,6 @@
   "nodeVersion": "system",
   "env": {
     "coverage": true
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

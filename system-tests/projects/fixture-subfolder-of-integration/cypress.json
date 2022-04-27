@@ -3,5 +3,6 @@
   "supportFile": false,
   "integrationFolder": "test",
   "fixturesFolder": "test/fixtures",
-  "testFiles": "**/*spec.js"
+  "testFiles": "**/*spec.js",
+  "experimentalSessionAndOrigin": true
 }

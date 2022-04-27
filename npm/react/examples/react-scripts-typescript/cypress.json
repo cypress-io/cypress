@@ -3,5 +3,6 @@
   "testFiles": "**/*cy-spec.tsx",
   "viewportWidth": 500,
   "viewportHeight": 800,
-  "componentFolder": "src"
+  "componentFolder": "src",
+  "experimentalSessionAndOrigin": true
 }

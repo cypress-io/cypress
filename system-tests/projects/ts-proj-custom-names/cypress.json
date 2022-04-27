@@ -1,4 +1,5 @@
 {
   "supportFile": "cypress/support.ts",
-  "pluginsFile": "cypress/plugins.ts"
+  "pluginsFile": "cypress/plugins.ts",
+  "experimentalSessionAndOrigin": true
 }

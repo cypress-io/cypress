@@ -11,5 +11,6 @@
     "**/__snapshots__/*",
     "**/__image_snapshots__/*"
   ],
-  "experimentalFetchPolyfill": true
+  "experimentalFetchPolyfill": true,
+  "experimentalSessionAndOrigin": true
 }

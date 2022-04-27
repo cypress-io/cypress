@@ -4,5 +4,6 @@
   "testFiles": "**/*spec.js",
   "viewportWidth": 500,
   "viewportHeight": 500,
-  "componentFolder": "src"
+  "componentFolder": "src",
+  "experimentalSessionAndOrigin": true
 }

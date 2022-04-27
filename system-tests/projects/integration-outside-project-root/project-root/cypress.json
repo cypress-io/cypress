@@ -1,3 +1,4 @@
 {
-  "integrationFolder": "../integration"
+  "integrationFolder": "../integration",
+  "experimentalSessionAndOrigin": true
 }

@@ -1,3 +1,4 @@
 {
-  "supportFolder": false
+  "supportFolder": false,
+  "experimentalSessionAndOrigin": true
 }

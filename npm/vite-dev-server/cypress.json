@@ -3,5 +3,6 @@
   "video": false,
   "fixturesFolder": false,
   "testFiles": "**/*.spec.*",
-  "componentFolder": "cypress/components"
+  "componentFolder": "cypress/components",
+  "experimentalSessionAndOrigin": true
 }

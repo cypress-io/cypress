@@ -12,5 +12,6 @@
     "cypress-plugin-snapshots": {
       "prettier": true
     }
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

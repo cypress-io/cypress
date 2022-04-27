@@ -9,5 +9,6 @@
     "cypress-react-selector": {
       "root": "#__cy_root"
     }
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

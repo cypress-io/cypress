@@ -1,3 +1,4 @@
 {
-  "projectId": "abc123"
+  "projectId": "abc123",
+  "experimentalSessionAndOrigin": true
 }

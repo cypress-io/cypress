@@ -1,3 +1,4 @@
 {
-  "viewportWidth": "foo"
+  "viewportWidth": "foo",
+  "experimentalSessionAndOrigin": true
 }

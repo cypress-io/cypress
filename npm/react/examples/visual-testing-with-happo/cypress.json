@@ -3,5 +3,6 @@
   "testFiles": "**/*cy-spec.js",
   "viewportWidth": 400,
   "viewportHeight": 700,
-  "componentFolder": "src"
+  "componentFolder": "src",
+  "experimentalSessionAndOrigin": true
 }

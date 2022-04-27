@@ -1,3 +1,4 @@
 {
-  "componentFolder": "cypress/component-tests"
+  "componentFolder": "cypress/component-tests",
+  "experimentalSessionAndOrigin": true
 }

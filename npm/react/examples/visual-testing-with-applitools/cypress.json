@@ -7,5 +7,6 @@
   "componentFolder": "src",
   "env": {
     "coverage": false
-  }
+  },
+  "experimentalSessionAndOrigin": true
 }

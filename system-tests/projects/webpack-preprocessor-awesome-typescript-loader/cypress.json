@@ -1,3 +1,4 @@
 {
-  "retries": null
+  "retries": null,
+  "experimentalSessionAndOrigin": true
 }
