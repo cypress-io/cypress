@@ -20,6 +20,7 @@ require('@packages/server/lib/project-base')
 
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
+const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
 
 const warning = (code, args) => {
@@ -36,8 +37,6 @@ const exit = (code = 0) => {
 }
 
 const showWarningForInvalidConfig = (options) => {
-  const { getPublicConfigKeys } = require('@packages/config')
-
   const publicConfigKeys = getPublicConfigKeys()
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
     if (!publicConfigKeys.find((configKey) => configKey === option)) {
@@ -257,6 +256,9 @@ module.exports = {
 
       case 'interactive':
         return this.runElectron(mode, options)
+
+      case 'openProject':
+        throw new Error('Unused')
 
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)
