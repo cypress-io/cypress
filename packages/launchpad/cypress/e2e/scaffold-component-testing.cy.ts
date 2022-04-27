@@ -100,11 +100,12 @@ describe('scaffolding component testing', {
       startSetupFor('nuxtjs-vue2-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Nuxt.js(detected)')
-      cy.get('button').contains('Next Step').click()
+      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
+      cy.contains('button', /Nuxt\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
+      cy.contains('button', 'Next Step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       // Don't verify this config file b/c we've had to modify it to get vue2 resolving
-      // verifyConfigFile(`cypress.config.js`)
+      verifyConfigFile(`cypress.config.js`)
     })
   })
 })
