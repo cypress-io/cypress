@@ -1,5 +1,5 @@
 import dedent from 'dedent'
-import type { MigrationTransformOptions } from './autoRename'
+import { MigrationTransformOptions, defaultMigrationTransformOptions } from './autoRename'
 
 export type FilePart = {
   text: string
@@ -7,7 +7,7 @@ export type FilePart = {
   highlight: boolean
 }
 
-export function formatMigrationFile (file: string, regexp: RegExp, options: MigrationTransformOptions = { migratePreExtension: true }): FilePart[] {
+export function formatMigrationFile (file: string, regexp: RegExp, options: MigrationTransformOptions = defaultMigrationTransformOptions): FilePart[] {
   const match = regexp.exec(file)
 
   if (!match?.groups) {

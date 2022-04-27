@@ -30,7 +30,11 @@ export type MigrationTransformOptions = {
   migratePreExtension: boolean
 }
 
-export function substitute (part: FilePart, options: MigrationTransformOptions = { migratePreExtension: true }): FilePart {
+export const defaultMigrationTransformOptions = {
+  migratePreExtension: true,
+}
+
+export function substitute (part: FilePart, options: MigrationTransformOptions = defaultMigrationTransformOptions): FilePart {
   // nothing to substitute, just a regular
   // part of the file
   if (!('group' in part)) {
@@ -57,9 +61,7 @@ export function substitute (part: FilePart, options: MigrationTransformOptions =
 
 export function applyMigrationTransform (
   spec: MigrationSpec,
-  options: MigrationTransformOptions = {
-    migratePreExtension: true,
-  },
+  options: MigrationTransformOptions = defaultMigrationTransformOptions,
 ): MigrationFile {
   let regexp: RegExp
 

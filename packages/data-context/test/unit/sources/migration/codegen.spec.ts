@@ -122,7 +122,6 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       hasProjectId: false,
-
     })
 
     snapshot(generatedConfig)
