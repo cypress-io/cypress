@@ -66,7 +66,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
 
   const exchanges: Exchange[] = [dedupExchange]
 
-  const io = window.ws ?? getPubSubSource(config)
+  const io = getPubSubSource(config)
 
   const connectPromise = new Promise<void>((resolve) => {
     io.once('connect', resolve)
@@ -77,9 +77,6 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
   // GraphQL and urql are not used in app + run mode, so we don't add the
   // pub sub exchange.
   if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
-    // If we're in the launchpad, we connect to the known GraphQL Socket port,
-    // otherwise we connect to the /__socket of the current domain, unless we've explicitly
-
     exchanges.push(pubSubExchange(io))
   }
 
@@ -161,15 +158,18 @@ interface AppPubSubConfig {
 
 type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 
+// We need a dedicated socket.io namespace, rather than re-use the one provided via the runner
+// at window.ws, because the event-manager calls .off() on its socket instance when Cypress
+// execution is stopped. We need to make sure the events here are long-lived.
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
-    return client({
+    return client('/data-context', {
       path: '/__launchpad/socket',
       transports: ['websocket'],
     })
   }
 
-  return client({
+  return client('/data-context', {
     path: config.socketIoRoute,
     transports: ['websocket'],
   })

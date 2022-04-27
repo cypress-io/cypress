@@ -1,9 +1,5 @@
 .reporter {
   .hooks-container {
-    margin: 5px 0 5px 9px;
-    padding-left: 10px;
-    border-left: 1px dotted $gray-900;
-
     .hook-item {
       margin-bottom: 5px;
 
@@ -13,6 +9,7 @@
     }
 
     .hook-header {
+      font-family: $font-system;
       display: flex;
       width: 100%;
 
@@ -63,6 +60,8 @@
         }
 
         svg {
+          vertical-align: middle;
+
           path:nth-child(2) {
             fill: $gray-800;
           }
