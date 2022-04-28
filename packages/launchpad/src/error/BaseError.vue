@@ -20,7 +20,6 @@
           class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
         >
           <Button
-            class=""
             variant="outline"
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"

@@ -85,7 +85,7 @@ describe('<BaseError />', () => {
     .and('contain.text', customStack)
   })
 
-  it('renders the header, message, and footer slots', () => {
+  it('renders the header and message slots', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
@@ -104,7 +104,7 @@ describe('<BaseError />', () => {
     .and('contain.text', customMessage)
   })
 
-  it('renders the header, message, and footer slots', () => {
+  it('renders the header and message slots', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
