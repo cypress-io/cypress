@@ -18,11 +18,13 @@ See [Node.js’s URL doc](https://nodejs.org/api/url.html#url-strings-and-url-ob
 
 When testing a single origin, all 3 frames are loaded on that origin.
 
-Components (nesting shows hierarchical relationship):
+Components:
 
-- **top (frame)**: The driver exists here.
-    - **spec frame**: The users’s spec code exists here.
-    - **AUT (frame)**: **A**pp **U**nder **T**est. The users’ app/site exists here.
+```mermaid
+graph TD;
+    top["top frame: domain1.com"]-->specFrame["spec frame: domain1.com"];
+    top-->aut["AUT frame: domain1.com"];
+```
 
 **top** communicates directly and synchronously with the **spec frame** and the **AUT frame**. The **spec frame** runs the spec, which uses the driver to run commands and interact with the **AUT**.
 
@@ -30,20 +32,22 @@ In a single test (`it` + hooks), the **AUT** must remain on the same origin or a
 
 ## Frame architecture (with multi-domain)
 
-Let’s say the primary origin is [domain1.com](http://domain1.com) and the secondary origin is domain2.com. The test has visited domain1.com and then issued a click that caused the **AUT** to navigate to domain2.com.
+Let’s say the primary origin is `domain1.com` and the secondary origin is domain2.com. The test has visited domain1.com and then issued a click that caused the **AUT** to navigate to domain2.com.
 
 Since the **AUT** is no longer on the same origin as **top**, they can no longer communicate synchronously. In order to facilitate cross-origin testing, we create another iframe we call the **spec bridge**. It exists as a sibling to the **AUT** (meaning they share the same parent frame, not to be confused with a DOM sibling). It contains a version of the driver tailored to cross-origin testing, with a different entry-point to the primary driver, but containing mostly the same code.
 
-The **spec bridge** is run on [domain2.com](http://domain2.com) to match the **AUT**. This and being a sibling allows the spec bridge to communicate directly with the **AUT**. The **spec bridge** communicates *asynchronously* with **top** via the [postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
+The **spec bridge** is run on `domain2.com` to match the **AUT**. This and being a sibling allows the spec bridge to communicate directly with the **AUT**. The **spec bridge** communicates *asynchronously* with **top** via the [postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 
 The **spec bridge** remains in the DOM from the moment it’s created until the browser is refreshed or closed, the same as the the **spec frame** and **AUT**.
 
-Here’s what the components look like now (nesting shows hierarchical relationship):
+Here’s what the components look like now:
 
-- **top (frame)**: domain1.om
-    - **spec frame**: domain1.com
-    - **AUT (frame)**: domain2.com
-    - **spec bridge**: domain2.com
+```mermaid
+graph TD;
+    top["top frame: domain1.com"]-->specFrame["spec frame: domain1.com"];
+    top-->aut["AUT frame: domain2.com"];
+    top-->specBridge["spec bridge: domain2.com"];
+```
 
 ## cy.origin()
 
