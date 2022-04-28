@@ -2158,7 +2158,7 @@ describe('src/cy/commands/navigation', () => {
             expect(err.message).to.equal(stripIndent`\
             Timed out after waiting \`3000ms\` for your remote page to load on origin(s):\n
             - \`http://localhost:3500\`\n
-            A cross-origin request for \`http://www.foobar.com:3500/fixtures/multi-domain-secondary.html\` was detected.\n
+            A cross-origin request for \`http://www.foobar.com:3500/fixtures/secondary-origin.html\` was detected.\n
             A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:\n
             \`cy.origin(\'http://foobar.com:3500\', () => {\`
             \`  <commands targeting http://www.foobar.com:3500 go here>\`
@@ -2192,7 +2192,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         })
 
-        cy.visit('/fixtures/multi-domain.html')
+        cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="cross-origin-secondary-link"]').click()
       })
 
