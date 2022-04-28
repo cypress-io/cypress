@@ -33,9 +33,6 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   return {
     port,
-    close (cb) {
-      return server.close().then(() => cb?.()).catch(cb)
-    },
   }
 }
 

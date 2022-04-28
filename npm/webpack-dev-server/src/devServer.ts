@@ -76,16 +76,6 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
 
         resolve({
           port,
-          close: (done) => {
-            srv.close((err) => {
-              if (err) {
-                debug('closing dev server, with error', err)
-              }
-
-              debug('closed dev server')
-              done?.(err)
-            })
-          },
         })
       })
 
@@ -101,12 +91,6 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
 
       resolve({
         port: result.server.options.port as number,
-        close: (done) => {
-          debug('closing dev server')
-          result.server.stop().then(() => done?.()).catch(done).finally(() => {
-            debug('closed dev server')
-          })
-        },
       })
     }).catch(reject)
   })
