@@ -158,8 +158,7 @@ function getEmptyCodeBlock (outputType: OutputExtension) {
 
 function maybeFormatWithPrettier (code: string, filePath: string) {
   try {
-    const prettierImportPath = require.resolve('prettier', { paths: [path.dirname(filePath)] })
-    const prettier = require(prettierImportPath) as typeof import('prettier')
+    const prettier = require('prettier') as typeof import('prettier')
 
     return prettier.format(code, {
       filepath: filePath,
