@@ -29,7 +29,7 @@ window.ws = ws
 
 app.config.errorHandler = (error) => {
   if (error instanceof Error) {
-    if (error?.message.startsWith('ResizeObserver loop limit')) {
+    if (error.message.includes('ResizeObserver loop limit exceeded')) {
       // eslint-disable-next-line no-console
       console.error(error)
     } else if (error) {
