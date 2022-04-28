@@ -371,11 +371,10 @@ commands:
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
-            nvm list
       - run:
           name: Check Node
           command: |
-            nvm list
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
             yarn check-node-version
 
   install-chrome:
