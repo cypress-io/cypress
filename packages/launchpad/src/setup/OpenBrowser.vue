@@ -60,8 +60,6 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!)  {
   launchOpenProject {
     id
   }
-  # Removing for now until we decide what the behavior should be
-  # hideBrowserWindow
   setProjectPreferences(testingType: $testingType) {
     currentProject {
       id
