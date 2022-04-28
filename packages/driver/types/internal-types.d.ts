@@ -23,12 +23,6 @@ declare namespace Cypress {
     (action: 'after:screenshot', config: {})
   }
 
-  interface Automation {
-    (eventName: 'clear:cookies', cookies?: Array<Cookie>): Bluebird.Promise<boolean>
-    (eventName: 'get:cookies'):  Bluebird.Promise<Array<Cookies>>
-    (eventName: 'set:cookies', data: Array<Cookie>): Bluebird.Promise<boolean>
-  }
-
   interface Backend {
     (task: 'cross:origin:release:html'): boolean
     (task: 'cross:origin:bridge:ready', args: { originPolicy?: string }): boolean
@@ -59,7 +53,6 @@ declare namespace Cypress {
 
   interface Cypress {
     backend: (eventName: string, ...args: any[]) => Promise<any>
-    automation: Automation
     // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
     ProxyLogging: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
