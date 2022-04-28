@@ -31,6 +31,7 @@
 
           <Button
             variant="outline"
+            data-testid="error-docs-button"
             :prefix-icon="BookIcon"
             prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             :href="t(`launchpadErrors.generic.docsButton.DOCS_TYPE.link`.replace('DOCS_TYPE', docsType))"
@@ -140,7 +141,6 @@ const { t } = useI18n()
 const props = defineProps<{
   gql: BaseErrorFragment
   retry?: () => void
-  onReadDocs?: () => void
 }>()
 
 const markdownTarget = ref()
