@@ -22,7 +22,7 @@ const normalizeOrigin = (urlOrDomain) => {
   return $Location.normalize(origin)
 }
 
-export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
+export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) => {
   let timeoutId
 
   const communicator = Cypress.primaryOriginCommunicator
