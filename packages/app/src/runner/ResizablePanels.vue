@@ -108,11 +108,17 @@ const handleMousedown = (panel: DraggablePanel, event: MouseEvent) => {
   }
 }
 const handleMousemove = (event: MouseEvent) => {
-  if (isNewWidthAllowed(event.clientX, 'panel1')) {
+  if (!panel1IsDragging.value && !panel2IsDragging.value) {
+    // nothing is dragging, ignore mousemove
+
+    return
+  }
+
+  if (panel1IsDragging.value && isNewWidthAllowed(event.clientX, 'panel1')) {
     panel1HandleX.value = event.clientX
     cachedPanel1Width.value = event.clientX - props.offsetLeft
     emit('panelWidthUpdated', { panel: 'panel1', width: panel1Width.value })
-  } else if (isNewWidthAllowed(event.clientX, 'panel2')) {
+  } else if (panel2IsDragging.value && isNewWidthAllowed(event.clientX, 'panel2')) {
     panel2HandleX.value = event.clientX
     panel2Width.value = event.clientX - props.offsetLeft - panel1Width.value
     emit('panelWidthUpdated', { panel: 'panel2', width: panel2Width.value })
@@ -131,7 +137,7 @@ const handleMouseup = () => {
 }
 
 const maxPanel1Width = computed(() => {
-  const unavailableWidth = panel2Width.value + props.minPanel3Width + props.offsetLeft
+  const unavailableWidth = panel2Width.value + props.minPanel3Width
 
   return props.maxTotalWidth - unavailableWidth
 })
@@ -145,7 +151,7 @@ const panel1Width = computed(() => {
 })
 
 const maxPanel2Width = computed(() => {
-  const unavailableWidth = panel1Width.value + props.minPanel3Width + props.offsetLeft
+  const unavailableWidth = panel1Width.value + props.minPanel3Width
 
   return props.maxTotalWidth - unavailableWidth
 })
@@ -166,14 +172,26 @@ function handleResizeEnd (panel: DraggablePanel) {
 }
 
 function isNewWidthAllowed (mouseClientX: number, panel: DraggablePanel) {
+  const isMaxWidthSmall = props.maxTotalWidth < (panel1Width.value + panel2Width.value + props.minPanel3Width)
+  const fallbackWidth = 50
+
   if (panel === 'panel1') {
     const newWidth = mouseClientX - props.offsetLeft
+
+    if (isMaxWidthSmall && newWidth > fallbackWidth) {
+      return true
+    }
+
     const result = panel1IsDragging.value && newWidth >= props.minPanel1Width && newWidth <= maxPanel1Width.value
 
     return result
   }
 
   const newWidth = mouseClientX - props.offsetLeft - panel1Width.value
+
+  if (isMaxWidthSmall && newWidth > fallbackWidth) {
+    return true
+  }
 
   return panel2IsDragging.value && newWidth >= props.minPanel2Width && newWidth <= maxPanel2Width.value
 }
