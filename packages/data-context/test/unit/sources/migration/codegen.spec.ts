@@ -28,7 +28,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -47,7 +47,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -66,7 +66,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -81,7 +81,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -96,7 +96,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -121,7 +121,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -136,7 +136,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -155,7 +155,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -171,7 +171,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -187,7 +187,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
-      hasProjectId: false,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -203,7 +203,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
-      hasProjectId: true,
+      shouldAddCustomE2eSpecPattern: true,
     })
 
     snapshot(generatedConfig)
@@ -221,7 +221,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
-      hasProjectId: true,
+      shouldAddCustomE2eSpecPattern: true,
     })
 
     snapshot(generatedConfig)
