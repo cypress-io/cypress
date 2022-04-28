@@ -33,6 +33,7 @@ async function readCircleEnv () {
   const taskData = await loadInternalTaskData()
 
   try {
+    // if this starts failing, try SSHing into a CircleCI job and see what changed in the $CIRCLE_INTERNAL_CONFIG file's schema
     const circleEnv = taskData['Dispatched']['TaskInfo']['Environment']
 
     if (!circleEnv || !Object.keys(circleEnv).length) throw new Error('An empty Environment object was found.')
