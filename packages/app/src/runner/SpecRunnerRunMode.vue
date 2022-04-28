@@ -42,7 +42,7 @@
           />
         </HideDuringScreenshot>
         <RemoveClassesDuringScreenshotting
-          class="bg-gray-100 p-16px"
+          class="bg-gray-100 h-0 p-16px"
         >
           <ScriptError
             v-if="autStore.scriptError"
