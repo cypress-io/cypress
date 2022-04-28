@@ -37,7 +37,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
-import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './multi-domain/communicator'
+import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
