@@ -1,15 +1,25 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { wrapSchema } from '@graphql-tools/wrap'
-import type { GraphQLResolveInfo } from 'graphql'
+import { buildSchema, GraphQLResolveInfo } from 'graphql'
 import { pathToArray } from 'graphql/jsutils/Path'
-import { remoteSchema } from './remoteSchema'
-import { remoteSchemaExecutor } from './remoteSchemaExecutor'
+import fs from 'fs'
+import path from 'path'
+
+import { cloudSchemaRemoteExecutor } from './cloudSchemaRemoteExecutor'
+
+export const CLOUD_SCHEMA_PATH = fs.readFileSync(path.join(__dirname, '../../schemas', 'cloud.graphql'), 'utf-8')
+
+// Get the Remote schema we've sync'ed locally
+export const cloudSchemaRemote = buildSchema(
+  CLOUD_SCHEMA_PATH,
+  { assumeValid: true },
+)
 
 // Takes the remote schema & wraps with an "executor", allowing us to delegate
 // queries we know should be executed against this server
-export const remoteSchemaWrapped = wrapSchema({
-  schema: remoteSchema,
-  executor: remoteSchemaExecutor,
+export const cloudSchemaRemoteWrapped = wrapSchema({
+  schema: cloudSchemaRemote,
+  executor: cloudSchemaRemoteExecutor,
   // Needed to ensure the operationName is created / propagated correctly
   createProxyingResolver ({
     subschemaConfig,

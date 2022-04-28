@@ -1,9 +1,9 @@
 import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
 import type { GraphQLResolveInfo } from 'graphql'
-import { remoteSchemaWrapped } from './remoteSchemaWrapped'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
 import type { DataContext } from '@packages/data-context'
 import { pathToArray } from 'graphql/jsutils/Path'
+import { cloudSchema } from './cloudSchema'
 
 type ArrVal<T> = T extends Array<infer U> ? U : never
 
@@ -41,7 +41,7 @@ export function cloudProjectBySlug (slug: string, context: DataContext, info: Gr
 export async function delegateToRemoteQueryBatched<T extends KnownBatchFields> (config: DelegateToRemoteQueryBatchedConfig<T>): Promise<ArrVal<CloudQuery[T]> | null | Error> {
   try {
     return await batchDelegateToSchema({
-      schema: remoteSchemaWrapped,
+      schema: cloudSchema,
       info: config.info,
       context: config.context,
       rootValue: config.rootValue ?? {},

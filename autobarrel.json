@@ -6,7 +6,7 @@
   ],
   "ignore": [
     "packages/data-context/src/gen",
-    "packages/graphql/src/stitching",
+    "packages/graphql/src/cloud",
     "packages/graphql/src/testing",
     "packages/graphql/src/gen"
   ]

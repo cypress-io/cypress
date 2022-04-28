@@ -21,6 +21,9 @@ packages/data-context/src/**/*.js
 packages/errors/src/**/*.js
 packages/errors/test/**/*.js
 
+# Generated file
+packages/graphql/schemas/cloud-local.graphql
+
 # from driver
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots

@@ -58,7 +58,7 @@ generates:
       - 'packages/frontend-shared/script/codegen-type-map.js'
 
   './packages/frontend-shared/cypress/support/generated/test-cloud-graphql-types.gen.ts':
-    schema: 'packages/graphql/schemas/cloud.graphql'
+    schema: 'packages/graphql/schemas/cloud-local.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
@@ -67,7 +67,7 @@ generates:
       - 'packages/frontend-shared/script/codegen-type-map.js'
 
   './packages/graphql/src/gen/cloud-source-types.gen.ts':
-    schema: 'packages/graphql/schemas/cloud.graphql'
+    schema: 'packages/graphql/schemas/cloud-local.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'

@@ -2,7 +2,7 @@ import { plugin } from 'nexus'
 import debugLib from 'debug'
 import { getNamedType, isNonNullType } from 'graphql'
 import type { DataContext } from '@packages/data-context'
-import { remoteSchema } from '../stitching/remoteSchema'
+import { cloudSchema } from '../cloud/cloudSchema'
 
 const NO_RESULT = {}
 // 2ms should be enough time to resolve from the local cache of the
@@ -30,7 +30,7 @@ export const nexusDeferIfNotLoadedPlugin = plugin({
 
     // Also don't need to if the type is in the cloud schema, (and isn't a Query) since these don't
     // actually need to resolve themselves, they're resolved from the remote request
-    if (parentTypeName !== 'Query' && remoteSchema.getType(parentTypeName)) {
+    if (parentTypeName !== 'Query' && cloudSchema.getType(parentTypeName)) {
       return
     }
 

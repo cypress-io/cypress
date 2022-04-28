@@ -3,8 +3,8 @@ import { makeSchema, connectionPlugin } from 'nexus'
 
 import * as schemaTypes from './schemaTypes/'
 import { nodePlugin } from './plugins/nexusNodePlugin'
-import { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'
 import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin, nexusDeferIfNotLoadedPlugin } from './plugins'
+import { cloudSchema } from './cloud/cloudSchema'
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
@@ -24,7 +24,7 @@ export const graphqlSchema = makeSchema({
     export: 'DataContext',
   },
   mergeSchema: {
-    schema: remoteSchemaWrapped,
+    schema: cloudSchema,
     skipFields: {
       Mutation: ['test'],
     },

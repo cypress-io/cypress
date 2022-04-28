@@ -11,7 +11,7 @@ export interface RemoteExecutionRoot {
  * Takes a "document" and executes it against the GraphQL schema
  * @returns
  */
-export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
+export const cloudSchemaRemoteExecutor = async (obj: Record<string, any>) => {
   const { document: _document, operationType, variables, context: _context, rootValue } = obj
 
   const document: DocumentNode = _document

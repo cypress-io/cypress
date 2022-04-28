@@ -29,7 +29,7 @@ interface InternalAddProjectOpts {
   open?: boolean
 }
 
-const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
+const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud-local.graphql'), 'utf8'))
 
 // require'd so we don't conflict with globals loaded in @packages/types
 const chai = require('chai')
