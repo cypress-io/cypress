@@ -103,8 +103,6 @@ system-tests/fixtures/large-img
 scripts/support
 binary-url.json
 
-# Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts
-.eslintrc.js
 cli/visual-snapshots
 
 # Created by https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
