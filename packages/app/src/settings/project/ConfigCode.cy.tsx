@@ -75,10 +75,24 @@ describe('<ConfigCode />', () => {
 
     it('sorts the config in alphabetical order', () => {
       let lastEntry = ''
+      let nesting = 0
 
-      config.forEach((entry) => {
-        expect(entry.field.localeCompare(lastEntry)).to.be.greaterThan(0)
-        lastEntry = entry.field
+      cy.get(selector).within(($selector) => {
+        cy.get('span').each(($el: any) => {
+          let configText = $el[0].innerText.split(':')[0]
+          const configFields = config.map((entry) => entry.field)
+
+          if (configText === '{') {
+            nesting++
+          } else if (configText === '}') {
+            nesting--
+          }
+
+          if (nesting === 0 && configFields.includes(configText)) {
+            expect(configText.localeCompare(lastEntry)).to.be.greaterThan(0)
+            lastEntry = configText
+          }
+        })
       })
     })
 
