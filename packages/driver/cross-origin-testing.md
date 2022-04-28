@@ -6,8 +6,8 @@ The goal of this document is to give a technical overview of the architecture be
 
 See [Node.js’s URL doc](https://nodejs.org/api/url.html#url-strings-and-url-objects) for a handy breakdown of URL parts
 
-- **domain**: The top-level domain or super-domain of a URL. A hostname without the subdomain. (e.g. example.com)
-- **origin**: The combination of the protocol, hostname, and port of a URL. For the purposes of Cypress, the subdomain is irrelevant. (e.g. http://example.com:3500)
+- **domain**: The top-level domain or super-domain of a URL. A hostname without the subdomain. (e.g. `example.com`)
+- **origin**: The combination of the protocol, hostname, and port of a URL. For the purposes of Cypress, the subdomain is irrelevant. (e.g. `http://example.com:3500`)
 - **top**: The main window/frame of the browser
 - **primary origin**: The origin that top is on
 - **secondary origin**: Any origin that is not the primary origin
@@ -32,7 +32,7 @@ In a single test (`it` + hooks), the **AUT** must remain on the same origin or a
 
 ## Frame architecture (with multi-domain)
 
-Let’s say the primary origin is `domain1.com` and the secondary origin is domain2.com. The test has visited domain1.com and then issued a click that caused the **AUT** to navigate to domain2.com.
+Let’s say the primary origin is `domain1.com` and the secondary origin is `domain2.com`. The test has visited `domain1.com` and then issued a click that caused the **AUT** to navigate to `domain2.com`.
 
 Since the **AUT** is no longer on the same origin as **top**, they can no longer communicate synchronously. In order to facilitate cross-origin testing, we create another iframe we call the **spec bridge**. It exists as a sibling to the **AUT** (meaning they share the same parent frame, not to be confused with a DOM sibling). It contains a version of the driver tailored to cross-origin testing, with a different entry-point to the primary driver, but containing mostly the same code.
 
