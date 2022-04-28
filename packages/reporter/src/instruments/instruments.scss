@@ -3,9 +3,13 @@
     .route-alias-name {
       border-radius: 4px;
       background-color: $teal-500;
-      color: $teal-50;
-      padding: 0px 5px;
+      color: $white;
       display: inline-block;
+      font-family: $font-sans;
+      font-style: normal;
+      font-size: 12px;
+      line-height: 16px;
+      padding: 0px 5px;
     }
 
     .instrument-content {
