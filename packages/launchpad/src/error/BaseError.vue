@@ -135,7 +135,5 @@ const props = defineProps<{
 
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
-
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
-
 </script>
