@@ -219,11 +219,22 @@
   },
   "launchpadErrors": {
     "generic": {
-      "header": "Something went wrong",
-      "message": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
-      "readTheDocsButton": "Read the docs",
       "retryButton": "Try again",
-      "stackTraceLabel": "Stack Trace"
+      "stackTraceLabel": "Stack trace",
+      "docsButton": {
+        "configGuide": {
+          "text": "Configuration Guide",
+          "link": "https://docs.cypress.io/guides/references/configuration"
+        },
+        "dashboardGuide": {
+          "text": "Cypress Dashboard Guide",
+          "link": "https://docs.cypress.io/guides/dashboard/introduction"
+        },
+        "docsHomepage": {
+          "text": "Cypress Docs",
+          "link": "https://docs.cypress.io"
+        }
+      }
     },
     "noInternet": {
       "header": "You have no internet connection",

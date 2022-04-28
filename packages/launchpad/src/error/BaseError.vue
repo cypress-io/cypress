@@ -28,6 +28,15 @@
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
+
+          <Button
+            variant="outline"
+            :prefix-icon="BookIcon"
+            prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
+            :href="t(`launchpadErrors.generic.docsButton.DOCS_TYPE.link`.replace('DOCS_TYPE', docsType))"
+          >
+            {{ t(`launchpadErrors.generic.docsButton.DOCS_TYPE.text`.replace('DOCS_TYPE', docsType)) }}
+          </Button>
         </div>
       </div>
 
@@ -110,6 +119,7 @@ import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdo
 import RestartIcon from '~icons/cy/restart_x16.svg'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
+import BookIcon from '~icons/cy/book_x24'
 
 gql`
 fragment BaseError on ErrorWrapper {
@@ -136,4 +146,24 @@ const props = defineProps<{
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
+
+const getDocsType = (): string => {
+  const { errorType, errorStack } = baseError.value
+
+  // Full list of errors lives in "packages/errors/src/errors.ts", but cannot be imported to Vue
+  switch (true) {
+    case errorStack.startsWith('UNKNOWN'):
+      return 'docsHomepage'
+    case errorType.includes('RECORD'):
+    case errorType.includes('PROJECT'):
+    case errorType.includes('DASHBOARD'):
+    case errorType.includes('PLAN'):
+      return 'dashboardGuide'
+    default:
+      return 'configGuide'
+  }
+}
+
+const docsType: string | undefined = props.retry ? getDocsType() : undefined
+
 </script>
