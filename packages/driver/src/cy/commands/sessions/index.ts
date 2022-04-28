@@ -33,12 +33,13 @@ export default function (Commands, Cypress, cy) {
     }
   }
 
-  const sessions = new SessionsManager(Cypress, cy)
+  const sessionsManager = new SessionsManager(Cypress, cy)
+  const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
     Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        sessions.currentTestRegisteredSessions.clear()
+        sessionsManager.currentTestRegisteredSessions.clear()
 
         return navigateAboutBlank(false)
         .then(() => sessions.clearCurrentSessionData())
@@ -91,8 +92,8 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession: SessionData = sessions.getActiveSession(id)
-      const isRegisteredSessionForTest = sessions.currentTestRegisteredSessions.has(id)
+      let existingSession: SessionData = sessionsManager.getActiveSession(id)
+      const isRegisteredSessionForTest = sessionsManager.currentTestRegisteredSessions.has(id)
 
       if (!setup) {
         if (!existingSession || !isRegisteredSessionForTest) {
@@ -112,7 +113,7 @@ export default function (Commands, Cypress, cy) {
             validate: options.validate,
           })
 
-          sessions.currentTestRegisteredSessions.set(id, true)
+          sessionsManager.currentTestRegisteredSessions.set(id, true)
         }
       }
 
@@ -165,7 +166,7 @@ export default function (Commands, Cypress, cy) {
           _.extend(existingSession, data)
           existingSession.hydrated = true
 
-          sessions.setActiveSession({ [existingSession.id]: existingSession })
+          sessionsManager.setActiveSession({ [existingSession.id]: existingSession })
 
           dataLog.set({
             consoleProps: () => getConsoleProps(existingSession),
@@ -406,5 +407,5 @@ export default function (Commands, Cypress, cy) {
     },
   })
 
-  Cypress.session = sessions.publicAPI()
+  Cypress.session = sessions
 }
