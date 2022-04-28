@@ -36,7 +36,7 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
 
     return executorResult
   } catch (error) {
-    if (error.networkError?.message === 'Unauthorized' || error.graphQLErrors.some((e) => e.message === 'Unauthorized')) {
+    if (error.networkError?.message === 'Unauthorized' || error.graphQLErrors.some((e: Error) => e.message === 'Unauthorized')) {
       await context.actions.auth.logout()
 
       return { data: null }
