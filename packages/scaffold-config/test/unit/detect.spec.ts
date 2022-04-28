@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import fs from 'fs-extra'
+import globby from 'globby'
 import type { ProjectFixtureDir } from '@tooling/system-tests'
 import { detectFramework, detectLanguage } from '../../src'
 import Fixtures from '@tooling/system-tests'
@@ -203,35 +204,110 @@ describe('detectFramework', () => {
 describe('detectLanguage', () => {
   it('existing project with `cypress.config.ts`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-ts')
-    const actual = detectLanguage(projectRoot)
+    const actual = detectLanguage(projectRoot, {})
 
     expect(actual).to.eq('ts')
   })
 
   it('existing project with `cypress.config.js`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-js')
-    const actual = detectLanguage(projectRoot)
+    const actual = detectLanguage(projectRoot, {})
 
     expect(actual).to.eq('js')
   })
 
   it('pristine project with typescript in package.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-yarn')
-    const actual = detectLanguage(projectRoot)
+    const actual = detectLanguage(projectRoot, {})
 
     expect(actual).to.eq('ts')
   })
 
   it('pristine project with root level tsconfig.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-npm')
-    const actual = detectLanguage(projectRoot)
+    const actual = detectLanguage(projectRoot, {})
 
     expect(actual).to.eq('ts')
   })
 
   it('pre-migration project with tsconfig.json in cypress directory', async () => {
     const projectRoot = await scaffoldMigrationProject('migration')
-    const actual = detectLanguage(projectRoot)
+    const actual = detectLanguage(projectRoot, {})
+
+    expect(actual).to.eq('ts')
+  })
+
+  //  *   IF `pluginsFile` OR `supportFile` uses `.ts` extension
+  //  *     USE TYPESCRIPT
+  //  *   ELSE IF at least 1 spec file (`cypress/integration/**`) uses `.ts` extension
+  //  *     USE TYPESCRIPT
+  //  *   ELSE
+  //  *     DO NOT USE TYPESCRIPT
+  //  *   END
+
+  const joinPosix = (...s: string[]) => path.join(...s).split(path.sep).join(path.posix.sep)
+
+  function removeAllTsFilesExcept (projectRoot: string, filename?: string) {
+    const files = globby.sync(joinPosix(projectRoot, '**/*.{ts,tsx}'), { onlyFiles: true })
+
+    for (const f of files) {
+      if (!filename) {
+        fs.rmSync(f)
+      } else if (!f.includes(filename)) {
+        fs.rmSync(f)
+      }
+    }
+  }
+
+  it('cypress.json project with a TypeScript supportFile', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
+
+    removeAllTsFilesExcept(projectRoot, 'support')
+
+    const actual = detectLanguage(projectRoot, {})
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('cypress.json project with a TypeScript pluginsFile', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
+
+    removeAllTsFilesExcept(projectRoot, 'plugins')
+
+    const actual = detectLanguage(projectRoot, {})
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('cypress.json project with a TypeScript integration specs', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
+
+    // detected based on `integration/**/*.tsx
+    removeAllTsFilesExcept(projectRoot, 'integration')
+
+    const actual = detectLanguage(projectRoot, {})
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('cypress.json project with a TypeScript integration spec', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
+
+    // detected based on `integration/**/*.tsx
+    removeAllTsFilesExcept(projectRoot, 'integration')
+
+    const actual = detectLanguage(projectRoot, {})
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('cypress.json project with a TypeScript commponent spec', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
+
+    // detected based on `integration/**/*.tsx
+    removeAllTsFilesExcept(projectRoot, 'component')
+
+    const actual = detectLanguage(projectRoot, {})
 
     expect(actual).to.eq('ts')
   })

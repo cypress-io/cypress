@@ -3,6 +3,7 @@ import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs-extra'
 import globby from 'globby'
+import type { LegacyCypressConfigJson } from '@packages/data-context/src/sources'
 
 interface DetectFramework {
   framework?: typeof WIZARD_FRAMEWORKS[number]
@@ -84,10 +85,22 @@ export function detectFramework (projectPath: string): DetectFramework {
  *   ELSE
  *     DOES NOT HAVE TYPESCRIPT
  *   END
+ * ELSE IF HAS CYPRESS_JSON
+ *   IF cypress/* contains *.ts file
+ *     USE TYPESCRIPT
+ *   ELSE
+ *     DO NOT USE TYPESCRIPT
+ *   END
+ * ELSE IS NEW PROJECT
+ *   IF `typescript` dependency in `package.json` OR `tsconfig.json` in `projectRoot/*`
+ *     HAS TYPESCRIPT
+ *   ELSE
+ *     DOES NOT HAVE TYPESCRIPT
+ *   END
  * END
  */
 
-export function detectLanguage (projectRoot: string): 'js' | 'ts' {
+export function detectLanguage (projectRoot: string, cypressJson: LegacyCypressConfigJson): 'js' | 'ts' {
   try {
     if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
       return 'ts'
@@ -110,12 +123,18 @@ export function detectLanguage (projectRoot: string): 'js' | 'ts' {
     //
   }
 
-  const joinPosix = (...s: string[]) => path.join(...s).split(path.sep).join(path.posix.sep)
+  const joinPosix = (...s: string[]) => {
+    return path.join(...s).split(path.sep).join(path.posix.sep)
+  }
 
-  const glob = joinPosix(projectRoot, '**/*tsconfig.json')
-  const tsConfig = globby.sync(glob, { onlyFiles: true })
+  const globs = [
+    joinPosix(projectRoot, '**/*tsconfig.json'),
+    joinPosix(projectRoot, 'cypress', '**/*.{ts,tsx}'),
+  ]
 
-  if (tsConfig.length > 0) {
+  const tsFiles = globby.sync(globs, { onlyFiles: true })
+
+  if (tsFiles.length > 0) {
     return 'ts'
   }
 
