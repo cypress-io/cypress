@@ -76,6 +76,7 @@ describe('<ConfigCode />', () => {
     it('sorts the config in alphabetical order', () => {
       let lastEntry = ''
       let nesting = 0
+      let checkedFieldCount = 0
       const configFields = config.map((entry) => entry.field)
 
       cy.get(selector).within(($selector) => {
@@ -91,9 +92,12 @@ describe('<ConfigCode />', () => {
           if (nesting === 0 && configFields.includes(configText)) {
             expect(configText.localeCompare(lastEntry)).to.be.greaterThan(0)
             lastEntry = configText
+            checkedFieldCount++
           }
         })
       })
+
+      cy.then(() => expect(checkedFieldCount).to.eq(configFields.length))
     })
 
     it('has an edit button', () => {
