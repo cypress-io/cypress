@@ -4,30 +4,32 @@
     class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center"
   >
     <div>
-      <h1
-        v-if="baseError.title"
-        class="font-medium leading-snug pb-24px text-32px text-gray-900"
-        data-testid="error-header"
-      >
-        <slot name="header">
-          {{ baseError.title }}
-        </slot>
-      </h1>
-
-      <div
-        v-if="props.retry"
-        class="w-full gap-16px inline-flex"
-      >
-        <Button
-          size="lg"
-          variant="primary"
-          data-testid="error-retry-button"
-          :prefix-icon="RestartIcon"
-          prefix-icon-class="icon-dark-white"
-          @click="retry"
+      <div class="p-24px pt-0">
+        <h1
+          v-if="baseError.title"
+          class="font-medium leading-snug text-32px text-gray-900"
+          data-testid="error-header"
         >
-          {{ t('launchpadErrors.generic.retryButton') }}
-        </Button>
+          <slot name="header">
+            {{ baseError.title }}
+          </slot>
+        </h1>
+
+        <div
+          v-if="props.retry"
+          class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
+        >
+          <Button
+            class=""
+            variant="outline"
+            data-testid="error-retry-button"
+            :prefix-icon="RestartIcon"
+            prefix-icon-class="icon-dark-indigo-500"
+            @click="retry"
+          >
+            {{ t('launchpadErrors.generic.retryButton') }}
+          </Button>
+        </div>
       </div>
 
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
@@ -93,7 +95,6 @@
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
 
       <slot name="stack" />
-      <!-- rachel todo: add margin below stack -->
     </div>
   </div>
 </template>
@@ -135,5 +136,7 @@ const props = defineProps<{
 
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
+
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
+
 </script>
