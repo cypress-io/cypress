@@ -407,9 +407,6 @@ type CurrentProject implements Node & ProjectLike {
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
-  """Whether the project has Typescript"""
-  hasTypescript: Boolean
-
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
@@ -430,6 +427,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether we are currently loading the setupNodeEvents"""
   isLoadingNodeEvents: Boolean
+
+  """Whether the project has Typescript"""
+  isUsingTypeScript: Boolean
 
   """Whether the project needs to be migrated before proceeding"""
   needsLegacyConfigMigration: Boolean
@@ -839,11 +839,11 @@ type Migration {
   """whether the testFiles member is custom or not in integration"""
   hasCustomIntegrationTestFiles: Boolean!
 
-  """Whether the project has Typescript"""
-  hasTypescript: Boolean
-
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
+
+  """Whether the project has Typescript"""
+  isUsingTypeScript: Boolean
 
   """List of files needing manual conversion"""
   manualFiles: ManualMigration
@@ -1332,9 +1332,6 @@ The Wizard is a container for any state associated with initial onboarding to Cy
 type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
-
-  """All of the languages to choose from"""
-  allLanguages: [WizardCodeLanguage!]!
   bundler: WizardBundler
   framework: WizardFrontendFramework
 
@@ -1343,7 +1340,6 @@ type Wizard {
 
   """Command to install required command"""
   installDependenciesCommand: String
-  language: WizardCodeLanguage
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
@@ -1364,26 +1360,6 @@ type WizardBundler implements Node {
 
   """The name of the framework"""
   type: SupportedBundlers!
-}
-
-"""
-A code language that the user can choose from to create their cypress.config
-"""
-type WizardCodeLanguage implements Node {
-  """Relay style Node ID field for the WizardCodeLanguage field"""
-  id: ID!
-
-  """Whether this is the detected language"""
-  isDetected: Boolean!
-
-  """Whether this is the selected language in the wizard"""
-  isSelected: Boolean!
-
-  """The name of the language"""
-  name: String!
-
-  """The key of the language"""
-  type: CodeLanguageEnum!
 }
 
 enum WizardConfigFileStatusEnum {
@@ -1448,6 +1424,5 @@ type WizardNpmPackage implements Node {
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
-  codeLanguage: CodeLanguageEnum
   framework: FrontendFrameworkEnum
 }

@@ -190,14 +190,14 @@ export class MigrationDataSource {
       throw Error('Need currentProject!')
     }
 
-    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+    const { isUsingTypeScript } = this.ctx.lifecycleManager.metaState
 
     return createConfigString(this.legacyConfig, {
       hasComponentTesting: this.ctx.coreData.migration.flags.hasComponentTesting,
       hasE2ESpec: this.ctx.coreData.migration.flags.hasE2ESpec,
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
-      hasTypescript,
+      isUsingTypeScript,
     })
   }
 

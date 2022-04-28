@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import fs from 'fs-extra'
 import globby from 'globby'
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import { detectFramework, detectLanguage } from '../../src'
+import { detectFramework, detectLanguage, PkgJson } from '../../src'
 import Fixtures from '@tooling/system-tests'
 import path from 'path'
 
@@ -204,46 +204,38 @@ describe('detectFramework', () => {
 describe('detectLanguage', () => {
   it('existing project with `cypress.config.ts`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-ts')
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
 
   it('existing project with `cypress.config.js`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-js')
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('js')
   })
 
   it('pristine project with typescript in package.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-yarn')
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
 
   it('pristine project with root level tsconfig.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-npm')
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
 
   it('pre-migration project with tsconfig.json in cypress directory', async () => {
     const projectRoot = await scaffoldMigrationProject('migration')
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
-
-  //  *   IF `pluginsFile` OR `supportFile` uses `.ts` extension
-  //  *     USE TYPESCRIPT
-  //  *   ELSE IF at least 1 spec file (`cypress/integration/**`) uses `.ts` extension
-  //  *     USE TYPESCRIPT
-  //  *   ELSE
-  //  *     DO NOT USE TYPESCRIPT
-  //  *   END
 
   const joinPosix = (...s: string[]) => path.join(...s).split(path.sep).join(path.posix.sep)
 
@@ -264,7 +256,7 @@ describe('detectLanguage', () => {
 
     removeAllTsFilesExcept(projectRoot, 'support')
 
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
@@ -274,7 +266,7 @@ describe('detectLanguage', () => {
 
     removeAllTsFilesExcept(projectRoot, 'plugins')
 
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
@@ -285,7 +277,7 @@ describe('detectLanguage', () => {
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'integration')
 
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
@@ -296,7 +288,7 @@ describe('detectLanguage', () => {
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'integration')
 
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })
@@ -307,7 +299,7 @@ describe('detectLanguage', () => {
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'component')
 
-    const actual = detectLanguage(projectRoot, {})
+    const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
   })

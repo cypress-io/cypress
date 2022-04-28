@@ -3,7 +3,7 @@ import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs-extra'
 import globby from 'globby'
-import type { LegacyCypressConfigJson } from '@packages/data-context/src/sources'
+import type { PkgJson } from '.'
 
 interface DetectFramework {
   framework?: typeof WIZARD_FRAMEWORKS[number]
@@ -100,7 +100,7 @@ export function detectFramework (projectPath: string): DetectFramework {
  * END
  */
 
-export function detectLanguage (projectRoot: string, cypressJson: LegacyCypressConfigJson): 'js' | 'ts' {
+export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | 'ts' {
   try {
     if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
       return 'ts'
@@ -114,8 +114,6 @@ export function detectLanguage (projectRoot: string, cypressJson: LegacyCypressC
   }
 
   try {
-    const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
-
     if ('typescript' in (pkgJson.dependencies || {}) || 'typescript' in (pkgJson.devDependencies || {})) {
       return 'ts'
     }

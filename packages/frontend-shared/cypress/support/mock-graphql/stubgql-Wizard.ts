@@ -1,5 +1,4 @@
 import type { Wizard, WizardBundler } from '../generated/test-graphql-types.gen'
-import { CODE_LANGUAGES } from '@packages/types/src/constants'
 import * as wizardDeps from '@packages/scaffold-config/src/dependencies'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
@@ -60,21 +59,6 @@ export const stubWizard: MaybeResolver<Wizard> = {
       category,
       type,
       supportedBundlers: supportedBundlers as unknown as WizardBundler[],
-      isSelected: idx === 0,
-      isDetected: false,
-    }
-  }),
-  language: {
-    ...testNodeId('WizardCodeLanguage'),
-    type: 'ts',
-    name: 'TypeScript',
-    isSelected: true,
-    isDetected: false,
-  },
-  allLanguages: CODE_LANGUAGES.map((language, idx) => {
-    return {
-      ...testNodeId('WizardCodeLanguage'),
-      ...language,
       isSelected: idx === 0,
       isDetected: false,
     }

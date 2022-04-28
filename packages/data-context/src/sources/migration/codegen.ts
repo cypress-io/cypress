@@ -38,7 +38,7 @@ export interface CreateConfigOptions {
   hasPluginsFile: boolean
   hasComponentTesting: boolean
   projectRoot: string
-  hasTypescript: boolean
+  isUsingTypeScript: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
@@ -167,7 +167,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
-    if (options.hasTypescript) {
+    if (options.isUsingTypeScript) {
       return formatConfig(
         `import { defineConfig } from 'cypress'
   
@@ -184,7 +184,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
     )
   }
 
-  if (options.hasTypescript) {
+  if (options.isUsingTypeScript) {
     return formatConfig(`export default {${globalString}${e2eString}${componentString}}`, options.projectRoot)
   }
 

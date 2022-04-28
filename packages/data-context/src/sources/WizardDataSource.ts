@@ -19,7 +19,7 @@ export class WizardDataSource {
       ),
     ]
 
-    if (this.ctx.coreData.wizard.chosenLanguage === 'ts') {
+    if (this.ctx.lifecycleManager.metaState.isUsingTypeScript) {
       packages.push({
         ...inPkgJson(WIZARD_DEPENDENCY_TYPESCRIPT, this.ctx.currentProject),
         dependency: WIZARD_DEPENDENCY_TYPESCRIPT,

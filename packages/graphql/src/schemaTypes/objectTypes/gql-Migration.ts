@@ -273,10 +273,10 @@ export const Migration = objectType({
       },
     })
 
-    t.boolean('hasTypescript', {
+    t.boolean('isUsingTypeScript', {
       description: 'Whether the project has Typescript',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.metaState.hasTypescript
+        return ctx.lifecycleManager.metaState.isUsingTypeScript
       },
     })
   },

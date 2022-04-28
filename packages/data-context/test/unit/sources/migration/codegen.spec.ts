@@ -27,7 +27,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -45,7 +45,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -63,7 +63,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -77,7 +77,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -91,7 +91,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: false,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -115,7 +115,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -129,7 +129,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -147,7 +147,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
     })
 
     snapshot(generatedConfig)
@@ -162,7 +162,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: true,
+      isUsingTypeScript: true,
     })
 
     snapshot(generatedConfig)
@@ -177,7 +177,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: true,
+      isUsingTypeScript: true,
     })
 
     snapshot(generatedConfig)

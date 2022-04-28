@@ -27,12 +27,6 @@
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"
       />
-      <SelectLanguage
-        :name="t('setupPage.projectSetup.languageLabel')"
-        :options="languages || []"
-        :value="props.gql.language?.type ?? 'js'"
-        @select="val => onWizardSetup('codeLanguage', val)"
-      />
     </div>
   </WizardLayout>
 </template>
@@ -41,7 +35,6 @@
 import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import SelectFwOrBundler from './SelectFwOrBundler.vue'
-import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
 import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
 import {
@@ -87,17 +80,6 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isDetected
-  }
-  language {
-    id
-    name
-    type
-    isSelected
-  }
-  allLanguages {
-    id
-    name
-    type
   }
 }
 `
@@ -170,12 +152,10 @@ const onBack = () => {
   clearTestingTypeMutation.executeMutation({})
 }
 
-const languages = computed(() => props.gql.allLanguages ?? [])
-
 const canNavigateForward = computed(() => {
-  const { bundler, framework, language } = props.gql
+  const { bundler, framework } = props.gql
 
-  return bundler !== null && framework !== null && language !== null
+  return bundler !== null && framework !== null
 })
 
 </script>
