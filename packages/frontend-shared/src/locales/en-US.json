@@ -122,6 +122,7 @@
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E Specs",
     "gitStatusHeader": "Git Status",
+    "latestRunsHeader": "Latest Runs",
     "rows": {
       "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
       "gitInfo": "{fileState} {timeAgo}"

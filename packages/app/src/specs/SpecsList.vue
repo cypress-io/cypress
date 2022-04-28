@@ -32,7 +32,7 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-2 children:font-medium children:text-gray-800 "
+      class="mb-4 grid grid-cols-3 children:font-medium children:text-gray-800 "
     >
       <div
         class="flex items-center justify-between"
@@ -43,6 +43,9 @@
       </div>
       <div class="flex items-center justify-between">
         <div>{{ t('specPage.gitStatusHeader') }}</div>
+      </div>
+      <div class="flex items-center justify-between">
+        <div>{{ t('specPage.latestRunsHeader') }}</div>
       </div>
     </div>
     <!--
@@ -105,6 +108,13 @@
               :gql="row.data.data.gitInfo"
             />
           </template>
+          
+          <template #latest-runs>
+            <RunStatusDots
+              v-if="row.data.isLeaf"
+              :runs="row.data.data?.runInfo?.recentRuns ?? []"
+            />
+          </template>
         </SpecsListRowItem>
       </div>
     </div>
@@ -115,13 +125,13 @@
       class="mt-56px"
       @clear="handleClear"
     />
-    <div>{{JSON.stringify(specs)}}</div>
   </div>
 </template>
 
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
+import RunStatusDots from './RunStatusDots.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
@@ -140,6 +150,7 @@ import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useRoute } from 'vue-router'
+import type { CloudProjectSpecs } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -175,8 +186,9 @@ fragment SpecsList on Spec {
 
 
 gql`
-fragment CloudSpecs_123 on CloudProject{
-  specs(specPaths: ["cypress/e2e/practice/practice.cy.js"]) {
+fragment CloudSpecs_123 on CloudProject {
+  # temporarily use hardcoded paths, pending an update to the GQL layer
+  specs(specPaths: ["cypress/e2e/practice/practice.cy.js","cypress/e2e/final/somethingelse.cy.js","cypress/e2e/final/app.cy.js","cypress/e2e/app.cy.js"]) {
       specPath
       averageDuration
       recentRuns {
@@ -249,14 +261,14 @@ function handleClear () {
 const specs = computed(() => {
   const specs2 = cachedSpecs.value.map((x) => {
     const s = makeFuzzyFoundSpec(x)
-    // console.log(JSON.stringify(props.gql.currentProject.cloudProject))
-    // console.log(s)
-    const runInfo = props.gql.currentProject.cloudProject.specs.find(ss=>ss.specPath === s.name)
-    // console.log(runInfo)
-    return {
-      ...s,
-      runInfo
+    if(props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'){
+      const runInfo = props.gql.currentProject?.cloudProject?.specs?.find(ss=>ss?.specPath === s.name)
+      return {
+        ...s,
+        runInfo
+      }
     }
+    return s
   })
 
   if (!debouncedSearchString.value) {
@@ -268,7 +280,7 @@ const specs = computed(() => {
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
-    buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true },
+    buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment } & {runInfo: CloudProjectSpecs} >(specs.value), { dropRoot: true },
   )
 })
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
