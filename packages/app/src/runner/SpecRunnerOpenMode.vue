@@ -227,13 +227,15 @@ function getMinimum (absoluteMinimum: number, doesContentFit: boolean) {
 }
 
 const minWidths = computed(() => {
-  const isWindowTooSmall = windowWidth.value < (preferredMinimumPanelWidth * 3 + collapsedNavBarWidth)
+  let smallestIdealWindowSize = preferredMinimumPanelWidth * 2 + collapsedNavBarWidth
   let contentWidth = reporterWidthPreferences.value + collapsedNavBarWidth + preferredMinimumPanelWidth
 
   if (isSpecsListOpenPreferences.value) {
     contentWidth += specsListWidthPreferences.value
+    smallestIdealWindowSize += preferredMinimumPanelWidth
   }
 
+  const isWindowTooSmall = windowWidth.value < smallestIdealWindowSize
   const doesContentFit = contentWidth > windowWidth.value || isWindowTooSmall
 
   return {
