@@ -27,17 +27,6 @@ const ws = createWebsocket(config.socketIoRoute)
 
 window.ws = ws
 
-app.config.errorHandler = (error) => {
-  if (error instanceof Error) {
-    if (error.message.includes('ResizeObserver loop limit exceeded')) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    } else if (error) {
-      throw error
-    }
-  }
-}
-
 // This injects the Cypress driver and Reporter, which are bundled with Webpack.
 // No need to wait for it to finish - it's resolved async with a deferred promise,
 // So it'll be ready when we need to run a spec. If not, we will wait for it.
