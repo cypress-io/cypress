@@ -897,7 +897,9 @@ commands:
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
-          command: yarn binary-zip --platform $PLATFORM
+          command: |
+          apt-get update && apt-get install -y zip
+          yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
