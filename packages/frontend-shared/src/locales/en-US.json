@@ -509,17 +509,17 @@
     "after": "After",
     "heresWhy": "here's why:",
     "renameAuto": {
-      "title": "We'll automatically rename your specs in this step",
+      "title": "We recommend automatically renaming your specs in this step",
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
       "optedOutMessage": "You've opted not to rename your spec file extension. You may need to change your specPattern later so we can still find your spec files.",
-      "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
+      "folderRenameMessage": "You've opted not to rename your spec file extension, we'll only rename the folder",
       "modals": {
         "title": "Change the existing spec file extension",
         "step1": {
-          "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team.",
+          "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team. You may need to change your specPattern later if you don't use the recommended filename extension.",
           "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
           "line2": "All new spec files created within Cypress will use the default pattern of: ",
           "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
@@ -530,7 +530,6 @@
           "buttonCancel": "Let Cypress rename files"
         },
         "step2": {
-          "warning": "You may need to change your specPattern later if you don't use the recommended filename extension.",
           "label": "Choose from the following filename patterns:",
           "option1": "{0} (Recommended)",
           "option2": "Don't rename anything — keep what I have.",

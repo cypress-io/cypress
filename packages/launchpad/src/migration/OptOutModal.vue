@@ -6,10 +6,54 @@
   >
     <Alert
       status="warning"
-      :title="t('migration.renameAuto.modals.step2.warning')"
+      :title="t('migration.renameAuto.modals.step1.warning')"
       :icon="WarningIcon"
       icon-classes="icon-dark-orange-400"
     />
+    <MigrationTitle
+      :title="t('migration.renameAuto.title')"
+      class="mt-24px"
+    />
+    <MigrationList>
+      <MigrationListItem>
+        {{ t('migration.renameAuto.modals.step1.line1') }}
+      </MigrationListItem>
+      <MigrationListItem>
+        {{ t('migration.renameAuto.modals.step1.line2') }}
+        <CodeTag class="text-jade-500">
+          [filename].cy.[ext]
+        </CodeTag>
+      </MigrationListItem>
+      <MigrationListItem>
+        {{ t('migration.renameAuto.modals.step1.line3') }}
+      </MigrationListItem>
+      <MigrationListItem>
+        {{ t('migration.renameAuto.modals.step1.line4') }}
+        <CodeTag class="text-jade-500">
+          [filename].cy.[ext]
+        </CodeTag>
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.modals.step1.line5"
+        >
+          <CodeTag class="text-jade-500">
+            [filename].cy.[ext]
+          </CodeTag>
+        </i18n-t>
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.modals.step1.line6"
+        >
+          <CodeTag class="text-jade-500">
+            [filename].cy.[ext]
+          </CodeTag>
+        </i18n-t>
+      </MigrationListItem>
+    </MigrationList>
     <Radio
       v-model:value="value"
       :options="options"
@@ -64,6 +108,9 @@ import CodeTag from '@cy/components/CodeTag.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Radio from '@cy/components/Radio.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
+import MigrationList from './fragments/MigrationList.vue'
+import MigrationTitle from './fragments/MigrationTitle.vue'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 import { useI18n } from '@cy/i18n'
 import type { PossibleOption } from './types'
 

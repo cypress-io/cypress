@@ -36,7 +36,7 @@
         <span class="m-8px text-gray-100">——</span>
         <a
           class="cursor-pointer text-indigo-500 hover:underline"
-          @click="step1Modal = true"
+          @click="optOutModal = true"
         >
           {{ t('migration.renameAuto.changeButton') }}
         </a>
@@ -66,22 +66,14 @@
         />
       </template>
     </BeforeAfter>
-    <OptOutModalStep1
-      v-if="step1Modal"
-      @proceed="
-        step1Modal = false;
-        step2Modal = true;
-      "
-      @cancel="step1Modal = false"
-    />
-    <OptOutModalStep2
-      v-if="step2Modal"
+    <OptOutModal
+      v-if="optOutModal"
       :has-custom-integration-folder="props.gql.hasCustomIntegrationFolder"
-      @cancel="step2Modal = false"
       @save="(val) => {
-        step2Modal = false;
+        optOutModal = false;
         applySkipResult(val)
       }"
+      @cancel="optOutModal = false"
     />
   </div>
 </template>
@@ -94,8 +86,7 @@ import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationListItem from './fragments/MigrationListItem.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
-import OptOutModalStep1 from './OptOutModalStep1.vue'
-import OptOutModalStep2 from './OptOutModalStep2.vue'
+import OptOutModal from './OptOutModal.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import type { PossibleOption } from './types'
@@ -138,8 +129,7 @@ const emits = defineEmits<{
   (eventName: 'selectOption', value: PossibleOption): void
 }>()
 
-const step1Modal = ref(false)
-const step2Modal = ref(false)
+const optOutModal = ref(false)
 
 const selectOption = ref<PossibleOption>()
 

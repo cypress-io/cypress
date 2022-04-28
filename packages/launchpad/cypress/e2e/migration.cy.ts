@@ -104,7 +104,7 @@ describe('Opening unmigrated project', () => {
   })
 })
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
+describe('Full migration flow for each project', { retries: { openMode: 0, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -241,8 +241,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       })
 
       cy.findByText('change').click()
-
-      cy.get('[data-cy=migration-button-proceed]').click()
 
       // this project has a default integration folder and default testFiles.
       // We rename the integration folder, even if the user skips the spec rename
@@ -934,8 +932,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
       cy.findByText('change').click()
 
-      cy.get('[data-cy=migration-button-proceed]').click()
-
       cy.findByText('Don\'t rename anything — keep what I have.').click()
 
       cy.findByText('Save Changes').click()
@@ -1117,43 +1113,6 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
 
     finishMigrationAndContinue()
     checkOutcome()
-  })
-
-  it('should show spec pattern rename change modal', () => {
-    startMigrationFor('migration')
-
-    cy.get(renameAutoStep).should('exist')
-    cy.get(renameManualStep).should('not.exist')
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('exist')
-    cy.get(configFileStep).should('exist')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').get('[aria-label="Close"]').click()
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get(renameAutoStep).click({ force: true })
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('Let Cypress rename files').click()
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still don\'t want to rename files').click()
-    cy.get('button').contains('Save Changes').click()
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still don\'t want to rename files').click()
-    cy.get('button').contains('Cancel').click()
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
   })
 })
 
