@@ -43,6 +43,7 @@
       <template #panel3="{width}">
         <HideDuringScreenshot>
           <SpecRunnerHeaderRunMode
+            :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             :width="width"
           />

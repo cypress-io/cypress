@@ -73,7 +73,6 @@
 
         <RemoveClassesDuringScreenshotting
           class="bg-gray-100 p-16px"
-          :style="autMainDivStyle"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -217,7 +216,6 @@ preferences.update('specListWidth', specsListWidthPreferences.value)
 const {
   viewportStyle,
   windowWidth,
-  autMainDivStyle,
 } = useRunnerStyle()
 
 function getMinimum (absoluteMinimum: number, doesContentFit: boolean) {
