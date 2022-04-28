@@ -1,6 +1,6 @@
 <template>
   <WizardLayout
-    :next="allDependenciesInstalled ? t('setupPage.step.continue') : t('setupPage.install.waitForInstall')"
+    :next="allDependenciesInstalled ? t('setupPage.step.continue') : t('setupWizard.installDependencies.waitForInstall')"
     :can-navigate-forward="allDependenciesInstalled"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
@@ -16,7 +16,7 @@
         v-model="showSuccessAlert"
         class="w-full"
         :icon="CircleCheck"
-        :title="t('setupPage.install.installationAlertSuccess')"
+        :title="t('setupWizard.installDependencies.installationAlertSuccess')"
         status="success"
         dismissible
       />

@@ -241,13 +241,6 @@
       "configFileLanguageLabel": "Cypress Config File",
       "detected": "(detected)"
     },
-    "install": {
-      "startButton": "Install",
-      "waitForInstall": "Waiting for you to install the dependencies...",
-      "installed": "installed",
-      "pendingInstall": "pending installation",
-      "installationAlertSuccess": "You've successfully installed all required dependencies."
-    },
     "step": {
       "continue": "Continue",
       "next": "Next Step",
@@ -608,7 +601,11 @@
     "installDependencies": {
       "title": "Install Dev Dependencies",
       "description": "Based on your previous selection, the following dependencies are required.",
-      "pasteCommand": "Paste this command into your terminal to install the following packages:"
+      "pasteCommand": "Paste this command into your terminal to install the following packages:",
+      "waitForInstall": "Waiting for you to install the dependencies...",
+      "installed": "installed",
+      "pendingInstall": "pending installation",
+      "installationAlertSuccess": "You've successfully installed all required dependencies."
     },
     "configFiles": {
       "title": "Configuration Files",

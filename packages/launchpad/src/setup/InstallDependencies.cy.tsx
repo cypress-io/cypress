@@ -61,6 +61,7 @@ describe('<InstallDependencies />', () => {
   it('renders with all dependencies installed', function () {
     cy.mountFragment(InstallDependenciesFragmentDoc, {
       render: (gqlVal) => {
+        gqlVal.wizard.installDependenciesCommand = null
         gqlVal.wizard.packagesToInstall = [
           {
             __typename: 'WizardNpmPackage',
