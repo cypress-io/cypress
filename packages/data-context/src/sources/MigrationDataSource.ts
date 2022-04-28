@@ -62,8 +62,12 @@ export class MigrationDataSource {
     return this.ctx.coreData.migration.legacyConfigForMigration
   }
 
+  get legacyConfigProjectId () {
+    return this.legacyConfig.projectId || this.legacyConfig.e2e?.projectId
+  }
+
   get shouldMigratePreExtension () {
-    return !this.legacyConfig.projectId
+    return !this.legacyConfigProjectId
   }
 
   get legacyConfigFile () {
@@ -208,7 +212,7 @@ export class MigrationDataSource {
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
       hasTypescript,
-      hasProjectId: Boolean(this.legacyConfig.projectId),
+      shouldAddCustomE2eSpecPattern: Boolean(this.legacyConfigProjectId),
     })
   }
 

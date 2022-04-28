@@ -39,7 +39,7 @@ export interface CreateConfigOptions {
   hasComponentTesting: boolean
   projectRoot: string
   hasTypescript: boolean
-  hasProjectId: boolean
+  shouldAddCustomE2eSpecPattern: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
@@ -195,7 +195,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
-  if (createConfigOptions.hasProjectId && !options.specPattern) {
+  if (createConfigOptions.shouldAddCustomE2eSpecPattern && !options.specPattern) {
     options.specPattern = 'cypress/e2e/**/*.{js,ts,tsx,jsx}'
   }
 
