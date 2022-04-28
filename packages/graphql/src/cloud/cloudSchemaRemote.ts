@@ -7,11 +7,11 @@ import path from 'path'
 
 import { cloudSchemaRemoteExecutor } from './cloudSchemaRemoteExecutor'
 
-export const CLOUD_SCHEMA_PATH = fs.readFileSync(path.join(__dirname, '../../schemas', 'cloud.graphql'), 'utf-8')
+export const CLOUD_SCHEMA_PATH = path.join(__dirname, '../../schemas', 'cloud.graphql')
 
 // Get the Remote schema we've sync'ed locally
 export const cloudSchemaRemote = buildSchema(
-  CLOUD_SCHEMA_PATH,
+  fs.readFileSync(CLOUD_SCHEMA_PATH, 'utf-8'),
   { assumeValid: true },
 )
 
