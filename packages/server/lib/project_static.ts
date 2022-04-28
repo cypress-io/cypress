@@ -27,7 +27,7 @@ export async function getPathsAndIds () {
   const projectRoots: string[] = await cache.getProjectRoots()
 
   // this assumes that the configFile for a cached project is 'cypress.json'
-  // https://git.io/JeGyF
+  // https://github.com/cypress-io/cypress/pull/3246/files/774af917ce73d8129b8208a1d8c7b24f60e85557#r299968521
   return Promise.all(projectRoots.map(async (projectRoot) => {
     return {
       path: projectRoot,
@@ -136,7 +136,7 @@ export function remove (path) {
 
 export async function add (path, options) {
   // don't cache a project if a non-default configFile is set
-  // https://git.io/JeGyF
+  // https://github.com/cypress-io/cypress/pull/3246/files/774af917ce73d8129b8208a1d8c7b24f60e85557#r299968521
   if (settings.configFile(options) !== 'cypress.json') {
     return Promise.resolve({ path })
   }
