@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full overflow-x-auto"
+    class="flex h-full overflow-x-auto overflow-y-hidden"
     :class="{'select-none': panel1IsDragging || panel2IsDragging}"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
@@ -40,7 +40,7 @@
 
     <div
       data-cy="aut-panel"
-      class="flex-grow h-full relative"
+      class="flex-grow h-full bg-gray-100 relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{
         width: `${panel3width}px`
