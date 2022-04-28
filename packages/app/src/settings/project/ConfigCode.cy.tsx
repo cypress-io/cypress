@@ -76,11 +76,11 @@ describe('<ConfigCode />', () => {
     it('sorts the config in alphabetical order', () => {
       let lastEntry = ''
       let nesting = 0
+      const configFields = config.map((entry) => entry.field)
 
       cy.get(selector).within(($selector) => {
         cy.get('span').each(($el: any) => {
           let configText = $el[0].innerText.split(':')[0]
-          const configFields = config.map((entry) => entry.field)
 
           if (configText === '{') {
             nesting++
