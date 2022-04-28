@@ -514,7 +514,7 @@
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
-      "optedOutMessage": "You've opted not to rename your spec file extension",
+      "optedOutMessage": "You've opted not to rename your spec file extension. You may need to change your specPattern later so we can still find your spec files.",
       "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
       "modals": {
         "title": "Change the existing spec file extension",
@@ -526,8 +526,8 @@
           "line4": "All documentation and example code will be using: ",
           "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
           "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
-          "buttonProceed": "I still want to change the spec file extension",
-          "buttonCancel": "Cancel, keep the default extension"
+          "buttonProceed": "I still want to change settings",
+          "buttonCancel": "Let Cypress rename files"
         },
         "step2": {
           "warning": "You may need to change your specPattern later if you don't use the recommended filename extension.",

@@ -19,7 +19,7 @@
           {{ t('migration.renameAuto.optedOutMessage') }}
         </template>
         <template
-          v-if="selectOption === 'renameFolder'"
+          v-else-if="selectOption === 'renameFolder'"
         >
           {{ t('migration.renameAuto.folderRenameMessage') }}
         </template>
@@ -52,7 +52,7 @@
         </i18n-t>
       </MigrationListItem>
     </MigrationList>
-    <BeforeAfter>
+    <BeforeAfter v-if="selectOption !== 'skip'">
       <template #before>
         <HighlightedFilesList
           :files="specFiles.map(x => x.before)"

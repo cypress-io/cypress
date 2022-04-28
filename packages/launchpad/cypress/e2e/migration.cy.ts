@@ -1140,18 +1140,18 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('Cancel, keep the default extension').click()
+    cy.get('button').contains('Let Cypress rename files').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still want to change the spec file extension').click()
+    cy.get('button').contains('I still don\'t want to rename files').click()
     cy.get('button').contains('Save Changes').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still want to change the spec file extension').click()
+    cy.get('button').contains('I still don\'t want to rename files').click()
     cy.get('button').contains('Cancel').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
   })
