@@ -1,6 +1,6 @@
 ## Migration E2E Custom Integration with projectId
 
-An e2e project with a custom `integrationFolder` named `src` and projectId. It uses the default `testFiles`. We will keep the custom `intergrationFolder`, but it'll be part of `e2e.specPattern`. We will rename their specs to use the `.cy.js` extension.
+An e2e project with a custom `integrationFolder` named `src` and projectId. It uses the default `testFiles`. We will keep the custom `intergrationFolder`, but it'll be part of `e2e.specPattern`. We will **not** rename their specs to use the `.cy.js` extension because the project config includes a projectId
 
 The following migration steps will be used during this migration:
 

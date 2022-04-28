@@ -66,14 +66,6 @@ export class MigrationDataSource {
     return !this.legacyConfig.projectId
   }
 
-  get migrationOptions () {
-    return {
-      // If the configFile has projectId, we do not want to change the preExtension
-      // so, we can keep the cloud history
-      migratePreExtension: this.shouldMigratePreExtension,
-    }
-  }
-
   get legacyConfigFile () {
     if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
       return this.ctx.modeOptions.configFile
@@ -185,7 +177,13 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, this.legacyConfig)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map((s) => applyMigrationTransform(s, this.migrationOptions)).filter((spec) => spec.before.relative !== spec.after.relative)
+    const e2eMigrationOptions = {
+      // If the configFile has projectId, we do not want to change the preExtension
+      // so, we can keep the cloud history
+      shouldMigratePreExtension: this.shouldMigratePreExtension,
+    }
+
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map((s) => applyMigrationTransform(s, e2eMigrationOptions)).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(this.legacyConfig, 'component')
 

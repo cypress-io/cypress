@@ -27,11 +27,11 @@ interface GetSpecs {
 }
 
 export type MigrationTransformOptions = {
-  migratePreExtension: boolean
+  shouldMigratePreExtension: boolean
 }
 
 export const defaultMigrationTransformOptions = {
-  migratePreExtension: true,
+  shouldMigratePreExtension: true,
 }
 
 export function substitute (part: FilePart, options: MigrationTransformOptions = defaultMigrationTransformOptions): FilePart {
@@ -47,7 +47,7 @@ export function substitute (part: FilePart, options: MigrationTransformOptions =
   }
 
   // basic.spec.js -> basic.cy.js
-  if (part.group === 'preExtension' && options.migratePreExtension) {
+  if (part.group === 'preExtension' && options.shouldMigratePreExtension) {
     return { ...part, text: '.cy.' }
   }
 

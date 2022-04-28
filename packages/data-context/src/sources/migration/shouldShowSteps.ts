@@ -68,7 +68,7 @@ export async function shouldShowAutoRenameStep (projectRoot: string, config: Leg
   const e2eMigrationOptions = {
     // If the configFile has projectId, we do not want to change the preExtension
     // so, we can keep the cloud history
-    migratePreExtension: !config.projectId,
+    shouldMigratePreExtension: !config.projectId,
   }
 
   const integrationCleaned = specsToAutoMigrate.integration.filter((spec) => {

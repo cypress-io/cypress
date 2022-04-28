@@ -9,7 +9,7 @@ describe('formatMigrationFile', () => {
     it('breaks pre-migration spec into parts', () => {
       const spec = 'cypress/integration/app.spec.js'
       const re = new RegExp(regexps.e2e.before.defaultFolderDefaultTestFiles)
-      const actual = formatMigrationFile(spec, re, { migratePreExtension: true })
+      const actual = formatMigrationFile(spec, re, { shouldMigratePreExtension: true })
 
       expect(actual).to.eql([
         { text: 'cypress/', highlight: false },
@@ -20,10 +20,10 @@ describe('formatMigrationFile', () => {
       ])
     })
 
-    it('do not highlight the preExtension', () => {
+    it('do not highlight the preExtension when migratePreExtension is false', () => {
       const spec = 'cypress/integration/app.spec.js'
       const re = new RegExp(regexps.e2e.before.defaultFolderDefaultTestFiles)
-      const actual = formatMigrationFile(spec, re, { migratePreExtension: false })
+      const actual = formatMigrationFile(spec, re, { shouldMigratePreExtension: false })
 
       expect(actual).to.eql([
         { text: 'cypress/', highlight: false },
@@ -39,7 +39,7 @@ describe('formatMigrationFile', () => {
     it(`handles e2e support pre file migration [${ext}]`, () => {
       const file = `cypress/support/index.${ext}`
       const re = new RegExp(supportFileRegexps.e2e.beforeRegexp)
-      const actual = formatMigrationFile(file, re, { migratePreExtension: true })
+      const actual = formatMigrationFile(file, re, { shouldMigratePreExtension: true })
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
@@ -51,7 +51,7 @@ describe('formatMigrationFile', () => {
     it(`handles e2e support post file migration [${ext}]`, () => {
       const file = `cypress/support/e2e.${ext}`
       const re = new RegExp(supportFileRegexps.e2e.afterRegexp)
-      const actual = formatMigrationFile(file, re, { migratePreExtension: true })
+      const actual = formatMigrationFile(file, re, { shouldMigratePreExtension: true })
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },

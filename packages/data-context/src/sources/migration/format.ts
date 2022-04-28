@@ -53,7 +53,7 @@ export function formatMigrationFile (file: string, regexp: RegExp, options: Migr
   },
   {
     text: preExtension || '', // user/cypress/integration/file.spec.tsx -> .spec.
-    highlight: options.migratePreExtension,
+    highlight: options.shouldMigratePreExtension,
     group: 'preExtension',
   }, {
     text: extension || '', // user/cypress/integration/file.spec.tsx -> tsx
