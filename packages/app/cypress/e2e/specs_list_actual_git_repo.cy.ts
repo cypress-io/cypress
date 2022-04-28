@@ -2,7 +2,6 @@ describe('Spec List - Git Status', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     .then((projectPath) => {
-      cy.wait(500)
       cy.openProject('cypress-in-cypress')
       cy.startAppServer('e2e')
       cy.task('initGitRepoForTestProject', projectPath)
