@@ -520,51 +520,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/0')
       })
     })
-
-    it('displays a list of recorded runs if a run has been recorded and remove them if user has been removed of project', () => {
-      cy.remoteGraphQLIntercept((obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs && obj.callCount > 1) {
-          for (let proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-
-            delete proj.recordKeys
-            delete proj.runs
-          }
-        }
-
-        return obj.result
-      })
-
-      cy.loginUser()
-      cy.visitApp()
-      cy.get('[href="#/runs"]').click()
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
-        cy.findByText('fix: make gql work CANCELLED')
-        cy.get('[data-cy="run-card-icon"]')
-      })
-
-      cy.get('[href="http://dummy.cypress.io/runs/1"]').first().within(() => {
-        cy.findByText('fix: make gql work ERRORED')
-        cy.get('[data-cy="run-card-icon"]')
-      })
-
-      cy.get('[href="http://dummy.cypress.io/runs/2"]').first().within(() => {
-        cy.findByText('fix: make gql work FAILED')
-        cy.get('[data-cy="run-card-icon"]')
-      })
-
-      // For some reason this has to happen twice, or the mocked cache is not gonna
-      // be updated, in prod it should work fine
-      cy.get('[href="#/settings"]').click()
-      cy.get('[href="#/runs"]').click()
-
-      cy.get('[href="#/settings"]').click()
-      cy.get('[href="#/runs"]').click()
-
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
-    })
   })
 
   describe('no internet connection', () => {
