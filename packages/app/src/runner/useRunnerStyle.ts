@@ -78,17 +78,12 @@ export const useRunnerStyle = () => {
     return style
   })
 
-  const autMainDivStyle = computed(() => {
-    return `height: calc(100% - ${autStore.specRunnerHeaderHeight}px)`
-  })
-
   watchEffect(() => {
     autStore.setScale(scale.value)
   })
 
   return {
     viewportStyle,
-    autMainDivStyle,
     windowWidth: computed(() => {
       if (window.__CYPRESS_MODE__ === 'run') {
         return windowWidth.value
