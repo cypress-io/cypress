@@ -46,7 +46,7 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1')
+      cy.contains('.command-number-column', '1')
       .closest('.command-wrapper')
       .find('.command-interceptions')
       .should('have.text', 'some status no alias')
@@ -59,6 +59,7 @@ describe('aliases', () => {
     it('shows status and count if dupe', () => {
       addCommand(runner, {
         aliasType: 'route',
+        name: 'command',
         renderProps: {
           wentToOrigin: true,
           status: 'some status',
@@ -72,12 +73,12 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1')
+      cy.contains('.command-number-column', '1')
       .closest('.command-wrapper')
       .find('.command-interceptions')
-      .should('have.text', 'some status no alias')
+      .should('contain.text', 'some status no alias')
       .parent().find('.command-interceptions-count')
-      .should('have.text', '2')
+      .should('contain.text', '2')
       .trigger('mouseover')
       .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with no aliascy.route() spy with no alias')
       .percySnapshot()
@@ -102,12 +103,12 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1')
+      cy.contains('.command-number-column', '1')
       .closest('.command-wrapper')
       .find('.command-interceptions')
-      .should('have.text', 'some status myAlias')
+      .should('contains.text', 'some status myAlias')
       .parent().find('.command-interceptions-count')
-      .should('have.text', '2')
+      .should('contains.text', '2')
       .trigger('mouseover')
       .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with alias @firstAliascy.intercept() spy with alias @myAlias')
       .percySnapshot()
@@ -128,7 +129,7 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1')
+      cy.contains('.command-number-column', '1')
       .closest('.command-wrapper')
       .find('.command-interceptions')
       .should('have.text', 'some status myAlias')
@@ -172,14 +173,14 @@ describe('aliases', () => {
       })
 
       it('has correct alias class', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .find('.command-alias')
         .should('have.class', 'route')
       })
 
       it('render without a count', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
@@ -247,7 +248,7 @@ describe('aliases', () => {
       })
 
       it('render with counts in non-event commands', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '1')
@@ -260,7 +261,7 @@ describe('aliases', () => {
           expect($tooltip).to.contain('Found 1st alias for: \'getPosts\'')
         })
 
-        cy.contains('.command-number', '2')
+        cy.contains('.command-number-column', '2')
         .should('be.visible')
         .closest('.command-wrapper')
         .within(() => {
@@ -391,7 +392,7 @@ describe('aliases', () => {
       })
 
       it('render with counts', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '1')
@@ -404,7 +405,7 @@ describe('aliases', () => {
           expect($tooltip).to.contain('Found 1st alias for: \'getPosts\'')
         })
 
-        cy.contains('.command-number', '3')
+        cy.contains('.command-number-column', '3')
         .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '2')
@@ -448,14 +449,15 @@ describe('aliases', () => {
       })
 
       it('has correct alias class', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .find('.command-alias')
         .should('have.class', 'dom')
+        .percySnapshot()
       })
 
       it('render without a count', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
@@ -516,7 +518,7 @@ describe('aliases', () => {
       })
 
       it('render without a count in non-event commands', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
@@ -529,7 +531,7 @@ describe('aliases', () => {
           expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
         })
 
-        cy.contains('.command-number', '2')
+        cy.contains('.command-number-column', '2')
         .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
@@ -541,6 +543,7 @@ describe('aliases', () => {
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
         })
+        .percySnapshot()
       })
 
       it('render without counts in event commands when collapsed', () => {
@@ -625,7 +628,7 @@ describe('aliases', () => {
       })
 
       it('render without counts', () => {
-        cy.contains('.command-number', '1')
+        cy.contains('.command-number-column', '1')
         .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
@@ -638,7 +641,7 @@ describe('aliases', () => {
           expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
         })
 
-        cy.contains('.command-number', '3')
+        cy.contains('.command-number-column', '3')
         .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
@@ -650,6 +653,7 @@ describe('aliases', () => {
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
         })
+        .percySnapshot()
       })
     })
   })
