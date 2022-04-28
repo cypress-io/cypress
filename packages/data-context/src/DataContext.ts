@@ -20,7 +20,6 @@ import {
   ProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
-  StorybookDataSource,
   CloudDataSource,
   EnvDataSource,
   HtmlDataSource,
@@ -34,7 +33,7 @@ import type { IncomingHttpHeaders, Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
@@ -170,11 +169,6 @@ export class DataContext {
     return new WizardDataSource(this)
   }
 
-  @cached
-  get storybook () {
-    return new StorybookDataSource(this)
-  }
-
   get wizardData () {
     return this.coreData.wizard
   }
@@ -238,7 +232,9 @@ export class DataContext {
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
       d.servers.appSocketServer?.disconnectSockets(true)
+      d.servers.appSocketNamespace?.disconnectSockets(true)
       d.servers.appSocketServer = socketServer
+      d.servers.appSocketNamespace = socketServer?.of('/data-context')
     })
   }
 
@@ -249,7 +245,7 @@ export class DataContext {
     })
   }
 
-  setGqlSocketServer (socketServer: SocketIOServer | undefined) {
+  setGqlSocketServer (socketServer: SocketIONamespace | undefined) {
     this.update((d) => {
       d.servers.gqlSocketServer?.disconnectSockets(true)
       d.servers.gqlSocketServer = socketServer
@@ -406,9 +402,7 @@ export class DataContext {
       await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
-      if (this.coreData.currentProject && this.coreData.currentTestingType && await this.lifecycleManager.waitForInitializeSuccess()) {
-        this.lifecycleManager.setAndLoadCurrentTestingType(this.coreData.currentTestingType)
-      }
+      await this.lifecycleManager.initializeOpenMode(this.coreData.currentTestingType)
     } else {
       throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
@@ -433,6 +427,6 @@ export class DataContext {
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    return Promise.all(toAwait)
+    await Promise.all(toAwait)
   }
 }

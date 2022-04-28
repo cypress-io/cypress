@@ -611,7 +611,7 @@
     },
     "configFiles": {
       "title": "Configuration Files",
-      "description": "We added the following files to your project."
+      "description": "We added the following files to your project:"
     },
     "chooseBrowser": {
       "title": "Choose a Browser",

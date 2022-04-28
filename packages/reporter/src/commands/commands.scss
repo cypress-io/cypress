@@ -12,14 +12,7 @@
   }
 
   .command {
-    background-color: $reporter-section-background;
-    cursor: default;
-    min-height: 20px;
-  }
-
-  .command-scaled {
-    font-size: 85%;
-    line-height: 14px;
+    min-height: 28px;
   }
 
   // System Command Styles
@@ -51,35 +44,30 @@
         float: left;
         content: "-";
         margin-right: 2px;
-        padding-left: 5px;
       }
     }
   }
 
   .command-wrapper {
-    color: $gray-400;
-    min-height: 20px;
+    border-left: 2px solid $reporter-section-background;
+    background-color: $reporter-section-background;
+    color: $gray-500;
+    display: flex;
+    min-height: 28px;
+    padding-right: 2px;
 
-    &:hover {
+    &.command-is-interactive:hover {
       background-color: $gray-900;
-
-      .command-pin + .command-number {
-        display: none;
-      }
-  
-      .command-pin {
-        display: block;
-      }
+      cursor: pointer;
 
       .command-expander > path {
-        stroke: $gray-500;
+        stroke: $gray-700;
       }
     }
 
     .command-wrapper-text {
       display: flex;
-      flex-wrap: wrap;
-      padding: 2px 5px 0 3px;
+      flex-wrap: nowrap;
     }
 
     .command-interceptions {
@@ -92,96 +80,117 @@
 
     .command-alias,
     .command-interceptions {
-      border-radius: 10px;
-      color: $gray-400;
-      padding: 0 5px;
+      border-radius: 4px;
+      color: $white;
       display: inline-block;
+      font-family: $font-sans;
+      font-size: 10px;
+      margin-left: 5px;
+      line-height: 16px;
+      max-width: 200px;
+      overflow: hidden;
+      padding: 0 4px;
+      text-overflow: ellipsis;
+      vertical-align: text-top;
+      white-space: nowrap;
 
       &.route {
-        background-color: $yellow-medium;
+        background-color: $teal-500;
       }
 
       &.dom {
-        background-color: $indigo-800;
+        background-color: $indigo-500;
       }
 
       &.agent,
       &.primitive {
-        background-color: $red-800;
+        background-color: $red-500;
       }
 
-      &.show-count {
-        padding-right: 2px;
-        border-radius: 10px 0 0 10px;
-        max-width: 200px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        vertical-align: top;
-        height: 18px;
+      &.has-multiple-aliases,
+      &.has-multiple-interceptions {
+        border-radius: 4px 0 0 4px;
+        padding: 0 2px 0 4px;
       }
     }
 
-    // ensures alias & number of children commands don't break if reporter
-    // width is narrow
+    // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
       white-space: nowrap;
-
+  
       > {
         display: inline-block;
       }
     }
 
-    .num-children,
     .command-alias-count,
     .command-interceptions-count {
-      background-color: $orange-700 !important;
-      border-radius: 5px;
-      color: $gray-400;
-      font-size: 90%;
-      font-style: normal;
-      line-height: 1;
-      margin-left: 0;
+      border-radius: 0 4px 4px 0;
+      color: $white;
+      display: inline-block;
+      line-height: 16px;
+      padding: 0 4px;
+      vertical-align: text-top;
+
+      &.route {
+        background-color: $teal-400;
+      }
+
+      &.dom {
+        background-color: $indigo-400;
+      }
+
+      &.agent,
+      &.primitive {
+        background-color: $red-400;
+      }
     }
 
     .num-children.has-alias {
-      border-radius: 10px;
-      line-height: 1;
-      padding: 3px 5px 3px 5px;
+      margin-left: 2px;
     }
-
-    .command-alias-count,
-    .command-interceptions-count {
-      border-radius: 0 10px 10px 0;
-      padding: 2px 5px;
-    }
-
-    .command-progress {
-      height: 2px;
-    }
-  }
-
-  .command-child-container {
-    margin-left: 10px;
   }
 
   .command-number-column {
+    color: #5a5f7a;
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
-    padding-right: 10px;
+    max-height: 28px; // because some numbers are empty
+    padding-top: 4px;
+    padding-bottom: 4px;
     text-align: right;
-    width: 25px;
+    width: 24px;
   }
 
-  .command-message {
-    flex-grow: 2;
+  // when no children, add padding to act as the .command-expander-column's width
+  // to prevent adding another element to the page
+  .command-number-column + span.command-pin-target {
+    margin-left: 24px;
+  }
+
+  .command-pin-target.command-group {
+    border-left: 1px dotted $gray-600;
+    padding-left: 12px;
+    min-height: 28px;
+
+    .command-group-block {
+      border-left: 1px dotted $gray-600;
+      width: 11px;
+      min-height: 28px;
+      min-width: 11px;
+    }
+  }
+
+  .command-info {
+    padding-top: 4px;
+    padding-bottom: 4px;
     margin-left: 0;
     overflow: hidden;
-    white-space: nowrap;
+    width: 100%;
 
-    > span {
-      align-items: center;
-      display: flex;
+    .command-aliases,
+    .command-message {
+      overflow: hidden;
 
       .fa-circle {
         padding: 4px;
@@ -190,48 +199,41 @@
       }
 
       .fa-circle.command-message-indicator-successful {
-        color: $pending;
+        color: $jade-400;
       }
 
       .fa-circle.command-message-indicator-aborted {
-        color: $fail;
+        color: $orange-400;
       }
 
       .fa-circle.command-message-indicator-bad {
-        color: $orange-500;
+        color: $red-500
       }
 
       .fa-circle.command-message-indicator-pending {
-        color: $gray-500;
+        color: $indigo-400;
       }
     }
   }
 
   .command-message-text {
-    display: block;
-    flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .command-method {
-    padding: 1px 2px 0;
-    display: inline-block;
-    font-size: 11px;
-    min-width: 80px;
+    font-size: 12px;
+    margin-right: 12px;
     font-weight: 600;
+    min-width: fit-content;
   }
 
   // Command State Styles
   .command-state-passed {
     border-left: 2px solid $reporter-section-background;
 
-    &:hover {
+    &.command-is-interactive:hover {
       border-left: 2px solid $gray-900;
-    }
-
-    .command-pin {
-      color: $gray-500;
     }
 
     &:not(.command-is-event) .command-number {
@@ -243,7 +245,7 @@
     }
 
     .command-message {
-      color: $gray-400;
+      color: $gray-500;
     }
   }
 
@@ -254,9 +256,8 @@
     color: $indigo-200;
 
     .command-number-column {
-      .command-pin {
-        display: none;
-      }
+      padding-top: 4px;
+      padding-bottom: 4px;
 
       .fa-circle {
         line-height: 18px;
@@ -267,8 +268,12 @@
         }
       }
     }
+  }
 
-    .command-progress > span {
+  .command-state-pending + .command-progress {
+    height: 2px;
+
+    span {
       animation-fill-mode: forwards;
       animation-iteration-count: 1;
       animation-name: progress-bar;
@@ -293,8 +298,22 @@
     background-color: $err-header-background;
     color: $err-header-text;
 
-    &:hover {
+    &.command-is-interactive:hover {
       background: rgba($red-400, 0.3);
+    }
+
+    .command-number-column,
+    .command-method,
+    .command-message {
+      color: $err-header-text;
+    }
+
+    .command-group {
+      border-color: $err-header-text;
+
+      .command-group-block {
+        border-color: $err-header-text;
+      }
     }
   }
 
@@ -304,7 +323,7 @@
     border-left: 2px solid $orange-700;
     color: $warn-text;
 
-    &:hover {
+    &.command-is-interactive:hover {
       background-color: $warn-header-background;
     }
   }
@@ -322,14 +341,14 @@
       span {
         border-radius: 2px;
         padding: 0 3px;
-        font-size: 11px;
+        font-size: 12px;
         display: inline-block;
         line-height: 14px;
       }
     }
 
     .command-message {
-      color: $gray-200;
+      color: $gray-500;
 
       strong {
         font-weight: 600;
@@ -399,21 +418,19 @@
     }
   }
 
-  .command-name-log,
-  .command-name-get,
-  .command-name-download {
-    // we're wrapping the text, so override command-scaled
-    font-size: 100%;
-    line-height: 18px;
+  .command-pin-target {
+    width: 100%;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
 
-    .command-message-text {
-      white-space: initial;
-      word-wrap: break-word;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 50;
-      -webkit-box-orient: vertical;
-    }
+  .command-message-text {
+    font-size: 12px;
+    white-space: initial;
+    word-wrap: inherit;
+    width: 100%;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
   }
 
   // Styles for Uncaught Exception
@@ -425,25 +442,20 @@
   }
 
   .command-controls {
+    display: flex;
+    padding-bottom: 4px;
+    padding-right: 2px;
+    padding-top: 4px;
+
     svg {
       color: $gray-600;
-      cursor: pointer;
-      margin: 0px 2px;
-      vertical-align: top;
+      vertical-align: text-top;
     }
 
     .command-invisible {
       display: inline-block;
       margin-left: 5px;
       margin-right: 0;
-    }
-
-    .command-alias,
-    .command-interceptions {
-      font-family: $open-sans;
-      font-size: 10px;
-      line-height: 1.75;
-      margin-left: 5px;
     }
 
     label {
@@ -456,30 +468,35 @@
   }
 
   .command-pin {
-    display: none;
-    flex-shrink: 0;
-    font-size: 14px;
+    color: $pinned;
+    font-size: 12px;
     line-height: 1;
-    margin-right: 10px;
+    margin-top: -1px;
+    margin-left: 10px;
     outline: none;
-    padding: 1px 0 0;
     text-align: right;
     width: 15px;
+    max-height: 20px;
 
     .icon-light {
-      fill: $gray-800;
+      fill: $purple-700;
     }
   }
 
   .command-expander-column {
-    padding-right: 10px;
-    padding-left: 5px;
+    flex-shrink: 0;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     width: 25px;
-    
+    display: flex;
+
     .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
       transition: transform 150ms ease-out;
+      margin-top: 5px;
 
       path {
         stroke: $gray-700;
@@ -489,11 +506,6 @@
     .command-expander-is-open {
       transform: rotate(0deg);
     }
-  }
-
-  .command-has-snapshot:hover,
-  .command-has-console-props {
-    cursor: pointer;
   }
 
   .command-is-pinned {
@@ -509,19 +521,6 @@
       background: $indigo-900;
       border-left: 2px solid $pinned;
     }
-
-    .command-pin {
-      color: $pinned;
-      display: block;
-  
-      .icon-light {
-        fill: $purple-700;
-      }
-    }
-
-    .command-pin + .command-number {
-      display: none
-    }
   }
 
   // rendered within ../attempts/attempts.tsx
@@ -530,30 +529,22 @@
     border: 1px solid $gray-900;
     border-radius: 3px;
     box-shadow: inset 0 1px 1px rgba($white, 0.05);
-    min-height: 20px;
+    min-height: 28px;
     padding: 9px;
   }
 
   // additional styles on top of the shared.scss styles
-  .num-children {
-    color: $black;
-    display: inline-block;
-    background-color: $gray-500;
-  }
-
-  // additional styles on top of the shared.scss styles
+  .num-children,
   .num-elements {
     background-color: $gray-600;
-    display: inline-block;
+    border-radius: 4px;
     color: $black;
+    display: inline-block;
+    font-family: $font-sans;
+    font-style: normal;
+    font-size: 10px;
+    line-height: 1.5;
+    padding: 0px 5px !important;
     vertical-align: text-top;
-  }
-
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="300px"] {
-    .command-wrapper-text {
-      flex-wrap: nowrap;
-    }
   }
 }

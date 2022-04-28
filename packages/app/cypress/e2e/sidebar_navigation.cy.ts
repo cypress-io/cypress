@@ -28,6 +28,7 @@ describe('Sidebar Navigation', () => {
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
+      cy.contains('todos')
     })
 
     it('expands the left nav bar by default', () => {
@@ -50,7 +51,6 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
@@ -65,7 +65,6 @@ describe('Sidebar Navigation', () => {
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-      cy.contains('todos')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
@@ -258,13 +257,13 @@ describe('Sidebar Navigation', () => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
       })
 
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
-        cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
-        .trigger('mousemove', { clientX: 400 })
-        .trigger('mouseup', { eventConstructor: 'MouseEvent' })
-      })
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 450)
 
-      cy.withCtx((ctx, o) => {
+      cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', { clientX: 400 })
+      .trigger('mouseup', { eventConstructor: 'MouseEvent' })
+
+      cy.withRetryableCtx((ctx, o) => {
         expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.eq('{"reporterWidth":336}')
       })
     })
