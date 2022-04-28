@@ -592,7 +592,9 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
+      - run: |
+        [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+        yarn verify:mocha:results <<parameters.expectedResultCount>>
 
   clone-repo-and-checkout-release-branch:
     description: |
