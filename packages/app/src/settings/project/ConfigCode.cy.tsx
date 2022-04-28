@@ -74,11 +74,11 @@ describe('<ConfigCode />', () => {
     })
 
     it('sorts the config in alphabetical order', () => {
-      let lastEntry: any = ''
+      let lastEntry = ''
 
       config.forEach((entry) => {
         expect(entry.field.localeCompare(lastEntry)).to.be.greaterThan(0)
-        lastEntry = entry
+        lastEntry = entry.field
       })
     })
 
