@@ -105,6 +105,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.openProject('cypress-in-cypress')
       cy.withCtx((ctx) => {
         ctx.coreData.localSettings.preferences.reporterWidth = 800
+        ctx.coreData.localSettings.preferences.specListWidth = 250
+        ctx.coreData.localSettings.preferences.isSpecsListOpen = false
       })
 
       cy.startAppServer(testingType)
@@ -135,6 +137,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         e2e: ['46%', '37%', '56%', '85%'],
         componentShortViewport: '61%',
         e2eShortViewport: '46%',
+        componentNarrowViewport: '40%',
+        e2eNarrowViewport: '20%',
       }
 
       // resize the reporter using each of the dragPositions and take Percy snapshots
@@ -171,7 +175,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.percySnapshot('tall viewport')
 
         cy.viewport(1500, 400)
-        cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('exist')
+        cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('be.visible')
         cy.percySnapshot('short viewport')
       })
 
@@ -198,6 +202,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       dragHandleToClientX('panel1', 130)
       cy.get('@selectBrowser')
       .should('be.visible') // now that we have reduced the specs list, we should be able to see this
+
+      cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`]).should('be.visible')
     })
   })
 })
