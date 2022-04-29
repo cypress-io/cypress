@@ -5,6 +5,7 @@
  */
 import type { DataContext } from '../DataContext'
 import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
+import _ from 'lodash'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
@@ -41,8 +42,32 @@ export class HtmlDataSource {
     throw err
   }
 
+  getUrlsFromLegacyProjectBase (cfg: any) {
+    const keys = [
+      'baseUrl',
+      'browserUrl',
+      'port',
+      'proxyServer',
+      'proxyUrl',
+      'remote',
+      'testingType',
+      'componentTesting',
+      'reporterUrl',
+      'xhrUrl',
+    ]
+
+    return _.pick(cfg, keys)
+  }
+
   async makeServeConfig () {
-    const cfg = this.ctx._apis.projectApi.getConfig() ?? {} as any
+    const fieldsFromLegacyCfg = this.getUrlsFromLegacyProjectBase(this.ctx._apis.projectApi.getConfig() ?? {})
+
+    const cfg = {
+      ...(await this.ctx.project.getConfig()),
+      ...fieldsFromLegacyCfg,
+    }
+
+    cfg.browser = this.ctx._apis.projectApi.getCurrentBrowser()
 
     return {
       projectName: this.ctx.lifecycleManager.projectTitle,
