@@ -3,10 +3,6 @@
     id="main-pane"
     class="flex border-gray-900"
   >
-    <!-- <div class="bg-white z-30 absolute">
-      {{ minWidths }}
-      {{ windowWidth }}
-    </div> -->
     <AutomationElement />
     <AutomationDisconnected
       v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
