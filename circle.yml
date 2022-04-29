@@ -38,8 +38,6 @@ linuxWorkflowExcludeFilters: &linux-workflow-exclude-filters
     or:
     - false
     # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
-        - feature-multidomain
-        - unify-1449-beta-slug-length
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -61,8 +59,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
     - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
-    - equal: [ feature-multidomain, << pipeline.git.branch >> ]
-    - equal: [ unify-1449-beta-slug-length, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
