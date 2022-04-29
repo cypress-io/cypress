@@ -24,11 +24,26 @@ describe('<GeneratorSuccess />', () => {
     cy.percySnapshot()
   })
 
-  it('can be expanded to show the content', () => {
+  it('can be collapsed to hide the content', () => {
     cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
     .get(targetSelector)
     .click()
     .get('code .line')
+    .should('not.be.visible')
+    .wait(200) // just to show off the animation
+    .get(targetSelector)
+    .click()
+
+    cy.percySnapshot()
+  })
+
+  it('can be expanded to show the content', () => {
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
+    .get(targetSelector)
+    .click()
+    .click()
+    .get('code .line')
+    .should('be.visible')
     .should('have.length', content.split('\n').length)
     .wait(200) // just to show off the animation
     .get(targetSelector)
