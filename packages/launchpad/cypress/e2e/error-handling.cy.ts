@@ -23,7 +23,7 @@ describe('Error handling', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', 'Cypress configuration error')
+    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
   })
 
   it('it handles a configuration file error', () => {
@@ -59,6 +59,6 @@ describe('Error handling', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', 'Cypress configuration error')
+    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
   })
 })
