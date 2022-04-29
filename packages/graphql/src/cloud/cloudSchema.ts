@@ -12,21 +12,15 @@ export const CLOUD_SCHEMA_LOCAL_PATH = CLOUD_SCHEMA_PATH.replace('cloud.graphql'
  * if we do then we'll consider there to be "local" cloud schema extensions,
  * which means that we'll be using this schema, rather than the remoteSchemWrapped
  * when combining with the other Nexus schema.
- *
- * @returns If
  */
 export const hasLocalCloudSchemaExtensions = Object.keys(types).length > 1
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
-/**
- * Makes the local schema, caching locally
- * @returns
- */
 let cloudSchema: GraphQLSchema
 
 // If we have local cloud schema extensions, we generate a new nexus schema
-// wrapping the
+// wrapping the remote schema
 if (hasLocalCloudSchemaExtensions) {
   cloudSchema = makeSchema({
     types,
