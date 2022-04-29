@@ -5472,6 +5472,7 @@ declare namespace Cypress {
 
   interface ResolvedDevServerConfig {
     port: number
+    close: (done?: (err?: Error) => any) => void
   }
 
   interface PluginEvents {
