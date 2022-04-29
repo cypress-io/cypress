@@ -30,6 +30,7 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
+  getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
   getDevServer (): {

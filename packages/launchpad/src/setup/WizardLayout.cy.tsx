@@ -52,4 +52,21 @@ describe('<WizardLayout />', () => {
     cy.contains('button', back).should('be.visible')
     cy.contains('button', skip).should('be.visible')
   })
+
+  it('renders accessory slot', () => {
+    cy.mount(() => (
+      <WizardLayout>
+        {{
+          default: () => (
+            <div class="h-20 border-jade-600 border flex items-center justify-center">
+              content
+            </div>
+          ),
+          accessory: () => <span>Accessory Content</span>,
+        }}
+      </WizardLayout>
+    ))
+
+    cy.contains('Accessory Content').should('be.visible')
+  })
 })

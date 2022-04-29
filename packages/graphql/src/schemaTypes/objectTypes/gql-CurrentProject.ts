@@ -150,6 +150,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.nonNull.json('serveConfig', {
+      description: 'base64 encoded config used on the runner page',
+      resolve: (source, args, ctx) => {
+        return ctx.html.makeServeConfig()
+      },
+    })
+
     t.json('savedState', {
       description: 'Project saved state',
       resolve: (source, args, ctx) => {
