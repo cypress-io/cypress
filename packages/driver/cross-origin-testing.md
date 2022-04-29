@@ -101,6 +101,8 @@ Config and env values are synced both ways between **primary** and **secondary**
 
 It’s possible for users to set custom key/value pairs where the value could be unserializable. In that case, the value is not synced and it behaves similar to state set by **defaults()** methods, where it persists only in the execution context of that origin.
 
+The config and env values are synced into the **secondary driver** before the **cy.origin()** callback is called. They are synced back to the **primary driver** when the callback and any commands run inside of it are finished.
+
 ## Events
 
 All event listeners are only bound to the execution context of the origin in which they are defined. Events occurring in one origin do not trigger event handlers in a different origin. This is because some event handlers accept arguments that are not serializable. Even though some event handlers do rely on unserializable arguments, for consistency’s sake, events are bound to their origin.
