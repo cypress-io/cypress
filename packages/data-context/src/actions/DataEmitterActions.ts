@@ -43,6 +43,14 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when cypress.config is re-executed and we'd like to
+   * either re-run a spec or update something in the App UI.
+   */
+  configChange () {
+    this._emit('configChange')
+  }
+
+  /**
    * Emitted when we have a notification from the cloud to refresh the data
    */
   cloudViewerChange () {
