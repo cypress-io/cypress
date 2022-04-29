@@ -6,7 +6,7 @@ The goal of this document is to give a technical overview of the architecture be
 
 See [Node.js’s URL doc](https://nodejs.org/api/url.html#url-strings-and-url-objects) for a handy breakdown of URL parts
 
-- **domain**: The top-level domain or super-domain of a URL. A hostname without the subdomain. (e.g. `example.com`)
+- **domain**: A hostname without the subdomain. (e.g. `example.com`, `example.co.uk`, `localhost`)
 - **origin**: The combination of the protocol, hostname, and port of a URL. For the purposes of Cypress, the subdomain is irrelevant. (e.g. `http://example.com:3500`)
 - **top**: The main window/frame of the browser
 - **primary origin**: The origin that top is on
@@ -14,7 +14,7 @@ See [Node.js’s URL doc](https://nodejs.org/api/url.html#url-strings-and-url-ob
 - **primary driver**: The Cypress driver that run in **top** on the primary origin
 - **secondary driver**: Any Cypress driver that run in a **spec bridge**, interacting with a secondary origin
 
-## Frame architecture (outside of multi-domain)
+## Frame architecture (single origin)
 
 When testing a single origin, all 3 frames are loaded on that origin.
 
@@ -30,7 +30,7 @@ graph TD;
 
 In a single test (`it` + hooks), the **AUT** must remain on the same origin or a cross-origin error will occur, as **top** can no longer interact with the **AUT** in that circumstance. Different tests can visit different origins. In this case, we change **top** to the new origin, which also runs the **spec frame** on that origin. This navigation causes the spec to run again. We skip any already-run tests and resume.
 
-## Frame architecture (with multi-domain)
+## Frame architecture (multiple origins)
 
 Let’s say the primary origin is `domain1.com` and the secondary origin is `domain2.com`. The test has visited `domain1.com` and then issued a click that caused the **AUT** to navigate to `domain2.com`.
 
@@ -95,7 +95,7 @@ This means that any global state set up by **defaults()** methods exists indepen
 
 The consequence of this is that users will need to call any given **defaults()** method again inside the **cy.origin()** callback if they wish to have the same behavior in that **secondary origin** as in the **primary origin**.
 
-### Cypress.config / Cypress.env()
+### Cypress.config() / Cypress.env()
 
 Config and env values are synced both ways between **primary** and **secondary** origins. All built-in config values are inherently serializable since they are passed between the server and the browser.
 
@@ -117,7 +117,7 @@ There are plans to change the implementation so that coercing the cookies is not
 
 ## Unsupported APIs
 
-Certain APIs are currently not supported in the **cy.origin()** callback. Depending on the API, we may or may not implemented support for them in the future.
+Certain APIs are currently not supported in the **cy.origin()** callback. Depending on the API, we may or may not implement support for them in the future.
 
 ### cy.origin()
 
