@@ -96,7 +96,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-root-sync-error')
     cy.openProject('plugins-root-sync-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Error')
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     expectStackToBe('open')
   })
 
