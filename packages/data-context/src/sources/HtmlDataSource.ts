@@ -62,9 +62,18 @@ export class HtmlDataSource {
   async makeServeConfig () {
     const fieldsFromLegacyCfg = this.getUrlsFromLegacyProjectBase(this.ctx._apis.projectApi.getConfig() ?? {})
 
-    const cfg = {
-      ...(await this.ctx.project.getConfig()),
-      ...fieldsFromLegacyCfg,
+    let cfg = { ...fieldsFromLegacyCfg }
+
+    try {
+      cfg = {
+        ...(await this.ctx.project.getConfig()),
+        ...cfg,
+      }
+    } catch {
+      // Error getting config, we will show an error screen when we render the page
+
+      cfg.namespace = '__cypress-app'
+      cfg.socketIoRoute = '/__app-socket'
     }
 
     cfg.browser = this.ctx._apis.projectApi.getCurrentBrowser()

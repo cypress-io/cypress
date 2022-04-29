@@ -15,7 +15,7 @@
 
     <TransitionQuickFade>
       <div
-        v-if="query.data.value?.baseError || query.data.value?.currentProject.isLoadingConfigFile"
+        v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
         class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
       >
         <BaseError
@@ -33,9 +33,6 @@
       aria-labelledby="primary-heading"
       class="overflow-auto"
     >
-      Error: {{ query.data.value?.baseError }}<br>
-      isLoadingConfigFile {{ query.data.value?.currentProject.isLoadingConfigFile }}<br>
-      isLoadingNodeEvents {{ query.data.value?.currentProject.isLoadingNodeEvents }}<br>
       <router-view v-slot="{ Component, route }">
         <h1
           id="primary-heading"
@@ -76,6 +73,7 @@ fragment MainAppQueryData on Query {
     currentProject {
       id
       isLoadingConfigFile
+      isLoadingNodeEvents
     }
 }
 `

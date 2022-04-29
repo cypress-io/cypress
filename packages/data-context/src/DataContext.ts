@@ -339,6 +339,7 @@ export class DataContext {
       this.emitter.baseErrorChange()
 
       this.emitter.toLaunchpad()
+      this.emitter.toApp()
     }
   }
 
