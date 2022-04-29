@@ -1,6 +1,7 @@
 /* eslint-disable no-dupe-class-members */
 import path from 'path'
 import { fork } from 'child_process'
+import fs from 'fs-extra'
 import semver from 'semver'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
@@ -30,6 +31,7 @@ import {
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
+import resolveFrom from 'resolve-from'
 
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
@@ -167,11 +169,8 @@ export class MigrationActions {
   }
 
   locallyInstalledCypressVersion (currentProject: string) {
-    const localCypressPath = require.resolve('cypress/package.json', {
-      paths: [currentProject],
-    })
-
-    const localCypressPkgJson = require(localCypressPath) as { version: string }
+    const localCypressPkgJsonPath = resolveFrom(currentProject, path.join('cypress', 'package.json'))
+    const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
 
     return localCypressPkgJson?.version ?? undefined
   }
