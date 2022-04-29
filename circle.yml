@@ -1259,7 +1259,7 @@ jobs:
 
   runner-integration-tests-firefox:
     <<: *defaults
-    resource_class: medium
+    resource_class: medium+
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1337,7 +1337,7 @@ jobs:
 
   driver-integration-tests-firefox-experimentalSessionAndOrigin:
     <<: *defaults
-    resource_class: medium
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
