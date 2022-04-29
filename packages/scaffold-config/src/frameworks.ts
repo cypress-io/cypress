@@ -207,7 +207,7 @@ export const WIZARD_FRAMEWORKS = [
     type: 'nuxtjs',
     configFramework: 'nuxt',
     category: 'template',
-    name: 'Nuxt.js (2)',
+    name: 'Nuxt.js (v2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
