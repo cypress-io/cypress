@@ -113,7 +113,7 @@ const getInvocationDetails = (specWindow, config) => {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
+    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot'), config('platform')) || {};
 
     (details as any).stack = stack
 
@@ -291,7 +291,7 @@ type LineDetail =
   whitespace: any
 }
 
-const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
+const getSourceDetailsForLine = (projectRoot, line, platform): LineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
@@ -313,12 +313,24 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
     relativeFile = path.normalize(relativeFile)
   }
 
+  let absoluteFile
+
+  if (relativeFile && projectRoot) {
+    absoluteFile = path.resolve(projectRoot, relativeFile)
+
+    // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have
+    // to remove the / so the openFileInIDE can find the correct path
+    if (platform === 'win32' && absoluteFile.startsWith('/')) {
+      absoluteFile = absoluteFile.substring(1)
+    }
+  }
+
   return {
     function: sourceDetails.function,
     fileUrl: generatedDetails.file,
     originalFile,
     relativeFile,
-    absoluteFile: (relativeFile && projectRoot) ? path.resolve(projectRoot, relativeFile) : undefined,
+    absoluteFile,
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,
@@ -326,12 +338,12 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   }
 }
 
-const getSourceDetailsForFirstLine = (stack, projectRoot) => {
+const getSourceDetailsForFirstLine = (stack, projectRoot, platform) => {
   const line = getStackLines(stack)[0]
 
   if (!line) return
 
-  return getSourceDetailsForLine(projectRoot, line)
+  return getSourceDetailsForLine(projectRoot, line, platform)
 }
 
 const reconstructStack = (parsedStack) => {
