@@ -13,7 +13,7 @@ describe('Error handling', () => {
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains('Stack Trace')
+    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
 
     cy.log('Fix error and validate it reloads configuration')
     cy.withCtx(async (ctx) => {
@@ -48,7 +48,7 @@ describe('Error handling', () => {
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains('Stack Trace')
+    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
 
     cy.log('Fix error and validate it reloads configuration')
 
