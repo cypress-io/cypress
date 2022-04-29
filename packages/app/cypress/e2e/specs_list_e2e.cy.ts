@@ -113,24 +113,41 @@ describe('App: Spec List (E2E)', () => {
     })
   })
 
+  it('allows you to search and filter the list of specs in the list', () => {
+    cy.get('button').contains('6 Matches')
+
+    cy.get('input').type('content', { force: true })
+
+    cy.get('[data-cy="spec-item"]').should('have.length', 2)
+    .should('contain', 'dom-content.spec.js')
+
+    cy.get('button').contains('2 of 6 Matches')
+
+    cy.get('input').clear().type('asdf', { force: true })
+
+    cy.get('[data-cy="spec-item"]').should('have.length', 0)
+
+    cy.get('button').contains('0 of 6 Matches')
+  })
+
   describe('typing the filter', function () {
-    const runAllIntegrationSpecsLabel = 'Run 8 integration specs'
+    // const runAllIntegrationSpecsLabel = 'Run 8 integration specs'
 
-    beforeEach(function () {
-      this.specs.integration.push({
-        name: 'a-b_c/d~e(f)g.spec.js',
-        absolute: '/user/project/cypress/integration/a-b_c/d~e(f)g.spec.js',
-        relative: 'cypress/integration/a-b_c/d~e(f)g.spec.js',
-      })
+    // beforeEach(function () {
+    //   this.specs.integration.push({
+    //     name: 'a-b_c/d~e(f)g.spec.js',
+    //     absolute: '/user/project/cypress/integration/a-b_c/d~e(f)g.spec.js',
+    //     relative: 'cypress/integration/a-b_c/d~e(f)g.spec.js',
+    //   })
 
-      this.numSpecs = 16
+    //   this.numSpecs = 16
 
-      this.ipc.getSpecs.yields(null, this.specs)
-      this.openProject.resolve(this.config)
+    //   this.ipc.getSpecs.yields(null, this.specs)
+    //   this.openProject.resolve(this.config)
 
-      cy.contains('.all-tests', runAllIntegrationSpecsLabel)
-      cy.get('.filter').type('new')
-    })
+    //   cy.contains('.all-tests', runAllIntegrationSpecsLabel)
+    //   cy.get('.filter').type('new')
+    // })
 
     it('displays only matching spec', function () {
       cy.get('.specs-list .file')
