@@ -164,6 +164,6 @@ const getDocsType = (): string => {
   }
 }
 
-const docsType: string | undefined = props.retry ? getDocsType() : undefined
+const docsType: string = getDocsType()
 
 </script>
