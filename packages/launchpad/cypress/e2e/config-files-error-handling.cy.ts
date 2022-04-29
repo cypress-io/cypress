@@ -240,7 +240,7 @@ describe('setupNodeEvents', () => {
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic).should('contain', 'Error Loading Config')
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.get('[data-cy="alert-body"]').should('contain', 'Expected baseUrl to be a fully qualified URL')
 
     cy.withCtx(async (ctx) => {
