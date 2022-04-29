@@ -41,7 +41,7 @@ export default class SessionsManager {
     this.cy.state('activeSessions', clearedSessions)
   }
 
-  mapOrigins = async (origins: string | Array<string>) => {
+  mapOrigins = async (origins: string | Array<string>): Promise<Array<string>> => {
     const getOrigins = this.Cypress.Promise.map(
       ([] as string[]).concat(origins), async (v) => {
         if (v === '*') {
@@ -208,7 +208,7 @@ export default class SessionsManager {
 
       const currentOrigin = $Location.create(window.location.href).origin
 
-      const origins = await this.mapOrigins(opts.origin)
+      const origins: Array<string> = await this.mapOrigins(opts.origin)
 
       const results = {
         localStorage: [] as any[],
