@@ -43,7 +43,7 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', 'Cypress configuration error')
+    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
     .and('contain.text', 'Error thrown from Config')
 
     cy.get('[data-cy="collapsible-header"]')
