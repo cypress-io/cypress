@@ -1,13 +1,26 @@
 <template>
   <WizardLayout
-    :next="canNavigateForward ? t('setupPage.step.continue') : t('setupPage.install.waitForInstall')"
-    :can-navigate-forward="canNavigateForward"
+    :next="allDependenciesInstalled ? t('setupPage.step.continue') : t('setupWizard.installDependencies.waitForInstall')"
+    :can-navigate-forward="allDependenciesInstalled"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
     class="max-w-640px relative"
-    :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
-    :skip-fn="!canNavigateForward ? confirmInstalled : undefined"
+    :main-button-variant="allDependenciesInstalled ? 'primary' : 'pending'"
+    :skip-fn="!allDependenciesInstalled ? confirmInstalled : undefined"
   >
+    <template
+      v-if="allDependenciesInstalled && showSuccessAlert"
+      #accessory
+    >
+      <Alert
+        v-model="showSuccessAlert"
+        class="w-full"
+        :icon="CircleCheck"
+        :title="t('setupWizard.installDependencies.installationAlertSuccess')"
+        status="success"
+        dismissible
+      />
+    </template>
     <ManualInstall :gql="props.gql" />
   </WizardLayout>
 </template>
@@ -16,8 +29,11 @@
 import { ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
+import Alert from '@cy/components/Alert.vue'
 import { gql } from '@urql/core'
 import type { InstallDependenciesFragment } from '../generated/graphql'
+import CircleCheck from '~icons/cy/circle-check_x16.svg'
+
 import {
   InstallDependencies_ScaffoldFilesDocument,
   Wizard_InstalledPackagesDocument,
@@ -53,7 +69,7 @@ fragment Wizard_InstalledPackages_Data on Query {
 `
 
 gql`
-query Wizard_InstalledPackages{
+query Wizard_InstalledPackages {
   ...Wizard_InstalledPackages_Data
 }`
 
@@ -61,25 +77,28 @@ const queryInstalled = useQuery({
   query: Wizard_InstalledPackagesDocument,
 })
 
-const intervalQueryTrigger = useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
-
-  const allDepsSatisified = res.data.value?.wizard?.packagesToInstall?.every((pkg) => pkg.satisfied)
-
-  if (allDepsSatisified) {
-    intervalQueryTrigger.pause()
-    canNavigateForward.value = true
-  }
-}, 1000, {
-  immediate: true,
-})
-
-const canNavigateForward = ref(false)
-
 const props = defineProps<{
   gql: InstallDependenciesFragment
   backFn: () => void
 }>()
+
+const checkForInstalledDependencies = (wizard) => {
+  return wizard?.packagesToInstall?.every((pkg) => pkg.satisfied) || false
+}
+
+const allDependenciesInstalled = ref(checkForInstalledDependencies(props.gql.wizard))
+const showSuccessAlert = ref(true)
+
+if (!allDependenciesInstalled.value) {
+  const intervalQueryTrigger = useIntervalFn(async () => {
+    const res = await queryInstalled.executeQuery({ requestPolicy: 'network-only' })
+
+    if (checkForInstalledDependencies(res.data.value?.wizard)) {
+      intervalQueryTrigger.pause()
+      allDependenciesInstalled.value = true
+    }
+  }, 1000)
+}
 
 const { t } = useI18n()
 const mutation = useMutation(InstallDependencies_ScaffoldFilesDocument)

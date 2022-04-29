@@ -2,6 +2,7 @@ import sinon from 'sinon'
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
 import * as deps from '@packages/scaffold-config/src/dependencies'
+import { defaultMessages } from '@cy/i18n'
 import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
 
 describe('<ManualInstall />', () => {
@@ -39,6 +40,7 @@ describe('<ManualInstall />', () => {
 
     const installCommand = `npm install -D react-scripts typescript`
 
+    cy.findByText(defaultMessages.setupWizard.installDependencies.pasteCommand).should('be.visible')
     cy.findByText(installCommand).should('be.visible')
     cy.findByRole('button', { name: 'Copy' }).click()
     cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
