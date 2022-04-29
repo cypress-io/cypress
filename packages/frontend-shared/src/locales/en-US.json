@@ -219,6 +219,7 @@
   },
   "launchpadErrors": {
     "generic": {
+      "configErrorTitle": "Cypress configuration error",
       "retryButton": "Try again",
       "stackTraceLabel": "Stack trace",
       "docsButton": {
