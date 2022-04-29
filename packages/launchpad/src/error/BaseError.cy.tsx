@@ -96,7 +96,7 @@ describe('<BaseError />', () => {
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     }).then(() => {
       cy.get('[data-cy=stack-open-true]').should('not.exist')
-      cy.contains('Stack trace').click()
+      cy.contains(cy.i18n.launchpadErrors.generic.stackTraceLabel).click()
       cy.contains('Error: foobar').should('be.visible')
       cy.get('[data-cy=stack-open-true]')
     })
