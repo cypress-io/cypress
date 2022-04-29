@@ -113,7 +113,7 @@ const getInvocationDetails = (specWindow, config) => {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot'), config('platform')) || {};
+    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
 
     (details as any).stack = stack
 
@@ -291,7 +291,7 @@ type LineDetail =
   whitespace: any
 }
 
-const getSourceDetailsForLine = (projectRoot, line, platform): LineDetail => {
+const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
@@ -320,7 +320,7 @@ const getSourceDetailsForLine = (projectRoot, line, platform): LineDetail => {
 
     // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have
     // to remove the / so the openFileInIDE can find the correct path
-    if (platform === 'win32' && absoluteFile.startsWith('/')) {
+    if (Cypress.config('platform') === 'win32' && absoluteFile.startsWith('/')) {
       absoluteFile = absoluteFile.substring(1)
     }
   }
@@ -338,12 +338,12 @@ const getSourceDetailsForLine = (projectRoot, line, platform): LineDetail => {
   }
 }
 
-const getSourceDetailsForFirstLine = (stack, projectRoot, platform) => {
+const getSourceDetailsForFirstLine = (stack, projectRoot) => {
   const line = getStackLines(stack)[0]
 
   if (!line) return
 
-  return getSourceDetailsForLine(projectRoot, line, platform)
+  return getSourceDetailsForLine(projectRoot, line)
 }
 
 const reconstructStack = (parsedStack) => {
