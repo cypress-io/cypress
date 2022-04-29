@@ -381,7 +381,7 @@ export class ProjectConfigManager {
       options: {
         ...options,
         testingType: this._testingType,
-        configFile: path.basename(this.configFilePath),
+        // configFile: path.basename(this.configFilePath),
       },
     })
 
