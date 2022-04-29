@@ -36,6 +36,13 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
+    t.field('configChange', {
+      type: CurrentProject,
+      description: 'Issued when cypress.config.js is re-executed due to a change',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('configChange'),
+      resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
+
     t.field('specsChange', {
       type: CurrentProject,
       description: 'Issued when the watched specs for the project changes',

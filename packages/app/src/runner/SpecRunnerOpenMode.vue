@@ -143,10 +143,18 @@ fragment SpecRunner_Preferences on Query {
 `
 
 gql`
+fragment SpecRunner_Config on CurrentProject {
+  id
+  config
+}
+`
+
+gql`
 fragment SpecRunner on Query {
   ...Specs_InlineSpecList
   currentProject {
     id
+    ...SpecRunner_Config
     ...SpecRunnerHeader
     ...AutomationMissing
   }
