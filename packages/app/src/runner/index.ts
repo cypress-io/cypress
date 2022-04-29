@@ -120,16 +120,17 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner (namespace: AutomationElementId) {
+function setupRunner () {
   const mobxRunnerStore = getMobxRunnerStore()
   const runnerUiStore = useRunnerUiStore()
+  const config = getRunnerConfigFromWindow()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
     randomString: runnerUiStore.randomString,
     element: getAutomationElementId(),
   })
 
-  getEventManager().start(window.UnifiedRunner.config)
+  getEventManager().start(config)
 
   const autStore = useAutStore()
 
@@ -192,7 +193,7 @@ export async function teardown () {
  */
 function runSpecCT (spec: SpecFile) {
   // TODO: UNIFY-1318 - figure out how to manage window.config.
-  const config = window.UnifiedRunner.config
+  const config = getRunnerConfigFromWindow()
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)
@@ -255,7 +256,7 @@ function setSpecForDriver (spec: SpecFile) {
  */
 function runSpecE2E (spec: SpecFile) {
   // TODO: UNIFY-1318 - manage config with GraphQL, don't put it on window.
-  const config = window.UnifiedRunner.config
+  const config = getRunnerConfigFromWindow()
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)
@@ -298,6 +299,10 @@ function runSpecE2E (spec: SpecFile) {
   getEventManager().initialize($autIframe, config)
 }
 
+function getRunnerConfigFromWindow () {
+  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+}
+
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
@@ -310,7 +315,7 @@ async function initialize () {
 
   isTorndown = false
 
-  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  const config = getRunnerConfigFromWindow()
 
   if (isTorndown) {
     return
@@ -323,21 +328,17 @@ async function initialize () {
   // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
   autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
 
-  // just stick config on window until we figure out how we are
-  // going to manage it
-  window.UnifiedRunner.config = config
-
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
-    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+    const store = initializeMobxStore(window.__CYPRESS_TESTING_TYPE__)
 
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
 /**
@@ -370,15 +371,15 @@ async function executeSpec (spec: SpecFile) {
 
   UnifiedReporterAPI.setupReporter()
 
-  if (window.UnifiedRunner.config.testingType === 'e2e') {
+  if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
     return runSpecE2E(spec)
   }
 
-  if (window.UnifiedRunner.config.testingType === 'component') {
+  if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
     return runSpecCT(spec)
   }
 
-  throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')
+  throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
 }
 
 function getAutomationElementId (): AutomationElementId {
