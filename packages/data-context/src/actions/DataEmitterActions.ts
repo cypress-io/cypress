@@ -36,6 +36,14 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when cypress.config is re-executed and we'd like to
+   * either re-run a spec or update something in the App UI.
+   */
+  configChange () {
+    this._emit('configChange')
+  }
+
+  /**
    * Emitted when we have a notification from the cloud to refresh the data
    */
   cloudViewerChange () {
@@ -72,16 +80,16 @@ export class DataEmitterActions extends DataEmitterEvents {
    * Broadcasts a signal to the "app" via Socket.io, typically used to trigger
    * a re-query of data on the frontend
    */
-  toApp (...args: any[]) {
-    this.ctx.coreData.servers.appSocketServer?.emit('graphql-refresh')
+  toApp () {
+    this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refetch')
   }
 
   /**
    * Broadcasts a signal to the "launchpad" (Electron GUI) via Socket.io,
    * typically used to trigger a re-query of data on the frontend
    */
-  toLaunchpad (...args: any[]) {
-    this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refresh')
+  toLaunchpad () {
+    this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refetch')
   }
 
   /**
@@ -89,9 +97,9 @@ export class DataEmitterActions extends DataEmitterEvents {
    * source, and respond with the data before the initial hit was able to resolve
    */
   notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
-    const server = target === 'app' ? this.ctx.coreData.servers.appSocketServer : this.ctx.coreData.servers.gqlSocketServer
+    const server = target === 'app' ? this.ctx.coreData.servers.appSocketNamespace : this.ctx.coreData.servers.gqlSocketServer
 
-    server?.emit('graphql-refresh', {
+    server?.emit('graphql-refetch', {
       field,
       operation,
       variables,

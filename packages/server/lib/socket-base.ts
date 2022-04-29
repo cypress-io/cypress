@@ -218,6 +218,8 @@ export class SocketBase {
       const headers = socket.request?.headers ?? {}
 
       socket.on('automation:client:connected', () => {
+        const connectedBrowser = getCtx().coreData.activeBrowser
+
         if (automationClient === socket) {
           return
         }
@@ -234,8 +236,10 @@ export class SocketBase {
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
         automationClient.on('disconnect', () => {
-          // if we've stopped then don't do anything
-          if (this.ended) {
+          const activeBrowser = getCtx().coreData.activeBrowser
+
+          // if we've stopped or if we've switched to another browser then don't do anything
+          if (this.ended || (connectedBrowser?.path !== activeBrowser?.path)) {
             return
           }
 
@@ -329,8 +333,6 @@ export class SocketBase {
 
         return socket.join('runner')
       })
-
-      socket.on('graphql:request', handleGraphQLSocketRequest)
 
       // TODO: what to do about runner disconnections?
 
@@ -564,6 +566,10 @@ export class SocketBase {
       })
 
       callbacks.onSocketConnection(socket)
+    })
+
+    io.of('/data-context').on('connection', (socket: Socket) => {
+      socket.on('graphql:request', handleGraphQLSocketRequest)
     })
 
     return io

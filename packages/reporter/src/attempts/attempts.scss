@@ -14,7 +14,7 @@
 
     > .collapsible {
       position: relative;
-      margin-right: 20px;
+      margin-right: 16px;
       .collapsible-header-inner {
         outline: none;
       }
@@ -59,6 +59,10 @@
         display: block;
       }
     }
+  }
+
+  .attempt-content {
+    padding-left: 5px;
   }
 }
 
@@ -120,8 +124,9 @@
       display: none;
     }
 
-    .attempt-state {
+    .attempt-tag > .attempt-state {
       margin-left: 3px;
+      margin-right: 0;
     }
   }
 }

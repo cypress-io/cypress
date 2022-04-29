@@ -85,6 +85,12 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
     const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
 
+    // Chrome plans to make document.domain immutable in Chrome 106, with the default value
+    // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+    // so that we can continue to support tests that visit multiple subdomains in a single spec.
+    // https://github.com/cypress-io/cypress/issues/20147
+    res.setHeader('Origin-Agent-Cluster', '?0')
+
     getCtx().html.appHtml(nonProxied)
     .then((html) => res.send(html))
     .catch((e) => res.status(500).send({ stack: e.stack }))

@@ -221,11 +221,8 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project:')
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
@@ -369,11 +366,8 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project:')
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
@@ -426,11 +420,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
@@ -438,7 +429,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('component')
 
-        cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
+        cy.findByRole('button', { name: 'Continue' })
       })
 
       it('can skip setup CT testing for a project', () => {
@@ -480,11 +471,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
@@ -492,7 +480,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyScaffoldedFiles('component')
 
-        cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
+        cy.findByRole('button', { name: 'Continue' })
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
@@ -720,6 +708,13 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Nuxt.js').click()
       cy.findByRole('button', { name: 'Next Step' }).should('not.be.disabled').click()
+      cy.intercept('POST', 'mutation-InstallDependencies_scaffoldFiles', (req) => {
+        req.continue((res) => {
+          // Force the response to have "changes", in the situation where we can't deal with it
+          res.body.data.scaffoldTestingType.scaffoldedFiles[0].status = 'changes'
+        })
+      })
+
       cy.findByRole('button', { name: 'Skip' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
       cy.findByText('Learn more.').click()

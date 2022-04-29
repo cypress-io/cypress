@@ -26,6 +26,8 @@
           :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
           :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
           :suffix-icon="props.dismissible ? DeleteIcon : null"
+          :suffix-button-class="classes.suffixButtonClass"
+          :suffix-icon-class="classes.suffixIconClass"
           data-cy="alert"
           class="rounded min-w-200px p-16px"
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"

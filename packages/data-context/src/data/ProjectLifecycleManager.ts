@@ -115,18 +115,6 @@ export class ProjectLifecycleManager {
     return Object.freeze(this._projectMetaState)
   }
 
-  get legacyJsonPath () {
-    return path.join(this.configFilePath, this.legacyConfigFile)
-  }
-
-  get legacyConfigFile () {
-    if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
-      return this.ctx.modeOptions.configFile
-    }
-
-    return 'cypress.json'
-  }
-
   get configFile () {
     return this.ctx.modeOptions.configFile ?? (this._configManager?.configFilePath && path.basename(this._configManager.configFilePath)) ?? 'cypress.config.js'
   }
@@ -188,12 +176,6 @@ export class ProjectLifecycleManager {
     return this.metaState.hasTypescript ? 'ts' : 'js'
   }
 
-  async checkIfLegacyConfigFileExist () {
-    const legacyConfigFileExist = await this.ctx.file.checkIfFileExists(this.legacyConfigFile)
-
-    return Boolean(legacyConfigFileExist)
-  }
-
   clearCurrentProject () {
     this.resetInternalState()
     this._initializedProject = undefined
@@ -234,14 +216,6 @@ export class ProjectLifecycleManager {
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
 
-        if (this.ctx.coreData.scaffoldedFiles) {
-          this.ctx.coreData.scaffoldedFiles.filter((f) => {
-            if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
-              f.status = 'valid'
-            }
-          })
-        }
-
         this.ctx.emitter.toLaunchpad()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
@@ -267,6 +241,7 @@ export class ProjectLifecycleManager {
         }
 
         this._pendingInitialize?.resolve(finalConfig)
+        this.ctx.emitter.configChange()
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
     })
@@ -309,24 +284,23 @@ export class ProjectLifecycleManager {
     }
   }
 
-  async refreshLifecycle () {
-    assert(this._projectRoot, 'Cannot reload config without a project root')
-    assert(this._configManager, 'Cannot reload config without a config manager')
-
-    if (this.readyToInitialize(this._projectRoot)) {
-      this._configManager.resetLoadingState()
-      await this.initializeConfig()
-
-      if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-        this._configManager.loadTestingType()
-      } else {
-        this.setAndLoadCurrentTestingType(null)
-      }
-
-      return true
+  async refreshLifecycle (): Promise<void> {
+    if (!this._projectRoot || !this._configManager || !this.readyToInitialize(this._projectRoot)) {
+      return
     }
 
-    return false
+    this._configManager.resetLoadingState()
+
+    // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
+    this.ctx.emitter.toLaunchpad()
+
+    await this.initializeConfig()
+
+    if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+      this._configManager.loadTestingType()
+    } else {
+      this.setAndLoadCurrentTestingType(null)
+    }
   }
 
   async waitForInitializeSuccess (): Promise<boolean> {
@@ -395,6 +369,8 @@ export class ProjectLifecycleManager {
       s.packageManager = packageManagerUsed
     })
 
+    this.verifyProjectRoot(projectRoot)
+
     if (this.readyToInitialize(this._projectRoot)) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
@@ -407,12 +383,10 @@ export class ProjectLifecycleManager {
    * @param projectRoot the project's root
    * @returns true if we can initialize and false if not
    */
-  readyToInitialize (projectRoot: string): boolean {
-    this.verifyProjectRoot(projectRoot)
-
+  private readyToInitialize (projectRoot: string): boolean {
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
-    const legacyConfigPath = path.join(projectRoot, this.legacyConfigFile)
+    const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
       this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
@@ -427,7 +401,7 @@ export class ProjectLifecycleManager {
     return this.metaState.hasValidConfigFile
   }
 
-  async legacyMigration (legacyConfigPath: string) {
+  private async legacyMigration (legacyConfigPath: string) {
     try {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
@@ -500,18 +474,6 @@ export class ProjectLifecycleManager {
     }
   }
 
-  loadTestingType () {
-    assert(this._configManager, 'Cannot load a testing type without a config manager')
-
-    this._configManager.loadTestingType()
-  }
-
-  scaffoldFilesIfNecessary () {
-    if (this._currentTestingType && this._projectMetaState.hasValidConfigFile && !this.isTestingTypeConfigured(this._currentTestingType) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-    }
-  }
-
   private resetInternalState () {
     if (this._configManager) {
       this._configManager.destroy()
@@ -539,12 +501,6 @@ export class ProjectLifecycleManager {
     assert(this._configManager, 'Cannot get config file contents without a config manager')
 
     return this._configManager.getConfigFileContents()
-  }
-
-  async loadCypressEnvFile () {
-    assert(this._configManager, 'Cannot load a cypress env file without a config manager')
-
-    return this._configManager.loadCypressEnvFile()
   }
 
   reinitializeCypress () {
@@ -585,7 +541,7 @@ export class ProjectLifecycleManager {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
-      hasLegacyCypressJson: fs.existsSync(this._pathToFile(this.legacyConfigFile)),
+      hasLegacyCypressJson: this.ctx.migration.legacyConfigFileExists(),
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 
@@ -703,10 +659,10 @@ export class ProjectLifecycleManager {
     return true
   }
 
-  async needsCypressJsonMigration () {
-    const legacyConfigFileExist = await this.checkIfLegacyConfigFileExist()
-
-    return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
+  async initializeOpenMode (testingType: TestingType | null) {
+    if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
+      this.setAndLoadCurrentTestingType(testingType)
+    }
   }
 
   async initializeRunMode (testingType: TestingType | null) {

@@ -316,6 +316,8 @@ describe('Routes', () => {
         expect(res.statusCode).to.eq(200)
 
         expect(res.body).to.match(/window.__Cypress__ = true/)
+
+        expect(res.headers['origin-agent-cluster']).to.eq('?0')
       })
     })
 

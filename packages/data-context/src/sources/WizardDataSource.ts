@@ -26,13 +26,6 @@ export class WizardDataSource {
       })
     }
 
-    // TODO: Storybook support.
-    // const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
-
-    // if (storybookInfo && this.chosenFramework.storybookDep) {
-    //   packages.push(this.chosenFramework.storybookDep)
-    // }
-
     return packages
   }
 

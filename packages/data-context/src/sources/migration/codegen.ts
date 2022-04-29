@@ -2,7 +2,6 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
-import prettier from 'prettier'
 import type { TestingType } from '@packages/types'
 import { formatMigrationFile } from './format'
 import { substitute } from './autoRename'
@@ -448,11 +447,17 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
-export function formatConfig (config: string) {
-  return prettier.format(config, {
-    semi: false,
-    singleQuote: true,
-    endOfLine: 'lf',
-    parser: 'babel',
-  })
+export function formatConfig (config: string): string {
+  try {
+    const prettier = require('prettier') as typeof import('prettier')
+
+    return prettier.format(config, {
+      semi: false,
+      singleQuote: true,
+      endOfLine: 'lf',
+      parser: 'babel',
+    })
+  } catch (e) {
+    return config
+  }
 }

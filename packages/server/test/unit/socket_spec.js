@@ -25,6 +25,9 @@ let ctx
 describe('lib/socket', () => {
   beforeEach(function () {
     ctx = getCtx()
+    ctx.coreData.activeBrowser = {
+      path: 'path-to-browser-one',
+    }
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')
@@ -245,6 +248,19 @@ describe('lib/socket', () => {
 
             return done()
           })
+        })
+
+        it('returns early if disconnect event is from another browser', function (done) {
+          const delaySpy = sinon.spy(Promise, 'delay')
+
+          this.extClient.on('disconnect', () => {
+            expect(delaySpy).to.not.have.been.calledWith(2000)
+
+            return done()
+          })
+
+          ctx.coreData.activeBrowser = { path: 'path-to-browser-two' }
+          this.extClient.disconnect()
         })
 
         it('returns true when tab matches magic string', function (done) {
