@@ -45,6 +45,7 @@
     "randexp": "0.5.3",
     "randomstring": "1.1.5",
     "resolve-from": "^5.0.0",
+    "semver": "7.3.2",
     "simple-git": "3.4.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.5",

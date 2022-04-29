@@ -1491,6 +1491,25 @@ export const AllCypressErrors = {
       `
   },
 
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+    return errTemplate`
+      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+
+      Ensure the project you are migrating has Cypress version 10 installed.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+
+  MIGRATION_CYPRESS_NOT_FOUND: () => {
+    return errTemplate`
+      You are running Cypress version 10 in global mode, but we were unable to determine the version of Cypress the project you are attempting to migrate is using.
+
+      Ensure the project you are migrating has Cypress version 10 installed.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
