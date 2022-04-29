@@ -73,7 +73,7 @@ The proxy intercepts http requests from all sources. In order to detect cross-or
 
 Allowing the proxy to know if a request is from the **AUT** enables us to do two things when it recognizes that it’s not the **primary origin**:
 
-- Delay the response. This allows us to communicate with the **primary driver** to set up the **spec bridge** and run the user’s callback function via **cy.origin()**. Then the driver notifies the proxy that it can allow the response through. This enables user’s to listen to the `window:before:load` event in the callback function, since the page will not load until after any such listeners are set up.
+- Delay the response. This allows us to communicate with the **primary driver** to set up the **spec bridge** and run the user’s callback function via **cy.origin()**. Then the driver notifies the proxy that it can allow the response through. This enables users to listen to the `window:before:load` event in the callback function, since the page will not load until after any such listeners are set up.
 - Inject code into the request that’s tailored to cross-origin testing.
 
 ### Cross-origin navigation timing
