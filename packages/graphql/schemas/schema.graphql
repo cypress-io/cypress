@@ -447,6 +447,9 @@ type CurrentProject implements Node & ProjectLike {
   """Project saved state"""
   savedState: JSON
 
+  """base64 encoded config used on the runner page"""
+  serveConfig: JSON!
+
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
   title: String!
@@ -1263,6 +1266,9 @@ type Subscription {
   Triggered when there is a change to the info associated with the cloud project (org added, project added)
   """
   cloudViewerChange: Query
+
+  """Issued when cypress.config.js is re-executed due to a change"""
+  configChange: CurrentProject
 
   """Issued for internal development changes"""
   devChange: DevState
