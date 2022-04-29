@@ -103,6 +103,14 @@ It’s possible for users to set custom key/value pairs where the value could be
 
 The config and env values are synced into the **secondary driver** before the **cy.origin()** callback is called. They are synced back to the **primary driver** when the callback and any commands run inside of it are finished.
 
+### Internal state
+
+Various internal state values (used throughout the codebase via `Cypress.state()`, `cy.state()` and `state()`) are sent from the **primary driver** into the **secondary driver** before the **cy.origin()** callback is called. These include values such the viewport width, viewport height, and the stability of the page.
+
+A read-only version of the `runnable` is also sent. While the actual `runnable` instance is a singleton only used by the **primary driver**, certain stateful values it holds are necessary for various parts of the **secondary driver** to function correctly.
+
+The full, up-to-date list of state values sent can be found in the **cy.origin()** implementation.
+
 ## Events
 
 All event listeners are only bound to the execution context of the origin in which they are defined. Events occurring in one origin do not trigger event handlers in a different origin. This is because some event handlers accept arguments that are not serializable. Even though some event handlers do rely on unserializable arguments, for consistency’s sake, events are bound to their origin.
