@@ -8,6 +8,8 @@ declare namespace Cypress {
       // the JQuery element for the command. This will highlight the command
       // in the main window when debugging
       $el?: JQuery
+    // whether or not the generated log was an event or command
+      event?: boolean
       // whether or not to emit a log to the UI
       // when disabled, child logs will not be nested in the UI
       log?: boolean

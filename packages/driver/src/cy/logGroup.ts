@@ -12,6 +12,7 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
     instrument: 'command',
     groupStart: true,
     emitOnly: !shouldEmitLog,
+    event: false,
   }
 
   const log = Cypress.log(options)
