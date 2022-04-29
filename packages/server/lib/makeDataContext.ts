@@ -107,7 +107,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cache.removeAllProjectPreferences()
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        return cache.insertProjectPreferences(projectTitle, preferences)
+        // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
+        // <issue link here>
+        cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
@@ -150,8 +152,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           ctx.logTraceError(e)
         })
       },
-      // All of the below instances of JIT requiring electron/gui/windows can be removed
-      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
       showItemInFolder (folder: string) {
         require('electron').shell.showItemInFolder(folder)
       },
@@ -164,6 +164,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       copyTextToClipboard (text: string) {
         require('electron').clipboard.writeText(text)
       },
+      // These instances of JIT requiring gui/windows can be removed
+      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
       isMainWindowFocused () {
         return require('./gui/windows').isMainWindowFocused()
       },
