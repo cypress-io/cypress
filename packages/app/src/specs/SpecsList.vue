@@ -32,16 +32,16 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-3 children:font-medium children:text-gray-800 "
+      class="mb-4 grid grid-cols-6 children:font-medium children:text-gray-800 "
     >
       <div
-        class="flex items-center justify-between"
+        class="flex col-span-3 items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex items-center justify-between">
+      <div class="flex col-span-2 items-center justify-between">
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
       <div class="flex items-center justify-between">
@@ -112,7 +112,7 @@
           <template #latest-runs>
             <RunStatusDots
               v-if="row.data.isLeaf"
-              :runs="row.data.data?.runInfo?.recentRuns ?? []"
+              :runs="row.data.data?.runInfo?.recentRuns ?? testingRuns"
             />
           </template>
         </SpecsListRowItem>
@@ -150,7 +150,7 @@ import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useRoute } from 'vue-router'
-import type { CloudProjectSpecs } from '@packages/graphql/src/gen/cloud-source-types.gen'
+import type { CloudProjectSpecs, CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -185,19 +185,19 @@ fragment SpecsList on Spec {
 `
 
 
-gql`
-fragment CloudSpecs_123 on CloudProject {
-  # temporarily use hardcoded paths, pending an update to the GQL layer
-  specs(specPaths: ["cypress/e2e/practice/practice.cy.js","cypress/e2e/final/somethingelse.cy.js","cypress/e2e/final/app.cy.js","cypress/e2e/app.cy.js"]) {
-      specPath
-      averageDuration
-      recentRuns {
-        id
-        status
-      }
-  }
-}
-`
+// gql`
+// fragment CloudSpecData on CloudProject {
+//   # temporarily use hardcoded paths, pending an update to the GQL layer
+//   specs(specPaths: ["cypress/e2e/practice/practice.cy.js","cypress/e2e/final/somethingelse.cy.js","cypress/e2e/final/app.cy.js","cypress/e2e/app.cy.js"]) {
+//       specPath
+//       averageDuration
+//       recentRuns {
+//         id
+//         status
+//       }
+//   }
+// }
+// `
 
 gql`
 fragment Specs_SpecsList on Query {
@@ -211,9 +211,9 @@ fragment Specs_SpecsList on Query {
     }
     config
     ...SpecPatternModal
-    cloudProject{
-      ...CloudSpecs_123
-    }
+    #cloudProject{
+    #  ...CloudSpecData
+    #}
   }
 }
 `
@@ -223,6 +223,12 @@ useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
 const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
+
+const testingRuns: CloudRun[] = [
+  { id: "4", status: "RUNNING"},
+  { id: "3", status: "PASSED"},
+  { id: "2", status: "FAILED"},
+];
 
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
@@ -261,13 +267,13 @@ function handleClear () {
 const specs = computed(() => {
   const specs2 = cachedSpecs.value.map((x) => {
     const s = makeFuzzyFoundSpec(x)
-    if(props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'){
-      const runInfo = props.gql.currentProject?.cloudProject?.specs?.find(ss=>ss?.specPath === s.name)
-      return {
-        ...s,
-        runInfo
-      }
-    }
+    // if(props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'){
+    //   const runInfo = props.gql.currentProject?.cloudProject?.specs?.find(ss=>ss?.specPath === s.name)
+    //   return {
+    //     ...s,
+    //     runInfo
+    //   }
+    // }
     return s
   })
 

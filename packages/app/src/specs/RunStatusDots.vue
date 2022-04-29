@@ -1,27 +1,29 @@
 <template>
-  <ol
-    class="list-none h-16px mb-0 pl-0 inline-block"
-  >
-    <li
-      v-for="(dot,i) in dotClasses"
-      :key="i"
-      class="ml-4px inline-block align-middle"
+  <div class="flex justify-center">
+    <ol
+      class="list-none h-16px mb-0 pl-0 inline-block"
     >
-      <i-cy-dot-solid_x4
-        width="4"
-        height="4"
-        :class="dot"
-      />
-    </li>
-    <li class="ml-4px inline-block align-middle">
-      <component
-        :is="latestStatus.icon"
-        width="16"
-        height="16"
-        :class="{'animate-spin': latestStatus.spin}"
-      />
-    </li>
-  </ol>
+      <li
+        v-for="(dot,i) in dotClasses"
+        :key="i"
+        class="ml-4px inline-block align-middle"
+      >
+        <i-cy-dot-solid_x4
+          width="4"
+          height="4"
+          :class="dot"
+        />
+      </li>
+      <li class="ml-4px inline-block align-middle">
+        <component
+          :is="latestStatus.icon"
+          width="16"
+          height="16"
+          :class="{'animate-spin': latestStatus.spin}"
+        />
+      </li>
+    </ol>
+  </div>
 </template>
 
 <script setup lang="ts">
