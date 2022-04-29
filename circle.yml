@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - remove-unused-scripts
+        - check-results-for-env
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ remove-unused-scripts, << pipeline.git.branch >> ]
+    - equal: [ check-results-for-env, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ remove-unused-scripts, << pipeline.git.branch >> ]
+    - equal: [ check-results-for-env, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1005,6 +1005,9 @@ jobs:
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
+      - run:
+          name: Check env canaries
+          command: node ./scripts/circle-env.js --check-canaries
       - build-and-persist
       - store-npm-logs
 
@@ -1651,7 +1654,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "remove-unused-scripts" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "check-results-for-env" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2050,6 +2053,7 @@ linux-workflow: &linux-workflow
   jobs:
     - node_modules_install
     - build:
+        context: test-runner:env-canary
         requires:
           - node_modules_install
     - lint:
@@ -2353,6 +2357,7 @@ mac-workflow: &mac-workflow
 
     - build:
         name: darwin-build
+        context: test-runner:env-canary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
@@ -2393,6 +2398,7 @@ windows-workflow: &windows-workflow
 
     - build:
         name: windows-build
+        context: test-runner:env-canary
         executor: windows
         resource_class: windows.medium
         requires:

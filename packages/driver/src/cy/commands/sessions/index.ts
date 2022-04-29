@@ -357,7 +357,7 @@ export default function (Commands, Cypress, cy) {
 
           // we have a saved session on the server AND setup matches
           if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
-            _.extend(existingSession, serverStoredSession)
+            _.extend(existingSession, _.omit(serverStoredSession, 'setup'))
             existingSession.hydrated = true
           } else {
             onValidationError = throwValidationError
