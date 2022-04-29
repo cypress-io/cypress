@@ -12,15 +12,20 @@
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
     />
+
     <TransitionQuickFade>
       <div
-        v-if="query.data.value?.baseError"
+        v-if="query.data.value?.baseError || query.data.value?.currentProject.isLoadingConfigFile"
         class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
       >
         <BaseError
+          v-if="query.data.value?.baseError"
           :gql="query.data.value?.baseError"
           :retry="resetErrorsAndLoadConfig"
         />
+        <div v-else>
+          <Spinner />
+        </div>
       </div>
     </TransitionQuickFade>
 
@@ -28,6 +33,9 @@
       aria-labelledby="primary-heading"
       class="overflow-auto"
     >
+      Error: {{ query.data.value?.baseError }}<br>
+      isLoadingConfigFile {{ query.data.value?.currentProject.isLoadingConfigFile }}<br>
+      isLoadingNodeEvents {{ query.data.value?.currentProject.isLoadingNodeEvents }}<br>
       <router-view v-slot="{ Component, route }">
         <h1
           id="primary-heading"
@@ -53,6 +61,8 @@ import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.
 
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
+import Spinner from '@cy/components/Spinner.vue'
+
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
@@ -62,7 +72,11 @@ gql`
 fragment MainAppQueryData on Query {
     baseError {
       ...BaseError
-  }
+    }
+    currentProject {
+      id
+      isLoadingConfigFile
+    }
 }
 `
 

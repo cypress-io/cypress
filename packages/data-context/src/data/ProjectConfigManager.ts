@@ -172,6 +172,7 @@ export class ProjectConfigManager {
       throw error
     } finally {
       this.options.ctx.emitter.toLaunchpad()
+      this.options.ctx.emitter.toApp()
     }
   }
 
