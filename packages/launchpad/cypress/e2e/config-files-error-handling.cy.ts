@@ -249,7 +249,7 @@ describe('setupNodeEvents', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is now invalid when set from the root of the config object')
 
     cy.withCtx(async (ctx) => {
