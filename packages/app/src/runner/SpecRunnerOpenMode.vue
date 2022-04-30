@@ -13,7 +13,7 @@
     />
     <ResizablePanels
       v-else
-      :class="`w-[calc(100vw-${collapsedNavBarWidth}px)]`"
+      class="w-[calc(100vw-64px)]"
       :offset-left="collapsedNavBarWidth"
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
@@ -68,7 +68,7 @@
         </HideDuringScreenshotOrRunMode>
 
         <RemoveClassesDuringScreenshotting
-          class="bg-gray-100 h-0 p-16px"
+          class="p-16px"
         >
           <ScriptError
             v-if="autStore.scriptError"
