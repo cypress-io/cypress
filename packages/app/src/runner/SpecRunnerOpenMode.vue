@@ -13,7 +13,7 @@
     />
     <ResizablePanels
       v-else
-      class="w-[calc(100vw-64px)]"
+      :style="{width: `calc(100vw - ${collapsedNavBarWidth}px)`}"
       :offset-left="collapsedNavBarWidth"
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
