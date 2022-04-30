@@ -12,23 +12,19 @@
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
     />
-
-    <TransitionQuickFade>
-      <div
-        v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
-        class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
-      >
-        <BaseError
-          v-if="query.data.value?.baseError"
-          :gql="query.data.value?.baseError"
-          :retry="resetErrorsAndLoadConfig"
-        />
-        <div v-else>
-          <Spinner />
-        </div>
+    <div
+      v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
+      class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
+    >
+      <BaseError
+        v-if="query.data.value?.baseError"
+        :gql="query.data.value?.baseError"
+        :retry="resetErrorsAndLoadConfig"
+      />
+      <div v-else>
+        <Spinner />
       </div>
-    </TransitionQuickFade>
-
+    </div>
     <main
       aria-labelledby="primary-heading"
       class="overflow-auto"
@@ -54,7 +50,6 @@
 <script lang="ts" setup>
 import { gql, useQuery, useMutation, useSubscription } from '@urql/vue'
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
-import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
