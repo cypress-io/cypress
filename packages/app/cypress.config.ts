@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
 import { initGitRepoForTestProject } from './cypress/tasks/git'
+import configDefaults from './config-defaults'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -62,8 +63,8 @@ export default defineConfig({
   },
   // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
-  namespace: '__cypress-app',
-  socketIoRoute: '/__app-socket',
+  namespace: configDefaults.namespace,
+  socketIoRoute: configDefaults.socketIoRoute,
   socketIoCookie: '__app-socket',
   devServerPublicPathRoute: '/__cypress-app/src',
 })

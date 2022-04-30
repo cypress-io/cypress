@@ -6,6 +6,7 @@
 import type { DataContext } from '../DataContext'
 import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
 import _ from 'lodash'
+import configDefaults from '../../../app/config-defaults'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
@@ -72,8 +73,8 @@ export class HtmlDataSource {
     } catch {
       // Error getting config, we will show an error screen when we render the page
 
-      cfg.namespace = '__cypress-app'
-      cfg.socketIoRoute = '/__app-socket'
+      cfg.namespace = configDefaults.namespace
+      cfg.socketIoRoute = configDefaults.socketIoRoute
     }
 
     cfg.browser = this.ctx._apis.projectApi.getCurrentBrowser()
