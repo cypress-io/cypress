@@ -1511,7 +1511,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
     })
 
-    context('2 inputs, 1 \'submit\' element button[type=submit]', () => {
+    context('2 inputs, 1 \'submit\' element button[type=submit] outside of the form', () => {
       it('triggers form submit', function (done) {
         this.$forms.find('#multiple-inputs-and-button-submit-outside-form').submit((e) => {
           e.preventDefault()
