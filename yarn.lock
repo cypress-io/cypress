@@ -10984,7 +10984,7 @@
     jiti "^1.13.0"
     windicss "^3.5.1"
 
-"@windicss/plugin-interaction-variants@1.0.0", "@windicss/plugin-interaction-variants@^1.0.0":
+"@windicss/plugin-interaction-variants@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@windicss/plugin-interaction-variants/-/plugin-interaction-variants-1.0.0.tgz#11e412c6fd653899f6cced4e4f7b402eb5456981"
   integrity sha512-jk0kvJEwphPlzjgCASxi0yCrLIrMPBHKTjPB1vF2LZsmWVaIPhKQRfpJW6+G093ipDos1E2BkevDrh/R2Ln8gg==
@@ -42345,11 +42345,6 @@ windicss-webpack-plugin@^1.6.10:
     pathe "^0.2.0"
     webpack-virtual-modules "^0.4.3"
     windicss "^3.5.1"
-
-windicss@3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/windicss/-/windicss-3.1.4.tgz#557eaf8e3c08064a309ccb5d887c82c4bce25069"
-  integrity sha512-3RBcANxdOy/n4dLVT8+0X409sGI+piO06ARbQ8RncxGuYgdw5Ip3hrhGIYajH67lV+tHc7xNVGxj73amOC9N0g==
 
 windicss@^3.1.4, windicss@^3.5.1:
   version "3.5.1"
