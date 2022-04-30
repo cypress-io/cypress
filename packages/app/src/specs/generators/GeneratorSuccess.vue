@@ -1,6 +1,7 @@
 <template>
   <Collapsible
     class="rounded outline-none m-4px overflow-hidden"
+    :initially-open="true"
   >
     <template #target="{open}">
       <div
