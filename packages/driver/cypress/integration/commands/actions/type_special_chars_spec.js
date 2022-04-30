@@ -1486,6 +1486,16 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         cy.get('#multiple-inputs-and-button-submit input:first').type('foo{enter}')
       })
 
+      it('triggers form submit when the submit button is outside of the form', function (done) {
+        this.$forms.find('#multiple-inputs-and-button-submit-outside-form').submit((e) => {
+          e.preventDefault()
+
+          done()
+        })
+
+        cy.get('#multiple-inputs-and-button-submit-outside-form input:first').type('foo{enter}')
+      })
+
       it('causes click event on the button[type=submit]', function (done) {
         this.$forms.find('#multiple-inputs-and-button-submit button[type=submit]').click((e) => {
           e.preventDefault()
@@ -1508,18 +1518,6 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         cy.get('#multiple-inputs-and-button-submit input:first').type('f{enter}').then(() => {
           done()
         })
-      })
-    })
-
-    context('2 inputs, 1 \'submit\' element button[type=submit] outside of the form', () => {
-      it('triggers form submit', function (done) {
-        this.$forms.find('#multiple-inputs-and-button-submit-outside-form').submit((e) => {
-          e.preventDefault()
-
-          done()
-        })
-
-        cy.get('#multiple-inputs-and-button-submit-outside-form input:first').type('foo{enter}')
       })
     })
 
