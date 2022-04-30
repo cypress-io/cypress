@@ -1,4 +1,6 @@
-import { defaultConfig } from '@packages/frontend-shared/windi.config'
+import { colors } from '@cypress-design/css'
 import { defineConfig } from 'windicss/helpers'
 
-export default defineConfig(defaultConfig)
+export default defineConfig({
+  colors,
+})

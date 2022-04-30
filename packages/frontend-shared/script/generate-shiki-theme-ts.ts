@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { colors } from '../.windicss/colors'
+import { colors } from '@cypress-design/css'
 import * as fs from 'fs'
 
 const filePath = './src/public/shiki/themes/cypress.theme'
