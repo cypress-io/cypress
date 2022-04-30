@@ -1511,6 +1511,18 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
     })
 
+    context('2 inputs, 1 \'submit\' element button[type=submit]', () => {
+      it('triggers form submit', function (done) {
+        this.$forms.find('#multiple-inputs-and-button-submit-outside-form').submit((e) => {
+          e.preventDefault()
+
+          done()
+        })
+
+        cy.get('#multiple-inputs-and-button-submit-outside-form input:first').type('foo{enter}')
+      })
+    })
+
     context(`2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]`, () => {
       it('triggers form submit', function () {
         const submit = cy.stub()
