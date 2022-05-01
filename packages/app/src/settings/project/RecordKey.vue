@@ -23,7 +23,7 @@
     >
       <CodeBox
         :code="recordKey"
-        :prefix-icon="IconTerminal"
+        :prefix-icon="IconKey"
         confidential
       />
       <CopyButton
@@ -49,7 +49,7 @@ import Button from '@cy/components/Button.vue'
 import CopyButton from '@cy/gql-components/CopyButton.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
-import IconTerminal from '~icons/cy/terminal_x16.svg'
+import IconKey from '~icons/cy/placeholder_x16.svg'
 import IconExport from '~icons/cy/export_x16.svg'
 import type { RecordKeyFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
