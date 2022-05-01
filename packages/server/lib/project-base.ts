@@ -453,10 +453,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.ctx.setAppSocketServer(io)
   }
 
-  changeToUrl (url) {
-    this.server.changeToUrl(url)
-  }
-
   async closeBrowserTabs () {
     return this.server.socket.closeBrowserTabs()
   }

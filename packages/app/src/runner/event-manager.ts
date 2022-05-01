@@ -140,10 +140,6 @@ export class EventManager {
       rerun()
     })
 
-    this.ws.on('specs:changed', ({ specs, testingType }) => {
-      state.setSpecs(specs)
-    })
-
     this.ws.on('dev-server:hmr:error', (error) => {
       Cypress.stop()
       this.localBus.emit('script:error', error)
