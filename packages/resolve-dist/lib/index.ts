@@ -10,7 +10,7 @@ export const resolveFromPackages = (...args: string[]) => {
   return path.join(...[__dirname, '..', '..', ...args])
 }
 
-const getRunnerContents = (filename) => {
+const getRunnerContents = (filename: string) => {
   fs ??= require('fs-extra') as typeof import('fs-extra')
 
   return fs.readFile(getPathToDist('runner', filename))

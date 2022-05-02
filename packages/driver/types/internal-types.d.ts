@@ -3,7 +3,6 @@
 /// <reference path="./cy/commands/session.d.ts" />
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
-/// <reference path="./remote-state.d.ts" />
 
 interface InternalWindowLoadDetails {
   type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'

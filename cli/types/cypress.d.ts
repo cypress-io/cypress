@@ -56,6 +56,16 @@ declare namespace Cypress {
     password: string
   }
 
+  interface RemoteState {
+    auth?: Auth
+    domainName: string
+    strategy: 'file' | 'http'
+    origin: string
+    fileServer: string | null
+    props: Record<string, any>
+    visiting: string
+  }
+
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -2939,6 +2949,9 @@ declare namespace Cypress {
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
+
+    remote: RemoteState
+    
     /**
      * The Cypress version being used.
      */
@@ -2971,6 +2984,7 @@ declare namespace Cypress {
     parentTestsFolderDisplay: string
     projectName: string
     proxyUrl: string
+    remote: RemoteState
     report: boolean
     reporterRoute: string
     reporterUrl: string

@@ -1,3 +1,5 @@
+/// <reference path="../driver/types/internal-types.d.ts" />
+
 import type { Socket } from '@packages/socket/lib/browser'
 import type MobX from 'mobx'
 import type { EventManager } from './src/runner/event-manager'

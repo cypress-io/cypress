@@ -324,7 +324,7 @@ const onReconnect = (client: CRIWrapper.Client) => {
   // if the client disconnects (e.g. due to a computer sleeping), update
   // the frame tree on reconnect in cases there were changes while
   // the client was disconnected
-  _updateFrameTree(client)()
+  return _updateFrameTree(client)()
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
