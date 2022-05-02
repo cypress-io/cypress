@@ -1,9 +1,11 @@
 require('graceful-fs').gracefulify(require('fs'))
+const fs = require('fs-extra')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
+const path = require('path')
 
 let tsRegistered = false
 
@@ -19,6 +21,19 @@ function run (ipc, file, projectRoot) {
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
+  }
+
+  let isProjectECMAScript = false
+
+  try {
+    // Find the suggested framework, starting with meta-frameworks first
+    const packageJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
+
+    if (packageJson.type === 'module') {
+      isProjectECMAScript = true
+    }
+  } catch {
+    // No need to handle. If there's no package.json (in testing), we assume this is not ECMAScript
   }
 
   if (!tsRegistered) {
@@ -238,7 +253,7 @@ function run (ipc, file, projectRoot) {
 
   ipc.on('loadLegacyPlugins', async (legacyConfig) => {
     try {
-      let legacyPlugins = require(file)
+      let legacyPlugins = isProjectECMAScript ? import(file) : require(file)
 
       if (legacyPlugins && typeof legacyPlugins.default === 'function') {
         legacyPlugins = legacyPlugins.default
