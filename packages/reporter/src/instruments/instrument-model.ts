@@ -16,7 +16,7 @@ export interface InstrumentProps {
   displayName?: string
   name?: string
   message?: string
-  type?: string
+  type?: 'agent' | 'parent' | 'child' | 'system' | 'route' | 'session'
   testCurrentRetry?: number
   // warn is specific to cy.session
   state?: TestState | 'warn' | null

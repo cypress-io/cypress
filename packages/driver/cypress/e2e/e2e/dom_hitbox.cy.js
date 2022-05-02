@@ -114,13 +114,14 @@ const ensureCorrectHighlightPositions = (sel) => {
     const doc = els.content[0].ownerDocument
 
     const contentHighlightCenter = [dims.content.x + dims.content.width / 2, dims.content.y + dims.content.height / 2]
+    const highlightedEl = doc.elementFromPoint(...contentHighlightCenter)
 
-    expect(doc.elementFromPoint(...contentHighlightCenter)).eq(els.content[0])
+    expect(highlightedEl).eq(els.content[0])
 
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
     if (sel) {
-      // assert convering bounding-box of element
+      // assert converting bounding-box of element
       expectToBeEqual(dims.border, cy.$$(sel)[0].getBoundingClientRect(), 'border-box to match selector bounding-box')
     }
   })
