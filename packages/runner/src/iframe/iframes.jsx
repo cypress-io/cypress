@@ -188,7 +188,7 @@ export default class Iframes extends Component {
       // container since it needs to match the size of the top window for screenshots
       $container: $(document.body),
       className: 'spec-bridge-iframe',
-      src: `${location.originPolicy}/${this.props.config.namespace}/multi-domain-iframes`,
+      src: `${location.originPolicy}/${this.props.config.namespace}/spec-bridge-iframes`,
     })
   }
 

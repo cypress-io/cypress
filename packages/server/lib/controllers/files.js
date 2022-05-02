@@ -51,7 +51,7 @@ module.exports = {
   },
 
   handleCrossOriginIframe (req, res) {
-    const iframePath = cwd('lib', 'html', 'multi-domain-iframe.html')
+    const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
     const domain = req.hostname
 
     const iframeOptions = {
