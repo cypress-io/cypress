@@ -4,10 +4,10 @@ import { BaseErrorFragmentDoc } from '../generated/graphql-test'
 import dedent from 'dedent'
 
 // Selectors
-const headerSelector = '[data-testid=error-header]'
+const headerSelector = 'h1[data-testid=error-header]'
 const messageSelector = '[data-testid=error-message]'
-const retryButtonSelector = '[data-testid=error-retry-button]'
-const docsButtonSelector = '[data-testid=error-docs-button]'
+const retryButtonSelector = 'button[data-testid=error-retry-button]'
+const docsButtonSelector = 'a[data-testid=error-docs-button]'
 
 // Constants
 const customHeaderMessage = 'Well, this was unexpected!'
