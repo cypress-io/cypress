@@ -60,7 +60,7 @@ describe('AuthActions', () => {
       expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.be.calledOnce
     })
 
-    it('focuses the main window if the activeBrowser does support focus but the main window is focused', async () => {
+    it('does not focus anything if the activeBrowser does support focus but the main window is focused', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
       sinon.stub(ctx.browser, 'isFocusSupported').withArgs(browser).resolves(true)
@@ -69,7 +69,7 @@ describe('AuthActions', () => {
 
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.be.calledOnce
+      expect(ctx._apis.electronApi.focusMainWindow).to.not.be.called
       expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.not.be.called
     })
   })
