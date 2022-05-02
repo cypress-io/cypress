@@ -1184,8 +1184,6 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
-            # make sure our snapshots are compared correctly
-            - run: yarn test-mocha-snapshot
             # run @cypress/design-system before other packages are built
             - run: yarn lerna run build-prod --scope \"@cypress/design-system\"
             # make sure packages with TypeScript can be transpiled to JS
