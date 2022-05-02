@@ -32,12 +32,11 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3="{width}">
+      <template #panel3>
         <HideDuringScreenshot>
           <SpecRunnerHeaderRunMode
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width"
             class="bg-white"
           />
         </HideDuringScreenshot>
