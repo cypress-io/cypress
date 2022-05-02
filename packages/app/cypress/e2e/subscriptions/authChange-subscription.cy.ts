@@ -3,6 +3,8 @@ describe('authChange subscription', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
     cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
+
       o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
     }, { AUTHED_USER })
   })
