@@ -255,6 +255,7 @@ export class WizardActions {
     }
 
     const result = await addTestingTypeToCypressConfig({
+      isProjectECMAScript: this.ctx.lifecycleManager.metaState.isProjectECMAScript,
       filePath: configFilePath,
       info: testingTypeInfo,
     })

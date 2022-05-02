@@ -39,6 +39,7 @@ export interface CreateConfigOptions {
   hasComponentTesting: boolean
   projectRoot: string
   hasTypescript: boolean
+  isProjectECMAScript: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
@@ -167,7 +168,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
-    if (options.hasTypescript) {
+    if (options.hasTypescript || options.isProjectECMAScript) {
       return formatConfig(
         `import { defineConfig } from 'cypress'
   
@@ -182,7 +183,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
     )
   }
 
-  if (options.hasTypescript) {
+  if (options.hasTypescript || options.isProjectECMAScript) {
     return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 

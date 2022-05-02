@@ -198,6 +198,7 @@ export class MigrationDataSource {
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
       hasTypescript,
+      isProjectECMAScript: this.ctx.lifecycleManager.metaState.isProjectECMAScript,
     })
   }
 
