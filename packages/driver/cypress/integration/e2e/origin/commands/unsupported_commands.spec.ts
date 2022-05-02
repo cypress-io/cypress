@@ -4,6 +4,13 @@ context('cy.origin unsupported commands', () => {
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
+  afterEach(() => {
+    // Enqueuing another cy command after each test to ensure stability
+    // for the next test. This can be removed with the completion of:
+    // https://github.com/cypress-io/cypress/issues/21300
+    cy.then(() => { /* ensuring stability */ })
+  })
+
   it('cy.route() method is deprecated', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.equal('`cy.route()` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
