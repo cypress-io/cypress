@@ -1,4 +1,4 @@
-module.exports = {
+export default ({
   component: {
     supportFile: false,
     devServer: {
@@ -10,4 +10,4 @@ module.exports = {
   e2e: {
     supportFile: false,
   },
-}
+})
