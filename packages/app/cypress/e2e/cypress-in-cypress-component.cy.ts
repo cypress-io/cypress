@@ -192,4 +192,59 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('#unified-runner').should('have.css', 'height', '333px')
     })
   })
+
+  it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('TestComponent.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
+
+    cy.get('[href="#/runs"]').click()
+    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
+
+    cy.get('[href="#/specs"]').click()
+    cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
+
+    cy.contains('TestComponent.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+
+    cy.window().then((win) => {
+      const connected = () => win.ws?.connected
+
+      win.ws?.close()
+
+      cy.wrap({
+        connected,
+      }).invoke('connected').should('be.false')
+
+      win.ws?.connect()
+
+      cy.wrap({
+        connected,
+      }).invoke('connected').should('be.true')
+    })
+
+    cy.withCtx((ctx, o) => {
+      ctx.actions.file.writeFileInProject(o.path, `
+import React from 'react'
+import { mount } from '@cypress/react'
+
+describe('TestComponent', () => {
+  it('renders the new test component', () => {
+    mount(<div>Component Test</div>)
+
+    cy.contains('Component Test').should('be.visible')
+  })
+})
+`)
+    }, { path: getPathForPlatform('src/TestComponent.spec.jsx') })
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the new test component')
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
+  })
 })
