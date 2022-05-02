@@ -35,7 +35,7 @@ export const useRunnerStyle = () => {
     const containerMinimum = 50
     let nonAutWidth = reporterWidth.value + (runnerUIStore.isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
-    if (window.__CYPRESS_MODE__ !== 'run') {
+    if (window.__CYPRESS_MODE__ === 'open') {
       nonAutWidth += collapsedNavBarWidth
     }
 
