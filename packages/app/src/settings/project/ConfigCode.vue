@@ -20,7 +20,7 @@
       {<br>
       <div class="pl-24px">
         <span
-          v-for="{ field, value, from } in props.gql.config"
+          v-for="{ field, value, from } in sortAlphabetical(props.gql.config)"
           :key="field"
         >
           {{ field }}:
@@ -73,6 +73,12 @@ fragment ConfigCode on CurrentProject {
 const props = defineProps<{
   gql: ConfigCodeFragment
 }>()
+
+const sortAlphabetical = (config) => {
+  return config.sort((a, b) => {
+    return a.field.localeCompare(b.field)
+  })
+}
 
 // a bug in vite demands that we do this passthrough
 const colorMap = CONFIG_LEGEND_COLOR_MAP

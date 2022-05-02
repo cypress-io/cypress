@@ -83,7 +83,11 @@ function scaffoldAndOpenCTProject (opts: {
   }
 
   cy.contains('Next Step').click()
+
+  cy.contains(cy.i18n.setupWizard.installDependencies.title).should('be.visible')
+  cy.contains('button', cy.i18n.setupWizard.installDependencies.waitForInstall).should('be.disabled')
   cy.contains('Skip').click()
+
   cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
 }

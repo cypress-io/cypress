@@ -127,7 +127,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
@@ -149,7 +148,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue CLI (Vue 2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
@@ -171,7 +169,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue CLI (Vue 3)',
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_3,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
@@ -193,7 +190,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
@@ -211,10 +207,9 @@ export const WIZARD_FRAMEWORKS = [
     type: 'nuxtjs',
     configFramework: 'nuxt',
     category: 'template',
-    name: 'Nuxt.js',
+    name: 'Nuxt.js (v2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
@@ -225,7 +220,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
-    supportStatus: 'full',
+    supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
@@ -235,7 +230,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue.js 2',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_2,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         getBundlerDependency(bundler, projectPath),
@@ -256,7 +250,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'Vue.js 3',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_VUE_3,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         getBundlerDependency(bundler, projectPath),
@@ -277,7 +270,6 @@ export const WIZARD_FRAMEWORKS = [
     name: 'React.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    storybookDep: dependencies.WIZARD_DEPENDENCY_STORYBOOK_REACT,
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
       return [
         getBundlerDependency(bundler, projectPath),

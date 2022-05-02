@@ -19,12 +19,6 @@ plugins.registerHandler((ipc) => {
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
-
-  baseEmitter.on('dev-server:close', () => {
-    debug('base emitter plugin close event')
-
-    ipc.send('dev-server:close')
-  })
 })
 
 // for simpler stubbing from unit tests
@@ -45,8 +39,6 @@ const API = {
 
   close () {
     debug('close dev-server')
-    baseEmitter.emit('close')
-
     baseEmitter.removeAllListeners()
   },
 }

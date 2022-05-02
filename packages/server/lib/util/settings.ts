@@ -74,16 +74,6 @@ export async function read (projectRoot: string) {
   return ctx.lifecycleManager.getConfigFileContents()
 }
 
-export async function readEnv (projectRoot: string) {
-  const ctx = getCtx()
-
-  // For testing purposes, no-op if the projectRoot is already the same
-  // as the one set in the DataContext, as it would be in normal execution
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
-
-  return ctx.lifecycleManager.loadCypressEnvFile()
-}
-
 export function writeForTesting (projectRoot, objToWrite = {}) {
   const file = path.join(projectRoot, 'cypress.config.js')
 
