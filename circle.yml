@@ -1337,7 +1337,7 @@ jobs:
 
   driver-integration-tests-firefox-experimentalSessionAndOrigin:
     <<: *defaults
-    resource_class: large
+    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
