@@ -30,6 +30,8 @@ import * as Location from './location'
 
 import * as Misc from './misc'
 
+import * as Origin from './origin'
+
 import * as Popups from './popups'
 
 import * as Navigation from './navigation'
@@ -69,6 +71,7 @@ export const allCommands = {
   LocalStorage,
   Location,
   Misc,
+  Origin,
   Popups,
   Navigation,
   ...Querying,
