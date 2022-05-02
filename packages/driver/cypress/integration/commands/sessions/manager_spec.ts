@@ -6,7 +6,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
   let baseUrl
 
   beforeEach(function () {
-  // @ts-ignore
+    // @ts-ignore
     CypressInstance = new $Cypress()
     baseUrl = Cypress.config('baseUrl')
   })
@@ -21,7 +21,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
   })
 
   describe('.setActiveSession()', () => {
-    it('adds session when non were previously added', () => {
+    it('adds session when none were previously added', () => {
       const cySpy = cy.spy(cy, 'state').withArgs('activeSessions')
 
       const activeSession: Cypress.Commands.Session.ActiveSessions = {
@@ -42,7 +42,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(calls[1].args[1]).to.haveOwnProperty('session_1')
     })
 
-    it('adds session when other sessions had previously added', () => {
+    it('adds session when other sessions were previously added', () => {
       const existingSessions: Cypress.Commands.Session.ActiveSessions = {
         'session_1': {
           id: 'session_1',
