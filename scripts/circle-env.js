@@ -21,6 +21,10 @@ async function checkCanaries () {
 
   const circleEnv = await readCircleEnv()
 
+  if (Object.keys(circleEnv).length === 0) {
+    return console.warn('CircleCI env empty, assuming this is a contributor PR. Not checking for canary variables.')
+  }
+
   if (!circleEnv.MAIN_CANARY) throw new Error('Missing MAIN_CANARY.')
 
   if (!circleEnv.CONTEXT_CANARY) throw new Error('Missing CONTEXT_CANARY. Does this job have the test-runner:env-canary context?')
@@ -36,7 +40,12 @@ async function readCircleEnv () {
     // if this starts failing, try SSHing into a CircleCI job and see what changed in the $CIRCLE_INTERNAL_CONFIG file's schema
     const circleEnv = taskData['Dispatched']['TaskInfo']['Environment']
 
-    if (!circleEnv || !Object.keys(circleEnv).length) throw new Error('An empty Environment object was found.')
+    if (!circleEnv) throw new Error('No Environment object was found.')
+
+    // last-ditch effort to check that an empty circle env is accurately reflecting process.env (external PRs)
+    if (process.env.CACHE_VERSION && Object.keys(circleEnv).length === 0) {
+      throw new Error('CACHE_VERSION is set, but circleEnv is empty')
+    }
 
     return circleEnv
   } catch (err) {
