@@ -67,13 +67,16 @@ export class AuthActions {
     })
 
     const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()
-    const isBrowserFocusSupported = this.ctx.coreData.activeBrowser
-      && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
 
-    if (isMainWindowFocused || !isBrowserFocusSupported) {
-      this.ctx._apis.electronApi.focusMainWindow()
-    } else {
-      await this.ctx.actions.browser.focusActiveBrowserWindow()
+    if (!isMainWindowFocused) {
+      const isBrowserFocusSupported = this.ctx.coreData.activeBrowser
+        && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
+
+      if (!isBrowserFocusSupported) {
+        this.ctx._apis.electronApi.focusMainWindow()
+      } else {
+        await this.ctx.actions.browser.focusActiveBrowserWindow()
+      }
     }
 
     if (!user) {
