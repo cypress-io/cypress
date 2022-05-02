@@ -1040,6 +1040,15 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/21166
+    it('can find input type=submits by Regex', () => {
+      cy.contains(/input contains submit/).then(($el) => {
+        expect($el.length).to.eq(1)
+
+        expect($el).to.match('input[type=submit]')
+      })
+    })
+
     it('has an optional filter argument', () => {
       cy.contains('ul', 'li 0').then(($el) => {
         expect($el.length).to.eq(1)
