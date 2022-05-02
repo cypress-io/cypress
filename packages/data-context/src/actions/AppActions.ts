@@ -20,7 +20,7 @@ export class AppActions {
   async setActiveBrowser (browser: FoundBrowser) {
     this.ctx.coreData.activeBrowser = browser
 
-    this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {
+    await this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {
       lastBrowser: {
         name: browser.name,
         channel: browser.channel,
