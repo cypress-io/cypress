@@ -1,7 +1,10 @@
 <template>
   <div class="rounded border-gray-100 border-1px w-full">
-    <div class="flex p-16px items-center justify-between">
-      <FileMatchIndicator>
+    <div
+      class="flex p-16px items-center"
+      :class="{'justify-between': !props.hideMatches, 'justify-end': props.hideMatches }"
+    >
+      <FileMatchIndicator v-if="!props.hideMatches">
         <i18n-t
           scope="global"
           keypath="components.specPattern.matches"
@@ -58,6 +61,7 @@ fragment SpecPatterns on CurrentProject {
 
 const props = defineProps<{
   gql: SpecPatternsFragment
+  hideMatches?: boolean
 }>()
 
 const specPatterns = computed<string[]>(() => {

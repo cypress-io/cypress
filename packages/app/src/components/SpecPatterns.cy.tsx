@@ -29,4 +29,21 @@ describe('<SpecPatterns />', () => {
     cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
     cy.get('[data-cy="file-match-indicator"]').contains('50 Matches')
   })
+
+  it('renders component spec pattern should not show matches', () => {
+    cy.mountFragment(SpecPatternsFragmentDoc, {
+      onResult: (res) => {
+        if (!res) {
+          return
+        }
+
+        res.currentTestingType = 'component'
+        res.specs = res.specs.slice(0, 50) || []
+      },
+      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} hideMatches={true} /></div>,
+    })
+
+    cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
+    cy.get('[data-cy="file-match-indicator"]').should('not.exist')
+  })
 })

@@ -39,6 +39,7 @@
           <div class="mt-16px">
             <SpecPatterns
               :gql="props.gql"
+              :hide-matches="true"
             />
           </div>
         </div>
