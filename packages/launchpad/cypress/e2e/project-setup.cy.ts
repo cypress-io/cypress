@@ -706,12 +706,24 @@ describe('Launchpad: Setup Project', () => {
 
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('Nuxt.js').click()
+      cy.findByText('Vue.js 3').click()
+      cy.contains('button', 'Pick a bundler').click()
+      cy.findByText('Webpack').click()
       cy.findByRole('button', { name: 'Next Step' }).should('not.be.disabled').click()
-      cy.intercept('POST', 'mutation-InstallDependencies_scaffoldFiles', (req) => {
-        req.continue((res) => {
-          // Force the response to have "changes", in the situation where we can't deal with it
-          res.body.data.scaffoldTestingType.scaffoldedFiles[0].status = 'changes'
+      cy.withCtx(async (ctx) => {
+        Object.defineProperty(ctx.coreData, 'scaffoldedFiles', {
+          get () {
+            return this._scaffoldedFiles.map((scaffold) => {
+              if (scaffold.file.absolute.includes('cypress.config')) {
+                return { ...scaffold, status: 'changes' }
+              }
+
+              return scaffold
+            })
+          },
+          set (scaffoldedFiles) {
+            this._scaffoldedFiles = scaffoldedFiles
+          },
         })
       })
 
