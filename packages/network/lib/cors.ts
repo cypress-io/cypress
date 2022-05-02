@@ -101,6 +101,7 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
 }
 
 export function getOriginPolicy (url: string) {
+  // @ts-ignore
   const { port, protocol } = new URL(url)
 
   // origin policy is comprised of:
