@@ -4,6 +4,9 @@ import path from 'path'
 import fs from 'fs-extra'
 import globby from 'globby'
 import type { PkgJson } from '.'
+import Debug from 'debug'
+
+const debug = Debug('cypress:scaffold-config:detect')
 
 interface DetectFramework {
   framework?: typeof WIZARD_FRAMEWORKS[number]
@@ -103,10 +106,14 @@ export function detectFramework (projectPath: string): DetectFramework {
 export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | 'ts' {
   try {
     if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
+      debug('Detected cypress.config.ts - using TS')
+
       return 'ts'
     }
 
     if (fs.existsSync(path.join(projectRoot, 'cypress.config.js'))) {
+      debug('Detected cypress.config.js - using JS')
+
       return 'js'
     }
   } catch (e) {
@@ -115,6 +122,8 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
 
   try {
     if ('typescript' in (pkgJson.dependencies || {}) || 'typescript' in (pkgJson.devDependencies || {})) {
+      debug('Detected typescript in package.json - using TS')
+
       return 'ts'
     }
   } catch (e) {
@@ -130,11 +139,15 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
     joinPosix(projectRoot, 'cypress', '**/*.{ts,tsx}'),
   ]
 
-  const tsFiles = globby.sync(globs, { onlyFiles: true })
+  const tsFiles = globby.sync(globs, { onlyFiles: true, gitignore: true })
 
   if (tsFiles.length > 0) {
+    debug(`Detected ts file(s) ${tsFiles.join(',')} - using TS`)
+
     return 'ts'
   }
+
+  debug(`Defaulting to JS`)
 
   return 'js'
 }
