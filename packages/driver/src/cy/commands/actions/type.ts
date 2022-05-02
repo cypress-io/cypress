@@ -178,7 +178,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const possibleDefaultButtons: JQuery<any> = formId ? $dom.wrap(_.uniq([
         ...nestedButtons,
-        ...cy.$$('body').find(`input[form='${formId}'], button[form='${formId}']`),
+        ...$dom.query('body', form.attr('ownerDocument')).find(`input[form='${formId}'], button[form='${formId}']`),
       ])) : nestedButtons
 
       return possibleDefaultButtons.filter((__, el) => {
