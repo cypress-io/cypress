@@ -6,7 +6,6 @@
 import type { DataContext } from '../DataContext'
 import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
 import _ from 'lodash'
-import configDefaults from '../../../app/config-defaults'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
@@ -43,7 +42,7 @@ export class HtmlDataSource {
     throw err
   }
 
-  getUrlsFromLegacyProjectBase (cfg: any) {
+  getPropertiesFromLegacyConfig (cfg: any) {
     const keys = [
       'baseUrl',
       'browserUrl',
@@ -55,15 +54,17 @@ export class HtmlDataSource {
       'componentTesting',
       'reporterUrl',
       'xhrUrl',
+      'namespace',
+      'socketIoRoute',
     ]
 
     return _.pick(cfg, keys)
   }
 
   async makeServeConfig () {
-    const fieldsFromLegacyCfg = this.getUrlsFromLegacyProjectBase(this.ctx._apis.projectApi.getConfig() ?? {})
+    const propertiesFromLegacyConfig = this.getPropertiesFromLegacyConfig(this.ctx._apis.projectApi.getConfig() ?? {})
 
-    let cfg = { ...fieldsFromLegacyCfg }
+    let cfg = { ...propertiesFromLegacyConfig }
 
     try {
       cfg = {
@@ -72,9 +73,6 @@ export class HtmlDataSource {
       }
     } catch {
       // Error getting config, we will show an error screen when we render the page
-
-      cfg.namespace = configDefaults.namespace
-      cfg.socketIoRoute = configDefaults.socketIoRoute
     }
 
     cfg.browser = this.ctx._apis.projectApi.getCurrentBrowser()
