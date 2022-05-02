@@ -220,6 +220,26 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toApp()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
+        if (this._currentTestingType && finalConfig.specPattern) {
+          await this.ctx.actions.project.setSpecsFoundBySpecPattern({
+            path: this.projectRoot,
+            testingType: this._currentTestingType,
+            specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
+            excludeSpecPattern: finalConfig.excludeSpecPattern,
+            additionalIgnorePattern: finalConfig.additionalIgnorePattern,
+          })
+        }
+
+        if (this._currentTestingType === 'component') {
+          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+
+          if (!devServerOptions?.port) {
+            this.ctx.onError(getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions))
+          }
+
+          finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+        }
+
         this._cachedFullConfig = finalConfig
 
         // This happens automatically with openProjectCreate in run mode
@@ -230,16 +250,6 @@ export class ProjectLifecycleManager {
         }
 
         await this.setInitialActiveBrowser()
-
-        if (this._currentTestingType && finalConfig.specPattern) {
-          await this.ctx.actions.project.setSpecsFoundBySpecPattern({
-            path: this.projectRoot,
-            testingType: this._currentTestingType,
-            specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
-            excludeSpecPattern: finalConfig.excludeSpecPattern,
-            additionalIgnorePattern: finalConfig.additionalIgnorePattern,
-          })
-        }
 
         this._pendingInitialize?.resolve(finalConfig)
         this.ctx.emitter.configChange()
@@ -299,6 +309,12 @@ export class ProjectLifecycleManager {
     await this.initializeConfig()
 
     if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
+      if (this._currentTestingType === 'component') {
+        // Since we refresh the dev-server on config changes, we need to close it and clean up it's listeners
+        // before we can start a new one. This needs to happen before we have registered the events of the child process
+        this.ctx._apis.projectApi.getDevServer().close()
+      }
+
       this._configManager.loadTestingType()
     } else {
       this.setAndLoadCurrentTestingType(null)

@@ -383,6 +383,7 @@ export class ProjectConfigManager {
       options: {
         ...options,
         testingType: this._testingType,
+        configFile: path.basename(this.configFilePath),
       },
     })
 
