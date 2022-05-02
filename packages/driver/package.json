@@ -5,7 +5,7 @@
   "scripts": {
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
-    "cypress:run": "node ../../scripts/cypress run --spec \"cypress/integration/*/*\",\"cypress/integration/*/!(origin)/**/*\"",
+    "cypress:run": "node ../../scripts/cypress run --spec \"cypress/e2e/*/*\",\"cypress/e2e/*/!(origin)/**/*\"",
     "cypress:open-experimentalSessionAndOrigin": "node ../../scripts/cypress open --config experimentalSessionAndOrigin=true",
     "cypress:run-experimentalSessionAndOrigin": "node ../../scripts/cypress run --config experimentalSessionAndOrigin=true",
     "postinstall": "patch-package",
