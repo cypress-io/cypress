@@ -296,7 +296,7 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http://127.0.0.1:3501/multi-domain.html',
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
           headers: {},
           ...props.req,
         },
@@ -580,7 +580,7 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http://127.0.0.1:3501/multi-domain.html',
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
           headers: {},
           cookies: {
             '__cypress.initial': true,
@@ -735,7 +735,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             isAUTFrame: true,
-            proxiedUrl: 'http://www.foobar.com/multi-domain.html',
+            proxiedUrl: 'http://www.foobar.com/primary-origin.html',
           },
           res: {
             append: appendStub,
@@ -758,7 +758,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             isAUTFrame: true,
-            proxiedUrl: 'http://www.foobar.com/multi-domain.html',
+            proxiedUrl: 'http://www.foobar.com/primary-origin.html',
           },
           res: {
             append: appendStub,
@@ -903,7 +903,7 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http://127.0.0.1:3501/multi-domain.html',
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
           headers: {},
           ...props.req,
         },

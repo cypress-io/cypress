@@ -10,20 +10,6 @@
     },
     {
       "type": "node",
-      "request": "launch",
-      "name": "test: active",
-      "runtimeExecutable": "yarn",
-      "runtimeArgs": [
-        "test-debug-package"
-      ],
-      "args": [
-        "${file}"
-      ],
-      "port": 5566,
-      "console": "integratedTerminal"
-    },
-    {
-      "type": "node",
       "request": "attach",
       "name": "electron",
       "port": 5567

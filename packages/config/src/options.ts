@@ -198,7 +198,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalSessionSupport',
+    name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,

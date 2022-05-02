@@ -188,7 +188,7 @@ export async function teardown () {
 }
 
 /**
- * Add a cross origin iframe for multi-domain
+ * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
   const id = `Spec Bridge: ${location.originPolicy}`
@@ -206,8 +206,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    // TODO: verify window.UnifiedRunner.config.namespace
-    src: `${location.originPolicy}/${window.UnifiedRunner.config.namespace}/multi-domain-iframes`,
+    src: `${location.originPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
   })
 }
 
