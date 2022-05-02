@@ -2949,9 +2949,7 @@ declare namespace Cypress {
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
-
     remote: RemoteState
-    
     /**
      * The Cypress version being used.
      */
