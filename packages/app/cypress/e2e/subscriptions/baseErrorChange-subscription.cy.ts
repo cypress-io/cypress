@@ -4,6 +4,17 @@ describe('baseErrorChange subscription', () => {
     cy.openProject('cypress-in-cypress')
   })
 
+  function assertLoadingSpinner () {
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+  }
+
+  function assertLoadingIntoErrorWorks (errorName: string) {
+    assertLoadingSpinner()
+    cy.contains('h3', errorName).should('be.visible')
+    cy.contains('[role="alert"]', 'Loading').should('not.exist')
+  }
+
   describe('in app', () => {
     beforeEach(() => {
       cy.startAppServer()
@@ -24,7 +35,7 @@ module.exports = {
 }`)
         })
 
-        cy.contains('Error').should('be.visible')
+        assertLoadingIntoErrorWorks('Error')
         cy.contains('Expected component.viewportHeight to be a number.').should('be.visible')
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -38,6 +49,7 @@ module.exports = {
         })
 
         cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
+        assertLoadingSpinner()
         cy.contains('Error').should('not.exist')
       })
 
@@ -54,7 +66,7 @@ module.exports = {
 }`)
         })
 
-        cy.contains('h3', 'SyntaxError').should('be.visible')
+        assertLoadingIntoErrorWorks('SyntaxError')
         cy.contains('Your configFile is invalid').should('be.visible')
         cy.contains('Unexpected token \',\'').should('be.visible')
         cy.withCtx(async (ctx) => {
@@ -69,6 +81,7 @@ module.exports = {
         })
 
         cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
+        assertLoadingSpinner()
         cy.contains('h3', 'SyntaxError').should('not.exist')
       })
     })
