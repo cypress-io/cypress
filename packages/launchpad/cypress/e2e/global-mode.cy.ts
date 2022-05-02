@@ -144,6 +144,36 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="dropzone"]').should('not.exist')
     })
 
+    it('updates breadcrumb when selecting a project and navigating back', () => {
+      const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
+        return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
+      }
+
+      const projectList = ['todos']
+
+      setupAndValidateProjectsList(projectList, ['--e2e'])
+
+      getBreadcrumbLink('Projects', { disabled: true })
+      cy.get('[data-cy="project-card"]').contains('todos').click()
+      cy.contains('h1', 'Welcome to Cypress!')
+
+      cy.withCtx((ctx, { sinon }) => {
+        sinon.spy(ctx.actions.project, 'clearCurrentProject')
+        sinon.spy(ctx.actions.wizard, 'resetWizard')
+      })
+
+      getBreadcrumbLink('todos', { disabled: true })
+      getBreadcrumbLink('Projects').click()
+
+      cy.get('[data-cy="project-card"]').contains('todos')
+      getBreadcrumbLink('Projects', { disabled: true })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.clearCurrentProject).to.have.been.calledOnce
+        expect(ctx.actions.project.clearCurrentProject).to.have.been.calledOnce
+      })
+    })
+
     describe('Project card menu', () => {
       it('can be opened', () => {
         setupAndValidateProjectsList(['todos'])
