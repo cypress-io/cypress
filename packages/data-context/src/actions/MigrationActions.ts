@@ -169,10 +169,16 @@ export class MigrationActions {
   }
 
   locallyInstalledCypressVersion (currentProject: string) {
-    const localCypressPkgJsonPath = resolveFrom(currentProject, path.join('cypress', 'package.json'))
-    const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
+    try {
+      const localCypressPkgJsonPath = resolveFrom(currentProject, path.join('cypress', 'package.json'))
+      const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
 
-    return localCypressPkgJson?.version ?? undefined
+      return localCypressPkgJson?.version ?? undefined
+    } catch (e) {
+      // node_modules was not found, or some other unexpected error
+      // return undefined and surface the correct error.
+      return undefined
+    }
   }
 
   /**
