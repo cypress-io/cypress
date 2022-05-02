@@ -177,8 +177,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
           ${globalString}
           ${e2eString}
           ${componentString}
-        })`,
-      options.projectRoot)
+        })`)
     }
 
     return formatConfig(dedent`
@@ -188,15 +187,14 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
         ${globalString}
         ${e2eString}
         ${componentString}
-      })`,
-    options.projectRoot)
+      })`)
   }
 
   if (options.hasTypescript) {
-    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`, options.projectRoot)
+    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 
-  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`, options.projectRoot)
+  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`)
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>) {
@@ -516,10 +514,9 @@ function formatWithBundledBabel (config: string) {
   return code
 }
 
-export function formatConfig (config: string, projectRoot: string): string {
+export function formatConfig (config: string): string {
   try {
-    const prettierPath = require.resolve('prettier', { paths: [projectRoot] })
-    const prettier = require(prettierPath)
+    const prettier = require('prettier') as typeof import('prettier')
 
     return prettier.format(config, {
       semi: false,

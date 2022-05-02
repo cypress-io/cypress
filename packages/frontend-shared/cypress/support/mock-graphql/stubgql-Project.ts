@@ -29,6 +29,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     ...globalProject,
     __typename: 'CurrentProject',
     isCTConfigured: true,
+    serveConfig: {},
     isE2EConfigured: true,
     currentTestingType: 'e2e',
     projectId: `${globalProject.title}-id`,

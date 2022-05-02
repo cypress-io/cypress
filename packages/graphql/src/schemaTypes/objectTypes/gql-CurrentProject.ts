@@ -102,7 +102,7 @@ export const CurrentProject = objectType({
     t.boolean('needsLegacyConfigMigration', {
       description: 'Whether the project needs to be migrated before proceeding',
       resolve (source, args, ctx) {
-        return ctx.lifecycleManager.needsCypressJsonMigration()
+        return ctx.migration.needsCypressJsonMigration()
       },
     })
 
@@ -147,6 +147,13 @@ export const CurrentProject = objectType({
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
         return ctx.project.getResolvedConfigFields()
+      },
+    })
+
+    t.nonNull.json('serveConfig', {
+      description: 'base64 encoded config used on the runner page',
+      resolve: (source, args, ctx) => {
+        return ctx.html.makeServeConfig()
       },
     })
 
