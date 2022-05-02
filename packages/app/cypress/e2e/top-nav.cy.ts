@@ -359,6 +359,36 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').findByText('Log In').should('be.visible')
       })
+
+      it('logouts user if cloud request returns unauthorized', () => {
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer('component')
+
+        cy.remoteGraphQLIntercept((obj) => {
+          if (obj.result.data?.cloudProjectsBySlugs) {
+            throw new Error('Unauthorized')
+          }
+
+          return obj.result
+        })
+
+        cy.loginUser()
+        cy.visitApp()
+
+        cy.get('@logInButton').click()
+
+        cy.findByTestId('login-panel').contains('Test User').should('be.visible')
+        cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
+
+        cy.get('[href="#/runs"]').click()
+        cy.get('@logInButton').click()
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
+      })
     })
 
     context('user not logged in', () => {
