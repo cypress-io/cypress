@@ -1,6 +1,7 @@
 <template>
   <div class="flex w-full gap-16px relative">
     <Input
+      id="spec-filter"
       type="search"
       class="flex-grow h-full min-w-200px"
       prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"

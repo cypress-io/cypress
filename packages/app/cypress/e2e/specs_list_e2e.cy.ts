@@ -41,23 +41,6 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E Specs')
   })
 
-  it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('6 Matches')
-
-    cy.get('input').type('content', { force: true })
-
-    cy.get('[data-cy="spec-item"]').should('have.length', 2)
-    .should('contain', 'dom-content.spec.js')
-
-    cy.get('button').contains('2 of 6 Matches')
-
-    cy.get('input').clear().type('asdf', { force: true })
-
-    cy.get('[data-cy="spec-item"]').should('have.length', 0)
-
-    cy.get('button').contains('0 of 6 Matches')
-  })
-
   it('shows a git status for each spec', () => {
     cy.get('[data-cy="spec-list-file"]').each((row) => {
       cy.wrap(row).contains('.git-info-row', 'Test Author')
@@ -113,169 +96,110 @@ describe('App: Spec List (E2E)', () => {
     })
   })
 
-  it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('6 Matches')
-
-    cy.get('input').type('content', { force: true })
-
-    cy.get('[data-cy="spec-item"]').should('have.length', 2)
-    .should('contain', 'dom-content.spec.js')
-
-    cy.get('button').contains('2 of 6 Matches')
-
-    cy.get('input').clear().type('asdf', { force: true })
-
-    cy.get('[data-cy="spec-item"]').should('have.length', 0)
-
-    cy.get('button').contains('0 of 6 Matches')
-  })
-
   describe('typing the filter', function () {
-    // const runAllIntegrationSpecsLabel = 'Run 8 integration specs'
-
-    // beforeEach(function () {
-    //   this.specs.integration.push({
-    //     name: 'a-b_c/d~e(f)g.spec.js',
-    //     absolute: '/user/project/cypress/integration/a-b_c/d~e(f)g.spec.js',
-    //     relative: 'cypress/integration/a-b_c/d~e(f)g.spec.js',
-    //   })
-
-    //   this.numSpecs = 16
-
-    //   this.ipc.getSpecs.yields(null, this.specs)
-    //   this.openProject.resolve(this.config)
-
-    //   cy.contains('.all-tests', runAllIntegrationSpecsLabel)
-    //   cy.get('.filter').type('new')
-    // })
-
     it('displays only matching spec', function () {
-      cy.get('.specs-list .file')
-      .should('have.length', 1)
-      .and('contain', 'account_new_spec.coffee')
+      cy.get('button').contains('14 Matches')
+      cy.findByLabelText('Search Specs').type('content')
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 2)
+      .and('contain', 'dom-content.spec.js')
 
-      cy.contains('.all-tests', 'Run 1 integration spec').click()
-      .find('.fa-dot-circle')
-      .then(() => {
-        expect(this.ipc.launchBrowser).to.have.property('called').equal(true)
-        const launchArgs = this.ipc.launchBrowser.lastCall.args
+      cy.get('button').contains('2 of 14 Matches')
 
-        expect(launchArgs[0].specFilter, 'spec filter').to.eq('new')
-      })
+      cy.findByLabelText('Search Specs').clear().type('asdf')
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 0)
+
+      cy.get('button').contains('0 of 14 Matches')
     })
 
     it('only shows matching folders', () => {
-      cy.get('.specs-list .folder')
+      cy.findByLabelText('Search Specs').type('new')
+      cy.get('[data-cy="spec-list-directory"]')
+      .should('have.length', 1)
+
+      cy.findByLabelText('Search Specs').clear().type('admin')
+      cy.get('[data-cy="spec-list-directory"]')
       .should('have.length', 2)
     })
 
     it('ignores non-letter characters', function () {
-      cy.get('.filter').clear().type('appspec')
+      cy.findByLabelText('Search Specs').clear().type('appspec')
 
-      cy.get('.specs-list .file')
+      cy.get('[data-cy="spec-item"]')
       .should('have.length', 1)
-      .and('contain', 'app_spec.coffee')
+      .and('contain', 'app.spec.js')
     })
 
     it('ignores non-number characters', function () {
-      cy.get('.filter').clear().type('123spec')
+      cy.findByLabelText('Search Specs').clear().type('123spec')
 
-      cy.get('.specs-list .file')
+      cy.get('[data-cy="spec-item"]')
       .should('have.length', 1)
-      .and('contain', '123_spec.coffee')
+      .and('contain', '123.spec.js')
     })
 
     it('ignores commonly used path characters', function () {
-      cy.get('.filter').clear().type('abcdefg')
+      cy.findByLabelText('Search Specs').clear().type('defg')
 
-      cy.get('.specs-list .file')
+      cy.get('[data-cy="spec-item"]')
       .should('have.length', 1)
       .and('contain', 'd~e(f)g.spec.js')
     })
 
     it('treats non-Latin characters as letters', function () {
-      cy.get('.filter').clear().type('日本語')
+      cy.findByLabelText('Search Specs').clear().type('柏树很棒')
 
-      cy.get('.specs-list .file')
+      cy.get('[data-cy="spec-item"]')
       .should('have.length', 1)
-      .and('contain', '日本語_spec.coffee')
+      .and('contain', '柏树很棒.spec.js')
     })
 
-    it('clears the filter on clear button click', function () {
+    // TODO: https://cypress-io.atlassian.net/browse/UNIFY-682
+    it.skip('clears the filter on search bar clear button click', function () {
       cy.get('.clear-filter').click()
-      cy.get('.filter')
+      cy.findByLabelText('Search Specs')
       .should('have.value', '')
 
-      cy.get('.specs-list .file')
-      .should('have.length', this.numSpecs)
-
-      cy.contains('.all-tests', runAllIntegrationSpecsLabel)
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 14)
     })
 
-    it('clears the filter if the user press ESC key', function () {
-      cy.get('.filter').type('{esc}')
+    it('clears the filter if the user presses ESC key', function () {
+      cy.findByLabelText('Search Specs').type('asdf')
+
+      cy.findByLabelText('Search Specs').realType('{esc}')
+
+      cy.findByLabelText('Search Specs')
       .should('have.value', '')
 
-      cy.get('.specs-list .file')
-      .should('have.length', this.numSpecs)
-
-      cy.contains('.all-tests', runAllIntegrationSpecsLabel)
-      .find('.fa-play')
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 14)
     })
 
     it('shows empty message if no results', function () {
-      cy.get('.filter').clear().type('foobarbaz')
-      cy.get('.specs-list').should('not.exist')
+      cy.findByLabelText('Search Specs').clear().type('foobarbaz')
+      cy.get('[data-cy="spec-item"]').should('not.exist')
 
-      cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
-      cy.percySnapshot()
-    })
-
-    it('removes run all tests buttons if no results', function () {
-      cy.get('.filter').clear().type('foobarbaz')
-
-      // the "Run ... tests" buttons should be gone
-      cy.get('.all-tests').should('not.exist')
+      cy.findByText('No specs matched your search:')
     })
 
     it('clears and focuses the filter field when clear search is clicked', function () {
-      cy.get('.filter').clear().type('foobarbaz')
-      cy.get('.btn').contains('Clear search').click()
-      cy.focused().should('have.id', 'filter')
+      cy.findByLabelText('Search Specs').type('asdf')
+      cy.findByText('Clear Search').click()
+      cy.focused().should('have.id', 'spec-filter')
 
-      cy.get('.specs-list .file')
-      .should('have.length', this.numSpecs)
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 14)
     })
 
-    it('saves the filter to local storage for the project', function () {
+    //TODO: https://cypress-io.atlassian.net/browse/UNIFY-1588
+    it.skip('saves the filter to local storage for the project', function () {
       cy.window().then((win) => {
         expect(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`]).to.be.a('string')
 
         expect(JSON.parse(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`])).to.equal('new')
       })
-    })
-
-    it('does not update run button label while running', function () {
-      cy.contains('.all-tests', 'Run 1 integration spec').click()
-      // mock opened browser and running tests
-      // to force "Stop" button to show up
-      cy.window().its('__project').then((project) => {
-        project.browserOpened()
-      })
-
-      // the button has its its label reflect the running specs
-      cy.contains('.all-tests', 'Running integration tests')
-      .should('have.class', 'active')
-
-      // the button has its label unchanged while the specs are running
-      cy.get('.filter').clear()
-      cy.contains('.all-tests', 'Running integration tests')
-      .should('have.class', 'active')
-
-      // but once the project stops running tests, the button gets updated
-      cy.get('.close-browser').click()
-      cy.contains('.all-tests', runAllIntegrationSpecsLabel)
-      .should('not.have.class', 'active')
     })
   })
 })
