@@ -4,6 +4,13 @@ describe('cy.origin - uncaught errors', () => {
     cy.get('a[data-cy="errors-link"]').click()
   })
 
+  afterEach(() => {
+    // Enqueuing another cy command after each test to ensure stability
+    // for the next test. This can be removed with the completion of:
+    // https://github.com/cypress-io/cypress/issues/21300
+    cy.then(() => { /* ensuring stability */ })
+  })
+
   describe('sync errors', () => {
     it('appropriately reports negative assertions', (done) => {
       cy.on('fail', (err) => {

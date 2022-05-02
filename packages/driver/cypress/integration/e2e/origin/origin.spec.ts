@@ -1,4 +1,11 @@
 describe('cy.origin', () => {
+  afterEach(() => {
+    // Enqueuing another cy command after each test to ensure stability
+    // for the next test. This can be removed with the completion of:
+    // https://github.com/cypress-io/cypress/issues/21300
+    cy.then(() => { /* ensuring stability */ })
+  })
+
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 
@@ -228,7 +235,8 @@ describe('cy.origin', () => {
         })
       })
 
-      it('has non serializable arguments', (done) => {
+      // TODO: Re-enable with completion of https://github.com/cypress-io/cypress/issues/21300
+      it.skip('has non serializable arguments', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include(`This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`)
           expect(err.stack).to.include(`This is likely because the arguments specified are not serializable. Note that functions and DOM objects cannot be serialized.`)

@@ -10,14 +10,14 @@
       error: 'cy-origin-error',
     }
 
-    beforeEach(() => {
-      cy.visit('/fixtures/primary-origin.html')
-      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
-    })
-
     afterEach(() => {
       // @ts-ignore
       window.top.__cySkipValidateConfig = true
+
+      // Enqueuing another cy command after each test to ensure stability
+      // for the next test. This can be removed with the completion of:
+      // https://github.com/cypress-io/cypress/issues/21300
+      cy.then(() => { /* ensuring stability */ })
     })
 
     if (fnName === 'config') {
