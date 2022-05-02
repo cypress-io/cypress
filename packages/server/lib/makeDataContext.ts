@@ -108,7 +108,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
         // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
-        // <issue link here>
+        // https://cypress-io.atlassian.net/browse/UNIFY-1705
         cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
