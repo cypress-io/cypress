@@ -8,7 +8,19 @@ import assert from 'assert'
 export class FileActions {
   constructor (private ctx: DataContext) {}
 
-  async writeFileInProject (relativePath: string, data: any) {
+  readFileInProject (relativePath: string): string {
+    if (!this.ctx.currentProject) {
+      throw new Error(`Cannot write file in project without active project`)
+    }
+
+    const filePath = path.join(this.ctx.currentProject, relativePath)
+
+    this.ctx.fs.ensureDirSync(path.dirname(filePath))
+
+    return this.ctx.fs.readFileSync(filePath, 'utf-8')
+  }
+
+  writeFileInProject (relativePath: string, data: any) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot write file in project without active project`)
     }

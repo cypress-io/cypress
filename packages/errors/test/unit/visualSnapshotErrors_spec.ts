@@ -1051,6 +1051,11 @@ describe('visual error templates', () => {
         default: ['/path/to/plugins/file.js'],
       }
     },
+    CONFIG_FILE_DEV_SERVER_INVALID_RETURN: () => {
+      return {
+        default: [{}],
+      }
+    },
     PLUGINS_RUN_EVENT_ERROR: () => {
       return {
         default: ['before:spec', makeErr()],

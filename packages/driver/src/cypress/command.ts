@@ -82,7 +82,7 @@ export class $Command {
       const arg = args[i]
 
       if (_.isObject(arg)) {
-        // filter out any properties which arent primitives
+        // filter out any properties which aren't primitives
         // to prevent accidental mutations
         const opts = _.omitBy(arg, _.isObject)
 

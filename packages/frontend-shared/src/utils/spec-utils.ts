@@ -1,11 +1,13 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import { ComputedRef, Ref, ref, watch } from 'vue'
+import _ from 'lodash'
+
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
 const PATH_SEP = /[\/\\]/
 
-export type FuzzyFoundSpec = FoundSpec & {
+export type FuzzyFoundSpec<T = FoundSpec> = T & {
   fileIndexes: number[]
   dirIndexes: number[]
 }
@@ -81,7 +83,7 @@ export function getDirIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFou
   return res.map((idx) => idx - minIndex)
 }
 
-export function fuzzySortSpecs (specs: FuzzyFoundSpec[], searchValue: string) {
+export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
   const transformedSpecs = addDirectoryToSpecs(specs)
 
   return fuzzySort
@@ -97,7 +99,7 @@ export function fuzzySortSpecs (specs: FuzzyFoundSpec[], searchValue: string) {
   }) as FuzzyFoundSpec[]
 }
 
-function addDirectoryToSpecs (specs: Partial<FuzzyFoundSpec>[]) {
+function addDirectoryToSpecs <T extends FuzzyFoundSpec> (specs: Partial<T>[]) {
   return specs.map((spec) => {
     return {
       ...spec,
@@ -118,35 +120,13 @@ export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
   }
 }
 
-export type SpecsComparator<T extends Readonly<FileLike>> = (
-  specs: Readonly<T[]>,
-  oldSpecs: Readonly<T[]>
-) => boolean
-
-type FileLike = {
-  absolute: string
-}
-
-function defaultCompareFn (
-  specs: Readonly<Array<FileLike>>,
-  oldSpecs: Readonly<Array<FileLike>>,
-) {
-  return specs.some((spec, idx) => spec.absolute !== oldSpecs[idx]?.absolute)
-}
-
 export function useCachedSpecs<S extends { absolute: string }> (
   specs: ComputedRef<Readonly<S[]>>,
-  compareFn?: SpecsComparator<S>,
 ): Ref<Readonly<S[]>> {
   const cachedSpecs: Ref<Readonly<S[]>> = ref([])
 
   watch(specs, (currentSpecs, prevSpecs = []) => {
-    const comparer = compareFn?.(currentSpecs, prevSpecs) || defaultCompareFn(currentSpecs, prevSpecs)
-
-    const specsAreDifferent =
-        currentSpecs.length !== prevSpecs?.length || comparer
-
-    if (specsAreDifferent) {
+    if (!_.isEqual(currentSpecs, prevSpecs)) {
       cachedSpecs.value = currentSpecs
     }
   }, { immediate: true })
