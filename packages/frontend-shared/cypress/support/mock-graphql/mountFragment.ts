@@ -151,7 +151,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add('stubMutationResolver', stubMutationResolver)
 
   Cypress.Commands.add('mountFragmentList', (source, options) => {
-    // @ts-expect-error - todo: tim fix
     return mountFragment(source, options, true)
   })
 
