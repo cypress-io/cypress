@@ -484,7 +484,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     return {
       ...this._cfg,
-      remote: this._server?.remoteStates.current() ?? {} as Cypress.RemoteState,
+      // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
+      remote: this._server?.remoteStates.getPrimary() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
