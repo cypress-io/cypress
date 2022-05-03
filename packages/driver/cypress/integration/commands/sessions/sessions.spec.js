@@ -238,5 +238,118 @@ describe('cy.session', () => {
         window.localStorage.two = 'value'
       })
     })
+
+    describe('options.validate failures', () => {
+      const errorHookMessage = 'This error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.'
+
+      it('throws when options.validate has a failing Cypress command', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('Expected to find element: `#does_not_exist`')
+          expect(err.message).contain(errorHookMessage)
+          expect(err.codeFrame).exist
+
+          done()
+        })
+
+        cy.session(['mock-session', 'command'], () => {
+          cy.log('setup')
+        }, {
+          validate () {
+            cy.get('#does_not_exist', { timeout: 20 })
+          },
+        })
+      })
+
+      it('throws when options.validate throws an error', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('validate error')
+          expect(err.message).contain(errorHookMessage)
+          expect(err.codeFrame).exist
+          done()
+        })
+
+        cy.session(['mock-session', 'throws'], () => {
+          cy.log('setup')
+        }, {
+          validate () {
+            throw new Error('validate error')
+          },
+        })
+      })
+
+      it('throws when options.validate rejects', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('validate error')
+          expect(err.message).contain(errorHookMessage)
+          expect(err.codeFrame).exist
+
+          done()
+        })
+
+        cy.session(['mock-session', 'rejects'], () => {
+          cy.log('setup')
+        }, {
+          validate () {
+            return Promise.reject(new Error('validate error'))
+          },
+        })
+      })
+
+      it('throws when options.validate returns false', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('Your `cy.session` **validate** callback returned false.')
+          expect(err.message).contain(errorHookMessage)
+          expect(err.codeFrame).exist
+
+          done()
+        })
+
+        cy.session(['mock-session', 'return false'], () => {
+          cy.log('setup')
+        }, {
+          validate () {
+            return false
+          },
+        })
+      })
+
+      it('throws when options.validate resolves false', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('Your `cy.session` **validate** callback resolved false.')
+          expect(err.message).contain(errorHookMessage)
+          expect(err.codeFrame).exist
+          done()
+        })
+
+        cy.session(['mock-session', 'resolves false'], () => {
+          cy.log('setup')
+        }, {
+          validate () {
+            return Promise.resolve(false)
+          },
+        })
+      })
+
+      // TODO: emilyrohrbough - 4/3/2022 - figure out what the below comment means
+      // TODO: cy.validate that will fail, hook into event, soft-reload inside and test everything is halted
+      // Look at other tests for cancellation
+      // make error collapsible by default
+
+      it('throws when options.validate returns Chainer<false>', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('Your `cy.session` **validate** callback resolved false.')
+          expect(err.message).contain(errorHookMessage)
+          done()
+        })
+
+        cy.session(['mock-session', 'Chainer<false>'], () => {
+          cy.log('setup')
+        }, {
+          validate () {
+            return cy.wrap(false)
+          },
+        })
+      })
+    })
   })
 })
