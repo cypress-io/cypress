@@ -206,4 +206,50 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`]).should('be.visible')
     })
   })
+
+  it('restarts browser if there is a change on the config file affecting the browser', () => {
+    startAtSpecsPage('e2e')
+
+    cy.withCtx((ctx, o) => {
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`e2e: {`, `e2e: {\n  chromeWebSecurity: false,\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+      o.sinon.spy(ctx.actions.browser, 'closeBrowser')
+      o.sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.wait(5000)
+
+    cy.withCtx((ctx) => {
+      expect(ctx.actions.browser.closeBrowser).to.be.called
+      expect(ctx.actions.browser.focusActiveBrowserWindow).to.be.called
+    })
+  })
+
+  it('restarts server if there is a change on the config file affecting the server', () => {
+    startAtSpecsPage('e2e')
+
+    cy.withCtx((ctx, o) => {
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`e2e: {`, `e2e: {\n  videosFolder: 'cypress/video',\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+      o.sinon.spy(ctx.actions.project, 'initializeActiveProject')
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.wait(5000)
+
+    cy.withCtx((ctx) => {
+      expect(ctx.actions.project.initializeActiveProject).to.be.called
+    })
+  })
 })
