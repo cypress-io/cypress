@@ -23,7 +23,9 @@
         >
           {{ t('migration.renameAuto.folderRenameMessage') }}
         </template>
-        <template v-else>
+        <template
+          v-else
+        >
           {{ t('migration.renameAuto.changedSpecExt') }}
           <CodeTag
             class="text-red-500"

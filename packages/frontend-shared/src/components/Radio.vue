@@ -1,6 +1,6 @@
 <template>
   <label
-    class="mt-24px text-gray-800 block"
+    class="mt-24px text-gray-800 block font-bold"
     :for="props.name"
   >{{ props.label }}</label>
   <div

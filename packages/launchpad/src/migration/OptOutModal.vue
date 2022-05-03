@@ -1,12 +1,12 @@
 <template>
   <StandardModal
     :model-value="true"
-    :title="t('migration.renameAuto.modals.title')"
+    :title="t('migration.renameAuto.modal.title')"
     @update:modelValue="emit('cancel')"
   >
     <Alert
       status="warning"
-      :title="t('migration.renameAuto.modals.step1.warning')"
+      :title="t('migration.renameAuto.modal.warning')"
       :icon="WarningIcon"
       icon-classes="icon-dark-orange-400"
     />
@@ -16,19 +16,19 @@
     />
     <MigrationList>
       <MigrationListItem>
-        {{ t('migration.renameAuto.modals.step1.line1') }}
+        {{ t('migration.renameAuto.modal.line1') }}
       </MigrationListItem>
       <MigrationListItem>
-        {{ t('migration.renameAuto.modals.step1.line2') }}
+        {{ t('migration.renameAuto.modal.line2') }}
         <CodeTag class="text-jade-500">
           [filename].cy.[ext]
         </CodeTag>
       </MigrationListItem>
       <MigrationListItem>
-        {{ t('migration.renameAuto.modals.step1.line3') }}
+        {{ t('migration.renameAuto.modal.line3') }}
       </MigrationListItem>
       <MigrationListItem>
-        {{ t('migration.renameAuto.modals.step1.line4') }}
+        {{ t('migration.renameAuto.modal.line4') }}
         <CodeTag class="text-jade-500">
           [filename].cy.[ext]
         </CodeTag>
@@ -36,7 +36,7 @@
       <MigrationListItem>
         <i18n-t
           scope="global"
-          keypath="migration.renameAuto.modals.step1.line5"
+          keypath="migration.renameAuto.modal.line5"
         >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]
@@ -46,7 +46,7 @@
       <MigrationListItem>
         <i18n-t
           scope="global"
-          keypath="migration.renameAuto.modals.step1.line6"
+          keypath="migration.renameAuto.modal.line6"
         >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]
@@ -58,7 +58,7 @@
       v-model:value="value"
       :options="options"
       name="skipRename"
-      :label="t('migration.renameAuto.modals.step2.label')"
+      :label="t('migration.renameAuto.modal.label')"
     >
       <template #option="{ option }">
         <span
@@ -67,7 +67,7 @@
         >
           <i18n-t
             scope="global"
-            keypath="migration.renameAuto.modals.step2.option1"
+            keypath="migration.renameAuto.modal.option1"
           >
             <CodeTag class="ml-0 text-jade-500">
               [filename].cy.[ext]
@@ -78,7 +78,16 @@
           v-else
           class="text-gray-800"
         >
-          {{ props.hasCustomIntegrationFolder ? t('migration.renameAuto.modals.step2.option2') : t('migration.renameAuto.modals.step2.option3') }}
+          {{ props.hasCustomIntegrationFolder ? t('migration.renameAuto.modal.option2') : t('migration.renameAuto.modal.option3') }}
+          <i18n-t
+            v-if="value !== 'rename'"
+            scope="global"
+            keypath="migration.renameAuto.modal.optOutAdditional"
+          >
+            <CodeTag class="text-jade-500">
+              specPattern
+            </CodeTag>
+          </i18n-t>
         </span>
       </template>
     </Radio>
@@ -87,13 +96,13 @@
         <Button
           @click="emit('save', value)"
         >
-          {{ t('migration.renameAuto.modals.step2.buttonSave') }}
+          {{ t('migration.renameAuto.modal.buttonSave') }}
         </Button>
         <Button
           variant="outline"
           @click="emit('cancel')"
         >
-          {{ t('migration.renameAuto.modals.step2.buttonCancel') }}
+          {{ t('migration.renameAuto.modal.buttonCancel') }}
         </Button>
       </div>
     </template>

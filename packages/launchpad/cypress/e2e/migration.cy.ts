@@ -932,7 +932,9 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
       cy.findByText('change').click()
 
+      cy.contains('You may need to change your specPattern later').should('not.exist')
       cy.findByText('Don\'t rename anything — keep what I have.').click()
+      cy.contains('You may need to change your specPattern later')
 
       cy.findByText('Save Changes').click()
 
