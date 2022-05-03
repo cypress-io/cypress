@@ -24,7 +24,7 @@
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@packages/driver": "0.0.0-development",
     "@types/http-proxy": "1.17.4",
-    "@types/node": "14.14.31",
+    "@types/node": "16.11.7",
     "@types/sockjs-client": "1.1.0",
     "babel-loader": "8.1.0",
     "bluebird": "3.5.3",
