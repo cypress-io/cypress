@@ -1,5 +1,10 @@
 <template>
-  <div class="h-screen min-w-728px grid grid-rows-[64px,1fr] grid-cols-[auto,1fr]">
+  <div
+    class="h-screen min-w-728px grid grid-cols-[auto,1fr]"
+    :class="{
+      'grid-rows-[64px,1fr]': showHeader
+    }"
+  >
     <SidebarNavigation
       v-if="renderSidebar"
       class="row-span-full"
