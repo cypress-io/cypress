@@ -3,8 +3,28 @@ import type { FoundBrowser, Browser, PathData } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
+import { promises as fs } from 'fs'
 import path from 'path'
 import Bluebird from 'bluebird'
+import which from 'which'
+
+async function isFirefoxSnap (binary: string): Promise<boolean> {
+  try {
+    const binaryPath = await which(binary)
+
+    // read the first 16kb, don't read the entire file into memory in case it is a binary
+    const fd = await fs.open(binaryPath, 'r')
+    const { buffer, bytesRead } = await fd.read({ length: 16384 })
+
+    fd.close()
+
+    return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
+  } catch (err) {
+    log('failed to check if Firefox is a snap, assuming it isn\'t %o', { err, binary })
+
+    return false
+  }
+}
 
 function getLinuxBrowser (
   name: string,
@@ -43,11 +63,25 @@ function getLinuxBrowser (
     throw notInstalledErr(binary)
   }
 
-  const maybeSetSnapProfilePath = (versionString: string) => {
-    if (os.platform() === 'linux' && name === 'chromium' && versionString.endsWith('snap')) {
+  const maybeSetSnapProfilePath = async (versionString: string) => {
+    if (os.platform() !== 'linux') return
+
+    if (name === 'chromium' && versionString.endsWith('snap')) {
       // when running as a snap, chromium can only write to certain directories
       // @see https://github.com/cypress-io/cypress/issues/7020
+      log('chromium is running as a snap, changing profile path')
       foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'chromium', 'current')
+
+      return
+    }
+
+    if (name === 'firefox' && (await isFirefoxSnap(binary))) {
+      // if the binary in the path points to a script that calls the snap, set a snap-specific profile path
+      // @see https://github.com/cypress-io/cypress/issues/19793
+      log('firefox is running as a snap, changing profile path')
+      foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'firefox', 'current')
+
+      return
     }
   }
 

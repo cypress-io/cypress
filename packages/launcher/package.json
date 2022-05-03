@@ -18,14 +18,15 @@
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
     "plist": "3.0.5",
-    "semver": "7.3.5"
+    "semver": "7.3.5",
+    "which": "2.0.2"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "mocha": "3.5.3",
-    "shelljs": "0.8.5",
+    "mock-fs": "5.1.2",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",
     "typescript": "^4.2.3"

@@ -10,12 +10,13 @@ import { expect } from 'chai'
 import { utils } from '../../lib/utils'
 import os from 'os'
 import sinon, { SinonStub } from 'sinon'
+import mockFs from 'mock-fs'
 
 describe('linux browser detection', () => {
   let execa: SinonStub
+  let cachedEnv = { ...process.env }
 
   beforeEach(() => {
-    sinon.restore()
     execa = sinon.stub(utils, 'getOutput')
 
     sinon.stub(os, 'platform').returns('linux')
@@ -32,6 +33,12 @@ describe('linux browser detection', () => {
 
     execa.withArgs('/foo/bar/browser', ['--version'])
     .resolves({ stdout: 'foo-browser v9001.1.2.3' })
+  })
+
+  afterEach(() => {
+    Object.assign(process.env, cachedEnv)
+    mockFs.restore()
+    sinon.restore()
   })
 
   it('detects browser by running --version', () => {
@@ -70,6 +77,34 @@ describe('linux browser detection', () => {
     }
 
     return detect().then(checkBrowser)
+  })
+
+  // https://github.com/cypress-io/cypress/issues/19793
+  it('sets profilePath on snapcraft firefox', async () => {
+    process.env.PATH = '/bin'
+    mockFs({
+      '/bin/firefox': mockFs.symlink({ path: '/usr/bin/firefox' }),
+      '/usr/bin/firefox': mockFs.file({ mode: 0o777, content: 'foo bar foo bar foo bar\nexec /snap/bin/firefox\n' }),
+    })
+
+    execa.withArgs('firefox', ['--version'])
+    .resolves({ stdout: 'Mozilla Firefox 99.2.3' })
+
+    sinon.stub(os, 'homedir').returns('/home/foo')
+
+    const [browser] = await detect()
+
+    expect(browser).to.deep.equal({
+      channel: 'stable',
+      name: 'firefox',
+      family: 'firefox',
+      displayName: 'Firefox',
+      majorVersion: 99,
+      minSupportedVersion: 86,
+      path: 'firefox',
+      profilePath: '/home/foo/snap/firefox/current',
+      version: '99.2.3',
+    })
   })
 
   // https://github.com/cypress-io/cypress/issues/6669
