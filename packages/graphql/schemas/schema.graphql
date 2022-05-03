@@ -967,9 +967,6 @@ type Mutation {
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
-
-  """Hides the launchpad windows"""
-  hideBrowserWindow: Boolean!
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1259,6 +1256,9 @@ enum SpecType {
 type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
+
+  """Triggered when the base error state changes"""
+  baseErrorChange: Query
 
   """Issued when the current branch of a project changes"""
   branchChange: CurrentProject

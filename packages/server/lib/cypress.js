@@ -6,7 +6,7 @@ require('./environment')
 // version v15.4.0 and after.
 //
 // TODO: Investigate need/removal of this with future major versions
-// of Electron when upgraded: https://github.com/cypress-io/cypress/pull/19090
+// of Electron when upgraded: https://github.com/cypress-io/cypress/issues/21236
 require('@packages/server/lib/project-base')
 
 // we are not requiring everything up front
