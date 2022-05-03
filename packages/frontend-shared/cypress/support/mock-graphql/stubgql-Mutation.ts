@@ -38,10 +38,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
   focusActiveBrowserWindow (source, args, ctx) {
     return true
   },
-  hideBrowserWindow (source, args, ctx) {
-    return true
-  },
-
   resetAuthState (source, args, ctx) {
     ctx.authState = { browserOpened: false }
 
