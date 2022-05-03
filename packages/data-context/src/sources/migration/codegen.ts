@@ -484,11 +484,13 @@ function formatWithBundledBabel (config: string) {
   const replacers = [
     {
       from: dedent`
-      const {
-        defineConfig
-      } = require('cypress');`,
+        const {
+          defineConfig
+        } = require('cypress');
+      `,
       to: dedent`
-      const { defineConfig } = require('cypress');`,
+        const { defineConfig } = require('cypress');
+      `,
     },
     {
 
