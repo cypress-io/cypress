@@ -8,7 +8,7 @@ import { snapshots } from './retries.mochaEvents.snapshots'
  * TODO: Find out if they are objectively slower on windows than on linux,
  * and if it's a 10.x specific performance regression.
  */
-describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
+describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   // NOTE: for test-retries
 
   it('simple retry', (done) => {
