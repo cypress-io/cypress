@@ -112,4 +112,10 @@ describe('App: Spec List (E2E)', () => {
       })
     })
   })
+
+  it('shows a list of recent runs', () => {
+    cy.get('[data-cy="run-status-dots"]').each((row) => {
+      cy.wrap(row).find('ol > li > svg').should('have.length', 4)
+    })
+  })
 })

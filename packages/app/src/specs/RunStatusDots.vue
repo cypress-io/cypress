@@ -1,5 +1,8 @@
 <template>
-  <div class="flex justify-center">
+  <div
+    class="flex justify-center"
+    data-cy="run-status-dots"
+  >
     <ol
       class="list-none h-16px mb-0 pl-0 inline-block"
     >
