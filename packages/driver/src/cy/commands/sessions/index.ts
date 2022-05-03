@@ -1,337 +1,55 @@
 import _ from 'lodash'
-import { $Location } from '../../../cypress/location'
-import $errUtils from '../../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
+import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
+import SessionsManager from './manager'
 import {
   getSessionDetails,
-  getCurrentOriginStorage,
-  setPostMessageLocalStorage,
   getConsoleProps,
-  getPostMessageLocalStorage,
   navigateAboutBlank,
 } from './utils'
-const currentTestRegisteredSessions = new Map()
 
-type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
+
 /**
- * rules for clearing session data:
+ * Session data should be cleared with spec browser launch.
+ *
+ * Rules for clearing session data:
  *  - if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
  *  - if user relaunches the browser or launches a new spec, session data SHOULD be cleared
  *  - session data SHOULD be cleared between specs in run mode
- *
- * therefore session data should be cleared with spec browser launch
  */
 
 export default function (Commands, Cypress, cy) {
-  const { Promise } = Cypress
-
-  const setActiveSession = (obj: ActiveSessions) => {
-    const currentSessions = cy.state('activeSessions') || {}
-
-    const newSessions = { ...currentSessions, ...obj }
-
-    cy.state('activeSessions', newSessions)
-  }
-
-  const getActiveSession = (id: string): SessionData => {
-    const currentSessions = cy.state('activeSessions') || {}
-
-    return currentSessions[id]
-  }
-
-  const clearActiveSessions = () => {
-    const curSessions = cy.state('activeSessions') || {}
-
-    cy.state('activeSessions', _.mapValues(curSessions, (v) => ({ ...v, hydrated: false })))
-  }
-
-  async function mapOrigins (origins) {
-    const currentOrigin = $Location.create(window.location.href).origin
-
-    return _.uniq(
-      _.flatten(await Promise.map(
-        ([] as string[]).concat(origins), async (v) => {
-          if (v === '*') {
-            return _.keys(await Cypress.backend('get:rendered:html:origins')).concat([currentOrigin])
-          }
-
-          if (v === 'currentOrigin') return currentOrigin
-
-          return $Location.create(v).origin
-        },
-      )),
-    ) as string[]
-  }
-
-  async function _setStorageOnOrigins (originOptions) {
-    const specWindow = cy.state('specWindow')
-
-    const currentOrigin = $Location.create(window.location.href).origin
-
-    const currentOriginIndex = _.findIndex(originOptions, { origin: currentOrigin })
-
-    if (currentOriginIndex !== -1) {
-      const opts = originOptions.splice(currentOriginIndex, 1)[0]
-
-      if (!_.isEmpty(opts.localStorage)) {
-        if (opts.localStorage.clear) {
-          window.localStorage.clear()
-        }
-
-        _.each(opts.localStorage.value, (val, key) => localStorage.setItem(key, val))
-      }
-
-      if (opts.sessionStorage) {
-        if (opts.sessionStorage.clear) {
-          window.sessionStorage.clear()
-        }
-
-        _.each(opts.sessionStorage.value, (val, key) => sessionStorage.setItem(key, val))
-      }
-    }
-
-    if (_.isEmpty(originOptions)) {
-      return
-    }
-
-    await setPostMessageLocalStorage(specWindow, originOptions)
-  }
-
-  async function getAllHtmlOrigins () {
-    const currentOrigin = $Location.create(window.location.href).origin
-
-    const origins = _.uniq([..._.keys(await Cypress.backend('get:rendered:html:origins')), currentOrigin]) as string[]
-
-    return origins
-  }
-
   function throwIfNoSessionSupport () {
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
         args: {
+          // determine if using experimental session opt-in flag (removed in 9.6.0) to
+          // generate a coherent error message
           experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
         },
       })
     }
   }
 
-  const sessions = {
-    defineSession (options = {} as any): SessionData {
-      const sess_state: SessionData = {
-        id: options.id,
-        cookies: null,
-        localStorage: null,
-        setup: options.setup,
-        hydrated: false,
-        validate: options.validate,
-      }
-
-      setActiveSession({ [sess_state.id]: sess_state })
-
-      return sess_state
-    },
-
-    async clearAllSavedSessions () {
-      clearActiveSessions()
-
-      return Cypress.backend('clear:session', null)
-    },
-
-    async clearCurrentSessionData () {
-      window.localStorage.clear()
-      window.sessionStorage.clear()
-
-      await Promise.all([
-        sessions.clearStorage(),
-        sessions.clearCookies(),
-      ])
-    },
-
-    async setSessionData (data) {
-      await sessions.clearCurrentSessionData()
-      const allHtmlOrigins = await getAllHtmlOrigins()
-
-      let _localStorage = data.localStorage || []
-      let _sessionStorage = data.sessionStorage || []
-
-      _.each(allHtmlOrigins, (v) => {
-        if (!_.find(_localStorage, v)) {
-          _localStorage = _localStorage.concat({ origin: v, clear: true })
-        }
-
-        if (!_.find(_sessionStorage, v)) {
-          _sessionStorage = _sessionStorage.concat({ origin: v, clear: true })
-        }
-      })
-
-      await Promise.all([
-        sessions.setStorage({ localStorage: _localStorage, sessionStorage: _sessionStorage }),
-        Cypress.automation('clear:cookies', null),
-      ])
-
-      await sessions.setCookies(data.cookies)
-    },
-
-    getCookies () {
-      return Cypress.automation('get:cookies', {})
-    },
-
-    setCookies (data) {
-      return Cypress.automation('set:cookies', data)
-    },
-
-    async clearCookies () {
-      return Cypress.automation('clear:cookies', await sessions.getCookies())
-    },
-
-    async getCurrentSessionData () {
-      const storage = await sessions.getStorage({ origin: '*' })
-
-      let cookies = [] as any[]
-
-      cookies = await Cypress.automation('get:cookies', {})
-
-      const ses = {
-        ...storage,
-        cookies,
-      }
-
-      return ses
-    },
-
-    getSession (id) {
-      return Cypress.backend('get:session', id)
-    },
-
-    /**
-     * 1) if we only need currentOrigin localStorage, access sync
-     * 2) if cross-origin http, we need to load in iframe from our proxy that will intercept all http reqs at /__cypress/automation/*
-     *      and postMessage() the localStorage value to us
-     * 3) if cross-origin https, since we pass-thru https connections in the proxy, we need to
-     *      send a message telling our proxy server to intercept the next req to the https domain,
-     *      then follow 2)
-     */
-    async getStorage (options = {}) {
-      const specWindow = cy.state('specWindow')
-
-      if (!_.isObject(options)) {
-        throw new Error('getStorage() takes an object')
-      }
-
-      const opts = _.defaults({}, options, {
-        origin: 'currentOrigin',
-      })
-
-      const currentOrigin = $Location.create(window.location.href).origin
-
-      const origins = await mapOrigins(opts.origin)
-
-      const getResults = () => {
-        return results
-      }
-      const results = {
-        localStorage: [] as any[],
-        sessionStorage: [] as any[],
-      }
-
-      function pushValue (origin, value) {
-        if (!_.isEmpty(value.localStorage)) {
-          results.localStorage.push({ origin, value: value.localStorage })
-        }
-
-        if (!_.isEmpty(value.sessionStorage)) {
-          results.sessionStorage.push({ origin, value: value.sessionStorage })
-        }
-      }
-
-      const currentOriginIndex = origins.indexOf(currentOrigin)
-
-      if (currentOriginIndex !== -1) {
-        origins.splice(currentOriginIndex, 1)
-        const currentOriginStorage = getCurrentOriginStorage()
-
-        pushValue(currentOrigin, currentOriginStorage)
-      }
-
-      if (_.isEmpty(origins)) {
-        return getResults()
-      }
-
-      if (currentOrigin.startsWith('https:')) {
-        _.remove(origins, (v) => v.startsWith('http:'))
-      }
-
-      const postMessageResults = await getPostMessageLocalStorage(specWindow, origins)
-
-      postMessageResults.forEach((val) => {
-        pushValue(val[0], val[1])
-      })
-
-      return getResults()
-    },
-
-    async clearStorage () {
-      const origins = await getAllHtmlOrigins()
-
-      const originOptions = origins.map((v) => ({ origin: v, clear: true }))
-
-      await sessions.setStorage({
-        localStorage: originOptions,
-        sessionStorage: originOptions,
-      })
-    },
-
-    async setStorage (options: any, clearAll = false) {
-      const currentOrigin = $Location.create(window.location.href).origin as string
-
-      const mapToCurrentOrigin = (v) => ({ ...v, origin: (v.origin && v.origin !== 'currentOrigin') ? $Location.create(v.origin).origin : currentOrigin })
-
-      const mappedLocalStorage = _.map(options.localStorage, (v) => {
-        const mapped = { origin: v.origin, localStorage: _.pick(v, 'value', 'clear') }
-
-        if (clearAll) {
-          mapped.localStorage.clear = true
-        }
-
-        return mapped
-      }).map(mapToCurrentOrigin)
-
-      const mappedSessionStorage = _.map(options.sessionStorage, (v) => {
-        const mapped = { origin: v.origin, sessionStorage: _.pick(v, 'value', 'clear') }
-
-        if (clearAll) {
-          mapped.sessionStorage.clear = true
-        }
-
-        return mapped
-      }).map(mapToCurrentOrigin)
-
-      const storageOptions = _.map(_.groupBy(mappedLocalStorage.concat(mappedSessionStorage), 'origin'), (v) => _.merge({}, ...v))
-
-      await _setStorageOnOrigins(storageOptions)
-    },
-
-    registerSessionHooks () {
-      Cypress.on('test:before:run:async', () => {
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          currentTestRegisteredSessions.clear()
-
-          return navigateAboutBlank(false)
-          .then(() => sessions.clearCurrentSessionData())
-          .then(() => {
-            return Cypress.backend('reset:rendered:html:origins')
-          })
-        }
-
-        return
-      })
-    },
-  }
+  const sessionsManager = new SessionsManager(Cypress, cy)
+  const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
-    sessions.registerSessionHooks()
+    Cypress.on('test:before:run:async', () => {
+      if (Cypress.config('experimentalSessionAndOrigin')) {
+        sessionsManager.currentTestRegisteredSessions.clear()
+
+        return navigateAboutBlank(false)
+        .then(() => sessions.clearCurrentSessionData())
+        .then(() => {
+          return Cypress.backend('reset:rendered:html:origins')
+        })
+      }
+
+      return
+    })
   })
 
   Commands.addAll({
@@ -374,17 +92,18 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession: SessionData = getActiveSession(id)
+      let existingSession: SessionData = sessionsManager.getActiveSession(id)
+      const isRegisteredSessionForTest = sessionsManager.currentTestRegisteredSessions.has(id)
 
       if (!setup) {
-        if (!existingSession || !currentTestRegisteredSessions.has(id)) {
+        if (!existingSession || !isRegisteredSessionForTest) {
           $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
         }
       } else {
         const isUniqSessionDefinition = !existingSession || existingSession.setup.toString().trim() !== setup.toString().trim()
 
         if (isUniqSessionDefinition) {
-          if (currentTestRegisteredSessions.has(id)) {
+          if (isRegisteredSessionForTest) {
             $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id: existingSession.id } })
           }
 
@@ -394,7 +113,7 @@ export default function (Commands, Cypress, cy) {
             validate: options.validate,
           })
 
-          currentTestRegisteredSessions.set(id, true)
+          sessionsManager.currentTestRegisteredSessions.set(id, true)
         }
       }
 
@@ -447,7 +166,7 @@ export default function (Commands, Cypress, cy) {
           _.extend(existingSession, data)
           existingSession.hydrated = true
 
-          setActiveSession({ [existingSession.id]: existingSession })
+          sessionsManager.setActiveSession({ [existingSession.id]: existingSession })
 
           dataLog.set({
             consoleProps: () => getConsoleProps(existingSession),
