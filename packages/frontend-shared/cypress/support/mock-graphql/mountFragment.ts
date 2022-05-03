@@ -9,22 +9,12 @@ import type { TypedDocumentNode } from '@urql/vue'
 import type { FragmentDefinitionNode } from 'graphql'
 import { print } from 'graphql'
 import { testUrqlClient } from './clientTestUrqlClient'
-import type { MutationResolverCallback as MutationResolver, ResultType } from './clientTestUrqlClient'
+import type { MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
 import { createI18n } from '@cy/i18n'
-
-/**
- * This variable is mimicing ipc provided by electron.
- * It has to be loaded run before initializing GraphQL
- * because graphql uses it.
- */
-
-(window as any).ipc = {
-  on: () => {},
-  send: () => {},
-}
+import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 
 export interface MountFnOptions {
   plugins?: (() => any)[]
@@ -66,7 +56,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     },
   )
 
-  function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
+  function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
     let hasMounted = false
     const context = makeClientTestContext()
     const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
@@ -143,7 +133,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 
   const mutationResolvers: Map<string, MutationResolver<any>> = new Map()
 
-  function stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (
+  function stubMutationResolver<T extends TypedDocumentNode<any, any>> (
     document: T,
     resolver: MutationResolver<T>,
   ) {
@@ -171,29 +161,29 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   })
 }
 
-type MountFragmentConfig<T extends TypedDocumentNode> = {
-  variables?: T['__variablesType']
+type MountFragmentConfig<T extends TypedDocumentNode<any, any>> = {
+  variables?: VariablesOf<T>
   /**
    * When we are mounting a GraphQL Fragment, we can use `onResult`
    * to intercept the result and modify the contents on the fragment
    * before rendering the component
    */
-  onResult?: (result: ResultType<T>, ctx: ClientTestContext) => ResultType<T> | void
+  onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void
   /**
    * Render is passed the result of the "frag" and mounts the component under test
    */
-  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
+  render: (frag: Exclude<ResultOf<T>, undefined>) => JSX.Element
   expectError?: boolean
 } & CyMountOptions<unknown>
 
-type MountFragmentListConfig<T extends TypedDocumentNode> = {
+type MountFragmentListConfig<T extends TypedDocumentNode<any, any>> = {
   /**
    * @default 2
    */
   count?: number
-  variables?: T['__variablesType']
-  render: (frag: Exclude<T['__resultType'], undefined>[]) => JSX.Element
-  onResult?: (result: ResultType<T>, ctx: ClientTestContext) => ResultType<T> | void
+  variables?: VariablesOf<T>
+  render: (frag: Exclude<ResultOf<T>, undefined>[]) => JSX.Element
+  onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void
   expectError?: boolean
 } & CyMountOptions<unknown>
 
@@ -207,7 +197,7 @@ declare global {
       /**
        * Mount helper for a component with a GraphQL fragment
        */
-      mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+      mountFragment<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentConfig<T>
       ): Cypress.Chainable<ClientTestContext>
@@ -217,14 +207,14 @@ declare global {
        * @param document
        * @param resolver
        */
-      stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+      stubMutationResolver<T extends TypedDocumentNode<any, any>>(
         document: T,
         resolver: MutationResolver<T>
       ): Cypress.Chainable<ClientTestContext>
       /**
        * Mount helper for a component with a GraphQL fragment, as a list
        */
-      mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+      mountFragmentList<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentListConfig<T>
       ): Cypress.Chainable<ClientTestContext>

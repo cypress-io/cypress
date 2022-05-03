@@ -3823,10 +3823,22 @@
     "@graphql-tools/utils" "^8.1.1"
     tslib "~2.3.0"
 
-"@graphql-codegen/plugin-helpers@2.3.2", "@graphql-codegen/plugin-helpers@^2.1.0", "@graphql-codegen/plugin-helpers@^2.3.2":
+"@graphql-codegen/plugin-helpers@2.3.2":
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/plugin-helpers/-/plugin-helpers-2.3.2.tgz#3f9ba625791901d19be733db1dfc9a3dbd0dac44"
   integrity sha512-19qFA5XMAWaAY64sBljjDPYfHjE+QMk/+oalCyY13WjSlcLDvYPfmFlCNgFSsydArDELlHR8T1GMbA7C42M8TA==
+  dependencies:
+    "@graphql-tools/utils" "^8.5.2"
+    change-case-all "1.0.14"
+    common-tags "1.8.2"
+    import-from "4.0.0"
+    lodash "~4.17.0"
+    tslib "~2.3.0"
+
+"@graphql-codegen/plugin-helpers@^2.1.0", "@graphql-codegen/plugin-helpers@^2.3.2", "@graphql-codegen/plugin-helpers@^2.4.0":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/plugin-helpers/-/plugin-helpers-2.4.2.tgz#e4f6b74dddcf8a9974fef5ce48562ae0980f9fed"
+  integrity sha512-LJNvwAPv/sKtI3RnRDm+nPD+JeOfOuSOS4FFIpQCMUCyMnFcchV/CPTTv7tT12fLUpEg6XjuFfDBvOwndti30Q==
   dependencies:
     "@graphql-tools/utils" "^8.5.2"
     change-case-all "1.0.14"
@@ -3844,13 +3856,13 @@
     "@graphql-tools/utils" "^8.1.1"
     tslib "~2.3.0"
 
-"@graphql-codegen/typed-document-node@2.2.2":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/typed-document-node/-/typed-document-node-2.2.2.tgz#460c92e75cfa9a7dc3131dee6cfee7279ded18cb"
-  integrity sha512-FOqXcH8mL91Wjvh57VzayjP1WSFPNOii6P4BqJ42j88wsVV7RpO/eQoQjQX1ltAjHGSny8UZJDKA/8It5QaboQ==
+"@graphql-codegen/typed-document-node@2.2.8":
+  version "2.2.8"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/typed-document-node/-/typed-document-node-2.2.8.tgz#e8c6c7d0b4607b37682002e50922205a8bf33e0a"
+  integrity sha512-72qTGNOMVnT51Fenk1MvavOwdyJewCZlrEp0miiTjtOSiTPzAm1acOck7cx8smNWyxNaDh3g4Jf60MkS8VCySw==
   dependencies:
-    "@graphql-codegen/plugin-helpers" "^2.3.2"
-    "@graphql-codegen/visitor-plugin-common" "2.5.2"
+    "@graphql-codegen/plugin-helpers" "^2.4.0"
+    "@graphql-codegen/visitor-plugin-common" "2.7.4"
     auto-bind "~4.0.0"
     change-case-all "1.0.14"
     tslib "~2.3.0"
@@ -3894,6 +3906,22 @@
   integrity sha512-qDMraPmumG+vEGAz42/asRkdgIRmQWH5HTc320UX+I6CY6eE/Ey85cgzoqeQGLV8gu4sj3UkNx/3/r79eX4u+Q==
   dependencies:
     "@graphql-codegen/plugin-helpers" "^2.3.2"
+    "@graphql-tools/optimize" "^1.0.1"
+    "@graphql-tools/relay-operation-optimizer" "^6.3.7"
+    "@graphql-tools/utils" "^8.3.0"
+    auto-bind "~4.0.0"
+    change-case-all "1.0.14"
+    dependency-graph "^0.11.0"
+    graphql-tag "^2.11.0"
+    parse-filepath "^1.0.2"
+    tslib "~2.3.0"
+
+"@graphql-codegen/visitor-plugin-common@2.7.4":
+  version "2.7.4"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/visitor-plugin-common/-/visitor-plugin-common-2.7.4.tgz#fbc8aec9df0035b8f29fa64a6356cbb02062da5d"
+  integrity sha512-aaDoEudDD+B7DK/UwDSL2Fzej75N9hNJ3N8FQuTIeDyw6FNGWUxmkjVBLQGlzfnYfK8IYkdfYkrPn3Skq0pVxA==
+  dependencies:
+    "@graphql-codegen/plugin-helpers" "^2.4.0"
     "@graphql-tools/optimize" "^1.0.1"
     "@graphql-tools/relay-operation-optimizer" "^6.3.7"
     "@graphql-tools/utils" "^8.3.0"
@@ -4285,10 +4313,10 @@
     tslib "~2.2.0"
     value-or-promise "1.0.6"
 
-"@graphql-typed-document-node/core@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.0.tgz#0eee6373e11418bfe0b5638f654df7a4ca6a3950"
-  integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
+"@graphql-typed-document-node/core@^3.1.0", "@graphql-typed-document-node/core@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.1.tgz#076d78ce99822258cf813ecc1e7fa460fa74d052"
+  integrity sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg==
 
 "@hapi/address@2.x.x", "@hapi/address@^2.1.2":
   version "2.1.4"
@@ -10266,12 +10294,12 @@
   resolved "https://registry.yarnpkg.com/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz#aa58042711d6e3275dd37dc597e5d31e8c290a44"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
-"@urql/core@2.3.1", "@urql/core@>=2.3.0", "@urql/core@>=2.3.1", "@urql/core@^2.1.5":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.3.1.tgz#1aa558b5aa6eca785062a3a768e6fec708aab6d2"
-  integrity sha512-M9gGz02+TH7buqkelVg+m0eTkLCKly9ZjuTp6NHMP7hXD/zpImPu/m3YluA+D4HbFqw3kofBtLCuVk67X9dxRw==
+"@urql/core@2.4.4", "@urql/core@>=2.3.0", "@urql/core@>=2.3.6", "@urql/core@^2.3.6":
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.4.4.tgz#29f1d03cc439134259761e70a78ae20302c3d7fe"
+  integrity sha512-TD+OS7jG1Ts6QkpU0TZ85i/vu40r71GF0QQFDhnWFtgkHcNwnpkIwWBMa72AR3j2imBTPpk61e/xb39uM/t37A==
   dependencies:
-    "@graphql-typed-document-node/core" "^3.1.0"
+    "@graphql-typed-document-node/core" "^3.1.1"
     wonka "^4.0.14"
 
 "@urql/devtools@2.0.3":
@@ -10289,12 +10317,12 @@
     "@urql/core" ">=2.3.0"
     wonka "^4.0.14"
 
-"@urql/exchange-graphcache@4.3.3":
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.3.tgz#5a4fee253458fd2faeb70a2bb1474d4f775f7846"
-  integrity sha512-30xFeagf1pJj+ilQeujY0J/qczFW6kQHMbK+WzLBjuomVkn/+D2ZCylMplaUMZ2gYKZ6hHIpkG4MWX1KUnmqhQ==
+"@urql/exchange-graphcache@4.3.6":
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.6.tgz#fea25b8877a704a9d65bdd29578fa6e9fd31bfa5"
+  integrity sha512-RDEi1954lcnwBK2dwQGaxOInuebZrRliz2v7aAuQasj49N9bWYrlSkBfELG14EzOL7NI23IUaeLeaDN7MouDJg==
   dependencies:
-    "@urql/core" ">=2.3.1"
+    "@urql/core" ">=2.3.6"
     wonka "^4.0.14"
 
 "@urql/introspection@^0.3.0":
@@ -10302,12 +10330,12 @@
   resolved "https://registry.yarnpkg.com/@urql/introspection/-/introspection-0.3.0.tgz#545f2425b68d95892afa5961433a19aab1867268"
   integrity sha512-dw87YiSmCgEUFnWj7fYu+wnrFcSEhYyQ8DykTvL1UzCKPm9uLDeey1z0yiSxZeX2qP9oD+TSGIq+61AZHhQO0w==
 
-"@urql/vue@0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.4.3.tgz#3f97c3a45fef2033d6965c4dde81c00ac75749fd"
-  integrity sha512-r5KPa6kQG2BAWkfXoahUnz3I9F3ShuEyIVCZ3nEjTWn1BsgnYObLOzcGYWgKfzHRVF4XW7KGaBkGnAt9ls8yXg==
+"@urql/vue@0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.6.2.tgz#991b474644bbcc11322eab68f9ff41ca3eff4bb2"
+  integrity sha512-hrVysup75sgnNgOhhvVfI2ChOM1JDx+/+D9qKIKrTHn/IsykIjm9IrYK5+CcYoQmzXX6lfnJ8d1F3uu8k4flyA==
   dependencies:
-    "@urql/core" "^2.1.5"
+    "@urql/core" "^2.3.6"
     wonka "^4.0.14"
 
 "@vitejs/plugin-react@1.3.1":
