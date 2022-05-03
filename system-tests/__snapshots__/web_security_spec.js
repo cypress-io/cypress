@@ -8,7 +8,7 @@ exports['e2e web security / when enabled / fails'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (web_security.cy.js)                                                     │
-  │ Searched:     cypress/integration/web_security.cy.js                                           │
+  │ Searched:     cypress/e2e/web_security.cy.js                                                   │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -23,10 +23,11 @@ exports['e2e web security / when enabled / fails'] = `
     2) fails when submitted a form and being redirected to another origin
     3) fails when using a javascript redirect to another origin
     4) fails when doing a CORS request cross-origin
-    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
+    - finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
 
 
-  1 passing
+  0 passing
+  1 pending
   4 failing
 
   1) web security
@@ -43,7 +44,7 @@ A command that triggers cross-origin navigation must be immediately followed by 
 \`  <commands targeting https://www.foo.com:44665 go here>\`
 \`})\`
 
-If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -66,7 +67,7 @@ A command that triggers cross-origin navigation must be immediately followed by 
 \`  <commands targeting https://www.foo.com:44665 go here>\`
 \`})\`
 
-If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -89,7 +90,7 @@ A command that triggers cross-origin navigation must be immediately followed by 
 \`  <commands targeting https://www.foo.com:44665 go here>\`
 \`})\`
 
-If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -105,17 +106,24 @@ https://on.cypress.io/origin
 
 
 
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
+
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        5                                                                                │
-  │ Passing:      1                                                                                │
+  │ Passing:      0                                                                                │
   │ Failing:      4                                                                                │
-  │ Pending:      0                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -133,12 +141,6 @@ https://on.cypress.io/origin
      oing a CORS request cross-origin (failed).png                                                  
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -146,75 +148,9 @@ https://on.cypress.io/origin
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security.cy.js                     XX:XX        5        1        4        -          - │
+  │ ✖  web_security.cy.js                       XX:XX        5        -        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
-
-
-`
-
-exports['e2e web security / when disabled / passes'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (web_security.cy.js)                                                     │
-  │ Searched:     cypress/integration/web_security.cy.js                                           │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  web_security.cy.js                                                              (1 of 1)
-
-
-  web security
-    ✓ fails when clicking <a> to another origin
-    ✓ fails when submitted a form and being redirected to another origin
-    ✓ fails when using a javascript redirect to another origin
-    ✓ fails when doing a CORS request cross-origin
-    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
-
-
-  5 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        5                                                                                │
-  │ Passing:      5                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security.cy.js                                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security.cy.js                       XX:XX        5        5        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        -        4        1        -  
 
 
 `
@@ -281,6 +217,73 @@ TimeoutError: operation timed out
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e web security / when disabled / passes'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (web_security.cy.js)                                                     │
+  │ Searched:     cypress/e2e/web_security.cy.js                                                   │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  web_security.cy.js                                                              (1 of 1)
+
+
+  web security
+    ✓ fails when clicking <a> to another origin
+    ✓ fails when submitted a form and being redirected to another origin
+    ✓ fails when using a javascript redirect to another origin
+    ✓ fails when doing a CORS request cross-origin
+    - finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
+
+
+  4 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        5                                                                                │
+  │ Passing:      4                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     web_security.cy.js                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  web_security.cy.js                       XX:XX        5        4        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        5        4        -        1        -  
 
 
 `
