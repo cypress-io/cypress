@@ -6,7 +6,7 @@ describe('App: Settings', () => {
   })
 
   beforeEach(() => {
-    cy.openProject('todos')
+    cy.openProject('todos', ['--config', 'projectId=fromCli'])
   })
 
   it('visits settings page', () => {
@@ -28,7 +28,7 @@ describe('App: Settings', () => {
   })
 
   describe('Cloud Settings', () => {
-    it('shows the projectId section when there is a projectId', () => {
+    it('shows the projectId section when there is a projectId and shows override from CLI', () => {
       cy.withCtx(async (ctx, o) => {
         o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
       })
@@ -38,10 +38,11 @@ describe('App: Settings', () => {
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
+      cy.get('[data-cy="code-box"]').should('contain', 'fromCli')
       cy.findByText('Copy').click()
       cy.findByText('Copied!').should('be.visible')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('abc123')
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('fromCli')
       })
     })
 
@@ -62,9 +63,9 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
-      cy.get('[data-cy="record-key"]').should('contain', '***')
+      cy.get('[data-cy="code-box"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
-      cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+      cy.get('[data-cy="code-box"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
     it('opens cloud settings when clicking on "Manage Keys"', () => {
@@ -221,7 +222,7 @@ describe('App: Settings', () => {
 
       cy.get('[data-cy="config-code"]').within(() => {
         cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
-        cy.get('[data-cy-config="config"]').contains('abc123')
+        cy.get('[data-cy-config="config"]').contains('fromCli')
         cy.get('[data-cy-config="config"]').contains('tests/**/*')
         cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
         cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
