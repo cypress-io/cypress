@@ -8,7 +8,7 @@ exports['e2e sessions / session tests'] = `
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (session.cy.js)                                                          │
-  │ Searched:     cypress/cypress/e2e/session.cy.js                                                │
+  │ Searched:     cypress/e2e/session.cy.js                                                        │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
