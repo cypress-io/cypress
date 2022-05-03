@@ -1503,9 +1503,9 @@ export const AllCypressErrors = {
 
   MIGRATION_CYPRESS_NOT_FOUND: () => {
     return errTemplate`
-      You are running Cypress version 10 in global mode, but we were unable to determine the version of Cypress the project you are attempting to migrate is using.
+      You are running Cypress 10 in global mode and attempting to migrate a project where an install of `cypress` cannot be found.
 
-      Ensure the project you are migrating has Cypress version 10 installed.
+      Ensure that `cypress@10` is installed in the project you are attempting to migrate.
 
       https://on.cypress.io/migration-guide
     `
