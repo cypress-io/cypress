@@ -65,6 +65,7 @@
               <template
                 v-if="props.gql?.currentProject?.branch"
               >
+                {{ ' ' }}
                 <Tooltip
                   placement="bottom"
                   class="inline-block"
@@ -92,7 +93,7 @@
             </li>
             <li
               v-if="props.gql?.currentProject?.currentTestingType"
-              class="lowercase inline-block"
+              class="inline-block"
             >
               {{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}
             </li>
