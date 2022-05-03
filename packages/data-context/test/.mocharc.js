@@ -1,3 +1,3 @@
 module.exports = {
-  spec: 'test/unit/**/*.spec.ts',
+  spec: 'test/unit/**/codegen.spec.ts',
 }

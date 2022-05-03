@@ -138,7 +138,7 @@ type OutputExtension = '.ts' | '.mjs' | '.js'
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
 function getEmptyCodeBlock ({ outputType, isProjectECMAScript }: { outputType: OutputExtension, isProjectECMAScript: boolean}) {
-  if (outputType === '.ts' || outputType === '.mjs') {
+  if (outputType === '.ts' || outputType === '.mjs' || isProjectECMAScript) {
     return dedent`
       import { defineConfig } from 'cypress'
 

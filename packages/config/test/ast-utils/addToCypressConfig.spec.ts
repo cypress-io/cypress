@@ -19,12 +19,13 @@ const { addTestingTypeToCypressConfig } = proxyquire('../../src/ast-utils/addToC
 }) as typeof import('../../src/ast-utils/addToCypressConfig')
 
 describe('addToCypressConfig', () => {
-  it('will create a file if the file is empty', async () => {
+  it('will create a ts file if the file is empty and the file path is ts', async () => {
     const result = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, '../__fixtures__/empty.config.ts'),
       info: {
         testingType: 'e2e',
       },
+      isProjectECMAScript: false,
     })
 
     expect(stub.firstCall.args[1].trim()).to.eq(dedent`
@@ -42,12 +43,61 @@ describe('addToCypressConfig', () => {
     expect(result.result).to.eq('ADDED')
   })
 
+  it('will create a module file if the file is empty and the project is ECMA Script', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/empty.config.js'),
+      info: {
+        testingType: 'e2e',
+      },
+      isProjectECMAScript: true,
+    })
+
+    expect(stub.firstCall.args[1].trim()).to.eq(dedent`
+      import { defineConfig } from "cypress";
+
+      export default defineConfig({
+        e2e: {
+          setupNodeEvents(on, config) {
+            // implement node event listeners here
+          },
+        },
+      });
+    `)
+
+    expect(result.result).to.eq('ADDED')
+  })
+
+  it('will create a js file if the file is empty and the file path is js', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/empty.config.js'),
+      info: {
+        testingType: 'e2e',
+      },
+      isProjectECMAScript: false,
+    })
+
+    expect(stub.firstCall.args[1].trim()).to.eq(dedent`
+      const { defineConfig } = require("cypress");
+
+      module.exports = defineConfig({
+        e2e: {
+          setupNodeEvents(on, config) {
+            // implement node event listeners here
+          },
+        },
+      });
+    `)
+
+    expect(result.result).to.eq('ADDED')
+  })
+
   it('will error if we are unable to add to the config', async () => {
     const result = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, '../__fixtures__/invalid.config.ts'),
       info: {
         testingType: 'e2e',
       },
+      isProjectECMAScript: false,
     })
 
     expect(result.result).to.eq('NEEDS_MERGE')
@@ -60,6 +110,7 @@ describe('addToCypressConfig', () => {
       info: {
         testingType: 'e2e',
       },
+      isProjectECMAScript: false,
     })
 
     expect(result.result).to.eq('NEEDS_MERGE')
