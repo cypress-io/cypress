@@ -17,6 +17,25 @@ import { scaffoldMigrationProject, getSystemTestProject } from '../../helper'
 const projectRoot = getSystemTestProject('migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
+  it('generates correct config for component testing migration with custom testFiles glob', async () => {
+    const config = {
+      component: {
+        testFiles: '**/*.spec.cy.{js,ts,jsx,tsx}',
+        componentFolder: '.',
+      },
+    }
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: false,
+      hasComponentTesting: true,
+      hasPluginsFile: false,
+      projectRoot,
+      hasTypescript: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
   it('should create a string when passed only a global option', async () => {
     const config: Partial<Cypress.Config> = {
       viewportWidth: 300,

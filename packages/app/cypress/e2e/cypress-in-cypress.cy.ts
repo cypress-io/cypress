@@ -105,6 +105,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.openProject('cypress-in-cypress')
       cy.withCtx((ctx) => {
         ctx.coreData.localSettings.preferences.reporterWidth = 800
+        ctx.coreData.localSettings.preferences.specListWidth = 250
+        ctx.coreData.localSettings.preferences.isSpecsListOpen = false
       })
 
       cy.startAppServer(testingType)
@@ -118,6 +120,12 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
       cy.percySnapshot('initial state')
 
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      .click({ force: true })
+
+      // this tooltip text confirms specs list is open
+      cy.contains('Collapse Specs List')
+
       // we will move the right-hand handle of the Reporter
       // to these positions from the left of the screen
       const dragPositions = [1000, 1090, 900, 600]
@@ -129,6 +137,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         e2e: ['46%', '37%', '56%', '85%'],
         componentShortViewport: '61%',
         e2eShortViewport: '46%',
+        componentNarrowViewport: '40%',
+        e2eNarrowViewport: '20%',
       }
 
       // resize the reporter using each of the dragPositions and take Percy snapshots
@@ -151,19 +161,49 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       // this viewport should be tall enough to not scale even the e2e test
       cy.viewport(1500, 1300)
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      .click({ force: true })
 
       // make sure the reporter is narrow enough (should be, but don't want to depend on leftover state from above)
       dragHandleToClientX('panel2', 400).then(() => {
         // but we have to also collapse the Specs List to remove any reason to scale horizontally
-        cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs').click()
+
+        // this tooltip text confirms specs list is closed
+        cy.contains('Expand Specs List')
 
         assertNoScaleShown()
         cy.percySnapshot('tall viewport')
 
         cy.viewport(1500, 400)
-        cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('exist')
+        cy.contains(testingTypeExpectedScales[`${ testingType }ShortViewport`]).should('be.visible')
         cy.percySnapshot('short viewport')
       })
+
+      cy.get('[data-cy="select-browser"]').as('selectBrowser')
+
+      cy.viewport(500, 600)
+      cy.get('@selectBrowser')
+      .should('not.be.visible')
+      .scrollIntoView()
+      .should('be.visible') // with no specs list open, we should see this by scrolling
+
+      dragHandleToClientX('panel2', 200).then(() => {
+        cy.contains('Chrome 1').should('be.visible')
+      })
+
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      .click({ force: true })
+
+      cy.get('@selectBrowser')
+      .should('not.be.visible')
+      .scrollIntoView()
+      .should('not.be.visible') // with specs list open, scrolling is not enough to see this
+
+      dragHandleToClientX('panel1', 130)
+      cy.get('@selectBrowser')
+      .should('be.visible') // now that we have reduced the specs list, we should be able to see this
+
+      cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`]).should('be.visible')
     })
   })
 })

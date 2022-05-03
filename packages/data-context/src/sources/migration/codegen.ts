@@ -12,6 +12,8 @@ import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
 import type { LegacyCypressConfigJson } from '..'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -169,18 +171,24 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
 
   if (defineConfigAvailable(options.projectRoot)) {
     if (options.hasTypescript) {
-      return formatConfig(
-        `import { defineConfig } from 'cypress'
+      return formatConfig(dedent`
+        import { defineConfig } from 'cypress'
   
-        export default defineConfig({${globalString}${e2eString}${componentString}})`,
-      )
+        export default defineConfig({
+          ${globalString}
+          ${e2eString}
+          ${componentString}
+        })`)
     }
 
-    return formatConfig(
-      `const { defineConfig } = require('cypress')
+    return formatConfig(dedent`
+      const { defineConfig } = require('cypress')
 
-      module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
-    )
+      module.exports = defineConfig({
+        ${globalString}
+        ${e2eString}
+        ${componentString}
+      })`)
   }
 
   if (options.hasTypescript) {
@@ -250,7 +258,11 @@ export interface RelativeSpec {
  *
  * NOTE: this is what we use to see if CT/E2E is set up
  */
-export async function hasSpecFile (projectRoot: string, folder: string, glob: string | string[]): Promise<boolean> {
+export async function hasSpecFile (projectRoot: string, folder: string | false, glob: string | string[]): Promise<boolean> {
+  if (!folder) {
+    return false
+  }
+
   return (await globby(glob, {
     cwd: path.join(projectRoot, folder),
     onlyFiles: true,
@@ -452,6 +464,65 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingT
   return specPattern
 }
 
+function formatWithBundledBabel (config: string) {
+  const ast = parse(config)
+
+  let { code } = generate(ast, {}, config)
+  // By default babel generates imports like this:
+  // const {
+  //   defineConfig
+  // } = require('cypress');
+  // So we replace them with a one-liner, since we know this will never
+  // be more than one import.
+  //
+  // Babel also adds empty lines, for example:
+  //
+  // export default defineConfig({
+  //   component: {
+  //   },
+  //               <===== empty line
+  //   e2e: {
+  //
+  //   }
+  // })
+  // Which we don't want, so we change those to single carriage returns.
+  const replacers = [
+    {
+      from: dedent`
+        const {
+          defineConfig
+        } = require('cypress');
+      `,
+      to: dedent`
+        const { defineConfig } = require('cypress');
+      `,
+    },
+    {
+
+      from: dedent`
+        import {
+          defineConfig
+        } from 'cypress';
+      `,
+      to: dedent`
+        import { defineConfig } from 'cypress';
+      `,
+    },
+    {
+      from: `,\n\n`,
+      to: `,\n`,
+    },
+  ]
+
+  for (const rep of replacers) {
+    if (code.includes(rep.from)) {
+      code = code.replaceAll(rep.from, rep.to)
+    }
+  }
+
+  return code
+}
+
 export function formatConfig (config: string): string {
   try {
     const prettier = require('prettier') as typeof import('prettier')
@@ -463,6 +534,11 @@ export function formatConfig (config: string): string {
       parser: 'babel',
     })
   } catch (e) {
-    return config
+    // If they do not have prettier
+    // We do a basic format using babel, which we
+    // bundle as part of the binary.
+    // We don't ship a fully fledged formatter like
+    // prettier, since it's massively bloats the bundle.
+    return formatWithBundledBabel(config)
   }
 }

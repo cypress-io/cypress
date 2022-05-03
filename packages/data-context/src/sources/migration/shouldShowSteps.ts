@@ -48,7 +48,7 @@ export function getIntegrationFolder (config: LegacyCypressConfigJson) {
   return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
 }
 
-export function getComponentFolder (config: LegacyCypressConfigJson) {
+export function getComponentFolder (config: LegacyCypressConfigJson): false | string {
   if (config.component?.componentFolder === false || config.componentFolder === false) {
     return false
   }

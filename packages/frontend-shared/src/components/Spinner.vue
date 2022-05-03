@@ -1,5 +1,15 @@
 <template>
-  <div class="flex top-0 right-0 bottom-0 left-0 absolute items-center justify-center">
+  <div
+    class="flex top-0 right-0 bottom-0 left-0 absolute items-center justify-center"
+    data-cy="loading-spinner"
+  >
+    <p
+      aria-live="assertive"
+      role="alert"
+      class="sr-only"
+    >
+      Loading...
+    </p>
     <svg
       width="48"
       height="48"
@@ -7,6 +17,7 @@
       fill="none"
       class="spinner"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
     >
       <defs>
         <mask id="y_and_circle">
