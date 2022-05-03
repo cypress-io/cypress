@@ -2172,7 +2172,7 @@ describe('src/cy/commands/navigation', () => {
             const error = Cypress.isBrowser('firefox') ? 'Permission denied to access property "document" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
 
             // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
-            expect(err.message).to.equal(stripIndent`\
+            expect(err.message).to.contain(stripIndent`\
             Cypress detected a cross origin error happened on page load:\n
               > ${error}\n
             Before the page load, you were bound to the origin policy:\n
@@ -2181,12 +2181,13 @@ describe('src/cy/commands/navigation', () => {
             A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.\n
             Cypress does not allow you to navigate to a different origin URL within a single test.\n
             You may need to restructure some of your test code to avoid this problem.\n
-            Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.`)
+            Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false }`)
 
+            expect(err.message).to.contain(`packages/driver/cypress.config.ts`)
             expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
           }
 
-          assertLogLength(this.logs, 6)
+          assertLogLength(this.logs, 7)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
