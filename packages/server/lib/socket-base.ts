@@ -567,10 +567,6 @@ export class SocketBase {
     return this._io?.emit('tests:finished')
   }
 
-  changeToUrl (url) {
-    return this.toRunner('change:to:url', url)
-  }
-
   async closeBrowserTabs () {
     if (this._sendCloseBrowserTabsMessage) {
       await this._sendCloseBrowserTabsMessage()
@@ -595,9 +591,5 @@ export class SocketBase {
 
   close () {
     return this._io?.close()
-  }
-
-  sendSpecList (specs, testingType: Cypress.TestingType) {
-    this.toRunner('specs:changed', { specs, testingType })
   }
 }

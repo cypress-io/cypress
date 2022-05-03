@@ -181,6 +181,19 @@ export default defineConfig({
 
 `
 
+exports['cypress.config.js generation generates correct config for component testing migration with custom testFiles glob 1'] = `
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  component: {
+    setupNodeEvents(on, config) {},
+    componentFolder: '.',
+    specPattern: './**/*.spec.cy.{js,ts,jsx,tsx}',
+  },
+})
+
+`
+
 exports['cypress.config.js generation should create a string when passed an empty object for an ECMA Script project 1'] = `
 import { defineConfig } from 'cypress'
 

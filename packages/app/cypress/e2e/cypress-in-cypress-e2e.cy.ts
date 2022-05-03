@@ -191,4 +191,51 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('new-file.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'expected true to be true')
   })
+
+  it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
+    cy.visitApp()
+    cy.contains('dom-content.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
+
+    cy.get('[href="#/runs"]').click()
+    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
+
+    cy.get('[href="#/specs"]').click()
+    cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
+
+    cy.contains('dom-content.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+
+    cy.window().then((win) => {
+      const connected = () => win.ws?.connected
+
+      win.ws?.close()
+
+      cy.wrap({
+        connected,
+      }).invoke('connected').should('be.false')
+
+      win.ws?.connect()
+
+      cy.wrap({
+        connected,
+      }).invoke('connected').should('be.true')
+    })
+
+    cy.withCtx((ctx, o) => {
+      ctx.actions.file.writeFileInProject(o.path, `
+describe('Dom Content', () => {
+  it('renders the new test content', () => {
+    cy.visit('cypress/e2e/dom-content.html')
+  })
+})
+`)
+    }, { path: getPathForPlatform('cypress/e2e/dom-content.spec.js') })
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the new test content')
+    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.failed > .num').should('contain', '--')
+  })
 })

@@ -58,7 +58,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
-    - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
+    - equal: [ 'UNIFY-1471-reporter-resize', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -301,6 +301,9 @@ commands:
       - run:
           name: Install Node Modules
           command: |
+            # avoid installing Percy's Chromium every time we use @percy/cli
+            # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
+            PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
       - prepare-modules-cache:
