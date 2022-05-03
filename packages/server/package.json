@@ -142,7 +142,7 @@
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
     "@types/http-proxy": "1.17.4",
-    "@types/node": "16.11.7",
+    "@types/node": "14.14.31",
     "babel-loader": "8.1.0",
     "chai-as-promised": "7.1.1",
     "chai-subset": "1.6.0",
