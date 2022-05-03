@@ -51,6 +51,10 @@ Note: you may need to enable "Verbose" or "Debug" log levels inside the browser'
 
 Note: when creating a patch, make sure there is no `package-lock.json` file! Also rename the patch to have ".dev.patch" extension.
 
+## Cross-origin Testing
+
+Working on cross-origin testing or reviewing a PR related to it? Check out the [Cross-origin Testing Technical Overview](./cross-origin-testing.md).
+
 <!-- ## Catalog of Events
 
 TODO: this data is accurate but also somewhat out of date.

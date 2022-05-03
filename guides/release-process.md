@@ -56,29 +56,20 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 In the following instructions, "X.Y.Z" is used to denote the [next version of Cypress being published](./next-version.md).
 
-1. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog.
-
-2. Create or review the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
-     - Use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
-        ```shell
-        cd packages/issues-in-release
-        yarn do:changelog --release <release label>
-        ```
-    - Ensure the changelog is up-to-date and has the correct date.
-    - Merge any release-specific documentation changes into the main release PR.
-    - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
-
-3. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case.
+1. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case.
    - Ensure that `master` does not have any additional commits that are not on `develop`.
    - Ensure all auto-generated pull requests designed to merge master into develop have been successfully merged.
+   - If there are additional commits necessary to merge `master` to `develop`, submit, get approvals on, and merge a new PR
 
-4. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
+2. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog. Also ensure that every closed issue in any obsolete releases are moved to the appropriate release in ZehHub. For example, if the open releases are 9.5.5 and 9.6.0, the current release is 9.6.0, then all closed issues marked as 9.5.5 should be moved to 9.6.0. Ensure that there are no commits on `develop` since the last release that are user facing and aren't marked with the current release.
 
-5. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
+3. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
 
-6. [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `production`. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable. Log into AWS SSO with `aws sso login --profile <name_of_profile>`.
+4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
 
-7. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
+5. [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `production`. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable. Log into AWS SSO with `aws sso login --profile <name_of_profile>`.
+
+6. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
     * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3
     * the Cloudflare cache for this version is purged
     * the pre-prod `cypress.tgz` NPM package is converted to a stable NPM package ready for release
@@ -89,22 +80,22 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
     You can pass `--dry-run` to see the commands this would run under the hood.
 
-8. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
+7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
 
-9. Publish the generated npm package under the `dev` tag, using your personal npm account.
+8. Publish the generated npm package under the `dev` tag, using your personal npm account.
 
     ```shell
     npm publish /tmp/cypress-prod.tgz --tag dev
     ```
 
-10. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
+9. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
 
     ```shell
     dist-tags:
     dev: 3.4.0     latest: 3.3.2
     ```
 
-11. Test `cypress@X.Y.Z` to make sure everything is working.
+10. Test `cypress@X.Y.Z` to make sure everything is working.
     - Install the new version: `npm install -g cypress@X.Y.Z`
     - Run a quick, manual smoke test:
         - `cypress open`
@@ -112,6 +103,16 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Install the new version into an established project and run the tests there
         - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app) uses yarn and represents a typical consumer implementation.
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress dashboard repo.
+
+11. Create or review the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one. This PR must be merged, built, and deployed before moving to the next step.
+     - Use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
+        ```shell
+        cd packages/issues-in-release
+        yarn do:changelog --release <release label>
+        ```
+    - Ensure the changelog is up-to-date and has the correct date.
+    - Merge any release-specific documentation changes into the main release PR.
+    - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 
 12. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
 
@@ -134,24 +135,18 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
     - Move all issues that are still open from the current release to the appropriate future release.
 
-17. Bump `version` in [`package.json`](package.json), commit it to `develop`, tag it with the version, and push the tag up:
+17. Bump `version` in [`package.json`](package.json), submit, get approvals on, and merge a new PR for the change. After it merges:
 
     ```shell
-    git commit -am "release X.Y.Z [skip ci]"
+    git checkout develop
+    git pull origin develop
     git log --pretty=oneline
     # copy sha of the previous commit
     git tag -a vX.Y.Z <sha>
     git push origin vX.Y.Z
     ```
 
-18. Merge `develop` into `master` and push both branches up. Note: pushing to `master` will automatically publish any independent npm packages that have not yet been published.
-
-    ```shell
-    git push origin develop
-    git checkout master
-    git merge develop
-    git push origin master
-    ```
+18. Submit, get approvals on, and merge a new PR that merges `develop` to `master`
 
 19. Inside of [cypress-io/release-automations][release-automations]:
     - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases`:
