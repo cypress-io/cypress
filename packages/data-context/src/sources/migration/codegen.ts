@@ -495,11 +495,13 @@ function formatWithBundledBabel (config: string) {
     {
 
       from: dedent`
-      import {
-        defineConfig
-      } from 'cypress';`,
+        import {
+          defineConfig
+        } from 'cypress';
+      `,
       to: dedent`
-      import { defineConfig } from 'cypress';`,
+        import { defineConfig } from 'cypress';
+      `,
     },
     {
       from: `,\n\n`,
