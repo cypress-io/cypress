@@ -1,26 +1,24 @@
-// const baseUrl = Cypress.config('baseUrl')
+const baseUrl = Cypress.config('baseUrl')
 // const iframeBaseUrl = Cypress.env('iframeBaseUrl')
 
-// const expectCurrentSessionData = (obj) => {
-//   cy.then(async () => {
-//     return await Cypress.session.getCurrentSessionData()
-//     .then((result) => {
-//       expect(result.cookies.map((v) => v.name)).members(obj.cookies || [])
-//       expect(result.localStorage).deep.members(obj.localStorage || [])
-//       expect(result.sessionStorage).deep.members(obj.sessionStorage || [])
-//     })
-//   })
-// }
+const expectCurrentSessionData = (obj) => {
+  return Cypress.session.getCurrentSessionData()
+  .then((result) => {
+    cy.log(result)
+    expect(result.cookies.map((v) => v.name)).members(obj.cookies || [])
+    expect(result.localStorage).deep.members(obj.localStorage || [])
+    expect(result.sessionStorage).deep.members(obj.sessionStorage || [])
+  })
+}
+// beforeEach(() => {
+//   if (top.doNotClearSessions) {
+//     top.doNotClearSessions = false
 
-beforeEach(() => {
-  if (top.doNotClearSessions) {
-    top.doNotClearSessions = false
+//     return
+//   }
 
-    return
-  }
-
-  cy.wrap(Cypress.session.clearAllSavedSessions(), { log: false })
-})
+//   cy.wrap(Cypress.session.clearAllSavedSessions(), { log: false })
+// })
 
 // const sessionUser = (name = 'user0') => {
 //   return cy.session(name, () => {
@@ -34,24 +32,30 @@ beforeEach(() => {
 describe('cy.session', () => {
   describe('args', () => {
     it('accepts string as id', () => {
-      cy.session('some-name', () => {})
-      cy.session({ name: 'some-name', zkey: 'val' }, () => {})
+      cy.session('session-id', () => {})
+      cy.session({ name: 'session-id', zkey: 'val' }, () => {})
     })
 
     it('accepts array as id', () => {
-      cy.session('some-name', () => {})
+      cy.session('session-id', () => {})
     })
 
     it('accepts object as id', () => {
-      cy.session('some-name', () => {})
+      cy.session('session-id', () => {})
     })
 
-    it('uses sorted stringify and rejects duplicate registrations', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).contain('previously used name')
-        expect(err.message).contain('{"key":"val"')
-        done()
+    // redundant?
+    it('accepts options as third argument', () => {
+      const setup = cy.stub().as('setupSession')
+      const validate = cy.stub().as('validateSession')
+
+      cy.session('session-id', setup, { validate })
+      cy.then(() => {
+        expect(setup).to.be.calledOnce
+        expect(validate).to.be.calledOnce
       })
+    })
+  })
 
       cy.session({ name: 'bob', key: 'val' }, () => {
         // foo
@@ -89,6 +93,47 @@ describe('cy.session', () => {
       })
 
       return null
+    })
+
+    it('throws error when experimentalSessionAndOrigin not enabled', { experimentalSessionAndOrigin: false, experimentalSessionSupport: false }, (done) => {
+      cy.on('fail', (err) => {
+        expect(lastLog.get('error')).to.eq(err)
+        expect(lastLog.get('state')).to.eq('failed')
+        expect(err.message).to.eq('`cy.session()` requires enabling the `experimentalSessionAndOrigin` flag.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
+
+        done()
+      })
+
+      cy.session('sessions-not-enabled')
+    })
+
+    it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
+      cy.on('fail', (err) => {
+        expect(lastLog.get('error')).to.eq(err)
+        expect(lastLog.get('state')).to.eq('failed')
+        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
+
+        done()
+      })
+
+      cy.session('sessions-not-enabled')
+    })
+
+    it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalSessionAndOrigin: false }, (done) => {
+      Cypress.config('experimentalSessionSupport', true)
+
+      cy.on('fail', (err) => {
+        Cypress.config('experimentalSessionSupport', false)
+        expect(lastLog.get('error')).to.eq(err)
+        expect(lastLog.get('state')).to.eq('failed')
+        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
+        done()
+      })
+
+      cy.session('sessions-not-enabled')
     })
 
     it('throws when sessionId argument was not provided', function (done) {
@@ -169,18 +214,29 @@ describe('cy.session', () => {
       cy.session('some-session')
     })
 
-    it('throws when sessionId is duplicated with different setup functions', function (done) {
+    it('throws when multiple session calls with same sessionId but different options', function (done) {
       cy.on('fail', (err) => {
         expect(lastLog.get('error')).to.eq(err)
         expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('You may not call `cy.session()` with a previously used name and different options. If you want to specify different options, please use a unique name other than **some-session**.')
+        expect(err.message).to.eq('You may not call `cy.session()` with a previously used name and different options. If you want to specify different options, please use a unique name other than **duplicate-session**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
+
+        expectCurrentSessionData({
+          localStorage: [{ origin: baseUrl, value: { one: 'value' } }],
+        })
 
         done()
       })
 
-      cy.session('some-session', () => true)
-      cy.session('some-session', () => false)
+      cy.session('duplicate-session', () => {
+        // function content
+        window.localStorage.one = 'value'
+      })
+
+      cy.session('duplicate-session', () => {
+        // different function content
+        window.localStorage.two = 'value'
+      })
     })
   })
 })

@@ -24,10 +24,7 @@ before(() => {
 })
 
 const sessionUser = (name = 'user0') => {
-  console.log('session User')
-
   return cy.session(name, () => {
-    console.log('cyvisit')
     cy.visit(`https://localhost:4466/cross_origin_iframe/${name}`)
     cy.window().then((win) => {
       win.localStorage.username = name
@@ -131,29 +128,6 @@ describe('cross origin automations', function () {
   })
 })
 
-describe('args', () => {
-  it('accepts string or object as id', () => {
-    cy.session('some-name', () => {})
-    cy.session({ name: 'some-name', zkey: 'val' }, () => {})
-  })
-
-  it('uses sorted stringify and rejects duplicate registrations', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).contain('previously used name')
-      expect(err.message).contain('{"key":"val"')
-      done()
-    })
-
-    cy.session({ name: 'bob', key: 'val' }, () => {
-      // foo
-    })
-
-    cy.session({ key: 'val', name: 'bob' }, () => {
-      // bar
-    })
-  })
-})
-
 describe('with a blank session', () => {
   beforeEach(() => {
     cy.session('sess1',
@@ -181,7 +155,6 @@ describe('with a blank session', () => {
 
     expectCurrentSessionData({
       cookies: ['/form'],
-
     })
   })
 })
@@ -757,80 +730,6 @@ describe('ignores setting insecure context data when on secure context', () => {
     it('clears only secure context data - 2/2', () => {
       top.logSpy = logSpy
       expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
-    })
-  })
-})
-
-describe('errors', () => {
-  it('throws error when experimentalSessionAndOrigin not enabled', { experimentalSessionAndOrigin: false }, (done) => {
-    cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag')
-      done()
-    })
-
-    cy.session('sessions-not-enabled')
-  })
-
-  it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
-    cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-      done()
-    })
-
-    cy.session('sessions-not-enabled')
-  })
-
-  it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalSessionAndOrigin: false }, (done) => {
-    Cypress.config('experimentalSessionSupport', true)
-
-    cy.on('fail', ({ message }) => {
-      expect(message).contain('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-      done()
-    })
-
-    cy.session('sessions-not-enabled')
-  })
-
-  it('throws if session has not been defined during current test', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message)
-      .contain('session')
-      .contain('No session is defined with')
-      .contain('**bob**')
-
-      expect(err.docsUrl).eq('https://on.cypress.io/session')
-      expect(err.codeFrame.frame, 'has accurate codeframe').contain('session')
-
-      done()
-    })
-
-    cy.session('bob')
-  })
-
-  it('throws if multiple session calls with same name but different options', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message)
-      expect(err.message).contain('previously used name')
-      .contain('**duplicate-session**')
-
-      expect(err.docsUrl).eq('https://on.cypress.io/session')
-      expect(err.codeFrame.frame, 'has accurate codeframe').contain('session')
-
-      done()
-    })
-
-    cy.session('duplicate-session', () => {
-      // function content
-      window.localStorage.one = 'value'
-    })
-
-    cy.session('duplicate-session', () => {
-      // different function content
-      window.localStorage.two = 'value'
-    })
-
-    expectCurrentSessionData({
-      localStorage: [{ origin: 'https://localhost:4466', value: { two: 'value' } }],
     })
   })
 })
