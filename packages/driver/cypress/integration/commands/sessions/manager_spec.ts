@@ -204,7 +204,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
   })
 
-  // TODO
+  // TODO:
   describe('._setStorageOnOrigins()', () => {})
 
   it('.getAllHtmlOrigins()', async () => {
@@ -279,7 +279,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(window.sessionStorage).of.have.lengthOf(0)
     })
 
-    // TODO
+    // TODO:
     describe('sessions.setSessionData', () => {})
 
     it('sessions.getCookies()', async () => {
@@ -343,13 +343,13 @@ describe('src/cy/commands/sessions/manager.ts', () => {
       expect(cypressSpy).to.be.calledOnceWith('get:session', 'session_1')
     })
 
-    // TODO
+    // TODO:
     describe('sessions.getStorage', () => {})
 
-    // TODO
+    // TODO:
     describe('sessions.clearStorage', () => {})
 
-    // TODO
+    // TODO:
     describe('sessions.setStorage', () => {})
   })
 })
