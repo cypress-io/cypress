@@ -266,15 +266,7 @@ export class OpenProject {
     })
 
     try {
-      const cfg = await this.projectBase.initializeConfig()
-
-      await this._ctx.actions.project.setSpecsFoundBySpecPattern({
-        path,
-        testingType,
-        specPattern: options.spec || cfg.specPattern,
-        excludeSpecPattern: cfg.excludeSpecPattern,
-        additionalIgnorePattern: cfg.additionalIgnorePattern,
-      })
+      await this.projectBase.initializeConfig()
 
       await this.projectBase.open()
     } catch (err: any) {

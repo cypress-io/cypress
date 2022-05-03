@@ -156,9 +156,6 @@ type CloudProject implements Node {
 
   """Unique identifier for a Project"""
   slug: String!
-
-  """List of specs in the project."""
-  specs(specPaths: [String!]): [CloudProjectSpecs]
 }
 
 type CloudProjectConnection {
@@ -194,7 +191,26 @@ union CloudProjectResult = CloudProject | CloudProjectNotFound | CloudProjectUna
 
 type CloudProjectSpecs {
   averageDuration: Float
-  recentRuns: [CloudRun]
+  isConsideredFlaky(
+    """The branch to measure flakiness against"""
+    fromBranch: String!
+  ): Boolean
+  runs(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """The branch to filter on for the specs"""
+    fromBranch: String!
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): CloudRunConnection
   specHash: String
   specPath: String
 }
@@ -222,10 +238,12 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
+  completedAt: DateTime
   createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+  runNumber: Int
   status: CloudRunStatus
 
   """
@@ -457,6 +475,9 @@ type CurrentProject implements Node & ProjectLike {
   """Project saved state"""
   savedState: JSON
 
+  """base64 encoded config used on the runner page"""
+  serveConfig: JSON!
+
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
   title: String!
@@ -520,6 +541,7 @@ enum ErrorTypeEnum {
   CHROME_WEB_SECURITY_NOT_SUPPORTED
   COMPONENT_FOLDER_REMOVED
   CONFIG_FILES_LANGUAGE_CONFLICT
+  CONFIG_FILE_DEV_SERVER_INVALID_RETURN
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID
   CONFIG_FILE_INVALID_DEV_START_EVENT
   CONFIG_FILE_INVALID_ROOT_CONFIG
@@ -1171,6 +1193,32 @@ type Query {
     slugs: [String!]!
   ): [CloudProjectResult]
 
+  """
+  Poll this query to determine when it's required to refresh run data for a given spec or branch
+  """
+  cloudShouldRequestNewSpecData(
+    """Clients active branch to search for builds"""
+    commitBranch: String!
+
+    """A list of Project slugs"""
+    projectSlug: String!
+
+    """Datetime since the fetched data"""
+    sinceDateTime: DateTime!
+
+    """The spec paths we want to test for"""
+    specPaths: [String!]
+  ): Boolean
+
+  """Gets a set of specs on a given project and branch"""
+  cloudSpecsByPath(
+    """Slug of the project to which the set of specs belong"""
+    projectSlug: String!
+
+    """A set of specs to include identified by spec path"""
+    specPaths: [String!]!
+  ): [CloudProjectSpecs]
+
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
@@ -1276,6 +1324,9 @@ type Subscription {
   Triggered when there is a change to the info associated with the cloud project (org added, project added)
   """
   cloudViewerChange: Query
+
+  """Issued when cypress.config.js is re-executed due to a change"""
+  configChange: CurrentProject
 
   """Issued for internal development changes"""
   devChange: DevState

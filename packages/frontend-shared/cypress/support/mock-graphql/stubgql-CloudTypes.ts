@@ -165,6 +165,8 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     totalDuration: 300,
     url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date('1995-12-17T03:17:00').toISOString(),
+    completedAt: new Date('1995-12-17T03:17:00').toISOString(),
+    runNumber: 1,
     ...config,
   }
 

@@ -207,7 +207,7 @@ export const WIZARD_FRAMEWORKS = [
     type: 'nuxtjs',
     configFramework: 'nuxt',
     category: 'template',
-    name: 'Nuxt.js',
+    name: 'Nuxt.js (v2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
     supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
     dependencies: (bundler: WizardBundler, projectPath: string): DependencyToInstall[] => {
@@ -220,7 +220,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
-    supportStatus: 'full',
+    supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {

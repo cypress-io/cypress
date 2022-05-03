@@ -112,7 +112,7 @@
           <template #latest-runs>
             <RunStatusDots
               v-if="row.data.isLeaf"
-              :runs="row.data.data?.runInfo?.recentRuns ?? testingRuns"
+              :runs="row.data.data?.runInfo?.runs?.nodes ?? testingRuns"
             />
           </template>
         </SpecsListRowItem>
@@ -135,10 +135,10 @@ import RunStatusDots from './RunStatusDots.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import { Specs_SpecsListFragment, SpecListRowFragment, SpecsList_GitInfoUpdatedDocument } from '../generated/graphql'
+import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
-import type { FuzzyFoundSpec, SpecsComparator } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -224,9 +224,9 @@ const props = defineProps<{
 }>()
 
 const testingRuns: CloudRun[] = [
-  { id: '4', status: 'RUNNING' },
-  { id: '3', status: 'PASSED' },
-  { id: '2', status: 'FAILED' },
+  { id: '4', status: 'RUNNING', completedAt: new Date('2022-04-17T03:17:00').toISOString() },
+  { id: '3', status: 'PASSED', completedAt: new Date('2022-04-17T03:17:00').toISOString() },
+  { id: '2', status: 'FAILED', completedAt: new Date('2022-04-17T03:17:00').toISOString() },
 ]
 
 const emit = defineEmits<{
@@ -237,23 +237,8 @@ const showSpecPatternModal = ref(false)
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 
-const compareGitInfo: SpecsComparator<{ absolute: string, gitInfo: any }> = (curr, prev) => {
-  for (let i = 0; i < curr.length; i++) {
-    if (!prev[i]) {
-      return true
-    }
-
-    if (JSON.stringify(curr[i].gitInfo) !== JSON.stringify(prev[i].gitInfo)) {
-      return true
-    }
-  }
-
-  return false
-}
-
 const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
-  compareGitInfo,
 )
 
 const search = ref('')
@@ -286,7 +271,7 @@ const specs = computed(() => {
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
-    buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment } & {runInfo: CloudProjectSpecs} >(specs.value), { dropRoot: true },
+    buildSpecTree<FuzzyFoundSpec<SpecsListFragment & {runInfo: CloudProjectSpecs}>>(specs.value), { dropRoot: true },
   )
 })
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
