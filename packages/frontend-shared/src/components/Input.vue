@@ -24,6 +24,7 @@
         </span>
       </div>
       <input
+        ref="input"
         v-model="localValue"
         :style="style"
         :type="type"

@@ -17,6 +17,7 @@
       <p>{{ t('specPage.noSpecErrorExplainer') }}</p>
     </Alert>
     <SpecsListHeader
+      ref="specsListHeader"
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
@@ -221,11 +222,13 @@ const cachedSpecs = useCachedSpecs(
   compareGitInfo,
 )
 
+const specsListHeader = ref('')
 const search = ref('')
 const debouncedSearchString = useDebounce(search, 200)
 
 function handleClear () {
   search.value = ''
+  specsListHeader.value.$refs.customInput.$refs.input.focus()
 }
 
 const specs = computed(() => {
