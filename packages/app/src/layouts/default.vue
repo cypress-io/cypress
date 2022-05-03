@@ -95,7 +95,19 @@ subscription CheckBaseError {
 }
 `
 
-useSubscription({ query: CheckBaseErrorDocument })
+const isRunMode = window.__CYPRESS_MODE__ === 'run'
+
+// subscriptions are used to trigger live updates without
+// reloading the page.
+// this is only useful in open mode - in run mode, we don't
+// use GraphQL, so we pause the
+// subscriptions so they never execute.
+const shouldPauseSubscriptions = isRunMode && window.top === window
+
+useSubscription({
+  query: CheckBaseErrorDocument,
+  pause: shouldPauseSubscriptions,
+})
 
 const query = useQuery({ query: MainAppQueryDocument })
 const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
