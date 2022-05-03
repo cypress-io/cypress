@@ -1,4 +1,4 @@
-Cypress.config('experimentalSessionSupport', true)
+Cypress.config('experimentalSessionAndOrigin', true)
 
 const stub = Cypress.sinon.stub().callsFake(() => {
   // The validation for t3 will fail, causing the
