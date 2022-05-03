@@ -1,11 +1,9 @@
 require('graceful-fs').gracefulify(require('fs'))
-const fs = require('fs-extra')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
-const path = require('path')
 
 let tsRegistered = false
 
@@ -21,19 +19,6 @@ function run (ipc, file, projectRoot) {
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
-  }
-
-  let isProjectECMAScript = false
-
-  try {
-    // Find the suggested framework, starting with meta-frameworks first
-    const packageJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
-
-    if (packageJson.type === 'module') {
-      isProjectECMAScript = true
-    }
-  } catch {
-    // No need to handle. If there's no package.json (in testing), we assume this is not ECMAScript
   }
 
   if (!tsRegistered) {
@@ -105,7 +90,7 @@ function run (ipc, file, projectRoot) {
 
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
-  const loadConfig = async (configFile) => {
+  const loadFile = async (file) => {
     // 1. Try loading the configFile
     // 2. Catch the "ERR_REQUIRE_ESM" error
     // 3. Check if esbuild is installed
@@ -114,7 +99,7 @@ function run (ipc, file, projectRoot) {
     // 4. Use node's dynamic import to import the configFile
 
     try {
-      return require(configFile)
+      return require(file)
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
@@ -131,14 +116,14 @@ function run (ipc, file, projectRoot) {
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
 
-      return (await bundleRequire({ filepath: configFile })).mod
+      return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
       if (err.stack.includes(`Cannot find package 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
         // Certain modules cannot be dynamically imported
-        return await import(configFile)
+        return await import(file)
       }
 
       throw err
@@ -148,7 +133,7 @@ function run (ipc, file, projectRoot) {
   ipc.on('loadConfig', async () => {
     try {
       debug('try loading', file)
-      const configFileExport = await loadConfig(file)
+      const configFileExport = await loadFile(file)
 
       debug('loaded config file', file)
       const result = configFileExport.default || configFileExport
@@ -253,7 +238,7 @@ function run (ipc, file, projectRoot) {
 
   ipc.on('loadLegacyPlugins', async (legacyConfig) => {
     try {
-      let legacyPlugins = isProjectECMAScript ? import(file) : require(file)
+      let legacyPlugins = await loadFile(file)
 
       if (legacyPlugins && typeof legacyPlugins.default === 'function') {
         legacyPlugins = legacyPlugins.default
