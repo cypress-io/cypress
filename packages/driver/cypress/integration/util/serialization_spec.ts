@@ -408,7 +408,7 @@ describe('Log Serialization', () => {
     expect($el[0].id).to.equal('button-inside-a')
     expect($el[0].textContent).to.equal('click button')
 
-    // most of the consoleProps logic is tested in the e2e/multi-domain folder. focus in this test will be mostly snapshot serialization
+    // most of the consoleProps logic is tested in the e2e/commands/origin folder. focus in this test will be mostly snapshot serialization
     expect(consoleProps['Applied To']).to.be.instanceOf(HTMLFormElement)
     expect(consoleProps['Applied To']).to.have.property('id').that.equals('button-inside-a')
     expect(consoleProps['Applied To']).to.have.property('textContent').that.equals('click button')
