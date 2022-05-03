@@ -394,30 +394,30 @@ describe('lib/browsers/chrome', () => {
           },
         }
 
-        this.criClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
+        this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
       it('does not listen to Fetch.requestPaused if experimental flag is off', async function () {
         await chrome.open('chrome', 'http://', { experimentalSessionAndOrigin: false }, this.automation)
 
-        expect(this.criClient.on).not.to.be.calledWith('Fetch.requestPaused')
+        expect(this.pageCriClient.on).not.to.be.calledWith('Fetch.requestPaused')
       })
 
       it('sends Fetch.enable', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
-        expect(this.criClient.send).to.have.been.calledWith('Fetch.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
       })
 
       it('does not add header when not a document', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
-        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+        this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
           requestId: '1234',
           resourceType: 'Script',
         })
 
-        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
           requestId: '1234',
         })
       })
@@ -425,9 +425,9 @@ describe('lib/browsers/chrome', () => {
       it('does not add header when it is a spec frame request', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
-        this.criClient.on.withArgs('Page.frameAttached').yield()
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
-        await this.criClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
           frameId: 'spec-frame-id',
           requestId: '1234',
           resourceType: 'Document',
@@ -436,7 +436,7 @@ describe('lib/browsers/chrome', () => {
           },
         })
 
-        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
           requestId: '1234',
         })
       })
@@ -444,9 +444,9 @@ describe('lib/browsers/chrome', () => {
       it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
-        this.criClient.on.withArgs('Page.frameAttached').yield()
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
-        await this.criClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
           frameId: 'aut-frame-id',
           requestId: '1234',
           resourceType: 'Document',
@@ -458,7 +458,7 @@ describe('lib/browsers/chrome', () => {
           },
         })
 
-        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
           requestId: '1234',
           headers: [
             {
@@ -476,17 +476,17 @@ describe('lib/browsers/chrome', () => {
       it('gets frame tree on Page.frameAttached', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
-        this.criClient.on.withArgs('Page.frameAttached').yield()
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
-        expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
+        expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
       })
 
       it('gets frame tree on Page.frameDetached', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
-        this.criClient.on.withArgs('Page.frameDetached').yield()
+        this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 
-        expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
+        expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
       })
     })
   })
