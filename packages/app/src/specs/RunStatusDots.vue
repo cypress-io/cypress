@@ -28,8 +28,8 @@
 
 <script setup lang="ts">
 
-import type { CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
-import { computed} from 'vue'
+import type { CloudRun } from '../../../graphql/src/gen/cloud-source-types.gen'
+import { computed } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -43,20 +43,22 @@ const props = withDefaults(defineProps<{
   runs: Maybe<CloudRun>[]
 }>(), { runs: () => [] })
 
-const dotClasses = computed(()=>{
-  const statuses = ['placeholder','placeholder','placeholder']
-  if(props.runs && props.runs.length>0){
-    for (let i = 1; i < Math.min(props.runs.length,4); i++) {
-      statuses[i-1] = props.runs[i]?.status??"";
+const dotClasses = computed(() => {
+  const statuses = ['placeholder', 'placeholder', 'placeholder']
+
+  if (props.runs && props.runs.length > 0) {
+    for (let i = 1; i < Math.min(props.runs.length, 4); i++) {
+      statuses[i - 1] = props.runs[i]?.status ?? ''
     }
   }
-  return statuses.reverse().map(s=> {
-    switch(s){
-      case 'PASSED': 
+
+  return statuses.reverse().map((s) => {
+    switch (s) {
+      case 'PASSED':
         return 'icon-light-jade-400'
       case 'RUNNING':
         return 'icon-light-indigo-400'
-      case 'FAILED': 
+      case 'FAILED':
         return 'icon-light-red-400'
       case 'ERRORED':
       case 'OVERLIMIT':
@@ -65,31 +67,33 @@ const dotClasses = computed(()=>{
       case 'NOTESTS':
         return 'icon-light-gray-400'
       case 'CANCELLED':
-      default: 
+      default:
         return 'icon-light-gray-300'
     }
   })
 })
 
-const latestStatus = computed(()=>{
-  if(props.runs == null || props.runs.length===0 || props.runs[0] === null)
-    return {icon: PlaceholderIcon, spin: false}
-  switch(props.runs[0]?.status){
-    case 'PASSED': 
-      return {icon: PassedIcon, spin: false}
+const latestStatus = computed(() => {
+  if (props.runs == null || props.runs.length === 0 || props.runs[0] === null) {
+    return { icon: PlaceholderIcon, spin: false }
+  }
+
+  switch (props.runs[0]?.status) {
+    case 'PASSED':
+      return { icon: PassedIcon, spin: false }
     case 'RUNNING':
-      return {icon: RunningIcon, spin: true}
-    case 'FAILED': 
-      return {icon: FailedIcon, spin: false}
+      return { icon: RunningIcon, spin: true }
+    case 'FAILED':
+      return { icon: FailedIcon, spin: false }
     case 'ERRORED':
     case 'OVERLIMIT':
     case 'TIMEDOUT':
-      return {icon: ErroredIcon, spin: false}
+      return { icon: ErroredIcon, spin: false }
     case 'NOTESTS':
     case 'CANCELLED':
-      return {icon: CancelledIcon, spin: false}
-    default: 
-      return {icon: PlaceholderIcon, spin: false}
+      return { icon: CancelledIcon, spin: false }
+    default:
+      return { icon: PlaceholderIcon, spin: false }
   }
 })
 

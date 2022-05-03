@@ -108,7 +108,7 @@
               :gql="row.data.data.gitInfo"
             />
           </template>
-          
+
           <template #latest-runs>
             <RunStatusDots
               v-if="row.data.isLeaf"
@@ -150,7 +150,7 @@ import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useRoute } from 'vue-router'
-import type { CloudProjectSpecs, CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
+import type { CloudProjectSpecs, CloudRun } from '../../../graphql/src/gen/cloud-source-types.gen'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -183,7 +183,6 @@ fragment SpecsList on Spec {
   }
 }
 `
-
 
 // gql`
 // fragment CloudSpecData on CloudProject {
@@ -225,10 +224,10 @@ const props = defineProps<{
 }>()
 
 const testingRuns: CloudRun[] = [
-  { id: "4", status: "RUNNING"},
-  { id: "3", status: "PASSED"},
-  { id: "2", status: "FAILED"},
-];
+  { id: '4', status: 'RUNNING' },
+  { id: '3', status: 'PASSED' },
+  { id: '2', status: 'FAILED' },
+]
 
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
@@ -267,6 +266,7 @@ function handleClear () {
 const specs = computed(() => {
   const specs2 = cachedSpecs.value.map((x) => {
     const s = makeFuzzyFoundSpec(x)
+
     // if(props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'){
     //   const runInfo = props.gql.currentProject?.cloudProject?.specs?.find(ss=>ss?.specPath === s.name)
     //   return {
