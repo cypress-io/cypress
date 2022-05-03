@@ -1257,6 +1257,9 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
+  """Triggered when the base error state changes"""
+  baseErrorChange: Query
+
   """Issued when the current branch of a project changes"""
   branchChange: CurrentProject
 
