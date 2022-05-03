@@ -382,9 +382,9 @@
         "name": "Interactive Run Events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
       },
-      "experimentalSessionSupport": {
-        "name": "Session",
-        "description": "Enable use of [`cy.session()`](https://on.cypress.io/session) and new behavior to handle caching and restoring cookies, localStorage, and sessionStorage."
+      "experimentalSessionAndOrigin": {
+        "name": "Cross-origin and Session",
+        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands. See https://on.cypress.io/origin and https://on.cypress.io/session."
       },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",

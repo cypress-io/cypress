@@ -179,10 +179,15 @@ describe('App: Settings', () => {
           })
         })
 
-        cy.get('[data-cy="experiment-experimentalSessionSupport"]').within(() => {
+        cy.get('[data-cy="experiment-experimentalSessionAndOrigin"]').within(() => {
           cy.validateExternalLink({
             name: 'cy.session()',
             href: 'https://on.cypress.io/session',
+          })
+
+          cy.validateExternalLink({
+            name: 'cy.origin()',
+            href: 'https://on.cypress.io/origin',
           })
         })
 
