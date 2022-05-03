@@ -1653,16 +1653,17 @@ export default {
     validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}',
     },
-    experimentNotEnabled (experimentalSessionSupport) {
+    experimentNotEnabled ({ experimentalSessionSupport }) {
       if (experimentalSessionSupport) {
         return {
           message: stripIndent`
           ${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.`,
+          docsUrl: 'https://on.cypress.io/session',
         }
       }
 
       return {
-        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag`,
+        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag.`,
         docsUrl: 'https://on.cypress.io/session',
       }
     },
