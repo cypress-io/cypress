@@ -219,6 +219,7 @@ export class ProjectLifecycleManager {
         this._cachedInitialConfig = initialConfig
 
         this.ctx.emitter.toLaunchpad()
+        this.ctx.emitter.toApp()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
         if (this._currentTestingType && finalConfig.specPattern) {
@@ -305,6 +306,7 @@ export class ProjectLifecycleManager {
 
     // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
     this.ctx.emitter.toLaunchpad()
+    this.ctx.emitter.toApp()
 
     await this.initializeConfig()
 
