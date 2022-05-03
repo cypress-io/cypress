@@ -12,6 +12,17 @@ const validateSessionsInstrumentPanel = (sessionIds = []) => {
   })
 }
 
+const validateNewSessionGroup = () => {
+  cy.contains('Create New Session')
+  .closest('.command')
+  .contains('runSetup')
+
+  cy.contains('Create New Session')
+  .closest('.command')
+  .find('.command-name-Clear-Page')
+  .should('have.length', 2)
+}
+
 describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeight: 1000 }, () => {
   it('creates new session', () => {
     runIsolatedCypress(() => {
@@ -73,9 +84,8 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       .should('contain', '(new) blank_session')
 
       cy.get('.command-name-session').contains('blank_session')
-      cy.contains('Create New Session')
-      .closest('.command')
-      .contains('runSetup')
+
+      validateNewSessionGroup()
     })
 
     cy.percySnapshot()
@@ -116,12 +126,9 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       .should('contain', '(new) blank_session')
 
       cy.get('.command-name-session').contains('blank_session')
-      cy.contains('Create New Session')
-      .closest('.command')
-      .contains('runSetup')
-    })
 
-    cy.contains('Validate Session')
+      validateNewSessionGroup()
+    })
 
     // FIXME: this should be nested within the session command
     // FIXME: this should be Validate Session: invalid
@@ -135,172 +142,249 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
     cy.percySnapshot()
   })
 
-  // it('restores saved session', () => {
-  //   runIsolatedCypress(() => {
-  //     const stub = Cypress.sinon.stub().callsFake(() => {
-  //       console.log(stub.callCount)
-  //       if (stub.callCount === 3 || stub.callCount === 5 || stub.callCount === 6) {
-  //         throw new Error('false')
+  it('restores saved session', () => {
+    runIsolatedCypress(() => {
+      let setupFn
+      let validateFn
 
-  //         return false
-  //       }
-  //     })
+      before(() => {
+        setupFn = cy.stub().as('runSetup')
+        validateFn = cy.stub().as('runValidation')
+      })
 
-  //     beforeEach(() => {
-  //       cy.session('user1', () => {
-  //         window.localStorage.foo = 'val'
-  //       }, {
-  //         validate: stub,
-  //       })
-  //     })
+      it('t1', () => {
+        cy.session('user1', setupFn, {
+          validate: validateFn,
+        })
 
-  //     it('t1', () => {
-  //       expect(true).to.be.true
-  //       // expect(window.localStorage.foo).to.eq('val')
-  //     })
+        cy.log('after')
+      })
 
-  //     it('t2', () => {
-  //       expect(window.localStorage.foo).to.eq('val')
-  //     })
+      it('t2', () => {
+        cy.session('user1', setupFn, {
+          validate: validateFn,
+        })
 
-  //     it('t3', () => {
-  //       expect(window.localStorage.foo).to.eq('val')
-  //     })
+        cy.log('after')
+      })
+    })
 
-  //     it('t4', () => {
-  //       expect(window.localStorage.foo).to.eq('val')
-  //     })
-  //   })
+    cy.get('.test').each(($el) => cy.wrap($el).click())
 
-  //   cy.get('.test').each(($el) => cy.wrap($el).click())
-  //   cy.get('.test').eq(0).within(() => {
-  //     validateSessionsInstrumentPanel(['blank_session'])
-  //   })
+    cy.log('validate new session was created in first test')
+    cy.get('.test').eq(0).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
+      validateNewSessionGroup()
+    })
 
-  //   // cy.log('validating new session was created')
-  //   // cy.get('.test').eq(0).within(() => {
-  //   //   cy.get('.sessions-container')
-  //   //   .should('contain', 'Sessions (1)')
-  //   //   .click()
-  //   //   .should('contain', 'user1')
+    cy.log('validate saved session was used in second test')
+    cy.get('.test').eq(1).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
 
-  //   //   cy.get('.command-name-session')
-  //   //   .first()
-  //   //   .find('i.successful')
-  //   //   .siblings()
-  //   //   .should('contain', '(new) user1')
+      cy.get('.command-name-session')
+      .first()
+      .within(() => {
+        cy.get('i.pending').siblings().should('contain', '(saved) user1')
 
-  //   //   cy.get('.command-name-session')
-  //   //   .last()
-  //   //   .contains('user1')
-  //   //   .click()
+        cy.get('.command-name-session').contains('user1')
 
-  //   //   cy.get('.command-name-assert')
-  //   //   .should('have.class', 'command-state-passed')
-  //   // })
+        cy.contains('Restore Saved Session')
+        .closest('.command')
+        .contains('Clear Page')
+        .should('have.length', 1)
 
-  //   // cy.log('validating previous session was used')
-  //   // cy.get('.test').eq(1).within(() => {
-  //   //   cy.get('.sessions-container')
-  //   //   .should('contain', 'Sessions (1)')
-  //   //   .click()
-  //   //   .should('contain', 'user1')
+        cy.contains('Restore Saved Session')
+        .closest('.command')
+        .contains('runSetup')
+        .should('not.exist')
 
-  //   //   cy.get('.command-name-session')
-  //   //   .first()
-  //   //   .find('i.pending')
-  //   //   .siblings()
-  //   //   .should('contain', '(saved) user1')
+        cy.contains('Validate Session: valid')
+        .closest('.command')
+        // FIXME: this validation group does not align with the
+        // with Create New Session's validation group behavior
+        // should be 'not.have.class' to align
+        .should('have.class', 'command-is-open')
+        .contains('runValidation')
+      })
 
-  //   //   cy.get('.command-name-session')
-  //   //   .last()
-  //   //   .contains('user1')
-  //   // })
+      cy.get('.command-name-session').first().click('top')
 
-  //   // cy.log('validating session was recreated after it failed to verify')
-  //   // cy.get('.test').eq(2).within(() => {
-  //   //   cy.get('.sessions-container')
-  //   //   .should('contain', 'Sessions (1)')
-  //   //   .click()
-  //   //   .should('contain', 'user1')
+      cy.get('.command').should('have.length', 2)
+    })
+  })
 
-  //   //   cy.get('.command-name-session')
-  //   //   .first()
-  //   //   .find('i.bad')
-  //   //   .siblings()
-  //   //   .should('contain', '(recreated) user1')
+  it('recreates session', () => {
+    runIsolatedCypress(() => {
+      let setupFn
+      let validateFn
 
-  //   //   cy.get('.command-name-session')
-  //   //   .last()
-  //   //   .contains('user1')
-  //   // })
+      before(() => {
+        setupFn = cy.stub().as('runSetup')
+        validateFn = cy.stub().callsFake(() => {
+          if (validateFn.callCount === 2) {
+            return false
+          }
+        }).as('runValidation')
+      })
 
-  //   // cy.percySnapshot()
-  // })
+      it('t1', () => {
+        cy.session('user1', setupFn, {
+          validate: validateFn,
+        })
 
-  // it('recreated session', () => {
-  //   runIsolatedCypress(() => {
-  //     const stub = Cypress.sinon.stub().callsFake(() => {
-  //       console.log(stub.callCount)
-  //       if (stub.callCount === 3 || stub.callCount === 5 || stub.callCount === 6) {
-  //         throw new Error('false')
+        cy.log('after')
+      })
 
-  //         return false
-  //       }
-  //     })
+      it('t2', () => {
+        cy.session('user1', setupFn, {
+          validate: validateFn,
+        })
 
-  //     beforeEach(() => {
+        cy.log('after')
+      })
+    })
 
-  //     })
+    cy.get('.test').each(($el) => cy.wrap($el).click())
 
-  //     it('t1', () => {
-  //       cy.session('user1', () => {
-  //         window.localStorage.foo = 'val'
-  //       })
+    cy.log('validate new session was created in first test')
+    cy.get('.test').eq(0).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
 
-  //       cy.session('user1')
-  //       cy.session('user2')
-  //     })
+      cy.contains('Create New Session')
+    })
 
-  //     it('t2', () => {
-  //       expect(window.localStorage.foo).to.eq('val')
-  //     })
-  //   })
+    cy.log('validate saved session was used in second test')
+    cy.get('.test').eq(1).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
 
-  //   cy.get('.test').each(($el) => cy.wrap($el).click())
-  // })
+      cy.get('.command-name-session')
+      .first()
+      .within(() => {
+        cy.get('i.bad').siblings().should('contain', '(recreated) user1')
 
-  // it('recreated session and fails validation', () => {
-  //   runIsolatedCypress(() => {
-  //     const stub = Cypress.sinon.stub().callsFake(() => {
-  //       console.log(stub.callCount)
-  //       if (stub.callCount === 3 || stub.callCount === 5 || stub.callCount === 6) {
-  //         throw new Error('false')
+        cy.get('.command-name-session').contains('user1')
 
-  //         return false
-  //       }
-  //     })
+        cy.contains('Restore Saved Session')
+        .closest('.command')
+        .contains('Clear Page')
+        .should('have.length', 1)
 
-  //     beforeEach(() => {
+        cy.contains('Restore Saved Session')
+        .closest('.command')
+        .contains('runSetup')
+        .should('not.exist')
 
-  //     })
+        cy.contains('Validate Session: invalid')
 
-  //     it('t1', () => {
-  //       cy.session('user1', () => {
-  //         window.localStorage.foo = 'val'
-  //       })
+        cy.contains('Create New Session')
+        .closest('.command')
+        .should('have.class', 'command-is-open')
 
-  //       cy.session('user1')
-  //       cy.session('user2')
-  //     })
+        cy.contains('Validate Session: valid')
+        .closest('.command')
+        // FIXME: this validation group does not align with the
+        // with Create New Session's validation group behavior
+        // should be 'not.have.class' to align
+        .should('have.class', 'command-is-open')
+        .contains('runValidation')
+      })
+      .percySnapshot()
 
-  //     it('t2', () => {
-  //       expect(window.localStorage.foo).to.eq('val')
-  //     })
-  //   })
+      cy.get('.runnable-err').should('have.length', 1)
 
-  //   cy.get('.test').each(($el) => cy.wrap($el).click())
-  // })
+      cy.get('.command-name-session').first().click('top')
+
+      cy.get('.command').should('have.length', 2)
+    })
+  })
+
+  it('recreated session and fails validation', () => {
+    runIsolatedCypress(() => {
+      let setupFn
+      let validateFn
+
+      before(() => {
+        setupFn = cy.stub().as('runSetup')
+        validateFn = cy.stub().callsFake(() => {
+          if (validateFn.callCount >= 2) {
+            return false
+          }
+        }).as('runValidation')
+      })
+
+      it('t1', () => {
+        cy.session('user1', setupFn, {
+          validate: validateFn,
+        })
+
+        cy.log('after')
+      })
+
+      it('t2', () => {
+        cy.session('user1', setupFn, {
+          validate: validateFn,
+        })
+
+        cy.log('after')
+      })
+    })
+
+    cy.get('.test').each(($el) => cy.wrap($el).click())
+
+    cy.log('validate new session was created in first test')
+    cy.get('.test').eq(0).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
+
+      cy.contains('Create New Session')
+    })
+
+    cy.log('validate saved session was used in second test')
+    cy.get('.test').eq(1).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
+
+      cy.get('.command-name-session')
+      .first()
+      .within(() => {
+        cy.get('i.bad').siblings().should('contain', '(recreated) user1')
+
+        cy.get('.command-name-session').contains('user1')
+
+        cy.contains('Restore Saved Session')
+        .closest('.command')
+        .contains('Clear Page')
+        .should('have.length', 1)
+
+        cy.contains('Restore Saved Session')
+        .closest('.command')
+        .contains('runSetup')
+        .should('not.exist')
+
+        cy.contains('Validate Session: invalid')
+
+        // FIXME: this validation group should say 'Validate Session: valid'
+        cy.contains('Validate Session')
+        .closest('.command')
+        // FIXME: this validation group does not align with the
+        // with Create New Session's validation group behavior
+        //' should be 'not.have.class' to align
+        .should('have.class', 'command-is-open')
+        .contains('runValidation')
+      })
+      .percySnapshot()
+
+      cy.contains('Create New Session')
+      .closest('.command')
+      // FIXME: this 'Create New Session' group's collapsed behavior
+      // does not align with behavior observed in other 'Create New Session'
+      // groups should be 'not.have.class' to align
+      .should('not.have.class', 'command-is-open')
+      .click()
+
+      validateNewSessionGroup()
+
+      cy.get('.runnable-err').should('have.length', 2)
+    })
+  })
 
   it('multiple sessions in a test', () => {
     runIsolatedCypress(() => {
