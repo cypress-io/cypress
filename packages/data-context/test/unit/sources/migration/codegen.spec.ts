@@ -31,6 +31,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: false,
       projectRoot,
       hasTypescript: false,
+      isProjectECMAScript: false,
     })
 
     snapshot(generatedConfig)
