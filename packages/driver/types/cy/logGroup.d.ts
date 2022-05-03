@@ -1,15 +1,13 @@
 // The type declarations for Cypress Log Group & the corresponding configuration permutations
 declare namespace Cypress {
   declare namespace LogGroup {
-    type ApiCallback = (log: Cypress.Log) => Chainable<S> | void
+    type ApiCallback = (log: Cypress.Log) => Chainable<S>
     type LogGroup = (cypress: Cypress.Cypress, options: Partial<LogGroupConfig>, callback: LogGroupCallback) => Chainable<S>
 
     interface Config {
       // the JQuery element for the command. This will highlight the command
       // in the main window when debugging
       $el?: JQuery
-    // whether or not the generated log was an event or command
-      event?: boolean
       // whether or not to emit a log to the UI
       // when disabled, child logs will not be nested in the UI
       log?: boolean
