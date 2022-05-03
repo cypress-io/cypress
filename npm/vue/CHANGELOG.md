@@ -1,3 +1,10 @@
+# [@cypress/vue-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.1...@cypress/vue-v3.1.2) (2022-05-03)
+
+
+### Bug Fixes
+
+* head content reset, fix [#19721](https://github.com/cypress-io/cypress/issues/19721) ([#21291](https://github.com/cypress-io/cypress/issues/21291)) ([77ab6a5](https://github.com/cypress-io/cypress/commit/77ab6a51a0de1929171a2275e9cec9580c57241d))
+
 # [@cypress/vue-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.0...@cypress/vue-v3.1.1) (2022-02-10)
 
 
