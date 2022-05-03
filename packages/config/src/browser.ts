@@ -36,6 +36,7 @@ const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
+const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()
 
@@ -177,4 +178,25 @@ export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) 
   if (errProperty) {
     return onErr(errProperty)
   }
+}
+
+export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: any) => {
+  const restartOnChange = {
+    browser: false,
+    server: false,
+  }
+
+  if (!cachedConfig || !updatedConfig) {
+    return restartOnChange
+  }
+
+  const configDiff = _.reduce<any, string[]>(cachedConfig, (result, value, key) => _.isEqual(value, updatedConfig[key]) ? result : result.concat(key), [])
+
+  restartOnChangeOptionsKeys.forEach((o) => {
+    if (o.requireRestartOnChange && configDiff.includes(o.name)) {
+      restartOnChange[o.requireRestartOnChange] = true
+    }
+  })
+
+  return restartOnChange
 }

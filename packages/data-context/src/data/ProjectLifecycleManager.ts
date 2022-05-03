@@ -21,6 +21,7 @@ import { ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
+import { validateNeedToRestartOnChange } from '@packages/config'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -239,12 +240,21 @@ export class ProjectLifecycleManager {
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
         }
 
+        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
+
         this._cachedFullConfig = finalConfig
 
         // This happens automatically with openProjectCreate in run mode
         if (!this.ctx.isRunMode) {
           if (!this._initializedProject) {
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else if (restartOnChange.server) {
+            this.ctx.project.setRelaunchBrowser(true)
+            this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else if (restartOnChange.browser) {
+            this.ctx.project.setRelaunchBrowser(true)
+            await this.ctx.actions.browser.closeBrowser()
+            await this.ctx.actions.browser.focusActiveBrowserWindow()
           }
         }
 
