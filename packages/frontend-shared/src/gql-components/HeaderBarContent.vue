@@ -87,7 +87,6 @@
               aria-hidden
             >
               <i-cy-chevron-right_x16
-
                 class="icon-dark-gray-200"
               />
             </li>
