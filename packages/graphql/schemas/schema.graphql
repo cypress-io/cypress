@@ -967,9 +967,6 @@ type Mutation {
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
-
-  """Hides the launchpad windows"""
-  hideBrowserWindow: Boolean!
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean

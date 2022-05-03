@@ -69,9 +69,13 @@
     "@types/mocha": "^8.0.3",
     "@types/parse-glob": "3.0.29",
     "@types/prettier": "2.4.3",
+    "@types/sinon": "10.0.11",
+    "@types/sinon-chai": "3.2.8",
     "@types/stringify-object": "^3.0.0",
     "mocha": "7.0.1",
     "rimraf": "3.0.2",
+    "sinon": "13.0.2",
+    "sinon-chai": "3.7.0",
     "tslint": "^6.1.3"
   },
   "files": [
