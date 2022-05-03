@@ -591,6 +591,12 @@
         "description": "In this step, we'll explain how you will reconfigure Cypress for component testing.",
         "button": "Finish migration and continue"
       }
+    },
+    "landingPage": {
+      "title": "Welcome to Cypress 10!",
+      "description": "Check out the highlights in the video below to explore what’s changed recently.",
+      "actionContinue": "Continue to Cypress 10",
+      "linkReleaseNotes": "Release notes"
     }
   },
   "setupWizard": {
