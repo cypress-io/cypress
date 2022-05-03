@@ -11,6 +11,8 @@ export interface ElectronApiShape {
   showOpenDialog(props: OpenDialogOptions): Promise<OpenDialogReturnValue>
   showSaveDialog(window: BrowserWindow, props: SaveDialogOptions): Promise<SaveDialogReturnValue>
   copyTextToClipboard(text: string): void
+  isMainWindowFocused(): boolean
+  focusMainWindow(): void
 }
 
 export class ElectronActions {
@@ -30,15 +32,6 @@ export class ElectronActions {
 
   setBrowserWindow (window: BrowserWindow) {
     this.electron.browserWindow = window
-  }
-
-  hideBrowserWindow () {
-    // this.electron.browserWindow?.hide()
-    // if (this.isMac) {
-    //   this.ctx.electronApp?.dock.hide()
-    // } else {
-    //   this.electron.browserWindow?.setSkipTaskbar(true)
-    // }
   }
 
   showBrowserWindow () {

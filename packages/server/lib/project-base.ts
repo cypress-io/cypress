@@ -8,7 +8,6 @@ import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
 import * as errors from './errors'
-import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import { checkSupportFile } from './project_utils'
@@ -156,12 +155,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    const { ctDevServerPort } = await this.initializeSpecsAndDevServer(cfg)
-
-    if (this.testingType === 'component') {
-      cfg.baseUrl = `http://localhost:${ctDevServerPort}`
-    }
-
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
@@ -266,7 +259,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   __reset () {
     preprocessor.close()
-    devServer.close()
 
     process.chdir(localCwd)
   }
@@ -306,46 +298,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     browsers.close()
 
     options.onError(err)
-  }
-
-  async initializeSpecsAndDevServer (updatedConfig: Cfg): Promise<{
-    ctDevServerPort: number | undefined
-  }> {
-    const specs = this.ctx.project.specs || []
-
-    let ctDevServerPort: number | undefined
-
-    if (!this.ctx.currentProject) {
-      throw new Error('Cannot set specs without current project')
-    }
-
-    updatedConfig.specs = specs
-
-    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
-      const { port } = await this.startCtDevServer(specs, updatedConfig)
-
-      ctDevServerPort = port
-    }
-
-    return {
-      ctDevServerPort,
-    }
-  }
-
-  async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
-    // CT uses a dev-server to build the bundle.
-    // We start the dev server here.
-    const devServerOptions = await devServer.start({ specs, config })
-
-    if (!devServerOptions) {
-      throw new Error([
-        'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-        'Make sure that the dev-server:start function returns an object.',
-        'For example: on("dev-server:start", () => startWebpackDevServer({ webpackConfig }))',
-      ].join('\n'))
-    }
-
-    return { port: devServerOptions.port }
   }
 
   initializeReporter ({
@@ -451,10 +403,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     })
 
     this.ctx.setAppSocketServer(io)
-  }
-
-  changeToUrl (url) {
-    this.server.changeToUrl(url)
   }
 
   async closeBrowserTabs () {

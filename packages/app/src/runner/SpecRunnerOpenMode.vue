@@ -13,11 +13,14 @@
     />
     <ResizablePanels
       v-else
-      :offset-left="64"
-      :max-total-width="windowWidth"
+      :style="{width: `calc(100vw - ${collapsedNavBarWidth}px)`}"
+      :offset-left="collapsedNavBarWidth"
+      :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
-      :min-panel3-width="340"
+      :min-panel1-width="minWidths.specsList"
+      :min-panel2-width="minWidths.reporter"
+      :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
@@ -54,19 +57,18 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3="{width}">
+      <template #panel3>
         <HideDuringScreenshotOrRunMode class="bg-white">
           <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width"
           />
         </HideDuringScreenshotOrRunMode>
 
         <RemoveClassesDuringScreenshotting
-          class="h-full bg-gray-100 p-16px"
+          class="h-0 p-16px"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -116,6 +118,15 @@ import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
+import { runnerConstants } from './runner-constants'
+
+const {
+  preferredMinimumPanelWidth,
+  absoluteAutMinimum,
+  absoluteSpecListMinimum,
+  absoluteReporterMinimum,
+  collapsedNavBarWidth,
+} = runnerConstants
 
 gql`
 fragment SpecRunner_Preferences on Query {
@@ -132,10 +143,18 @@ fragment SpecRunner_Preferences on Query {
 `
 
 gql`
+fragment SpecRunner_Config on CurrentProject {
+  id
+  config
+}
+`
+
+gql`
 fragment SpecRunner on Query {
   ...Specs_InlineSpecList
   currentProject {
     id
+    ...SpecRunner_Config
     ...SpecRunnerHeader
     ...AutomationMissing
   }
@@ -179,16 +198,9 @@ const reporterWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
 })
 
-// we must update preferences before calling useRunnerStyle, to make sure that values from GQL
-// will be available during the initial calculation that useRunnerStyle does
-
-preferences.update('reporterWidth', reporterWidthPreferences.value)
-preferences.update('specListWidth', specsListWidthPreferences.value)
-
-const {
-  viewportStyle,
-  windowWidth,
-} = useRunnerStyle()
+const isSpecsListOpenPreferences = computed(() => {
+  return props.gql.localSettings.preferences.isSpecsListOpen ?? false
+})
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
@@ -198,9 +210,42 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? false)
+preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
 preferences.update('reporterWidth', reporterWidthPreferences.value)
 preferences.update('specListWidth', specsListWidthPreferences.value)
+
+// 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
+// will be available during the initial calculation that useRunnerStyle does
+
+const {
+  viewportStyle,
+  windowWidth,
+} = useRunnerStyle()
+
+function getMinimum (absoluteMinimum: number, doesContentFit: boolean) {
+  // windowWidth.value / 6 is arbitrary here, it just happens to work nicely to give us
+  // some flexibility in proportion to the window
+  return doesContentFit ? Math.min(absoluteMinimum, windowWidth.value / 6) : preferredMinimumPanelWidth
+}
+
+const minWidths = computed(() => {
+  let smallestIdealWindowSize = preferredMinimumPanelWidth * 2 + collapsedNavBarWidth
+  let contentWidth = reporterWidthPreferences.value + collapsedNavBarWidth + preferredMinimumPanelWidth
+
+  if (isSpecsListOpenPreferences.value) {
+    contentWidth += specsListWidthPreferences.value
+    smallestIdealWindowSize += preferredMinimumPanelWidth
+  }
+
+  const isWindowTooSmall = windowWidth.value < smallestIdealWindowSize
+  const doesContentFit = contentWidth > windowWidth.value || isWindowTooSmall
+
+  return {
+    aut: getMinimum(absoluteAutMinimum, doesContentFit),
+    specsList: getMinimum(absoluteSpecListMinimum, doesContentFit),
+    reporter: getMinimum(absoluteReporterMinimum, doesContentFit),
+  }
+})
 
 let fileToOpen: FileDetails
 
