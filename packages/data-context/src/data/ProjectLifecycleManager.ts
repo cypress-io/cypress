@@ -103,7 +103,7 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
-      const contents = await this.getConfigFileContents()
+      const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
     } catch {
