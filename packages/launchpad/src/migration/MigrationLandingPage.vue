@@ -1,6 +1,6 @@
 <template>
-  <div class="rounded min-h-700px lp-wrapper">
-    <h1 class="font-medium text-center pt-20px text-32px text-teal-1000">
+  <div class="bg-no-repeat -bg-top-70px min-h-700px lp-wrapper">
+    <h1 class="font-medium text-center pt-45px text-32px text-teal-1000">
       {{ t('migration.landingPage.title') }}
     </h1>
     <p
@@ -9,16 +9,19 @@
       {{ t('migration.landingPage.description') }}
     </p>
 
-    <div class="mx-auto text-center max-w-80vw w-688px ">
+    <div class="rounded mx-auto text-center max-w-80vw w-688px">
       <div
         class="bg-white border-4px-gray-500  w-full video"
         data-cy="video-container"
       />
       <div class="flex bg-gray-50 py-16px px-24px gap-8px">
-        <Button @click="handleClick">
+        <Button
+          class="group"
+          @click="handleClick"
+        >
           {{ t('migration.landingPage.actionContinue') }}
           <template #suffix>
-            <i-cy-arrow-right_x16 />
+            <i-cy-arrow-right_x16 class="transform transition-transform ease-in duration-200 group-hocus:translate-x-1px" />
           </template>
         </Button>
         <Button

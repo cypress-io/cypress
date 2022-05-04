@@ -3,11 +3,15 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
+
+    <MigrationLandingPage
+      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage"
+      class="pt-64px"
+      @clearLandingPage="showLandingPage = false"
+    />
     <div
-      :class="{
-        'px-24px pt-86px': !showLandingPage,
-        'pt-64px': showLandingPage
-      }"
+      v-else
+      class="px-24px pt-86px"
     >
       <BaseError
         v-if="query.data.value.baseError"
@@ -17,11 +21,6 @@
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
         :gql="query.data.value"
-      />
-
-      <MigrationLandingPage
-        v-else-if="currentProject?.needsLegacyConfigMigration && showLandingPage"
-        @clearLandingPage="showLandingPage = false"
       />
       <MigrationWizard
         v-else-if="currentProject?.needsLegacyConfigMigration && !showLandingPage"
