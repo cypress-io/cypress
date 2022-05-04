@@ -58,6 +58,7 @@ export interface ProjectMetaState {
   hasSpecifiedConfigViaCLI: false | string
   allFoundConfigFiles: string[]
   needsCypressJsonMigration: boolean
+  isProjectUsingESModules: boolean
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
@@ -68,6 +69,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
+  isProjectUsingESModules: false,
 }
 
 export class ProjectLifecycleManager {
@@ -569,6 +571,10 @@ export class ProjectLifecycleManager {
 
       if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
         metaState.hasTypescript = true
+      }
+
+      if (packageJson.type === 'module') {
+        metaState.isProjectUsingESModules = true
       }
     } catch {
       // No need to handle
