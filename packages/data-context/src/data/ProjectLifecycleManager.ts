@@ -58,6 +58,7 @@ export interface ProjectMetaState {
   hasSpecifiedConfigViaCLI: false | string
   allFoundConfigFiles: string[]
   needsCypressJsonMigration: boolean
+  isProjectUsingESModules: boolean
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
@@ -68,6 +69,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
+  isProjectUsingESModules: false,
 }
 
 export class ProjectLifecycleManager {
@@ -217,6 +219,7 @@ export class ProjectLifecycleManager {
         this._cachedInitialConfig = initialConfig
 
         this.ctx.emitter.toLaunchpad()
+        this.ctx.emitter.toApp()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig) => {
         if (this._currentTestingType && finalConfig.specPattern) {
@@ -303,6 +306,7 @@ export class ProjectLifecycleManager {
 
     // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
     this.ctx.emitter.toLaunchpad()
+    this.ctx.emitter.toApp()
 
     await this.initializeConfig()
 
@@ -568,6 +572,10 @@ export class ProjectLifecycleManager {
       if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
         metaState.hasTypescript = true
       }
+
+      if (packageJson.type === 'module') {
+        metaState.isProjectUsingESModules = true
+      }
     } catch {
       // No need to handle
     }
@@ -730,7 +738,7 @@ export class ProjectLifecycleManager {
     if (this.ctx.isRunMode && this._configManager) {
       this._configManager.onLoadError(err)
     } else {
-      this.ctx.onError(err, 'Error Loading Config')
+      this.ctx.onError(err, 'Cypress configuration error')
     }
   }
 }
