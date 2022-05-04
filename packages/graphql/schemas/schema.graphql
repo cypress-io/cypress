@@ -852,6 +852,9 @@ type Migration {
   """List of files needing manual conversion"""
   manualFiles: ManualMigration
 
+  """whether the pre extension info should be displayed"""
+  shouldMigratePreExtension: Boolean
+
   """All spec files after conversion"""
   specFiles: [MigrationFile!]!
 
@@ -1256,6 +1259,9 @@ enum SpecType {
 type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
+
+  """Triggered when the base error state changes"""
+  baseErrorChange: Query
 
   """Issued when the current branch of a project changes"""
   branchChange: CurrentProject

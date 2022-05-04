@@ -91,6 +91,7 @@
         "dedent",
         "events",
         "fake-uuid",
+        "floating-vue",
         "fuzzysort",
         "graphql",
         "graphql-relay",

@@ -98,6 +98,7 @@
         "@vueuse/core",
         "dedent",
         "fake-uuid",
+        "floating-vue",
         "graphql",
         "graphql-relay",
         "graphql/jsutils/Path",
