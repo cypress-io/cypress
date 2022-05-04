@@ -45,19 +45,6 @@ describe('cy.session', () => {
     })
   })
 
-  describe('.log', () => {
-    beforeEach(function () {
-      this.logs = []
-
-      cy.on('log:added', (attrs, log) => {
-        this.lastLog = log
-        this.logs.push(log)
-      })
-
-      return null
-    })
-  })
-
   describe('errors', () => {
     let lastLog = null
     let logs = []
