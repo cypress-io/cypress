@@ -10,16 +10,20 @@ import which from 'which'
 
 async function isFirefoxSnap (binary: string): Promise<boolean> {
   try {
-    const binaryPath = await which(binary)
+    return Bluebird.resolve((async () => {
+      const binaryPath = await which(binary)
 
-    // read the first 16kb, don't read the entire file into memory in case it is a binary
-    const fd = await fs.open(binaryPath, 'r')
-    // @ts-ignore - needs @types/node at least 16
-    const { buffer, bytesRead } = await fd.read<Buffer>({ length: 16384 })
+      // read the first 16kb, don't read the entire file into memory in case it is a binary
+      const fd = await fs.open(binaryPath, 'r')
+      // @ts-ignore - needs @types/node at least 16
+      // https://github.com/cypress-io/cypress/issues/21329
+      const { buffer, bytesRead } = await fd.read<Buffer>({ length: 16384 })
 
-    fd.close()
+      await fd.close()
 
-    return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
+      return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
+    })())
+    .timeout(30000)
   } catch (err) {
     log('failed to check if Firefox is a snap, assuming it isn\'t %o', { err, binary })
 
