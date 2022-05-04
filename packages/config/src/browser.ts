@@ -198,5 +198,11 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
     }
   })
 
+  // devServer property is not part of the options, but we should trigger a server
+  // restart if we identify any change
+  if (!_.isEqual(cachedConfig.devServer, updatedConfig.devServer)) {
+    restartOnChange.server = true
+  }
+
   return restartOnChange
 }
