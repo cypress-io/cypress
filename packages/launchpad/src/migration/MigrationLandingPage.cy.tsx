@@ -3,7 +3,7 @@ import MigrationLandingPage from './MigrationLandingPage.vue'
 
 const text = defaultMessages.migration.landingPage
 
-describe('<MigrationLandingPage />', () => {
+describe('<MigrationLandingPage />', { viewportWidth: 1280, viewportHeight: 720 }, () => {
   it('renders the content', () => {
     cy.mount(MigrationLandingPage)
     cy.contains('h1', text.title).should('be.visible')
