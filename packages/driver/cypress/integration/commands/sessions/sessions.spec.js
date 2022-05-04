@@ -1,5 +1,11 @@
 const baseUrl = Cypress.config('baseUrl')
-// const iframeBaseUrl = Cypress.env('iframeBaseUrl')
+
+if (!Cypress.config('experimentalSessionsAndOrigin')) {
+  // eslint-disable-next-line
+  it.only('skip tests since the `experimentalSessionsAndOrigin` configuration is disabled', () => {
+    cy.log('Run `cypress:open-experimentalSessionAndOrigin` or `cypress:run-experimentalSessionAndOrigin` to run these tests.')
+  })
+}
 
 const expectCurrentSessionData = (obj) => {
   return Cypress.session.getCurrentSessionData()
@@ -10,24 +16,6 @@ const expectCurrentSessionData = (obj) => {
     expect(result.sessionStorage).deep.members(obj.sessionStorage || [])
   })
 }
-// beforeEach(() => {
-//   if (top.doNotClearSessions) {
-//     top.doNotClearSessions = false
-
-//     return
-//   }
-
-//   cy.wrap(Cypress.session.clearAllSavedSessions(), { log: false })
-// })
-
-// const sessionUser = (name = 'user0') => {
-//   return cy.session(name, () => {
-//     cy.visit(`/cross_origin_iframe/${name}`)
-//     cy.window().then((win) => {
-//       win.localStorage.username = name
-//     })
-//   })
-// }
 
 describe('cy.session', () => {
   describe('args', () => {
@@ -53,16 +41,6 @@ describe('cy.session', () => {
       cy.then(() => {
         expect(setup).to.be.calledOnce
         expect(validate).to.be.calledOnce
-      })
-    })
-  })
-
-      cy.session({ name: 'bob', key: 'val' }, () => {
-        // foo
-      })
-
-      cy.session({ key: 'val', name: 'bob' }, () => {
-        // bar
       })
     })
   })
