@@ -10,7 +10,7 @@
   >
     <div
       :key="'popover-container'"
-      @mouseover="mouseOver"
+      @mouseenter="mouseEnter"
       @mouseleave="mouseLeave"
       @click="click"
     >
@@ -29,7 +29,6 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { promiseTimeout } from '@vueuse/core'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
 const props = defineProps<{
@@ -40,14 +39,13 @@ const props = defineProps<{
 const shown = ref(false)
 const textToShow = ref(props.hoverText)
 
-function mouseOver () {
+function mouseEnter () {
+  textToShow.value = props.hoverText
   shown.value = true
 }
 
 async function mouseLeave () {
   shown.value = false
-  await promiseTimeout(200)
-  textToShow.value = props.hoverText
 }
 
 function click () {
