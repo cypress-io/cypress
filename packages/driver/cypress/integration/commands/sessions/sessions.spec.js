@@ -1,12 +1,5 @@
 const baseUrl = Cypress.config('baseUrl')
 
-if (!Cypress.config('experimentalSessionsAndOrigin')) {
-  // eslint-disable-next-line
-  it.only('skip tests since the `experimentalSessionsAndOrigin` configuration is disabled', () => {
-    cy.log('Run `cypress:open-experimentalSessionAndOrigin` or `cypress:run-experimentalSessionAndOrigin` to run these tests.')
-  })
-}
-
 const expectCurrentSessionData = (obj) => {
   return Cypress.session.getCurrentSessionData()
   .then((result) => {
