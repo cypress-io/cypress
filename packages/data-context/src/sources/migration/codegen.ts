@@ -42,6 +42,7 @@ export interface CreateConfigOptions {
   projectRoot: string
   hasTypescript: boolean
   isProjectECMAScript: boolean
+  shouldAddCustomE2eSpecPattern: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
@@ -203,11 +204,15 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+  if (createConfigOptions.shouldAddCustomE2eSpecPattern && !options.specPattern) {
+    options.specPattern = 'cypress/e2e/**/*.{js,ts,tsx,jsx}'
+  }
+
   if (!createConfigOptions.hasPluginsFile || !pluginPath) {
     return dedent`
       e2e: {
         setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
-      }
+      },
     `
   }
 
@@ -297,7 +302,7 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Mi
   const afterParts = formatMigrationFile(
     defaultOldSupportFile,
     new RegExp(supportFileRegexps.e2e.beforeRegexp),
-  ).map(substitute)
+  ).map((part) => substitute(part))
 
   return {
     testingType: 'e2e',
@@ -440,7 +445,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
 }
 
 export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? (cfg.projectId ? '**/*.{js,ts,tsx,jsx}' : '**/*.cy.{js,jsx,ts,tsx}')
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
