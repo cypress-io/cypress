@@ -12,6 +12,7 @@
     />
     <ResizablePanels
       v-else
+      class="w-full"
       :max-total-width="windowWidth"
       :initial-panel1-width="0"
       :initial-panel2-width="runnerUiStore.reporterWidth"
@@ -20,14 +21,6 @@
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <template #panel1="{isDragging}">
-        <HideDuringScreenshotOrRunMode
-          v-show="runnerUiStore.isSpecsListOpen"
-          id="inline-spec-list"
-          class="h-full bg-gray-1000 border-r-1 border-gray-900 force-dark"
-          :class="{'pointer-events-none': isDragging}"
-        />
-      </template>
       <template #panel2>
         <HideDuringScreenshot
           class="h-full"
@@ -39,16 +32,16 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3="{width}">
+      <template #panel3>
         <HideDuringScreenshot>
           <SpecRunnerHeaderRunMode
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width"
+            class="bg-white"
           />
         </HideDuringScreenshot>
         <RemoveClassesDuringScreenshotting
-          class="h-full bg-gray-100 p-16px"
+          class="h-0 p-16px"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -84,7 +77,6 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
-import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
