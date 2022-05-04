@@ -2513,7 +2513,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.medium+
+        resource_class: windows.large
         context: test-runner:launchpad-tests
         requires:
           - windows-build
