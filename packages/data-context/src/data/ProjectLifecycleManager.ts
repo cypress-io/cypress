@@ -299,6 +299,10 @@ export class ProjectLifecycleManager {
       return
     }
 
+    // Make sure remote states in the server are reset when the project is reloaded.
+    // TODO: maybe we should also reset the server state here as well?
+    this.ctx._apis.projectApi.getRemoteStates()?.reset()
+
     this._configManager.resetLoadingState()
 
     // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
