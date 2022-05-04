@@ -65,6 +65,8 @@
               <template
                 v-if="props.gql?.currentProject?.branch"
               >
+                <!-- Using a margin here causes different overflow problems.
+                        See PR #21325. Using a space for now. -->
                 {{ ' ' }}
                 <Tooltip
                   placement="bottom"
