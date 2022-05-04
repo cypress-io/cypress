@@ -1,9 +1,6 @@
 <template>
   <div class="rounded border-gray-100 border-1px w-full">
-    <div
-      class="flex p-16px items-center"
-      :class="{'justify-between': !props.hideMatches, 'justify-end': props.hideMatches }"
-    >
+    <div class="flex p-16px items-center justify-between">
       <FileMatchIndicator :variant="props.variant">
         <span v-if="props.variant === 'empty'">specPattern</span>
         <i18n-t
