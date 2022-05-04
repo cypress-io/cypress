@@ -12,12 +12,11 @@ import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
 import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
+import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 
-export type MutationResolverCallback<T extends TypedDocumentNode> = (
-  defineResult: (input: ResultType<T>) => ResultType<T>,
-  variables: Exclude<T['__variablesType'], undefined>) => ResultType<T> | void
-
-export type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
+export type MutationResolverCallback<T extends TypedDocumentNode<any, any>> = (
+  defineResult: (input: ResultOf<T>) => ResultOf<T>,
+  variables: Exclude<VariablesOf<T>, undefined>) => ResultOf<T> | void
 
 export function testUrqlClient (context: ClientTestContext,
   onResult?: (result: any, context: ClientTestContext) => any,
