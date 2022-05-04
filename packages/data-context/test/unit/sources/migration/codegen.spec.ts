@@ -32,7 +32,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -50,7 +50,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -70,7 +70,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -88,7 +88,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -102,7 +102,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -116,7 +116,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -142,7 +142,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -158,7 +158,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -173,7 +173,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
-      isProjectECMAScript: true,
+      isProjectUsingESModules: true,
       shouldAddCustomE2eSpecPattern: false,
     })
 
@@ -194,7 +194,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -211,7 +211,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -228,7 +228,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: false,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -245,7 +245,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: true,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -264,7 +264,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: true,
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)

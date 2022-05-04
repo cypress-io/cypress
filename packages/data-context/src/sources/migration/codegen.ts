@@ -41,7 +41,7 @@ export interface CreateConfigOptions {
   hasComponentTesting: boolean
   projectRoot: string
   hasTypescript: boolean
-  isProjectECMAScript: boolean
+  isProjectUsingESModules: boolean
   shouldAddCustomE2eSpecPattern: boolean
 }
 
@@ -171,7 +171,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
-    if (options.hasTypescript || options.isProjectECMAScript) {
+    if (options.hasTypescript || options.isProjectUsingESModules) {
       return formatConfig(dedent`
         import { defineConfig } from 'cypress'
   
@@ -192,7 +192,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string | undefi
       })`)
   }
 
-  if (options.hasTypescript || options.isProjectECMAScript) {
+  if (options.hasTypescript || options.isProjectUsingESModules) {
     return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 

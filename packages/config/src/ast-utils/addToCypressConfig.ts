@@ -88,7 +88,7 @@ export interface AddToCypressConfigResult {
 }
 
 export interface AddTestingTypeToCypressConfigOptions {
-  isProjectECMAScript: boolean
+  isProjectUsingESModules: boolean
   filePath: string
   info: ASTComponentDefinitionConfig | {
     testingType: 'e2e'
@@ -114,7 +114,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
       resultStatus = 'ADDED'
-      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectECMAScript: options.isProjectECMAScript })
+      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules })
     }
 
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
@@ -137,8 +137,8 @@ type OutputExtension = '.ts' | '.mjs' | '.js'
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectECMAScript }: { outputType: OutputExtension, isProjectECMAScript: boolean}) {
-  if (outputType === '.ts' || outputType === '.mjs' || isProjectECMAScript) {
+function getEmptyCodeBlock ({ outputType, isProjectUsingESModules }: { outputType: OutputExtension, isProjectUsingESModules: boolean}) {
+  if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
     return dedent`
       import { defineConfig } from 'cypress'
 

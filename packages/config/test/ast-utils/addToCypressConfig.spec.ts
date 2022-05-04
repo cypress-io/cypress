@@ -25,7 +25,7 @@ describe('addToCypressConfig', () => {
       info: {
         testingType: 'e2e',
       },
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     expect(stub.firstCall.args[1].trim()).to.eq(dedent`
@@ -49,7 +49,7 @@ describe('addToCypressConfig', () => {
       info: {
         testingType: 'e2e',
       },
-      isProjectECMAScript: true,
+      isProjectUsingESModules: true,
     })
 
     expect(stub.firstCall.args[1].trim()).to.eq(dedent`
@@ -73,7 +73,7 @@ describe('addToCypressConfig', () => {
       info: {
         testingType: 'e2e',
       },
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     expect(stub.firstCall.args[1].trim()).to.eq(dedent`
@@ -97,7 +97,7 @@ describe('addToCypressConfig', () => {
       info: {
         testingType: 'e2e',
       },
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     expect(result.result).to.eq('NEEDS_MERGE')
@@ -110,7 +110,7 @@ describe('addToCypressConfig', () => {
       info: {
         testingType: 'e2e',
       },
-      isProjectECMAScript: false,
+      isProjectUsingESModules: false,
     })
 
     expect(result.result).to.eq('NEEDS_MERGE')
