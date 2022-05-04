@@ -158,6 +158,19 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.contains('The viewport determines').should('be.hidden')
   })
 
+  it('links to the viewport docs', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.findByTestId('viewport').click()
+    cy.findByTestId('viewport-docs')
+    .should('be.visible')
+    .should('have.attr', 'href', 'https://on.cypress.io/viewport')
+  })
+
   it('disables browser dropdown button when isRunning is true', () => {
     const autStore = useAutStore()
 
