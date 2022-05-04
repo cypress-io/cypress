@@ -36,10 +36,13 @@
             {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
-          <div class="mt-16px">
+          <div
+            v-if="hasError"
+            class="mt-16px"
+          >
             <SpecPatterns
               :gql="props.gql"
-              :hide-matches="true"
+              variant="empty"
             />
           </div>
         </div>

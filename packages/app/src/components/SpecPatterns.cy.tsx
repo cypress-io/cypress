@@ -40,10 +40,10 @@ describe('<SpecPatterns />', () => {
         res.currentTestingType = 'component'
         res.specs = res.specs.slice(0, 50) || []
       },
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} hideMatches={true} /></div>,
+      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} variant='empty' /></div>,
     })
 
     cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
-    cy.get('[data-cy="file-match-indicator"]').should('not.exist')
+    cy.get('[data-cy="file-match-indicator"]').should('contain', 'specPattern')
   })
 })

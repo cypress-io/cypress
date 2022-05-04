@@ -4,8 +4,10 @@
       class="flex p-16px items-center"
       :class="{'justify-between': !props.hideMatches, 'justify-end': props.hideMatches }"
     >
-      <FileMatchIndicator v-if="!props.hideMatches">
+      <FileMatchIndicator :variant="props.variant">
+        <span v-if="props.variant === 'empty'">specPattern</span>
         <i18n-t
+          v-else
           scope="global"
           keypath="components.specPattern.matches"
         >
@@ -61,7 +63,7 @@ fragment SpecPatterns on CurrentProject {
 
 const props = defineProps<{
   gql: SpecPatternsFragment
-  hideMatches?: boolean
+  variant?: 'default' | 'empty'
 }>()
 
 const specPatterns = computed<string[]>(() => {
