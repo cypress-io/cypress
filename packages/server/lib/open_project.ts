@@ -39,6 +39,10 @@ export class OpenProject {
     return this.projectBase?.getConfig()
   }
 
+  getRemoteStates () {
+    return this.projectBase?.remoteStates
+  }
+
   getProject () {
     return this.projectBase
   }

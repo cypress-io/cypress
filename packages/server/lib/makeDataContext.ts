@@ -133,6 +133,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getConfig () {
         return openProject.getConfig()
       },
+      getRemoteStates () {
+        return openProject.getRemoteStates()
+      },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,
         // shouldn't we have this already in the DataContext?
