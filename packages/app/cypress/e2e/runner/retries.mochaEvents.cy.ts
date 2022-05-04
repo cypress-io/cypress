@@ -3,10 +3,11 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './retries.mochaEvents.snapshots'
 
 /**
- * These tests require specs to be loaded and executed within the inner Cypress context. These
- * specs must complete within the duration of a Cypress command timeout to succeed. The execution
- * time within the inner Cypress is resource/OS dependant and can exceed the default value (4s),
- * so we have increased the command timeout to allow the inner spec more time to complete.
+ * The mochaEvent tests require a spec to be loaded and executed within an inner Cypress context.
+ * The spec must load and execute within the duration of the Cypress command timeout.
+ * The execution time of the inner Cypress is resource/OS dependant and can exceed the default value (4s),
+ * so we have increased the command timeout to allow the inner spec more time to complete and report
+ * its mocha event log.
  */
 describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   // NOTE: for test-retries
