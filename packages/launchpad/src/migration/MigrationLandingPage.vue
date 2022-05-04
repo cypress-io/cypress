@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-700px lp-wrapper">
+  <div class="rounded min-h-700px lp-wrapper">
     <h1 class="font-medium text-center pt-20px text-32px text-teal-1000">
       {{ t('migration.landingPage.title') }}
     </h1>
@@ -25,6 +25,9 @@
           href="https://on.cypress.io/changelog"
           variant="outline"
         >
+          <template #prefix>
+            <i-cy-book_x16 class="icon-dark-gray-600" />
+          </template>
           {{ t('migration.landingPage.linkReleaseNotes') }}
         </Button>
       </div>
