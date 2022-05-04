@@ -1,6 +1,11 @@
 const baseUrl = Cypress.config('baseUrl')
 
-const expectCurrentSessionData = (obj) => {
+before(() => {
+  // sessions has logic built in to persists sessions on UI refresh
+  Cypress.session.clearAllSavedSessions()
+})
+
+const expectCurrentSessionData = async (obj) => {
   return Cypress.session.getCurrentSessionData()
   .then((result) => {
     cy.log(result)
@@ -10,7 +15,7 @@ const expectCurrentSessionData = (obj) => {
   })
 }
 
-describe('cy.session', () => {
+describe('cy.session', { retries: 0 }, () => {
   describe('args', () => {
     it('accepts string as id', () => {
       cy.session('session-id', () => {})
@@ -173,13 +178,13 @@ describe('cy.session', () => {
     })
 
     it('throws when multiple session calls with same sessionId but different options', function (done) {
-      cy.on('fail', (err) => {
+      cy.on('fail', async (err) => {
         expect(lastLog.get('error')).to.eq(err)
         expect(lastLog.get('state')).to.eq('failed')
         expect(err.message).to.eq('You may not call `cy.session()` with a previously used name and different options. If you want to specify different options, please use a unique name other than **duplicate-session**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
-        expectCurrentSessionData({
+        await expectCurrentSessionData({
           localStorage: [{ origin: baseUrl, value: { one: 'value' } }],
         })
 

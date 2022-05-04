@@ -295,13 +295,13 @@ describe('test errors', () => {
     })
 
     it('is not visible by default', () => {
-      cy.get('.studio-err-wrapper').should('not.be.visible')
+      cy.get('.studio-err-wrapper').should('not.exist')
     })
 
     it('is visible when studio is active', () => {
       runner.emit('reporter:start', { studioActive: true })
 
-      cy.get('.studio-err-wrapper').should('be.visible')
+      cy.get('.studio-err-wrapper').should('exist').should('be.visible')
 
       cy.percySnapshot()
     })
