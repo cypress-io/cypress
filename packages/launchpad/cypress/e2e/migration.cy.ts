@@ -1079,7 +1079,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('not.exist')
 
-    cy.contains('Error Loading Config')
+    cy.contains(cy.i18n.launchpadErrors.generic.configErrorTitle)
     // correct location of error
     const pluginsPath = platform === 'win32' ? 'cypress\\plugins\\index.js:2:9' : 'cypress/plugins/index.js:2:9'
 

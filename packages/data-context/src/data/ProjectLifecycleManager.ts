@@ -732,7 +732,7 @@ export class ProjectLifecycleManager {
     if (this.ctx.isRunMode && this._configManager) {
       this._configManager.onLoadError(err)
     } else {
-      this.ctx.onError(err, 'Error Loading Config')
+      this.ctx.onError(err, 'Cypress configuration error')
     }
   }
 }
