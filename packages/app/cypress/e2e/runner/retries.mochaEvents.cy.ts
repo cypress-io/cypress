@@ -19,7 +19,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/simple-fail.retries.mochaEvents.cy.js',
+      fileName: 'simple-fail.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -33,7 +33,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/test-retry-with-hooks.retries.mochaEvents.cy.js',
+      fileName: 'test-retry-with-hooks.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -47,7 +47,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/test-retry-with-hooks.retries.mochaEvents.cy.js',
+      fileName: 'test-retry-with-hooks.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -61,7 +61,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/test-retry-with-only.retries.mochaEvents.cy.js',
+      fileName: 'test-retry-with-only.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -75,7 +75,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/can-retry-from-beforeEach.retries.mochaEvents.cy.js',
+      fileName: 'can-retry-from-beforeEach.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -89,7 +89,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/can-retry-from-afterEach.retries.mochaEvents.cy.js',
+      fileName: 'can-retry-from-afterEach.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -103,7 +103,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/cant-retry-from-before.retries.mochaEvents.cy.js',
+      fileName: 'cant-retry-from-before.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -117,7 +117,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     )
 
     runSpec({
-      filePath: 'runner/three-tests-with-retry.retries.mochaEvents.cy.js',
+      fileName: 'three-tests-with-retry.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })
@@ -132,7 +132,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
       )
 
       runSpec({
-        filePath: 'runner/does-not-serialize-dom-error.cy.js',
+        fileName: 'does-not-serialize-dom-error.cy.js',
       }).then((win) => {
         // should not have err.actual, expected properties since the subject is a DOM element
         assertMatchingSnapshot(win)

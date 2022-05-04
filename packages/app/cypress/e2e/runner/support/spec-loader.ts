@@ -65,15 +65,15 @@ export function loadSpec (options: LoadSpecOptions) {
   shouldHaveTestResults({ passCount, failCount, pendingCount })
 }
 
-export function runSpec ({ filePath }: { filePath: string }) {
+export function runSpec ({ fileName }: { fileName: string }) {
   cy.scaffoldProject('runner-e2e-specs')
   cy.openProject('runner-e2e-specs')
   cy.startAppServer()
 
-  cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
+  cy.visitApp(`specs/runner?file=cypress/e2e/runner/${fileName}`)
 
   // Wait for runner to load before continuing, otherwise we may execute
-  //  prior to the eventManager having been initialized.
+  // prior to the EventManager having been initialized.
   cy.get('#unified-reporter').should('exist')
 
   return cy.window()

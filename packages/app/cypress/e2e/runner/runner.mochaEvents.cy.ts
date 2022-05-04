@@ -19,7 +19,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
         )
 
         runSpec({
-          filePath: 'runner/fail-with-before.mochaEvents.cy.js',
+          fileName: 'fail-with-before.mochaEvents.cy.js',
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
@@ -33,7 +33,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
         )
 
         runSpec({
-          filePath: 'runner/fail-with-beforeEach.mochaEvents.cy.js',
+          fileName: 'fail-with-beforeEach.mochaEvents.cy.js',
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
@@ -47,7 +47,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
         )
 
         runSpec({
-          filePath: 'runner/fail-with-after.mochaEvents.cy.js',
+          fileName: 'fail-with-after.mochaEvents.cy.js',
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
@@ -61,7 +61,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
         )
 
         runSpec({
-          filePath: 'runner/fail-with-afterEach.mochaEvents.cy.js',
+          fileName: 'fail-with-afterEach.mochaEvents.cy.js',
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
@@ -77,7 +77,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
         )
 
         runSpec({
-          filePath: 'runner/fail-with-only.mochaEvents.cy.js',
+          fileName: 'fail-with-only.mochaEvents.cy.js',
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
@@ -91,7 +91,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
         )
 
         runSpec({
-          filePath: 'runner/pass-with-only.mochaEvents.cy.js',
+          fileName: 'pass-with-only.mochaEvents.cy.js',
         }).then((win) => {
           assertMatchingSnapshot(win)
         })
@@ -108,7 +108,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
       )
 
       runSpec({
-        filePath: 'runner/simple-single-test.mochaEvents.cy.js',
+        fileName: 'simple-single-test.mochaEvents.cy.js',
       }).then((win) => {
         assertMatchingSnapshot(win)
       })
@@ -122,7 +122,7 @@ describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () =
       )
 
       runSpec({
-        filePath: 'runner/three-tests-with-hooks.mochaEvents.cy.js',
+        fileName: 'three-tests-with-hooks.mochaEvents.cy.js',
       }).then((win) => {
         assertMatchingSnapshot(win)
       })
