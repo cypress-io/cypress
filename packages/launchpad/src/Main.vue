@@ -3,7 +3,12 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
-    <div class="px-24px pt-86px">
+    <div
+      :class="{
+        'px-24px pt-86px': !showLandingPage,
+        'pt-64px': showLandingPage
+      }"
+    >
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
@@ -13,8 +18,13 @@
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
         :gql="query.data.value"
       />
+
+      <MigrationLandingPage
+        v-else-if="currentProject?.needsLegacyConfigMigration && showLandingPage"
+        @clearLandingPage="showLandingPage = false"
+      />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration"
+        v-else-if="currentProject?.needsLegacyConfigMigration && !showLandingPage"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -87,7 +97,7 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-
+import MigrationLandingPage from './migration/MigrationLandingPage.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
@@ -95,6 +105,7 @@ import OpenBrowser from './setup/OpenBrowser.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
+const showLandingPage = ref(true)
 
 gql`
 fragment MainLaunchpadQueryData on Query {

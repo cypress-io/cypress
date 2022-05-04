@@ -10,12 +10,13 @@
     </p>
 
     <div class="mx-auto text-center w-688px">
-      <div class="bg-white  border-4px-gray-500 h-408px ">
-        video
-      </div>
+      <div class="bg-white  border-4px-gray-500 h-408px " />
       <div class="flex bg-gray-50 py-16px px-24px gap-8px">
         <Button @click="handleClick">
           {{ t('migration.landingPage.actionContinue') }}
+          <template #suffix>
+            <i-cy-arrow-right_x16 />
+          </template>
         </Button>
         <Button
           href="https://on.cypress.io/changelog"
@@ -34,10 +35,13 @@ import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
-const handleClick = () => {
-  // emit event dismiss
-}
+const emit = defineEmits<{
+  (eventName: 'clearLandingPage', value: void): void
+}>()
 
+const handleClick = () => {
+  emit('clearLandingPage')
+}
 </script>
 
 <style scoped>

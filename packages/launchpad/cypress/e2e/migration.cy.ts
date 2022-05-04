@@ -40,6 +40,7 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
+  cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
   cy.waitForWizard()
 }
 
@@ -93,6 +94,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
 
@@ -100,6 +102,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
 })
@@ -982,6 +985,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     }, { path: getPathForPlatform('cypress/plugins/index.js') })
 
     cy.findByRole('button', { name: 'Try again' }).click()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.waitForWizard()
   })
