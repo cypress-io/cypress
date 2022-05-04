@@ -1,5 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
+import type { SinonSpy } from 'sinon'
 
 const sep = Cypress.platform === 'win32' ? '\\\\' : '/'
 
@@ -149,28 +150,64 @@ describe('Launchpad: Global Mode', () => {
         return cy.findByRole('link', { name }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
       }
 
+      const resetSpies = () => {
+        return cy.withCtx((ctx) => {
+          (ctx.actions.project.clearCurrentProject as SinonSpy).resetHistory();
+          (ctx.actions.wizard.resetWizard as SinonSpy).resetHistory();
+          (ctx.lifecycleManager.setAndLoadCurrentTestingType as SinonSpy).resetHistory()
+        })
+      }
+
       const projectList = ['todos']
 
-      setupAndValidateProjectsList(projectList, ['--e2e'])
-
-      getBreadcrumbLink('Projects', { disabled: true })
-      cy.get('[data-cy="project-card"]').contains('todos').click()
-      cy.contains('h1', 'Welcome to Cypress!')
+      setupAndValidateProjectsList(projectList)
 
       cy.withCtx((ctx, { sinon }) => {
         sinon.spy(ctx.actions.project, 'clearCurrentProject')
         sinon.spy(ctx.actions.wizard, 'resetWizard')
+        sinon.spy(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
       })
 
+      // Component testing breadcrumbs
+      cy.get('[data-cy="project-card"]').contains('todos').click()
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('todos').click()
       getBreadcrumbLink('todos', { disabled: true })
-      getBreadcrumbLink('Projects').click()
-
-      cy.get('[data-cy="project-card"]').contains('todos')
-      getBreadcrumbLink('Projects', { disabled: true })
-
       cy.withCtx((ctx) => {
-        expect(ctx.actions.project.clearCurrentProject).to.have.been.calledOnce
-        expect(ctx.actions.project.clearCurrentProject).to.have.been.calledOnce
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
+      })
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('Projects').click()
+      getBreadcrumbLink('Projects', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.clearCurrentProject).to.have.been.called
+        expect(ctx.actions.wizard.resetWizard).to.have.been.called
+      })
+
+      // E2E testing breadcrumbs
+      cy.get('[data-cy="project-card"]').contains('todos').click()
+      cy.get('[data-cy-testingtype="e2e"]').click()
+      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('todos').click()
+      getBreadcrumbLink('todos', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
+      })
+
+      cy.get('[data-cy-testingtype="e2e"]').click()
+      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      resetSpies()
+      getBreadcrumbLink('Projects').click()
+      getBreadcrumbLink('Projects', { disabled: true })
+      cy.withCtx((ctx) => {
+        expect(ctx.actions.project.clearCurrentProject).to.have.been.called
+        expect(ctx.actions.wizard.resetWizard).to.have.been.called
       })
     })
 
