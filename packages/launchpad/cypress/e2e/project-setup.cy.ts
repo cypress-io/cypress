@@ -1,3 +1,5 @@
+import { getPathForPlatform } from './support/getPathForPlatform'
+
 function verifyScaffoldedFiles (testingType: string) {
   const expectedFileOrder = (testingType === 'e2e') ? [
     'cypress.config.',
@@ -17,7 +19,7 @@ function verifyScaffoldedFiles (testingType: string) {
   .each(($el, i) => {
     const relativePath = $el.text()
 
-    expect(relativePath, `file index ${i}`).to.include(expectedFileOrder[i]) // assert file order
+    expect(relativePath, `file index ${i}`).to.include(getPathForPlatform(expectedFileOrder[i])) // assert file order
 
     cy.withCtx(async (ctx, o) => { // assert file exists
       const stats = await ctx.file.checkIfFileExists(o.relativePath)

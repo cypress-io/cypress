@@ -171,8 +171,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   it('stops correctly running spec while switching specs', () => {
     cy.visitApp()
     cy.contains('withFailure.spec').click()
+    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.get('body').type('f')
-    cy.contains('switch spec')
+    cy.contains('Search Specs')
     cy.contains('withWait.spec').click()
 
     cy.get('.passed > .num', { timeout: 10000 }).should('contain', 4)

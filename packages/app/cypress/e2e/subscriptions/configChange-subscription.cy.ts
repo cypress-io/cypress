@@ -46,6 +46,8 @@ describe('specChange subscription', () => {
       // update the config - the spec should re-execute with the new viewportHeight
       updateViewportHeightInCypressConfig(777)
 
+      cy.get('.passed > .num').should('contain', '--')
+      cy.get('.failed > .num').should('contain', '--')
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.get('button').contains('1000x777')
     })

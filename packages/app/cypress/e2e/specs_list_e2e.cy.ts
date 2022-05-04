@@ -87,6 +87,7 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="spec-item-link"]').should('have.attr', 'href')
     cy.get('[data-cy="spec-item-link"]').contains('dom-content.spec.js').click()
 
+    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.findByText('Your tests are loading...').should('not.be.visible')
     cy.get('body').type('f')
 
