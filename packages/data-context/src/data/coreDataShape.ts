@@ -87,6 +87,7 @@ export interface MigrationDataShape {
     hasComponentTesting: boolean
     hasE2ESpec: boolean
     hasPluginsFile: boolean
+    shouldAddCustomE2eSpecPattern: boolean
   }
 }
 
@@ -200,6 +201,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
         hasComponentTesting: true,
         hasE2ESpec: true,
         hasPluginsFile: true,
+        shouldAddCustomE2eSpecPattern: false,
       },
     },
     warnings: [],
