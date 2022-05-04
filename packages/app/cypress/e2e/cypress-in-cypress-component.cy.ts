@@ -165,12 +165,20 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       })
 
       cy.contains('TestComponent.spec').click()
+      // First ensure the test is running
+      cy.get('.passed > .num').should('contain', '--')
+      cy.get('.failed > .num').should('contain', '--')
+      // Then test the result of the run
       cy.get('.failed > .num').should('contain', 1)
 
       cy.withCtx(async (ctx, { testState }) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', testState.originalCypressConfig)
       })
 
+      // First ensure the test is running
+      cy.get('.passed > .num').should('contain', '--')
+      cy.get('.failed > .num').should('contain', '--')
+      // Then test the result of the run
       cy.get('.passed > .num').should('contain', 1)
     })
 
