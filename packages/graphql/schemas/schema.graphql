@@ -852,6 +852,9 @@ type Migration {
   """List of files needing manual conversion"""
   manualFiles: ManualMigration
 
+  """whether the pre extension info should be displayed"""
+  shouldMigratePreExtension: Boolean
+
   """All spec files after conversion"""
   specFiles: [MigrationFile!]!
 

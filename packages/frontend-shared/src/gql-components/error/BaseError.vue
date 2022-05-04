@@ -4,15 +4,43 @@
     class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center"
   >
     <div>
-      <h1
-        v-if="baseError.title"
-        class="font-medium leading-snug pb-24px text-32px text-gray-900"
-        data-testid="error-header"
-      >
-        <slot name="header">
-          {{ baseError.title }}
-        </slot>
-      </h1>
+      <div class="p-24px pt-0">
+        <h1
+          v-if="baseError.title"
+          class="font-medium leading-snug text-32px text-gray-900"
+          data-testid="error-header"
+        >
+          <slot name="header">
+            {{ baseError.title }}
+          </slot>
+        </h1>
+
+        <div
+          v-if="props.retry"
+          class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
+        >
+          <Button
+            variant="outline"
+            data-testid="error-retry-button"
+            :prefix-icon="RestartIcon"
+            prefix-icon-class="icon-dark-indigo-500"
+            @click="retry"
+          >
+            {{ t('launchpadErrors.generic.retryButton') }}
+          </Button>
+
+          <Button
+            variant="outline"
+            data-testid="error-docs-button"
+            :prefix-icon="BookIcon"
+            prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
+            :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
+          >
+            {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
+          </Button>
+        </div>
+      </div>
+
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
 
       <slot name="message">
@@ -77,21 +105,6 @@
 
       <slot name="stack" />
     </div>
-    <div class="w-full gap-16px inline-flex">
-      <slot name="footer">
-        <Button
-          v-if="props.retry"
-          size="lg"
-          variant="primary"
-          data-testid="error-retry-button"
-          :prefix-icon="RestartIcon"
-          prefix-icon-class="icon-dark-white"
-          @click="retry"
-        >
-          {{ t('launchpadErrors.generic.retryButton') }}
-        </Button>
-      </slot>
-    </div>
   </div>
 </template>
 
@@ -107,6 +120,7 @@ import { useMarkdown } from '../../composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
+import BookIcon from '~icons/cy/book_x24'
 
 gql`
 fragment BaseError on ErrorWrapper {
@@ -127,10 +141,29 @@ const { t } = useI18n()
 const props = defineProps<{
   gql: BaseErrorFragment
   retry?: () => void
-  onReadDocs?: () => void
 }>()
 
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
+
+const getDocsType = (): string => {
+  const { errorType, errorStack } = baseError.value
+
+  // Full list of errors lives in "packages/errors/src/errors.ts", but cannot be imported to Vue
+  switch (true) {
+    case errorStack.startsWith('UNKNOWN'):
+      return 'docsHomepage'
+    case errorType.includes('RECORD'):
+    case errorType.includes('PROJECT'):
+    case errorType.includes('DASHBOARD'):
+    case errorType.includes('PLAN'):
+      return 'dashboardGuide'
+    default:
+      return 'configGuide'
+  }
+}
+
+const docsType: string = getDocsType()
+
 </script>

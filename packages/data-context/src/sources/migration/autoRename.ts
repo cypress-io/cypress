@@ -26,7 +26,15 @@ interface GetSpecs {
   integration: MigrationSpec[]
 }
 
-export function substitute (part: FilePart): FilePart {
+export type MigrationTransformOptions = {
+  shouldMigratePreExtension: boolean
+}
+
+export const defaultMigrationTransformOptions = {
+  shouldMigratePreExtension: true,
+}
+
+export function substitute (part: FilePart, options: MigrationTransformOptions = defaultMigrationTransformOptions): FilePart {
   // nothing to substitute, just a regular
   // part of the file
   if (!('group' in part)) {
@@ -39,7 +47,7 @@ export function substitute (part: FilePart): FilePart {
   }
 
   // basic.spec.js -> basic.cy.js
-  if (part.group === 'preExtension') {
+  if (part.group === 'preExtension' && options.shouldMigratePreExtension) {
     return { ...part, text: '.cy.' }
   }
 
@@ -53,6 +61,7 @@ export function substitute (part: FilePart): FilePart {
 
 export function applyMigrationTransform (
   spec: MigrationSpec,
+  options: MigrationTransformOptions = defaultMigrationTransformOptions,
 ): MigrationFile {
   let regexp: RegExp
 
@@ -77,7 +86,7 @@ export function applyMigrationTransform (
     throw Error(`Cannot use applyMigrationTransform on a project with a custom folder and custom testFiles.`)
   }
 
-  const partsBeforeMigration = formatMigrationFile(spec.relative, regexp)
+  const partsBeforeMigration = formatMigrationFile(spec.relative, regexp, options)
   const partsAfterMigration = partsBeforeMigration.map((part) => {
     // avoid re-renaming files with the right preExtension
     // it would make a myFile.cy.cy.js file
@@ -87,7 +96,7 @@ export function applyMigrationTransform (
       return part
     }
 
-    return substitute(part)
+    return substitute(part, options)
   })
 
   return {
