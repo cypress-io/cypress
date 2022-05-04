@@ -405,6 +405,7 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
+          options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
               onMessage({ browserOpened: true })

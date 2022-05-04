@@ -67,6 +67,14 @@ export class EventManager {
   }
 
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
+    // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
+    // but connect is added when the websocket is created elsewhere so we need to add it back.
+    if (!this.ws.hasListeners('connect')) {
+      this.ws.on('connect', () => {
+        this.ws.emit('runner:connected')
+      })
+    }
+
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
@@ -132,10 +140,6 @@ export class EventManager {
     this.ws.on('watched:file:changed', () => {
       this.studioRecorder.cancel()
       rerun()
-    })
-
-    this.ws.on('specs:changed', ({ specs, testingType }) => {
-      state.setSpecs(specs)
     })
 
     this.ws.on('dev-server:hmr:error', (error) => {
