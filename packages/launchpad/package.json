@@ -107,7 +107,6 @@
         "lodash/clone",
         "markdown-it",
         "@toycode/markdown-it-class",
-        "path",
         "shiki",
         "socket.io-client",
         "vue",
