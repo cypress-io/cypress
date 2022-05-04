@@ -10,7 +10,7 @@ import which from 'which'
 
 async function isFirefoxSnap (binary: string): Promise<boolean> {
   try {
-    return Bluebird.resolve((async () => {
+    return await Bluebird.resolve((async () => {
       const binaryPath = await which(binary)
 
       // read the first 16kb, don't read the entire file into memory in case it is a binary
