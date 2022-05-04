@@ -110,7 +110,7 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    cy.get('[data-cy="playground-copy"]').trigger('mouseover')
+    cy.get('[data-cy="playground-copy"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
     cy.percySnapshot('Copy to clipboard hover tooltip')
     cy.get('[data-cy="playground-copy"]').click()
@@ -128,7 +128,7 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
 
-    cy.get('[data-cy="playground-print"]').trigger('mouseover')
+    cy.get('[data-cy="playground-print"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
     cy.percySnapshot('Print to console hover tooltip')
 
@@ -157,5 +157,28 @@ describe('SelectorPlayground', () => {
         Yielded: 'Nothing',
       })
     })
+  })
+
+  it('shows tooltips when buttons are focused', () => {
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-toggle"]').focus()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Click an element to see a suggested selector')
+    cy.get('[data-cy="playground-toggle"]').blur()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+
+    cy.get('[data-cy="playground-copy"]').focus()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
+    cy.get('[data-cy="playground-copy"]').click()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied')
+    cy.get('[data-cy="playground-copy"]').blur()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+
+    cy.get('[data-cy="playground-print"]').focus()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
+    cy.get('[data-cy="playground-print"]').click()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed')
+    cy.get('[data-cy="playground-print"]').blur()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
   })
 })

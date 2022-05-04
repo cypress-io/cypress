@@ -8,8 +8,7 @@
       class="flex h-full"
     >
       <button
-        class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center hover:default-ring"
-        :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
+        class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-40px duration-150 items-center justify-center hocus-default"
         data-cy="playground-toggle"
         @click="toggleEnabled"
       >
@@ -95,31 +94,41 @@
         :hover-text="t('runner.selectorPlayground.copyTooltip')"
         :click-text="t('runner.selectorPlayground.copyTooltipAction')"
       >
-        <Button
-          size="md"
-          variant="outline"
-          data-cy="playground-copy"
-          class="override-border"
-          @click="copyToClipboard"
+        <template
+          #default="{focus}"
         >
-          <i-cy-copy-clipboard_x16 class="icon-dark-gray-500" />
-        </Button>
+          <Button
+            size="md"
+            variant="outline"
+            data-cy="playground-copy"
+            class="override-border"
+            @click="copyToClipboard"
+            @focus="focus"
+          >
+            <i-cy-copy-clipboard_x16 class="icon-dark-gray-500" />
+          </Button>
+        </template>
       </SelectorPlaygroundTooltip>
 
       <SelectorPlaygroundTooltip
         :hover-text="t('runner.selectorPlayground.printTooltip')"
         :click-text="t('runner.selectorPlayground.printTooltipAction')"
       >
-        <Button
-          key="fudge"
-          size="md"
-          variant="outline"
-          data-cy="playground-print"
-          class="override-border"
-          @click="printSelected"
+        <template
+          #default="{focus}"
         >
-          <i-cy-technology-terminal_x16 class="icon-dark-gray-600" />
-        </Button>
+          <Button
+            key="fudge"
+            size="md"
+            variant="outline"
+            data-cy="playground-print"
+            class="override-border"
+            @click="printSelected()"
+            @focus="focus"
+          >
+            <i-cy-technology-terminal_x16 class="icon-dark-gray-600" />
+          </Button>
+        </template>
       </SelectorPlaygroundTooltip>
     </div>
   </div>

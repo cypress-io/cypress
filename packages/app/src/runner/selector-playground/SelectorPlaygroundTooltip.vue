@@ -1,21 +1,15 @@
 <template>
   <Tooltip
-    :triggers="[]"
-    :hide-triggers="[]"
+    :triggers="['hover', 'focus']"
+    :hide-triggers="['hover', 'focus']"
     :distance="8"
     hide-arrow
-    :auto-hide="false"
-    :shown="shown"
     handle-resize
+    @mouseenter="mouseEnter"
+    @mouseleave="mouseLeave"
+    @click="click"
   >
-    <div
-      :key="'popover-container'"
-      @mouseenter="mouseEnter"
-      @mouseleave="mouseLeave"
-      @click="click"
-    >
-      <slot />
-    </div>
+    <slot :focus="focus" />
     <template #popper>
       <div
         class="whitespace-nowrap"
@@ -44,12 +38,16 @@ function mouseEnter () {
   shown.value = true
 }
 
-async function mouseLeave () {
+function mouseLeave () {
   shown.value = false
 }
 
 function click () {
   textToShow.value = props.clickText ?? props.hoverText
+}
+
+function focus () {
+  textToShow.value = props.hoverText
 }
 
 </script>
