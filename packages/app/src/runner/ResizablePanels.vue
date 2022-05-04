@@ -1,14 +1,17 @@
 <template>
   <div
-    class="flex h-full w-full"
-    :class="{'select-none': panel1IsDragging || panel2IsDragging}"
+    class="flex overflow-y-hidden"
+    :class="{
+      'select-none': panel1IsDragging || panel2IsDragging,
+      'overflow-x-auto': !isFirefox
+    }"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
   >
     <div
       v-show="showPanel1"
       data-cy="specs-list-panel"
-      class="h-full flex-shrink-0 z-10 relative"
+      class="h-full flex-shrink-0 z-20 relative"
       :style="{width: `${panel1Width}px`}"
     >
       <slot
@@ -40,7 +43,7 @@
 
     <div
       data-cy="aut-panel"
-      class="flex-grow h-full relative"
+      class="flex-grow h-full bg-gray-100 relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{
         width: `${panel3width}px`
@@ -108,11 +111,17 @@ const handleMousedown = (panel: DraggablePanel, event: MouseEvent) => {
   }
 }
 const handleMousemove = (event: MouseEvent) => {
-  if (isNewWidthAllowed(event.clientX, 'panel1')) {
+  if (!panel1IsDragging.value && !panel2IsDragging.value) {
+    // nothing is dragging, ignore mousemove
+
+    return
+  }
+
+  if (panel1IsDragging.value && isNewWidthAllowed(event.clientX, 'panel1')) {
     panel1HandleX.value = event.clientX
     cachedPanel1Width.value = event.clientX - props.offsetLeft
     emit('panelWidthUpdated', { panel: 'panel1', width: panel1Width.value })
-  } else if (isNewWidthAllowed(event.clientX, 'panel2')) {
+  } else if (panel2IsDragging.value && isNewWidthAllowed(event.clientX, 'panel2')) {
     panel2HandleX.value = event.clientX
     panel2Width.value = event.clientX - props.offsetLeft - panel1Width.value
     emit('panelWidthUpdated', { panel: 'panel2', width: panel2Width.value })
@@ -131,7 +140,7 @@ const handleMouseup = () => {
 }
 
 const maxPanel1Width = computed(() => {
-  const unavailableWidth = panel2Width.value + props.minPanel3Width + props.offsetLeft
+  const unavailableWidth = panel2Width.value + props.minPanel3Width
 
   return props.maxTotalWidth - unavailableWidth
 })
@@ -145,13 +154,20 @@ const panel1Width = computed(() => {
 })
 
 const maxPanel2Width = computed(() => {
-  const unavailableWidth = panel1Width.value + props.minPanel3Width + props.offsetLeft
+  const unavailableWidth = panel1Width.value + props.minPanel3Width
 
   return props.maxTotalWidth - unavailableWidth
 })
 
 const panel3width = computed(() => {
-  return props.maxTotalWidth - panel1Width.value - panel2Width.value
+  const panel3SpaceAvailable = props.maxTotalWidth - panel1Width.value - panel2Width.value
+
+  // minimumWithMargin - if panel 3 would end up below the minimum allowed size
+  // due to window resizing, forcing the minimum width will create a horizontal scroll
+  // so that on small windows users _can_ recover the AUT, just like Cy 9.x.
+  const minimumWithBuffer = props.minPanel3Width
+
+  return panel3SpaceAvailable < props.minPanel3Width ? minimumWithBuffer : panel3SpaceAvailable
 })
 
 function handleResizeEnd (panel: DraggablePanel) {
@@ -159,14 +175,26 @@ function handleResizeEnd (panel: DraggablePanel) {
 }
 
 function isNewWidthAllowed (mouseClientX: number, panel: DraggablePanel) {
+  const isMaxWidthSmall = props.maxTotalWidth < (panel1Width.value + panel2Width.value + props.minPanel3Width)
+  const fallbackWidth = 50
+
   if (panel === 'panel1') {
     const newWidth = mouseClientX - props.offsetLeft
+
+    if (isMaxWidthSmall && newWidth > fallbackWidth) {
+      return true
+    }
+
     const result = panel1IsDragging.value && newWidth >= props.minPanel1Width && newWidth <= maxPanel1Width.value
 
     return result
   }
 
   const newWidth = mouseClientX - props.offsetLeft - panel1Width.value
+
+  if (isMaxWidthSmall && newWidth > fallbackWidth) {
+    return true
+  }
 
   return panel2IsDragging.value && newWidth >= props.minPanel2Width && newWidth <= maxPanel2Width.value
 }
@@ -179,4 +207,6 @@ watchEffect(() => {
   }
 })
 
+// TODO: UNIFY-1704 - avoid special case for FF
+const isFirefox = window.__CYPRESS_BROWSER__?.family === 'firefox'
 </script>

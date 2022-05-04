@@ -7,8 +7,10 @@ export function useAutHeader () {
   const autHeaderEl = ref<HTMLDivElement>()
   const { height } = useElementSize(autHeaderEl)
 
-  watch(height, () => {
-    autStore.setSpecRunnerHeaderHeight(height.value)
+  watch(height, (newVal) => {
+    if (newVal && autStore.specRunnerHeaderHeight !== newVal) {
+      autStore.setSpecRunnerHeaderHeight(newVal)
+    }
   }, {
     immediate: true,
   })

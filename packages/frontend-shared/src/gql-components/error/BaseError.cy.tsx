@@ -1,6 +1,6 @@
 import { codeFrameColumns } from '@babel/code-frame'
 import BaseError from './BaseError.vue'
-import { BaseErrorFragmentDoc } from '../generated/graphql-test'
+import { BaseErrorFragmentDoc } from '../../../../launchpad/src/generated/graphql-test'
 import dedent from 'dedent'
 
 // Selectors
