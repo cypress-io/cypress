@@ -16,7 +16,6 @@ describe('<SelectCloudProjectModal />', () => {
 
         result.cloudViewer = {
           ...CloudUserStubs.me,
-          organizationControl: null,
           organizations: CloudOrganizationConnectionStubs,
         }
       },

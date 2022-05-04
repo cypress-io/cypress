@@ -18,7 +18,6 @@ describe('<CloudConnectModals />', () => {
 
         result.cloudViewer = {
           ...CloudUserStubs.me,
-          organizationControl: null,
           organizations: noOrg ? null : CloudOrganizationConnectionStubs,
         }
       },
