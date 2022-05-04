@@ -370,7 +370,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'server',
   }, {
     name: 'userAgent',
     defaultValue: null,
@@ -387,20 +386,17 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 32,
     validation: validate.isNumberOrFalse,
     canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'browser',
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'server',
   }, {
     name: 'videoUploadOnPasses',
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'browser',
   }, {
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
