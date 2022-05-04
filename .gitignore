@@ -75,11 +75,6 @@ system-tests/lib/fixtureDirs.ts
 /npm/react/cypress/videos
 /npm/react/.babel-cache
 
-# from npm/design-system
-/npm/design-system/bin/*
-/npm/design-system/cypress/videos
-/npm/design-system/.babel-cache
-
 # from npm/webpack-dev-server
 /npm/webpack-dev-server/cypress/videos
 

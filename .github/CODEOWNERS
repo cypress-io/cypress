@@ -13,7 +13,6 @@
 /npm/angular @cypress-io/component-testing
 /npm/create-cypress-tests @cypress-io/component-testing
 /npm/cypress-schematic @cypress-io/component-testing
-/npm/design-system @cypress-io/component-testing
 /npm/eslint-plugin-dev @cypress-io/end-to-end @cypress-io/component-testing
 /npm/mount-utils @cypress-io/component-testing
 /npm/react @cypress-io/component-testing
