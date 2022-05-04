@@ -341,7 +341,7 @@ async function makeE2ETasks () {
           return { value }
         } catch (e: any) {
           if (i <= retries) {
-            await ctx.util.delayMs(obj.options.retryDelay ?? 1000)
+            await new Promise((resolve) => setTimeout(resolve, obj.options.retryDelay ?? 1000))
           }
 
           lastErr = e

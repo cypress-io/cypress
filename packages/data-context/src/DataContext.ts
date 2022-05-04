@@ -392,7 +392,6 @@ export class DataContext {
     return Promise.all([
       this.lifecycleManager.destroy(),
       this.cloud.reset(),
-      this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
