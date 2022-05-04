@@ -1,4 +1,5 @@
 const helpers = require('../support/helpers')
+const path = require('path')
 
 const { runIsolatedCypress } = helpers.createCypress({ config: { experimentalSessionAndOrigin: true } })
 
@@ -12,9 +13,10 @@ const validateSessionsInstrumentPanel = (sessionIds = []) => {
   })
 }
 
-const validateNewSessionGroup = () => {
+const validateCreateNewSessionGroup = () => {
   cy.contains('Create New Session')
   .closest('.command')
+  .should('have.class', 'command-is-open')
   .contains('runSetup')
 
   cy.contains('Create New Session')
@@ -25,14 +27,7 @@ const validateNewSessionGroup = () => {
 
 describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeight: 1000 }, () => {
   it('creates new session', () => {
-    runIsolatedCypress(() => {
-      it('t1', () => {
-        const setupFn = cy.stub().as('runSetup')
-
-        cy.session('blank_session', setupFn)
-        cy.log('after')
-      })
-    })
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/new_session.cy'))
 
     validateSessionsInstrumentPanel(['blank_session'])
 
@@ -44,11 +39,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       .should('contain', '(new) blank_session')
 
       cy.get('.command-name-session').contains('blank_session')
-      cy.contains('Create New Session')
-      .closest('.command')
-      .within(() => {
-        cy.contains('runSetup')
-      })
+      validateCreateNewSessionGroup()
     })
 
     cy.percySnapshot()
@@ -61,18 +52,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
   })
 
   it('creates new session with validation', () => {
-    runIsolatedCypress(() => {
-      it('t1', () => {
-        const setupFn = cy.stub().as('runSetup')
-        const validateFn = cy.stub().as('runValidation')
-
-        cy.session('blank_session', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-    })
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/new_session_with_validation.cy'))
 
     validateSessionsInstrumentPanel(['blank_session'])
 
@@ -85,7 +65,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
 
       cy.get('.command-name-session').contains('blank_session')
 
-      validateNewSessionGroup()
+      validateCreateNewSessionGroup()
     })
 
     cy.percySnapshot()
@@ -105,16 +85,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
   })
 
   it('creates new session and fails validation', () => {
-    runIsolatedCypress(() => {
-      it('t1', () => {
-        const setupFn = cy.stub().as('runSetup')
-        const validateFn = cy.stub().returns(false).as('runValidation')
-
-        cy.session('blank_session', setupFn, {
-          validate: validateFn,
-        })
-      })
-    })
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/new_session_and_fails_validation.cy'))
 
     validateSessionsInstrumentPanel(['blank_session'])
 
@@ -127,7 +98,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
 
       cy.get('.command-name-session').contains('blank_session')
 
-      validateNewSessionGroup()
+      validateCreateNewSessionGroup()
     })
 
     // FIXME: this should be nested within the session command
@@ -143,38 +114,14 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
   })
 
   it('restores saved session', () => {
-    runIsolatedCypress(() => {
-      let setupFn
-      let validateFn
-
-      before(() => {
-        setupFn = cy.stub().as('runSetup')
-        validateFn = cy.stub().as('runValidation')
-      })
-
-      it('t1', () => {
-        cy.session('user1', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-
-      it('t2', () => {
-        cy.session('user1', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-    })
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/restores_saved_session.cy'))
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
 
     cy.log('validate new session was created in first test')
     cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
-      validateNewSessionGroup()
+      validateCreateNewSessionGroup()
     })
 
     cy.log('validate saved session was used in second test')
@@ -214,35 +161,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
   })
 
   it('recreates session', () => {
-    runIsolatedCypress(() => {
-      let setupFn
-      let validateFn
-
-      before(() => {
-        setupFn = cy.stub().as('runSetup')
-        validateFn = cy.stub().callsFake(() => {
-          if (validateFn.callCount === 2) {
-            return false
-          }
-        }).as('runValidation')
-      })
-
-      it('t1', () => {
-        cy.session('user1', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-
-      it('t2', () => {
-        cy.session('user1', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-    })
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/recreates_session.cy'))
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
 
@@ -276,9 +195,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
 
         cy.contains('Validate Session: invalid')
 
-        cy.contains('Create New Session')
-        .closest('.command')
-        .should('have.class', 'command-is-open')
+        validateCreateNewSessionGroup()
 
         cy.contains('Validate Session: valid')
         .closest('.command')
@@ -298,36 +215,8 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
     })
   })
 
-  it('recreated session and fails validation', () => {
-    runIsolatedCypress(() => {
-      let setupFn
-      let validateFn
-
-      before(() => {
-        setupFn = cy.stub().as('runSetup')
-        validateFn = cy.stub().callsFake(() => {
-          if (validateFn.callCount >= 2) {
-            return false
-          }
-        }).as('runValidation')
-      })
-
-      it('t1', () => {
-        cy.session('user1', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-
-      it('t2', () => {
-        cy.session('user1', setupFn, {
-          validate: validateFn,
-        })
-
-        cy.log('after')
-      })
-    })
+  it('recreates session and fails validation', () => {
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/recreates_session_and_fails_validation.cy'))
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
 
@@ -361,6 +250,8 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
 
         cy.contains('Validate Session: invalid')
 
+        validateCreateNewSessionGroup()
+
         // FIXME: this validation group should say 'Validate Session: valid'
         cy.contains('Validate Session')
         .closest('.command')
@@ -372,33 +263,12 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       })
       .percySnapshot()
 
-      cy.contains('Create New Session')
-      .closest('.command')
-      // FIXME: this 'Create New Session' group's collapsed behavior
-      // does not align with behavior observed in other 'Create New Session'
-      // groups should be 'not.have.class' to align
-      .should('not.have.class', 'command-is-open')
-      .click()
-
-      validateNewSessionGroup()
-
       cy.get('.runnable-err').should('have.length', 2)
     })
   })
 
   it('multiple sessions in a test', () => {
-    runIsolatedCypress(() => {
-      it('t1', () => {
-        cy.session('user1', () => {
-          window.localStorage.foo = 'val'
-        })
-
-        cy.session('user2', () => {
-          window.localStorage.foo = 'val'
-          window.localStorage.bar = 'val'
-        })
-      })
-    })
+    runIsolatedCypress(path.join(__dirname, '../../../../system-tests/projects/runner-e2e-specs/cypress/e2e/sessions/multiple_sessions.cy'))
 
     validateSessionsInstrumentPanel(['user1', 'user2'])
     cy.percySnapshot()
