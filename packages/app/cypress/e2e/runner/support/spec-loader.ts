@@ -65,22 +65,16 @@ export function loadSpec (options: LoadSpecOptions) {
   shouldHaveTestResults({ passCount, failCount, pendingCount })
 }
 
-export function runSpec ({ fileName }: { fileName: string }) {
+export function runSpec ({ filePath }: { filePath: string }) {
   cy.scaffoldProject('runner-e2e-specs')
   cy.openProject('runner-e2e-specs')
   cy.startAppServer()
 
-  cy.visitApp()
+  cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
 
-  cy.findByLabelText('Search Specs').type(fileName)
-  // wait for virtualized spec list to update, there is a chance
-  // of disconnection otherwise
-  cy.wait(500)
-  cy.contains('[data-cy=spec-item]', fileName).click()
-
-  cy.location().should((location) => {
-    expect(location.hash).to.contain(fileName)
-  })
+  // Wait for runner to load before continuing, otherwise we may execute
+  //  prior to the eventManager having been initialized.
+  cy.get('#unified-reporter').should('exist')
 
   return cy.window()
 }
