@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
-import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
@@ -204,7 +203,9 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
   if (options.contextMenu) {
     // adds context menu with copy, paste, inspect element, etc
-    contextMenu({
+    // this instance of JIT requiring electron-context-menu can be removed
+    // once https://github.com/cypress-io/cypress/issues/21236 is fixed
+    require('electron-context-menu')({
       showInspectElement: true,
       window: win,
     })
