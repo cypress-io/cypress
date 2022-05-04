@@ -124,7 +124,10 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   })
 
   describe('cleanses errors before emitting', () => {
-    it('does not try to serialize error with err.actual as DOM node', (done) => {
+    // The does-not-serialize-dom-error.cy.js spec loaded as part of this test
+    // loads a fixture and can execute slower in Windows CI builds. We increase the
+    // timeout to ensure that the inner spec can complete within the timeout duration.
+    it('does not try to serialize error with err.actual as DOM node', { defaultCommandTimeout: 7500 }, (done) => {
       const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
         snapshots,
         'src/cypress/runner retries mochaEvents cleanses errors before emitting does not try to serialize error with err.actual as DOM node #1',
@@ -134,7 +137,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
       runSpec({
         fileName: 'does-not-serialize-dom-error.cy.js',
       }).then((win) => {
-      // should not have err.actual, expected properties since the subject is a DOM element
+        // should not have err.actual, expected properties since the subject is a DOM element
         assertMatchingSnapshot(win)
       })
     })
