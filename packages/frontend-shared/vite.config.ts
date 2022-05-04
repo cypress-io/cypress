@@ -53,6 +53,11 @@ const makePlugins = (plugins) => {
         cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
         ...plugins.iconsOptions?.customCollections,
       },
+      iconCustomizer (collection, icon, props) {
+        if (icon.includes('_x16')) {
+          props.style = 'min-width: 16px; min-height: 16px'
+        }
+      },
       ...plugins.iconsOptions,
     }),
     Components({
