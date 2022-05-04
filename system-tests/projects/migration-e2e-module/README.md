@@ -1,6 +1,6 @@
-## Migration E2E Defaults
+## Migration E2E Module
 
-An e2e project with all defaults. We rename the `integrationFolder` and spec extension.
+An e2e project with ES modules. We rename the `integrationFolder` and spec extension.
 
 The following migration steps will be used during this migration:
 
