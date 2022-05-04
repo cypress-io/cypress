@@ -110,10 +110,39 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
+    cy.get('[data-cy="playground-copy"]').trigger('mouseover')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
+    cy.percySnapshot('Copy to clipboard hover tooltip')
     cy.get('[data-cy="playground-copy"]').click()
-    cy.get('[data-cy="playground-copy-tooltip"]').should('be.visible').contains('Copied to clipboard')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied!')
+    cy.percySnapshot('Copy to clipboard click tooltip')
 
     cy.wrap(copyStub).should('have.been.calledWith', '.foo-bar')
+  })
+
+  it('prints elements when selected elements found', () => {
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(logger, 'logFormatted')
+    cy.stub(autIframe, 'getElements').callsFake(() => Array(2))
+
+    cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
+
+    cy.get('[data-cy="playground-print"]').trigger('mouseover')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
+    cy.percySnapshot('Print to console hover tooltip')
+
+    cy.get('[data-cy="playground-print"]').click()
+    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed!')
+    cy.percySnapshot('Print to console click tooltip')
+
+    cy.then(() => {
+      expect(logger.logFormatted).to.have.been.calledWith({
+        Command: `cy.get('.foo-bar')`,
+        Elements: 2,
+        Yielded: undefined, // stubbed dom does not actually return anything
+      })
+    })
   })
 
   it('prints nothing to console when no selected elements found', () => {
@@ -126,25 +155,6 @@ describe('SelectorPlayground', () => {
       expect(logger.logFormatted).to.have.been.calledWith({
         Command: `cy.get('.foo-bar')`,
         Yielded: 'Nothing',
-      })
-    })
-
-    cy.get('[data-cy="playground-print-tooltip"]').should('be.visible').contains('Printed to console')
-  })
-
-  it('prints elements when selected elements found', () => {
-    const { autIframe } = mountSelectorPlayground()
-
-    cy.spy(logger, 'logFormatted')
-    cy.stub(autIframe, 'getElements').callsFake(() => Array(2))
-
-    cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
-
-    cy.get('[data-cy="playground-print"]').click().then(() => {
-      expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
-        Elements: 2,
-        Yielded: undefined, // stubbed dom does not actually return anything
       })
     })
   })

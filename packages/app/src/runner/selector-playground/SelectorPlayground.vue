@@ -3,14 +3,19 @@
     id="selector-playground"
     class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
   >
-    <button
-      class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center hover:default-ring"
-      :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
-      data-cy="playground-toggle"
-      @click="toggleEnabled"
+    <SelectorPlaygroundTooltip
+      :hover-text="t('runner.selectorPlayground.playgroundTooltip')"
+      class="flex h-full"
     >
-      <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
-    </button>
+      <button
+        class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center hover:default-ring"
+        :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
+        data-cy="playground-toggle"
+        @click="toggleEnabled"
+      >
+        <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
+      </button>
+    </SelectorPlaygroundTooltip>
     <div
       class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
@@ -86,13 +91,9 @@
     </div>
 
     <div class="flex gap-12px">
-      <Tooltip
-        :triggers="['click', 'touch']"
-        :hide-triggers="['hover']"
-        :distance="8"
-        auto-hide
-        :delay="{ hide: 2000 }"
-        hide-arrow
+      <SelectorPlaygroundTooltip
+        :hover-text="t('runner.selectorPlayground.copyTooltip')"
+        :click-text="t('runner.selectorPlayground.copyTooltipAction')"
       >
         <Button
           size="md"
@@ -103,25 +104,14 @@
         >
           <i-cy-copy-clipboard_x16 class="icon-dark-gray-500" />
         </Button>
-        <template #popper>
-          <div
-            class="whitespace-nowrap"
-            data-cy="playground-copy-tooltip"
-          >
-            {{ t('runner.selectorPlayground.copyTooltip') }}
-          </div>
-        </template>
-      </Tooltip>
+      </SelectorPlaygroundTooltip>
 
-      <Tooltip
-        :triggers="['click', 'touch']"
-        :hide-triggers="['hover']"
-        :distance="8"
-        auto-hide
-        :delay="{ hide: 2000 }"
-        hide-arrow
+      <SelectorPlaygroundTooltip
+        :hover-text="t('runner.selectorPlayground.printTooltip')"
+        :click-text="t('runner.selectorPlayground.printTooltipAction')"
       >
         <Button
+          key="fudge"
           size="md"
           variant="outline"
           data-cy="playground-print"
@@ -130,15 +120,7 @@
         >
           <i-cy-technology-terminal_x16 class="icon-dark-gray-600" />
         </Button>
-        <template #popper>
-          <div
-            class="whitespace-nowrap"
-            data-cy="playground-print-tooltip"
-          >
-            {{ t('runner.selectorPlayground.printTooltip') }}
-          </div>
-        </template>
-      </Tooltip>
+      </SelectorPlaygroundTooltip>
     </div>
   </div>
 </template>
@@ -149,11 +131,11 @@ import { useSelectorPlaygroundStore } from '../../store/selector-playground-stor
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@cy/gql-components/useClipboard'
+import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
 
 const { t } = useI18n()
 
