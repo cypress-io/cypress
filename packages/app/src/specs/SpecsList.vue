@@ -207,7 +207,7 @@ const cachedSpecs = useCachedSpecs(
   computed(() => props.gql.currentProject?.specs ?? []),
 )
 
-const specsListHeader = ref('')
+const specsListHeader: any = ref('')
 const search = ref('')
 const debouncedSearchString = useDebounce(search, 200)
 
