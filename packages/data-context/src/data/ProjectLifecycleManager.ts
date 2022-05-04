@@ -247,15 +247,17 @@ export class ProjectLifecycleManager {
 
         // This happens automatically with openProjectCreate in run mode
         if (!this.ctx.isRunMode) {
+          const shouldRelaunchBrowser = this.ctx.coreData.app.browserStatus !== 'closed'
+
           if (!this._initializedProject) {
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
           } else if (restartOnChange.server) {
-            this.ctx.project.setRelaunchBrowser(true)
+            this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
-          } else if (restartOnChange.browser) {
-            this.ctx.project.setRelaunchBrowser(true)
+          } else if (restartOnChange.browser && shouldRelaunchBrowser) {
+            this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
             await this.ctx.actions.browser.closeBrowser()
-            await this.ctx.actions.browser.focusActiveBrowserWindow()
+            await this.ctx.actions.browser.relaunchBrowser()
           }
         }
 
