@@ -5,12 +5,12 @@
     :disabled="isNavBarExpanded"
     :distance="8"
   >
-    <div
+    <button
+      type="button"
       class="border-b cursor-pointer flex border-gray-900 flex-shrink-0 h-64px pl-20px transition-all duration-300 items-center hover:bg-gray-900"
       :popper-top-offset="4"
       popper-class="h-56px"
       data-cy="sidebar-header"
-      tabindex="0"
       @click="showModal = true"
       @keydown.enter="showModal = true"
     >
@@ -34,7 +34,7 @@
           {{ props.gql.currentProject?.branch }}
         </p>
       </div>
-    </div>
+    </button>
     <template #popper>
       <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}

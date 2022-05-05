@@ -8,7 +8,7 @@
     <button
       v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
-      role="button"
+      type="button"
       aria-label="toggle navigation"
       @click="toggleNavbarIfAllowed"
     >
@@ -26,27 +26,31 @@
     <div class="flex flex-col flex-1 overflow-y-auto ">
       <SidebarNavigationHeader
         v-if="query.data.value"
+        id="sidebar-navigation-header"
         :gql="query.data.value"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
+        aria-labelledby="sidebar-navigation-header"
       >
-        <RouterLink
-          v-for="item in navigation"
-          v-slot="{ isActive }"
-          :key="item.name"
-          :to="item.href"
-        >
-          <SidebarNavigationRow
-            :data-e2e-href="item.href"
-            :active="isActive"
-            :icon="item.icon"
-            :name="item.name"
-            :is-nav-bar-expanded="isNavBarExpanded"
-          />
-        </RouterLink>
+        <ul>
+          <RouterLink
+            v-for="item in navigation"
+            v-slot="{ isActive }"
+            :key="item.name"
+            :to="item.href"
+          >
+            <SidebarNavigationRow
+              :data-e2e-href="item.href"
+              :active="isActive"
+              :icon="item.icon"
+              :name="item.name"
+              :is-nav-bar-expanded="isNavBarExpanded"
+            />
+          </RouterLink>
+        </ul>
       </nav>
       <Tooltip
         placement="right"
@@ -78,6 +82,7 @@
       />
       <img
         :src="CypressLogo"
+        alt="Cypress"
         class="h-32px m-16px w-32px"
       >
     </div>
