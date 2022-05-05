@@ -657,8 +657,11 @@
     },
     "selectorPlayground": {
       "matches": "No Matches | {n} Match | {n} Matches",
-      "copyTooltip": "Copied to clipboard",
-      "printTooltip": "Printed to console",
+      "playgroundTooltip": "Click an element to see a suggested selector",
+      "copyTooltip": "Copy to clipboard",
+      "copyTooltipAction": "Copied!",
+      "printTooltip": "Print to console",
+      "printTooltipAction": "Printed!",
       "invalidSelector": "Invalid",
       "selectorMethodsLabel": "Selector Methods"
     },
