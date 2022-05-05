@@ -8,7 +8,7 @@ import * as configUtil from '../src/index'
 chai.use(sinonChai)
 const { expect } = chai
 
-describe('config/lib/index', () => {
+describe('config/src/index', () => {
   describe('.allowed', () => {
     it('returns filter config only containing allowed keys', () => {
       const keys = configUtil.allowed({

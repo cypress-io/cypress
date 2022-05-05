@@ -103,18 +103,18 @@ exports['null instead of a number'] = {
   "type": "one of these values: 1, 2, 3"
 }
 
-exports['config/lib/validation .isValidClientCertificatesSet returns error message for certs not passed as an array array 1'] = {
+exports['config/src/validation .isValidClientCertificatesSet returns error message for certs not passed as an array array 1'] = {
   "key": "mockConfigKey",
   "value": "1",
   "type": "a positive number or null or an object with keys \"openMode\" and \"runMode\" with values of numbers or nulls"
 }
 
-exports['config/lib/validation .isValidClientCertificatesSet returns error message for certs object without url 1'] = {
+exports['config/src/validation .isValidClientCertificatesSet returns error message for certs object without url 1'] = {
   "key": "clientCertificates[0].url",
   "type": "a URL matcher"
 }
 
-exports['config/lib/validation .isValidBrowser passes valid browsers and forms error messages for invalid ones isValidBrowser 1'] = {
+exports['config/src/validation .isValidBrowser passes valid browsers and forms error messages for invalid ones isValidBrowser 1'] = {
   "name": "isValidBrowser",
   "behavior": [
     {
@@ -183,43 +183,43 @@ exports['config/lib/validation .isValidBrowser passes valid browsers and forms e
   ]
 }
 
-exports['config/lib/validation .isPlainObject returns error message when value is a not an object 1'] = {
+exports['config/src/validation .isPlainObject returns error message when value is a not an object 1'] = {
   "key": "mockConfigKey",
   "value": 1,
   "type": "a plain object"
 }
 
-exports['config/lib/validation .isNumber returns error message when value is a not a number 1'] = {
+exports['config/src/validation .isNumber returns error message when value is a not a number 1'] = {
   "key": "mockConfigKey",
   "value": "string",
   "type": "a number"
 }
 
-exports['config/lib/validation .isNumberOrFalse returns error message when value is a not number or false 1'] = {
+exports['config/src/validation .isNumberOrFalse returns error message when value is a not number or false 1'] = {
   "key": "mockConfigKey",
   "value": null,
   "type": "a number or false"
 }
 
-exports['config/lib/validation .isBoolean returns error message when value is a not a string 1'] = {
+exports['config/src/validation .isBoolean returns error message when value is a not a string 1'] = {
   "key": "mockConfigKey",
   "value": 1,
   "type": "a string"
 }
 
-exports['config/lib/validation .isString returns error message when value is a not a string 1'] = {
+exports['config/src/validation .isString returns error message when value is a not a string 1'] = {
   "key": "mockConfigKey",
   "value": 1,
   "type": "a string"
 }
 
-exports['config/lib/validation .isArray returns error message when value is a non-array 1'] = {
+exports['config/src/validation .isArray returns error message when value is a non-array 1'] = {
   "key": "mockConfigKey",
   "value": 1,
   "type": "an array"
 }
 
-exports['config/lib/validation .isStringOrFalse returns error message when value is neither string nor false 1'] = {
+exports['config/src/validation .isStringOrFalse returns error message when value is neither string nor false 1'] = {
   "key": "mockConfigKey",
   "value": null,
   "type": "a string or false"

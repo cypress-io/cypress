@@ -1,4 +1,4 @@
-exports['config/lib/index .getBreakingKeys returns list of breaking config keys 1'] = [
+exports['config/src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "blacklistHosts",
   "componentFolder",
   "experimentalComponentTesting",
@@ -17,7 +17,7 @@ exports['config/lib/index .getBreakingKeys returns list of breaking config keys 
   "testFiles"
 ]
 
-exports['config/lib/index .getDefaultValues returns list of public config keys 1'] = {
+exports['config/src/index .getDefaultValues returns list of public config keys 1'] = {
   "animationDistanceThreshold": 5,
   "baseUrl": null,
   "blockHosts": null,
@@ -94,7 +94,7 @@ exports['config/lib/index .getDefaultValues returns list of public config keys 1
   "xhrRoute": "/xhrs/"
 }
 
-exports['config/lib/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
+exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
   "animationDistanceThreshold": 5,
   "baseUrl": null,
   "blockHosts": null,
@@ -172,7 +172,7 @@ exports['config/lib/index .getDefaultValues returns list of public config keys f
   "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
 }
 
-exports['config/lib/index .getPublicConfigKeys returns list of public config keys 1'] = [
+exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
   "animationDistanceThreshold",
   "arch",
   "baseUrl",
