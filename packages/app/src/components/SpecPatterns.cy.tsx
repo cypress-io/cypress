@@ -40,7 +40,7 @@ describe('<SpecPatterns />', () => {
         res.currentTestingType = 'component'
         res.specs = res.specs.slice(0, 50) || []
       },
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} variant='empty' /></div>,
+      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} variant='info' /></div>,
     })
 
     cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')

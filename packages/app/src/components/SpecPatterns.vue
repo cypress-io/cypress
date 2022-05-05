@@ -2,7 +2,7 @@
   <div class="rounded border-gray-100 border-1px w-full">
     <div class="flex p-16px items-center justify-between">
       <FileMatchIndicator :variant="props.variant">
-        <span v-if="props.variant === 'empty'">specPattern</span>
+        <span v-if="props.variant === 'info'">specPattern</span>
         <i18n-t
           v-else
           scope="global"
@@ -60,7 +60,7 @@ fragment SpecPatterns on CurrentProject {
 
 const props = defineProps<{
   gql: SpecPatternsFragment
-  variant?: 'default' | 'empty'
+  variant?: 'default' | 'info'
 }>()
 
 const specPatterns = computed<string[]>(() => {

@@ -15,12 +15,12 @@
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
-  variant?: 'default' | 'empty'
+  variant?: 'default' | 'info'
 }>(), { variant: 'default' })
 
 const colorClasses = {
   default: 'bg-jade-100 text-jade-600',
-  empty: 'bg-purple-100 text-purple-600',
+  info: 'bg-purple-100 text-purple-600',
 }
 
 const color = computed(() => {

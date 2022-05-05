@@ -42,7 +42,7 @@
           >
             <SpecPatterns
               :gql="props.gql"
-              variant="empty"
+              variant="info"
             />
           </div>
         </div>
