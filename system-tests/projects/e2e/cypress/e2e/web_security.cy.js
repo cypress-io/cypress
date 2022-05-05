@@ -25,8 +25,7 @@ describe('web security', function () {
     .contains('success!', { timeout: 500 })
   })
 
-  // TODO: Pair with MD team to fix this issue
-  it.skip('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', () => {
+  it('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', () => {
     // Establish a spec bridge with a 'bar.com' host prior to loading 'foobar.com'
     cy.origin('http://www.bar.com:4466', () => undefined)
 

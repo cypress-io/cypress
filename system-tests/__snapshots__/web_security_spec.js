@@ -23,11 +23,10 @@ exports['e2e web security / when enabled / fails'] = `
     2) fails when submitted a form and being redirected to another origin
     3) fails when using a javascript redirect to another origin
     4) fails when doing a CORS request cross-origin
-    - finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
+    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
 
 
-  0 passing
-  1 pending
+  1 passing
   4 failing
 
   1) web security
@@ -111,9 +110,9 @@ https://on.cypress.io/origin
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        5                                                                                │
-  │ Passing:      0                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      4                                                                                │
-  │ Pending:      1                                                                                │
+  │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
   │ Video:        true                                                                             │
@@ -147,9 +146,9 @@ https://on.cypress.io/origin
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security.cy.js                       XX:XX        5        -        4        1        - │
+  │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        -        4        1        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
 
 
 `
@@ -245,20 +244,19 @@ exports['e2e web security / when disabled / passes'] = `
     ✓ fails when submitted a form and being redirected to another origin
     ✓ fails when using a javascript redirect to another origin
     ✓ fails when doing a CORS request cross-origin
-    - finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
+    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
 
 
-  4 passing
-  1 pending
+  5 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        5                                                                                │
-  │ Passing:      4                                                                                │
+  │ Passing:      5                                                                                │
   │ Failing:      0                                                                                │
-  │ Pending:      1                                                                                │
+  │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
@@ -280,9 +278,9 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security.cy.js                       XX:XX        5        4        -        1        - │
+  │ ✔  web_security.cy.js                       XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        4        -        1        -  
+    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
 
 
 `
