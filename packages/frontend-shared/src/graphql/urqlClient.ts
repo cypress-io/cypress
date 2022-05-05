@@ -25,7 +25,19 @@ import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
 const toast = useToast()
 
 export function makeCacheExchange (schema: any = urqlSchema) {
-  return graphcacheExchange({ ...urqlCacheKeys, schema })
+  return graphcacheExchange({
+    ...urqlCacheKeys,
+    schema,
+    updates: {
+      Mutation: {
+        logout (parent, args, cache, info) {
+          // Invalidate all queries locally upon logging out, to ensure there's no stale cloud data
+          // https://formidable.com/open-source/urql/docs/graphcache/cache-updates/#invalidating-entities
+          cache.invalidate({ __typename: 'Query' })
+        },
+      },
+    },
+  })
 }
 
 declare global {

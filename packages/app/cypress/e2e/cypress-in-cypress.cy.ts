@@ -205,5 +205,21 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`]).should('be.visible')
     })
+
+    it(`resets selector playground validity when selecting element with playground selector in ${testingType}`, () => {
+      startAtSpecsPage(testingType)
+
+      cy.get('[data-cy="spec-item"]').first().click()
+      cy.get('#unified-reporter').should('be.visible')
+
+      cy.get('[data-cy="playground-activator"]').click()
+      cy.get('[data-cy="playground-selector"]').clear()
+      cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
+      cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap).within(() => {
+        cy.get('body').click()
+      })
+
+      cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+    })
   })
 })
