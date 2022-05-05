@@ -598,7 +598,16 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').trigger('tap', { animationDistanceThreshold: 1000 }).then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+          args[1].forEach((fromElWin) => {
+            // in some firefox versions, leftCenter may drift slightly by a pixel. The reason for this is unclear.
+            const { leftCenter: argLeftCenter, topCenter: argTopCenter, ...argCoordinates } = fromElWin
+            const { leftCenter: fromElWinLeftCenter, topCenter: fromElWinTopCenter, ...fromElWinCoordinates } = fromElWindow
+
+            expect(argLeftCenter).to.be.closeTo(fromElWinLeftCenter, 1)
+            expect(argTopCenter).to.be.closeTo(fromElWinTopCenter, 1)
+            expect(argCoordinates).to.deep.eq(fromElWinCoordinates)
+          })
+
           expect(args[2]).to.eq(1000)
         })
       })
@@ -615,7 +624,16 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').trigger('mouseover').then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+          args[1].forEach((fromElWin) => {
+            // in some firefox versions, leftCenter may drift slightly by a pixel. The reason for this is unclear.
+            const { leftCenter: argLeftCenter, topCenter: argTopCenter, ...argCoordinates } = fromElWin
+            const { leftCenter: fromElWinLeftCenter, topCenter: fromElWinTopCenter, ...fromElWinCoordinates } = fromElWindow
+
+            expect(argLeftCenter).to.be.closeTo(fromElWinLeftCenter, 1)
+            expect(argTopCenter).to.be.closeTo(fromElWinTopCenter, 1)
+            expect(argCoordinates).to.deep.eq(fromElWinCoordinates)
+          })
+
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
       })
