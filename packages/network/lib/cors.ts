@@ -93,6 +93,12 @@ export function urlOriginsMatch (url1, url2) {
   return _.isEqual(parsedUrl1, parsedUrl2)
 }
 
+declare module 'url' {
+  interface UrlWithStringQuery {
+    format(): string
+  }
+}
+
 export function urlMatchesOriginProtectionSpace (urlStr, origin) {
   const normalizedUrl = uri.addDefaultPort(urlStr).format()
   const normalizedOrigin = uri.addDefaultPort(origin).format()

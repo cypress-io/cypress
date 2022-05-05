@@ -123,7 +123,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
                 source: print(source),
               }))
             },
-          }).end()
+          })?.end()
         }
 
         return props.gql ? options.render(props.gql) : h('div')

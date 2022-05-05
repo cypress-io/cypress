@@ -1,4 +1,4 @@
-/// <reference path="../driver/types/internal-types.d.ts" />
+/// <reference path="../driver/types/internal-types-lite.d.ts" />
 
 import type { Socket } from '@packages/socket/lib/browser'
 import type MobX from 'mobx'

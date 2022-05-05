@@ -11,7 +11,6 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
-import type { RemoteStates } from '@packages/server/lib/remote_states'
 
 export interface ProjectApiShape {
   /**
@@ -31,7 +30,7 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
-  getRemoteStates(): RemoteStates | undefined
+  getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void

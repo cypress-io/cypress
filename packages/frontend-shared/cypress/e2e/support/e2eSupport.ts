@@ -302,7 +302,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
 
         return ctx.appServerPort
       }, { log: false, mode, url: win.top ? win.top.location.href : undefined, ...options }).then((serverPort) => {
-        log.set({ message: `port: ${serverPort}` })
+        log?.set({ message: `port: ${serverPort}` })
         Cypress.env('e2e_serverPort', serverPort)
       })
     })
@@ -370,8 +370,8 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
     fn: fn.toString(),
     options: rest,
   }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
-    _log.set('result', result)
-    _log.end()
+    _log?.set('result', result)
+    _log?.end()
 
     if (result.error) {
       const err = new Error(result.error.message)
@@ -452,13 +452,13 @@ function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ET
   return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: options.timeout ?? (isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
 }
 
-function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
+function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log | undefined) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
   const _log = typeof name === 'string'
     ? Cypress.log({ name, message: '' })
     : Cypress.log(name)
 
   return cb(_log).then<T>((val) => {
-    _log.end()
+    _log?.end()
 
     return val
   })
