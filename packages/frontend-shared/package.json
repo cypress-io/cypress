@@ -44,7 +44,7 @@
     "dayjs": "^1.9.3",
     "fake-uuid": "^1.0.0",
     "faker": "5.5.3",
-    "floating-vue": "2.0.0-beta.12",
+    "floating-vue": "2.0.0-beta.16",
     "fuzzysort": "^1.1.4",
     "graphql": "^15.5.1",
     "graphql-relay": "^0.9.0",
