@@ -24,11 +24,7 @@ describe('Spec List - Git Status', () => {
     // we still show "modified" but a different style, indicating the last
     // person to touch the file.
     cy.get('[data-cy-row="dom-container.spec.js"] .git-info-row svg')
-    .should(($icon) => {
-      $icon.map((i, el) => {
-        expect(Cypress.$(el).attr('class')).to.eq('')
-      })
-    })
+    .should('have.class', 'icon-light-gray-500')
 
     cy.withCtx((ctx) => {
       ctx.fs.appendFileSync(
@@ -38,7 +34,6 @@ describe('Spec List - Git Status', () => {
       )
     })
 
-    cy.wait(2000)
     // should update via GraphQL subscription, now the status is modified.
     cy.get('[data-cy-row="dom-container.spec.js"] .git-info-row svg')
     .should('have.class', 'icon-light-orange-50')
@@ -51,7 +46,6 @@ describe('Spec List - Git Status', () => {
       )
     })
 
-    cy.wait(2000)
     // even if a created file is updated, the status should stay created
     cy.get('[data-cy-row="foo.spec.js"] .git-info-row svg')
     .should('have.class', 'icon-light-jade-50')
@@ -69,12 +63,7 @@ describe('Spec List - Git Status', () => {
       )
     })
 
-    cy.wait(2000)
     cy.get('[data-cy-row="dom-container.spec.js"] .git-info-row svg')
-    .should(($icon) => {
-      $icon.map((i, el) => {
-        expect(Cypress.$(el).attr('class')).to.eq('')
-      })
-    })
+    .should('have.class', 'icon-light-gray-500')
   })
 })

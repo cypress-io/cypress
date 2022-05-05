@@ -34,7 +34,7 @@ import { useI18n } from '@cy/i18n'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import DocumentIconPlus from '~icons/cy/document-plus_x16'
 import DocumentIconPlusMinus from '~icons/cy/document-plus-minus_x16'
-import IconGit from '~icons/cy/git_x16'
+import CommitIcon from '~icons/cy/commit_x14'
 
 const { t } = useI18n()
 
@@ -64,7 +64,8 @@ const classes = computed(() => {
       showTooltip: false,
     },
     unmodified: {
-      icon: IconGit,
+      icon: CommitIcon,
+      iconClasses: 'icon-light-gray-500',
       showTooltip: true,
     },
   }[props.gql?.statusType || 'unmodified']
