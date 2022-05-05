@@ -103,6 +103,30 @@ describe('App: Settings', () => {
       cy.contains('Record Key').should('not.exist')
       cy.contains('Record Key')
     })
+
+    it('clears nested cloud data (record key) upon logging out', () => {
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx.actions.auth, 'logout')
+      })
+
+      cy.get(`[href='#/settings']`).click()
+      cy.contains('Dashboard Settings').click()
+      cy.contains('Record Key').should('exist')
+      cy.get(`[href='#/runs']`).click()
+      cy.get('[data-cy="user-avatar-title"]').click()
+      cy.findByRole('button', { name: 'Log Out' }).click()
+
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx.actions.auth.logout).to.have.been.calledOnce
+      })
+
+      cy.get(`[href='#/settings']`).click()
+      cy.contains('Dashboard Settings').click()
+      cy.contains('Record Key').should('not.exist')
+    })
   })
 
   describe('Project Settings', () => {
