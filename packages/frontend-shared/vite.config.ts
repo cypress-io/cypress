@@ -54,8 +54,12 @@ const makePlugins = (plugins) => {
         ...plugins.iconsOptions?.customCollections,
       },
       iconCustomizer (collection, icon, props) {
-        if (icon.includes('_x16')) {
-          props.style = 'min-width: 16px; min-height: 16px'
+        if (icon.includes('_x')) {
+          const [, size] = icon.split('_x')
+
+          if (Number(size)) {
+            props.style = `min-width: ${size}px; min-height: ${size}px`
+          }
         }
       },
       ...plugins.iconsOptions,
