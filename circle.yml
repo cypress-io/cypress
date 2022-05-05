@@ -39,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ check-results-for-env, << pipeline.git.branch >> ]
+    - equal: [ renovate/electron-16.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -49,6 +50,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ check-results-for-env, << pipeline.git.branch >> ]
+    - equal: [ renovate/electron-16.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
