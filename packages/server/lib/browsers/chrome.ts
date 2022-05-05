@@ -324,12 +324,12 @@ const onReconnect = (client: CRIWrapper.Client) => {
   // if the client disconnects (e.g. due to a computer sleeping), update
   // the frame tree on reconnect in cases there were changes while
   // the client was disconnected
-  return _updateFrameTree(client)()
+  return _updateFrameTree(client, 'onReconnect')()
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const _updateFrameTree = (client: CRIWrapper.Client) => async () => {
-  debug('update frame tree')
+const _updateFrameTree = (client: CRIWrapper.Client, eventName) => async () => {
+  debug(`update frame tree for ${eventName}`)
 
   gettingFrameTree = new Promise<void>(async (resolve) => {
     try {
@@ -351,8 +351,8 @@ const _updateFrameTree = (client: CRIWrapper.Client) => async () => {
 const _listenForFrameTreeChanges = (client) => {
   debug('listen for frame tree changes')
 
-  client.on('Page.frameAttached', _updateFrameTree(client))
-  client.on('Page.frameDetached', _updateFrameTree(client))
+  client.on('Page.frameAttached', _updateFrameTree(client, 'Page.frameAttached'))
+  client.on('Page.frameDetached', _updateFrameTree(client, 'Page.frameDetached'))
 }
 
 const _continueRequest = (client, params, header?) => {
@@ -391,7 +391,7 @@ interface HasFrame {
 const _isAUTFrame = async (frameId: string) => {
   debug('need frame tree')
 
-  // the request could come in while in the middle of geting the frame tree,
+  // the request could come in while in the middle of getting the frame tree,
   // which is asynchronous, so wait for it to be fetched
   if (gettingFrameTree) {
     debug('awaiting frame tree')
@@ -559,6 +559,9 @@ export = {
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
 
+    // make sure page events are re enabled or else frame tree updates will NOT work as well as other items listening for page events
+    await pageCriClient.send('Page.enable')
+
     await options.onInitializeNewBrowserTab()
 
     await Promise.all([
@@ -567,6 +570,11 @@ export = {
     ])
 
     await this._navigateUsingCRI(pageCriClient, options.url)
+
+    if (options.experimentalSessionAndOrigin) {
+      await this._handlePausedRequests(pageCriClient)
+      _listenForFrameTreeChanges(pageCriClient)
+    }
   },
 
   async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
