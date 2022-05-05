@@ -1,5 +1,6 @@
 const baseUrl = Cypress.config('baseUrl')
 
+Cypress.config({ experimentalSessionAndOrigin: true })
 before(() => {
   // sessions has logic built in to persists sessions on UI refresh
   Cypress.session.clearAllSavedSessions()
@@ -39,6 +40,250 @@ describe('cy.session', { retries: 0 }, () => {
       cy.then(() => {
         expect(setup).to.be.calledOnce
         expect(validate).to.be.calledOnce
+      })
+    })
+  })
+
+  describe('session flows', () => {
+    describe('create session flow', () => {
+      let logs = []
+      let clearPageCount = 0
+      let clearCurrentSessionDataSpy
+
+      const handleSetup = () => {
+        cy.then(() => {
+          expect(clearPageCount, 'cleared page before executing session setup').to.eq(1)
+          expect(clearCurrentSessionDataSpy, 'clears session data before creating session').to.be.calledOnce
+        })
+
+        cy.contains('This is a blank page')
+        cy.contains('We always navigate you here after')
+        cy.contains('cy.session(...)')
+      }
+
+      beforeEach(() => {
+        clearPageCount = 0
+        clearCurrentSessionDataSpy = cy.spy(Cypress.session, 'clearCurrentSessionData')
+        let sessionGroupId
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'session' && !sessionGroupId) {
+            sessionGroupId = attrs.id
+          }
+
+          logs.push(log)
+        })
+
+        // cy.on('log:changed', (attrs, log) => {
+        //   console.log('changed', attrs, log)
+        // })
+
+        cy.on('internal:window:load', (args) => {
+          if (args.window.location.href === 'about:blank') {
+            clearPageCount++
+          }
+        })
+
+        cy.log('Cypress.session.clearAllSavedSessions()')
+        cy.wrap(Cypress.session.clearAllSavedSessions(), { log: false })
+      })
+
+      it('successfully creates new session', () => {
+        const setup = cy.stub().callsFake(handleSetup).as('setupSession')
+
+        cy.log('create new session to validate against')
+        cy.session('session-1', setup)
+        .then(() => {
+          expect(setup).to.be.calledOnce
+          // FIXME: currently page is cleared 3 times when it should clear 2 times
+          // expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        })
+      })
+
+      it('successfully creates new session and validates it', () => {
+        const setup = cy.stub().callsFake(handleSetup).as('setupSession')
+        const validate = cy.stub().as('validateSession')
+
+        cy.log('create new session to validate against')
+        cy.session('session-1', setup, { validate })
+        .then(() => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledOnce
+          // TODO: currently page is cleared 3 times when it should clear twice
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+        })
+      })
+
+      it('fails validating new session', () => {
+        const setup = cy.stub().callsFake(handleSetup).as('setupSession')
+        const validate = cy.stub().returns(false).as('validateSession')
+
+        cy.on('fail', (err) => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledOnce
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+          expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+        })
+
+        cy.log('create new session to validate against')
+        cy.session('session-1', setup, { validate })
+      })
+    })
+
+    describe('restores saved session flow', () => {
+      let logs = []
+      let clearPageCount = 0
+      let setup
+      let validate
+
+      beforeEach(() => {
+        clearPageCount = 0
+        let sessionGroupId
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'session' && !sessionGroupId) {
+            sessionGroupId = attrs.id
+          }
+
+          logs.push(log)
+        })
+
+        // cy.on('log:changed', (attrs, log) => {
+        //   console.log('changed', attrs, log)
+        // })
+
+        cy.on('internal:window:load', (args) => {
+          if (args.window.location.href === 'about:blank') {
+            clearPageCount++
+          }
+        })
+
+        cy.log('Cypress.session.clearAllSavedSessions()')
+        cy.wrap(Cypress.session.clearAllSavedSessions(), { log: false })
+        setup = cy.stub().callsFake(() => { }).as('setupSession')
+        validate = cy.stub().as('validateSession')
+      })
+
+      it('successfully restores saved session', () => {
+        cy.log('create new session for test')
+        cy.session('restores', setup)
+        .then(() => {
+          // reset and only test restored session
+          setup.reset()
+          validate.reset()
+          clearPageCount = 0
+        })
+
+        cy.log('restore session to validate against')
+        cy.session('restores', setup)
+        .then(() => {
+          expect(setup).to.not.be.called
+          expect(validate).to.not.be.called
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        })
+      })
+
+      it('successfully restores saved session and validates it', () => {
+        cy.log('create new session for test')
+        cy.session(['restores', 'validate'], setup, { validate })
+        .then(() => {
+          // reset and only test restored session
+          setup.reset()
+          validate.reset()
+          clearPageCount = 0
+        })
+
+        cy.log('restore session to validate against')
+        cy.session(['restores', 'validate'], setup, { validate })
+        .then(() => {
+          expect(setup).to.not.be.called
+          expect(validate).to.be.calledOnce
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+        })
+      })
+    })
+
+    describe('recreates existing session flow', () => {
+      let logs = []
+      // let clearCurrentSessionDataSpy
+      let clearPageCount = 0
+      let setup
+      let validate
+
+      beforeEach(() => {
+        // clearCurrentSessionDataSpy = cy.spy(Cypress.session, 'clearCurrentSessionData')
+        clearPageCount = 0
+        let sessionGroupId
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'session' && !sessionGroupId) {
+            sessionGroupId = attrs.id
+          }
+
+          logs.push(log)
+        })
+
+        // cy.on('log:changed', (attrs, log) => {
+        //   console.log('changed', attrs, log)
+        // })
+
+        cy.on('internal:window:load', (args) => {
+          if (args.window.location.href === 'about:blank') {
+            clearPageCount++
+          }
+        })
+
+        cy.log('Cypress.session.clearAllSavedSessions()')
+        cy.wrap(Cypress.session.clearAllSavedSessions(), { log: false })
+
+        setup = cy.stub().callsFake(() => { }).as('setupSession')
+        validate = cy.stub().as('validateSession')
+      })
+
+      it('successfully recreates existing session', () => {
+        cy.log('create new session for test')
+        cy.session('recreates', setup, { validate })
+        .then(() => {
+          // reset and only test restored session
+          setup.reset()
+          validate.reset()
+          clearPageCount = 0
+          validate.callsFake(() => {
+            if (validate.callCount === 1) {
+              return false
+            }
+          })
+        })
+
+        cy.log('recreate session to validate against')
+        cy.session('recreates', setup, { validate })
+        .then(() => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledTwice
+          expect(clearPageCount, 'total times session cleared the page').to.eq(4)
+        })
+      })
+
+      it('recreates existing session and fails validates it', () => {
+        cy.log('create new session for test')
+        cy.session(['recreates', 'fail'], setup, { validate })
+        .then(() => {
+          // reset and only test restored session
+          setup.reset()
+          validate.reset()
+          validate.callsFake(() => false)
+          clearPageCount = 0
+        })
+
+        cy.on('fail', (err) => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledTwice
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+          expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+        })
+
+        cy.log('recreate session to validate against')
+        cy.session(['recreates', 'fail'], setup, { validate })
       })
     })
   })
