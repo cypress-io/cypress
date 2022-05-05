@@ -83,6 +83,8 @@ const defaultPreferences = {
   'browser.startup.homepage_override.mstone': 'ignore',
   // Start with a blank page about:blank
   'browser.startup.page': 0,
+  // Disable notification banners related to session restoration
+  'browser.startup.couldRestoreSession.count': 0,
 
   // Do not allow background tabs to be zombified on Android: otherwise for
   // tests that open additional tabs: the test harness tab itself might get

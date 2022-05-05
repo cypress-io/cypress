@@ -267,7 +267,7 @@ describe('util', () => {
     })
 
     it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', () => {
-      sandbox.stub(process.versions, 'node').value('v16.5.0')
+      sandbox.stub(process.versions, 'node').value('v16.13.2')
       sandbox.stub(process.versions, 'openssl').value('1.0.0')
 
       restoreEnv = mockedEnv({
@@ -322,7 +322,7 @@ describe('util', () => {
 
     // https://github.com/cypress-io/cypress/issues/18914
     it('does not include --openssl-legacy-provider in Node <=16', () => {
-      sandbox.stub(process.versions, 'node').value('v16.5.0')
+      sandbox.stub(process.versions, 'node').value('v16.13.2')
       sandbox.stub(process.versions, 'openssl').value('1.0.0')
 
       restoreEnv = mockedEnv({})

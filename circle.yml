@@ -48,6 +48,7 @@ macWorkflowFilters: &mac-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ new-cmd-log-styles, << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/10.0-electron-16.x', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -58,7 +59,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
-    - equal: [ 'UNIFY-1471-reporter-resize', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/10.0-electron-16.x', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -70,7 +71,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.5.0-chrome94-ff93
+      - image: cypress/browsers:node16.13.2-chrome100-ff98
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -79,7 +80,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.5.0-chrome94-ff93
+      - image: cypress/browsers:node16.13.2-chrome100-ff98
         user: node
     environment:
       PLATFORM: linux
