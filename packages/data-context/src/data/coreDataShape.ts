@@ -54,6 +54,7 @@ export interface ConfigChildProcessShape {
 
 export interface AppDataShape {
   isInGlobalMode: boolean
+  videoEmbedCode: string
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
@@ -161,6 +162,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
+      videoEmbedCode: '',
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,

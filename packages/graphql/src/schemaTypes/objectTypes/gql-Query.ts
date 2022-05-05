@@ -9,6 +9,7 @@ import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
+const rp = require('@cypress/request-promise')
 
 export const Query = objectType({
   name: 'Query',
@@ -80,6 +81,20 @@ export const Query = objectType({
     t.nonNull.boolean('isInGlobalMode', {
       description: 'Whether the app is in global mode or not',
       resolve: (source, args, ctx) => !ctx.currentProject,
+    })
+
+    t.nonNull.string('videoEmbedCode', {
+      description: 'The code to embed a video',
+      resolve: async (source, args, ctx) => {
+        const res = await rp.get({
+          url: 'https://on.cypress.io/release-notes/7.0.1',
+        }).catch((err: Error) => {
+          // eslint-disable-next-line no-console
+          console.log('Error fetching video embed', err)
+        })
+
+        return res
+      },
     })
 
     t.nonNull.boolean('projectRootFromCI', {

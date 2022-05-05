@@ -31,6 +31,9 @@ export const stubQuery: MaybeResolver<Query> = {
   isInGlobalMode (source, args, ctx) {
     return !ctx.currentProject
   },
+  videoEmbedCode (source, args, ctx) {
+    return ''
+  },
   baseError (source, args, ctx) {
     return {}
   },

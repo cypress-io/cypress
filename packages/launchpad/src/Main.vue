@@ -5,7 +5,7 @@
     />
 
     <MigrationLandingPage
-      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage"
+      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && query.data.videoEmbedCode"
       class="pt-64px"
       @clearLandingPage="showLandingPage = false"
     />
@@ -101,10 +101,12 @@ import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
+import { useOnline } from '@vueuse/core'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 const showLandingPage = ref(true)
+const online = useOnline()
 
 gql`
 fragment MainLaunchpadQueryData on Query {
@@ -124,6 +126,7 @@ fragment MainLaunchpadQueryData on Query {
     currentTestingType
   }
   isInGlobalMode
+  videoEmbedCode
   ...GlobalPage
   ...ScaffoldedFiles
   ...WarningList
