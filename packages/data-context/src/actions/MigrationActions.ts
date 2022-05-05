@@ -175,7 +175,7 @@ export class MigrationActions {
     // this allows users to stop migration halfway,
     // then to pick up where they left migration off
     if (!hasE2ESpec && (!hasCustomIntegrationTestFiles || !hasCustomIntegrationFolder)) {
-      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e', shouldAddCustomE2eSpecPattern) // Figure out how to know if it was only folder
+      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e', shouldAddCustomE2eSpecPattern)
 
       hasE2ESpec = await hasSpecFile(this.ctx.currentProject, '', newE2eSpecPattern)
     }
