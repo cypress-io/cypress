@@ -5,14 +5,11 @@ describe('Reporter Header', () => {
     cy.startAppServer()
     cy.visitApp()
     cy.contains('dom-content.spec').click()
+    cy.waitForSpecToFinish()
   })
 
   context('Specs Shortcut', () => {
     it('selects the correct spec in the Specs List', () => {
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('dom-content.spec')
-      })
-
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
@@ -20,10 +17,6 @@ describe('Reporter Header', () => {
     })
 
     it('filters the list of specs when searching for specs', () => {
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('dom-content.spec')
-      })
-
       cy.get('body').type('f')
 
       cy.get('input').type('dom', { force: true })
@@ -43,10 +36,6 @@ describe('Reporter Header', () => {
 
   context('Testing Preferences', () => {
     it('clicking the down arrow will open a panel showing Testing Preferences', () => {
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('dom-content.spec')
-      })
-
       cy.get('.testing-preferences-toggle').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
 
@@ -60,10 +49,6 @@ describe('Reporter Header', () => {
     })
 
     it('will show a toggle beside the auto-scrolling option', () => {
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('dom-content.spec')
-      })
-
       const switchSelector = '[data-cy=auto-scroll-switch]'
 
       cy.get('.testing-preferences-toggle').click()

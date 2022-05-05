@@ -78,9 +78,12 @@ export function runSpec ({ fileName }: { fileName: string }) {
   cy.wait(500)
   cy.contains('[data-cy=spec-item]', fileName).click()
 
-  cy.location().should((location) => {
-    expect(location.hash).to.contain(fileName)
-  })
+  // First ensure the test is loaded
+  cy.get('.passed > .num').should('contain', '--')
+  cy.get('.failed > .num').should('contain', '--')
+
+  // Then ensure the tests are running
+  cy.contains('Your tests are loading...').should('not.exist')
 
   return cy.window()
 }

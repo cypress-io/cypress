@@ -9,9 +9,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     simulateRunModeInUI()
 
     cy.contains('dom-content.spec').click()
-    cy.location().should((location) => {
-      expect(location.hash).to.contain('dom-content.spec')
-    })
+    cy.waitForSpecToFinish()
 
     cy.findByTestId('aut-url').should('be.visible')
     cy.findByTestId('playground-activator').should('not.exist')
@@ -43,9 +41,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.visitApp()
     simulateRunModeInUI()
     cy.contains('TestComponent.spec').click()
-    cy.location().should((location) => {
-      expect(location.hash).to.contain('TestComponent.spec')
-    })
+    cy.waitForSpecToFinish()
 
     cy.findByTestId('aut-url').should('not.exist')
     cy.findByTestId('playground-activator').should('not.exist')

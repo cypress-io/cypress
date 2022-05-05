@@ -15,10 +15,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('test component', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('TestComponent.spec')
-      })
-
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.findByTestId('aut-url').should('not.exist')
@@ -61,6 +58,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('navigation between specs and other parts of the app works', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Settings page and back to spec runner
@@ -68,6 +66,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Runs page and back to spec runner
@@ -75,6 +74,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(defaultMessages.runs.connect.title).should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
     })
 
@@ -122,6 +122,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('browser picker in runner calls mutation with current spec path', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.withCtx((ctx, o) => {
@@ -165,9 +166,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       })
 
       cy.contains('TestComponent.spec').click()
-      // First ensure the test is running
-      cy.get('.passed > .num').should('contain', '--')
-      cy.get('.failed > .num').should('contain', '--')
+      cy.waitForSpecToFinish()
+
       // Then test the result of the run
       cy.get('.failed > .num').should('contain', 1)
 
@@ -188,6 +188,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
@@ -199,6 +200,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.window().then((win) => {

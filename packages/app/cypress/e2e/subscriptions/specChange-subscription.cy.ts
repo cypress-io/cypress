@@ -145,10 +145,7 @@ module.exports = {
     describe('inline specs list', () => {
       it('responds to specChange event for an added file', () => {
         cy.contains('dom-content.spec').click()
-        // First ensure the test is running
-        cy.get('.passed > .num').should('contain', '--')
-        cy.get('.failed > .num').should('contain', '--')
-        // Ensure the tests pass
+        cy.waitForSpecToFinish()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('body').type('f')
@@ -174,10 +171,7 @@ module.exports = {
 
       it('responds to specChange event for a removed file', () => {
         cy.contains('dom-content.spec').click()
-        // First ensure the test is running
-        cy.get('.passed > .num').should('contain', '--')
-        cy.get('.failed > .num').should('contain', '--')
-        // Ensure the tests pass
+        cy.waitForSpecToFinish()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('body').type('f')
@@ -201,10 +195,7 @@ module.exports = {
 
       it('handles removing the last file', () => {
         cy.contains('dom-content.spec').click()
-        // First ensure the test is running
-        cy.get('.passed > .num').should('contain', '--')
-        cy.get('.failed > .num').should('contain', '--')
-        // Ensure the tests pass
+        cy.waitForSpecToFinish()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.withCtx(async (ctx, o) => {
@@ -233,10 +224,7 @@ module.exports = {
 
       it('responds to a cypress.config.js file change', () => {
         cy.contains('dom-content.spec').click()
-        // First ensure the test is running
-        cy.get('.passed > .num').should('contain', '--')
-        cy.get('.failed > .num').should('contain', '--')
-        // Ensure the tests pass
+        cy.waitForSpecToFinish()
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('body').type('f')
