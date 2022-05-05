@@ -48,7 +48,7 @@ macWorkflowFilters: &mac-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ new-cmd-log-styles, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/10.0-electron-16.x', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/10.0-electron-18.x', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -59,7 +59,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/10.0-electron-16.x', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/10.0-electron-18.x', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -396,8 +396,10 @@ commands:
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
       - run:
-          name: Check  Node
-          command: yarn check-node-version
+          name: Check Node
+          command: |
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            yarn check-node-version
 
   install-chrome:
     description: Install Google Chrome
@@ -596,7 +598,11 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
+      - run: 
+          name: 'Verify Mocha Results'
+          command: |
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            yarn verify:mocha:results <<parameters.expectedResultCount>>
 
   clone-repo-and-checkout-branch:
     description: |
@@ -939,7 +945,9 @@ commands:
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
-          command: yarn binary-zip --platform $PLATFORM
+          command: |
+            apt-get update && apt-get install -y zip
+            yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
