@@ -1,10 +1,8 @@
-import execa from 'execa'
 import simpleGit from 'simple-git'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
 import fs from 'fs-extra'
-import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
@@ -27,17 +25,9 @@ dayjs.extend(relativeTime)
 // Where possible, we use SimpleGit to get other git info, like
 // the status of untracked files and the current git username.
 
-// matches <timestamp> <when> <author>
-// $ git log -1 --pretty=format:%ci %ar %an <file>
-// eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
-const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
-const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
-function ensurePosixPathSeparators (text: string) {
-  return text.replace(/\\/g, '/') // normalize \ to /
-}
 export interface GitInfo {
   author: string | null
   lastModifiedTimestamp: string | null
@@ -217,21 +207,15 @@ export class GitDataSource {
     }
 
     try {
-      const [stdout, statusResult] = await Promise.all([
-        os.platform() === 'win32'
-          ? this.#getInfoWindows(absolutePaths)
-          : this.#getInfoPosix(absolutePaths),
-        this.#git.status(),
-      ])
-
-      debug('stdout %s', stdout)
+      const statusResult = await this.#git.status()
 
       const changed: string[] = []
 
       // Go through each file, updating our gitInfo cache and detecting which
       // entries have changed, to notify the UI
-      for (const [i, file] of absolutePaths.entries()) {
+      for (const file of absolutePaths) {
         debug(`checking %s`, file)
+
         const current = this.#gitMeta.get(file)
 
         // first check unstaged/untracked files
@@ -255,19 +239,21 @@ export class GitDataSource {
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
           }
         } else {
-          const data = stdout[i]
-          const info = data?.match(GIT_LOG_REGEXP)
+          const gitInfo = await this.#git.log({
+            maxCount: 1,
+            file,
+            format: {
+              author: '%an',
+              lastModifiedTimestamp: '%ci',
+              lastModifiedHumanReadable: '%ar',
+            },
+          })
 
-          if (file && info && info[1] && info[2] && info[3]) {
-            toSet = {
-              lastModifiedTimestamp: info[1],
-              lastModifiedHumanReadable: info[2],
-              author: info[3],
-              statusType: 'unmodified',
-            }
-          } else {
-            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
-            toSet = null
+          toSet = {
+            lastModifiedTimestamp: gitInfo.latest?.lastModifiedTimestamp ?? null,
+            lastModifiedHumanReadable: gitInfo.latest?.lastModifiedHumanReadable ?? null,
+            author: gitInfo.latest?.author ?? null,
+            statusType: 'unmodified',
           }
         }
 
@@ -287,55 +273,5 @@ export class GitDataSource {
       // ... etc ...
       debug('Error getting git info: %s', e)
     }
-  }
-
-  async #getInfoPosix (absolutePaths: readonly string[]) {
-    debug('getting git info for %o:', absolutePaths)
-    const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
-
-    // for file in {one,two} is valid in bash, but for file {one} is not
-    // no need to use a for loop for a single file
-    // IFS is needed to handle paths with white space.
-    const cmd = absolutePaths.length === 1
-      ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
-      : `IFS=$'\n'; for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
-
-    debug('executing command `%s`:', cmd)
-
-    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
-    const stdout = result.stdout.split('\n')
-
-    if (stdout.length !== absolutePaths.length) {
-      debug('error... stdout:', stdout)
-      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
-    }
-
-    debug('stdout for git info', stdout)
-
-    return stdout
-  }
-
-  async #getInfoWindows (absolutePaths: readonly string[]) {
-    const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
-    const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
-    const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
-
-    const stdout = ensurePosixPathSeparators(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
-
-    const output: string[] = []
-
-    for (const p of absolutePaths) {
-      const idx = stdout.findIndex((entry) => entry.includes(p))
-      const text = stdout[idx + 1] ?? ''
-
-      output.push(text)
-    }
-
-    if (output.length !== absolutePaths.length) {
-      debug('stdout', output)
-      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${output.length}`)
-    }
-
-    return output
   }
 }

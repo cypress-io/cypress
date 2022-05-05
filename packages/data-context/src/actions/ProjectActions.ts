@@ -301,13 +301,17 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
-    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
+    this.refreshSpecs(specs)
 
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
     }
 
     this.ctx.emitter.specsChange()
+  }
+
+  refreshSpecs (specs: FoundSpec[]) {
+    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
