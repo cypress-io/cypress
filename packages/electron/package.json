@@ -23,7 +23,7 @@
     "minimist": "1.2.6"
   },
   "devDependencies": {
-    "electron": "18.1.0",
+    "electron": "18.0.4",
     "electron-packager": "15.4.0",
     "execa": "4.1.0",
     "mocha": "3.5.3"
