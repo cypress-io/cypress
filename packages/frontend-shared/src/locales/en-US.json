@@ -123,8 +123,7 @@
     "e2eSpecsHeader": "E2E Specs",
     "gitStatusHeader": "Git Status",
     "rows": {
-      "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
-      "gitInfo": "{fileState} {timeAgo}"
+      "gitTooltip": "Last commit by {author}"
     },
     "noResultsMessage": "No specs matched your search:",
     "noSpecErrorTitle": "Spec not found",
