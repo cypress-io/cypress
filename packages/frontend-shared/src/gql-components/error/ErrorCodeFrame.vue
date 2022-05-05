@@ -27,9 +27,9 @@
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
-import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
-import OpenFileInIDE from '@packages/frontend-shared/src/gql-components/OpenFileInIDE.vue'
-import type { ErrorCodeFrameFragment } from '../generated/graphql'
+import ShikiHighlight from '../../components/ShikiHighlight.vue'
+import OpenFileInIDE from '../OpenFileInIDE.vue'
+import type { ErrorCodeFrameFragment } from '../../generated/graphql'
 
 gql`
 fragment ErrorCodeFrame on CodeFrame {

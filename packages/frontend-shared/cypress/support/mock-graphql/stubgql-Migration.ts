@@ -154,4 +154,5 @@ export const stubMigration: MaybeResolver<Migration> = {
   hasCustomIntegrationTestFiles: false,
   configFileNameAfter: 'cypress.config.js',
   configFileNameBefore: 'cypress.json',
+  shouldMigratePreExtension: true,
 }

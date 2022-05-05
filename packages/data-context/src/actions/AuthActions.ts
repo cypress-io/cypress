@@ -3,12 +3,14 @@ import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthStateShape) => void): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void, utmCode: string): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
   resetAuthState(): void
 }
 
 export class AuthActions {
+  #cancelActiveLogin: (() => void) | null = null
+
   constructor (private ctx: DataContext) {}
 
   async getUser () {
@@ -44,26 +46,38 @@ export class AuthActions {
   }
 
   async login () {
-    const loginPromise = new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
+    const onMessage = (authState: AuthStateShape) => {
+      this.ctx.update((coreData) => {
+        coreData.authState = authState
+      })
+
+      // Ensure auth state changes during the login lifecycle
+      // are propagated to the clients
+      this.ctx.emitter.authChange()
+    }
+
+    const user = await new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
       // if a reset occurs
-      this.ctx.update((coreData) => {
-        coreData.cancelActiveLogin = () => resolve(null)
-      })
+      this.#cancelActiveLogin = () => resolve(null)
 
-      this.authApi.logIn((authState) => {
-        this.ctx.update((coreData) => {
-          coreData.authState = authState
-        })
-
-        // Ensure auth state changes during the login lifecycle
-        // are propagated to the clients
-        this.ctx.emitter.authChange()
-      }).then(resolve, reject)
+      // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
+      this.authApi.logIn(onMessage, 'launchpad').then(resolve, reject)
     })
 
-    const user = await loginPromise
+    const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()
+
+    if (!isMainWindowFocused) {
+      const isBrowserFocusSupported = this.ctx.coreData.activeBrowser
+        && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
+
+      if (!isBrowserFocusSupported) {
+        this.ctx._apis.electronApi.focusMainWindow()
+      } else {
+        await this.ctx.actions.browser.focusActiveBrowserWindow()
+      }
+    }
 
     if (!user) {
       // if the user is null, this promise is resolving due to a
@@ -72,11 +86,9 @@ export class AuthActions {
       return
     }
 
-    this.setAuthenticatedUser(user as AuthenticatedUserShape)
+    this.setAuthenticatedUser(user)
 
-    this.ctx.update((coreData) => {
-      coreData.cancelActiveLogin = null
-    })
+    this.#cancelActiveLogin = null
 
     this.resetAuthState()
   }
@@ -87,12 +99,9 @@ export class AuthActions {
 
     // if a login mutation is still in progress, we
     // forcefully resolve it so that the mutation does not persist
-    if (this.ctx.coreData.cancelActiveLogin) {
-      this.ctx.coreData.cancelActiveLogin()
-
-      this.ctx.update((coreData) => {
-        coreData.cancelActiveLogin = null
-      })
+    if (this.#cancelActiveLogin) {
+      this.#cancelActiveLogin()
+      this.#cancelActiveLogin = null
     }
 
     this.ctx.update((coreData) => {

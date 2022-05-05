@@ -13,7 +13,7 @@ describe('Error handling', () => {
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains('Stack Trace')
+    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
 
     cy.log('Fix error and validate it reloads configuration')
     cy.withCtx(async (ctx) => {
@@ -23,7 +23,7 @@ describe('Error handling', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', 'Error Loading Config')
+    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
   })
 
   it('it handles a configuration file error', () => {
@@ -43,12 +43,12 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', 'Error Loading Config')
+    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
     .and('contain.text', 'Error thrown from Config')
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains('Stack Trace')
+    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
 
     cy.log('Fix error and validate it reloads configuration')
 
@@ -59,6 +59,6 @@ describe('Error handling', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', 'Error Loading Config')
+    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
   })
 })
