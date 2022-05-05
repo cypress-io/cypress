@@ -10,7 +10,6 @@ module.exports = defineConfig({
       return require('./cypress/plugins/index.js')(on, config)
     },
     viewportWidth: 1600,
-    specPattern: 'cypress/e2e/**/*.{js,ts,tsx,jsx}',
   },
   component: {
     setupNodeEvents (on, config) {},

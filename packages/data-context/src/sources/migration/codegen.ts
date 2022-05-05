@@ -205,7 +205,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 
 function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
   if (createConfigOptions.shouldAddCustomE2eSpecPattern && !options.specPattern) {
-    options.specPattern = 'cypress/e2e/**/*.{js,ts,tsx,jsx}'
+    options.specPattern = 'cypress/e2e/**/*.{js,jsx,ts,tsx}'
   }
 
   if (!createConfigOptions.hasPluginsFile || !pluginPath) {
@@ -445,7 +445,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
 }
 
 export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType, shouldAddCustomE2eSpecPattern?: boolean) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? (testType === 'e2e' && shouldAddCustomE2eSpecPattern ? '**/*.{js,ts,tsx,jsx}' : '**/*.cy.{js,jsx,ts,tsx}')
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? (testType === 'e2e' && shouldAddCustomE2eSpecPattern ? '**/*.{js,jsx,ts,tsx}' : '**/*.cy.{js,jsx,ts,tsx}')
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {

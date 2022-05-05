@@ -20,7 +20,7 @@ export default defineConfig({
     viewportWidth: 800,
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
-    specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
+    specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
     devServer: {
       bundler: 'vite',
       framework: 'vue',
