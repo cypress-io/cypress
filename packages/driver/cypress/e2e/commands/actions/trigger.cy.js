@@ -600,12 +600,15 @@ describe('src/cy/commands/actions/trigger', () => {
 
           args[1].forEach((fromElWin) => {
             // in some firefox versions, leftCenter may drift slightly by a pixel. The reason for this is unclear.
-            const { leftCenter: argLeftCenter, topCenter: argTopCenter, ...argCoordinates } = fromElWin
-            const { leftCenter: fromElWinLeftCenter, topCenter: fromElWinTopCenter, ...fromElWinCoordinates } = fromElWindow
+            const { leftCenter: argLeftCenter, topCenter: argTopCenter, top: argElWinTop, left: argElWinLeft, x: argElWinX, y: argElWinY } = fromElWin
+            const { leftCenter: fromElWinLeftCenter, topCenter: fromElWinTopCenter, top: fromElWinTop, left: fromElWinLeft, x: fromElWinX, y: fromElWinY } = fromElWindow
 
             expect(argLeftCenter).to.be.closeTo(fromElWinLeftCenter, 1)
             expect(argTopCenter).to.be.closeTo(fromElWinTopCenter, 1)
-            expect(argCoordinates).to.deep.eq(fromElWinCoordinates)
+            expect(argElWinTop).to.be.closeTo(fromElWinTop, 1)
+            expect(argElWinLeft).to.be.closeTo(fromElWinLeft, 1)
+            expect(argElWinX).to.be.closeTo(fromElWinX, 1)
+            expect(argElWinY).to.be.closeTo(fromElWinY, 1)
           })
 
           expect(args[2]).to.eq(1000)
@@ -626,12 +629,15 @@ describe('src/cy/commands/actions/trigger', () => {
 
           args[1].forEach((fromElWin) => {
             // in some firefox versions, leftCenter may drift slightly by a pixel. The reason for this is unclear.
-            const { leftCenter: argLeftCenter, topCenter: argTopCenter, ...argCoordinates } = fromElWin
-            const { leftCenter: fromElWinLeftCenter, topCenter: fromElWinTopCenter, ...fromElWinCoordinates } = fromElWindow
+            const { leftCenter: argLeftCenter, topCenter: argTopCenter, top: argElWinTop, left: argElWinLeft, x: argElWinX, y: argElWinY } = fromElWin
+            const { leftCenter: fromElWinLeftCenter, topCenter: fromElWinTopCenter, top: fromElWinTop, left: fromElWinLeft, x: fromElWinX, y: fromElWinY } = fromElWindow
 
             expect(argLeftCenter).to.be.closeTo(fromElWinLeftCenter, 1)
             expect(argTopCenter).to.be.closeTo(fromElWinTopCenter, 1)
-            expect(argCoordinates).to.deep.eq(fromElWinCoordinates)
+            expect(argElWinTop).to.be.closeTo(fromElWinTop, 1)
+            expect(argElWinLeft).to.be.closeTo(fromElWinLeft, 1)
+            expect(argElWinX).to.be.closeTo(fromElWinX, 1)
+            expect(argElWinY).to.be.closeTo(fromElWinY, 1)
           })
 
           expect(args[2]).to.eq(animationDistanceThreshold)
