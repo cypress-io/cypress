@@ -31,6 +31,8 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: false,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -48,6 +50,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -67,55 +70,53 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string when passed only a component options', async () => {
-    const config: Partial<Cypress.Config> = {
+    const generatedConfig = await createConfigString({
       component: {
         retries: 2,
       },
-    }
-
-    const generatedConfig = await createConfigString(config, {
+    }, {
       hasE2ESpec: true,
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
   })
 
   it('should create only a component entry when no e2e specs are detected', async () => {
-    const config: OldCypressConfig = {}
-
-    const generatedConfig = await createConfigString(config, {
+    const generatedConfig = await createConfigString({}, {
       hasE2ESpec: false,
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
   })
 
   it('should create only an e2e entry when no component specs are detected', async () => {
-    const config: OldCypressConfig = {}
-
-    const generatedConfig = await createConfigString(config, {
+    const generatedConfig = await createConfigString({}, {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -141,6 +142,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -155,6 +157,23 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should create a string when passed an empty object for an ECMA Script project', async () => {
+    const config = {}
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+      isProjectUsingESModules: true,
       shouldAddCustomE2eSpecPattern: false,
     })
 
@@ -175,6 +194,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: false,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -191,6 +211,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -207,6 +228,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -223,6 +245,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: true,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -241,6 +264,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       hasTypescript: true,
       shouldAddCustomE2eSpecPattern: true,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)

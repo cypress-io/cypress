@@ -212,6 +212,7 @@ export class MigrationDataSource {
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
       hasTypescript,
+      isProjectUsingESModules: this.ctx.lifecycleManager.metaState.isProjectUsingESModules,
       shouldAddCustomE2eSpecPattern: this.ctx.coreData.migration.flags.shouldAddCustomE2eSpecPattern,
     })
   }
