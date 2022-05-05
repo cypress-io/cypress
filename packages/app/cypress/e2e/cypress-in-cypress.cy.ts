@@ -209,8 +209,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     it(`resets selector playground validity when selecting element with playground selector in ${testingType}`, () => {
       startAtSpecsPage(testingType)
 
-      cy.get('[data-cy="spec-item"]').first().click()
-      cy.get('#unified-reporter').should('be.visible')
+      const spec = testingType === 'e2e' ? 'dom-content.spec.js' : 'TestComponent.spec.jsx'
+
+      cy.get('[data-cy="spec-item"]').contains(spec).click()
+      cy.get('.passed > .num').should('contain', 1)
 
       cy.get('[data-cy="playground-activator"]').click()
       cy.get('[data-cy="playground-selector"]').clear()
