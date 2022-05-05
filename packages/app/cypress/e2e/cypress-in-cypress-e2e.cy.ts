@@ -38,9 +38,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
     .should('be.visible')
 
-    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport command.')
-    .should('be.visible')
-
     snapshotAUTPanel('viewport info open')
 
     cy.get('body').click()
