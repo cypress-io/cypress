@@ -28,16 +28,16 @@ describe('Reporter Header', () => {
 
       cy.get('input').type('dom', { force: true })
 
-      cy.get('[data-testid="spec-file-item"]').should('have.length', 3)
+      cy.findByTestId('spec-file-item').should('have.length', 3)
       .should('contain', 'dom-content.spec')
 
       cy.get('input').clear()
 
-      cy.get('[data-testid="spec-file-item"]').should('have.length', '3')
+      cy.findByTestId('spec-file-item').should('have.length', '3')
 
       cy.get('input').type('asdf', { force: true })
 
-      cy.get('[data-testid="spec-file-item"]').should('have.length', 0)
+      cy.findByTestId('spec-file-item').should('have.length', 0)
     })
   })
 
