@@ -17,7 +17,7 @@ import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
 import { GitDataSource, LegacyCypressConfigJson } from '../sources'
-import { ProjectConfigManager } from './ProjectConfigManager'
+import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
@@ -220,7 +220,7 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toLaunchpad()
         this.ctx.emitter.toApp()
       },
-      onFinalConfigLoaded: async (finalConfig: FullConfig) => {
+      onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             path: this.projectRoot,
@@ -260,7 +260,7 @@ export class ProjectLifecycleManager {
           } else if (restartOnChange.server) {
             this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
-          } else if (restartOnChange.browser && shouldRelaunchBrowser) {
+          } else if ((restartOnChange.browser || options.shouldRestartBrowser) && shouldRelaunchBrowser) {
             this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
             await this.ctx.actions.browser.closeBrowser()
             await this.ctx.actions.browser.relaunchBrowser()

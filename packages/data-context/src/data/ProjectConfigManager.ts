@@ -16,6 +16,10 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
+export type OnFinalConfigLoadedOptions = {
+  shouldRestartBrowser: boolean
+}
+
 type ProjectConfigManagerOptions = {
   ctx: DataContext
   configFile: string | false
@@ -25,7 +29,7 @@ type ProjectConfigManagerOptions = {
   eventRegistrar: EventRegistrar
   onError: (cypressError: CypressError, title?: string | undefined) => void
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
-  onFinalConfigLoaded: (finalConfig: FullConfig) => Promise<void>
+  onFinalConfigLoaded: (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => Promise<void>
   refreshLifecycle: () => Promise<void>
 }
 
@@ -226,7 +230,13 @@ export class ProjectConfigManager {
 
     const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
 
-    await this.options.onFinalConfigLoaded(finalConfig)
+    // Check if the config file has a before:browser:launch task, and if it's the case
+    // we should restart the browser if it is open
+    const onFinalConfigLoadedOptions = {
+      shouldRestartBrowser: result.registrations.some((registration) => registration.event === 'before:browser:launch'),
+    }
+
+    await this.options.onFinalConfigLoaded(finalConfig, onFinalConfigLoadedOptions)
 
     this.watchFiles([
       ...result.requires,

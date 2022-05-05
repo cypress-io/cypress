@@ -171,7 +171,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'server',
+    requireRestartOnChange: 'browser',
   }, {
     name: 'e2e',
     // e2e runner overrides
@@ -196,7 +196,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
-    requireRestartOnChange: 'browser',
   }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
