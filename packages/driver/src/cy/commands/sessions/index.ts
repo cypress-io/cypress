@@ -66,7 +66,7 @@ export default function (Commands, Cypress, cy) {
       const sessionCommand = cy.state('current')
 
       // stringify deterministically if we were given an object
-      id = typeof id === 'string' ? id : stringifyStable(id)
+      id = _.isString(id) ? id : stringifyStable(id)
 
       if (options) {
         if (!_.isObject(options)) {
@@ -77,14 +77,14 @@ export default function (Commands, Cypress, cy) {
           'validate': 'function',
         }
 
-        Object.keys(options).forEach((key) => {
+        Object.entries(options).forEach(([key, value]) => {
           const expectedType = validOpts[key]
 
           if (!expectedType) {
             $errUtils.throwErrByPath('sessions.session.wrongArgOptionUnexpected', { args: { key } })
           }
 
-          const actualType = typeof options[key]
+          const actualType = typeof value
 
           if (actualType !== expectedType) {
             $errUtils.throwErrByPath('sessions.session.wrongArgOptionInvalid', { args: { key, expected: expectedType, actual: actualType } })
