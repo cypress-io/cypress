@@ -65,6 +65,9 @@
               <template
                 v-if="props.gql?.currentProject?.branch"
               >
+                <!-- Using a margin here causes different overflow problems.
+                        See PR #21325. Using a space for now. -->
+                {{ ' ' }}
                 <Tooltip
                   placement="bottom"
                   class="inline-block"
@@ -86,13 +89,12 @@
               aria-hidden
             >
               <i-cy-chevron-right_x16
-
                 class="icon-dark-gray-200"
               />
             </li>
             <li
               v-if="props.gql?.currentProject?.currentTestingType"
-              class="lowercase inline-block"
+              class="inline-block"
             >
               {{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}
             </li>
