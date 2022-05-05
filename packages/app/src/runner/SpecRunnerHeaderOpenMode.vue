@@ -78,29 +78,38 @@
         </template>
         <template #default>
           <div class="max-h-50vw p-14px text-gray-700 leading-20px w-300px overflow-auto">
-            <p class="mb-14px">
-              The viewport determines the width and height of your application under test. By default the viewport will be
-              <strong>{{ autStore.defaultViewportWidth }}px</strong> by
-              <strong>{{ autStore.defaultViewportHeight }}px</strong> for {{ props.gql.currentTestingType === "e2e" ? 'end-to-end' : 'component' }}
-              testing.
-            </p>
-            <p class="mb-14px">
-              Additionally, you can override this value in your
-              <!-- eslint disable is needed to prevent trailing space from being added to <InlineCodeFragment/> -->
+            <i18n-t
+              tag="p"
+              scope="global"
+              keypath="runner.viewportTooltip.infoText"
+              class="mb-14px"
+            >
+              <strong>{{ autStore.defaultViewportWidth }}px</strong>
+              <strong>{{ autStore.defaultViewportHeight }}px</strong>
+              {{ props.gql.currentTestingType === "e2e" ? 'end-to-end' : 'component' }}
+            </i18n-t>
+
+            <i18n-t
+              tag="p"
+              scope="global"
+              keypath="runner.viewportTooltip.configText"
+              class="mb-14px"
+            >
+              <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs">cypress.config.js</InlineCodeFragment> or via the
+              <InlineCodeFragment class="text-xs">cypress.config.js</InlineCodeFragment>
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs">cy.viewport</InlineCodeFragment> command.
-            </p>
+              <InlineCodeFragment class="text-xs">cy.viewport</InlineCodeFragment>
+            </i18n-t>
             <p class="flex justify-center">
               <Button
                 data-cy="viewport-docs"
                 :prefix-icon="BookIcon"
                 prefix-icon-class="icon-dark-indigo-500"
                 variant="outline"
-                href="https://on.cypress.io/viewport"
+                :href="t('runner.viewportTooltip.buttonHref')"
               >
-                Review the guide on viewports
+                {{ t('runner.viewportTooltip.buttonText') }}
               </Button>
             </p>
           </div>
