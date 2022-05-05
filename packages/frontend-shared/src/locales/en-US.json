@@ -396,7 +396,7 @@
       },
       "experimentalSessionAndOrigin": {
         "name": "Cross-origin and Session",
-        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands. See https://on.cypress.io/origin and https://on.cypress.io/session."
+        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands."
       },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
