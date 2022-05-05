@@ -18,7 +18,6 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@cypress/design-system": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/free-regular-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "^0.1.17",
