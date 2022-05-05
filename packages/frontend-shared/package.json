@@ -102,7 +102,6 @@
         "gravatar",
         "human-interval",
         "lodash",
-        "path",
         "shiki",
         "socket.io-client",
         "vue",
