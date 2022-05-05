@@ -80,21 +80,8 @@ describe('linux browser detection', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/19793
-  it('sets profilePath on snapcraft firefox', async () => {
-    process.env.PATH = '/bin'
-    mockFs({
-      '/bin/firefox': mockFs.symlink({ path: '/usr/bin/firefox' }),
-      '/usr/bin/firefox': mockFs.file({ mode: 0o777, content: 'foo bar foo bar foo bar\nexec /snap/bin/firefox\n' }),
-    })
-
-    execa.withArgs('firefox', ['--version'])
-    .resolves({ stdout: 'Mozilla Firefox 99.2.3' })
-
-    sinon.stub(os, 'homedir').returns('/home/foo')
-
-    const [browser] = await detect()
-
-    expect(browser).to.deep.equal({
+  context('sets profilePath on snapcraft firefox', () => {
+    const expectedSnapFirefox = {
       channel: 'stable',
       name: 'firefox',
       family: 'firefox',
@@ -104,6 +91,48 @@ describe('linux browser detection', () => {
       path: 'firefox',
       profilePath: '/home/foo/snap/firefox/current',
       version: '99.2.3',
+    }
+
+    beforeEach(() => {
+      execa.withArgs('firefox', ['--version'])
+      .resolves({ stdout: 'Mozilla Firefox 99.2.3' })
+
+      sinon.stub(os, 'homedir').returns('/home/foo')
+    })
+
+    it('with shim script', async () => {
+      process.env.PATH = '/bin'
+      mockFs({
+        '/bin/firefox': mockFs.symlink({ path: '/usr/bin/firefox' }),
+        '/usr/bin/firefox': mockFs.file({ mode: 0o777, content: 'foo bar foo bar foo bar\nexec /snap/bin/firefox\n' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).to.deep.equal(expectedSnapFirefox)
+    })
+
+    it('with /snap/bin in path', async () => {
+      process.env.PATH = '/bin:/snap/bin'
+      mockFs({
+        '/snap/bin/firefox': mockFs.file({ mode: 0o777, content: 'binary' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).to.deep.equal(expectedSnapFirefox)
+    })
+
+    it('with symlink to /snap/bin in path', async () => {
+      process.env.PATH = '/bin'
+      mockFs({
+        '/bin/firefox': mockFs.symlink({ path: '/snap/bin/firefox' }),
+        '/snap/bin/firefox': mockFs.file({ mode: 0o777, content: 'binary' }),
+      })
+
+      const [browser] = await detect()
+
+      expect(browser).to.deep.equal(expectedSnapFirefox)
     })
   })
 

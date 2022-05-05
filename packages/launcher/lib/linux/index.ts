@@ -13,6 +13,9 @@ async function isFirefoxSnap (binary: string): Promise<boolean> {
     return await Bluebird.resolve((async () => {
       const binaryPath = await which(binary)
 
+      // if the bin path or what it's symlinked to start with `/snap/bin`, it's a snap
+      if (binaryPath.startsWith('/snap/bin/') || (await fs.realpath(binaryPath)).startsWith('/snap/bin')) return true
+
       // read the first 16kb, don't read the entire file into memory in case it is a binary
       const fd = await fs.open(binaryPath, 'r')
       // @ts-ignore - needs @types/node at least 16
