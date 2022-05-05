@@ -366,10 +366,6 @@ export class DataContext {
     ])
   }
 
-  get loader () {
-    return this.util.loader
-  }
-
   /**
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
