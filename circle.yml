@@ -468,28 +468,13 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            if [[ -v MAIN_RECORD_KEY ]]; then
-              # internal PR
-
-              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-              CYPRESS_KONFIG_ENV=production \
-              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
-              PERCY_PARALLEL_TOTAL=-1 \
-              $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
-            else
-              # external PR
-              TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-              echo "Test files for this machine are $TESTFILES"
-
-              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-              CYPRESS_KONFIG_ENV=production \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
-              PERCY_PARALLEL_TOTAL=-1 \
-              $cmd yarn workspace @packages/runner cypress:run --browser <<parameters.browser>> --spec $TESTFILES
-            fi
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
