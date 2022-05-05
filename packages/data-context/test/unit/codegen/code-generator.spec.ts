@@ -221,7 +221,8 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[0])
+    // @ts-ignore
+    sinon.stub(ctx.project, 'guessFramework').returns(WIZARD_FRAMEWORKS[0])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
@@ -243,7 +244,8 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[1])
+    // @ts-ignore
+    sinon.stub(ctx.project, 'guessFramework').returns(WIZARD_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
