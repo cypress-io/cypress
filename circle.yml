@@ -1351,16 +1351,27 @@ jobs:
           working_directory: packages/desktop-gui
       - run:
           command: |
-            TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-            echo "Test files for this machine are $TESTFILES"
+            if [[ -v MAIN_RECORD_KEY ]]; then
+              # internal PR
+              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy exec --parallel -- -- \
+              yarn cypress:run --record --parallel --group 2x-desktop-gui
+            else
+              # external PR
+              TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
 
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group 2x-desktop-gui --spec $TESTFILES
+              CYPRESS_KONFIG_ENV=production \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy exec --parallel -- -- \
+              yarn cypress:run --spec $TESTFILES
+            fi
           working_directory: packages/desktop-gui
       - verify-mocha-results
       - store_test_results:
