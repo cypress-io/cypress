@@ -2155,7 +2155,7 @@ describe('src/cy/commands/navigation', () => {
 
           if (Cypress.config('experimentalSessionAndOrigin')) {
             // When the experimentalSessionAndOrigin feature is enabled, we will timeout and display this message.
-            expect(err.message).to.equal(stripIndent`\
+            expect(err.message).to.include(stripIndent`\
             Timed out after waiting \`3000ms\` for your remote page to load on origin(s):\n
             - \`http://localhost:3500\`\n
             A cross-origin request for \`http://www.foobar.com:3500/fixtures/secondary-origin.html\` was detected.\n
@@ -2163,11 +2163,16 @@ describe('src/cy/commands/navigation', () => {
             \`cy.origin(\'http://foobar.com:3500\', () => {\`
             \`  <commands targeting http://www.foobar.com:3500 go here>\`
             \`})\`\n
-            If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.\n
-            Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.\n
-            When this \`load\` event occurs, Cypress will continue running commands.`)
+            If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in`)
+
+            expect(err.message).to.include(`packages/driver/cypress.config.ts`)
+            expect(err.message).to.include(`to wait longer.\n`)
+
+            expect(err.message).to.include(`Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.\n`)
+            expect(err.message).to.include(`When this \`load\` event occurs, Cypress will continue running commands.`)
 
             expect(err.docsUrl).to.eq('https://on.cypress.io/origin')
+            assertLogLength(this.logs, 10)
           } else {
             const error = Cypress.isBrowser('firefox') ? 'Permission denied to access property "document" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
 
@@ -2185,9 +2190,9 @@ describe('src/cy/commands/navigation', () => {
 
             expect(err.message).to.contain(`packages/driver/cypress.config.ts`)
             expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
+            assertLogLength(this.logs, 7)
           }
 
-          assertLogLength(this.logs, 7)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
