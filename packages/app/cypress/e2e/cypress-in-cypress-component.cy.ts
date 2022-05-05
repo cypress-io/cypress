@@ -29,7 +29,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       snapshotAUTPanel('browsers open')
       cy.contains('Canary').should('be.hidden')
-      cy.contains(cy.i18n.runner.viewportTooltip.infoText.replace('{0}', '500px').replace('{1}', '500px').replace('{2}', 'component'))
+      cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for component testing.')
+      .should('be.visible')
+
+      cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport command.')
       .should('be.visible')
 
       snapshotAUTPanel('viewport info open')
@@ -227,6 +230,22 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-model-state="passed"]').should('contain', 'renders the new test component')
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
+    })
+  })
+
+  context('typescript config', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('react-vite-ts-configured')
+      cy.openProject('react-vite-ts-configured')
+      cy.startAppServer('component')
+      cy.visitApp()
+    })
+
+    it('viewport tooltip shows correct config file extension', () => {
+      cy.contains('App.cy.tsx').click()
+      cy.findByTestId('viewport').click()
+      cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport command.')
+      .should('be.visible')
     })
   })
 

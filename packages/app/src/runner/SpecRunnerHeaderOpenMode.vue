@@ -97,7 +97,7 @@
             >
               <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs">cypress.config.js</InlineCodeFragment>
+              <InlineCodeFragment class="text-xs">{{ props.gql.configFile }}</InlineCodeFragment>
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
               <InlineCodeFragment class="text-xs">cy.viewport</InlineCodeFragment>
             </i18n-t>
@@ -163,8 +163,8 @@ import BookIcon from '~icons/cy/book_x24'
 gql`
 fragment SpecRunnerHeader on CurrentProject {
   id
+  configFile
   currentTestingType
-
   activeBrowser {
     id
     displayName
