@@ -24,7 +24,7 @@ context('cy.origin navigation', () => {
     cy.origin('http://foobar.com:3500', () => {
       cy.window().then((localWindow) => {
         // Define a custom property on window that we can assert the presence of.
-        // After reloading, this property should not exit.
+        // After reloading, this property should not exist.
         // @ts-ignore
         localWindow.cy_testCustomValue = true
       })
