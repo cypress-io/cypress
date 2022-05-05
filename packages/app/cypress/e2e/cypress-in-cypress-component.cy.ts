@@ -147,31 +147,27 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       })
     })
 
-    it('restarts dev server on config change', () => {
+    it('restarts server on devServer config change', () => {
       cy.visitApp()
+      cy.get('[data-cy="spec-item"]')
 
-      cy.withCtx(async (ctx, { testState, sinon }) => {
-        sinon.stub(ctx._apis.projectApi.getDevServer(), 'close')
-        const devServerReady =
-        new Promise<void>((res) => {
-          ctx._apis.projectApi.getDevServer().emitter.on('dev-server:compile:success', () => res())
-        })
+      cy.withCtx(async (ctx, { sinon }) => {
+        ctx.coreData.app.browserStatus = 'open'
 
-        testState.originalCypressConfig = await ctx.file.readFileInProject('cypress.config.js')
-        const newCypressConfig = testState.originalCypressConfig.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
+        sinon.spy(ctx.actions.project, 'initializeActiveProject')
+
+        const config = await ctx.file.readFileInProject('cypress.config.js')
+        const newCypressConfig = config.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
 
         await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
-        await devServerReady
       })
 
-      cy.contains('TestComponent.spec').click()
-      cy.get('.failed > .num').should('contain', 1)
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.contains('[role="alert"]', 'Loading')
 
-      cy.withCtx(async (ctx, { testState }) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', testState.originalCypressConfig)
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.actions.project.initializeActiveProject).to.be.called
       })
-
-      cy.get('.passed > .num').should('contain', 1)
     })
 
     it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
