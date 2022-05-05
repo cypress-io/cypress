@@ -367,8 +367,8 @@ commands:
             echo "Installing Node $node_version"
             nvm install ${node_version}
             echo "Using Node $node_version"
-            [[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s
             nvm use ${node_version}
+            [[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
