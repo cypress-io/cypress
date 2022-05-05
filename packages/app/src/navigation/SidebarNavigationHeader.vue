@@ -53,7 +53,7 @@ import type { SidebarNavigationHeaderFragment } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e-solid-simple'
-import IconComponent from '~icons/cy/testing-type-component-solid_x64'
+import IconComponent from '~icons/cy/testing-type-component-solid_x24'
 import { useI18n } from '@cy/i18n'
 import { SidebarNavigationHeaderBranchChangeDocument } from '../generated/graphql-test'
 

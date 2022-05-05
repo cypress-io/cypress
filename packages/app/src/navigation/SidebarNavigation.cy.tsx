@@ -24,6 +24,7 @@ describe('SidebarNavigation', () => {
 
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
     cy.findByText('test-project').should('be.visible')
+    cy.percySnapshot()
   })
 
   it('shows tooltips on hover', () => {
@@ -35,10 +36,12 @@ describe('SidebarNavigation', () => {
     cy.get('[data-e2e-href="/runs"]').realHover()
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
+    cy.percySnapshot()
   })
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
     cy.get('[data-cy="sidebar-header"]').click()
+    cy.percySnapshot()
   })
 })
