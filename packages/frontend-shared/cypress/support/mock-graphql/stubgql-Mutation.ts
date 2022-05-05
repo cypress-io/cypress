@@ -1,8 +1,12 @@
 import type { Mutation } from '../generated/test-graphql-types.gen'
-import path from 'path'
 
 import type { MaybeResolver } from './clientTestUtils'
 import { createTestCurrentProject, createTestGlobalProject } from './stubgql-Project'
+
+// `path` is externalized, so we use a simple implementation of `path.basename` here
+function basename (path: string) {
+  return path.split(/[/\\]/).slice(-1)[0]
+}
 
 export const stubMutation: MaybeResolver<Mutation> = {
   __typename: 'Mutation',
@@ -11,7 +15,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       return {}
     }
 
-    ctx.projects.push(createTestGlobalProject(path.basename(args.path)))
+    ctx.projects.push(createTestGlobalProject(basename(args.path)))
 
     return {}
   },
