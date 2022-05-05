@@ -279,7 +279,7 @@ describe('errors', () => {
       expect(err.message).to.include(`A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:`)
       expect(err.message).to.include(`\`cy.origin(\'http://foobar.com:3500\', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})\`\n`)
       expect(err.message).to.include(`If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\``)
-      expect(err.message).to.include(`cypress.config.ts\` to wait longer`)
+      expect(err.message).to.include(`packages/driver/cypress.config.ts\` to wait longer`)
 
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
