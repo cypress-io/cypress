@@ -14,6 +14,10 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
 }
 
 describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
+  afterEach(() => {
+    cy.percySnapshot()
+  })
+
   it('renders', () => {
     const autStore = useAutStore()
 
@@ -23,8 +27,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
         return renderWithGql(gqlVal)
       },
     })
-
-    cy.percySnapshot()
   })
 
   it('disabled selector playground button when isRunning is true', () => {
@@ -39,8 +41,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
-
-    cy.percySnapshot()
   })
 
   it('disabled selector playground button when isLoading is true', () => {
@@ -55,7 +55,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
-    cy.percySnapshot()
   })
 
   it('enables selector playground button by default', () => {
@@ -102,7 +101,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="aut-url"]').should('exist')
-    cy.percySnapshot()
   })
 
   it('does not show url section if currentTestingType is component', () => {
@@ -143,6 +141,10 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
   it('shows current viewport info', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (gql) => {
+        gql.currentTestingType = 'component',
+        gql.configFile = 'cypress.config.js'
+      },
       render: (gqlVal) => {
         return renderWithGql(gqlVal)
       },
@@ -150,6 +152,9 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.visible')
+    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport command.')
+    .should('be.visible')
+
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.hidden')
     cy.get('[data-cy="viewport"] button').focus().type(' ')
@@ -160,6 +165,10 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
   it('links to the viewport docs', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (gql) => {
+        gql.currentTestingType = 'e2e',
+        gql.configFile = 'cypress.config.ts'
+      },
       render: (gqlVal) => {
         return renderWithGql(gqlVal)
       },
@@ -169,6 +178,9 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.findByTestId('viewport-docs')
     .should('be.visible')
     .should('have.attr', 'href', 'https://on.cypress.io/viewport')
+
+    cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport command.')
+    .should('be.visible')
   })
 
   it('disables browser dropdown button when isRunning is true', () => {
@@ -186,7 +198,5 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="select-browser"] > button').should('be.disabled')
-
-    cy.percySnapshot()
   })
 })

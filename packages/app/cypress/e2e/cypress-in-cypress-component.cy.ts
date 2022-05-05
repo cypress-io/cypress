@@ -233,22 +233,6 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     })
   })
 
-  context('typescript config', () => {
-    beforeEach(() => {
-      cy.scaffoldProject('react-vite-ts-configured')
-      cy.openProject('react-vite-ts-configured')
-      cy.startAppServer('component')
-      cy.visitApp()
-    })
-
-    it('viewport tooltip shows correct config file extension', () => {
-      cy.contains('App.cy.tsx').click()
-      cy.findByTestId('viewport').click()
-      cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport command.')
-      .should('be.visible')
-    })
-  })
-
   context('custom config', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
