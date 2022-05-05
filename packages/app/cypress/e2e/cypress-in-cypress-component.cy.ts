@@ -29,7 +29,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       snapshotAUTPanel('browsers open')
       cy.contains('Canary').should('be.hidden')
-      cy.contains('The viewport determines the width and height of your application. By default the viewport will be 500px by 500px for Component Testing unless specified by a cy.viewport command.')
+      cy.contains(cy.i18n.runner.viewportTooltip.infoText.replace('{0}', '500px').replace('{1}', '500px').replace('{2}', 'component'))
       .should('be.visible')
 
       snapshotAUTPanel('viewport info open')
