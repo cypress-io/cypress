@@ -28,11 +28,11 @@ describe('SidebarNavigation', () => {
 
   it('shows tooltips on hover', () => {
     mountComponent(false)
-    cy.get('[data-cy="sidebar-header"').realHover()
+    cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-    cy.get('[data-e2e-href="/runs"]').realHover()
+    cy.get('[data-e2e-href="/runs"]').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
   })
