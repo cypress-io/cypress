@@ -24,7 +24,10 @@ export function useEventManager () {
 
     // these events do not use GraphQL
     eventManager.on('restart', () => {
-      runSpec()
+      // If we get the event to restart but have already navigated away from the runner, don't execute the spec
+      if (specStore.activeSpec) {
+        runSpec()
+      }
     })
 
     eventManager.on('before:screenshot', (payload) => {
