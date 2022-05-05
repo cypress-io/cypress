@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { URL, URLSearchParams } from 'url'
+import { shell } from 'electron'
 
 // NOTE: in order for query params to be passed through on links
 // forwardQueryParams: true must be set for that slug in the on package
@@ -11,7 +12,7 @@ interface OpenExternalOptions {
 
 export const openExternal = (opts: OpenExternalOptions | string) => {
   if (_.isString(opts)) {
-    return require('electron').shell.openExternal(opts)
+    return shell.openExternal(opts)
   }
 
   const url = new URL(opts.url)
@@ -25,5 +26,5 @@ export const openExternal = (opts: OpenExternalOptions | string) => {
     url.search = new URLSearchParams(opts.params).toString()
   }
 
-  return require('electron').shell.openExternal(url.href)
+  return shell.openExternal(url.href)
 }

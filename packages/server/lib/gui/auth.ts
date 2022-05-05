@@ -5,6 +5,7 @@ const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const url = require('url')
+const { shell } = require('electron')
 
 const machineId = require('../util/machine_id')
 const random = require('../util/random')
@@ -163,7 +164,7 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
-  return require('electron').shell.openExternal(loginUrl)
+  return shell.openExternal(loginUrl)
   .catch((err) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()

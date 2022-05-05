@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import { BrowserWindow } from 'electron'
+import electronContextMenu from 'electron-context-menu'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
@@ -203,9 +204,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
   if (options.contextMenu) {
     // adds context menu with copy, paste, inspect element, etc
-    // this instance of JIT requiring electron-context-menu can be removed
-    // once https://github.com/cypress-io/cypress/issues/21236 is fixed
-    require('electron-context-menu')({
+    electronContextMenu({
       showInspectElement: true,
       window: win,
     })

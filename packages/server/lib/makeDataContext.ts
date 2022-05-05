@@ -3,6 +3,7 @@ import type { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electr
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
+import { shell, dialog, clipboard } from 'electron'
 
 import type {
   AllModeOptions,
@@ -153,19 +154,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         })
       },
       showItemInFolder (folder: string) {
-        require('electron').shell.showItemInFolder(folder)
+        shell.showItemInFolder(folder)
       },
       showOpenDialog (props: OpenDialogOptions) {
-        return require('electron').dialog.showOpenDialog(props)
+        return dialog.showOpenDialog(props)
       },
       showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
-        return require('electron').dialog.showSaveDialog(window, props)
+        return dialog.showSaveDialog(window, props)
       },
       copyTextToClipboard (text: string) {
-        require('electron').clipboard.writeText(text)
+        clipboard.writeText(text)
       },
-      // These instances of JIT requiring gui/windows can be removed
-      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
       isMainWindowFocused () {
         return require('./gui/windows').isMainWindowFocused()
       },
