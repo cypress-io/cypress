@@ -46,7 +46,6 @@ describe('cy.session', { retries: 0 }, () => {
   describe('session flows', () => {
     let logs = []
     let clearPageCount = 0
-    // let clearCurrentSessionDataSpy
     let sessionGroupId
     let setup
     let validate
@@ -54,7 +53,6 @@ describe('cy.session', { retries: 0 }, () => {
     const handleSetup = () => {
       cy.then(() => {
         expect(clearPageCount, 'cleared page before executing session setup').to.eq(1)
-        // expect(clearCurrentSessionDataSpy, 'clears session data before creating session').to.be.calledOnce
       })
 
       cy.contains('This is a blank page')
