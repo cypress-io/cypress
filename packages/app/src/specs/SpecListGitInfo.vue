@@ -15,7 +15,14 @@
         v-if="classes.showTooltip"
         #popper
       >
-        {{ tooltipText }}
+        <div>
+          <p class="max-w-sm text-sm truncate overflow-hidden">
+            {{ props.gql.subject }}
+          </p>
+          <p class="text-xs">
+            {{ gitTooltipSubtext }}
+          </p>
+        </div>
       </template>
     </Tooltip>
     <div
@@ -44,6 +51,8 @@ fragment SpecListRow on GitInfo {
   lastModifiedHumanReadable
   author
   statusType
+  shortHash
+  subject
 }
 `
 
@@ -71,10 +80,11 @@ const classes = computed(() => {
   }[props.gql?.statusType || 'unmodified']
 })
 
-const tooltipText = computed(() => {
+const gitTooltipSubtext = computed(() => {
   if (props.gql?.statusType === 'unmodified') {
-    return t('specPage.rows.gitTooltip', {
+    return t('specPage.rows.gitTooltipSubtext', {
       author: props.gql.author,
+      shortHash: props.gql.shortHash,
     })
   }
 

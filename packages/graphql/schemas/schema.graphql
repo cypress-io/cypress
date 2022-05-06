@@ -740,8 +740,14 @@ type GitInfo {
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
 
+  """short hash for latest commit"""
+  shortHash: String
+
   """status type - created or modified"""
   statusType: GitInfoStatusType
+
+  """subject for latest commit"""
+  subject: String
 }
 
 enum GitInfoStatusType {
