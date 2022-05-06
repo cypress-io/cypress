@@ -124,6 +124,8 @@ export class GitDataSource {
     }
 
     this.#loadBulkGitInfo(specs).catch(this.config.onError)
+
+    this.#specs = specs
   }
 
   get gitBaseDir () {
