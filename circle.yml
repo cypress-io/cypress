@@ -48,7 +48,7 @@ macWorkflowFilters: &mac-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ new-cmd-log-styles, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/10.0-electron-18.x', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/10.0-electron-18', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -59,7 +59,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/10.0-electron-18.x', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/10.0-electron-18', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
