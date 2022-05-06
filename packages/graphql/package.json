@@ -35,6 +35,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
+    "@types/micromatch": "4.0.2",
     "@types/server-destroy": "^1.0.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
