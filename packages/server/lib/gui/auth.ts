@@ -186,7 +186,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmCode, onLoginFlowComplete) => {
+const start = (onMessage, utmCode) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -221,7 +221,6 @@ const start = (onMessage, utmCode, onLoginFlowComplete) => {
   })
   .finally(() => {
     _internal.stopServer()
-    onLoginFlowComplete()
   })
 }
 

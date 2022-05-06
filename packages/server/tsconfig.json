@@ -8,7 +8,7 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": ["esnext"],
     "types": [
       "mocha",
       "node"

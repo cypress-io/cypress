@@ -17,6 +17,27 @@ import { scaffoldMigrationProject, getSystemTestProject } from '../../helper'
 const projectRoot = getSystemTestProject('migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
+  it('generates correct config for component testing migration with custom testFiles glob', async () => {
+    const config = {
+      component: {
+        testFiles: '**/*.spec.cy.{js,ts,jsx,tsx}',
+        componentFolder: '.',
+      },
+    }
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: false,
+      hasComponentTesting: true,
+      hasPluginsFile: false,
+      projectRoot,
+      hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
   it('should create a string when passed only a global option', async () => {
     const config: Partial<Cypress.Config> = {
       viewportWidth: 300,
@@ -28,6 +49,8 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -46,52 +69,54 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string when passed only a component options', async () => {
-    const config: Partial<Cypress.Config> = {
+    const generatedConfig = await createConfigString({
       component: {
         retries: 2,
       },
-    }
-
-    const generatedConfig = await createConfigString(config, {
+    }, {
       hasE2ESpec: true,
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
   })
 
   it('should create only a component entry when no e2e specs are detected', async () => {
-    const config: OldCypressConfig = {}
-
-    const generatedConfig = await createConfigString(config, {
+    const generatedConfig = await createConfigString({}, {
       hasE2ESpec: false,
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
   })
 
   it('should create only an e2e entry when no component specs are detected', async () => {
-    const config: OldCypressConfig = {}
-
-    const generatedConfig = await createConfigString(config, {
+    const generatedConfig = await createConfigString({}, {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -116,6 +141,8 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -130,6 +157,24 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should create a string when passed an empty object for an ECMA Script project', async () => {
+    const config = {}
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+      isProjectUsingESModules: true,
+      shouldAddCustomE2eSpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -148,6 +193,8 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -163,6 +210,8 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)
@@ -178,6 +227,44 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: true,
+      shouldAddCustomE2eSpecPattern: false,
+      isProjectUsingESModules: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should add custom specPattern if project has projectId', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-defaults-with-projectId')
+    const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
+      shouldAddCustomE2eSpecPattern: true,
+      isProjectUsingESModules: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should not add custom specPattern if project has projectId and integrationFolder', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-defaults-with-projectId')
+    const config = await fs.readJson(path.join(projectRoot, 'cypress.json'))
+
+    config['integrationFolder'] = 'cypress/custom/e2e'
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: true,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
+      shouldAddCustomE2eSpecPattern: true,
+      isProjectUsingESModules: false,
     })
 
     snapshot(generatedConfig)

@@ -213,6 +213,8 @@ export class SocketBase {
       const headers = socket.request?.headers ?? {}
 
       socket.on('automation:client:connected', () => {
+        const connectedBrowser = getCtx().coreData.activeBrowser
+
         if (automationClient === socket) {
           return
         }
@@ -224,8 +226,10 @@ export class SocketBase {
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
         automationClient.on('disconnect', () => {
-          // if we've stopped then don't do anything
-          if (this.ended) {
+          const activeBrowser = getCtx().coreData.activeBrowser
+
+          // if we've stopped or if we've switched to another browser then don't do anything
+          if (this.ended || (connectedBrowser?.path !== activeBrowser?.path)) {
             return
           }
 
@@ -563,10 +567,6 @@ export class SocketBase {
     return this._io?.emit('tests:finished')
   }
 
-  changeToUrl (url) {
-    return this.toRunner('change:to:url', url)
-  }
-
   async closeBrowserTabs () {
     if (this._sendCloseBrowserTabsMessage) {
       await this._sendCloseBrowserTabsMessage()
@@ -591,9 +591,5 @@ export class SocketBase {
 
   close () {
     return this._io?.close()
-  }
-
-  sendSpecList (specs, testingType: Cypress.TestingType) {
-    this.toRunner('specs:changed', { specs, testingType })
   }
 }

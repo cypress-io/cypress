@@ -1370,6 +1370,20 @@ export const AllCypressErrors = {
     `
   },
 
+  CONFIG_FILE_DEV_SERVER_INVALID_RETURN: (devServerOptions: any) => {
+    return errTemplate`
+      The returned value of the ${fmt.highlight('devServer')} function is not valid.
+
+      The returned value must be an object with a ${fmt.highlight('port')} property of the dev-server that is running.
+
+      Instead, we saw:
+
+      ${fmt.stringify(devServerOptions)}
+
+      Learn more: https://on.cypress.io/dev-server
+    `
+  },
+
   UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
     return errTemplate`
       An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:

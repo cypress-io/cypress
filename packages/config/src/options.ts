@@ -39,6 +39,7 @@ interface ResolvedConfigOption {
    */
   canUpdateDuringTestTime?: boolean
   specificTestingType?: TestingType
+  requireRestartOnChange?: 'server' | 'browser'
 }
 
 interface RuntimeConfigOption {
@@ -50,6 +51,7 @@ interface RuntimeConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
+  requireRestartOnChange?: 'server' | 'browser'
 }
 
 export interface BreakingOption {
@@ -142,11 +144,13 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'clientCertificates',
     defaultValue: [],
     validation: validate.isValidClientCertificatesSet,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'component',
     // runner-ct overrides
@@ -167,6 +171,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'e2e',
     // e2e runner overrides
@@ -197,6 +202,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSessionSupport',
     defaultValue: false,
@@ -209,18 +215,21 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
@@ -241,6 +250,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
@@ -324,6 +334,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
@@ -340,12 +351,14 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'supportFolder',
     defaultValue: false,
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'taskTimeout',
     defaultValue: 60000,
@@ -361,6 +374,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isString,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'video',
     defaultValue: true,
@@ -402,11 +416,22 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   },
 ]
 
 const runtimeOptions: Array<RuntimeConfigOption> = [
   {
+    // Internal config field, useful to ignore the e2e specPattern set by the user
+    // or the default one when looking fot CT, it needs to be a config property because after
+    // having the final config that has the e2e property flattened/compacted
+    // we may not be able to get the value to ignore.
+    name: 'additionalIgnorePattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
+    validation: validate.isString,
+    isInternal: true,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'autoOpen',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -511,16 +536,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
-  }, {
-    // Internal config field, useful to ignore the e2e specPattern set by the user
-    // or the default one when looking fot CT, it needs to be a config property because after
-    // having the final config that has the e2e property flattened/compacted
-    // we may not be able to get the value to ignore.
-    name: 'additionalIgnorePattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : undefined,
-    validation: validate.isString,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
   },
 ]
 
@@ -543,35 +558,17 @@ export const additionalOptionsToResolveConfig = [
  */
 export const breakingOptions: Array<BreakingOption> = [
   {
+    name: 'blacklistHosts',
+    errorKey: 'RENAMED_CONFIG_OPTION',
+    newName: 'blockHosts',
+    isWarning: false,
+  }, {
     name: 'componentFolder',
     errorKey: 'COMPONENT_FOLDER_REMOVED',
     isWarning: false,
   }, {
-    name: 'integrationFolder',
-    errorKey: 'INTEGRATION_FOLDER_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'testFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    newName: 'specPattern',
-    isWarning: false,
-  }, {
-    name: 'ignoreTestFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    newName: 'excludeSpecPattern',
-    isWarning: false,
-  }, {
-    name: 'pluginsFile',
-    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
-    isWarning: false,
-  }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'blacklistHosts',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'blockHosts',
     isWarning: false,
   }, {
     name: 'experimentalGetCookiesSameSite',
@@ -599,6 +596,15 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
   }, {
+    name: 'ignoreTestFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'excludeSpecPattern',
+    isWarning: false,
+  }, {
+    name: 'integrationFolder',
+    errorKey: 'INTEGRATION_FOLDER_REMOVED',
+    isWarning: false,
+  }, {
     name: 'nodeVersion',
     value: 'system',
     errorKey: 'NODE_VERSION_DEPRECATION_SYSTEM',
@@ -608,51 +614,54 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  }, {
+    name: 'pluginsFile',
+    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+    isWarning: false,
+  }, {
+    name: 'testFiles',
+    errorKey: 'TEST_FILES_RENAMED',
+    newName: 'specPattern',
+    isWarning: false,
   },
 ]
 
 export const breakingRootOptions: Array<BreakingOption> = [
   {
-    name: 'supportFile',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
-    isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
-    name: 'specPattern',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
-    isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
-    name: 'excludeSpecPattern',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
-    isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
-    name: 'experimentalStudio',
-    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
-    isWarning: true,
-    testingTypes: ['component', 'e2e'],
-  },
-  {
     name: 'baseUrl',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
-  },
-  {
-    name: 'slowTestThreshold',
+  }, {
+    name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['component', 'e2e'],
-  },
-  {
+  }, {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+    testingTypes: ['component', 'e2e'],
+  }, {
     name: 'indexHtmlFile',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
     isWarning: false,
     testingTypes: ['component'],
+  }, {
+    name: 'slowTestThreshold',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'specPattern',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  }, {
+    name: 'supportFile',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
 ]
 

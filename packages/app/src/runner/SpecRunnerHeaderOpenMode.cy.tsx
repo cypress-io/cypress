@@ -9,7 +9,6 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
 
   return (<SpecRunnerHeaderOpenMode
     gql={gqlVal}
-    width={800}
     eventManager={eventManager}
     getAutIframe={() => autIframe}/>)
 }

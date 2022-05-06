@@ -129,6 +129,13 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     assertScaffoldedFilesAreCorrect({ language, testingType: 'e2e' })
   })
 
+  it('scaffolds E2E for a project of type module', () => {
+    const language = 'js'
+
+    scaffoldAndOpenE2EProject({ name: 'pristine-module', language, removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'e2e' })
+  })
+
   it('scaffolds E2E and skip fixtures for a JS project', () => {
     const language = 'js'
 
