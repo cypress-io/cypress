@@ -53,6 +53,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
+      relaunchBrowser () {
+        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
+      },
     },
     configApi: {
       allowedConfig: configUtils.allowed,
