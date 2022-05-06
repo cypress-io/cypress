@@ -77,14 +77,14 @@
           </span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-24px pt-20px text-gray-700 leading-20px w-346px overflow-auto">
+          <div class="max-h-50vw p-24px pt-5 text-gray-700 leading-5 w-346px overflow-auto">
             <i18n-t
               tag="p"
               keypath="runner.viewportTooltip.infoText"
               class="mb-24px"
             >
-              <strong>{{ autStore.defaultViewportWidth }}px</strong>
-              <strong>{{ autStore.defaultViewportHeight }}px</strong>
+              <strong class="font-bold">{{ autStore.defaultViewportWidth }}px</strong>
+              <strong class="font-bold">{{ autStore.defaultViewportHeight }}px</strong>
               {{ props.gql.currentTestingType === "e2e" ? 'end-to-end' : 'component' }}
             </i18n-t>
 
@@ -95,9 +95,9 @@
             >
               <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs font-medium">{{ props.gql.configFile }}</InlineCodeFragment>
+              <InlineCodeFragment class="text-xs font-medium leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs font-medium">cy.viewport()</InlineCodeFragment>
+              <InlineCodeFragment class="text-xs font-medium leading-5">cy.viewport()</InlineCodeFragment>
             </i18n-t>
             <div class="flex justify-center">
               <Button
