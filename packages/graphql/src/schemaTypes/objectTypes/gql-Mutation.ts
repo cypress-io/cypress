@@ -373,16 +373,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('hideBrowserWindow', {
-      type: 'Boolean',
-      description: 'Hides the launchpad windows',
-      resolve: (_, args, ctx) => {
-        ctx.actions.electron.hideBrowserWindow()
-
-        return true
-      },
-    })
-
     t.nonNull.field('resetLatestVersionTelemetry', {
       type: 'Boolean',
       description: 'Resets the latest version call to capture additional telemetry for the current user',

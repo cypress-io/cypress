@@ -184,9 +184,12 @@ export class MigrationActions {
     const hasCustomComponentFolder = componentFolder !== 'cypress/component'
     const hasCustomComponentTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'component')
 
-    const hasComponentTesting = componentFolder
-      ? await hasSpecFile(this.ctx.currentProject, componentFolder, componentTestFiles)
-      : false
+    // A user is considered to "have" component testing if either
+    // 1. they have a default component folder (cypress/component) with at least 1 spec file
+    // OR
+    // 2. they have configured a non-default componentFolder (even if it doesn't have any specs.)
+    const hasSpecInDefaultComponentFolder = await hasSpecFile(this.ctx.currentProject, componentFolder, componentTestFiles)
+    const hasComponentTesting = (hasCustomComponentFolder || hasSpecInDefaultComponentFolder) ?? false
 
     this.ctx.update((coreData) => {
       coreData.migration.flags = {

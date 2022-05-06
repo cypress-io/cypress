@@ -336,7 +336,10 @@ export class DataContext {
         coreData.baseError = { title, cypressError }
       })
 
+      this.emitter.baseErrorChange()
+
       this.emitter.toLaunchpad()
+      this.emitter.toApp()
     }
   }
 

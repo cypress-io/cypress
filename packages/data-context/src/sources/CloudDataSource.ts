@@ -69,7 +69,7 @@ export class CloudDataSource {
       return { data: null }
     }
 
-    const requestPolicy = config.requestPolicy ?? 'cache-first'
+    const requestPolicy = config.requestPolicy ?? 'cache-and-network'
 
     const isQuery = config.operationType !== 'mutation'
 
@@ -98,9 +98,9 @@ export class CloudDataSource {
           if (!resolvedData) {
             resolvedData = res
 
-            // Ignore the error when there's no internet connection
-            if (res.error?.networkError) {
-              debug('executeRemoteGraphQL network error', res.error)
+            // Ignore the error when there's no internet connection or when the
+            // cloud session is not valid, we want to logout the user on the app
+            if (res.error?.networkError && res.error?.networkError.message !== 'Unauthorized') {
               dfd.resolve({ ...res, error: undefined, data: null })
             } else if (res.error) {
               dfd.reject(res.error)

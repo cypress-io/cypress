@@ -9,7 +9,7 @@
     "script"
   ],
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": ["esnext"],
     "strict": true,
     "allowJs": false,
     "noImplicitAny": true,

@@ -1,8 +1,10 @@
 <template>
   <div class="rounded border-gray-100 border-1px w-full">
     <div class="flex p-16px items-center justify-between">
-      <FileMatchIndicator>
+      <FileMatchIndicator :variant="props.variant">
+        <span v-if="props.variant === 'info'">specPattern</span>
         <i18n-t
+          v-else
           scope="global"
           keypath="components.specPattern.matches"
         >
@@ -58,6 +60,7 @@ fragment SpecPatterns on CurrentProject {
 
 const props = defineProps<{
   gql: SpecPatternsFragment
+  variant?: 'default' | 'info'
 }>()
 
 const specPatterns = computed<string[]>(() => {

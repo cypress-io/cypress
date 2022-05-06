@@ -341,6 +341,7 @@ export class AutIframe {
         selectorPlaygroundStore.setNumElements(1)
         selectorPlaygroundStore.resetMethod()
         selectorPlaygroundStore.setSelector(selector)
+        selectorPlaygroundStore.setValidity(!!el)
       },
     })
   }

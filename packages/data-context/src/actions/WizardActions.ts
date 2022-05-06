@@ -230,6 +230,7 @@ export class WizardActions {
     }
 
     const result = await addTestingTypeToCypressConfig({
+      isProjectUsingESModules: this.ctx.lifecycleManager.metaState.isProjectUsingESModules,
       filePath: configFilePath,
       info: testingTypeInfo,
     })

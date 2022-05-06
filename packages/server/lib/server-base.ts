@@ -576,10 +576,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._socket && this._socket.end()
   }
 
-  changeToUrl (url) {
-    return this._socket && this._socket.changeToUrl(url)
-  }
-
   async sendFocusBrowserMessage () {
     this._socket && await this._socket.sendFocusBrowserMessage()
   }
@@ -622,9 +618,5 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     socket.once('upstream-connected', this.socketAllowed.add)
 
     return this.httpsProxy.connect(req, socket, head)
-  }
-
-  sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
-    return this.socket.sendSpecList(specs, testingType)
   }
 }

@@ -74,7 +74,7 @@ import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument } fro
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
-import BaseError from './error/BaseError.vue'
+import BaseError from '@cy/gql-components/error/BaseError.vue'
 import WarningList from './warning/WarningList.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
