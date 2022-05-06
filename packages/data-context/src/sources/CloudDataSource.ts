@@ -138,7 +138,7 @@ export class CloudDataSource {
     })
   }
 
-  #pendingPromises: Record<string, Promise<OperationResult>> = {}
+  #pendingPromises = new Map<string, Promise<OperationResult>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
     return `${print(config.document)}-${stringifyVariables(config.variables)}`
@@ -147,14 +147,14 @@ export class CloudDataSource {
   #maybeQueueDeferredExecute (config: CloudExecuteRemote, initialResult?: OperationResult) {
     const stableKey = this.#hashRemoteRequest(config)
 
-    let loading = this.#pendingPromises[stableKey]
+    let loading = this.#pendingPromises.get(stableKey)
 
     if (loading) {
       return loading
     }
 
     loading = this.#cloudUrqlClient.query(config.document, config.variables, { requestPolicy: 'network-only' }).toPromise().then((op) => {
-      delete this.#pendingPromises[stableKey]
+      this.#pendingPromises.delete(stableKey)
       if (initialResult && _.isEqual(op.data, initialResult.data)) {
         debug('Different Query Value %j, %j', op.data, initialResult.data)
 
@@ -164,7 +164,7 @@ export class CloudDataSource {
       return op
     })
 
-    this.#pendingPromises[stableKey] = loading
+    this.#pendingPromises.set(stableKey, loading)
 
     return loading
   }
@@ -172,7 +172,7 @@ export class CloudDataSource {
   isResolving (config: CloudExecuteQuery) {
     const stableKey = this.#hashRemoteRequest(config)
 
-    return Boolean(this.#pendingPromises[stableKey])
+    return Boolean(this.#pendingPromises.get(stableKey))
   }
 
   hasResolved (config: CloudExecuteQuery) {
@@ -221,7 +221,7 @@ export class CloudDataSource {
   }
 
   // Invalidate individual fields in the GraphQL by hitting a "fake"
-  // mutation and
+  // mutation and calling cache.invalidate on the internal cache
   invalidate (...args: Parameters<Cache['invalidate']>) {
     return this.#cloudUrqlClient.mutation(`
       mutation Internal_cloudCacheInvalidate($args: JSON) { 
