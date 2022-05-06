@@ -18,7 +18,6 @@ describe('<CloudConnectButton />', () => {
 
   const cloudViewer = {
     ...CloudUserStubs.me,
-    organizationControl: null,
     organizations: {
       __typename: 'CloudOrganizationConnection' as const,
       nodes: [
