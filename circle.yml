@@ -1183,8 +1183,6 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
-            # run @cypress/design-system before other packages are built
-            - run: yarn lerna run build-prod --scope \"@cypress/design-system\"
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream
             # run unit tests from each individual package
