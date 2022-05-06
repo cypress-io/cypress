@@ -324,13 +324,7 @@ export default class ProxyLogging {
     return proxyRequest
   }
 
-  private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
-
-    if (!proxyRequest) {
-      return debug('unmatched responseReceived event %o', responseReceived)
-    }
-
+  private updateProxyRequestWithResponse (proxyRequest, responseReceived) {
     proxyRequest.responseReceived = responseReceived
 
     proxyRequest.updateConsoleProps()
@@ -341,6 +335,29 @@ export default class ProxyLogging {
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
 
     proxyRequest.log?.end()
+  }
+
+  private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
+
+    if (!proxyRequest) {
+      return debug('unmatched responseReceived event %o', responseReceived)
+    }
+
+    if (proxyRequest.xhr && proxyRequest.xhr.xhr.readyState !== 4) {
+      const oldOnload = proxyRequest.xhr.xhr.onload
+      const proxyLogging = this
+
+      proxyRequest.xhr.xhr.onload = function (...args) {
+        if (oldOnload) {
+          oldOnload.call(this, ...args)
+        }
+
+        proxyLogging.updateProxyRequestWithResponse(proxyRequest, responseReceived)
+      }
+    }
+
+    this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
   }
 
   private updateRequestWithError (error: RequestError): void {
