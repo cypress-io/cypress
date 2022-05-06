@@ -77,7 +77,7 @@
           </span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-24px pt-20px text-gray-700 leading-20px w-346px overflow-auto text-opacity-100">
+          <div class="max-h-50vw p-24px pt-20px text-gray-700 leading-20px w-346px overflow-auto">
             <i18n-t
               tag="p"
               keypath="runner.viewportTooltip.infoText"
