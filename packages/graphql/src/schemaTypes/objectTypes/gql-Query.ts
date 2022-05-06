@@ -107,8 +107,5 @@ export const Query = objectType({
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
   },
-  sourceType: {
-    module: '@packages/graphql',
-    export: 'RemoteExecutionRoot',
-  },
+  sourceType: `{ __typename?: 'Query' }`,
 })
