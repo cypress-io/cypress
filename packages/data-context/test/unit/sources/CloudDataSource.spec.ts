@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised'
 import { Response } from 'cross-fetch'
 
 import { DataContext } from '../../../src/DataContext'
-import { CloudDataResponse, CloudDataSource } from '../../../src/sources'
+import { CloudDataSource } from '../../../src/sources'
 import { createTestDataContext, scaffoldProject } from '../helper'
 import chai, { expect } from 'chai'
 import { ExecutionResult } from '@urql/core'
@@ -14,7 +14,7 @@ chai.use(chaiAsPromised)
 const FAKE_USER_QUERY = parse(`{ cloudViewer { __typename id fullName email } }`)
 const FAKE_USER_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com' } } }
 const FAKE_USER_WITH_OPTIONAL_MISSING = parse(`{ cloudViewer { __typename id fullName email cloudProfileUrl } }`)
-const FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', cloudProfileUrl: null } } }
+// const FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', cloudProfileUrl: null } } }
 const FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', cloudProfileUrl: 'https://example.com' } } }
 const FAKE_USER_WITH_REQUIRED_MISSING = parse(`{ cloudViewer { __typename id fullName email userIsViewer } }`)
 const FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE = { data: { cloudViewer: { __typename: 'CloudUser', id: '1', fullName: 'test', email: 'test@example.com', userIsViewer: true } } }
@@ -40,7 +40,12 @@ describe('CloudDataSource', () => {
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
       getUser: getUserStub,
+      logout: sinon.stub(),
     })
+  })
+
+  afterEach(function () {
+    ctx.destroy()
   })
 
   describe('excecuteRemoteGraphQL', () => {
@@ -107,7 +112,7 @@ describe('CloudDataSource', () => {
       expect(fetchStub).to.have.been.calledOnce
     })
 
-    it('when there is a nullable field missing, resolves eagerly with the cached data, but issues the remote query', async () => {
+    it('when there is a nullable field missing, resolves with a remote query', async () => {
       const result = cloudDataSource.executeRemoteGraphQL({
         document: FAKE_USER_QUERY,
         variables: {},
@@ -124,14 +129,14 @@ describe('CloudDataSource', () => {
         operationType: 'query',
       })
 
-      expect(immediateResult).not.to.be.instanceOf(Promise)
+      expect(immediateResult).to.be.instanceOf(Promise)
 
-      expect((immediateResult as CloudDataResponse).data).to.eql(FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE.data)
-      expect((immediateResult as CloudDataResponse).stale).to.eql(true)
+      // expect((immediateResult as CloudDataResponse).data).to.eql(FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE.data)
+      // expect((immediateResult as CloudDataResponse).stale).to.eql(true)
 
-      const executingResponse = await (immediateResult as CloudDataResponse).executing
+      // const executingResponse = await (immediateResult as CloudDataResponse).executing
 
-      expect(executingResponse.data).to.eql(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data)
+      expect((await immediateResult).data).to.eql(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data)
 
       expect(fetchStub).to.have.been.calledTwice
     })

@@ -366,7 +366,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer('component')
 
         cy.remoteGraphQLIntercept((obj) => {
-          if (obj.result.data?.cloudProjectsBySlugs) {
+          if (obj.result.data?.cloudProjectBySlug) {
             throw new Error('Unauthorized')
           }
 

@@ -47,12 +47,8 @@ When we hit the remote GraphQL server, we mock against the same mocked schema we
 cy.remoteGraphQLIntercept(async (obj) => {
   // Currently, all remote requests go through here, we want to use this to modify the
   // remote request before it's used and avoid touching the login query
-  if (obj.result.data?.cloudProjectsBySlugs) {
-    for (const proj of obj.result.data.cloudProjectsBySlugs) {
-      if (proj.runs?.nodes) {
-        proj.runs.nodes = []
-      }
-    }
+  if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+    obj.result.data.cloudProjectBySlug.runs.nodes = []
   }
 
   return obj.result

@@ -640,6 +640,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('refreshOrganizations', {
+      type: Query,
+      description: 'Clears the cloudViewer cache to refresh the organizations',
+      resolve: async (source, args, ctx) => {
+        await ctx.cloud.invalidate('Query', 'cloudViewer')
+
+        return {}
+      },
+    })
+
     t.boolean('_clearCloudCache', {
       description: 'Internal use only, clears the cloud cache',
       resolve: (source, args, ctx) => {

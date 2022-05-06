@@ -125,7 +125,8 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncGenerator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean}): AsyncGenerator<any> {
+    const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
     let pending: any[] = []

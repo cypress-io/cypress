@@ -11,6 +11,7 @@ import {
   createClient,
   dedupExchange,
   fetchExchange,
+  errorExchange,
   Client,
   OperationResult,
   stringifyVariables,
@@ -22,6 +23,7 @@ import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
+import { pathToArray } from 'graphql/jsutils/Path'
 
 export type CloudDataResponse = ExecutionResult & Partial<OperationResult> & { executing?: Promise<ExecutionResult & Partial<OperationResult>> }
 
@@ -58,6 +60,7 @@ export interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
 export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
+  logout(): void
 }
 
 /**
@@ -101,10 +104,21 @@ export class CloudDataSource {
             },
           },
         }),
+        errorExchange({
+          onError: (err, operation) => {
+            if (err.graphQLErrors.some((e) => e.message.includes('Unauthorized'))) {
+              this.params.logout()
+            }
+
+            if (err.networkError) {
+              // TODO: Handle network error
+            }
+          },
+        }),
         fetchExchange,
       ],
       // Set this way so we can intercept the fetch on the context for testing
-      fetch: (uri, init) => {
+      fetch: async (uri, init) => {
         const internalResponse = _.get(init, 'headers.INTERNAL_REQUEST')
 
         if (internalResponse) {
@@ -135,7 +149,12 @@ export class CloudDataSource {
       info: params.info,
       args: params.args,
       context: params.ctx,
+      operationName: this.makeOperationName(params.info),
     })
+  }
+
+  makeOperationName (info: GraphQLResolveInfo) {
+    return `${info.operation.name?.value ?? 'Anonymous'}_${pathToArray(info.path).map((p) => typeof p === 'number' ? 'idx' : p).join('_')}`
   }
 
   #pendingPromises = new Map<string, Promise<OperationResult>>()
@@ -201,15 +220,13 @@ export class CloudDataSource {
 
     // If we do have a synchronous result, return it, and determine if we want to check for
     // updates to this field
-    if (eagerResult) {
+    if (eagerResult && config.requestPolicy !== 'network-only') {
       debug(`eagerResult found stale? %s, %o`, eagerResult.stale, eagerResult.data)
 
       // If we have some of the fields, but not the full thing, return what we do have and follow up
       // with an update we send to the client.
-      if (eagerResult?.stale) {
-        const executing = this.#maybeQueueDeferredExecute(config, eagerResult)
-
-        return { ...eagerResult, executing }
+      if (eagerResult?.stale || config.requestPolicy === 'cache-and-network') {
+        return this.#maybeQueueDeferredExecute(config, eagerResult)
       }
 
       return eagerResult
@@ -222,6 +239,7 @@ export class CloudDataSource {
 
   // Invalidate individual fields in the GraphQL by hitting a "fake"
   // mutation and calling cache.invalidate on the internal cache
+  // https://formidable.com/open-source/urql/docs/api/graphcache/#invalidate
   invalidate (...args: Parameters<Cache['invalidate']>) {
     return this.#cloudUrqlClient.mutation(`
       mutation Internal_cloudCacheInvalidate($args: JSON) { 

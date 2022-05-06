@@ -219,18 +219,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
+        if (obj.result.data?.cloudProjectBySlug && obj.variables._v0_slug === 'abcdef42') {
+          const proj = obj.result.data.cloudProjectBySlug
 
-        if (obj.result.data?.cloudProjectsBySlugs && obj.variables._v0_slugs.includes('abcdef42')) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectNotFound'
-            proj.message = 'Cloud Project Not Found'
-          }
+          proj.__typename = 'CloudProjectNotFound'
+          proj.message = 'Cloud Project Not Found'
         }
 
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           const projectNodes = obj.result.data?.cloudViewer.organizations.nodes[0].projects.nodes
 
           projectNodes.push({
+            __typename: 'CloudProject',
             id: '1',
             slug: 'ghijkl',
             name: 'Mock Project',
@@ -270,12 +270,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-          }
+        if (obj.result.data?.cloudProjectBySlug) {
+          const proj = obj.result.data.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = false
         }
 
         return obj.result
@@ -299,12 +299,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           return obj.result
         }
 
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-          }
+        if (obj.result.data?.cloudProjectBySlug) {
+          const proj = obj.result.data.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = false
         }
 
         return obj.result
@@ -322,7 +322,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('updates the button text when the request access button is clicked', () => {
       cy.remoteGraphQLIntercept(async (obj, testState) => {
         if (obj.operationName === 'Runs_currentProject_cloudProject_batched') {
-          for (const proj of obj!.result!.data!.cloudProjectsBySlugs) {
+          for (const proj of obj!.result!.data!.cloudProjectBySlug) {
             proj.__typename = 'CloudProjectUnauthorized'
             proj.message = 'Cloud Project Unauthorized'
             proj.hasRequestedAccess = false
@@ -355,12 +355,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
 
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = true
-          }
+        if (obj.result.data?.cloudProjectBySlug) {
+          const proj = obj.result.data.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = true
         }
 
         return obj.result
@@ -386,12 +386,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
+        if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+          obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
         return obj.result
@@ -409,12 +405,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
+        if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+          obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
         return obj.result
@@ -438,12 +430,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
+        if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+          obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
         return obj.result

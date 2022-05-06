@@ -274,7 +274,12 @@ export const CloudRunQuery: MaybeResolver<Query> = {
     return nodeRegistry[args.id] ?? null
   },
   cloudProjectBySlug (args: QueryCloudProjectBySlugArgs) {
-    return CloudProjectStubs.componentProject
+    return projectsBySlug[args.slug] ?? createCloudProject({
+      slug: args.slug,
+      name: `cloud-project-${args.slug}`,
+      cloudProjectSettingsUrl: 'http:/test.cloud/cloud-project/settings',
+      cloudProjectUrl: 'http:/test.cloud/cloud-project/settings',
+    })
   },
   cloudProjectsBySlugs (args: QueryCloudProjectsBySlugsArgs) {
     return args.slugs.map((s) => {

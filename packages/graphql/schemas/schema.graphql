@@ -935,6 +935,7 @@ type Mutation {
 
   """Used internally to update the URQL cache in the CloudDataSource"""
   _cloudCacheInvalidate(args: JSON): Boolean
+
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -1040,6 +1041,9 @@ type Mutation {
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
+
+  """Clears the cloudViewer cache to refresh the organizations"""
+  refreshOrganizations: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
