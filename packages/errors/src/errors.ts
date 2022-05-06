@@ -6,11 +6,9 @@ import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { TestingType } from '@packages/types'
 import type { BreakingErrResult } from '@packages/config'
-
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
