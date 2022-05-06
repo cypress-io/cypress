@@ -344,20 +344,13 @@ export default class ProxyLogging {
       return debug('unmatched responseReceived event %o', responseReceived)
     }
 
-    if (proxyRequest.xhr && proxyRequest.xhr.xhr.readyState !== 4) {
-      const oldOnload = proxyRequest.xhr.xhr.onload
-      const proxyLogging = this
-
-      proxyRequest.xhr.xhr.onload = function (...args) {
-        if (oldOnload) {
-          oldOnload.call(this, ...args)
-        }
-
-        proxyLogging.updateProxyRequestWithResponse(proxyRequest, responseReceived)
-      }
+    if (proxyRequest.xhr && proxyRequest.xhr.xhr.readyState !== XMLHttpRequest.DONE) {
+      proxyRequest.xhr.xhr.addEventListener('load', () => {
+        this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
+      })
+    } else {
+      this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
     }
-
-    this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
   }
 
   private updateRequestWithError (error: RequestError): void {
