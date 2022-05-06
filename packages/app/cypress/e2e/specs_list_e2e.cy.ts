@@ -15,6 +15,8 @@ describe('App: Spec List (E2E)', () => {
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
           statusType: 'unmodified',
+          subject: 'commit subject',
+          shortHash: '1234567890',
         }
       })
     })
