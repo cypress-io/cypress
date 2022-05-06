@@ -208,12 +208,23 @@ export class GitDataSource {
 
     try {
       const statusResult = await this.#git.status()
+      const logResults = await Promise.all(absolutePaths.map((p) => {
+        return this.#git.log({
+          maxCount: 1,
+          file: p,
+          format: {
+            author: '%an',
+            lastModifiedTimestamp: '%ci',
+            lastModifiedHumanReadable: '%ar',
+          },
+        })
+      }))
 
       const changed: string[] = []
 
       // Go through each file, updating our gitInfo cache and detecting which
       // entries have changed, to notify the UI
-      for (const file of absolutePaths) {
+      for (const [i, file] of absolutePaths.entries()) {
         debug(`checking %s`, file)
 
         const current = this.#gitMeta.get(file)
@@ -239,20 +250,12 @@ export class GitDataSource {
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
           }
         } else {
-          const gitInfo = await this.#git.log({
-            maxCount: 1,
-            file,
-            format: {
-              author: '%an',
-              lastModifiedTimestamp: '%ci',
-              lastModifiedHumanReadable: '%ar',
-            },
-          })
+          const gitInfo = logResults[i]
 
           toSet = {
-            lastModifiedTimestamp: gitInfo.latest?.lastModifiedTimestamp ?? null,
-            lastModifiedHumanReadable: gitInfo.latest?.lastModifiedHumanReadable ?? null,
-            author: gitInfo.latest?.author ?? null,
+            lastModifiedTimestamp: gitInfo?.latest?.lastModifiedTimestamp ?? null,
+            lastModifiedHumanReadable: gitInfo?.latest?.lastModifiedHumanReadable ?? null,
+            author: gitInfo?.latest?.author ?? null,
             statusType: 'unmodified',
           }
         }
