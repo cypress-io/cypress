@@ -8,7 +8,10 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const autIframe = createTestAutIframe()
 
   return (<SpecRunnerHeaderOpenMode
-    gql={gqlVal}
+    gql={{
+      ...gqlVal,
+      configFile: gqlVal.configFile || 'cypress.config.ts',
+    }}
     eventManager={eventManager}
     getAutIframe={() => autIframe}/>)
 }
@@ -141,12 +144,11 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
   it('shows current viewport info', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'component',
-        gql.configFile = 'cypress.config.js'
-      },
       render: (gqlVal) => {
-        return renderWithGql(gqlVal)
+        return renderWithGql({
+          ...gqlVal,
+          configFile: 'cypress.config.js',
+        })
       },
     })
 
@@ -165,12 +167,11 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
   it('links to the viewport docs', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'e2e',
-        gql.configFile = 'cypress.config.ts'
-      },
       render: (gqlVal) => {
-        return renderWithGql(gqlVal)
+        return renderWithGql({
+          ...gqlVal,
+          currentTestingType: 'e2e',
+        })
       },
     })
 
