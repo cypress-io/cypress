@@ -73,11 +73,6 @@ gql`
 fragment CreateCloudOrgModal on CloudUser {
   id
   createCloudOrganizationUrl
-  organizationControl: organizations (first: 1) {
-    nodes {
-      id
-    }
-  }
 }
 `
 
