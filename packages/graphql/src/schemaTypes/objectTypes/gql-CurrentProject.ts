@@ -2,7 +2,6 @@ import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum } from '..'
-import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
@@ -64,7 +63,12 @@ export const CurrentProject = objectType({
           return null
         }
 
-        return cloudProjectBySlug(projectId, ctx, info)
+        return ctx.cloud.delegateCloudField({
+          field: 'cloudProjectBySlug',
+          args: { slug: projectId },
+          ctx,
+          info,
+        })
       },
     })
 

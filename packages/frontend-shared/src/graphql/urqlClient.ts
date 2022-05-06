@@ -14,8 +14,7 @@ import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
-
-import { urqlSchema } from '../generated/urql-introspection.gen'
+import { urqlSchema } from '@packages/data-context/src/gen/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'

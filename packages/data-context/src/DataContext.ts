@@ -51,6 +51,7 @@ export interface InternalDataContextOptions {
 
 export interface DataContextConfig {
   schema: GraphQLSchema
+  schemaCloud: GraphQLSchema
   mode: 'run' | 'open'
   modeOptions: Partial<AllModeOptions>
   electronApp?: ElectronApp
@@ -90,6 +91,14 @@ export class DataContext {
     this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
     this.lifecycleManager = new ProjectLifecycleManager(this)
+  }
+
+  get schema () {
+    return this._config.schema
+  }
+
+  get schemaCloud () {
+    return this._config.schemaCloud
   }
 
   get isRunMode () {
@@ -184,7 +193,10 @@ export class DataContext {
 
   @cached
   get cloud () {
-    return new CloudDataSource(this)
+    return new CloudDataSource({
+      fetch: (...args) => this.util.fetch(...args),
+      getUser: () => this.user,
+    })
   }
 
   @cached

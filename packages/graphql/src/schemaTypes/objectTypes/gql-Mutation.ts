@@ -639,5 +639,14 @@ export const mutation = mutationType({
         return {}
       },
     })
+
+    t.boolean('_clearCloudCache', {
+      description: 'Internal use only, clears the cloud cache',
+      resolve: (source, args, ctx) => {
+        ctx.cloud.reset()
+
+        return true
+      },
+    })
   },
 })

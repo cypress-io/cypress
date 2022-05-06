@@ -930,6 +930,11 @@ enum MigrationStepEnum {
 }
 
 type Mutation {
+  """Internal use only, clears the cloud cache"""
+  _clearCloudCache: Boolean
+
+  """Used internally to update the URQL cache in the CloudDataSource"""
+  _cloudCacheInvalidate(args: JSON): Boolean
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
