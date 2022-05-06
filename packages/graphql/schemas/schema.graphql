@@ -1156,6 +1156,12 @@ type Query {
     id: ID!
   ): Node
 
+  """Returns a list of cloud nodes, by ID. Max 100 nodes per batch"""
+  cloudNodesByIds(
+    """A list of IDs for a Node, conforming to the Relay spec"""
+    ids: [ID!]!
+  ): [Node]
+
   """Lookup an individual project by the slug"""
   cloudProjectBySlug(slug: String!): CloudProjectResult
 

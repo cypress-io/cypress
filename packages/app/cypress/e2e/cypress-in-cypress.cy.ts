@@ -205,5 +205,103 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`]).should('be.visible')
     })
+
+    it(`resets selector playground validity when selecting element with playground selector in ${testingType}`, () => {
+      startAtSpecsPage(testingType)
+
+      cy.get('[data-cy="spec-item"]').first().click()
+      cy.get('#unified-reporter').should('be.visible')
+
+      cy.get('[data-cy="playground-activator"]').click()
+      cy.get('[data-cy="playground-selector"]').clear()
+      cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
+      cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap).within(() => {
+        cy.get('body').click()
+      })
+
+      cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+    })
+  })
+
+  it('restarts browser if there is a change on the config file affecting the browser', () => {
+    startAtSpecsPage('e2e')
+    cy.get('[data-cy="spec-item"]')
+
+    cy.withCtx((ctx, o) => {
+      ctx.coreData.app.browserStatus = 'open'
+
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`e2e: {`, `e2e: {\n  chromeWebSecurity: false,\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+      o.sinon.spy(ctx.actions.browser, 'closeBrowser')
+      o.sinon.spy(ctx.actions.browser, 'relaunchBrowser')
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.browser.closeBrowser).to.be.called
+      expect(ctx.actions.browser.relaunchBrowser).to.be.called
+    })
+  })
+
+  it('restarts browser if there is a before:browser:launch task and there is a change on the config', () => {
+    startAtSpecsPage('e2e')
+
+    cy.withCtx((ctx, o) => {
+      ctx.coreData.app.browserStatus = 'open'
+
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`e2e: {`, `e2e: {\n  setupNodeEvents(on) {\n on('before:browser:launch', () => {})\n},\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+    })
+
+    cy.get('[data-cy="spec-item"]')
+
+    cy.withCtx((ctx, o) => {
+      ctx.coreData.app.browserStatus = 'open'
+
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`e2e: {`, `e2e: {\n  viewportHeight: 600,\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+      o.sinon.spy(ctx.actions.browser, 'closeBrowser')
+      o.sinon.spy(ctx.actions.browser, 'relaunchBrowser')
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.browser.closeBrowser).to.be.called
+      expect(ctx.actions.browser.relaunchBrowser).to.be.called
+    })
+  })
+
+  it('restarts server if there is a change on the config file affecting the server', () => {
+    startAtSpecsPage('e2e')
+    cy.get('[data-cy="spec-item"]')
+
+    cy.withCtx((ctx, o) => {
+      ctx.coreData.app.browserStatus = 'open'
+      o.sinon.spy(ctx.actions.project, 'initializeActiveProject')
+
+      let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+      config = config.replace(`{`, `{\n  watchForFileChanges: false,\n`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', config)
+    })
+
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
+    cy.contains('[role="alert"]', 'Loading')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.initializeActiveProject).to.be.called
+    })
   })
 })

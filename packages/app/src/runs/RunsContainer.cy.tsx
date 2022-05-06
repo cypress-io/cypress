@@ -8,7 +8,6 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
     ...CloudUserStubs.me,
     organizations: null,
-    organizationControl: null,
   }
 
   context('when the user is logged in', () => {

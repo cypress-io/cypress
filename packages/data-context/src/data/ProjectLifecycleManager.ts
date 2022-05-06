@@ -17,10 +17,11 @@ import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
 import { GitDataSource, LegacyCypressConfigJson } from '../sources'
-import { ProjectConfigManager } from './ProjectConfigManager'
+import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
+import { validateNeedToRestartOnChange } from '@packages/config'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -58,6 +59,7 @@ export interface ProjectMetaState {
   hasSpecifiedConfigViaCLI: false | string
   allFoundConfigFiles: string[]
   needsCypressJsonMigration: boolean
+  isProjectUsingESModules: boolean
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
@@ -68,6 +70,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
+  isProjectUsingESModules: false,
 }
 
 export class ProjectLifecycleManager {
@@ -103,7 +106,7 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
-      const contents = await this.getConfigFileContents()
+      const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
     } catch {
@@ -219,7 +222,7 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toLaunchpad()
         this.ctx.emitter.toApp()
       },
-      onFinalConfigLoaded: async (finalConfig: FullConfig) => {
+      onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             path: this.projectRoot,
@@ -230,6 +233,8 @@ export class ProjectLifecycleManager {
           })
         }
 
+        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
+
         if (this._currentTestingType === 'component') {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
@@ -238,14 +243,29 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+
+          // Devserver can pick a random port, this solve the edge case where closing
+          // and spawning the devserver can result in a different baseUrl
+          if (this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl) {
+            restartOnChange.server = true
+          }
         }
 
         this._cachedFullConfig = finalConfig
 
         // This happens automatically with openProjectCreate in run mode
         if (!this.ctx.isRunMode) {
+          const shouldRelaunchBrowser = this.ctx.coreData.app.browserStatus !== 'closed'
+
           if (!this._initializedProject) {
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else if (restartOnChange.server) {
+            this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
+            this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else if ((restartOnChange.browser || options.shouldRestartBrowser) && shouldRelaunchBrowser) {
+            this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
+            await this.ctx.actions.browser.closeBrowser()
+            await this.ctx.actions.browser.relaunchBrowser()
           }
         }
 
@@ -569,6 +589,10 @@ export class ProjectLifecycleManager {
 
       if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
         metaState.hasTypescript = true
+      }
+
+      if (packageJson.type === 'module') {
+        metaState.isProjectUsingESModules = true
       }
     } catch {
       // No need to handle

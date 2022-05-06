@@ -24,7 +24,7 @@
     <code
       class="text-size-14px"
       :class="{ 'text-gray-500': localConfidential }"
-      data-cy="record-key"
+      data-cy="code-box"
     >
       {{ localConfidential ? '*'.repeat(code.length) : code }}
     </code>

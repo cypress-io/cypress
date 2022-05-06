@@ -90,7 +90,7 @@ function run (ipc, file, projectRoot) {
 
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
-  const loadConfig = async (configFile) => {
+  const loadFile = async (file) => {
     // 1. Try loading the configFile
     // 2. Catch the "ERR_REQUIRE_ESM" error
     // 3. Check if esbuild is installed
@@ -99,7 +99,7 @@ function run (ipc, file, projectRoot) {
     // 4. Use node's dynamic import to import the configFile
 
     try {
-      return require(configFile)
+      return require(file)
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
@@ -116,14 +116,14 @@ function run (ipc, file, projectRoot) {
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
 
-      return (await bundleRequire({ filepath: configFile })).mod
+      return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
       if (err.stack.includes(`Cannot find package 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
         // Certain modules cannot be dynamically imported
-        return await import(configFile)
+        return await import(file)
       }
 
       throw err
@@ -133,7 +133,7 @@ function run (ipc, file, projectRoot) {
   ipc.on('loadConfig', async () => {
     try {
       debug('try loading', file)
-      const configFileExport = await loadConfig(file)
+      const configFileExport = await loadFile(file)
 
       debug('loaded config file', file)
       const result = configFileExport.default || configFileExport
@@ -238,7 +238,7 @@ function run (ipc, file, projectRoot) {
 
   ipc.on('loadLegacyPlugins', async (legacyConfig) => {
     try {
-      let legacyPlugins = require(file)
+      let legacyPlugins = await loadFile(file)
 
       if (legacyPlugins && typeof legacyPlugins.default === 'function') {
         legacyPlugins = legacyPlugins.default
