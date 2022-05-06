@@ -16,5 +16,5 @@ if [ $? -ne 0 ]; then
   echo 'To skip this check for local development, set SKIP_DEPCHECK=1.'
   echo 'Installing the correct dependencies with "yarn --frozen-lockfile"...'
   set +e
-  yarn --frozen-lockfile
+  yarn
 fi
