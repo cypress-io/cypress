@@ -152,7 +152,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.visible')
-    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport command.')
+    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport() command.')
     .should('be.visible')
 
     cy.get('[data-cy="viewport"]').click()
@@ -179,7 +179,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     .should('be.visible')
     .should('have.attr', 'href', 'https://on.cypress.io/viewport')
 
-    cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport command.')
+    cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport() command.')
     .should('be.visible')
   })
 

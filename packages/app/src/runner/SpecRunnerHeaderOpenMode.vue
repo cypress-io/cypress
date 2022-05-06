@@ -77,12 +77,11 @@
           </span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-14px text-gray-700 leading-20px w-300px overflow-auto">
+          <div class="max-h-50vw p-24px pt-20px text-gray-700 leading-20px w-346px overflow-auto text-opacity-100">
             <i18n-t
               tag="p"
-              scope="global"
               keypath="runner.viewportTooltip.infoText"
-              class="mb-14px"
+              class="mb-24px"
             >
               <strong>{{ autStore.defaultViewportWidth }}px</strong>
               <strong>{{ autStore.defaultViewportHeight }}px</strong>
@@ -91,18 +90,18 @@
 
             <i18n-t
               tag="p"
-              scope="global"
               keypath="runner.viewportTooltip.configText"
-              class="mb-14px"
+              class="mb-24px"
             >
               <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs">{{ props.gql.configFile }}</InlineCodeFragment>
+              <InlineCodeFragment class="text-xs font-medium">{{ props.gql.configFile }}</InlineCodeFragment>
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="text-xs">cy.viewport</InlineCodeFragment>
+              <InlineCodeFragment class="text-xs font-medium">cy.viewport()</InlineCodeFragment>
             </i18n-t>
-            <p class="flex justify-center">
+            <div class="flex justify-center">
               <Button
+                class="font-medium"
                 data-cy="viewport-docs"
                 :prefix-icon="BookIcon"
                 prefix-icon-class="icon-dark-indigo-500"
@@ -111,7 +110,7 @@
               >
                 {{ t('runner.viewportTooltip.buttonText') }}
               </Button>
-            </p>
+            </div>
           </div>
         </template>
       </SpecRunnerDropdown>
@@ -158,7 +157,7 @@ import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-componen
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import BookIcon from '~icons/cy/book_x24'
+import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
