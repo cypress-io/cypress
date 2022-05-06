@@ -123,7 +123,7 @@ export class CloudDataSource {
   }
 
   isLoadingRemote (config: CloudExecuteRemote) {
-    return Boolean(this.#pendingPromises[this.#hashRemoteRequest(config)])
+    return Boolean(this.#pendingPromises.get(this.#hashRemoteRequest(config)))
   }
 
   delegateCloudField <F extends CloudQueryField> (params: CloudExecuteDelegateFieldParams<F>) {
