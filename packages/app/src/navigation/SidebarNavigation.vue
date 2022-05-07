@@ -35,51 +35,49 @@
         aria-labelledby="sidebar-navigation-header"
         :aria-expanded="isNavBarExpanded"
       >
-        <ul class="list-none">
-          <RouterLink
-            v-for="item in navigation"
-            v-slot="{ isActive }"
-            :key="item.name"
-            :to="item.href"
-          >
-            <SidebarNavigationRow
-              :data-e2e-href="item.href"
-              :active="isActive"
-              :icon="item.icon"
-              :name="item.name"
-              :is-nav-bar-expanded="isNavBarExpanded"
-            />
-          </RouterLink>
-        </ul>
-      </nav>
-      <Tooltip
-        placement="right"
-        :disabled="isNavBarExpanded"
-        :distance="8"
-        :skidding="-16"
-      >
-        <div
-          class="border border-transparent rounded
+        <RouterLink
+          v-for="item in navigation"
+          v-slot="{ isActive }"
+          :key="item.name"
+          :to="item.href"
+        >
+          <SidebarNavigationRow
+            :data-e2e-href="item.href"
+            :active="isActive"
+            :icon="item.icon"
+            :name="item.name"
+            :is-nav-bar-expanded="isNavBarExpanded"
+          />
+        </RouterLink>
+        <Tooltip
+          placement="right"
+          :disabled="isNavBarExpanded"
+          :distance="8"
+          :skidding="-16"
+        >
+          <div
+            class="border border-transparent rounded
               cursor-pointer h-32px m-16px
               p-7px transform transition-all
               right-0 bottom-0 w-32px duration-300
               inline-block absolute hover:border-gray-500"
-          :class="{ '-translate-y-48px': !isNavBarExpanded }"
-          @click="bindingsOpen = true"
-        >
-          <i-cy-command-key_x16
-            class="h-16px w-16px icon-dark-gray-500"
-            data-cy="keyboard-shortcuts"
-          />
-        </div>
-        <template #popper>
-          {{ t('sideBar.keyboardShortcuts.title') }}
-        </template>
-      </Tooltip>
-      <KeyboardBindingsModal
-        :show="bindingsOpen"
-        @close="bindingsOpen = false"
-      />
+            :class="{ '-translate-y-48px': !isNavBarExpanded }"
+            @click="bindingsOpen = true"
+          >
+            <i-cy-command-key_x16
+              class="h-16px w-16px icon-dark-gray-500"
+              data-cy="keyboard-shortcuts"
+            />
+          </div>
+          <template #popper>
+            {{ t('sideBar.keyboardShortcuts.title') }}
+          </template>
+        </Tooltip>
+        <KeyboardBindingsModal
+          :show="bindingsOpen"
+          @close="bindingsOpen = false"
+        />
+      </nav>
       <img
         :src="CypressLogo"
         alt="Cypress"

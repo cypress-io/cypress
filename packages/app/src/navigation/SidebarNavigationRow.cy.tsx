@@ -11,12 +11,10 @@ describe('SidebarNavigationRow', () => {
         class="resize-x overflow-auto space-y-4 h-500px w-256px bg-gray-900"
       >
         <h2 class="text-white text-sm uppercase truncate">Tab Style</h2>
-        <ul>
-          <SidebarNavigationRow icon={BookIcon} name="book" active isNavBarExpanded/>
-          <SidebarNavigationRow icon={SettingsIcon} name="settings" isNavBarExpanded/>
-          <SidebarNavigationRow icon={TestResultsIcon} name="test-results" isNavBarExpanded/>
-          <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" isNavBarExpanded/>
-        </ul>
+        <SidebarNavigationRow icon={BookIcon} name="book" active isNavBarExpanded/>
+        <SidebarNavigationRow icon={SettingsIcon} name="settings" isNavBarExpanded/>
+        <SidebarNavigationRow icon={TestResultsIcon} name="test-results" isNavBarExpanded/>
+        <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" isNavBarExpanded/>
       </div>
     </div>))
   })
@@ -27,12 +25,10 @@ describe('SidebarNavigationRow', () => {
         class="resize-x overflow-auto space-y-4 h-500px w-256px bg-gray-900"
       >
         <h2 class="text-white text-sm uppercase truncate">Tab Style</h2>
-        <ul>
-          <SidebarNavigationRow icon={BookIcon} name="book" active isNavBarExpanded/>
-          <SidebarNavigationRow icon={SettingsIcon} name="settings" isNavBarExpanded/>
-          <SidebarNavigationRow icon={TestResultsIcon} name="test-results" isNavBarExpanded/>
-          <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" isNavBarExpanded/>
-        </ul>
+        <SidebarNavigationRow icon={BookIcon} name="book" active isNavBarExpanded/>
+        <SidebarNavigationRow icon={SettingsIcon} name="settings" isNavBarExpanded/>
+        <SidebarNavigationRow icon={TestResultsIcon} name="test-results" isNavBarExpanded/>
+        <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" isNavBarExpanded/>
       </div>
     </div>))
 
