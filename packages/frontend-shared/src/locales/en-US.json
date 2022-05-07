@@ -137,7 +137,7 @@
   },
   "sideBar": {
     "keyboardShortcuts": {
-      "title": "Keyboard Shortcuts",
+      "title": "Keyboard shortcuts",
       "rerun": "Re-run tests",
       "stop": "Stop tests",
       "toggle": "Toggle specs list"
