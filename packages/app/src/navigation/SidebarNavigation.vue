@@ -1,7 +1,6 @@
 <template>
   <HideDuringScreenshot
     data-cy="sidebar"
-    :aria-expanded="isNavBarExpanded"
     class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
@@ -34,8 +33,9 @@
         class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
         aria-labelledby="sidebar-navigation-header"
+        :aria-expanded="isNavBarExpanded"
       >
-        <ul>
+        <ul class="list-none">
           <RouterLink
             v-for="item in navigation"
             v-slot="{ isActive }"

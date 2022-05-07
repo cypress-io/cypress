@@ -15,6 +15,7 @@
       >
         <Button
           data-cy="playground-activator"
+          aria-label="toggle playground"
           :disabled="isDisabled"
           class="rounded-none border-gray-100 border-r-1px mr-12px"
           variant="text"
@@ -32,6 +33,7 @@
       >
         <Button
           data-cy="playground-activator"
+          aria-label="toggle playground"
           :disabled="isDisabled"
           class="border-gray-100  mr-12px"
           variant="outline"
@@ -49,6 +51,7 @@
           <img
             class="min-w-16px w-16px"
             :src="allBrowsersIcons[selectedBrowser.displayName]"
+            :alt="allBrowsersIcons[selectedBrowser.displayName]"
           >
           {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
         </template>

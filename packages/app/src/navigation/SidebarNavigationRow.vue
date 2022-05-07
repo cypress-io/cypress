@@ -1,5 +1,5 @@
 <template>
-  <li>
+  <li class="list-none">
     <Tooltip
       placement="right"
       :disabled="isNavBarExpanded"
