@@ -35,20 +35,15 @@
         aria-labelledby="sidebar-navigation-header"
         :aria-expanded="isNavBarExpanded"
       >
-        <RouterLink
+        <SidebarNavigationRow
           v-for="item in navigation"
-          v-slot="{ isActive }"
           :key="item.name"
-          :to="item.href"
-        >
-          <SidebarNavigationRow
-            :data-e2e-href="item.href"
-            :active="isActive"
-            :icon="item.icon"
-            :name="item.name"
-            :is-nav-bar-expanded="isNavBarExpanded"
-          />
-        </RouterLink>
+          :href="item.href"
+          :active="isActive"
+          :icon="item.icon"
+          :name="item.name"
+          :is-nav-bar-expanded="isNavBarExpanded"
+        />
       </nav>
       <Tooltip
         placement="right"
@@ -56,7 +51,8 @@
         :distance="8"
         :skidding="-16"
       >
-        <div
+        <button
+          type="button"
           class="border border-transparent rounded
               cursor-pointer h-32px m-16px
               p-7px transform transition-all
@@ -69,7 +65,7 @@
             class="h-16px w-16px icon-dark-gray-500"
             data-cy="keyboard-shortcuts"
           />
-        </div>
+        </button>
         <template #popper>
           {{ t('sideBar.keyboardShortcuts.title') }}
         </template>

@@ -5,6 +5,7 @@
     :distance="8"
   >
     <button
+      type="button"
       v-bind="$attrs"
       :class="active
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
@@ -21,10 +22,10 @@
         focus-visible:outline-none
         before:(rounded-r-md h-40px mr-4px text-transparent transform origin-left w-4px duration-300 content-open-square) hover:before:scale-x-100 "
       :data-selected="active"
+      @click="onClick"
     >
       <component
-        :is="
-          icon"
+        :is="icon"
         :class="active ? 'icon-dark-indigo-300 icon-light-indigo-700' : 'icon-dark-gray-500 icon-light-gray-900 group-hover:(icon-dark-gray-300 icon-light-gray-800) group-focus:(icon-dark-gray-300 icon-light-gray-800)'"
         class="flex-shrink-0 h-24px m-12px w-24px
               children:transition children:duration-300"
@@ -45,15 +46,21 @@
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { computed } from 'vue'
 
-withDefaults(defineProps <{
+const props = withDefaults(defineProps <{
   icon: FunctionalComponent<SVGAttributes, {}>
   name: string
+  href: string
   // Currently active row (generally the current route)
   active?: boolean
   isNavBarExpanded: boolean
 }>(), {
   active: false,
+})
+
+const onClick = computed(() => {
+  return location.href = props.href
 })
 
 </script>
