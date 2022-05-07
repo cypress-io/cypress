@@ -61,6 +61,7 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
+  onError(e: DashboardErrorShape): void
 }
 
 /**
@@ -110,8 +111,10 @@ export class CloudDataSource {
               this.params.logout()
             }
 
-            if (err.networkError) {
-              // TODO: Handle network error
+            if (err.graphQLErrors[0]) {
+              this.params.onError(err.graphQLErrors[0])
+            } else if (err.networkError) {
+              this.params.onError(err.networkError)
             }
           },
         }),

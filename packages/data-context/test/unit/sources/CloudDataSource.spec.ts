@@ -28,6 +28,7 @@ describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource
   let fetchStub: sinon.SinonStub
   let getUserStub: sinon.SinonStub
+  let onErrorStub: sinon.SinonStub
   let ctx: DataContext
 
   beforeEach(() => {
@@ -36,11 +37,13 @@ describe('CloudDataSource', () => {
     fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
     getUserStub = sinon.stub()
     getUserStub.returns({ authToken: '1234' })
+    onErrorStub = sinon.stub()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
       getUser: getUserStub,
       logout: sinon.stub(),
+      onError: onErrorStub,
     })
   })
 
@@ -254,8 +257,8 @@ describe('CloudDataSource', () => {
 
       const delegateCloudField = cloudDataSource.delegateCloudField
 
-      const delegateCloudSpy = sinon.stub(cloudDataSource, 'delegateCloudField').callsFake(async function () {
-        return delegateCloudField.apply(this, arguments)
+      const delegateCloudSpy = sinon.stub(cloudDataSource, 'delegateCloudField').callsFake(async function (...args) {
+        return delegateCloudField.apply(this, args)
       })
 
       await ctx.actions.project.setCurrentProject(dir)
@@ -274,7 +277,7 @@ describe('CloudDataSource', () => {
       expect(result.data).to.eql({
         currentProject: {
           cloudProject: null,
-          id: 'Q3VycmVudFByb2plY3Q6L3ByaXZhdGUvdmFyL2ZvbGRlcnMvMHovcjE5N19zMm41ejdkMTJrOHM1dDBtdGZ3MDAwMGduL1QvY3ktcHJvamVjdHMvY29tcG9uZW50LXRlc3Rz',
+          id: Buffer.from(`CurrentProject:${dir}`, 'utf8').toString('base64'),
         },
       })
 
@@ -293,7 +296,7 @@ describe('CloudDataSource', () => {
             __typename: 'CloudProject',
             id: '1',
           },
-          id: 'Q3VycmVudFByb2plY3Q6L3ByaXZhdGUvdmFyL2ZvbGRlcnMvMHovcjE5N19zMm41ejdkMTJrOHM1dDBtdGZ3MDAwMGduL1QvY3ktcHJvamVjdHMvY29tcG9uZW50LXRlc3Rz',
+          id: Buffer.from(`CurrentProject:${dir}`, 'utf8').toString('base64'),
         },
       })
 

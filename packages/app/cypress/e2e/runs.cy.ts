@@ -321,13 +321,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('updates the button text when the request access button is clicked', () => {
       cy.remoteGraphQLIntercept(async (obj, testState) => {
-        if (obj.operationName === 'Runs_currentProject_cloudProject_batched') {
-          for (const proj of obj!.result!.data!.cloudProjectBySlug) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-            testState.project = proj
-          }
+        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+          const proj = obj!.result!.data!.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = false
+          testState.project = proj
         } else if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
           obj!.result!.data!.cloudProjectRequestAccess = {
             ...testState.project,
@@ -386,7 +386,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
-        if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes) {
           obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
@@ -405,7 +405,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes) {
           obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
@@ -430,7 +430,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectBySlug.runs?.nodes) {
+        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes) {
           obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
