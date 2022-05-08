@@ -61,7 +61,7 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
-  onError(e: DashboardErrorShape): void
+  onError(e: Error): void
 }
 
 /**
@@ -107,14 +107,22 @@ export class CloudDataSource {
         }),
         errorExchange({
           onError: (err, operation) => {
+            // Ignore the error when there's no internet connection or when the
+            // cloud session is not valid, we want to logout the user on the app
             if (err.graphQLErrors.some((e) => e.message.includes('Unauthorized'))) {
               this.params.logout()
+
+              return
+            }
+
+            if (err.networkError) {
+              // TODO: UNIFY-1691 handle the networkError via a GraphQL & UI representation
+              // this.params.onError(err.networkError)
+              return
             }
 
             if (err.graphQLErrors[0]) {
               this.params.onError(err.graphQLErrors[0])
-            } else if (err.networkError) {
-              this.params.onError(err.networkError)
             }
           },
         }),

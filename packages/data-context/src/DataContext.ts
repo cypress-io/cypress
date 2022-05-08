@@ -36,7 +36,7 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import type { CypressError } from '@packages/errors'
+import { CypressError, getError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -197,7 +197,9 @@ export class DataContext {
       fetch: (...args) => this.util.fetch(...args),
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
-      onError: this.onError,
+      onError: (err) => {
+        return this.onError(getError('DASHBOARD_GRAPHQL_ERROR', err), 'Cypress Dashboard Error')
+      },
     })
   }
 
