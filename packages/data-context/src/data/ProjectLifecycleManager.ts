@@ -166,6 +166,10 @@ export class ProjectLifecycleManager {
   }
 
   get projectRoot () {
+    if (!this._projectRoot) {
+      console.trace()
+    }
+
     assert(this._projectRoot, 'Expected projectRoot to be set in ProjectLifecycleManager')
 
     return this._projectRoot
