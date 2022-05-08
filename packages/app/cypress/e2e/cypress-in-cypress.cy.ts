@@ -23,8 +23,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       startAtSpecsPage(testingType)
 
       cy.get('[data-cy="spec-item"]').first().click()
-      // Let runner stabilize
-      cy.get('#unified-reporter').should('be.visible')
+      cy.waitForSpecToFinish()
 
       cy.withCtx((ctx) => {
         ctx.coreData.servers.appSocketServer?.emit('automation:disconnected')
@@ -68,7 +67,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
 
       cy.get('[data-cy="spec-item"]').first().click()
-      // Let runner stabilize
+      cy.waitForSpecToFinish()
       cy.get('#unified-reporter').should('be.visible').then(() => {
         connectedCallback(false)
       })
