@@ -265,7 +265,11 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('create session with failed validation flow', () => {
-      before(function (done) {
+      // TODO: make this a before hook. Before hook is timing out under the hood
+      // and the failure is being captured in tests further down in run-mode.
+      // This is only visible in open-mode when setting a breakpoint in
+      // patchRunnableResetTimeout in src/cypress/mocha.ts
+      it('fails validation', function (done) {
         setupTestContext()
         cy.log('create new session with validation to test against')
 
@@ -577,7 +581,11 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('recreates existing session with failed validation flow', () => {
-      before(function (done) {
+      // TODO: make this a before hook. Before hook is timing out under the hood
+      // and the failure is being captured in tests further down in run-mode.
+      // This is only visible in open-mode when setting a breakpoint in
+      // patchRunnableResetTimeout in src/cypress/mocha.ts
+      it('fails to recreate session', function (done) {
         setupTestContext()
         cy.log('create new session for test')
         cy.session('session-1', setup, { validate })
