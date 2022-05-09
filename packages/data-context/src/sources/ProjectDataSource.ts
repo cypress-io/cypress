@@ -104,7 +104,7 @@ export function transformSpec ({
   }
 }
 
-export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?: 'js' | 'ts') {
+export function getDefaultSpecFileName (specPattern: string, testingType: Cypress.TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -122,7 +122,7 @@ export function getDefaultSpecFileName (specPattern: string, fileExtensionToUse?
   }
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, 'e2e')).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
+  const fileName = testingType === 'e2e' ? replaceWildCard(parsedGlob.path.filename, 'spec') : replaceWildCard(parsedGlob.path.filename, 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
   let extname = replaceWildCard(extnameWithoutExt, 'cy')
@@ -280,7 +280,7 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName () {
-    const defaultFileName = 'cypress/e2e/filename.cy.js'
+    const defaultFileName = 'cypress/e2e/spec.cy.js'
 
     try {
       if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
@@ -298,7 +298,7 @@ export class ProjectDataSource {
         return defaultFileName
       }
 
-      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.lifecycleManager.fileExtensionToUse)
+      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
 
       if (!specFileName) {
         return defaultFileName

@@ -109,7 +109,7 @@ const helpLink = computed(() => {
 const specFileName = computed(() => {
   const extension = props.gql.currentProject?.fileExtensionToUse ?? 'js'
 
-  const fileName = props.gql.currentProject?.defaultSpecFileName ?? `cypress/e2e/filename.cy.${extension}`
+  const fileName = props.gql.currentProject?.defaultSpecFileName ?? `cypress/e2e/spec.cy.${extension}`
 
   return getPathForPlatform(fileName)
 })
