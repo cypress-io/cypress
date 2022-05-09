@@ -243,9 +243,7 @@ export class CloudDataSource {
       // If we have some of the fields, but not the full thing, return what we do have and follow up
       // with an update we send to the client.
       if (eagerResult?.stale || config.requestPolicy === 'cache-and-network') {
-        this.#maybeQueueDeferredExecute(config, eagerResult)
-
-        return eagerResult
+        return { ...eagerResult, executing: this.#maybeQueueDeferredExecute(config, eagerResult) }
       }
 
       return eagerResult

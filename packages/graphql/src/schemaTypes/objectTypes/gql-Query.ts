@@ -118,5 +118,8 @@ export const Query = objectType({
       },
     })
   },
-  sourceType: `{__typename?: 'Query'}`,
+  sourceType: {
+    module: '@packages/graphql',
+    export: 'RemoteExecutionRoot',
+  },
 })
