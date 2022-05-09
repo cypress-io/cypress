@@ -5,13 +5,19 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import type { Log } from '../../../cypress/log'
 
 const newLineRe = /\n/g
 
+interface InternalSelectOptions extends Partial<Cypress.SelectOptions> {
+  _log?: Log
+  $el: JQuery<HTMLSelectElement>
+  error?: any
+}
+
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    // TODO: any -> Partial<Cypress.SelectOptions>
-    select (subject, valueOrTextOrIndex, options: any = {}) {
+    select (subject, valueOrTextOrIndex, userOptions: Partial<Cypress.SelectOptions> = {}) {
       if (
         !_.isNumber(valueOrTextOrIndex)
         && !_.isString(valueOrTextOrIndex)
@@ -28,9 +34,7 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+      const options: InternalSelectOptions = _.defaults({}, userOptions, {
         $el: subject,
         log: true,
         force: false,
@@ -55,7 +59,7 @@ export default (Commands, Cypress, cy) => {
           },
         })
 
-        options._log.snapshot('before', { next: 'after' })
+        options._log!.snapshot('before', { next: 'after' })
       }
 
       let node

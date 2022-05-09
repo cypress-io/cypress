@@ -9,7 +9,7 @@ export const isDetached = ($el) => {
 
 export const isAttached = function ($el) {
   // if we're being given window
-  // then these are automaticallyed attached
+  // then these are automatically attached
   if ($window.isWindow($el)) {
     // there is a code path when forcing focus and
     // blur on the window where this check is necessary.
