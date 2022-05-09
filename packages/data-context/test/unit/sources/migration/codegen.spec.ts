@@ -31,7 +31,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: false,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -49,7 +49,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -69,7 +69,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -87,7 +87,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -101,7 +101,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -115,7 +115,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -141,7 +141,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -157,7 +157,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -174,7 +174,7 @@ describe('cypress.config.js generation', () => {
       projectRoot,
       isUsingTypeScript: false,
       isProjectUsingESModules: true,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
     })
 
     snapshot(generatedConfig)
@@ -193,7 +193,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: false,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -210,7 +210,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: true,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -227,7 +227,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: true,
-      shouldAddCustomE2eSpecPattern: false,
+      shouldAddCustomE2ESpecPattern: false,
       isProjectUsingESModules: false,
     })
 
@@ -244,7 +244,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: true,
-      shouldAddCustomE2eSpecPattern: true,
+      shouldAddCustomE2ESpecPattern: true,
       isProjectUsingESModules: false,
     })
 
@@ -263,7 +263,7 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       isUsingTypeScript: true,
-      shouldAddCustomE2eSpecPattern: true,
+      shouldAddCustomE2ESpecPattern: true,
       isProjectUsingESModules: false,
     })
 
@@ -417,7 +417,7 @@ describe('reduceConfig', () => {
     projectRoot: '',
     hasTypescript: false,
     isProjectUsingESModules: false,
-    shouldAddCustomE2eSpecPattern: false,
+    shouldAddCustomE2ESpecPattern: false,
   }
 
   it('should move the testFiles field to e2e and component', () => {
@@ -459,9 +459,9 @@ describe('reduceConfig', () => {
     expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/**/*.cy.{js,jsx,ts,tsx}`)
   })
 
-  it('should add custom integrationFolder to default testFiles if testFiles is not present and shouldAddCustomE2eSpecPattern is true', () => {
+  it('should add custom integrationFolder to default testFiles if testFiles is not present and shouldAddCustomE2ESpecPattern is true', () => {
     const config = { integrationFolder: 'cypress/custom-integration' }
-    const newConfig = reduceConfig(config, { ...options, shouldAddCustomE2eSpecPattern: true })
+    const newConfig = reduceConfig(config, { ...options, shouldAddCustomE2ESpecPattern: true })
 
     expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/**/*.{js,jsx,ts,tsx}`)
   })
