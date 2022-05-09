@@ -1,10 +1,13 @@
 /* eslint-disable no-dupe-class-members */
 import path from 'path'
 import { fork } from 'child_process'
+import fs from 'fs-extra'
+import semver from 'semver'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
 import _ from 'lodash'
 import type { DataContext } from '..'
+import { getError } from '@packages/errors'
 import {
   cleanUpIntegrationFolder,
   formatConfig,
@@ -132,6 +135,23 @@ export class MigrationActions {
       throw Error('cannot do migration without currentProject!')
     }
 
+    if (this.ctx.isGlobalMode) {
+      const version = this.locallyInstalledCypressVersion(this.ctx.currentProject)
+
+      if (!version) {
+        // Could not resolve Cypress. Unlikely, but they are using a
+        // project with Cypress that is nested more deeply than
+        // another project, which has a `cypress.json` but has not had
+        // it's node_modules installed, or it relies on a global version
+        // of Cypress that is missing for whatever reason.
+        return this.ctx.onError(getError('MIGRATION_CYPRESS_NOT_FOUND'))
+      }
+
+      if (!semver.satisfies(version, '^10.0.0')) {
+        return this.ctx.onError(getError('MIGRATION_MISMATCHED_CYPRESS_VERSIONS', version))
+      }
+    }
+
     await this.initializeFlags()
 
     const legacyConfigFileExist = this.ctx.migration.legacyConfigFileExists()
@@ -145,6 +165,21 @@ export class MigrationActions {
       coreData.migration.filteredSteps = filteredSteps
       coreData.migration.step = filteredSteps[0]
     })
+  }
+
+  locallyInstalledCypressVersion (currentProject: string) {
+    try {
+      const localCypressPkgJsonPath = require.resolve(path.join('cypress', 'package.json'), {
+        paths: [currentProject],
+      })
+      const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
+
+      return localCypressPkgJson?.version ?? undefined
+    } catch (e) {
+      // node_modules was not found, or some other unexpected error
+      // return undefined and surface the correct error.
+      return undefined
+    }
   }
 
   /**
