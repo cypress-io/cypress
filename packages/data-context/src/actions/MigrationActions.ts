@@ -199,6 +199,8 @@ export class MigrationActions {
     const hasCustomIntegrationFolder = getIntegrationFolder(legacyConfigForMigration) !== 'cypress/integration'
     const hasCustomIntegrationTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'integration')
 
+    const shouldAddCustomE2ESpecPattern = Boolean(this.ctx.migration.legacyConfigProjectId)
+
     let hasE2ESpec = integrationFolder
       ? await hasSpecFile(this.ctx.currentProject, integrationFolder, integrationTestFiles)
       : false
@@ -208,7 +210,7 @@ export class MigrationActions {
     // this allows users to stop migration halfway,
     // then to pick up where they left migration off
     if (!hasE2ESpec && (!hasCustomIntegrationTestFiles || !hasCustomIntegrationFolder)) {
-      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e')
+      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e', shouldAddCustomE2ESpecPattern)
 
       hasE2ESpec = await hasSpecFile(this.ctx.currentProject, '', newE2eSpecPattern)
     }
@@ -236,6 +238,7 @@ export class MigrationActions {
         hasComponentTesting,
         hasE2ESpec,
         hasPluginsFile: true,
+        shouldAddCustomE2ESpecPattern,
       }
     })
   }
@@ -281,6 +284,13 @@ export class MigrationActions {
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
     const from = path.join(projectRoot, 'cypress', 'integration')
     const to = path.join(projectRoot, 'cypress', 'e2e')
+
+    this.ctx.update((coreData) => {
+      coreData.migration.flags = {
+        ...coreData.migration.flags,
+        shouldAddCustomE2ESpecPattern: true,
+      }
+    })
 
     await this.ctx.fs.move(from, to)
   }
