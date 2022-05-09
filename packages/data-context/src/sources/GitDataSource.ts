@@ -30,8 +30,8 @@ dayjs.extend(relativeTime)
 // matches <timestamp> <when> <author>
 // $ git log -1 --pretty=format:%ci %ar %an <file>
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
-const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
-const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
+const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s([^|]*)\|([^|]*)\|([^|]*)/
+const GIT_LOG_COMMAND = `git log --max-count=1 --pretty="format:%ci %ar %an|%h|%s"`
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
@@ -43,6 +43,8 @@ export interface GitInfo {
   lastModifiedTimestamp: string | null
   lastModifiedHumanReadable: string | null
   statusType: typeof gitStatusType[number]
+  subject: string | null
+  shortHash: string | null
 }
 
 export interface GitDataSourceConfig {
@@ -83,8 +85,10 @@ export class GitDataSource {
     // Simple Git will error if the projectRoot does not exist.
     // This should never happen outside of testing code simulating
     // incorrect scenarios
+    debug('config: %o', this.config)
     try {
       this.#git = simpleGit({ baseDir: this.config.projectRoot })
+      this.#gitBaseDir = this.config.projectRoot
     } catch {
       this.#git = simpleGit()
     }
@@ -124,6 +128,8 @@ export class GitDataSource {
     }
 
     this.#loadBulkGitInfo(specs).catch(this.config.onError)
+
+    this.#specs = specs
   }
 
   get gitBaseDir () {
@@ -247,26 +253,31 @@ export class GitDataSource {
         if (isUnstaged && ['M', 'A', ' ', '?'].includes(isUnstaged?.working_dir)) {
           const stat = fs.statSync(file)
           const ctime = dayjs(stat.ctime)
+          const birthtime = dayjs(stat.birthtime)
 
           toSet = {
-            lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
-            lastModifiedHumanReadable: ctime.fromNow(),
+            lastModifiedTimestamp: isUnstaged.working_dir === 'M' ? ctime.format('YYYY-MM-DD HH:mm:ss Z') : birthtime.format('YYYY-MM-DD HH:mm:ss Z'),
+            lastModifiedHumanReadable: isUnstaged.working_dir === 'M' ? ctime.fromNow() : birthtime.fromNow(),
             author: this.#currentUser ?? '',
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
+            subject: null,
+            shortHash: null,
           }
         } else {
           const data = stdout[i]
           const info = data?.match(GIT_LOG_REGEXP)
 
-          if (file && info && info[1] && info[2] && info[3]) {
+          if (file && info && info[1] && info[2] && info[3] && info[4] && info[5]) {
             toSet = {
               lastModifiedTimestamp: info[1],
               lastModifiedHumanReadable: info[2],
               author: info[3],
               statusType: 'unmodified',
+              subject: info[5],
+              shortHash: info[4],
             }
           } else {
-            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
+            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>|<short_hash>|<subject>'. Got: ${data}`)
             toSet = null
           }
         }
@@ -301,9 +312,14 @@ export class GitDataSource {
       : `IFS=$'\n'; for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
     debug('executing command `%s`:', cmd)
+    debug('gitBaseDir `%s`:', this.#gitBaseDir)
 
-    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash' })
+    const result = await execa(cmd, { shell: process.env.SHELL || '/bin/bash', cwd: this.#gitBaseDir })
     const stdout = result.stdout.split('\n')
+
+    if (result.exitCode !== 0) {
+      debug(`error... stderr`, result.stderr)
+    }
 
     if (stdout.length !== absolutePaths.length) {
       debug('error... stdout:', stdout)

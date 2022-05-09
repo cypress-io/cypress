@@ -1,11 +1,8 @@
 import path from 'path'
-import dedent from 'dedent'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
-import { defineConfigAvailable } from '@packages/data-context/src/sources/migration/codegen'
 import semver from 'semver'
-import resolveFrom from 'resolve-from'
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
@@ -26,7 +23,9 @@ export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number]
 
 export function inPkgJson (dependency: WizardDependency, projectPath: string): DependencyToInstall {
   try {
-    const loc = resolveFrom(projectPath, path.join(dependency.package, 'package.json'))
+    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
+      paths: [projectPath],
+    })
     const pkg = fs.readJsonSync(loc) as PkgJson
     const pkgVersion = semver.coerce(pkg.version)
 
@@ -58,67 +57,6 @@ function getBundlerDependency (bundler: WizardBundler, projectPath: string): Dep
   }
 }
 
-interface CreateCypressConfig {
-  framework: typeof WIZARD_FRAMEWORKS[number]['configFramework']
-  bundler: WizardBundler
-  language: 'js' | 'ts'
-  projectRoot: string
-}
-
-export function createCypressConfig (config: CreateCypressConfig): string {
-  const isDefineConfigAvailable = defineConfigAvailable(config.projectRoot)
-
-  if (config.language === 'ts') {
-    if (isDefineConfigAvailable) {
-      return dedent`
-        import { defineConfig } from 'cypress'
-
-        export default defineConfig({
-          component: {
-            devServer: {
-              framework: '${config.framework}',
-              bundler: '${config.bundler}'
-            }
-          }
-        })`
-    }
-
-    return dedent`
-      export default {
-        component: {
-          devServer: {
-            framework: '${config.framework}',
-            bundler: '${config.bundler}'
-          }
-        }
-      }`
-  }
-
-  if (isDefineConfigAvailable) {
-    return dedent`
-      const { defineConfig } = require('cypress')
-
-      module.exports = defineConfig({
-        component: {
-          devServer: {
-            framework: '${config.framework}',
-            bundler: '${config.bundler}'
-          }
-        }
-      })`
-  }
-
-  return dedent`
-    module.exports = {
-      component: {
-        devServer: {
-          framework: '${config.framework}',
-          bundler: '${config.bundler}'
-        }
-      }
-    }`
-}
-
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
@@ -134,7 +72,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
@@ -155,7 +92,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
@@ -176,7 +112,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
@@ -196,7 +131,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',
@@ -216,7 +150,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
@@ -236,7 +169,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue2',
@@ -256,7 +188,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'vue',
     glob: '*.vue',
     mountModule: 'cypress/vue',
@@ -276,7 +207,6 @@ export const WIZARD_FRAMEWORKS = [
         inPkgJson(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ]
     },
-    createCypressConfig,
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: 'cypress/react',

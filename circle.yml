@@ -58,7 +58,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ chore/cutover-to-bundled-react-mount, << pipeline.git.branch >> ]
-    - equal: [ 'unify-1036-windows-test-projects', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/windows-mocha-tests-metrics', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -301,6 +301,9 @@ commands:
       - run:
           name: Install Node Modules
           command: |
+            # avoid installing Percy's Chromium every time we use @percy/cli
+            # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
+            PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
       - prepare-modules-cache:
@@ -1106,7 +1109,6 @@ jobs:
           job-names: >
             cli-visual-tests,
             reporter-integration-tests,
-            npm-design-system,
             run-app-component-tests-chrome,
             run-app-integration-tests-chrome,
             run-frontend-shared-component-tests-chrome,
@@ -1172,10 +1174,8 @@ jobs:
             - run: yarn test-scripts
             # make sure our snapshots are compared correctly
             - run: yarn test-mocha-snapshot
-            # run @cypress/design-system before other packages are built
-            - run: yarn lerna run build-prod --scope \"@cypress/design-system\"
             # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream --ignore \"@cypress/design-system\"
+            - run: yarn lerna run build-prod --stream
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1599,28 +1599,6 @@ jobs:
           path: npm/vue/test_results
       - store_artifacts:
           path: npm/vue/test_results
-      - store-npm-logs
-
-  npm-design-system:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: yarn workspace @cypress/design-system build
-      - run:
-          name: Run tests
-          # will use PERCY_TOKEN environment variable if available
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
-          working_directory: npm/design-system
-      - store_test_results:
-          path: npm/design-system/test_results
       - store-npm-logs
 
   npm-angular:
@@ -2299,10 +2277,6 @@ linux-workflow: &linux-workflow
     - npm-webpack-batteries-included-preprocessor:
         requires:
           - build
-    - npm-design-system:
-        context: test-runner:percy
-        requires:
-          - build
     - npm-vue:
         requires:
           - build
@@ -2363,7 +2337,6 @@ linux-workflow: &linux-workflow
           - unit-tests-release
           - cli-visual-tests
           - reporter-integration-tests
-          - npm-design-system
           - run-app-component-tests-chrome
           - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome

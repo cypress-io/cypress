@@ -42,7 +42,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex col-span-2 items-center justify-between">
-        <div>{{ t('specPage.gitStatusHeader') }}</div>
+        <div>{{ t('specPage.lastUpdatedHeader') }}</div>
       </div>
       <div class="flex items-center justify-between">
         <div>{{ t('specPage.latestRunsHeader') }}</div>
@@ -105,14 +105,14 @@
           <template #git-info>
             <SpecListGitInfo
               v-if="row.data.isLeaf && row.data.data?.gitInfo"
-              :gql="row.data.data.gitInfo"
+              :gql="row.data.data?.gitInfo"
             />
           </template>
 
           <template #latest-runs>
             <RunStatusDots
               v-if="row.data.isLeaf"
-              :runs="row.data.data?.runInfo?.runs?.nodes ?? testingRuns"
+              :runs="testingRuns"
             />
           </template>
         </SpecsListRowItem>

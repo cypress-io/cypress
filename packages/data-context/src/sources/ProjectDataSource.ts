@@ -259,6 +259,8 @@ export class ProjectDataSource {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       if (isEqual(this.specs, specs)) {
+        this.ctx.actions.project.refreshSpecs(specs)
+
         // If no differences are found, we do not need to emit events
         return
       }
@@ -357,10 +359,6 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
-  frameworkLoader = this.ctx.loader<string, typeof WIZARD_FRAMEWORKS[number] | null>((projectRoots) => {
-    return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
-  })
-
   private guessFramework (projectRoot: string) {
     const guess = WIZARD_FRAMEWORKS.find((framework) => {
       const lookingForDeps = framework.detectors.map((x) => x.package).reduce(
@@ -379,7 +377,7 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
 
-    const framework = await this.frameworkLoader.load(this.ctx.currentProject)
+    const framework = this.guessFramework(this.ctx.currentProject)
 
     return {
       component: framework?.glob ?? looseComponentGlob,

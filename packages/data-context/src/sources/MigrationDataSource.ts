@@ -62,6 +62,14 @@ export class MigrationDataSource {
     return this.ctx.coreData.migration.legacyConfigForMigration
   }
 
+  get legacyConfigProjectId () {
+    return this.legacyConfig.projectId || this.legacyConfig.e2e?.projectId
+  }
+
+  get shouldMigratePreExtension () {
+    return !this.legacyConfigProjectId
+  }
+
   get legacyConfigFile () {
     if (this.ctx.modeOptions.configFile && this.ctx.modeOptions.configFile.endsWith('.json')) {
       return this.ctx.modeOptions.configFile
@@ -173,13 +181,19 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, this.legacyConfig)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
+    const e2eMigrationOptions = {
+      // If the configFile has projectId, we do not want to change the preExtension
+      // so, we can keep the cloud history
+      shouldMigratePreExtension: this.shouldMigratePreExtension,
+    }
+
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map((s) => applyMigrationTransform(s, e2eMigrationOptions)).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(this.legacyConfig, 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
+      canBeAutomaticallyMigrated.push(...specs.component.map((s) => applyMigrationTransform(s)).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
     return this.checkAndUpdateDuplicatedSpecs(canBeAutomaticallyMigrated)
@@ -190,14 +204,16 @@ export class MigrationDataSource {
       throw Error('Need currentProject!')
     }
 
-    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+    const { isUsingTypeScript } = this.ctx.lifecycleManager.metaState
 
     return createConfigString(this.legacyConfig, {
       hasComponentTesting: this.ctx.coreData.migration.flags.hasComponentTesting,
       hasE2ESpec: this.ctx.coreData.migration.flags.hasE2ESpec,
       hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
-      hasTypescript,
+      isUsingTypeScript,
+      isProjectUsingESModules: this.ctx.lifecycleManager.metaState.isProjectUsingESModules,
+      shouldAddCustomE2ESpecPattern: this.ctx.coreData.migration.flags.shouldAddCustomE2ESpecPattern,
     })
   }
 

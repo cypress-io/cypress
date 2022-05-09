@@ -61,8 +61,6 @@ describe('GitDataSource', () => {
     fs.createFileSync(fooSpec)
     fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
 
-    process.chdir(projectPath)
-
     const dfd = pDefer()
 
     onGitInfoChange.onFirstCall().callsFake(dfd.resolve)

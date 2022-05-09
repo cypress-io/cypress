@@ -10,9 +10,10 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useScreenshotStore } from '../../store/screenshot-store'
+import { runnerConstants } from '../runner-constants'
 
-const navbarWidth = 64
 const screenshotStore = useScreenshotStore()
+const isRunMode = window.__CYPRESS_MODE__ === 'run'
 
 const style = computed(() => {
   if (screenshotStore.isScreenshotting) {
@@ -23,7 +24,8 @@ const style = computed(() => {
   }
 
   return {
-    width: `calc(100% - ${navbarWidth})`,
+    // since run mode has no nav, let's check for run mode here
+    width: isRunMode ? '100%' : `calc(100% - ${runnerConstants.collapsedNavBarWidth})`,
   }
 })
 </script>

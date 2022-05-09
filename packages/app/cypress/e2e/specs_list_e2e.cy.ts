@@ -15,6 +15,8 @@ describe('App: Spec List (E2E)', () => {
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
           statusType: 'unmodified',
+          subject: 'commit subject',
+          shortHash: '1234567890',
         }
       })
     })
@@ -59,8 +61,8 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('shows a git status for each spec', () => {
-    cy.get('[data-cy="spec-list-file"]').each((row) => {
-      cy.wrap(row).contains('.git-info-row', 'Test Author')
+    cy.get('[data-cy="git-info-row"]').each((row) => {
+      cy.wrap(row).find('svg').should('have.length', 1)
     })
   })
 

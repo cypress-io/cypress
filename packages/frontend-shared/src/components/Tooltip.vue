@@ -1,5 +1,6 @@
 <template>
   <Tooltip
+    v-if="!skipTooltip"
     :popper-class="{'no-arrow': hideArrow}"
     :popper-hide-triggers="['hover']"
   >
@@ -8,6 +9,7 @@
       <slot name="popper" />
     </template>
   </Tooltip>
+  <slot v-else />
 </template>
 
 <script setup lang="ts">
@@ -16,9 +18,11 @@ import { Tooltip } from 'floating-vue'
 withDefaults(defineProps<{
   color?: string
   hideArrow?: boolean
+  skipTooltip?: boolean
 }>(), {
   color: 'dark',
   hideArrow: false,
+  skipTooltip: false,
 })
 
 </script>

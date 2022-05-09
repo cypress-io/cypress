@@ -65,8 +65,14 @@ async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: st
 export async function shouldShowAutoRenameStep (projectRoot: string, config: LegacyCypressConfigJson) {
   const specsToAutoMigrate = await getSpecs(projectRoot, config)
 
+  const e2eMigrationOptions = {
+    // If the configFile has projectId, we do not want to change the preExtension
+    // so, we can keep the cloud history
+    shouldMigratePreExtension: !config.projectId && !config.e2e?.projectId,
+  }
+
   const integrationCleaned = specsToAutoMigrate.integration.filter((spec) => {
-    const transformed = applyMigrationTransform(spec)
+    const transformed = applyMigrationTransform(spec, e2eMigrationOptions)
 
     return transformed.before.relative !== transformed.after.relative
   })

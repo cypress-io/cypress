@@ -120,12 +120,11 @@
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
     "componentSpecsHeader": "Component Specs",
-    "e2eSpecsHeader": "E2E Specs",
-    "gitStatusHeader": "Git Status",
-    "latestRunsHeader": "Latest Runs",
+    "e2eSpecsHeader": "E2E specs",
+    "lastUpdatedHeader": "Last updated",
+    "latestRunsHeader": "Latest runs",
     "rows": {
-      "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
-      "gitInfo": "{fileState} {timeAgo}"
+      "gitTooltipSubtext": "{shortHash} by {author}"
     },
     "noResultsMessage": "No specs matched your search:",
     "noSpecErrorTitle": "Spec not found",
@@ -220,11 +219,23 @@
   },
   "launchpadErrors": {
     "generic": {
-      "header": "Something went wrong",
-      "message": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
-      "readTheDocsButton": "Read the docs",
+      "configErrorTitle": "Cypress configuration error",
       "retryButton": "Try again",
-      "stackTraceLabel": "Stack Trace"
+      "stackTraceLabel": "Stack trace",
+      "docsButton": {
+        "configGuide": {
+          "text": "Configuration Guide",
+          "link": "https://docs.cypress.io/guides/references/configuration"
+        },
+        "dashboardGuide": {
+          "text": "Cypress Dashboard Guide",
+          "link": "https://docs.cypress.io/guides/dashboard/introduction"
+        },
+        "docsHomepage": {
+          "text": "Cypress Docs",
+          "link": "https://docs.cypress.io"
+        }
+      }
     },
     "noInternet": {
       "header": "You have no internet connection",
@@ -646,8 +657,11 @@
     },
     "selectorPlayground": {
       "matches": "No Matches | {n} Match | {n} Matches",
-      "copyTooltip": "Copied to clipboard",
-      "printTooltip": "Printed to console",
+      "playgroundTooltip": "Click an element to see a suggested selector",
+      "copyTooltip": "Copy to clipboard",
+      "copyTooltipAction": "Copied!",
+      "printTooltip": "Print to console",
+      "printTooltipAction": "Printed!",
       "invalidSelector": "Invalid",
       "selectorMethodsLabel": "Selector Methods"
     },
@@ -664,6 +678,12 @@
       "shared": {
         "link": "Read more about browser management"
       }
+    },
+    "viewportTooltip": {
+      "buttonText": "Review the guide on viewports",
+      "buttonHref": "https://on.cypress.io/viewport",
+      "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
+      "configText": "Additionally, you can override this value in your {2} or via the {4} command."
     }
   },
   "warnings": {
