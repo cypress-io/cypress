@@ -44,7 +44,7 @@ export default {
       // NOTE: since in evalScripts, scripts are evaluated in order,
       // we chose to respect this constraint here too.
       // indeed _.each goes through the array in order
-      return Bluebird.each(scripts, (script: any) => script())
+      return Bluebird.each(scripts, (script: () => Promise<unknown>) => script())
     }
 
     return runScriptsFromUrls(specWindow, scripts)
