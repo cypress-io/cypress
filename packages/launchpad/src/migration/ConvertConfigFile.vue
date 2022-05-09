@@ -155,7 +155,7 @@ fragment ConvertConfigFile on Migration {
   hasCustomIntegrationTestFiles
   hasCustomComponentFolder
   hasCustomComponentTestFiles
-  hasTypescript
+  isUsingTypeScript
 }`
 
 const props = defineProps<{
@@ -174,7 +174,7 @@ const codeAfter = computed(() => {
   return props.gql.configAfterCode + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\n').join('')
 })
 
-const fileName = computed(() => props.gql.hasTypescript ? 'cypress.config.ts' : 'cypress.config.js')
+const fileName = computed(() => props.gql.isUsingTypeScript ? 'cypress.config.ts' : 'cypress.config.js')
 
 </script>
 
