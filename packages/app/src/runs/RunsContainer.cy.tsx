@@ -17,7 +17,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
           result.cloudViewer = cloudViewer
         },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} />
+          return <RunsContainer gql={gqlVal} online />
         },
       })
 
@@ -39,7 +39,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
           }
         },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} />
+          return <RunsContainer gql={gqlVal} online />
         },
       })
 
@@ -58,7 +58,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
     it('renders instructions and login button', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} />
+          return <RunsContainer gql={gqlVal} online />
         },
       })
 

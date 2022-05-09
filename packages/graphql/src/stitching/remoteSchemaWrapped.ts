@@ -1,9 +1,13 @@
+import { delegateToSchema } from '@graphql-tools/delegate'
 import { wrapSchema } from '@graphql-tools/wrap'
 import type { DataContext } from '@packages/data-context'
 import type { RequestPolicy } from '@urql/core'
 import assert from 'assert'
+import debugLib from 'debug'
 import { BREAK, OperationDefinitionNode, visit } from 'graphql'
 import { remoteSchema } from './remoteSchema'
+
+const debug = debugLib('cypress:graphql:remoteSchemaWrapped')
 
 export interface RemoteExecutionRoot {
   requestPolicy?: RequestPolicy
@@ -13,16 +17,35 @@ export interface RemoteExecutionRoot {
 // queries we know should be executed against this server
 export const remoteSchemaWrapped = wrapSchema<DataContext>({
   schema: remoteSchema,
+  createProxyingResolver: ({
+    subschemaConfig,
+    operation,
+    transformedSchema,
+  }) => {
+    return (source, args, context, info) => {
+      return delegateToSchema({
+        rootValue: source,
+        schema: subschemaConfig,
+        operation,
+        transformedSchema,
+        context,
+        info,
+      })
+    }
+  },
   executor: (obj) => {
     const info = obj.info
 
     assert(obj.context?.cloud, 'Cannot execute without a DataContext')
-    assert(info, 'Cannoy execute without GraphQLResolveInfo')
+    assert(info, 'Cannot execute without GraphQLResolveInfo')
 
     const operationName = obj.context.cloud.makeOperationName(info)
+    const requestPolicy = ((obj.rootValue ?? {}) as RemoteExecutionRoot).requestPolicy ?? 'cache-first'
+
+    debug('executing: %j', { rootValue: obj.rootValue, operationName, requestPolicy })
 
     return obj.context.cloud.executeRemoteGraphQL({
-      requestPolicy: ((obj.rootValue ?? {}) as RemoteExecutionRoot).requestPolicy ?? 'cache-first',
+      requestPolicy,
       operationType: obj.operationType ?? 'query',
       document: visit(obj.document, {
         OperationDefinition (node) {

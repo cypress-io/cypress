@@ -95,6 +95,19 @@ export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
     recordKeys: [CloudRecordKeyStubs.componentProject],
     latestRun: CloudRunStubs.running,
     runs (args: CloudProjectRunsArgs) {
+      if (args.before) {
+        return {
+          pageInfo: {
+            hasNextPage: true,
+            hasPreviousPage: false,
+          },
+          nodes: [
+            createCloudRun({ status: 'RUNNING' }),
+            createCloudRun({ status: 'RUNNING' }),
+          ],
+        }
+      }
+
       const twentyRuns = _.times(20, (i) => {
         const statusIndex = i % STATUS_ARRAY.length
         const status = STATUS_ARRAY[statusIndex]
@@ -161,10 +174,13 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
-    commitInfo: null,
     totalDuration: 300,
     url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date('1995-12-17T03:17:00').toISOString(),
+    commitInfo: createCloudRunCommitInfo({
+      sha: `fake-sha-${getNodeIdx('CloudRun')}`,
+      summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
+    }),
     ...config,
   }
 
@@ -301,5 +317,8 @@ export const CloudQuery: MaybeResolver<Query> = {
     }
 
     return CloudUserStubs.me
+  },
+  cloudNodesByIds ({ ids }) {
+    return ids.map((id) => nodeRegistry[id] ?? null)
   },
 }
