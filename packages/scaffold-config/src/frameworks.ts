@@ -3,7 +3,6 @@ import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import semver from 'semver'
-import resolveFrom from 'resolve-from'
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
@@ -24,7 +23,9 @@ export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number]
 
 export function inPkgJson (dependency: WizardDependency, projectPath: string): DependencyToInstall {
   try {
-    const loc = resolveFrom(projectPath, path.join(dependency.package, 'package.json'))
+    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
+      paths: [projectPath],
+    })
     const pkg = fs.readJsonSync(loc) as PkgJson
     const pkgVersion = semver.coerce(pkg.version)
 

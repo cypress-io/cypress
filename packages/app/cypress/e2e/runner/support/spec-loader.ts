@@ -70,20 +70,11 @@ export function runSpec ({ fileName }: { fileName: string }) {
   cy.openProject('runner-e2e-specs')
   cy.startAppServer()
 
-  cy.visitApp()
-
-  cy.findByLabelText('Search Specs').type(fileName)
-  // wait for virtualized spec list to update, there is a chance
-  // of disconnection otherwise
-  cy.wait(500)
-  cy.contains('[data-cy=spec-item]', fileName).click()
+  cy.visitApp(`specs/runner?file=cypress/e2e/runner/${fileName}`)
 
   // First ensure the test is loaded
   cy.get('.passed > .num').should('contain', '--')
   cy.get('.failed > .num').should('contain', '--')
-
-  // Then ensure the tests are running
-  cy.contains('Your tests are loading...').should('not.exist')
 
   return cy.window()
 }
