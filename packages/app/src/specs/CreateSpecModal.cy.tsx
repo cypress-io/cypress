@@ -35,7 +35,7 @@ describe('<CreateSpecModal />', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
           },
         }}
         show={show.value}
@@ -100,7 +100,7 @@ describe('playground', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
           },
         }}
         show={show.value}
@@ -111,5 +111,90 @@ describe('playground', () => {
     .get(modalSelector)
     .should('be.visible')
     .get(modalCloseSelector)
+  })
+})
+
+describe('defaultSpecFileName', () => {
+  it('shows correct default filename for e2e testing', () => {
+    const show = ref(true)
+
+    cy.mount(() => (<div>
+      <CreateSpecModal
+        gql={{
+          currentProject: {
+            id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
+            currentTestingType: 'e2e',
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/path/to/cypress.config.js',
+            config: [{
+              field: 'e2e',
+              value: {
+                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }, {
+              field: 'component',
+              value: {
+                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }],
+            specs: [],
+            fileExtensionToUse: 'js',
+          },
+        }}
+        show={show.value}
+        onClose={() => show.value = false}
+      />
+    </div>))
+
+    cy.findByText('Create new empty spec').click()
+    cy.get('input').invoke('val').then((val) => {
+      expect(val).to.contain('spec.cy.js')
+    })
+  })
+
+  it('shows correct default filename for component testing', () => {
+    const show = ref(true)
+
+    cy.mount(() => (<div>
+      <CreateSpecModal
+        gql={{
+          currentProject: {
+            id: 'id',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+            },
+            currentTestingType: 'component',
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/path/to/cypress.config.js',
+            config: [{
+              field: 'e2e',
+              value: {
+                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }, {
+              field: 'component',
+              value: {
+                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+              },
+            }],
+            specs: [],
+            fileExtensionToUse: 'js',
+          },
+        }}
+        show={show.value}
+        onClose={() => show.value = false}
+      />
+    </div>))
+
+    cy.get('input').invoke('val').then((val) => {
+      expect(val).to.contain('ComponentName.spec.js')
+    })
   })
 })
