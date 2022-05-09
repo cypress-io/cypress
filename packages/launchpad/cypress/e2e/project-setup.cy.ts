@@ -74,7 +74,18 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
+
+    cy.contains('h1', 'Configuration Files')
+    cy.findByText('We added the following files to your project:')
+
+    cy.get('[data-cy=valid]').within(() => {
+      cy.contains('cypress.config.js')
+      cy.containsPath('cypress/support/e2e.js')
+      cy.containsPath('cypress/support/commands.js')
+      cy.containsPath('cypress/fixtures/example.json')
+    })
+
+    verifyScaffoldedFiles('e2e')
   })
 
   it('opens correctly in unconfigured project with --component', () => {
@@ -273,23 +284,6 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project not been configured for cypress', () => {
-      it('can go back before selecting e2e scaffold lang', () => {
-        scaffoldAndOpenProject('pristine')
-        cy.visitLaunchpad()
-
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
-
-        cy.tabUntil((el) => {
-          return el.text().includes('E2E Testing')
-        })
-
-        cy.contains('button', 'E2E Testing')
-        .should('have.focus')
-        .realPress('Enter')
-
-        cy.contains('h1', 'Configuration Files')
-      })
-
       it('can setup e2e testing for a project selecting JS', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
