@@ -162,9 +162,15 @@ export class ProjectConfigManager {
       this._registeredEventsTarget = this._testingType
       const config = await this.getFullInitialConfig()
 
-      console.log('eventsIpc', this._eventsIpc)
+      console.log('eventsIpc')
 
-      const setupNodeEventsReply = await this._eventsIpc?.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
+      const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
+
+      if (!this._eventsIpc) {
+        console.log('events ipc is undefined')
+
+        return
+      }
 
       console.log('setup testing type reply')
 
