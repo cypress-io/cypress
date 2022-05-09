@@ -9,7 +9,7 @@
     </a>
 </p>
 
- Add this schematic to quickly get up and running with [Cypress](https://cypress.io) in your Angular project.
+ Add this schematic to quickly get up and running with [Cypress](https://cypress.io) in your Angular project. 
 
  ___
 
@@ -26,6 +26,10 @@
 ✅  Provide the ability to add new e2e files easily using `ng-generate`
 
 ✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress.
+
+## Requirements
+
+- Angular 12+
 
 ## Usage ⏯
 
