@@ -21,6 +21,7 @@ import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfi
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
+import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 
 export interface SetupFullConfigOptions {
@@ -52,7 +53,7 @@ export interface InjectedConfigApi {
 }
 
 export interface ProjectMetaState {
-  hasTypescript: boolean
+  isUsingTypeScript: boolean
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean
@@ -63,7 +64,7 @@ export interface ProjectMetaState {
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
-  hasTypescript: false,
+  isUsingTypeScript: false,
   hasLegacyCypressJson: false,
   allFoundConfigFiles: [],
   hasCypressEnvFile: false,
@@ -176,7 +177,7 @@ export class ProjectLifecycleManager {
   }
 
   get fileExtensionToUse () {
-    return this.metaState.hasTypescript ? 'ts' : 'js'
+    return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
   clearCurrentProject () {
@@ -584,16 +585,13 @@ export class ProjectLifecycleManager {
     }
 
     try {
-      // Find the suggested framework, starting with meta-frameworks first
       const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
-
-      if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
-        metaState.hasTypescript = true
-      }
 
       if (packageJson.type === 'module') {
         metaState.isProjectUsingESModules = true
       }
+
+      metaState.isUsingTypeScript = detectLanguage(this.projectRoot, packageJson) === 'ts'
     } catch {
       // No need to handle
     }
@@ -603,7 +601,7 @@ export class ProjectLifecycleManager {
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
 
-        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
 
         if (this.ctx.fs.existsSync(this._pathToFile(configFileNameAfterMigration))) {
           if (this.ctx.fs.existsSync(this._pathToFile(configFile))) {
@@ -650,7 +648,7 @@ export class ProjectLifecycleManager {
     // We finished looping through all of the possible config files
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!configFilePathSet) {
-      this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+      this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
       configFilePathSet = true
     }
 
