@@ -26,6 +26,7 @@ import {
   UtilDataSource,
   BrowserApiShape,
   MigrationDataSource,
+  NodeDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
@@ -38,6 +39,7 @@ import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import { CypressError, getError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
+import { GraphQLDataSource } from './sources/GraphQLDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -105,6 +107,11 @@ export class DataContext {
     return this._config.mode === 'run'
   }
 
+  @cached
+  get graphql () {
+    return new GraphQLDataSource()
+  }
+
   get electronApp () {
     return this._config.electronApp
   }
@@ -148,6 +155,11 @@ export class DataContext {
   @cached
   get file () {
     return new FileDataSource(this)
+  }
+
+  @cached
+  get node () {
+    return new NodeDataSource(this)
   }
 
   @cached

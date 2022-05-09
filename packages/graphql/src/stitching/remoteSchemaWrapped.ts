@@ -14,10 +14,12 @@ export interface RemoteExecutionRoot {
 export const remoteSchemaWrapped = wrapSchema<DataContext>({
   schema: remoteSchema,
   executor: (obj) => {
-    assert(obj.context?.cloud, 'Cannot execute without a DataContext')
-    assert(obj.info, 'Cannoy execute without GraphQLResolveInfo')
+    const info = obj.info
 
-    const operationName = obj.context.cloud.makeOperationName(obj.info)
+    assert(obj.context?.cloud, 'Cannot execute without a DataContext')
+    assert(info, 'Cannoy execute without GraphQLResolveInfo')
+
+    const operationName = obj.context.cloud.makeOperationName(info)
 
     return obj.context.cloud.executeRemoteGraphQL({
       requestPolicy: ((obj.rootValue ?? {}) as RemoteExecutionRoot).requestPolicy ?? 'cache-first',
@@ -34,6 +36,16 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
         },
       }),
       variables: obj.variables,
+      // When we respond eagerly with a result, but receive an updated value
+      // for the query, we can "push" the data down using the pushFragment subscription
+      onUpdatedResult (result) {
+        obj.context?.graphql.pushResult({
+          result: result[info.fieldName] ?? null,
+          source: obj.rootValue,
+          info,
+          ctx: obj.context,
+        })
+      },
     }) as any
   },
 })

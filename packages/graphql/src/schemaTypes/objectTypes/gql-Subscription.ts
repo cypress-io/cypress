@@ -1,4 +1,5 @@
-import { list, subscriptionType } from 'nexus'
+import type { PushFragmentData } from '@packages/data-context/src/actions'
+import { list, objectType, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
 
@@ -78,6 +79,20 @@ export const Subscription = subscriptionType({
       description: 'Issued when the current branch of a project changes',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('branchChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
+
+    t.field('pushFragment', {
+      description: 'When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache',
+      type: list(objectType({
+        name: 'PushFragmentPayload',
+        definition (t) {
+          t.nonNull.string('target')
+          t.nonNull.json('fragment')
+          t.json('data')
+        },
+      })),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('pushFragment', { sendInitial: false }),
+      resolve: (source: PushFragmentData[], args, ctx) => source,
     })
   },
 })

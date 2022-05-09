@@ -22,10 +22,10 @@ import type {
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
   CloudRunStatus,
-} from '../generated/test-cloud-graphql-types.gen'
+} from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
-type ConfigFor<T> = Omit<T, 'id' | '__typename'>
+ type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
 export type CloudTypesWithId = {
   [K in keyof CodegenTypeMap]: 'id' extends keyof CodegenTypeMap[K] ? K : never
@@ -264,11 +264,11 @@ interface CloudTypesContext {
   __server__?: NexusGen['context']
 }
 
-type MaybeResolver<T> = {
-  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: CloudTypesContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
-}
+ type MaybeResolver<T> = {
+   [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: CloudTypesContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
+ }
 
-export const CloudRunQuery: MaybeResolver<Query> = {
+export const CloudQuery: MaybeResolver<Query> = {
   __typename: 'Query',
   cloudNode (args: QueryCloudNodeArgs) {
     return nodeRegistry[args.id] ?? null

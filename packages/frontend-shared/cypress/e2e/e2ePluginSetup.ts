@@ -13,7 +13,7 @@ import fs from 'fs-extra'
 import { buildSchema, execute, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
 
-import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
+import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
 
@@ -204,7 +204,7 @@ async function makeE2ETasks () {
             document,
             variableValues: variables,
             schema: cloudSchema,
-            rootValue: CloudRunQuery,
+            rootValue: CloudQuery,
             contextValue: {
               __server__: ctx,
             },
