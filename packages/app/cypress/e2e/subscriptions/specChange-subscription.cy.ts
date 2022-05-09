@@ -148,7 +148,7 @@ module.exports = {
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('body').type('f')
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-cy="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
@@ -159,7 +159,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject(o.path, '')
         }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-cy="spec-file-item"]')
         .should('have.length', 7)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
@@ -173,7 +173,7 @@ module.exports = {
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('body').type('f')
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-cy="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
@@ -184,7 +184,7 @@ module.exports = {
           await ctx.actions.file.removeFileInProject(o.path)
         }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-cy="spec-file-item"]')
         .should('have.length', 5)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
@@ -207,7 +207,7 @@ module.exports = {
           ],
         })
 
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-cy="spec-file-item"]')
         .should('have.length', 1)
         .should('contain', 'dom-content.spec.js')
 
@@ -224,7 +224,7 @@ module.exports = {
         cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
         cy.get('body').type('f')
-        cy.get('[data-testid="spec-file-item"]')
+        cy.get('[data-cy="spec-file-item"]')
         .should('have.length', 6)
         .should('contain', 'blank-contents.spec.js')
         .should('contain', 'dom-container.spec.js')
@@ -253,7 +253,7 @@ module.exports = {
 }`)
         })
 
-        cy.get('[data-testid="spec-file-item"]', { timeout: 7500 })
+        cy.get('[data-cy="spec-file-item"]', { timeout: 7500 })
         .should('have.length', 2)
         .should('contain', 'dom-container.spec.js')
         .should('contain', 'dom-content.spec.js')

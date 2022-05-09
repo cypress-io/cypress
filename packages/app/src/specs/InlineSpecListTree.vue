@@ -15,7 +15,7 @@
         flex
         group
         relative"
-        data-testid="spec-row-item"
+        data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submit(row.data, row.index)"
       >
@@ -42,7 +42,7 @@
             :selected="isCurrentSpec(row.data)"
             :indexes="row.data?.data?.fileIndexes"
             class="pl-22px"
-            data-testid="spec-file-item"
+            data-cy="spec-file-item"
           />
           <DirectoryItem
             v-else
@@ -50,7 +50,7 @@
             :name="row.data.name"
             :expanded="treeSpecList[row.index].expanded.value"
             :indexes="getDirIndexes(row.data)"
-            data-testid="directory-item"
+            data-cy="directory-item"
           />
         </RouterLink>
       </li>

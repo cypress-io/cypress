@@ -8,7 +8,10 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const autIframe = createTestAutIframe()
 
   return (<SpecRunnerHeaderOpenMode
-    gql={gqlVal}
+    gql={{
+      ...gqlVal,
+      configFile: gqlVal.configFile || 'cypress.config.ts',
+    }}
     eventManager={eventManager}
     getAutIframe={() => autIframe}/>)
 }
@@ -39,7 +42,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
-
     cy.percySnapshot()
   })
 
@@ -66,6 +68,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
+    cy.percySnapshot()
   })
 
   it('shows url section if currentTestingType is e2e', () => {
@@ -83,6 +86,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="aut-url"]').should('exist')
+    cy.percySnapshot()
   })
 
   it('url section handles long url/small viewport', {
@@ -121,6 +125,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="playground-activator"]').should('be.visible')
     cy.get('[data-cy="aut-url"]').should('not.exist')
+    cy.percySnapshot()
   })
 
   it('shows current browser and possible browsers', () => {
@@ -139,23 +144,51 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
     cy.contains('Firefox').should('be.hidden')
+    cy.percySnapshot()
   })
 
   it('shows current viewport info', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
-        return renderWithGql(gqlVal)
+        return renderWithGql({
+          ...gqlVal,
+          configFile: 'cypress.config.js',
+        })
       },
     })
 
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.visible')
+    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport() command.')
+    .should('be.visible')
+
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.hidden')
     cy.get('[data-cy="viewport"] button').focus().type(' ')
     cy.contains('The viewport determines').should('be.visible')
     cy.get('[data-cy="viewport"] button').focus().type('{enter}')
     cy.contains('The viewport determines').should('be.hidden')
+  })
+
+  it('links to the viewport docs', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql({
+          ...gqlVal,
+          currentTestingType: 'e2e',
+        })
+      },
+    })
+
+    cy.findByTestId('viewport').click()
+    cy.findByTestId('viewport-docs')
+    .should('be.visible')
+    .should('have.attr', 'href', 'https://on.cypress.io/viewport')
+
+    cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport() command.')
+    .should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('disables browser dropdown button when isRunning is true', () => {
@@ -173,7 +206,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="select-browser"] > button').should('be.disabled')
-
     cy.percySnapshot()
   })
 })
