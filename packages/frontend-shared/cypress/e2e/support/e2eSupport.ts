@@ -136,7 +136,7 @@ declare global {
       /**
        * Visits the Cypress app, for Cypress-in-Cypress testing
        */
-      visitApp(href?: string): Chainable<AUTWindow>
+      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
       /**
        * Visits the Cypress launchpad
        */
@@ -309,7 +309,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
   })
 }
 
-function visitApp (href?: string) {
+function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -326,7 +326,7 @@ function visitApp (href?: string) {
 
       return config.clientRoute
     }).then((clientRoute) => {
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
+      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
     })
   })
 }

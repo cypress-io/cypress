@@ -8,8 +8,12 @@ export const Subscription = subscriptionType({
     t.field('authChange', {
       type: Query,
       description: 'Triggered when the auth state changes',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('authChange'),
-      resolve: (source, args, ctx) => ({}),
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('authChange', { sendInitial: false }),
+      resolve: (source, args, ctx) => {
+        return {
+          requestPolicy: 'network-only',
+        } as const
+      },
     })
 
     t.field('baseErrorChange', {

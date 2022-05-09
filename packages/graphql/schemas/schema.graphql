@@ -1042,6 +1042,11 @@ type Mutation {
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
+  """
+  Signal that we are explicitly refetching remote data and should not use the server cache
+  """
+  refetchRemote: Query
+
   """Clears the cloudViewer cache to refresh the organizations"""
   refreshOrganizations: Query
 

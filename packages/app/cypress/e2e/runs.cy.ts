@@ -468,17 +468,17 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
         cy.findByText('fix: make gql work CANCELLED')
-        cy.get('[data-cy="run-card-icon"]')
+        cy.get('[data-cy="run-card-icon-CANCELLED"]')
       })
 
       cy.get('[href="http://dummy.cypress.io/runs/1"]').first().within(() => {
         cy.findByText('fix: make gql work ERRORED')
-        cy.get('[data-cy="run-card-icon"]')
+        cy.get('[data-cy="run-card-icon-ERRORED"]')
       })
 
       cy.get('[href="http://dummy.cypress.io/runs/2"]').first().within(() => {
         cy.findByText('fix: make gql work FAILED')
-        cy.get('[data-cy="run-card-icon"]')
+        cy.get('[data-cy="run-card-icon-FAILED"]')
       })
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
@@ -551,6 +551,109 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.goOnline()
 
       cy.get('[data-cy=warning-alert]').should('not.exist')
+    })
+  })
+
+  describe('refetching', () => {
+    let obj: {toCall?: Function} = {}
+    const RUNNING_COUNT = 3
+
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+      cy.loginUser()
+      cy.remoteGraphQLIntercept((obj, testState) => {
+        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
+          obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
+            run.status = 'RUNNING'
+          })
+
+          obj.result.data.cloudProjectBySlug.runs.nodes = obj.result.data.cloudProjectBySlug.runs.nodes.slice(0, 3)
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp('/runs', {
+        onBeforeLoad (win) {
+          const setTimeout = win.setTimeout
+
+          // @ts-expect-error
+          win.setTimeout = function (fn, time) {
+            if (fn.name === 'fetchNewerRuns') {
+              obj.toCall = fn
+            } else {
+              setTimeout(fn, time)
+            }
+          }
+        },
+      })
+    })
+
+    it('should re-query for executing runs', () => {
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        if (obj.result.data?.cloudNode?.newerRuns?.nodes) {
+          obj.result.data.cloudNode.newerRuns.nodes = []
+        }
+
+        if (obj.result.data?.cloudNodesByIds) {
+          obj.result.data?.cloudNodesByIds.map((node) => {
+            node.status = 'RUNNING'
+          })
+
+          obj.result.data.cloudNodesByIds[0].status = 'PASSED'
+        }
+
+        return obj.result
+      })
+
+      function completeNext (passed) {
+        cy.wrap(obj).invoke('toCall').then(() => {
+          cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
+          if (passed < RUNNING_COUNT) {
+            completeNext(passed + 1)
+          }
+        })
+      }
+
+      completeNext(1)
+    })
+
+    it('should fetch newer runs and maintain them when navigating', () => {
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        if (obj.result.data?.cloudNodesByIds) {
+          obj.result.data?.cloudNodesByIds.map((node) => {
+            node.status = 'PASSED'
+          })
+        }
+
+        return obj.result
+      })
+
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 3).should('be.visible')
+
+      cy.wrap(obj).invoke('toCall')
+
+      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible')
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
+
+      // If we navigate away & back, we should see the same runs
+      cy.get('[href="#/settings"]').click()
+      cy.remoteGraphQLIntercept((obj) => obj.result)
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible')
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
     })
   })
 })

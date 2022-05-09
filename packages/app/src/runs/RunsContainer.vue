@@ -44,26 +44,31 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
-import { gql } from '@urql/vue'
-import { useOnline } from '@vueuse/core'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
-import type { RunsContainerFragment } from '../generated/graphql'
+import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 
 const { t } = useI18n()
 
-const online = useOnline()
-
-const emit = defineEmits<{
-  (e: 'reexecuteRunsQuery'): void
-}>()
+gql`
+fragment RunsContainer_RunsConnection on CloudRunConnection {
+  nodes {
+    id
+    ...RunCard
+  }
+  pageInfo {
+    startCursor
+  }
+}
+`
 
 gql`
 fragment RunsContainer on Query {
@@ -78,10 +83,7 @@ fragment RunsContainer on Query {
       ... on CloudProject {
         id
         runs(first: 10) {
-          nodes {
-            id
-            ...RunCard
-          }
+          ...RunsContainer_RunsConnection
         }
       }
     }
@@ -92,30 +94,95 @@ fragment RunsContainer on Query {
   ...RunsConnect
 }`
 
+gql`
+mutation RunsContainer_FetchNewerRuns(
+  $cloudProjectNodeId: ID!, 
+  $beforeCursor: String, 
+  $hasBeforeCursor: Boolean!,
+  $refreshPendingRuns: [ID!]!,
+  $hasRefreshPendingRuns: Boolean!
+) {
+  refetchRemote {
+    cloudNode(id: $cloudProjectNodeId) {
+      id
+      __typename
+      ... on CloudProject {
+        runs(first: 10) @skip(if: $hasBeforeCursor) {
+          ...RunsContainer_RunsConnection
+        }
+        newerRuns: runs(last: 10, before: $beforeCursor) @include(if: $hasBeforeCursor) {
+          ...RunsContainer_RunsConnection
+        }
+      }
+    }
+    cloudNodesByIds(ids: $refreshPendingRuns) @include(if: $hasRefreshPendingRuns) {
+      id
+      ... on CloudRun {
+        ...RunCard
+      }
+    }
+  }
+}
+`
+
+const currentProject = computed(() => props.gql.currentProject)
+const cloudViewer = computed(() => props.gql.cloudViewer)
+
+const variables = computed(() => {
+  if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
+    const toRefresh = currentProject.value?.cloudProject.runs?.nodes?.map((r) => r.status === 'RUNNING' ? r.id : null).filter((f) => f) ?? []
+
+    return {
+      cloudProjectNodeId: currentProject.value?.cloudProject.id,
+      beforeCursor: currentProject.value?.cloudProject.runs?.pageInfo.startCursor,
+      hasBeforeCursor: Boolean(currentProject.value?.cloudProject.runs?.pageInfo.startCursor),
+      refreshPendingRuns: toRefresh,
+      hasRefreshPendingRuns: toRefresh.length > 0,
+    }
+  }
+
+  return undefined as any
+})
+
+const refetcher = useMutation(RunsContainer_FetchNewerRunsDocument)
+
+// 30 seconds polling
+const POLL_FOR_LATEST = 1000 * 15
+const timeout = ref<null | number>(null)
+
+function startPolling () {
+  timeout.value = window.setTimeout(function fetchNewerRuns () {
+    if (variables.value && props.online) {
+      refetcher.executeMutation(variables.value)
+      .then(() => {
+        startPolling()
+      })
+    } else {
+      startPolling()
+    }
+  }, POLL_FOR_LATEST)
+}
+
+onMounted(() => {
+  startPolling()
+})
+
+onUnmounted(() => {
+  if (timeout.value) {
+    clearTimeout(timeout.value)
+  }
+
+  timeout.value = null
+})
+
 const props = defineProps<{
   gql: RunsContainerFragment
+  online: boolean
 }>()
 
 const isCloudProjectReturned = computed(() => props.gql.currentProject?.cloudProject?.__typename === 'CloudProject')
 
-const isOnlineRef = ref(true)
 const showConnectSuccessAlert = ref(false)
-
-watchEffect(() => {
-  // We want to keep track of the previous state to refetch the query
-  // when the internet connection is back
-  if (!online.value && isOnlineRef.value) {
-    isOnlineRef.value = false
-  }
-
-  if (online.value && !isOnlineRef.value) {
-    isOnlineRef.value = true
-    emit('reexecuteRunsQuery')
-  }
-})
-
-const currentProject = computed(() => props.gql.currentProject)
-const cloudViewer = computed(() => props.gql.cloudViewer)
 </script>
 
 <style scoped>

@@ -168,7 +168,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
   // https://formidable.com/open-source/urql/docs/advanced/subscriptions/#one-off-subscriptions
   pipe(
     client.subscription(gql`
-      subscription MainApp_PushFragment {
+      subscription urqlClient_PushFragment {
         pushFragment {
           target
           fragment
