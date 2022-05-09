@@ -83,7 +83,7 @@ export const makeCypressPlugin = (
     load (id) {
       if (id === 'cypress:spec-loaders') {
         return `export default {\n${specs.map((s) => {
-          return `${JSON.stringify(s.relative)}:()=>import(${JSON.stringify(s.absolute)})`
+          return `${JSON.stringify(encodeURI(s.relative))}:()=>import(${JSON.stringify(s.absolute)})`
         }).join(',\n')}\n}`
       }
 
