@@ -116,8 +116,6 @@ const specFileName = computed(() => {
 
 const codeGenGlob = computed(() => {
   if (!generator.value) {
-    Typ
-
     return null
   }
 
