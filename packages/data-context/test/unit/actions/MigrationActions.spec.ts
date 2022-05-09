@@ -1,5 +1,9 @@
 import { expect } from 'chai'
 import { getConfigWithDefaults, getDiff } from '../../../src/actions/MigrationActions'
+import fs from 'fs-extra'
+import Fixtures from '@tooling/system-tests'
+import { createTestDataContext, scaffoldMigrationProject } from '../helper'
+import path from 'path'
 
 describe('MigrationActions', () => {
   context('getConfigWithDefaults', () => {
@@ -35,6 +39,62 @@ describe('MigrationActions', () => {
       expect(diff).to.have.property('foo', 'hello')
       expect(diff).to.have.property('updated', 'newValue')
       expect(diff).not.to.have.property('removed')
+    })
+  })
+
+  describe('#initialize', () => {
+    let currentProject: string
+
+    beforeEach(async () => {
+      Fixtures.clearFixtureNodeModules('migration')
+      currentProject = await scaffoldMigrationProject('migration')
+    })
+
+    // simulate having a specific version of cypress installed
+    // in a project's local node_modules
+    function mockLocallyInstalledCypress (projectRoot: string, version: string) {
+      const mockPkgJson = {
+        version,
+        main: 'index.js',
+      }
+      const mockCypressDir = path.join(projectRoot, 'node_modules', 'cypress')
+
+      fs.mkdirSync(mockCypressDir, { recursive: true })
+      fs.createFileSync(path.join(mockCypressDir, 'index.js'))
+      fs.writeJsonSync(path.join(mockCypressDir, 'package.json'), mockPkgJson)
+    }
+
+    it('errors when local cypress version is <10', (done) => {
+      mockLocallyInstalledCypress(currentProject, '9.5.0')
+      const ctx = createTestDataContext()
+
+      ctx.update((coreData) => {
+        coreData.currentProject = currentProject
+        coreData.currentTestingType = 'e2e'
+        coreData.app.isInGlobalMode = true
+      })
+
+      ctx.actions.migration.initialize({})
+      .catch((e) => {
+        expect((e as Error).message).to.include(
+          'You are running Cypress version 10 in global mode, but you are attempting to migrate a project where Cypress version 9.5.0 is installed',
+        )
+
+        done()
+      })
+    })
+
+    it('does not error when local cypress version is 10', (done) => {
+      mockLocallyInstalledCypress(currentProject, '10.0.0')
+      const ctx = createTestDataContext()
+
+      ctx.update((coreData) => {
+        coreData.currentProject = currentProject
+        coreData.currentTestingType = 'e2e'
+        coreData.app.isInGlobalMode = true
+      })
+
+      ctx.actions.migration.initialize({}).then(done)
     })
   })
 })

@@ -171,9 +171,14 @@ export const mutation = mutationType({
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         // if necessary init the wizard for configuration
-        if (ctx.coreData.currentTestingType
-          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          await ctx.actions.wizard.initialize()
+        if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          // Component Testing has a wizard to help users configure their project
+          if (ctx.coreData.currentTestingType === 'component') {
+            ctx.actions.wizard.initialize()
+          } else {
+            // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
+            await ctx.actions.wizard.scaffoldTestingType()
+          }
         }
 
         return {}
@@ -204,10 +209,6 @@ export const mutation = mutationType({
 
         if (args.input.bundler) {
           ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
-        }
-
-        if (args.input.codeLanguage) {
-          ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
         // TODO: remove when live-mutations are implements

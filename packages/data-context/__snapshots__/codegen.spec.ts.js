@@ -193,7 +193,7 @@ export default defineConfig({
       return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'http://localhost:3000',
-    specPattern: 'cypress/e2e/**/*.{js,ts,tsx,jsx}',
+    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
   },
   component: {
     setupNodeEvents(on, config) {},
@@ -214,7 +214,7 @@ export default defineConfig({
       return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'http://localhost:3000',
-    specPattern: 'cypress/custom/e2e/**/*.{js,ts,tsx,jsx}',
+    specPattern: 'cypress/custom/e2e/**/*.{js,jsx,ts,tsx}',
   },
   component: {
     setupNodeEvents(on, config) {},

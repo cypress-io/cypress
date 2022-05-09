@@ -118,7 +118,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return !this.currentProject
+    return this.appData.isInGlobalMode
   }
 
   get modeOptions () {
