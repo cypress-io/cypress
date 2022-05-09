@@ -6,11 +6,9 @@ import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { TestingType } from '@packages/types'
 import type { BreakingErrResult } from '@packages/config'
-
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -1511,6 +1509,25 @@ export const AllCypressErrors = {
       `
   },
 
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+    return errTemplate`
+      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+
+      Ensure the project you are migrating has Cypress version 10 installed.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+
+  MIGRATION_CYPRESS_NOT_FOUND: () => {
+    return errTemplate`
+      You are running Cypress 10 in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
+
+      Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to open or migrate.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

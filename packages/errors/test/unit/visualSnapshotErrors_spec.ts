@@ -1152,5 +1152,15 @@ describe('visual error templates', () => {
         default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
+      return {
+        default: ['9.6.0'],
+      }
+    },
+    MIGRATION_CYPRESS_NOT_FOUND: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })
