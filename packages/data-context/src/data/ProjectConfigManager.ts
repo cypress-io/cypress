@@ -161,7 +161,12 @@ export class ProjectConfigManager {
       assert(this._testingType, 'Cannot setup node events without a testing type')
       this._registeredEventsTarget = this._testingType
       const config = await this.getFullInitialConfig()
+
+      console.log('eventsIpc', this._eventsIpc)
+
       const setupNodeEventsReply = await this._eventsIpc?.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
+
+      console.log('setup testing type reply')
 
       await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
       this._state = 'ready'
@@ -236,6 +241,7 @@ export class ProjectConfigManager {
       shouldRestartBrowser: result.registrations.some((registration) => registration.event === 'before:browser:launch'),
     }
 
+    console.log('on final config loaded')
     await this.options.onFinalConfigLoaded(finalConfig, onFinalConfigLoadedOptions)
 
     this.watchFiles([
