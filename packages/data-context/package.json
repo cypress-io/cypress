@@ -20,7 +20,7 @@
     "@graphql-tools/batch-execute": "^8.4.6",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
-    "@urql/exchange-graphcache": "4.3.6",
+    "@urql/exchange-graphcache": "4.4.0",
     "chokidar": "3.5.1",
     "common-path-prefix": "3.0.0",
     "create-cypress-tests": "0.0.0-development",
