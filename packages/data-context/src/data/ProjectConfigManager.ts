@@ -162,22 +162,9 @@ export class ProjectConfigManager {
       this._registeredEventsTarget = this._testingType
       const config = await this.getFullInitialConfig()
 
-      console.log('eventsIpc')
-
       const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
-      if (!this._eventsIpc) {
-        console.log('events ipc is undefined')
-
-        return
-      }
-
-      console.log('setup testing type reply')
-
       await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
-
-      console.log('setup testing type reply done')
-
       this._state = 'ready'
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)
@@ -250,7 +237,6 @@ export class ProjectConfigManager {
       shouldRestartBrowser: result.registrations.some((registration) => registration.event === 'before:browser:launch'),
     }
 
-    console.log('on final config loaded')
     await this.options.onFinalConfigLoaded(finalConfig, onFinalConfigLoadedOptions)
 
     this.watchFiles([

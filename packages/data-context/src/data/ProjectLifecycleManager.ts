@@ -166,10 +166,6 @@ export class ProjectLifecycleManager {
   }
 
   get projectRoot () {
-    if (!this._projectRoot) {
-      console.trace()
-    }
-
     assert(this._projectRoot, 'Expected projectRoot to be set in ProjectLifecycleManager')
 
     return this._projectRoot
@@ -227,8 +223,6 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toApp()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
-        console.log('on final config loaded')
-        console.trace()
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             path: this.projectRoot,
@@ -263,7 +257,6 @@ export class ProjectLifecycleManager {
         if (!this.ctx.isRunMode) {
           const shouldRelaunchBrowser = this.ctx.coreData.app.browserStatus !== 'closed'
 
-          console.log('relaunching', shouldRelaunchBrowser, restartOnChange)
           if (!this._initializedProject) {
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
           } else if (restartOnChange.server) {
@@ -520,7 +513,6 @@ export class ProjectLifecycleManager {
   }
 
   private resetInternalState () {
-    console.log('destroying config manager')
     if (this._configManager) {
       this._configManager.destroy()
       this._configManager = undefined
