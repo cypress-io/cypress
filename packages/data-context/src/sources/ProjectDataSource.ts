@@ -282,12 +282,14 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName () {
+    const getDefaultFileName = (testingType: TestingType) => `cypress/${testingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+
     try {
       if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
         return null
       }
 
-      const defaultFileName = `cypress/${this.ctx.coreData.currentTestingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+      const defaultFileName = getDefaultFileName(this.ctx.coreData.currentTestingType)
 
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()
@@ -312,7 +314,7 @@ export class ProjectDataSource {
 
       return specFileName
     } catch {
-      return 'cypress/e2e/filename.cy.js'
+      return getDefaultFileName('e2e')
     }
   }
 
