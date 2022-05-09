@@ -24,7 +24,7 @@
         </span>
       </div>
       <input
-        ref="input"
+        :ref="props.inputRef()"
         v-model="localValue"
         :style="style"
         :type="type"
@@ -61,7 +61,7 @@ export default {
 <script lang="ts" setup>
 import _ from 'lodash'
 
-import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes, Ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
 import { computed, useSlots, useAttrs } from 'vue'
 import { useModelWrapper } from '../composables'
@@ -81,6 +81,7 @@ const props = withDefaults(defineProps<{
   modelValue?: string
   style?: string
   hasError?: boolean
+  inputRef?: () => Ref<HTMLInputElement | undefined>
 }>(), {
   type: 'text',
   modelValue: '',
@@ -91,6 +92,7 @@ const props = withDefaults(defineProps<{
   suffixIconClasses: undefined,
   style: '',
   hasError: false,
+  inputRef: undefined,
 })
 
 const emits = defineEmits(['update:modelValue'])
