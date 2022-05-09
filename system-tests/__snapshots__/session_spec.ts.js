@@ -25,10 +25,6 @@ exports['e2e sessions / session tests'] = `
     ✓ get localStorage from all origins
     ✓ only gets localStorage from origins visited in test
 
-  args
-    ✓ accepts string or object as id
-    ✓ uses sorted stringify and rejects duplicate registrations
-
   with a blank session
     ✓ t1
     ✓ t2
@@ -87,14 +83,6 @@ exports['e2e sessions / session tests'] = `
     ✓ t1
     ✓ t2
 
-  options.validate failing test
-    ✓ test fails when options.validate after setup fails command
-    ✓ test fails when options.validate after setup throws
-    ✓ test fails when options.validate after setup rejects
-    ✓ test fails when options.validate after setup returns false
-    ✓ test fails when options.validate after setup resolves false
-    ✓ test fails when options.validate after setup returns Chainer<false>
-
   can wait for login redirect automatically
     ✓ t1
 
@@ -118,23 +106,16 @@ exports['e2e sessions / session tests'] = `
       ✓ switches to secure context - clears only secure context data - 1/2
       ✓ clears only secure context data - 2/2
 
-  errors
-    ✓ throws error when experimentalSessionAndOrigin not enabled
-    ✓ throws error when experimentalSessionSupport is enabled through test config
-    ✓ throws error when experimentalSessionSupport is enabled through Cypress.config
-    ✓ throws if session has not been defined during current test
-    ✓ throws if multiple session calls with same name but different options
 
-
-  56 passing
+  43 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        57                                                                               │
-  │ Passing:      56                                                                               │
+  │ Tests:        44                                                                               │
+  │ Passing:      43                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -152,9 +133,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX       57       56        -        1        - │
+  │ ✔  session_spec.js                          XX:XX       44       43        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       57       56        -        1        -  
+    ✔  All specs passed!                        XX:XX       44       43        -        1        -  
 
 
 `

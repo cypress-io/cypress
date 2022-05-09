@@ -8,7 +8,8 @@
     "type-check": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
-    "test:ci": "node ./scripts/run.js"
+    "test:ci": "node ./scripts/run.js",
+    "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",

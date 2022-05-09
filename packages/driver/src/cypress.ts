@@ -672,7 +672,7 @@ class $Cypress {
           // clone the error object
           // and set stack cleaned
           // to prevent bluebird from
-          // attaching long stace traces
+          // attaching long stack traces
           // which otherwise make this err
           // unusably long
           const err = $errUtils.makeErrFromObj(e) as BackendError
