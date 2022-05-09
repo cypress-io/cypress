@@ -31,7 +31,6 @@ import {
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
-import resolveFrom from 'resolve-from'
 
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
@@ -170,7 +169,9 @@ export class MigrationActions {
 
   locallyInstalledCypressVersion (currentProject: string) {
     try {
-      const localCypressPkgJsonPath = resolveFrom(currentProject, path.join('cypress', 'package.json'))
+      const localCypressPkgJsonPath = require.resolve(path.join('cypress', 'package.json'), {
+        paths: [currentProject],
+      })
       const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
 
       return localCypressPkgJson?.version ?? undefined
