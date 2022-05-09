@@ -4,7 +4,8 @@
     :disabled="isNavBarExpanded"
     :distance="8"
   >
-    <div
+    <button
+      type="button"
       :class="active
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
         : 'before:(scale-x-0 transition-transform bg-gray-300)'"
@@ -34,7 +35,7 @@
       >
         {{ name }}
       </span>
-    </div>
+    </button>
     <template #popper>
       {{ name }}
     </template>

@@ -8,7 +8,7 @@
     <button
       v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
-      role="button"
+      type="button"
       aria-label="toggle navigation"
       @click="toggleNavbarIfAllowed"
     >
@@ -26,12 +26,14 @@
     <div class="flex flex-col flex-1 overflow-y-auto ">
       <SidebarNavigationHeader
         v-if="query.data.value"
+        id="sidebar-navigation-header"
         :gql="query.data.value"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
+        aria-labelledby="sidebar-navigation-header"
       >
         <RouterLink
           v-for="item in navigation"
@@ -54,7 +56,8 @@
         :distance="8"
         :skidding="-16"
       >
-        <div
+        <button
+          type="button"
           class="border border-transparent rounded
               cursor-pointer h-32px m-16px
               p-7px transform transition-all
@@ -67,7 +70,7 @@
             class="h-16px w-16px icon-dark-gray-500"
             data-cy="keyboard-shortcuts"
           />
-        </div>
+        </button>
         <template #popper>
           {{ t('sideBar.keyboardShortcuts.title') }}
         </template>
@@ -79,6 +82,7 @@
       <img
         :src="CypressLogo"
         class="h-32px m-16px w-32px"
+        alt="Cypress"
       >
     </div>
   </HideDuringScreenshot>
