@@ -22,13 +22,6 @@
           :gql="query.data.value"
         />
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
-        <template v-else-if="currentProject?.isLoadingNodeEvents">
-          <LaunchpadHeader
-            :title="t('components.loading.config.title')"
-            :description="t('components.loading.config.description')"
-          />
-          <Spinner />
-        </template>
         <template v-else-if="!currentProject?.currentTestingType">
           <WarningList :gql="query.data.value" />
           <LaunchpadHeader
@@ -65,6 +58,13 @@
           v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
           :gql="query.data.value"
         />
+        <template v-else-if="!currentProject?.isFullConfigReady">
+          <LaunchpadHeader
+            :title="t('components.loading.config.title')"
+            :description="t('components.loading.config.description')"
+          />
+          <Spinner />
+        </template>
         <OpenBrowser v-else />
       </template>
     </div>
@@ -110,6 +110,7 @@ fragment MainLaunchpadQueryData on Query {
     isE2EConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
+    isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
   }

@@ -425,6 +425,9 @@ type CurrentProject implements Node & ProjectLike {
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
 
+  """Whether or not the full config is ready"""
+  isFullConfigReady: Boolean
+
   """Whether we are currently loading the configFile"""
   isLoadingConfigFile: Boolean
 

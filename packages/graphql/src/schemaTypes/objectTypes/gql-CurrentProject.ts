@@ -35,6 +35,10 @@ export const CurrentProject = objectType({
       description: 'Whether we are currently loading the setupNodeEvents',
     })
 
+    t.boolean('isFullConfigReady', {
+      description: 'Whether or not the full config is ready',
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,

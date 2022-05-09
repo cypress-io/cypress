@@ -63,7 +63,7 @@ export class ProjectConfigManager {
     return this._state === 'loadingNodeEvents'
   }
 
-  get isReady () {
+  get isFullConfigReady () {
     return this._state === 'ready'
   }
 

@@ -153,8 +153,8 @@ export class ProjectLifecycleManager {
     return this._configManager?.isLoadingNodeEvents
   }
 
-  get isReady () {
-    return this._configManager?.isReady
+  get isFullConfigReady () {
+    return this._configManager?.isFullConfigReady
   }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {

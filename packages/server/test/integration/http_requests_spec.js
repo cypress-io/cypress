@@ -450,7 +450,7 @@ describe('Routes', () => {
       let i = 0
 
       const interval = setInterval(() => {
-        if (ctx.lifecycleManager.isReady) {
+        if (ctx.lifecycleManager.isFullConfigReady) {
           clearInterval(interval)
           resolve()
         }
