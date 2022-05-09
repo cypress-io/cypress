@@ -42,7 +42,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex items-center justify-between">
-        <div>{{ t('specPage.gitStatusHeader') }}</div>
+        <div>{{ t('specPage.lastUpdatedHeader') }}</div>
       </div>
     </div>
     <!--

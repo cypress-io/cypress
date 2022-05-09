@@ -120,8 +120,8 @@
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
     "componentSpecsHeader": "Component Specs",
-    "e2eSpecsHeader": "E2E Specs",
-    "gitStatusHeader": "Git Status",
+    "e2eSpecsHeader": "E2E specs",
+    "lastUpdatedHeader": "Last updated",
     "rows": {
       "gitTooltipSubtext": "{shortHash} by {author}"
     },
