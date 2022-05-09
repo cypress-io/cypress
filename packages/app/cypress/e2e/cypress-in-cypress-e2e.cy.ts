@@ -33,7 +33,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('Canary').should('be.hidden')
 
     cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
+    cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
     .should('be.visible')
 
     snapshotAUTPanel('viewport info open')

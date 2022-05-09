@@ -40,5 +40,36 @@ describe('Spec List - Git Status', () => {
     cy.get('[data-cy-row="dom-container.spec.js"]')
     .contains('Modified')
     .get('[data-cy="git-status-modified"]')
+
+    cy.withCtx((ctx) => {
+      ctx.fs.appendFileSync(
+        ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'foo.spec.js'),
+        '// modifying the spec.',
+        'utf-8',
+      )
+    })
+
+    // even if a created file is updated, the status should stay created
+    cy.get('[data-cy-row="foo.spec.js"]')
+    .contains('Created')
+    .get('[data-cy="git-status-created"]')
+
+    cy.withCtx((ctx) => {
+      ctx.fs.writeFileSync(
+        ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'dom-container.spec.js'),
+`describe('Dom Content', () => {
+  it('renders a container', () => {
+    cy.get('.container')
+  })
+})
+`,
+'utf-8',
+      )
+    })
+
+    // reverting the updates to a file before committing should revert its status
+    cy.get('[data-cy-row="dom-container.spec.js"]')
+    .contains('Modified')
+    .get('[data-cy="git-status-unmodified"]')
   })
 })
