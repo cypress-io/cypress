@@ -146,7 +146,7 @@ const variables = computed(() => {
 
 const refetcher = useMutation(RunsContainer_FetchNewerRunsDocument)
 
-// 30 seconds polling
+// 15 seconds polling
 const POLL_FOR_LATEST = 1000 * 15
 const timeout = ref<null | number>(null)
 
