@@ -109,7 +109,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return !this.currentProject
+    return this.appData.isInGlobalMode
   }
 
   get modeOptions () {
@@ -366,10 +366,6 @@ export class DataContext {
     ])
   }
 
-  get loader () {
-    return this.util.loader
-  }
-
   /**
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
@@ -392,7 +388,6 @@ export class DataContext {
     return Promise.all([
       this.lifecycleManager.destroy(),
       this.cloud.reset(),
-      this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])

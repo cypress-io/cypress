@@ -30,7 +30,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: false,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -48,7 +48,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -68,7 +68,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -86,7 +86,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -100,7 +100,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -114,7 +114,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: false,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -140,7 +140,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -156,7 +156,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -172,7 +172,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       isProjectUsingESModules: true,
       shouldAddCustomE2eSpecPattern: false,
     })
@@ -192,7 +192,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: false,
+      isUsingTypeScript: false,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -209,7 +209,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: true,
+      isUsingTypeScript: true,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -226,7 +226,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: true,
+      isUsingTypeScript: true,
       shouldAddCustomE2eSpecPattern: false,
       isProjectUsingESModules: false,
     })
@@ -243,7 +243,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: true,
+      isUsingTypeScript: true,
       shouldAddCustomE2eSpecPattern: true,
       isProjectUsingESModules: false,
     })
@@ -262,7 +262,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: true,
       hasPluginsFile: true,
       projectRoot,
-      hasTypescript: true,
+      isUsingTypeScript: true,
       shouldAddCustomE2eSpecPattern: true,
       isProjectUsingESModules: false,
     })
