@@ -1517,9 +1517,9 @@ export const AllCypressErrors = {
 
   MIGRATION_CYPRESS_NOT_FOUND: () => {
     return errTemplate`
-      You are running Cypress 10 in global mode and attempting to migrate a project where an install of ${fmt.code('cypress')} cannot be found.
+      You are running Cypress 10 in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
 
-      Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to migrate.
+      Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to open or migrate.
 
       https://on.cypress.io/migration-guide
     `
