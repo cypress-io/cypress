@@ -61,7 +61,7 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('shows a git status for each spec', () => {
-    cy.get('.git-info-row').each((row) => {
+    cy.get('[data-cy="git-info-row"]').each((row) => {
       cy.wrap(row).find('svg').should('have.length', 1)
     })
   })

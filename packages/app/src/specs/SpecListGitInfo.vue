@@ -1,6 +1,7 @@
 <template>
   <div
     class="h-full grid gap-9px grid-cols-[16px,auto] git-info-row items-center"
+    data-cy="git-info-row"
   >
     <Tooltip
       placement="top"
@@ -9,7 +10,7 @@
     >
       <component
         :is="classes.icon"
-        :class="classes?.iconClasses"
+        :class="classes.iconClasses"
       />
       <template
         v-if="classes.showTooltip"

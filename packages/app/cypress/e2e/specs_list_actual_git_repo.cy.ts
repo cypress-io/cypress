@@ -12,18 +12,18 @@ describe('Spec List - Git Status', () => {
   it('shows correct git status for files using real git repo', () => {
     // newly created, not yet committed
     // this is performed by the task `initGitRepoForTestProject`
-    cy.get('[data-cy-row="foo.spec.js"] .git-info-row svg')
+    cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-jade-50')
 
     // modified by not yet committed
     // this is performed by the task `initGitRepoForTestProject`
-    cy.get('[data-cy-row="blank-contents.spec.js"] .git-info-row svg')
+    cy.get('[data-cy-row="blank-contents.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-orange-50')
 
     // unmodified by current user
     // we still show "modified" but a different style, indicating the last
     // person to touch the file.
-    cy.get('[data-cy-row="dom-container.spec.js"] .git-info-row svg')
+    cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-gray-500')
 
     cy.withCtx((ctx) => {
@@ -35,7 +35,7 @@ describe('Spec List - Git Status', () => {
     })
 
     // should update via GraphQL subscription, now the status is modified.
-    cy.get('[data-cy-row="dom-container.spec.js"] .git-info-row svg')
+    cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-orange-50')
 
     cy.withCtx((ctx) => {
@@ -47,7 +47,7 @@ describe('Spec List - Git Status', () => {
     })
 
     // even if a created file is updated, the status should stay created
-    cy.get('[data-cy-row="foo.spec.js"] .git-info-row svg')
+    cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-jade-50')
 
     cy.withCtx((ctx) => {
@@ -63,7 +63,7 @@ describe('Spec List - Git Status', () => {
       )
     })
 
-    cy.get('[data-cy-row="dom-container.spec.js"] .git-info-row svg')
+    cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-gray-500')
   })
 })
