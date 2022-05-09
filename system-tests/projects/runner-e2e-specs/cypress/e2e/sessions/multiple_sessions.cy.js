@@ -1,4 +1,4 @@
-Cypress.config('experimentalSessionSupport', true)
+Cypress.config('experimentalSessionAndOrigin', true)
 
 it('t1', () => {
   cy.session('user1', () => {

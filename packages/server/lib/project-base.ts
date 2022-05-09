@@ -130,6 +130,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.cfg.state
   }
 
+  get remoteStates () {
+    return this._server?.remoteStates
+  }
+
   injectCtSpecificConfig (cfg) {
     cfg.resolved.testingType = { value: 'component' }
 
@@ -480,7 +484,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     return {
       ...this._cfg,
-      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
