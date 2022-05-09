@@ -563,15 +563,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
-      new Promise<void>((resolve, reject) => {
-        this._graphqlWS ? this._graphqlWS.close((err) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        }) : resolve()
-      }),
+      this._graphqlWS?.close(),
     ])
     .then((res) => {
       this._middleware = null

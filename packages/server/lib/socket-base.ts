@@ -590,6 +590,6 @@ export class SocketBase {
   }
 
   close () {
-    return new Promise<void>((resolve) => this._io ? this._io.close(() => resolve()) : resolve())
+    return this._io?.close()
   }
 }

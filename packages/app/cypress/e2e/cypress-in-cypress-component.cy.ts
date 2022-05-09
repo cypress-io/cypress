@@ -155,7 +155,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.withCtx(async (ctx, { sinon }) => {
         ctx.coreData.app.browserStatus = 'open'
 
-        sinon.spy(ctx.actions.project, 'initializeActiveProject')
+        sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
         const config = await ctx.file.readFileInProject('cypress.config.js')
         const newCypressConfig = config.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
