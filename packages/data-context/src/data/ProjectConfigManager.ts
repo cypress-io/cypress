@@ -164,10 +164,6 @@ export class ProjectConfigManager {
 
       const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
-      if (!this._eventsIpc) {
-        console.log('events ipc is undefined')
-      }
-
       await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
       this._state = 'ready'
     } catch (error) {

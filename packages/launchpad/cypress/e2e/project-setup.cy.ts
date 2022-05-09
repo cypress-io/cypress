@@ -231,6 +231,12 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
@@ -253,12 +259,18 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('shows the configuration setup page when opened via cli with --component flag', () => {
         scaffoldAndOpenProject('pristine-with-ct-testing', ['--component'])
         cy.visitLaunchpad()
-        cy.contains('h1', 'Choose a Browser')
+        verifyChooseABrowserPage()
       })
     })
 
@@ -347,6 +359,12 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('can setup e2e testing for a project selecting TS when CT is configured and config file is JS', () => {
@@ -376,6 +394,12 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('can setup CT testing for a project selecting TS when E2E is configured and config file is JS', () => {
@@ -430,8 +454,6 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('component')
-
-        cy.findByRole('button', { name: 'Continue' })
       })
 
       it('can skip setup CT testing for a project', () => {
@@ -481,14 +503,12 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('component')
-
-        cy.findByRole('button', { name: 'Continue' })
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
         scaffoldAndOpenProject('pristine-with-e2e-testing', ['--e2e'])
         cy.visitLaunchpad()
-        cy.contains('h1', 'Choose a Browser')
+        verifyChooseABrowserPage()
       })
 
       it('can reconfigure config after CT has been set up', () => {

@@ -10,7 +10,7 @@ export default defineConfig({
   viewportHeight: 850,
   retries: {
     runMode: 2,
-    openMode: 2,
+    openMode: 0,
   },
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
