@@ -703,7 +703,7 @@ export class ProjectLifecycleManager {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
       this.setAndLoadCurrentTestingType(testingType)
 
-      if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration && !this.isTestingTypeConfigured(testingType)) {
+      if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration() && !this.isTestingTypeConfigured(testingType)) {
         // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
         await this.ctx.actions.wizard.scaffoldTestingType()
       }
