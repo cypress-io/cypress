@@ -1,6 +1,5 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import { CODE_LANGUAGES } from '@packages/types/src/constants'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
   it('default component', () => {
@@ -43,10 +42,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       cy.findByRole('option', { name })
       .find('svg')
       .should('have.attr', 'data-cy', frameworkIconName(name))
-    })
-
-    CODE_LANGUAGES.forEach((lang) => {
-      cy.findByRole('button', { name: lang.name })
     })
 
     cy.findByRole('button', { name: 'Next Step' })

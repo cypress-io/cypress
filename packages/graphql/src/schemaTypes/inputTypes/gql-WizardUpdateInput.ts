@@ -1,5 +1,5 @@
 import { inputObjectType } from 'nexus'
-import { CodeLanguageEnum, FrontendFrameworkEnum, SupportedBundlerEnum } from '../enumTypes/gql-WizardEnums'
+import { FrontendFrameworkEnum, SupportedBundlerEnum } from '../enumTypes/gql-WizardEnums'
 
 export const WizardUpdateInput = inputObjectType({
   name: 'WizardUpdateInput',
@@ -10,10 +10,6 @@ export const WizardUpdateInput = inputObjectType({
 
     t.field('bundler', {
       type: SupportedBundlerEnum,
-    })
-
-    t.field('codeLanguage', {
-      type: CodeLanguageEnum,
     })
   },
 })
