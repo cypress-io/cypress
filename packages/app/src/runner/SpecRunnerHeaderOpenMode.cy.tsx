@@ -17,10 +17,6 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
 }
 
 describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
-  afterEach(() => {
-    cy.percySnapshot()
-  })
-
   it('renders', () => {
     const autStore = useAutStore()
 
@@ -30,6 +26,8 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
         return renderWithGql(gqlVal)
       },
     })
+
+    cy.percySnapshot()
   })
 
   it('disabled selector playground button when isRunning is true', () => {
@@ -44,6 +42,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
+    cy.percySnapshot()
   })
 
   it('disabled selector playground button when isLoading is true', () => {
@@ -58,6 +57,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
+    cy.percySnapshot()
   })
 
   it('enables selector playground button by default', () => {
@@ -68,6 +68,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
+    cy.percySnapshot()
   })
 
   it('shows url section if currentTestingType is e2e', () => {
@@ -85,6 +86,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="aut-url"]').should('exist')
+    cy.percySnapshot()
   })
 
   it('url section handles long url/small viewport', {
@@ -104,6 +106,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="aut-url"]').should('exist')
+    cy.percySnapshot()
   })
 
   it('does not show url section if currentTestingType is component', () => {
@@ -122,6 +125,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="playground-activator"]').should('be.visible')
     cy.get('[data-cy="aut-url"]').should('not.exist')
+    cy.percySnapshot()
   })
 
   it('shows current browser and possible browsers', () => {
@@ -140,6 +144,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
     cy.contains('Firefox').should('be.hidden')
+    cy.percySnapshot()
   })
 
   it('shows current viewport info', () => {
@@ -182,6 +187,8 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport() command.')
     .should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('disables browser dropdown button when isRunning is true', () => {
@@ -199,5 +206,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="select-browser"] > button').should('be.disabled')
+    cy.percySnapshot()
   })
 })
