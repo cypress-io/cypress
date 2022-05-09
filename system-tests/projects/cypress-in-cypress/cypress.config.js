@@ -2,7 +2,7 @@ module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
-    specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
+    specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
     supportFile: false,
     devServer: {
       framework: 'react',
