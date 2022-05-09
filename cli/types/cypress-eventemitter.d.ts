@@ -1,23 +1,7 @@
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 
-type event = import("eventemitter2").event
-type eventNS = import("eventemitter2").eventNS
-type ListenerFn = import("eventemitter2").ListenerFn
-type Listener = import("eventemitter2").Listener
-type OnOptions = import("eventemitter2").OnOptions
-
-interface CyActions extends Cypress.Actions {
-  (event: event | eventNS, listener: ListenerFn, options?: boolean|OnOptions): this|Listener
-}
-
-interface CyEventEmitter {
-  once: CyActions
-  on: CyActions
-  off: CyActions
-  emit: EventEmitter2['emit']
-  removeListener: EventEmitter2['removeListener']
-  removeAllListeners: EventEmitter2['removeAllListeners']
+interface CyEventEmitter extends Omit<EventEmitter2, 'waitFor'> {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
   emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
