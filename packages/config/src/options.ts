@@ -17,6 +17,7 @@ export type BreakingOptionErrorKey =
   | 'EXPERIMENTAL_SAMESITE_REMOVED'
   | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
   | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
+  | 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED'
   | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
   | 'EXPERIMENTAL_STUDIO_REMOVED'
   | 'FIREFOX_GC_INTERVAL_REMOVED'
@@ -204,7 +205,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalSessionSupport',
+    name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -581,6 +582,10 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'experimentalRunEvents',
     errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalSessionSupport',
+    errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalShadowDomSupport',

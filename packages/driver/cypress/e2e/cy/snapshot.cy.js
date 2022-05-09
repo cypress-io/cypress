@@ -32,26 +32,14 @@ describe('driver/src/cy/snapshots', () => {
   })
 
   context('snapshot el', () => {
-    before(() => {
+    beforeEach(() => {
       cy
       .visit('/fixtures/generic.html')
       .then(function (win) {
         const h = $(win.document.head)
 
         h.find('script').remove()
-
-        this.head = h.prop('outerHTML')
-        this.body = win.document.body.outerHTML
       })
-    })
-
-    beforeEach(function () {
-      const doc = cy.state('document')
-
-      $(doc.head).empty().html(this.head)
-      $(doc.body).empty().html(this.body)
-
-      this.$el = $('<span id=\'snapshot\'>snapshot</span>').appendTo(cy.$$('body'))
     })
 
     it('does not clone scripts', function () {
@@ -95,17 +83,20 @@ describe('driver/src/cy/snapshots', () => {
     })
 
     it('sets data-cypress-el attr', function () {
-      const attr = cy.spy(this.$el, 'attr')
+      const $el = $('<span id=\'snapshot\'>snapshot</span>').appendTo(cy.$$('body'))
+      const attr = cy.spy($el, 'attr')
 
-      cy.createSnapshot(null, this.$el)
+      cy.createSnapshot(null, $el)
 
       expect(attr).to.be.calledWith('data-cypress-el', 'true')
     })
 
     it('removes data-cypress-el attr', function () {
-      cy.createSnapshot(null, this.$el)
+      const $el = $('<span id=\'snapshot\'>snapshot</span>').appendTo(cy.$$('body'))
 
-      expect(this.$el.attr('data-cypress-el')).to.be.undefined
+      cy.createSnapshot(null, $el)
+
+      expect($el.attr('data-cypress-el')).to.be.undefined
     })
 
     // https://github.com/cypress-io/cypress/issues/8679

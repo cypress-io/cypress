@@ -2,6 +2,7 @@ import _ from 'lodash'
 import retargetEvents from 'react-shadow-dom-retarget-events'
 
 import $Cypress from '@packages/driver'
+import $dimensions from './dimensions'
 import { selectorPlaygroundHighlight } from './selector-playground/highlight'
 import { studioAssertionsMenu } from './studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
@@ -72,7 +73,7 @@ function addHitBoxLayer (coords, $body) {
 function addElementBoxModelLayers ($el, $body) {
   $body = $body || $('body')
 
-  const dimensions = getElementDimensions($el)
+  const dimensions = $dimensions.getElementDimensions($el)
 
   const $container = $('<div class="__cypress-highlight">')
   .css({
@@ -306,89 +307,6 @@ function getZIndex (el) {
   return _.toNumber(el.css('zIndex'))
 }
 
-function getElementDimensions ($el) {
-  const el = $el.get(0)
-
-  const { offsetHeight, offsetWidth } = el
-
-  const box = {
-    offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
-    // TODO: switch back to using jquery when upgrading to jquery 3.4+
-    paddingTop: getPadding($el, 'top'),
-    paddingRight: getPadding($el, 'right'),
-    paddingBottom: getPadding($el, 'bottom'),
-    paddingLeft: getPadding($el, 'left'),
-    borderTop: getBorder($el, 'top'),
-    borderRight: getBorder($el, 'right'),
-    borderBottom: getBorder($el, 'bottom'),
-    borderLeft: getBorder($el, 'left'),
-    marginTop: getMargin($el, 'top'),
-    marginRight: getMargin($el, 'right'),
-    marginBottom: getMargin($el, 'bottom'),
-    marginLeft: getMargin($el, 'left'),
-  }
-
-  // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
-  // to get the true "clientHeight" and "clientWidth".
-  // we CANNOT just use "clientHeight" and "clientWidth" because those always return 0
-  // for inline elements >_<
-  //
-  box.width = offsetWidth - (box.paddingLeft + box.paddingRight + box.borderLeft + box.borderRight)
-  box.height = offsetHeight - (box.paddingTop + box.paddingBottom + box.borderTop + box.borderBottom)
-
-  // innerHeight: Get the current computed height for the first
-  // element in the set of matched elements, including padding but not border.
-
-  // outerHeight: Get the current computed height for the first
-  // element in the set of matched elements, including padding, border,
-  // and optionally margin. Returns a number (without 'px') representation
-  // of the value or null if called on an empty set of elements.
-  box.heightWithPadding = box.height + box.paddingTop + box.paddingBottom
-
-  box.heightWithBorder = box.heightWithPadding + box.borderTop + box.borderBottom
-
-  box.heightWithMargin = box.heightWithBorder + box.marginTop + box.marginBottom
-
-  box.widthWithPadding = box.width + box.paddingLeft + box.paddingRight
-
-  box.widthWithBorder = box.widthWithPadding + box.borderLeft + box.borderRight
-
-  box.widthWithMargin = box.widthWithBorder + box.marginLeft + box.marginRight
-
-  return box
-}
-
-function getNumAttrValue ($el, attr) {
-  // nuke anything thats not a number or a negative symbol
-  const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
-
-  if (!_.isFinite(num)) {
-    throw new Error('Element attr did not return a valid number')
-  }
-
-  return num
-}
-
-function getPadding ($el, dir) {
-  return getNumAttrValue($el, `padding-${dir}`)
-}
-
-function getBorder ($el, dir) {
-  return getNumAttrValue($el, `border-${dir}-width`)
-}
-
-function getMargin ($el, dir) {
-  return getNumAttrValue($el, `margin-${dir}`)
-}
-
-function getOuterSize ($el) {
-  return {
-    width: $el.outerWidth(true),
-    height: $el.outerHeight(true),
-  }
-}
-
 function isInViewport (win, el) {
   let rect = el.getBoundingClientRect()
 
@@ -428,73 +346,13 @@ function getElementsForSelector ({ $root, selector, method, cypressDom }) {
   return $el
 }
 
-function addCssAnimationDisabler ($body) {
-  $(`
-    <style id="__cypress-animation-disabler">
-      *, *:before, *:after {
-        transition-property: none !important;
-        animation: none !important;
-      }
-    </style>
-  `).appendTo($body)
-}
-
-function removeCssAnimationDisabler ($body) {
-  $body.find('#__cypress-animation-disabler').remove()
-}
-
-function addBlackoutForElement ($body, $el) {
-  const dimensions = getElementDimensions($el)
-  const width = dimensions.widthWithBorder
-  const height = dimensions.heightWithBorder
-  const top = dimensions.offset.top
-  const left = dimensions.offset.left
-
-  const style = styles(`
-    ${resetStyles}
-    position: absolute;
-    top: ${top}px;
-    left: ${left}px;
-    width: ${width}px;
-    height: ${height}px;
-    background-color: black;
-    z-index: 2147483647;
-  `)
-
-  $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
-}
-
-function addBlackout ($body, selector) {
-  let $el
-
-  try {
-    $el = $body.find(selector)
-    if (!$el.length) return
-  } catch (err) {
-    // if it's an invalid selector, just ignore it
-    return
-  }
-
-  $el.each(function () {
-    addBlackoutForElement($body, $(this))
-  })
-}
-
-function removeBlackouts ($body) {
-  $body.find('.__cypress-blackout').remove()
-}
-
 export const dom = {
-  addBlackout,
-  removeBlackouts,
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorPlaygroundHighlight,
   openStudioAssertionsMenu,
   closeStudioAssertionsMenu,
-  addCssAnimationDisabler,
-  removeCssAnimationDisabler,
   getElementsForSelector,
-  getOuterSize,
+  getOuterSize: $dimensions.getOuterSize,
   scrollIntoView,
 }

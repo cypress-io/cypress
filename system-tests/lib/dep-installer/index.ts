@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import path from 'path'
-import cachedir from 'cachedir'
 import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
@@ -162,7 +161,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
-  const cacheNodeModulesDir = path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
+  const cacheNodeModulesDir = path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules')
   const tmpNodeModulesDir = path.join(projectPath(project), 'node_modules')
 
   async function removeWorkspacePackages (packages: string[]): Promise<void> {

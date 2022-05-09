@@ -4,6 +4,7 @@ import Debug from 'debug'
 import files from './files'
 import type { Cfg } from '../project-base'
 import type { FoundSpec } from '@packages/types'
+import type { RemoteStates } from '../remote_states'
 
 const debug = Debug('cypress:server:iframes')
 
@@ -12,7 +13,7 @@ interface IFramesController {
 }
 
 interface E2E extends IFramesController {
-  getRemoteState: () => any
+  remoteStates: RemoteStates
   getSpec: () => FoundSpec | null
 }
 
@@ -21,7 +22,7 @@ interface CT extends IFramesController {
 }
 
 export const iframesController = {
-  e2e: ({ getSpec, getRemoteState, config }: E2E, req: Request, res: Response) => {
+  e2e: ({ getSpec, remoteStates, config }: E2E, req: Request, res: Response) => {
     const extraOptions = {
       specType: 'integration',
     }
@@ -37,7 +38,7 @@ export const iframesController = {
     // https://github.com/cypress-io/cypress/issues/20147
     res.setHeader('Origin-Agent-Cluster', '?0')
 
-    files.handleIframe(req, res, config, getRemoteState, extraOptions)
+    files.handleIframe(req, res, config, remoteStates, extraOptions)
   },
 
   component: ({ config, nodeProxy }: CT, req: Request, res: Response) => {

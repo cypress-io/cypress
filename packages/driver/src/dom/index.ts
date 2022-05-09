@@ -5,6 +5,8 @@ import $elements from './elements'
 import $coordinates from './coordinates'
 import $selection from './selection'
 import $visibility from './visibility'
+import $blackout from './blackout'
+import $animation from './animation'
 
 const { isWindow, getWindowByElement } = $window
 const { isDocument, getDocumentFromElement } = $document
@@ -13,6 +15,8 @@ const { isVisible, isHidden, isStrictlyHidden, isHiddenByAncestors, getReasonIsH
 const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, getInputFromLabel, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, isWithinShadowRoot, getHostContenteditable } = $elements
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 const { getSelectionBounds } = $selection
+const { addBlackouts, removeBlackouts } = $blackout
+const { removeCssAnimationDisabler, addCssAnimationDisabler } = $animation
 
 const isDom = (obj) => {
   return isElement(obj) || isWindow(obj) || isDocument(obj)
@@ -24,6 +28,10 @@ const isDom = (obj) => {
 // purposes or for overriding. Everything else
 // can be tucked away behind these interfaces.
 export default {
+  removeBlackouts,
+  addBlackouts,
+  removeCssAnimationDisabler,
+  addCssAnimationDisabler,
   wrap,
   isW3CFocusable,
   isW3CRendered,

@@ -126,7 +126,7 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation)
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation, options.experimentalSessionAndOrigin)
 
   await options.onInitializeNewBrowserTab()
 
@@ -134,11 +134,11 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
   await navigateToUrl(options.url)
 }
 
-async function setupRemote (remotePort, automation, onError): Promise<BrowserCriClient> {
+async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation)
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation, options.experimentalSessionAndOrigin)
 
   return browserCriClient
 }
@@ -222,11 +222,12 @@ export default {
     marionettePort,
     foxdriverPort,
     remotePort,
+    options,
   }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, onError),
+      remotePort && setupRemote(remotePort, automation, onError, options),
     ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
