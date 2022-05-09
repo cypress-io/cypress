@@ -175,6 +175,9 @@ export class ProjectConfigManager {
       console.log('setup testing type reply')
 
       await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
+
+      console.log('setup testing type reply done')
+
       this._state = 'ready'
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)

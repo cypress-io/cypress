@@ -228,6 +228,7 @@ export class ProjectLifecycleManager {
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
         console.log('on final config loaded')
+        console.trace()
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             path: this.projectRoot,
