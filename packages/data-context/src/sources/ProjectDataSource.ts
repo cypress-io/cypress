@@ -259,6 +259,8 @@ export class ProjectDataSource {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       if (isEqual(this.specs, specs)) {
+        this.ctx.actions.project.refreshSpecs(specs)
+
         // If no differences are found, we do not need to emit events
         return
       }
