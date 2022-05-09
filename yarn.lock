@@ -8413,10 +8413,10 @@
     "@urql/core" ">=2.3.0"
     wonka "^4.0.14"
 
-"@urql/exchange-graphcache@4.3.6":
-  version "4.3.6"
-  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.6.tgz#fea25b8877a704a9d65bdd29578fa6e9fd31bfa5"
-  integrity sha512-RDEi1954lcnwBK2dwQGaxOInuebZrRliz2v7aAuQasj49N9bWYrlSkBfELG14EzOL7NI23IUaeLeaDN7MouDJg==
+"@urql/exchange-graphcache@4.4.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.4.0.tgz#f0606501ab8d53713001e24dbd228cc2793e9066"
+  integrity sha512-vr89m7E09XLIGhksBcyrUK19+wttSzz2Ieg8Bkt5UkJ7h7YazO6marWUxwFA6n+3/R5Z5uWt5Wie8f3i+oScxg==
   dependencies:
     "@urql/core" ">=2.3.6"
     wonka "^4.0.14"
