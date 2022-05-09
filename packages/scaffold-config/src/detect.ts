@@ -117,17 +117,13 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
       return 'js'
     }
   } catch (e) {
-    //
+    debug('Did not find cypress.config file')
   }
 
-  try {
-    if ('typescript' in (pkgJson.dependencies || {}) || 'typescript' in (pkgJson.devDependencies || {})) {
-      debug('Detected typescript in package.json - using TS')
+  if ('typescript' in (pkgJson.dependencies || {}) || 'typescript' in (pkgJson.devDependencies || {})) {
+    debug('Detected typescript in package.json - using TS')
 
-      return 'ts'
-    }
-  } catch (e) {
-    //
+    return 'ts'
   }
 
   const joinPosix = (...s: string[]) => {
@@ -147,7 +143,7 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
     return 'ts'
   }
 
-  debug(`Defaulting to JS`)
+  debug('Defaulting to JS')
 
   return 'js'
 }
