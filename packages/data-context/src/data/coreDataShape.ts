@@ -64,9 +64,7 @@ export interface AppDataShape {
 export interface WizardDataShape {
   chosenBundler: typeof WIZARD_BUNDLERS[number] | null
   chosenFramework: typeof WIZARD_FRAMEWORKS[number] | null
-  chosenLanguage: 'js' | 'ts'
   chosenManualInstall: boolean
-  detectedLanguage: 'js' | 'ts' | null
   detectedBundler: typeof WIZARD_BUNDLERS[number] | null
   detectedFramework: typeof WIZARD_FRAMEWORKS[number] | null
 }
@@ -182,11 +180,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     wizard: {
       chosenBundler: null,
       chosenFramework: null,
-      chosenLanguage: 'js',
       chosenManualInstall: false,
       detectedBundler: null,
       detectedFramework: null,
-      detectedLanguage: null,
     },
     migration: {
       step: 'renameAuto',
