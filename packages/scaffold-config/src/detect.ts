@@ -1,5 +1,12 @@
 import { WIZARD_FRAMEWORKS, inPkgJson } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
+import path from 'path'
+import fs from 'fs-extra'
+import globby from 'globby'
+import type { PkgJson } from '.'
+import Debug from 'debug'
+
+const debug = Debug('cypress:scaffold-config:detect')
 
 interface DetectFramework {
   framework?: typeof WIZARD_FRAMEWORKS[number]
@@ -13,7 +20,7 @@ interface DetectFramework {
 // If we don't find a specific framework, but we do find a library and/or
 // bundler, we return both the framework, which might just be "React",
 // and the bundler, which could be Vite.
-export function detect (projectPath: string): DetectFramework {
+export function detectFramework (projectPath: string): DetectFramework {
   // first see if it's a template
   for (const framework of WIZARD_FRAMEWORKS.filter((x) => x.category === 'template')) {
     const hasAllDeps = [...framework.detectors].every((dep) => {
@@ -63,4 +70,80 @@ export function detect (projectPath: string): DetectFramework {
     framework: undefined,
     bundler: undefined,
   }
+}
+
+/**
+ * Detect the language the current project is using
+ *
+ * If `cypress.config` exists, we derive the language
+ * from the extension.
+ *
+ * IF HAS_CYPRESS_CONFIG
+ *   IF CYPRESS_CONFIG_TS
+ *     HAS TYPESCRIPT
+ *   ELSE
+ *     DOES NOT HAVE TYPESCRIPT
+ *   ELSE IF `typescript` dependency in `package.json` OR `tsconfig.json` in `projectRoot/*`
+ *     HAS TYPESCRIPT
+ *   ELSE
+ *     DOES NOT HAVE TYPESCRIPT
+ *   END
+ * ELSE IF HAS CYPRESS_JSON
+ *   IF cypress/* contains *.ts file
+ *     USE TYPESCRIPT
+ *   ELSE
+ *     DO NOT USE TYPESCRIPT
+ *   END
+ * ELSE IS NEW PROJECT
+ *   IF `typescript` dependency in `package.json` OR `tsconfig.json` in `projectRoot/*`
+ *     HAS TYPESCRIPT
+ *   ELSE
+ *     DOES NOT HAVE TYPESCRIPT
+ *   END
+ * END
+ */
+
+export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | 'ts' {
+  try {
+    if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
+      debug('Detected cypress.config.ts - using TS')
+
+      return 'ts'
+    }
+
+    if (fs.existsSync(path.join(projectRoot, 'cypress.config.js'))) {
+      debug('Detected cypress.config.js - using JS')
+
+      return 'js'
+    }
+  } catch (e) {
+    debug('Did not find cypress.config file')
+  }
+
+  if ('typescript' in (pkgJson.dependencies || {}) || 'typescript' in (pkgJson.devDependencies || {})) {
+    debug('Detected typescript in package.json - using TS')
+
+    return 'ts'
+  }
+
+  const joinPosix = (...s: string[]) => {
+    return path.join(...s).split(path.sep).join(path.posix.sep)
+  }
+
+  const globs = [
+    joinPosix(projectRoot, '**/*tsconfig.json'),
+    joinPosix(projectRoot, 'cypress', '**/*.{ts,tsx}'),
+  ]
+
+  const tsFiles = globby.sync(globs, { onlyFiles: true, gitignore: true })
+
+  if (tsFiles.length > 0) {
+    debug(`Detected ts file(s) ${tsFiles.join(',')} - using TS`)
+
+    return 'ts'
+  }
+
+  debug('Defaulting to JS')
+
+  return 'js'
 }

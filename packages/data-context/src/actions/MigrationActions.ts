@@ -1,10 +1,13 @@
 /* eslint-disable no-dupe-class-members */
 import path from 'path'
 import { fork } from 'child_process'
+import fs from 'fs-extra'
+import semver from 'semver'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
 import _ from 'lodash'
 import type { DataContext } from '..'
+import { getError } from '@packages/errors'
 import {
   cleanUpIntegrationFolder,
   formatConfig,
@@ -132,6 +135,23 @@ export class MigrationActions {
       throw Error('cannot do migration without currentProject!')
     }
 
+    if (this.ctx.isGlobalMode) {
+      const version = this.locallyInstalledCypressVersion(this.ctx.currentProject)
+
+      if (!version) {
+        // Could not resolve Cypress. Unlikely, but they are using a
+        // project with Cypress that is nested more deeply than
+        // another project, which has a `cypress.json` but has not had
+        // it's node_modules installed, or it relies on a global version
+        // of Cypress that is missing for whatever reason.
+        return this.ctx.onError(getError('MIGRATION_CYPRESS_NOT_FOUND'))
+      }
+
+      if (!semver.satisfies(version, '^10.0.0')) {
+        return this.ctx.onError(getError('MIGRATION_MISMATCHED_CYPRESS_VERSIONS', version))
+      }
+    }
+
     await this.initializeFlags()
 
     const legacyConfigFileExist = this.ctx.migration.legacyConfigFileExists()
@@ -145,6 +165,21 @@ export class MigrationActions {
       coreData.migration.filteredSteps = filteredSteps
       coreData.migration.step = filteredSteps[0]
     })
+  }
+
+  locallyInstalledCypressVersion (currentProject: string) {
+    try {
+      const localCypressPkgJsonPath = require.resolve(path.join('cypress', 'package.json'), {
+        paths: [currentProject],
+      })
+      const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
+
+      return localCypressPkgJson?.version ?? undefined
+    } catch (e) {
+      // node_modules was not found, or some other unexpected error
+      // return undefined and surface the correct error.
+      return undefined
+    }
   }
 
   /**
@@ -164,6 +199,8 @@ export class MigrationActions {
     const hasCustomIntegrationFolder = getIntegrationFolder(legacyConfigForMigration) !== 'cypress/integration'
     const hasCustomIntegrationTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'integration')
 
+    const shouldAddCustomE2ESpecPattern = Boolean(this.ctx.migration.legacyConfigProjectId)
+
     let hasE2ESpec = integrationFolder
       ? await hasSpecFile(this.ctx.currentProject, integrationFolder, integrationTestFiles)
       : false
@@ -173,7 +210,7 @@ export class MigrationActions {
     // this allows users to stop migration halfway,
     // then to pick up where they left migration off
     if (!hasE2ESpec && (!hasCustomIntegrationTestFiles || !hasCustomIntegrationFolder)) {
-      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e')
+      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e', shouldAddCustomE2ESpecPattern)
 
       hasE2ESpec = await hasSpecFile(this.ctx.currentProject, '', newE2eSpecPattern)
     }
@@ -201,6 +238,7 @@ export class MigrationActions {
         hasComponentTesting,
         hasE2ESpec,
         hasPluginsFile: true,
+        shouldAddCustomE2ESpecPattern,
       }
     })
   }
@@ -246,6 +284,13 @@ export class MigrationActions {
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
     const from = path.join(projectRoot, 'cypress', 'integration')
     const to = path.join(projectRoot, 'cypress', 'e2e')
+
+    this.ctx.update((coreData) => {
+      coreData.migration.flags = {
+        ...coreData.migration.flags,
+        shouldAddCustomE2ESpecPattern: true,
+      }
+    })
 
     await this.ctx.fs.move(from, to)
   }

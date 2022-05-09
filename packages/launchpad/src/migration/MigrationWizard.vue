@@ -231,6 +231,7 @@ mutation MigrationWizard_RenameSpecsFolder {
   migrateRenameSpecsFolder {
     ...MigrationBaseError
     migration {
+      ...ConvertConfigFile
       ...RenameSpecsManual
       filteredSteps {
         id
