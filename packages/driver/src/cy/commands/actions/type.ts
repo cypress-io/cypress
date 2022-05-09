@@ -360,8 +360,9 @@ export default function (Commands, Cypress, cy, state, config) {
               // We don't want to send it twice.
               !Cypress.isBrowser('firefox') ||
               // After Firefox 98,
-              // it sends a click event automatically if the element is a <button>
-              // it does not if the element is an <input>
+              // it sends a click event automatically if the element is a <button>,
+              // but it does not if the element is an <input>.
+              // event.target is null when used with shadow DOM.
               (!isFirefoxBefore98 && event.target && $elements.isInput(event.target))
             ) &&
             // Click event is sent after keyup event with space key.
