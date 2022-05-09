@@ -42,11 +42,11 @@ export interface CreateConfigOptions {
   projectRoot: string
   isUsingTypeScript: boolean
   isProjectUsingESModules: boolean
-  shouldAddCustomE2eSpecPattern: boolean
+  shouldAddCustomE2ESpecPattern: boolean
 }
 
 export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
-  const newConfig = reduceConfig(cfg)
+  const newConfig = reduceConfig(cfg, options)
   const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
 
   return createCypressConfig(newConfig, relativePluginPath, options)
@@ -204,8 +204,8 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
-  if (createConfigOptions.shouldAddCustomE2eSpecPattern && !options.specPattern) {
-    options.specPattern = 'cypress/e2e/**/*.{js,ts,tsx,jsx}'
+  if (createConfigOptions.shouldAddCustomE2ESpecPattern && !options.specPattern) {
+    options.specPattern = 'cypress/e2e/**/*.{js,jsx,ts,tsx}'
   }
 
   if (!createConfigOptions.hasPluginsFile || !pluginPath) {
@@ -360,7 +360,7 @@ export function renameSupportFilePath (relative: string) {
   return relative.slice(0, res.index) + relative.slice(res.index).replace(res.groups.supportFileName, 'e2e')
 }
 
-export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
+export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfigOptions): ConfigOptions {
   return Object.entries(cfg).reduce((acc, [key, val]) => {
     switch (key) {
       case 'pluginsFile':
@@ -378,7 +378,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
         const { testFiles, ignoreTestFiles, ...rest } = value
 
         // don't include if it's the default! No need.
-        const specPattern = getSpecPattern(cfg, key)
+        const specPattern = getSpecPattern(cfg, key, options.shouldAddCustomE2ESpecPattern)
         const ext = '**/*.cy.{js,jsx,ts,tsx}'
         const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
         const isDefaultCT = key === 'component' && specPattern === ext
@@ -403,7 +403,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
       case 'integrationFolder':
         return {
           ...acc,
-          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e', options.shouldAddCustomE2ESpecPattern) },
         }
       case 'componentFolder':
         return {
@@ -413,7 +413,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
       case 'testFiles':
         return {
           ...acc,
-          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+          e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e', options.shouldAddCustomE2ESpecPattern) },
           component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
         }
       case 'ignoreTestFiles':
@@ -444,15 +444,15 @@ export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? (cfg.projectId ? '**/*.{js,ts,tsx,jsx}' : '**/*.cy.{js,jsx,ts,tsx}')
+export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: TestingType, shouldAddCustomE2ESpecPattern: boolean = false) {
+  const specPattern = cfg[testingType]?.testFiles ?? cfg.testFiles ?? (testingType === 'e2e' && shouldAddCustomE2ESpecPattern ? '**/*.{js,jsx,ts,tsx}' : '**/*.cy.{js,jsx,ts,tsx}')
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
-  if (testType === 'component' && customComponentFolder) {
+  if (testingType === 'component' && customComponentFolder) {
     return `${customComponentFolder}/${specPattern}`
   }
 
-  if (testType === 'e2e') {
+  if (testingType === 'e2e') {
     const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
     if (customIntegrationFolder) {
