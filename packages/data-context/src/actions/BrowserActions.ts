@@ -14,4 +14,8 @@ export class BrowserActions {
   async focusActiveBrowserWindow () {
     await this.browserApi.focusActiveBrowserWindow()
   }
+
+  async relaunchBrowser () {
+    await this.browserApi.relaunchBrowser()
+  }
 }

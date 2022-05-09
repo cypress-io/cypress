@@ -39,6 +39,7 @@ interface ResolvedConfigOption {
    */
   canUpdateDuringTestTime?: boolean
   specificTestingType?: TestingType
+  requireRestartOnChange?: 'server' | 'browser'
 }
 
 interface RuntimeConfigOption {
@@ -50,6 +51,7 @@ interface RuntimeConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
+  requireRestartOnChange?: 'server' | 'browser'
 }
 
 export interface BreakingOption {
@@ -142,11 +144,13 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'clientCertificates',
     defaultValue: [],
     validation: validate.isValidClientCertificatesSet,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'component',
     // runner-ct overrides
@@ -167,6 +171,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'e2e',
     // e2e runner overrides
@@ -197,6 +202,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSessionSupport',
     defaultValue: false,
@@ -209,18 +215,21 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
@@ -241,6 +250,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
@@ -324,6 +334,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
@@ -340,12 +351,14 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'supportFolder',
     defaultValue: false,
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   }, {
     name: 'taskTimeout',
     defaultValue: 60000,
@@ -361,6 +374,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isString,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'browser',
   }, {
     name: 'video',
     defaultValue: true,
@@ -402,6 +416,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: false,
+    requireRestartOnChange: 'server',
   },
 ]
 

@@ -3,10 +3,11 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './retries.mochaEvents.snapshots'
 
 /**
- * These tests are slow, particular slow on windows, thus the
- * 7500m timeout.
- * TODO: Find out if they are objectively slower on windows than on linux,
- * and if it's a 10.x specific performance regression.
+ * The mochaEvent tests require a spec to be loaded and executed within an inner Cypress context.
+ * The spec must load and execute within the duration of the Cypress command timeout.
+ * The execution time of the inner Cypress is resource/OS dependant and can exceed the default value (4s),
+ * so we have increased the command timeout to allow the inner spec more time to complete and report
+ * its mocha event log.
  */
 describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   // NOTE: for test-retries
@@ -134,7 +135,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
       runSpec({
         fileName: 'does-not-serialize-dom-error.cy.js',
       }).then((win) => {
-      // should not have err.actual, expected properties since the subject is a DOM element
+        // should not have err.actual, expected properties since the subject is a DOM element
         assertMatchingSnapshot(win)
       })
     })
