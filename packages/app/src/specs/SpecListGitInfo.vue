@@ -27,7 +27,7 @@
       </template>
     </Tooltip>
     <div
-      class="overflow-hidden truncate"
+      class="text-gray-700 overflow-hidden truncate"
     >
       {{ props.gql?.lastModifiedHumanReadable ?? '' }}
     </div>
