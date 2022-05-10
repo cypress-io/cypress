@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-no-repeat min-h-700px lp-wrapper">
+  <div class="bg-no-repeat bg-cover h-screen min-h-700px lp-wrapper">
     <h1 class="font-medium text-center tracking-tighter pt-45px text-32px text-teal-1000">
       {{ t('migration.landingPage.title') }}
     </h1>
@@ -68,17 +68,17 @@ const handleClick = () => {
 }
 
 .video {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 15 / 9;
 
   // since we support pre-aspect-ratio browsers,
   // the classic padding hack is used here
   // https://css-tricks.com/aspect-ratio-boxes/#aa-the-pseudo-element-tactic
   // https://codepen.io/una/pen/BazyaOM
 
-  @supports not (aspect-ratio: 16 / 9) {
+  @supports not (aspect-ratio: 15 / 9) {
     &::before {
       float: left;
-      padding-top: 56.25%;
+      padding-top: 60%;
       content: '';
     }
 
