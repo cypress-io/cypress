@@ -111,6 +111,7 @@ describe('cy.session', { retries: 0 }, () => {
         setupTestContext()
         cy.log('create new session to test against')
         cy.session('session-1', setup)
+        .wait(4) // ensure last log clear page has been updated
       })
 
       it('successfully creates new session', () => {
@@ -193,6 +194,7 @@ describe('cy.session', { retries: 0 }, () => {
         cy.log('create new session with validation to test against')
 
         cy.session('session-1', setup, { validate })
+        .wait(4) // ensure last log clear page has been updated
       })
 
       it('successfully creates new session and validates it', () => {
@@ -262,16 +264,24 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('create session with failed validation flow', () => {
-      before(function (done) {
+      // TODO: make this a before hook. Before hook is timing out under the hood
+      // and the failure is being captured in tests further down in run-mode.
+      // This is only visible in open-mode when setting a breakpoint in
+      // patchRunnableResetTimeout in src/cypress/mocha.ts
+      it('fails validation', function (done) {
         setupTestContext()
         cy.log('create new session with validation to test against')
 
-        cy.on('fail', (err) => {
-          expect(setup).to.be.calledOnce
-          expect(validate).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
-          expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
-          done()
+        cy.once('fail', (err) => {
+          new Promise((resolve) => {
+            setTimeout(() => {
+              expect(setup).to.be.calledOnce
+              expect(validate).to.be.calledOnce
+              expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+              expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+              done()
+            }, 4)
+          })
         })
 
         validate.callsFake(() => false)
@@ -340,6 +350,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session('session-1', setup)
+        .wait(4) // ensure last log clear page has been updated
       })
 
       it('successfully restores saved session', () => {
@@ -397,6 +408,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session('session-1', setup, { validate })
+        .wait(4) // ensure last log clear page has been updated
       })
 
       it('successfully restores saved session', () => {
@@ -471,6 +483,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session('session-1', setup, { validate })
+        .wait(4) // ensure last log clear page has been updated
       })
 
       it('successfully recreates session', () => {
@@ -571,7 +584,11 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('recreates existing session with failed validation flow', () => {
-      before(function (done) {
+      // TODO: make this a before hook. Before hook is timing out under the hood
+      // and the failure is being captured in tests further down in run-mode.
+      // This is only visible in open-mode when setting a breakpoint in
+      // patchRunnableResetTimeout in src/cypress/mocha.ts
+      it('fails to recreate session', function (done) {
         setupTestContext()
         cy.log('create new session for test')
         cy.session('session-1', setup, { validate })
@@ -582,11 +599,13 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.once('fail', (err) => {
-          expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
-          expect(setup).to.be.calledOnce
-          expect(validate).to.be.calledTwice
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
-          done()
+          return setTimeout(() => {
+            expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+            expect(setup).to.be.calledOnce
+            expect(validate).to.be.calledTwice
+            expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+            done()
+          }, 4)// ensure last log clear page has been updated
         })
 
         cy.log('restore session to test against')
