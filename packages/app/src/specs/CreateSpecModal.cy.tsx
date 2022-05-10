@@ -144,6 +144,7 @@ describe('defaultSpecFileName', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
+            defaultSpecFileName: null,
           },
         }}
         show={show.value}
@@ -186,6 +187,7 @@ describe('defaultSpecFileName', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
+            defaultSpecFileName: null,
           },
         }}
         show={show.value}
