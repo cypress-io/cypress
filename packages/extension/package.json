@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "gulp build",
+    "build": "cross-env NODE_OPTIONS=\"$(node ../../scripts/use-legacy-openssl.js)\" gulp build",
     "build-prod": "yarn build",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",

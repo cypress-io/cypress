@@ -4,7 +4,7 @@
   "private": true,
   "browser": "src/index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "cross-env NODE_OPTIONS=\"$(node ../../scripts/use-legacy-openssl.js)\" webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
