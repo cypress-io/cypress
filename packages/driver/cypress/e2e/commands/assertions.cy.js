@@ -35,20 +35,10 @@ const captureCommands = () => {
 }
 
 describe('src/cy/commands/assertions', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/jquery.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   let testCommands
 
   beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/jquery.html')
 
     testCommands = captureCommands()
   })
@@ -70,6 +60,7 @@ describe('src/cy/commands/assertions', () => {
       .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
       .then((obj) => {
         expect(testCommands()).to.eql([
+          { name: 'visit', snapshots: 1, retries: 0 },
           { name: 'noop', snapshots: 0, retries: 0 },
           { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
@@ -204,6 +195,7 @@ describe('src/cy/commands/assertions', () => {
         })
         .then(() => {
           expect(testCommands()).to.eql([
+            { name: 'visit', snapshots: 1, retries: 0 },
             // cy.get() has 2 snapshots, 1 for itself, and 1
             // for the .should(...) assertion.
 
@@ -1277,6 +1269,36 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  // TODO: this suite should be merged with the suite above
+  describe('message formatting', () => {
+    const expectMarkdown = (test, message, done) => {
+      cy.then(() => {
+        test()
+      })
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'assert') {
+          cy.removeAllListeners('log:added')
+
+          expect(log.get('message')).to.eq(message)
+
+          done()
+        }
+      })
+    }
+
+    // https://github.com/cypress-io/cypress/issues/19116
+    it('text with backslashes', (done) => {
+      const text = '"<OE_D]dQ\\'
+
+      expectMarkdown(
+        () => expect(text).to.equal(text),
+        `expected **"<OE_D]dQ\\\\** to equal **"<OE_D]dQ\\\\**`,
+        done,
+      )
+    })
+  })
+
   context('chai overrides', () => {
     beforeEach(function () {
       this.$body = cy.$$('body')
@@ -1326,6 +1348,15 @@ describe('src/cy/commands/assertions', () => {
         cy.$$($span).appendTo(cy.$$('body'))
 
         cy.get('#escape-quotes').should('contain', 'shouldn\'t')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/19116
+      it('escapes backslashes', () => {
+        const $span = '<span id="escape-backslashes">"&lt;OE_D]dQ\\</span>'
+
+        cy.$$($span).appendTo(cy.$$('body'))
+
+        cy.get('#escape-backslashes').should('contain', '"<OE_D]dQ\\')
       })
     })
 
@@ -2997,11 +3028,10 @@ describe('src/cy/commands/assertions', () => {
     // should be taken.
     it('only snapshots once when failing to find DOM elements and not retrying', (done) => {
       cy.on('fail', (err) => {
-        expect(testCommands()).to.eql([{
-          name: 'get',
-          snapshots: 1,
-          retries: 0,
-        }])
+        expect(testCommands()).to.eql([
+          { name: 'visit', snapshots: 1, retries: 0 },
+          { name: 'get', snapshots: 1, retries: 0 },
+        ])
 
         done()
       })

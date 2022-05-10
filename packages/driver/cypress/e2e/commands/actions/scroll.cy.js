@@ -1,19 +1,8 @@
-const { $ } = window.Cypress.$Cypress
-const { _ } = window.Cypress
+const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/scroll', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/scrolling.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+  beforeEach(() => {
+    cy.visit('/fixtures/scrolling.html')
 
     cy.viewport(600, 200)
   })

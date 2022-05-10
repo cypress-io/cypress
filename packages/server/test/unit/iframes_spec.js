@@ -15,7 +15,7 @@ describe('controllers/iframes', () => {
 
       const controllerOptions = {
         getSpec: sinon.stub(),
-        getRemoteState: sinon.stub(),
+        remoteStates: sinon.stub(),
         config: {},
       }
 
@@ -23,7 +23,7 @@ describe('controllers/iframes', () => {
 
       expect(mockRes.setHeader).to.have.been.calledWith('Origin-Agent-Cluster', '?0')
       expect(files.handleIframe).to.have.been.calledWith(
-        mockReq, mockRes, controllerOptions.config, controllerOptions.getRemoteState, sinon.match({
+        mockReq, mockRes, controllerOptions.config, controllerOptions.remoteStates, sinon.match({
           specFilter: undefined, specType: 'integration',
         }),
       )

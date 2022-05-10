@@ -26,7 +26,6 @@
     "@packages/types": "0.0.0-development",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
-    "cross-env": "6.0.3",
     "mocha": "3.5.3",
     "rimraf": "3.0.2",
     "sinon": "^10.0.0",

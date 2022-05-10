@@ -8,6 +8,7 @@ import sinonChai from '@cypress/sinon-chai'
 
 import $dom from '../dom'
 import $utils from '../cypress/utils'
+import { escapeBackslashes, escapeQuotes } from '../util/escape'
 import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
@@ -29,6 +30,8 @@ const trailingWhitespaces = /\s*'\*\*/g
 const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
 const imageMarkdown = /!\[.*?\]\(.*?\)/g
+const doubleslashRe = /\\\\/g
+const escapedDoubleslashRe = /__double_slash__/g
 
 type CreateFunc = ((specWindow, state, assertFn) => ({
   chai: Chai.ChaiStatic
@@ -102,6 +105,9 @@ chai.use((chai, u) => {
 
     return
   })
+
+  const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__double_slash__')
+  const restoreDoubleSlash = (str: string) => str.replace(escapedDoubleslashRe, '\\\\')
 
   // remove any single quotes between our **,
   // except escaped quotes, empty strings and number strings.
@@ -277,7 +283,9 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const escText = $utils.escapeQuotes(text)
+        const escText = escapeQuotes(
+          escapeBackslashes(text),
+        )
 
         const selector = `:contains('${escText}'), [type='submit'][value~='${escText}']`
 
@@ -457,7 +465,9 @@ chai.use((chai, u) => {
       let message = chaiUtils.getMessage(this, customArgs as Chai.AssertionArgs)
       const actual = chaiUtils.getActual(this, customArgs as Chai.AssertionArgs)
 
+      message = escapeDoubleSlash(message)
       message = removeOrKeepSingleQuotesBetweenStars(message)
+      message = restoreDoubleSlash(message)
       message = escapeMarkdown(message)
 
       try {

@@ -11,6 +11,8 @@
     "browsingData",
     "downloads",
     "tabs",
+    "webRequest",
+    "webRequestBlocking",
     "http://*/*",
     "https://*/*",
     "<all_urls>"
