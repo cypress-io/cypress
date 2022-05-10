@@ -1,6 +1,35 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
+function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component') {
+  if (testingType === 'component') {
+    cy.scaffoldProject('component-tests')
+    cy.openProject('component-tests')
+    cy.startAppServer('component')
+  } else {
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad')
+    cy.startAppServer('e2e')
+  }
+
+  cy.loginUser()
+  cy.remoteGraphQLIntercept(async (obj) => {
+    if (obj.result.data?.cloudProjectsBySlugs) {
+      for (const proj of obj.result.data.cloudProjectsBySlugs) {
+        if (proj.runs?.nodes) {
+          proj.runs.nodes = []
+        }
+      }
+    }
+
+    return obj.result
+  })
+
+  cy.visitApp()
+
+  return cy.get('[href="#/runs"]').click()
+}
+
 describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs Page', () => {
     beforeEach(() => {
@@ -402,55 +431,34 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
-    it('displays how to record prompt when connected and no runs', () => {
-      cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
-      cy.startAppServer('component')
-
-      cy.loginUser()
-      cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
-        }
-
-        return obj.result
-      })
-
-      cy.visitApp()
-      cy.get('[href="#/runs"]').click()
-      cy.contains(defaultMessages.runs.empty.title)
-      cy.contains(defaultMessages.runs.empty.description)
-      cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+    it('displays how to record prompt when connected and no runs in Component Testing', () => {
+      scaffoldTestingTypeAndVisitRunsPage('component')
+      cy.contains(defaultMessages.runs.empty.title).should('be.visible')
+      cy.contains(defaultMessages.runs.empty.description).should('be.visible')
+      cy.contains('cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
-    it('displays a copy button', () => {
-      cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
-      cy.startAppServer('component')
+    it('displays how to record prompt when connected and no runs in E2E', () => {
+      scaffoldTestingTypeAndVisitRunsPage('e2e')
 
-      cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+      cy.contains(defaultMessages.runs.empty.title).should('be.visible')
+      cy.contains(defaultMessages.runs.empty.description).should('be.visible')
+      cy.contains('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+    })
+
+    it('displays a copy button and copies correct command in Component Testing', () => {
+      scaffoldTestingTypeAndVisitRunsPage('component')
+
+      cy.get('[data-cy="copy-button"]').click()
+      cy.contains('Copied!')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
+    })
 
-      cy.loginUser()
-      cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
-        }
+    it('displays a copy button and copies correct command in Component Testing', () => {
+      scaffoldTestingTypeAndVisitRunsPage('e2e')
 
-        return obj.result
-      })
-
-      cy.visitApp()
-      cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
