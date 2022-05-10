@@ -2,6 +2,7 @@ import _ from 'lodash'
 import stringifyStable from 'json-stable-stringify'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
+import logGroup from '../../logGroup'
 import SessionsManager from './manager'
 import {
   getSessionDetails,
@@ -117,18 +118,8 @@ export default function (Commands, Cypress, cy) {
         }
       }
 
-      const _log = Cypress.log({
-        name: 'session',
-        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
-        groupStart: true,
-        snapshot: false,
-      })
-
-      const dataLog = Cypress.log({
-        name: 'session',
-        sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
-      })
+      let _log
+      let dataLog
 
       function createSession (existingSession, recreateSession = false) {
         Cypress.log({
@@ -391,24 +382,38 @@ export default function (Commands, Cypress, cy) {
        *      1. run restore session flow
        *      2. clear page
        */
-      return cy.then(async () => {
-        if (!existingSession.hydrated) {
-          const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
+      return logGroup(Cypress, {
+        name: 'session',
+        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+      },
+      (sessionLogGroup) => {
+        _log = sessionLogGroup
 
-          // we have a saved session on the server AND setup matches
-          if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
-            _.extend(existingSession, _.omit(serverStoredSession, 'setup'))
-            existingSession.hydrated = true
-          } else {
-            return createSessionWorkflow(existingSession)
+        dataLog = Cypress.log({
+          name: 'session',
+          sessionInfo: getSessionDetails(existingSession),
+          message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        })
+
+        return cy.then(async () => {
+          if (!existingSession.hydrated) {
+            const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
+
+            // we have a saved session on the server AND setup matches
+            if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
+              _.extend(existingSession, _.omit(serverStoredSession, 'setup'))
+              existingSession.hydrated = true
+            } else {
+              return createSessionWorkflow(existingSession)
+            }
           }
-        }
 
-        return restoreSessionWorkflow(existingSession)
-      })
-      .then(async () => {
-        await navigateAboutBlank()
-        Cypress.log({ groupEnd: true, emitOnly: true })
+          return restoreSessionWorkflow(existingSession)
+        })
+        .then(async () => {
+          await navigateAboutBlank()
+        // Cypress.log({ groupEnd: true, emitOnly: true })
+        })
       })
     },
   })
