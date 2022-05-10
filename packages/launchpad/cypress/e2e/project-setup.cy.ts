@@ -1,3 +1,5 @@
+import { getPathForPlatform } from './support/getPathForPlatform'
+
 function verifyScaffoldedFiles (testingType: string) {
   const expectedFileOrder = (testingType === 'e2e') ? [
     'cypress.config.',
@@ -17,7 +19,7 @@ function verifyScaffoldedFiles (testingType: string) {
   .each(($el, i) => {
     const relativePath = $el.text()
 
-    expect(relativePath, `file index ${i}`).to.include(expectedFileOrder[i]) // assert file order
+    expect(relativePath, `file index ${i}`).to.include(getPathForPlatform(expectedFileOrder[i])) // assert file order
 
     cy.withCtx(async (ctx, o) => { // assert file exists
       const stats = await ctx.file.checkIfFileExists(o.relativePath)
@@ -72,7 +74,18 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
+
+    cy.contains('h1', 'Configuration Files')
+    cy.findByText('We added the following files to your project:')
+
+    cy.get('[data-cy=valid]').within(() => {
+      cy.contains('cypress.config.js')
+      cy.containsPath('cypress/support/e2e.js')
+      cy.containsPath('cypress/support/commands.js')
+      cy.containsPath('cypress/fixtures/example.json')
+    })
+
+    verifyScaffoldedFiles('e2e')
   })
 
   it('opens correctly in unconfigured project with --component', () => {
@@ -228,6 +241,12 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
@@ -249,33 +268,22 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('shows the configuration setup page when opened via cli with --component flag', () => {
         scaffoldAndOpenProject('pristine-with-ct-testing', ['--component'])
         cy.visitLaunchpad()
-        cy.contains('h1', 'Choose a Browser')
+        verifyChooseABrowserPage()
       })
     })
 
     describe('project not been configured for cypress', () => {
-      it('can go back before selecting e2e scaffold lang', () => {
-        scaffoldAndOpenProject('pristine')
-        cy.visitLaunchpad()
-
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
-
-        cy.tabUntil((el) => {
-          return el.text().includes('E2E Testing')
-        })
-
-        cy.contains('button', 'E2E Testing')
-        .should('have.focus')
-        .realPress('Enter')
-
-        cy.contains('h1', 'Configuration Files')
-      })
-
       it('can setup e2e testing for a project selecting JS', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
@@ -331,6 +339,12 @@ describe('Launchpad: Setup Project', () => {
         })
 
         verifyScaffoldedFiles('e2e')
+
+        cy.findByRole('button', { name: 'Continue' })
+        .should('not.have.disabled')
+        .click()
+
+        verifyChooseABrowserPage()
       })
 
       it('can skip setup CT testing for an E2E project', () => {
@@ -383,7 +397,7 @@ describe('Launchpad: Setup Project', () => {
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
         scaffoldAndOpenProject('pristine-with-e2e-testing', ['--e2e'])
         cy.visitLaunchpad()
-        cy.contains('h1', 'Choose a Browser')
+        verifyChooseABrowserPage()
       })
 
       it('can reconfigure config after CT has been set up', () => {

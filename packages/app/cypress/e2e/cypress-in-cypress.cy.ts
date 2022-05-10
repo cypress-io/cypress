@@ -23,8 +23,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       startAtSpecsPage(testingType)
 
       cy.get('[data-cy="spec-item"]').first().click()
-      // Let runner stabilize
-      cy.get('#unified-reporter').should('be.visible')
+      cy.waitForSpecToFinish()
 
       cy.withCtx((ctx) => {
         ctx.coreData.servers.appSocketServer?.emit('automation:disconnected')
@@ -68,7 +67,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
 
       cy.get('[data-cy="spec-item"]').first().click()
-      // Let runner stabilize
+      cy.waitForSpecToFinish()
       cy.get('#unified-reporter').should('be.visible').then(() => {
         connectedCallback(false)
       })
@@ -235,8 +234,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       config = config.replace(`e2e: {`, `e2e: {\n  chromeWebSecurity: false,\n`)
       ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
-      o.sinon.spy(ctx.actions.browser, 'closeBrowser')
-      o.sinon.spy(ctx.actions.browser, 'relaunchBrowser')
+      o.sinon.stub(ctx.actions.browser, 'closeBrowser')
+      o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')
@@ -270,8 +269,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       config = config.replace(`e2e: {`, `e2e: {\n  viewportHeight: 600,\n`)
       ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
-      o.sinon.spy(ctx.actions.browser, 'closeBrowser')
-      o.sinon.spy(ctx.actions.browser, 'relaunchBrowser')
+      o.sinon.stub(ctx.actions.browser, 'closeBrowser')
+      o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')
@@ -289,7 +288,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
     cy.withCtx((ctx, o) => {
       ctx.coreData.app.browserStatus = 'open'
-      o.sinon.spy(ctx.actions.project, 'initializeActiveProject')
+      o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
       let config = ctx.actions.file.readFileInProject('cypress.config.js')
 
