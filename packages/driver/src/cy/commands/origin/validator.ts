@@ -48,7 +48,7 @@ export class Validator {
       }
     }
 
-    if (typeof callbackFn !== 'function') {
+    if (!_.isFunction(callbackFn) && !_.isPlainObject(callbackFn)) {
       this.onFailure()
 
       $errUtils.throwErrByPath('origin.invalid_fn_argument', {

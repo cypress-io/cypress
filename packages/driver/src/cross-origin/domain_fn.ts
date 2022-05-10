@@ -127,6 +127,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     try {
       const value = window.eval(`(${fn})`)(args)
+      // const value = window.eval(fn)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {
@@ -160,6 +161,8 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         }
       }
     } catch (err) {
+      console.log('eval error:', err.stack)
+
       setRunnableStateToPassed()
       Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', { err }, { syncGlobals: true })
 

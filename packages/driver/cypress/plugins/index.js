@@ -28,6 +28,20 @@ babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plu
   return _.includes(plugin[0], 'babel-plugin-prismjs')
 })
 
+// babelLoader.use.options.customize = path.resolve('./cypress/plugins/custom-loader')
+
+webpackOptions.module.rules.unshift({
+  test: /\.(js|ts)$/,
+  use: [
+    {
+      loader: path.resolve('./cypress/plugins/custom-loader'),
+      options: {
+        /* ... */
+      },
+    },
+  ],
+})
+
 /**
  * @type {Cypress.PluginConfig}
  */

@@ -268,6 +268,107 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       const jsonStats = stats.toJson()
 
+      // NOTE: Might need something from these stats to resolve
+      // console.log('stats:', stats)
+      /*
+    assets: {
+      '7f4e078c10c66ebbf76cb07000ba0732.js': [RawSource],
+      'dependencies.spec.ts..main.js': [ConcatSource],
+      'index.html': [Object],
+      'favicon.ico': [Object]
+    },
+    assetsInfo: Map(3) {
+      '__child-HtmlWebpackPlugin_0' => {},
+      '7f4e078c10c66ebbf76cb07000ba0732.js' => [Object],
+      'dependencies.spec.ts..main.js' => {}
+    },
+      */
+
+      // console.log('jsonStats:', jsonStats)
+      /*
+    hash: 'ddb0d9e53ebb62975ff3',
+    assetsByChunkName: { main: 'dependencies.spec.ts..main.js' },
+    assets: [
+    {
+      name: '7f4e078c10c66ebbf76cb07000ba0732.js',
+      size: 183,
+      chunks: [],
+      chunkNames: [],
+      info: [Object],
+      emitted: true,
+      isOverSizeLimit: undefined
+    },
+    {
+      name: 'dependencies.spec.ts..main.js',
+      size: 11394,
+      chunks: [Array],
+      chunkNames: [Array],
+      info: {},
+      emitted: true,
+      isOverSizeLimit: undefined
+    },
+    {
+      name: 'favicon.ico',
+      size: 32038,
+      chunks: [],
+      chunkNames: [],
+      info: {},
+      emitted: true,
+      isOverSizeLimit: undefined
+    },
+    {
+      name: 'index.html',
+      size: 761,
+      chunks: [],
+      chunkNames: [],
+      info: {},
+      emitted: true,
+      isOverSizeLimit: undefined
+    }
+  ],
+
+  entrypoints: {
+    main: {
+      chunks: [Array],
+      assets: [Array],
+      children: [Object: null prototype] {},
+      childAssets: [Object: null prototype] {},
+      isOverSizeLimit: undefined
+    }
+  },
+
+  namedChunkGroups: {
+    main: {
+      chunks: [Array],
+      assets: [Array],
+      children: [Object: null prototype] {},
+      childAssets: [Object: null prototype] {},
+      isOverSizeLimit: undefined
+    }
+  },
+  chunks: [
+    {
+      id: 'main',
+      rendered: true,
+      initial: true,
+      entry: true,
+      recorded: undefined,
+      reason: undefined,
+      size: 727,
+      names: [Array],
+      files: [Array],
+      hash: '8f266091c6c87d8fe3c1',
+      siblings: [],
+      parents: [],
+      children: [],
+      childrenByOrder: [Object: null prototype] {},
+      modules: [Array],
+      filteredModules: 0,
+      origins: [Array]
+    }
+  ],
+      */
+
       // these stats are really only useful for debugging
       if (jsonStats.warnings.length > 0) {
         debug(`warnings for ${outputPath} %o`, jsonStats.warnings)
