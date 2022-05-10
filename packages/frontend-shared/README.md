@@ -30,7 +30,7 @@ WindiCSS can create an awesome interactive summary showing our usage of utility 
 yarn windi
 ```
 
-This will be useful from time to time so that we can audit our usage of these classes and extract repeated patterns into Windi shortcuts or otherwise consolidate them, when it makes sense to do so. And this is part of such an audit.
+This will be useful from time to time so that we can audit our usage of these classes and extract repeated patterns into Windi shortcuts or otherwise consolidate them, when it makes sense to do so. 
 
 ## Link Components
 There are two shared components involved with links - `BaseLink`, and `ExternalLink`. `BaseLink` is responsible for default colors and hover/focus styles. `ExternalLink` wraps `BaseLink` is responsible for managing the GraphQL mutation that triggers links to open the in the user's default browser.
