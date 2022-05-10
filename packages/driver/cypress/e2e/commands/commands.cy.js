@@ -1,18 +1,8 @@
-const { _, $ } = Cypress
+const { _ } = Cypress
 
 describe('src/cy/commands/commands', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+  beforeEach(() => {
+    cy.visit('/fixtures/dom.html')
   })
 
   it('can invoke commands by name', () => {
@@ -43,7 +33,7 @@ describe('src/cy/commands/commands', () => {
     cy.command('get', 'body').then(() => {
       const names = cy.queue.names()
 
-      expect(names).to.deep.eq(['get', 'then'])
+      expect(names).to.deep.eq(['visit', 'get', 'then'])
     })
   })
 

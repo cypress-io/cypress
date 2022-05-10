@@ -394,9 +394,9 @@
         "name": "Interactive Run Events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
       },
-      "experimentalSessionSupport": {
-        "name": "Session",
-        "description": "Enable use of [`cy.session()`](https://on.cypress.io/session) and new behavior to handle caching and restoring cookies, localStorage, and sessionStorage."
+      "experimentalSessionAndOrigin": {
+        "name": "Cross-origin and Session",
+        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands."
       },
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
@@ -678,6 +678,12 @@
       "shared": {
         "link": "Read more about browser management"
       }
+    },
+    "viewportTooltip": {
+      "buttonText": "Review the guide on viewports",
+      "buttonHref": "https://on.cypress.io/viewport",
+      "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
+      "configText": "Additionally, you can override this value in your {2} or via the {4} command."
     }
   },
   "warnings": {

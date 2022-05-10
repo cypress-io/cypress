@@ -2,18 +2,8 @@ const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/trigger', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#trigger', () => {
@@ -599,13 +589,10 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const $btn = cy.$$('button:first')
-
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        cy.get('button:first').trigger('tap', { animationDistanceThreshold: 1000 }).then(() => {
+        cy.get('button:first').trigger('tap', { animationDistanceThreshold: 1000 }).then(($btn) => {
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
@@ -616,13 +603,10 @@ describe('src/cy/commands/actions/trigger', () => {
       it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
 
-        const $btn = cy.$$('button:first')
-
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        cy.get('button:first').trigger('mouseover').then(() => {
+        cy.get('button:first').trigger('mouseover').then(($btn) => {
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])

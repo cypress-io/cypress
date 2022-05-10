@@ -4,6 +4,7 @@ export default defineConfig({
   'projectId': 'ypt4pf',
   'hosts': {
     '*.foobar.com': '127.0.0.1',
+    '*.idp.com': '127.0.0.1',
   },
   'reporter': 'cypress-multi-reporters',
   'reporterOptions': {

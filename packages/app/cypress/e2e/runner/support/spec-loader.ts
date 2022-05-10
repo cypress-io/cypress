@@ -72,9 +72,9 @@ export function runSpec ({ fileName }: { fileName: string }) {
 
   cy.visitApp(`specs/runner?file=cypress/e2e/runner/${fileName}`)
 
-  // Wait for runner to load before continuing, otherwise we may execute
-  // prior to the EventManager having been initialized.
-  cy.get('#unified-reporter').should('exist')
+  // First ensure the test is loaded
+  cy.get('.passed > .num').should('contain', '--')
+  cy.get('.failed > .num').should('contain', '--')
 
   return cy.window()
 }

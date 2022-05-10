@@ -35,8 +35,7 @@ const _isBrowser = (browser, matcher, errPrefix) => {
   }
 }
 
-// TODO: change the type of `any` to `IsBrowserMatcher`
-const isBrowser = (config, obj: any = '', errPrefix: string = '`Cypress.isBrowser()`') => {
+const isBrowser = (config, obj: Cypress.IsBrowserMatcher = '', errPrefix: string = '`Cypress.isBrowser()`') => {
   return _
   .chain(obj)
   .concat([])

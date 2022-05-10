@@ -8,6 +8,6 @@ module.exports = defineConfig({
     setupNodeEvents (on, config) {
       return require('./cypress/plugins/index.js')(on, config)
     },
-    specPattern: 'src/**/*.{js,ts,tsx,jsx}',
+    specPattern: 'src/**/*.{js,jsx,ts,tsx}',
   },
 })
