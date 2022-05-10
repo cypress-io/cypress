@@ -6,18 +6,9 @@ import _ from 'lodash'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 import { decodeBase64Unicode } from './decodeBase64'
 
-const getPlatform = () => {
-  // @ts-ignore
-  return window.Cypress?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
-}
-
-const getRegexSeparator = () => {
-  return getPlatform() === 'win32' ? /\\/ : /\//
-}
-
-const getSeparator = () => {
-  return getPlatform() === 'win32' ? '\\' : '/'
-}
+const platform = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
+const regexSeparator = platform === 'win32' ? /\\/ : /\//
+const separator = platform === 'win32' ? '\\' : '/'
 
 export type FuzzyFoundSpec<T = FoundSpec> = T & {
   fileIndexes: number[]
@@ -41,8 +32,8 @@ export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: Sp
 }
 
 export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
-  const [firstFile, ...rest] = path.split(getRegexSeparator())
-  const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
+  const [firstFile, ...rest] = path.split(regexSeparator)
+  const id = tree.id ? [tree.id, firstFile].join(separator) : firstFile
 
   if (rest.length < 1) {
     tree.children.push({ name: firstFile, isLeaf: true, children: [], parent: tree, data, id })
@@ -53,12 +44,12 @@ export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree:
   const foundChild = tree.children.find((child) => child.name === firstFile)
 
   if (foundChild) {
-    buildSpecTreeRecursive(rest.join(getSeparator()), foundChild, data)
+    buildSpecTreeRecursive(rest.join(separator), foundChild, data)
 
     return tree
   }
 
-  const newTree = buildSpecTreeRecursive(rest.join(getSeparator()), { name: firstFile, isLeaf: false, children: [], parent: tree, id, data }, data)
+  const newTree = buildSpecTreeRecursive(rest.join(separator), { name: firstFile, isLeaf: false, children: [], parent: tree, id, data }, data)
 
   tree.children.push(newTree)
 
@@ -76,8 +67,8 @@ function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   // Root name of our tree is '/'. We don't want to collapse into the root node
   // so we check node.parent.parent
   if (node.parent && node.parent.parent && (node.parent.children.length === 1)) {
-    node.parent.name = [node.parent.name, node.name].join(getSeparator())
-    node.parent.id = [node.parent.id, node.name].join(getSeparator())
+    node.parent.name = [node.parent.name, node.name].join(separator)
+    node.parent.id = [node.parent.id, node.name].join(separator)
     node.parent.children = node.children
   }
 
@@ -121,7 +112,7 @@ function addDirectoryToSpecs <T extends FuzzyFoundSpec> (specs: Partial<T>[]) {
 }
 
 function getDirectoryPath (path: string) {
-  return path.slice(0, path.lastIndexOf(getSeparator()))
+  return path.slice(0, path.lastIndexOf(separator))
 }
 
 export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
