@@ -40,6 +40,10 @@
           v-if="!expanded"
           class="mr-8px ml-12px inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"
         />
+        <i-cy-add-large
+          size="16"
+          :tototata="'sss'"
+        />
 
         <FileMatchInput
           v-if="expanded"
