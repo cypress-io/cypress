@@ -89,7 +89,7 @@ namespace CypressActionCommandOptionTests {
 }
 
 // https://github.com/cypress-io/cypress/pull/21286
-// `waitFor` doesn't exist in Node EventEmitter 
+// `waitFor` doesn't exist in Node EventEmitter
 // and it confuses the users with `cy.wait`
 namespace CyEventEmitterTests {
   cy.waitFor() // $ExpectError
