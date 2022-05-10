@@ -448,6 +448,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('displays a copy button and copies correct command in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+      })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
@@ -458,6 +461,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('displays a copy button and copies correct command in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+      })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
