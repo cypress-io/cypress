@@ -1,5 +1,5 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
 const platform = window.Cypress.platform
@@ -9,16 +9,6 @@ const renameManualStep = `[data-cy="migration-step renameManual"]`
 const renameSupportStep = `[data-cy="migration-step renameSupport"]`
 const configFileStep = `[data-cy="migration-step configFile"]`
 const setupComponentStep = `[data-cy="migration-step setupComponent"]`
-
-function getPathForPlatform (posixPath: string) {
-  // @ts-ignore
-  const cy = window.Cypress
-  const platform = cy?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
-
-  if (platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
 
 declare global {
   namespace Cypress {
