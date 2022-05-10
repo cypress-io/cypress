@@ -386,7 +386,7 @@ describe('App: Specs', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/filename.cy.js'))
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/spec.cy.js'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
