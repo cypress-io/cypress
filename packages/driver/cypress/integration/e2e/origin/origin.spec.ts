@@ -248,18 +248,12 @@ describe('cy.origin', () => {
           expect(err.codeFrame).to.exist
           expect(err.codeFrame!.frame).to.include('cy.origin')
 
-          // FIXME: Tests that end with a cy.origin command and enqueue no further cy
-          // commands may have origin's unload event bleed into subsequent tests
-          // and prevent stability from being reached, causing those tests to hang.
-          // We execute done after a brief timeout to ensure stability
-          // is reached for the next test. This timeout can be removed with the
-          // completion of: https://github.com/cypress-io/cypress/issues/21300
-          setTimeout(done, 0)
+          done()
         })
 
         const variable = () => {}
 
-        cy.origin('http://idp.com:3500', { args: variable }, (variable) => {
+        cy.origin('http://foobar.com:3500', { args: variable }, (variable) => {
           variable()
         })
       })
