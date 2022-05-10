@@ -5,7 +5,7 @@
     />
 
     <MigrationLandingPage
-      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && query.data.videoEmbedCode"
+      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && query.data.value.videoEmbedCode"
       class="pt-64px"
       @clearLandingPage="showLandingPage = false"
     />
@@ -119,6 +119,7 @@ fragment MainLaunchpadQueryData on Query {
     needsLegacyConfigMigration
     currentTestingType
   }
+  videoEmbedCode
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
