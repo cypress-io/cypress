@@ -132,7 +132,8 @@ export default function (Commands, Cypress, cy) {
 
       function runSetup (existingSession) {
         Cypress.log({
-          name: 'Create New Session',
+          name: 'session',
+          displayName: 'Create New Session',
           state: 'passed',
           event: true,
           type: 'system',
@@ -181,7 +182,8 @@ export default function (Commands, Cypress, cy) {
       // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
       function validateSession (existingSession, _onFail) {
         const validatingLog = Cypress.log({
-          name: 'Validate Session',
+          name: 'session',
+          displayName: 'Validate Session',
           message: '',
           snapshot: false,
           type: 'system',
@@ -192,7 +194,8 @@ export default function (Commands, Cypress, cy) {
 
         const onSuccess = () => {
           validatingLog.set({
-            name: 'Validate Session: valid',
+            name: 'session',
+            displayName: 'Validate Session: valid',
             message: '',
             type: 'system',
             event: true,
@@ -297,7 +300,8 @@ export default function (Commands, Cypress, cy) {
       let hadValidationError = false
       let onValidationError: Function = (err, log) => {
         log.set({
-          name: 'Validate Session: invalid',
+          name: 'session',
+          displayName: 'Validate Session: invalid',
           message: '',
           type: 'system',
           event: true,
@@ -308,7 +312,8 @@ export default function (Commands, Cypress, cy) {
           showError: true,
           type: 'system',
           event: true,
-          name: '',
+          name: 'session',
+          displayName: '',
           message: '',
         })
 
@@ -339,7 +344,7 @@ export default function (Commands, Cypress, cy) {
           .then(() => {
             cy.then(async () => {
               await navigateAboutBlank()
-              Cypress.log({ groupEnd: true, name: '', message: '', emitOnly: true })
+              Cypress.log({ groupEnd: true, name: 'session', message: '', emitOnly: true })
             })
           })
         })
@@ -367,7 +372,8 @@ export default function (Commands, Cypress, cy) {
         }
 
         Cypress.log({
-          name: 'Restore Saved Session',
+          name: 'session',
+          displayName: 'Restore Saved Session',
           event: true,
           state: 'passed',
           type: 'system',
