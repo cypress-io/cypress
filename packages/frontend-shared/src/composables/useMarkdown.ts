@@ -50,12 +50,12 @@ const defaultClasses = {
 const buildClasses = (options) => {
   // --- Normalize + Merge the classes ---
   // Array notation supports a single class or space-delimited classes.
-  // Input: `['bg-pink text-pink-500', 'text-medium']`
-  // Output: `[...defaults, 'bg-pink', 'text-pink-500', 'text-medium']`
+  // Input: `['bg-pink text-fuchsia-500', 'text-medium']`
+  // Output: `[...defaults, 'bg-pink', 'text-fuchsia-500', 'text-medium']`
 
   // String notation is also supported and split by empty space
-  // Input: `'bg-pink text-pink-500'`
-  // Output: `[...defaults, 'bg-pink', text-pink-500']`
+  // Input: `'bg-pink text-fuchsia-500'`
+  // Output: `[...defaults, 'bg-pink', text-fuchsia-500']`
 
   const _classes = defaultClasses // Constant above
 

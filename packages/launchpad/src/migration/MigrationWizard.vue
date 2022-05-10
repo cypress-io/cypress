@@ -1,10 +1,10 @@
 <template>
   <div class="pb-8px">
-    <h1 class="font-medium text-center pt-20px text-32px text-body-gray-900">
+    <h1 class="font-medium text-center pt-20px text-32px text-gray-900">
       {{ t('migration.wizard.title') }}
     </h1>
     <p
-      class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
+      class="mx-42px mt-12px text-center mb-32px text-gray-600 text-18px"
     >
       {{ t('migration.wizard.description') }}
     </p>

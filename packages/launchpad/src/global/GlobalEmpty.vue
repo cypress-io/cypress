@@ -3,7 +3,7 @@
     <h1 class="mb-2 text-2rem">
       {{ t('globalPage.empty.title') }}
     </h1>
-    <p class="mb-6 text-lg font-light text-body-gray">
+    <p class="font-light text-lg mb-6 text-gray-600">
       {{ t('globalPage.empty.helper') }}
     </p>
     <FileDropzone @addProject="emit('addProject', $event)" />

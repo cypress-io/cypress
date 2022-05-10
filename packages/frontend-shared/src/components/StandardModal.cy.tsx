@@ -48,7 +48,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
     })
 
     it('optional classes pass through to the modal root element', () => {
-      const testClass = 'text-pink-400'
+      const testClass = 'text-fuchsia-400'
 
       cy.mount(<StandardModal
         class={`${testClass } w-400px`}

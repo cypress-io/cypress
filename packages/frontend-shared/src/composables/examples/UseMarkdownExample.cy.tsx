@@ -38,12 +38,12 @@ const heres = {
     `
 
     cy.mount(<UseMarkdownExample
-      options={{ classes: { code: ['bg-pink-200 text-pink-600'], pre: ['bg-orange-100', 'text-orange-500'] } }}
+      options={{ classes: { code: ['bg-fuchsia-200 text-fuchsia-600'], pre: ['bg-orange-100', 'text-orange-500'] } }}
       text={text}
     />)
 
     cy.get('ul').should('have.class', 'list-disc')
-    cy.get('code').first().should('have.class', 'bg-pink-200').and('have.class', 'text-pink-600')
+    cy.get('code').first().should('have.class', 'bg-fuchsia-200').and('have.class', 'text-fuchsia-600')
 
     const openExternalStub = cy.stub()
 

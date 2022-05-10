@@ -143,7 +143,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
             Content Header
           </h2>
           <p class="bg-red-500 h-900px">{ text }</p>
-          <p class="bg-green-500">{ bottomText }</p>
+          <p class="bg-jade-500">{ bottomText }</p>
         </div>
       </Collapsible>
     </div>))

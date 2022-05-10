@@ -1,7 +1,5 @@
 // NOTE: All the colors in this file are also temporarily stored in packages/reporter/src/lib/variables.scss, for use in the reporter. If you change any here, please also change them there.
 
-import Colors from 'windicss/colors'
-
 const customColors = {
   jade: {
     50: '#E4FBF2',
@@ -190,19 +188,6 @@ export const cyColors = {
     ...customColors.jade,
     DEFAULT: customColors.jade[500],
   },
-  'body-gray': {
-    ...customColors.gray,
-    DEFAULT: customColors.gray[600],
-  },
 }
 
-// filter out this deprecated color to remove the annoying warning
-const FilteredColors = Object.keys(Colors).reduce((acc, key) => {
-  if (key !== 'lightBlue') {
-    acc[key] = Colors[key]
-  }
-
-  return acc
-}, {})
-
-export const colors = { ...FilteredColors, ...cyColors }
+export const colors = cyColors

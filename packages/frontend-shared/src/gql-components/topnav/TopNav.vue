@@ -59,7 +59,7 @@
       <div class="whitespace-nowrap">
         <ExternalLink
           :href="changelogLink(versions.current.version)"
-          class="font-medium text-amber-800"
+          class="font-medium text-orange-800"
           data-cy="current-version"
         >
           {{ versions.current.version }}
@@ -69,7 +69,7 @@
       </div>
       <template #suffix>
         <span class="rounded-md bg-yellow-100">
-          <span class="p-5px text-amber-800">
+          <span class="p-5px text-orange-800">
             {{ t('topNav.installed') }}
           </span>
         </span>

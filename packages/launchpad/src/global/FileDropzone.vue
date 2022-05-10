@@ -17,7 +17,7 @@
           <i-cy-drag-project_x80
             class="mx-auto h-80px -mb-4px w-80px icon-dark-indigo-500 icon-light-indigo-200"
           />
-          <span class="font-light text-body-gray-700 text-18px">
+          <span class="font-light text-gray-700 text-18px">
             <i18n-t
               scope="global"
               keypath="globalPage.empty.dropText"

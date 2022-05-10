@@ -133,10 +133,10 @@ will be used to target paths and strokes inside the SVG that have the class `ico
 ```jsx
 
 <i-cy-book_x16 class="
-  icon-light-pink-100 
+  icon-light-fuchsia-100 
   icon-dark-purple-500
   hover:icon-light-purple-500
-  hover:icon-dark-pink-100
+  hover:icon-dark-fuchsia-100
 " />
 ```
 
