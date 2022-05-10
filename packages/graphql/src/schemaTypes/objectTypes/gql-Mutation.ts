@@ -602,7 +602,7 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.project.setRelaunchBrowser(true)
+        ctx.project.setRelaunchBrowser(ctx.lifecycleManager.isTestingTypeConfigured(args.testingType))
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 

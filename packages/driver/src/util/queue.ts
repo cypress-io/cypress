@@ -77,7 +77,9 @@ export class Queue<T> {
       // have to go in the opposite direction from outer -> inner
       rejectOuterAndCancelInner = (err) => {
         inner.cancel()
-        reject(err)
+
+        // If this error is thrown after the promise is fulfilled, we still want to throw the error.
+        promise.isPending() ? reject(err) : onError(err)
       }
     })
     .catch(onError)
@@ -103,5 +105,17 @@ export class Queue<T> {
 
   get stopped () {
     return this._stopped
+  }
+
+  /**
+   * Helper function to return the last item in the queue.
+   * @returns The last item or undefined if the queue is empty.
+   */
+  last (): T | undefined {
+    if (this.length < 1) {
+      return undefined
+    }
+
+    return this.at(this.length - 1)
   }
 }

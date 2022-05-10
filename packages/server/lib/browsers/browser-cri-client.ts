@@ -79,12 +79,12 @@ export class BrowserCriClient {
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (port: number, browserName: string, onAsynchronousError: Function): Promise<BrowserCriClient> {
+  static async create (port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CRIWrapper.Client) => void): Promise<BrowserCriClient> {
     await ensureLiveBrowser(port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host: HOST, port })
-      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
+      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
       return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
     }, browserName, port)

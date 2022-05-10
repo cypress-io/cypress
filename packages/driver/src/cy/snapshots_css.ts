@@ -59,7 +59,7 @@ const makePathsAbsoluteToStylesheet = $utils.memoize((styles, href) => {
 }, makePathsAbsoluteToStylesheetCache)
 
 const getExternalCssContents = (href, stylesheet) => {
-  //// some browsers may throw a SecurityError if the stylesheet is cross-domain
+  //// some browsers may throw a SecurityError if the stylesheet is cross-origin
   //// https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
   //// for others, it will just be null
   try {
@@ -164,7 +164,7 @@ export const create = ($$, state) => {
       const href = stylesheet.href
 
       //// if there's an href, it's a link tag
-      //// return the CSS rules as a string, or, if cross-domain,
+      //// return the CSS rules as a string, or, if cross-origin,
       //// a reference to the stylesheet's href
       if (href) {
         return getStyleId(href, stylesheets[href]) || { href }

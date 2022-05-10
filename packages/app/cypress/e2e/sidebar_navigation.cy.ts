@@ -181,7 +181,7 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
-        cy.contains('Not Configured')
+        cy.contains('Configured')
       }).click()
 
       cy.withCtx((ctx) => {
@@ -336,7 +336,7 @@ describe('Sidebar Navigation', () => {
       }).click()
 
       cy.withCtx((ctx) => {
-        expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.coreData.app.relaunchBrowser).eq(false)
         expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })
