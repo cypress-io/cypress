@@ -174,7 +174,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       function restoreSession (existingSession) {
-        Cypress.log({
+        logGroup(Cypress, {
           name: 'session',
           displayName: 'Restore Saved Session',
           event: true,
@@ -182,26 +182,25 @@ export default function (Commands, Cypress, cy) {
           type: 'system',
           message: ``,
           groupStart: true,
-        })
+        }, () => {
+          cy.then(async () => {
+            await navigateAboutBlank()
 
-        return cy.then(async () => {
-          await navigateAboutBlank()
+            _log.set({
+              renderProps: () => {
+                return {
+                  indicator: 'pending',
+                  message: `(saved) ${_log.get().message}`,
+                }
+              },
+            })
 
-          _log.set({
-            renderProps: () => {
-              return {
-                indicator: 'pending',
-                message: `(saved) ${_log.get().message}`,
-              }
-            },
+            dataLog.set({
+              consoleProps: () => getConsoleProps(existingSession),
+            })
+
+            await sessions.setSessionData(existingSession)
           })
-
-          dataLog.set({
-            consoleProps: () => getConsoleProps(existingSession),
-          })
-
-          await sessions.setSessionData(existingSession)
-          Cypress.log({ groupEnd: true, emitOnly: true })
         })
       }
 
@@ -366,7 +365,9 @@ export default function (Commands, Cypress, cy) {
        *   3. if validation fails, catch error and recreate session
        */
       const restoreSessionWorkflow = (existingSession) => {
-        return restoreSession(existingSession)
+        return cy.then(() => {
+          restoreSession(existingSession)
+        })
         .then(() => {
           validateSession(existingSession, onRestoreSessionValidationError)
         })
@@ -412,7 +413,6 @@ export default function (Commands, Cypress, cy) {
         })
         .then(async () => {
           await navigateAboutBlank()
-        // Cypress.log({ groupEnd: true, emitOnly: true })
         })
       })
     },
