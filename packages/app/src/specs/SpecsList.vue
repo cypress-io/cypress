@@ -42,10 +42,15 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex col-span-2 items-center justify-between">
-        <div>{{ t('specPage.lastUpdatedHeader') }}</div>
+        <div>{{ t('specPage.lastUpdated.header') }}</div>
       </div>
       <div class="flex items-center justify-between">
-        <div>{{ t('specPage.latestRunsHeader') }}</div>
+        <SpecHeaderCloudDataTooltip
+          :gql="props.gql"
+          :header-text="t('specPage.latestRuns.header')"
+          :connected-text="t('specPage.latestRuns.tooltip.connected')"
+          :not-connected-text="t('specPage.latestRuns.tooltip.notConnected')"
+        />
       </div>
     </div>
     <!--
@@ -129,6 +134,7 @@
 </template>
 
 <script setup lang="ts">
+import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
@@ -210,10 +216,8 @@ fragment Specs_SpecsList on Query {
     }
     config
     ...SpecPatternModal
-    #cloudProject{
-    #  ...CloudSpecData
-    #}
   }
+  ...SpecHeaderCloudDataTooltip
 }
 `
 

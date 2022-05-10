@@ -121,8 +121,19 @@
     "searchPlaceholder": "Search Specs",
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E specs",
-    "lastUpdatedHeader": "Last updated",
-    "latestRunsHeader": "Latest runs",
+    "lastUpdated": {
+      "header": "Last updated"
+    },
+    "latestRuns": {
+      "header": "Latest runs",
+      "tooltip": {
+        "connected": "Status of the last 4 runs from the Cypress Dashboard",
+        "notConnected": "View the status of the last 4 runs from the Cypress Dashboard"
+      }
+    },
+    "connectProjectButton": "Connect your project",
+    "reconnectProjectButton": "Reconnect your project",
+    "requestAccessButton": "Request access",
     "rows": {
       "gitTooltipSubtext": "{shortHash} by {author}"
     },
