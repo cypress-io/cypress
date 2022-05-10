@@ -6,9 +6,17 @@ import _ from 'lodash'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 import { decodeBase64Unicode } from './decodeBase64'
 
-const getSeparator = () => {
+const getPlatform = () => {
   // @ts-ignore
-  return window.Cypress?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform === 'win32' ? '\\' : '/'
+  return window.Cypress?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
+}
+
+const getRegexSeparator = () => {
+  return getPlatform() === 'win32' ? /\\/ : /\//
+}
+
+const getSeparator = () => {
+  return getPlatform() === 'win32' ? '\\' : '/'
 }
 
 export type FuzzyFoundSpec<T = FoundSpec> = T & {
@@ -33,7 +41,7 @@ export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: Sp
 }
 
 export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
-  const [firstFile, ...rest] = path.split(getSeparator())
+  const [firstFile, ...rest] = path.split(getRegexSeparator())
   const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
 
   if (rest.length < 1) {
