@@ -1,5 +1,8 @@
 #!/bin/bash
-if [ $SKIP_DEPCHECK ] && ! [ $CI ]; then exit 0; fi
+if [ $SKIP_DEPCHECK ]; then
+  echo 'SKIP_DEPCHECK is set, not checking modules.'
+  exit 0
+fi
 
 yarn check --integrity
 
