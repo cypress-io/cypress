@@ -48,7 +48,7 @@ describe('sessionLifecycle', () => {
   it('works', () => {
     getContainerEl()!.innerHTML = sessionLifecycle()
 
-    cy.get('.warn').contains('experimentalSessionSupport')
+    cy.get('.warn').contains('experimentalSessionAndOrigin')
 
     cy.percySnapshot()
   })

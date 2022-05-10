@@ -2,9 +2,7 @@ import { WizardBundler } from './gql-WizardBundler'
 import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
-import { CODE_LANGUAGES } from '@packages/types'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
-import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -30,17 +28,6 @@ export const Wizard = objectType({
       type: WizardFrontendFramework,
       description: 'All of the component testing frameworks to choose from',
       resolve: () => Array.from(WIZARD_FRAMEWORKS), // TODO(tim): fix this in nexus to accept Readonly
-    })
-
-    t.field('language', {
-      type: WizardCodeLanguage,
-      resolve: (source, args, ctx) => CODE_LANGUAGES.find((x) => x.type === ctx.coreData.wizard.chosenLanguage) ?? null,
-    })
-
-    t.nonNull.list.nonNull.field('allLanguages', {
-      type: WizardCodeLanguage,
-      description: 'All of the languages to choose from',
-      resolve: () => Array.from(CODE_LANGUAGES), // TODO(tim): fix this in nexus to accept Readonly
     })
 
     t.nonNull.list.nonNull.field('packagesToInstall', {

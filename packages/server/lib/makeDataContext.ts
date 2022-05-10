@@ -53,6 +53,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
+      relaunchBrowser () {
+        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
+      },
     },
     configApi: {
       allowedConfig: configUtils.allowed,
@@ -122,6 +125,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       getConfig () {
         return openProject.getConfig()
+      },
+      getRemoteStates () {
+        return openProject.getRemoteStates()
       },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,

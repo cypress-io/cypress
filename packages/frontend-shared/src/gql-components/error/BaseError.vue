@@ -120,7 +120,7 @@ import { useMarkdown } from '../../composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
-import BookIcon from '~icons/cy/book_x24'
+import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment BaseError on ErrorWrapper {

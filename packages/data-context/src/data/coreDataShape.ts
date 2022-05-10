@@ -65,9 +65,7 @@ export interface AppDataShape {
 export interface WizardDataShape {
   chosenBundler: typeof WIZARD_BUNDLERS[number] | null
   chosenFramework: typeof WIZARD_FRAMEWORKS[number] | null
-  chosenLanguage: 'js' | 'ts'
   chosenManualInstall: boolean
-  detectedLanguage: 'js' | 'ts' | null
   detectedBundler: typeof WIZARD_BUNDLERS[number] | null
   detectedFramework: typeof WIZARD_FRAMEWORKS[number] | null
 }
@@ -88,6 +86,7 @@ export interface MigrationDataShape {
     hasComponentTesting: boolean
     hasE2ESpec: boolean
     hasPluginsFile: boolean
+    shouldAddCustomE2ESpecPattern: boolean
   }
 }
 
@@ -183,11 +182,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     wizard: {
       chosenBundler: null,
       chosenFramework: null,
-      chosenLanguage: 'js',
       chosenManualInstall: false,
       detectedBundler: null,
       detectedFramework: null,
-      detectedLanguage: null,
     },
     migration: {
       step: 'renameAuto',
@@ -202,6 +199,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
         hasComponentTesting: true,
         hasE2ESpec: true,
         hasPluginsFile: true,
+        shouldAddCustomE2ESpecPattern: false,
       },
     },
     warnings: [],

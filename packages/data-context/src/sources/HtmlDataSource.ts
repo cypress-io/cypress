@@ -35,7 +35,7 @@ export class HtmlDataSource {
         )
       } catch (e) {
         err = e
-        await this.ctx.util.delayMs(1000)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
 
@@ -73,6 +73,16 @@ export class HtmlDataSource {
       }
     } catch {
       // Error getting config, we will show an error screen when we render the page
+    }
+
+    // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
+    // whenever the app is served/re-served
+    if (this.ctx.coreData.currentTestingType === 'e2e') {
+      const remoteStates = this.ctx._apis.projectApi.getRemoteStates()
+
+      if (remoteStates) {
+        cfg.remote = remoteStates.getPrimary()
+      }
     }
 
     cfg.browser = this.ctx._apis.projectApi.getCurrentBrowser()

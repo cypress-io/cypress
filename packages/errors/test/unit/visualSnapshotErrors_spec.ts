@@ -991,6 +991,11 @@ describe('visual error templates', () => {
         default: [{ configFile: '/path/to/cypress.config.js' }],
       }
     },
+    EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],
@@ -1145,6 +1150,16 @@ describe('visual error templates', () => {
     INTEGRATION_FOLDER_REMOVED: () => {
       return {
         default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
+      return {
+        default: ['9.6.0'],
+      }
+    },
+    MIGRATION_CYPRESS_NOT_FOUND: () => {
+      return {
+        default: [],
       }
     },
   })
