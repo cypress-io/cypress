@@ -1,5 +1,5 @@
-import type { Exchange, Client } from '@urql/core'
-import {
+import { pipe, subscribe } from 'wonka'
+import { Exchange, Client, gql,
   createClient,
   dedupExchange,
   errorExchange,
@@ -20,6 +20,7 @@ import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
+import type { DocumentNode } from 'graphql'
 
 const toast = useToast()
 
@@ -28,6 +29,15 @@ export function makeCacheExchange (schema: any = urqlSchema) {
     ...urqlCacheKeys,
     schema,
     updates: {
+      Subscription: {
+        pushFragment (parent, args, cache, info) {
+          const { pushFragment } = parent as { pushFragment: { id?: string, fragment: DocumentNode, data: any, typename: string }[] }
+
+          for (const toPush of pushFragment) {
+            cache.writeFragment(toPush.fragment, toPush.data)
+          }
+        },
+      },
       Mutation: {
         logout (parent, args, cache, info) {
           // Invalidate all queries locally upon logging out, to ensure there's no stale cloud data
@@ -154,6 +164,22 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
   })
 
   await connectPromise
+
+  // https://formidable.com/open-source/urql/docs/advanced/subscriptions/#one-off-subscriptions
+  pipe(
+    client.subscription(gql`
+      subscription urqlClient_PushFragment {
+        pushFragment {
+          target
+          fragment
+          data
+        }
+      }
+    `),
+    subscribe((val) => {
+      // console.log(val)
+    }),
+  )
 
   return client
 }

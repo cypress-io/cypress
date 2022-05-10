@@ -3,6 +3,12 @@ import { EventEmitter } from 'stream'
 
 import type { DataContext } from '../DataContext'
 
+export interface PushFragmentData {
+  data: any
+  target: string
+  fragment: string
+}
+
 abstract class DataEmitterEvents {
   protected pub = new EventEmitter()
 
@@ -72,6 +78,14 @@ abstract class DataEmitterEvents {
    */
   specsChange () {
     this._emit('specsChange')
+  }
+
+  /**
+   * When we want to update the cache with known values from the server, without
+   * triggering a full refresh, we can send down a specific fragment / data to update
+   */
+  pushFragment (toPush: PushFragmentData[]) {
+    this._emit('pushFragment', toPush)
   }
 
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {

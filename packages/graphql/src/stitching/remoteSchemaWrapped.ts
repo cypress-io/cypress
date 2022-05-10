@@ -1,9 +1,13 @@
+import { delegateToSchema } from '@graphql-tools/delegate'
 import { wrapSchema } from '@graphql-tools/wrap'
 import type { DataContext } from '@packages/data-context'
 import type { RequestPolicy } from '@urql/core'
 import assert from 'assert'
+import debugLib from 'debug'
 import { BREAK, OperationDefinitionNode, visit } from 'graphql'
 import { remoteSchema } from './remoteSchema'
+
+const debug = debugLib('cypress:graphql:remoteSchemaWrapped')
 
 export interface RemoteExecutionRoot {
   requestPolicy?: RequestPolicy
@@ -13,14 +17,35 @@ export interface RemoteExecutionRoot {
 // queries we know should be executed against this server
 export const remoteSchemaWrapped = wrapSchema<DataContext>({
   schema: remoteSchema,
+  createProxyingResolver: ({
+    subschemaConfig,
+    operation,
+    transformedSchema,
+  }) => {
+    return (source, args, context, info) => {
+      return delegateToSchema({
+        rootValue: source,
+        schema: subschemaConfig,
+        operation,
+        transformedSchema,
+        context,
+        info,
+      })
+    }
+  },
   executor: (obj) => {
-    assert(obj.context?.cloud, 'Cannot execute without a DataContext')
-    assert(obj.info, 'Cannoy execute without GraphQLResolveInfo')
+    const info = obj.info
 
-    const operationName = obj.context.cloud.makeOperationName(obj.info)
+    assert(obj.context?.cloud, 'Cannot execute without a DataContext')
+    assert(info, 'Cannot execute without GraphQLResolveInfo')
+
+    const operationName = obj.context.cloud.makeOperationName(info)
+    const requestPolicy = ((obj.rootValue ?? {}) as RemoteExecutionRoot).requestPolicy ?? 'cache-first'
+
+    debug('executing: %j', { rootValue: obj.rootValue, operationName, requestPolicy })
 
     return obj.context.cloud.executeRemoteGraphQL({
-      requestPolicy: ((obj.rootValue ?? {}) as RemoteExecutionRoot).requestPolicy ?? 'cache-first',
+      requestPolicy,
       operationType: obj.operationType ?? 'query',
       document: visit(obj.document, {
         OperationDefinition (node) {
@@ -34,6 +59,16 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
         },
       }),
       variables: obj.variables,
+      // When we respond eagerly with a result, but receive an updated value
+      // for the query, we can "push" the data down using the pushFragment subscription
+      onUpdatedResult (result) {
+        obj.context?.graphql.pushResult({
+          result: result[info.fieldName] ?? null,
+          source: obj.rootValue,
+          info,
+          ctx: obj.context,
+        })
+      },
     }) as any
   },
 })

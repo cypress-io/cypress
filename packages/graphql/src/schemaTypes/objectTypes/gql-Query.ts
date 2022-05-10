@@ -1,4 +1,4 @@
-import { objectType } from 'nexus'
+import { idArg, nonNull, objectType } from 'nexus'
 import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -105,6 +105,17 @@ export const Query = objectType({
       description: 'The files that have just been scaffolded',
       type: ScaffoldedFile,
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
+    })
+
+    t.field('node', {
+      type: 'Node',
+      args: {
+        id: nonNull(idArg()),
+      },
+      resolve: (root, args, ctx, info) => {
+        // Cast as any, because this is extremely difficult to type correctly
+        return ctx.node.resolveNode(args.id, info) as any
+      },
     })
   },
   sourceType: {

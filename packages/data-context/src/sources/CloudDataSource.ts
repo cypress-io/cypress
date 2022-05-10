@@ -48,6 +48,7 @@ export interface CloudExecuteQuery {
 export interface CloudExecuteRemote extends CloudExecuteQuery {
   operationType: OperationTypeNode
   requestPolicy?: RequestPolicy
+  onUpdatedResult?: (data: any) => any
 }
 
 export interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
@@ -185,8 +186,13 @@ export class CloudDataSource {
 
     loading = this.#cloudUrqlClient.query(config.document, config.variables, { requestPolicy: 'network-only' }).toPromise().then((op) => {
       this.#pendingPromises.delete(stableKey)
-      if (initialResult && _.isEqual(op.data, initialResult.data)) {
+
+      if (initialResult && !_.isEqual(op.data, initialResult.data)) {
         debug('Different Query Value %j, %j', op.data, initialResult.data)
+
+        if (typeof config.onUpdatedResult === 'function') {
+          config.onUpdatedResult(op.data)
+        }
 
         return op
       }
@@ -237,7 +243,7 @@ export class CloudDataSource {
       // If we have some of the fields, but not the full thing, return what we do have and follow up
       // with an update we send to the client.
       if (eagerResult?.stale || config.requestPolicy === 'cache-and-network') {
-        return this.#maybeQueueDeferredExecute(config, eagerResult)
+        return { ...eagerResult, executing: this.#maybeQueueDeferredExecute(config, eagerResult) }
       }
 
       return eagerResult
