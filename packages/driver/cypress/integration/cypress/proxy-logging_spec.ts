@@ -181,15 +181,22 @@ describe('Proxy Logging', () => {
           }
         })
 
-        const oldOnload = cy.state('server').options.onLoad
+        const xhr = new win.XMLHttpRequest()
 
-        cy.stub(cy.state('server').options, 'onLoad').log(false).callsFake(function (...args) {
-          setTimeout(() => {
-            oldOnload.call(this, ...args)
-          }, 500)
+        const logIncomingRequest = Cypress.ProxyLogging.logIncomingRequest
+        const updateRequestWithResponse = Cypress.ProxyLogging.updateRequestWithResponse
+
+        // To simulate the xhr call landing second, we send updateRequestWithResponse immediately after
+        // the call is intercepted
+        cy.stub(Cypress.ProxyLogging, 'logIncomingRequest').log(false).callsFake(function (...args) {
+          logIncomingRequest.call(this, ...args)
+          updateRequestWithResponse.call(this, {
+            requestId: args[0].requestId,
+            status: 404,
+          })
         })
 
-        const xhr = new win.XMLHttpRequest()
+        cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function () {})
 
         xhr.open('GET', '/some-url')
         xhr.send()
