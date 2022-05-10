@@ -63,7 +63,7 @@ export class ProjectConfigManager {
     return this._state === 'loadingNodeEvents'
   }
 
-  get isReady () {
+  get isFullConfigReady () {
     return this._state === 'ready'
   }
 
@@ -161,7 +161,8 @@ export class ProjectConfigManager {
       assert(this._testingType, 'Cannot setup node events without a testing type')
       this._registeredEventsTarget = this._testingType
       const config = await this.getFullInitialConfig()
-      const setupNodeEventsReply = await this._eventsIpc?.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
+
+      const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
       await this.handleSetupTestingTypeReply(this._eventsIpc, loadConfigReply, setupNodeEventsReply)
       this._state = 'ready'

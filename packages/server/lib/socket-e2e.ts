@@ -138,6 +138,6 @@ export class SocketE2E extends SocketBase {
   close () {
     preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
 
-    super.close()
+    return super.close()
   }
 }
