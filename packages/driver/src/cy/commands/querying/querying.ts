@@ -4,14 +4,25 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
+import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 
+interface InternalGetOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> {
+  _log?: Log
+  _retries?: number
+  filter?: any
+  onRetry?: Function
+  verify?: boolean
+}
+
+interface InternalContainsOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> {
+  _log?: Log
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>
-    get (selector, options: any = {}) {
-      const userOptions = options
+    get (selector, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow> = {}) {
       const ctx = this
 
       if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
@@ -20,7 +31,7 @@ export default (Commands, Cypress, cy, state) => {
         })
       }
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalGetOptions = _.defaults({}, userOptions, {
         retry: true,
         withinSubject: state('withinSubject'),
         log: true,
@@ -28,7 +39,7 @@ export default (Commands, Cypress, cy, state) => {
         verify: true,
       })
 
-      options.includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
+      options.includeShadowDom = resolveShadowDomInclusion(Cypress, options.includeShadowDom)
 
       let aliasObj
       const consoleProps: Record<string, any> = {}
@@ -100,7 +111,7 @@ export default (Commands, Cypress, cy, state) => {
           return consoleProps
         }
 
-        options._log.set(obj)
+        options._log!.set(obj)
       }
 
       let allParts
@@ -263,14 +274,14 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
-        options._log.set({ $el })
+        options._log!.set({ $el })
       }
 
       const getElements = () => {
         let $el
 
         try {
-          let scope = options.withinSubject
+          let scope: (typeof options.withinSubject) | Node[] = options.withinSubject
 
           if (options.includeShadowDom) {
             const root = options.withinSubject ? options.withinSubject[0] : cy.state('document')
@@ -295,7 +306,7 @@ export default (Commands, Cypress, cy, state) => {
               return err
             }
 
-            options._log.error(err)
+            options._log!.error(err)
           }
 
           throw err
@@ -305,7 +316,7 @@ export default (Commands, Cypress, cy, state) => {
         // and we have been explictly told to filter
         // then just attempt to filter out elements from our within subject
         if (!$el.length && options.withinSubject && options.filter) {
-          const filtered = options.withinSubject.filter(selector)
+          const filtered = (options.withinSubject as JQuery).filter(selector)
 
           // reset $el if this found anything
           if (filtered.length) {
@@ -350,10 +361,7 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
-    contains (subject, filter, text, options: any = {}) {
-      let userOptions = options
-
+    contains (subject, filter, text, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow> = {}) {
       // nuke our subject if its present but not an element.
       // in these cases its either window or document but
       // we dont care.
@@ -389,7 +397,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('contains.regex_conflict')
       }
 
-      options = _.defaults({}, userOptions, { log: true, matchCase: true })
+      const options: InternalContainsOptions = _.defaults({}, userOptions, { log: true, matchCase: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
         $errUtils.throwErrByPath('contains.invalid_argument')
@@ -459,7 +467,7 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
-        options._log.set({ $el })
+        options._log!.set({ $el })
       }
 
       // find elements by the :cy-contains psuedo selector

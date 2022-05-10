@@ -59,6 +59,7 @@ type BoundCallbacks = {
   onError: (handlerType) => (event) => undefined
   onHistoryNav: (delta) => void
   onSubmit: (e) => any
+  onLoad: (e) => any
   onBeforeUnload: (e) => undefined
   onUnload: (e) => any
   onNavigation: (...args) => any
@@ -77,6 +78,10 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
 
   addListener(contentWindow, 'error', callbacks.onError('error'))
   addListener(contentWindow, 'unhandledrejection', callbacks.onError('unhandledrejection'))
+
+  addListener(contentWindow, 'load', (e) => {
+    callbacks.onLoad(e)
+  })
 
   addListener(contentWindow, 'beforeunload', (e) => {
     // bail if we've canceled this event (from another source)

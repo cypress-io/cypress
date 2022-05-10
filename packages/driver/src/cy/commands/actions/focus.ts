@@ -4,16 +4,29 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import type { Log } from '../../../cypress/log'
+
+interface InternalFocusOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  $el: JQuery
+  error: boolean
+  verify: boolean
+}
+
+interface InternalBlurOptions extends Partial<Cypress.BlurOptions> {
+  _log?: Log
+  $el: JQuery
+  $focused: JQuery
+  error: boolean
+  verify: boolean
+}
 
 export default (Commands, Cypress, cy) => {
   return Commands.addAll({ prevSubject: ['element', 'window'] }, {
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    focus (subject, options: any = {}) {
-      const userOptions = options
-
+    focus (subject, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       // we should throw errors by default!
       // but allow them to be silenced
-      options = _.defaults({}, userOptions, {
+      const options: InternalFocusOptions = _.defaults({}, userOptions, {
         $el: subject,
         error: true,
         log: true,
@@ -85,13 +98,10 @@ export default (Commands, Cypress, cy) => {
       return verifyAssertions()
     },
 
-    // TODO: any -> Partial<Cypress.BlurOptions>
-    blur (subject, options: any = {}) {
-      const userOptions = options
-
+    blur (subject, userOptions: Partial<Cypress.BlurOptions> = {}) {
       // we should throw errors by default!
       // but allow them to be silenced
-      options = _.defaults({}, userOptions, {
+      const options: InternalBlurOptions = _.defaults({}, userOptions, {
         $el: subject,
         $focused: cy.getFocused(),
         error: true,

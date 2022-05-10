@@ -2,14 +2,17 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
+
+interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
+  _log?: Log
+  cmd?: string
+}
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    // TODO: change the type of `any` to `Partical<Cypress.ExecOptions>`
-    exec (cmd, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    exec (cmd: string, userOptions: Partial<Cypress.ExecOptions> = {}) {
+      const options: InternalExecOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('execTimeout'),
         failOnNonZeroExit: true,
