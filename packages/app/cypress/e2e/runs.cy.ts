@@ -7,8 +7,8 @@ function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component') 
     cy.openProject('component-tests')
     cy.startAppServer('component')
   } else {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad')
+    cy.scaffoldProject('e2e-with-project-id')
+    cy.openProject('e2e-with-project-id')
     cy.startAppServer('e2e')
   }
 
@@ -456,7 +456,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('displays a copy button and copies correct command in Component Testing', () => {
+    it('displays a copy button and copies correct command in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
 
       cy.get('[data-cy="copy-button"]').click()
