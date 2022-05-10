@@ -18,6 +18,7 @@
     </Alert>
     <SpecsListHeader
       v-model="search"
+      :specs-list-input-ref-fn="specsListInputRefFn"
       class="pb-32px"
       :result-count="specs.length"
       :spec-count="cachedSpecs.length"
@@ -246,10 +247,14 @@ const cachedSpecs = useCachedSpecs(
 )
 
 const search = ref('')
+const specsListInputRef = ref<HTMLInputElement>()
 const debouncedSearchString = useDebounce(search, 200)
+
+const specsListInputRefFn = () => specsListInputRef
 
 function handleClear () {
   search.value = ''
+  specsListInputRef.value?.focus()
 }
 
 const specs = computed(() => {

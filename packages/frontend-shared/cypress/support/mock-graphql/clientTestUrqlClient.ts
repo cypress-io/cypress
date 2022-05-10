@@ -43,7 +43,7 @@ export function testUrqlClient (context: ClientTestContext,
                 consoleProps () {
                   return result
                 },
-              }).end()
+              })?.end()
 
               if (mutationResolvers && result.operation.kind === 'mutation') {
                 const firstMutation = result.operation.query.definitions[0]

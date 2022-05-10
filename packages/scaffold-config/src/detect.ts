@@ -1,7 +1,7 @@
 import { WIZARD_FRAMEWORKS, inPkgJson } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
-import fs from 'fs-extra'
+import fs from 'fs'
 import globby from 'globby'
 import type { PkgJson } from '.'
 import Debug from 'debug'
