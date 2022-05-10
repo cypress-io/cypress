@@ -23,6 +23,7 @@ describe('App: Spec List (Component)', () => {
 
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
+    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')
