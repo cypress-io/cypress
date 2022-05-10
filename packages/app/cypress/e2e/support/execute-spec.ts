@@ -26,7 +26,7 @@ export const waitForSpecToFinish = () => {
   cy.contains('Your tests are loading...').should('not.exist')
 
   // Then ensure the tests have finished
-  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 }).should('exist')
+  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
 }
 
 Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)
