@@ -229,6 +229,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
       headers[name.toLowerCase()] = [name, value]
     }
+
+    return this
   }
 
   this.next()

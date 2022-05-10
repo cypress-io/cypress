@@ -351,7 +351,7 @@ let browserCriClient
 export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
 
-  detachedInstance.pid = browserInstance.pid
+  detachedInstance.pid = browserProcess.pid!
 
   // kill the entire process tree, from the spawned instance up
   detachedInstance.kill = (): void => {

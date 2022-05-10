@@ -43,10 +43,6 @@ import { Url } from 'url'
     uri: Url
   }
 
-  interface OutgoingMessage {
-    destroy(error?: Error): this
-  }
-
   export const CRLF: string
 }
 
