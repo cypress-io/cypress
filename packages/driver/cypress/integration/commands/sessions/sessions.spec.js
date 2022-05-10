@@ -111,15 +111,13 @@ describe('cy.session', { retries: 0 }, () => {
         setupTestContext()
         cy.log('create new session to test against')
         cy.session('session-1', setup)
-        .wait(4) // ensure last log clear page has been updated
+        cy.url().should('eq', 'about:blank')
       })
 
       it('successfully creates new session', () => {
-        cy.then(() => {
-          expect(setup).to.be.calledOnce
-          // FIXME: currently page is cleared 3 times when it should clear 2 times
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
-        })
+        expect(setup).to.be.calledOnce
+        // FIXME: currently page is cleared 3 times when it should clear 2 times
+        expect(clearPageCount, 'total times session cleared the page').to.eq(3)
       })
 
       it('groups session logs correctly', () => {
@@ -195,7 +193,7 @@ describe('cy.session', { retries: 0 }, () => {
         cy.log('create new session with validation to test against')
 
         cy.session('session-1', setup, { validate })
-        .wait(4) // ensure last log clear page has been updated
+        cy.url().should('eq', 'about:blank')
       })
 
       it('successfully creates new session and validates it', () => {
@@ -347,7 +345,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session('session-1', setup)
-        .wait(4) // ensure last log clear page has been updated
+        cy.url().should('eq', 'about:blank')
       })
 
       it('successfully restores saved session', () => {
@@ -405,7 +403,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session('session-1', setup, { validate })
-        .wait(4) // ensure last log clear page has been updated
+        cy.url().should('eq', 'about:blank')
       })
 
       it('successfully restores saved session', () => {
@@ -480,7 +478,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         cy.log('restore session to test against')
         cy.session('session-1', setup, { validate })
-        .wait(4) // ensure last log clear page has been updated
+        cy.url().should('eq', 'about:blank')
       })
 
       it('successfully recreates session', () => {
