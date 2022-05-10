@@ -1,6 +1,6 @@
 <template>
   <Tooltip
-    v-if="!skipTooltip"
+    v-if="!disabled"
     :popper-class="{'no-arrow': hideArrow}"
     :popper-triggers="['hover']"
     :hide-triggers="['hover']"
@@ -28,13 +28,13 @@ export type InteractiveHighlightColor = 'INDIGO'|'ORANGE'|'RED'|'GRAY'|'JADE'
 const props = withDefaults(defineProps<{
   color?: string
   hideArrow?: boolean
-  skipTooltip?: boolean
+  disabled?: boolean
   isInteractive?: boolean
   interactiveHighlightColor?: InteractiveHighlightColor
 }>(), {
   color: 'dark',
   hideArrow: false,
-  skipTooltip: false,
+  disabled: false,
   isInteractive: false,
   interactiveHighlightColor: undefined,
 })

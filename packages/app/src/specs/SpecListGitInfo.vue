@@ -6,7 +6,7 @@
     <Tooltip
       placement="top"
       class="h-full grid items-center"
-      :skip-tooltip="!classes.showTooltip"
+      :disabled="!classes.showTooltip"
     >
       <component
         :is="classes.icon"
@@ -27,7 +27,7 @@
       </template>
     </Tooltip>
     <div
-      class="overflow-hidden truncate"
+      class="text-gray-700 overflow-hidden truncate"
     >
       {{ props.gql?.lastModifiedHumanReadable ?? '' }}
     </div>
