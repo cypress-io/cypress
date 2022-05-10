@@ -1693,7 +1693,7 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            SKIP_DEPCHECK=1 \ # skip ensure-dependencies since we only have prod deps here
+            SKIP_DEPCHECK=1 # skip ensure-dependencies since we only have prod deps here \
             yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store-npm-logs
 
@@ -1720,7 +1720,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             CYPRESS_video=false \
-            SKIP_DEPCHECK=1 \ # skip ensure-dependencies since we only have prod deps here
+            SKIP_DEPCHECK=1 # skip ensure-dependencies since we only have prod deps here \
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
