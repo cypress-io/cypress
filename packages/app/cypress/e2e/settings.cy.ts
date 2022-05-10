@@ -96,6 +96,7 @@ describe('App: Settings', () => {
       cy.get('.spec-list-container').scrollTo('bottom')
       // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
+      cy.waitForSpecToFinish()
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
       cy.get(`[href='#/settings']`).click()
