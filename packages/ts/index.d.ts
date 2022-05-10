@@ -18,9 +18,7 @@ import { Url } from 'url'
 
   interface Agent {
     addRequest(req: ClientRequest, options: RequestOptions): void
-    createSocket(req: ClientRequest, options: RequestOptions, cb: SocketCallback): void
     createConnection(options: RequestOptions, cb: Optional<SocketCallback>): void
-    protocol: 'http:' | 'https:' | string
   }
 
   interface ClientRequest {
@@ -38,18 +36,11 @@ import { Url } from 'url'
     href: string
     port: number
     proxy: Optional<string>
-    servername: Optional<string>
     socket: Optional<Socket>
     uri: Url
   }
 
   export const CRLF: string
-}
-
-declare module 'https' {
-  interface Agent {
-    _sessionCache: { [_agentKey: string]: Buffer }
-  }
 }
 
 declare interface InternalStream {
@@ -64,34 +55,9 @@ declare module 'net' {
     address: string
     family: family
   }
-
-  interface Socket {
-    _handle: TCPSocket | null
-  }
-
-}
-
-declare interface Object {
-  assign(...obj: any[]): any
 }
 
 declare type Optional<T> = T | void
-
-declare module 'plist' {
-  interface Plist {
-    parse: (s: string) => any
-  }
-  const plist: Plist
-  export = plist
-}
-
-declare module 'proxy-from-env' {
-  const getProxyForUrl: (url: string) => string
-}
-
-declare interface SymbolConstructor {
-  for(str: string): SymbolConstructor
-}
 
 declare module 'url' {
   interface UrlWithStringQuery {
