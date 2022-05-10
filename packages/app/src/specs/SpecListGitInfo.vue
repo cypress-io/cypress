@@ -6,7 +6,7 @@
     <Tooltip
       placement="top"
       class="h-full grid items-center"
-      :skip-tooltip="!classes.showTooltip"
+      :disabled="!classes.showTooltip"
     >
       <component
         :is="classes.icon"

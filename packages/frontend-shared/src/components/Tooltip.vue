@@ -1,6 +1,6 @@
 <template>
   <Tooltip
-    v-if="!skipTooltip"
+    v-if="!disabled"
     :popper-class="{'no-arrow': hideArrow}"
     :popper-hide-triggers="['hover']"
   >
@@ -18,11 +18,11 @@ import { Tooltip } from 'floating-vue'
 withDefaults(defineProps<{
   color?: string
   hideArrow?: boolean
-  skipTooltip?: boolean
+  disabled?: boolean
 }>(), {
   color: 'dark',
   hideArrow: false,
-  skipTooltip: false,
+  disabled: false,
 })
 
 </script>

@@ -22,7 +22,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
   })
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
@@ -39,8 +39,8 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
   })
 
-  it('shows the "E2E Specs" label as the header for the Spec Name column', () => {
-    cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E Specs')
+  it('shows the "E2E specs" label as the header for the Spec Name column', () => {
+    cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E specs')
   })
 
   it('allows you to search and filter the list of specs in the list', () => {
