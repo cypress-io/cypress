@@ -9,6 +9,15 @@ function smokeTestDockerImage (dockerImage: string) {
     specDir: 'tests',
     project: 'todos',
   })
+
+  systemTests.it(`can run in ${dockerImage}`, {
+    withBinary: true,
+    browser: 'electron',
+    dockerImage,
+    testingType: 'component',
+    project: 'simple-ct',
+    spec: 'src/simple_passing_component.cy.js',
+  })
 }
 
 describe('e2e binary node versions', () => {

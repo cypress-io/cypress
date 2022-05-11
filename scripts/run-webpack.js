@@ -1,3 +1,9 @@
+const cp = require('child_process')
+const path = require('path')
+const semver = require('semver')
+
+const webpackCli = path.join(__dirname, '../node_modules/.bin/webpack-cli')
+
 // https://github.com/cypress-io/cypress/issues/18914
 // Node 17+ ships with OpenSSL 3 by default, so we may need the option
 // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
@@ -8,13 +14,10 @@
 // Can be removed once the webpack version is upgraded to >= 5.61,
 // which no longer relies on Node's builtin crypto.hash function.
 
-const semver = require('semver')
-
-let opts = process.env.NODE_OPTIONS || ''
+let NODE_OPTIONS = process.env.NODE_OPTIONS || ''
 
 if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
-  opts = `${opts} --openssl-legacy-provider`
+  NODE_OPTIONS = `${NODE_OPTIONS} --openssl-legacy-provider`
 }
 
-// eslint-disable-next-line no-console
-console.log(opts)
+cp.execSync(`node ${webpackCli} ${process.argv.slice(2).join(' ')}`, { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS } })
