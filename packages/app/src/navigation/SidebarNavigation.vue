@@ -10,7 +10,7 @@
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       type="button"
       :aria-label="isNavBarExpanded ? t('sidebar.toggleLabel.expanded') : t('sidebar.toggleLabel.collapsed')"
-      data-cy="toggle-sidear"
+      data-cy="toggle-sidebar"
       :aria-expanded="isNavBarExpanded"
       aria-controls="sidebar"
       @click="toggleNavbarIfAllowed"
