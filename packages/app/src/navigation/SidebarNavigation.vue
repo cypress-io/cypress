@@ -66,13 +66,13 @@
               right-0 bottom-0 w-32px duration-300
               inline-block absolute hover:border-gray-500"
           :class="{ '-translate-y-48px': !isNavBarExpanded }"
-          :aria-label="t('sideBar.keyboardShortcuts.title')"
+          :aria-label="t('sidebar.keyboardShortcuts.title')"
           @click="bindingsOpen = true"
         >
           <i-cy-command-key_x16 class="h-16px w-16px icon-dark-gray-500" />
         </button>
         <template #popper>
-          {{ t('sideBar.keyboardShortcuts.title') }}
+          {{ t('sidebar.keyboardShortcuts.title') }}
         </template>
       </Tooltip>
       <KeyboardBindingsModal

@@ -135,7 +135,7 @@
     "defaultMessage": "No results matched your search:",
     "clearSearch": "Clear Search"
   },
-  "sideBar": {
+  "sidebar": {
     "keyboardShortcuts": {
       "title": "Keyboard Shortcuts",
       "rerun": "Re-run tests",
