@@ -108,6 +108,7 @@
       <img
         class="w-16px filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
+        :alt="props.gql?.currentProject?.activeBrowser?.displayName"
         :class="open ? 'grayscale-0' : 'grayscale'"
         :src="allBrowsersIcons[props.gql?.currentProject?.activeBrowser?.displayName] || allBrowsersIcons.generic"
       >
