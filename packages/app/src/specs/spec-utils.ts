@@ -6,7 +6,7 @@ import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/compo
 import { getRunnerConfigFromWindow } from '../runner'
 
 // @ts-ignore
-const platform = getRunnerConfigFromWindow().platform
+const platform = window.Cypress?.platform ?? getRunnerConfigFromWindow().platform
 const regexSeparator = platform === 'win32' ? /\\/ : /\//
 const separator = platform === 'win32' ? '\\' : '/'
 
