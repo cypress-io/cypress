@@ -42,7 +42,7 @@
           :to="item.href"
         >
           <SidebarNavigationRow
-            :data-e2e-href="item.href"
+            :data-cy="item.href"
             :active="isActive"
             :icon="item.icon"
             :name="item.name"
