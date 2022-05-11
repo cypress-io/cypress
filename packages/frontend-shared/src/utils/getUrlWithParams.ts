@@ -5,7 +5,7 @@ export type LinkWithParams = {
 
 export const getUrlWithParams = (link: LinkWithParams) => {
   let result = link.url
-  const hasUtmParams = Object.keys(link.params).find((param) => param.startsWith('utm_'))
+  const hasUtmParams = Object.keys(link.params).some((param) => param.startsWith('utm_'))
 
   if (hasUtmParams) {
     // __CYPRESS_MODE__ is only set on the window in th browser app -
