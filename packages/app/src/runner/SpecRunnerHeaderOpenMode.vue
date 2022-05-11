@@ -18,6 +18,7 @@
           :disabled="isDisabled"
           class="rounded-none border-gray-100 border-r-1px mr-12px"
           variant="text"
+          :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
           <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
@@ -35,6 +36,7 @@
           :disabled="isDisabled"
           class="border-gray-100  mr-12px"
           variant="outline"
+          :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
           <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
