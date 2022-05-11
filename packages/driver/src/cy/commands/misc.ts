@@ -4,6 +4,12 @@ import Promise from 'bluebird'
 import $Command from '../../cypress/command'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
+
+interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+  timeout: number
+}
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'optional' }, {
@@ -49,11 +55,8 @@ export default (Commands, Cypress, cy, state) => {
       return null
     },
 
-    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
-    wrap (arg, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    wrap (arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: InternalWrapOptions = _.defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('defaultCommandTimeout'),
       })
@@ -68,7 +71,7 @@ export default (Commands, Cypress, cy, state) => {
         })
 
         if ($dom.isElement(arg)) {
-          options._log.set({ $el: arg })
+          options._log!.set({ $el: arg })
         }
       }
 

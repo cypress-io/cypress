@@ -9,6 +9,14 @@ const remoteJQueryisNotSameAsGlobal = (remoteJQuery) => {
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (state) => ({
+  $$ (selector, context) {
+    if (context == null) {
+      context = state('document')
+    }
+
+    return $dom.query(selector, context)
+  },
+
   getRemotejQueryInstance (subject) {
     // we make assumptions that you cannot have
     // an array of mixed types, so we only look at

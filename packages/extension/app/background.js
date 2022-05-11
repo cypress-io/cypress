@@ -1,3 +1,4 @@
+const get = require('lodash/get')
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
@@ -16,6 +17,16 @@ const httpRe = /^http/
 // normalize into null when empty array
 const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
+}
+
+const checkIfFirefox = async () => {
+  if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
+    return false
+  }
+
+  const { name } = await browser.runtime.getBrowserInfo()
+
+  return name === 'Firefox'
 }
 
 const connect = function (host, path, extraOpts) {
@@ -44,6 +55,32 @@ const connect = function (host, path, extraOpts) {
         id: `${downloadDelta.id}`,
       })
     })
+  })
+
+  const listenToOnBeforeHeaders = once(() => {
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      if (
+        // parentFrameId: 0 means the parent is the top-level, so if it isn't
+        // 0, it's nested inside the AUT and can't be the AUT itself
+        details.parentFrameId !== 0
+        // isn't an iframe
+        || details.type !== 'sub_frame'
+        // is the spec frame, not the AUT
+        || details.url.includes('__cypress')
+      ) return
+
+      return {
+        requestHeaders: [
+          ...details.requestHeaders,
+          {
+            name: 'X-Cypress-Is-AUT-Frame',
+            value: 'true',
+          },
+        ],
+      }
+    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
   })
 
   const fail = (id, err) => {
@@ -97,11 +134,22 @@ const connect = function (host, path, extraOpts) {
     }
   })
 
-  ws.on('connect', () => {
-    listenToCookieChanges()
-    listenToDownloads()
+  ws.on('automation:config', async (config) => {
+    const isFirefox = await checkIfFirefox()
 
-    return ws.emit('automation:client:connected')
+    listenToCookieChanges()
+    // Non-Firefox browsers use CDP for these instead
+    if (isFirefox) {
+      listenToDownloads()
+
+      if (config.experimentalSessionAndOrigin) {
+        listenToOnBeforeHeaders()
+      }
+    }
+  })
+
+  ws.on('connect', () => {
+    ws.emit('automation:client:connected')
   })
 
   return ws

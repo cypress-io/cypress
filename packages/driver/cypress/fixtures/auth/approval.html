@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <button data-cy="approve-orig">Approve Redirect to originator after auth</button>
+  <button data-cy="approve-me">Approve Redirect to me after auth</button>
+
+  <script>
+    const queryString = location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const token = urlParams.get('token')
+
+    const addTokenToRedirect = (href, jwt) => {
+      const redirectUrl = new URL(href)
+      const redirectUrlParams = new URLSearchParams(redirectUrl.search);
+      redirectUrlParams.append('token', jwt)
+      redirectUrl.search = redirectUrlParams.toString()
+      return redirectUrl.href
+    }
+
+    const getRedirectHref = () => {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      let redirect = urlParams.get('redirect')
+
+      if (redirect){
+        return decodeURIComponent(redirect)
+      }
+
+      return 'http://localhost:3500/fixtures/auth/index.html'
+    }
+
+    if (token) {
+      // Add Login button that redirects to the idp
+      const loginBtn = document.createElement("button");
+      loginBtn.innerHTML = "Login Successful - return to main site"
+      loginBtn.dataset.cy = "login-success"
+      loginBtn.onclick = function () {
+        const redirectHref = getRedirectHref()
+
+        window.location.href = addTokenToRedirect(redirectHref, token)
+      };
+      document.body.appendChild(loginBtn);
+    }
+
+    document.querySelector('[data-cy="approve-orig"]').addEventListener('click', () => {
+
+      const redirectHref = getRedirectHref()
+
+      window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(redirectHref)}`
+    })
+
+    document.querySelector('[data-cy="approve-me"]').addEventListener('click', () => {
+      window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+    })
+  </script>
+</body>
+</html>

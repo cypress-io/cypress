@@ -10,6 +10,7 @@ const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
+
 const httpPorts = [3500, 3501]
 const httpsPort = 3502
 
@@ -25,6 +26,7 @@ const createApp = (port) => {
   })
 
   app.use(require('cors')())
+  app.use(require('cookie-parser')())
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
@@ -33,6 +35,10 @@ const createApp = (port) => {
 
   app.head('/', (req, res) => {
     return res.sendStatus(200)
+  })
+
+  app.get('/', (req, res) => {
+    return res.send('<html><body>root page</body></html>')
   })
 
   app.get('/timeout', (req, res) => {
@@ -127,6 +133,7 @@ const createApp = (port) => {
 
     return res
     .set('WWW-Authenticate', 'Basic')
+    .type('html')
     .sendStatus(401)
   })
 
@@ -186,6 +193,69 @@ const createApp = (port) => {
     return res
     .status(500)
     .send('<html><body>server error</body></html>')
+  })
+
+  const getCookieAdditions = ({ sameSite, secure }) => {
+    let additions = ''
+
+    if (sameSite) additions += `; SameSite=${sameSite}`
+
+    if (secure) additions += '; Secure'
+
+    return additions
+  }
+
+  app.get('/cookie-login', (req, res) => {
+    const { username, redirect } = req.query
+
+    res
+    .header('Set-Cookie', `user=${username}${getCookieAdditions(req.query)}`)
+    .redirect(302, `/verify-cookie-login?username=${username}&redirect=${redirect}`)
+  })
+
+  app.get('/verify-cookie-login', (req, res) => {
+    if (!req.cookies.user) {
+      return res
+      .status(403)
+      .send('<html><body><h1>Not logged in</h1></body></html>')
+    }
+
+    const { username, redirect } = req.query
+
+    res.send(`
+      <html>
+        <body>
+          <h1>Redirecting ${username}...</h1>
+          <script>
+            setTimeout(() => {
+              window.location.href = '${redirect}?username=${username}'
+            }, 1000)
+          </script>
+        </body>
+      </html>
+    `)
+  })
+
+  app.get('/login', (req, res) => {
+    const { username } = req.query
+
+    if (!username) {
+      return res.send('<html><body><h1>Must specify username to log in</h1></body></html>')
+    }
+
+    // can't use res.cookie() because it won't allow setting an invalid
+    // SameSite value, which we want to test
+    res
+    .header('Set-Cookie', `user=${username}${getCookieAdditions(req.query)}`)
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/welcome', (req, res) => {
+    if (!req.cookies.user) {
+      return res.send('<html><body><h1>No user found</h1></body></html>')
+    }
+
+    res.send(`<html><body><h1>Welcome, ${req.cookies.user}!</h1></body></html>`)
   })
 
   let _var = ''

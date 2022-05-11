@@ -96,6 +96,7 @@ describe('App: Settings', () => {
       cy.get('.spec-list-container').scrollTo('bottom')
       // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
+      cy.waitForSpecToFinish()
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
       cy.get(`[href='#/settings']`).click()
@@ -204,10 +205,15 @@ describe('App: Settings', () => {
           })
         })
 
-        cy.get('[data-cy="experiment-experimentalSessionSupport"]').within(() => {
+        cy.get('[data-cy="experiment-experimentalSessionAndOrigin"]').within(() => {
           cy.validateExternalLink({
             name: 'cy.session()',
             href: 'https://on.cypress.io/session',
+          })
+
+          cy.validateExternalLink({
+            name: 'cy.origin()',
+            href: 'https://on.cypress.io/origin',
           })
         })
 
