@@ -950,7 +950,7 @@ export default {
   },
 
   navigation: {
-    cross_origin ({ message, originPolicy, configFile }) {
+    cross_origin ({ message, originPolicy }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
@@ -961,15 +961,18 @@ export default {
 
             > ${originPolicy}
 
+          In order to navigate to a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:
+
+          \`cy.get('.goToAnotherOrigin').click()\`
+          \`cy.origin('${originPolicy}', () => {\`
+          \`  <commands targeting ${originPolicy} go here>\`
+          \`})\`
+
           A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
           A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-          Cypress does not allow you to navigate to a different origin URL within a single test.
-
-          You may need to restructure some of your test code to avoid this problem.
-
-          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(configFile)}.`,
+          Cypress does not allow you to navigate to a different origin URL within a single test without using ${cmd('origin')}.`,
         docsUrl: 'https://on.cypress.io/cross-origin-violation',
       }
     },

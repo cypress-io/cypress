@@ -35,7 +35,7 @@ interface BreakingOption {
   /**
    * Configuration value of the configuration option to check against.
    */
-  value?: string
+  value?: string | boolean
   /**
    * The new configuration key that is replacing the existing configuration key.
    */
@@ -486,6 +486,11 @@ export const breakingOptions: Array<BreakingOption> = [
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
+  }, {
+    name: 'chromeWebSecurity',
+    errorKey: 'CHROME_WEB_SECURITY_DEPRECATED',
+    value: false,
+    isWarning: true,
   }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',

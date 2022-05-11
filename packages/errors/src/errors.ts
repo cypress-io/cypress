@@ -88,6 +88,12 @@ export const AllCypressErrors = {
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
+  CHROME_WEB_SECURITY_DEPRECATED: ({ name, configFile }: { name: string, configFile: string }) => {
+    return errTemplate`\
+      Deprecation Warning: ${fmt.highlight(name)} configuration option will be removed in a future release.
+
+      As of ${fmt.cypressVersion(`9.6.0`)}, ${fmt.code('cy.origin()')} is available to replace ${fmt.highlight(name)}. It is recommended to implement ${fmt.code('cy.origin()')} and remove the ${fmt.highlight(name)} configuration option from ${fmt.highlightTertiary(configFile)}.`
+  },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix: PartialErr | null = null
 
@@ -1078,7 +1084,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
 
-        Since Cypress no longer supports Firefox 85 and below in Cypress ${fmt.cypressVersion(`8.0.0`)}, this option was removed.
+        Since Cypress no longer supports Firefox 85 and below in ${fmt.cypressVersion(`8.0.0`)}, this option was removed.
 
         You can safely remove this option from your config.`
   },

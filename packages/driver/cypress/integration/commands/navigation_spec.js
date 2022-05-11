@@ -2177,11 +2177,14 @@ describe('src/cy/commands/navigation', () => {
               > ${error}\n
             Before the page load, you were bound to the origin policy:\n
               > http://localhost:3500\n
+            In order to navigate to a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
+            \`cy.get('.goToAnotherOrigin').click()\`
+            \`cy.origin('http://localhost:3500', () => {\`
+            \`  <commands targeting http://localhost:3500 go here>\`
+            \`})\`\n
             A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.\n
             A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.\n
-            Cypress does not allow you to navigate to a different origin URL within a single test.\n
-            You may need to restructure some of your test code to avoid this problem.\n
-            Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.`)
+            Cypress does not allow you to navigate to a different origin URL within a single test without using \`cy.origin()\`.`)
 
             expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
           }

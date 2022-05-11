@@ -79,7 +79,7 @@ module.exports = {
   validateNoBreakingConfig: (cfg, onWarning, onErr) => {
     breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
       if (cfg.hasOwnProperty(name)) {
-        if (value && cfg[name] !== value) {
+        if (value !== undefined && cfg[name] !== value) {
           // Bail if a value is specified but the config does not have that value.
           return
         }

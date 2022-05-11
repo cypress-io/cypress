@@ -1,5 +1,6 @@
 exports['config/lib/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "blacklistHosts",
+  "chromeWebSecurity",
   "experimentalComponentTesting",
   "experimentalGetCookiesSameSite",
   "experimentalNetworkStubbing",

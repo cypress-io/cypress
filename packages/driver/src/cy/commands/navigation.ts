@@ -346,7 +346,6 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       $errUtils.throwErrByPath('navigation.cross_origin', {
         onFail: options._log,
         args: {
-          configFile: Cypress.config('configFile'),
           message: err.message,
           originPolicy,
         },

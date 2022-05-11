@@ -1403,6 +1403,16 @@ describe('lib/config', () => {
       })
     })
 
+    it('warns if chromeWebSecurity is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('chromeWebSecurity', false, {
+        chromeWebSecurity: false,
+      })
+
+      expect(warning).to.be.calledWith('CHROME_WEB_SECURITY_DEPRECATED')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/6892
     it('warns if experimentalGetCookiesSameSite is passed', async function () {
       const warning = sinon.spy(errors, 'warning')

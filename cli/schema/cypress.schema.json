@@ -181,7 +181,7 @@
         "chromeWebSecurity": {
           "type": "boolean",
           "default": true,
-          "description": "Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this at https://on.cypress.io/web-security"
+          "description": "DEPRECATED: Please use cy.origin() instead. Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this at https://on.cypress.io/web-security"
         },
         "userAgent": {
           "type": "string",

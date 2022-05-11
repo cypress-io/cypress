@@ -996,6 +996,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    CHROME_WEB_SECURITY_DEPRECATED: () => {
+      return {
+        default: [{ name: 'chromeWebSecurity', configFile: '/path/to/configFile.json' }],
+      }
+    },
     EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
       return {
         default: [{ configFile: '/path/to/configFile.json' }],
