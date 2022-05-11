@@ -36,4 +36,10 @@ describe('App: Spec List (Component)', () => {
     cy.get('button').get('[aria-label="Close"]').click()
     cy.get('[data-cy="standard-modal"]').should('not.exist')
   })
+
+  it('has the correct defaultSpecFileName in the "Create a new spec" modal', () => {
+    cy.get('[data-cy="standard-modal"]').should('not.exist')
+    cy.get('[data-cy="new-spec-button"]').click()
+    cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', 'cypress/component-tests/ComponentName.spec.js')
+  })
 })

@@ -107,12 +107,11 @@ const helpLink = computed(() => {
 })
 
 const specFileName = computed(() => {
-  // const extension = props.gql.currentProject?.fileExtensionToUse ?? 'js'
+  const extension = props.gql.currentProject?.fileExtensionToUse ?? 'js'
 
-  // const fileName = props.gql.currentProject?.defaultSpecFileName ?? (props.gql.currentProject?.currentTestingType === 'e2e' ? `cypress/e2e/spec.cy.${extension}` : `src/ComponentName.spec.${extension}`)
+  const fileName = props.gql.currentProject?.defaultSpecFileName ?? (props.gql.currentProject?.currentTestingType === 'e2e' ? `cypress/e2e/spec.cy.${extension}` : `src/ComponentName.spec.${extension}`)
 
-  // return getPathForPlatform(fileName)
-  return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName)
+  return getPathForPlatform(fileName)
 })
 
 const codeGenGlob = computed(() => {
