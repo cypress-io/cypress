@@ -12,7 +12,7 @@ describe('Sidebar Navigation', () => {
 
     it('can tab through navigation', () => {
       cy.get('body').focus()
-      .tab().should('have.attr', 'aria-label', 'Collapse navigation bar').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'toggle-navbar').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
       .tab().should('have.attr', 'data-cy', 'Specs').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'Runs').should('have.prop', 'tagName', 'BUTTON')
@@ -72,11 +72,10 @@ describe('Sidebar Navigation', () => {
 
     it('highlights indicator on hover showing you can click to expand', () => {
       const navIndicatorSelector = '[data-cy=sidebar-nav-indicator]'
-      const navExpansionToggleSelector = '[aria-label="Collapse navigation bar"]'
 
       cy.get(navIndicatorSelector)
       .should('not.be.visible')
-      .get(navExpansionToggleSelector)
+      .findByTestId('toggle-navbar')
       .realHover()
       .get(navIndicatorSelector)
       .should('be.visible')
@@ -84,43 +83,29 @@ describe('Sidebar Navigation', () => {
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
-      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'true')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
-
-      cy.findByLabelText('Collapse navigation bar', {
-        selector: 'button',
-      }).click()
-
-      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'false')
+      cy.findByTestId('toggle-navbar').click()
       cy.get('@title').should('not.be.visible')
       cy.percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
-      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'true')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
+      cy.findByTestId('toggle-navbar').click()
 
-      cy.findByLabelText('Collapse navigation bar', {
-        selector: 'button',
-      }).click()
-
-      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'false')
       cy.get('@title').should('not.be.visible')
 
       cy.reload()
 
-      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'false')
       cy.findAllByText('todos').should('not.be.visible')
 
       cy.percySnapshot()
     })
 
     it('has menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
-      cy.findByLabelText('Collapse navigation bar', {
-        selector: 'button',
-      }).click().should('have.attr', 'aria-expanded', 'false')
+      cy.findByTestId('toggle-navbar').click()
 
       cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
@@ -137,14 +122,12 @@ describe('Sidebar Navigation', () => {
     })
 
     it('shows a tooltip when hovering over menu item', () => {
-      cy.findByLabelText('Collapse navigation bar', {
-        selector: 'button',
-      }).click().should('have.attr', 'aria-expanded', 'false')
+      cy.findByTestId('toggle-navbar').click()
 
-      cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
+      cy.findByTestId('sidebar-header').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'todos')
       cy.percySnapshot()
-      cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
+      cy.findByTestId('sidebar-header').trigger('mouseout')
 
       cy.findByTestId('Runs').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
@@ -160,19 +143,9 @@ describe('Sidebar Navigation', () => {
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
-      cy.findByLabelText('Collapse navigation bar', {
-        selector: 'button',
-      })
-      .should('have.attr', 'aria-expanded', 'true')
-      .click()
-
+      cy.findByTestId('toggle-navbar').click()
       cy.findAllByText('todos').eq(1).should('not.be.visible')
-
-      cy.findByLabelText('Expand navigation bar', {
-        selector: 'button',
-      })
-      .should('have.attr', 'aria-expanded', 'false')
-
+      cy.findByTestId('toggle-navbar').click()
       cy.findAllByText('todos').eq(1).should('be.visible')
     })
 
