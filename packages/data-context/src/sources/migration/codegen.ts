@@ -385,8 +385,9 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
         const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
         const isDefaultCT = key === 'component' && specPattern === ext
 
-        const restWithoutBreakingKeys = _.omit(rest, getBreakingKeys())
-        const existingWithoutBreakingKeys = _.omit(acc[key], getBreakingKeys())
+        const breakingKeys = getBreakingKeys()
+        const restWithoutBreakingKeys = _.omit(rest, breakingKeys)
+        const existingWithoutBreakingKeys = _.omit(acc[key], breakingKeys)
 
         if (isDefaultE2E || isDefaultCT) {
           return {
