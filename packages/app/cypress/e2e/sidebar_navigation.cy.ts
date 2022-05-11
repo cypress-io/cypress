@@ -200,11 +200,7 @@ describe('Sidebar Navigation', () => {
 
       cy.get('[aria-label="Close"]').click()
       cy.findByText('Choose a testing type').should('not.exist')
-
-      cy.findByLabelText('Collapse sidebar', {
-        selector: 'button',
-      }).click()
-
+      cy.findByTestId('toggle-sidebar').click()
       cy.findByTestId('sidebar-header').click()
       cy.findByText('Choose a testing type').should('be.visible')
     })
@@ -231,7 +227,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
-      cy.findByLabelText('Sidebar').within(() => {
+      cy.findByTestId('sidebar').within(() => {
         cy.findByText('Specs').should('be.visible')
         cy.findByText('Specs').click()
       })
