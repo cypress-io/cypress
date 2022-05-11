@@ -80,13 +80,11 @@ describe('Sidebar Navigation', () => {
     it('highlights indicator on hover showing you can click to expand', () => {
       const navIndicatorSelector = '[data-cy=sidebar-nav-indicator]'
 
-      cy.get(navIndicatorSelector)
-      .should('not.be.visible')
-      .findByTestId('toggle-sidebar')
-      .realHover()
-      .get(navIndicatorSelector)
-      .should('be.visible')
-      .percySnapshot()
+      cy.get(navIndicatorSelector).should('not.be.visible')
+      cy.findByTestId('toggle-sidebar').realHover()
+      cy.get(navIndicatorSelector).should('be.visible')
+
+      cy.percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
