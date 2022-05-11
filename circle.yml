@@ -1641,11 +1641,6 @@ jobs:
           command: |
             yarn launch:test12
           working_directory: npm/cypress-schematic
-      - run:
-          name: Run Sandbox e2e test
-          command: |
-            yarn test:e2e:sandbox12
-          working_directory: npm/cypress-schematic
       - store-npm-logs
 
   npm-release:
