@@ -29,3 +29,14 @@ html {
     height: 0;
   }
 }
+
+// used to style the spec bridge needed for cy.origin.
+iframe.spec-bridge-iframe {
+  border: none;
+  height: 100%;
+  position: fixed;
+  visibility: hidden;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
