@@ -1653,11 +1653,10 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: nx run angular:build
       - run:
           name: Run tests
-          command: yarn test-ci
-          working_directory: npm/angular
+          command: nx run angular:test-ci
       - store_test_results:
           path: npm/angular/test_results
       - store_artifacts:
