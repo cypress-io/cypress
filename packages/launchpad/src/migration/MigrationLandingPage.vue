@@ -9,20 +9,20 @@
       {{ t('migration.landingPage.description') }}
     </p>
 
-    <div class="rounded overflow-hidden mx-auto text-center max-w-80vw w-688px border-4px border-gray-50/50">
+    <div class="rounded overflow-hidden mx-auto text-center max-w-80vw w-688px border-4px border-transparent bg-gray-50/50">
       <div
-        class="bg-white border-4px-gray-500 w-full p-24px video"
+        class="bg-white border-4px-gray-500 w-full p-24px video rounded-t"
         data-cy="video-container"
       >
         <iframe
           src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-          class="h-full w-full"
+          class="h-full w-full rounded"
           frameborder="0"
           allow="autoplay; fullscreen; picture-in-picture"
           allowfullscreen
         />
       </div>
-      <div class="flex bg-gray-50 py-16px px-24px gap-8px">
+      <div class="flex bg-gray-50 py-16px px-24px gap-8px rounded-b overflow-hidden">
         <Button
           class="group"
           size="lg"
