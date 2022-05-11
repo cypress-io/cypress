@@ -9,7 +9,7 @@
       {{ t('migration.landingPage.description') }}
     </p>
 
-    <div class="rounded mx-auto text-center max-w-80vw w-688px">
+    <div class="rounded overflow-hidden mx-auto text-center max-w-80vw w-688px border-4px border-gray-50/50">
       <div
         class="bg-white border-4px-gray-500 w-full p-24px video"
         data-cy="video-container"
@@ -25,6 +25,7 @@
       <div class="flex bg-gray-50 py-16px px-24px gap-8px">
         <Button
           class="group"
+          size="lg"
           @click="handleClick"
         >
           {{ t('migration.landingPage.actionContinue') }}
@@ -35,6 +36,7 @@
         <Button
           href="https://on.cypress.io/changelog"
           variant="outline"
+          size="lg"
         >
           <template #prefix>
             <i-cy-book_x16 class="icon-dark-gray-600" />

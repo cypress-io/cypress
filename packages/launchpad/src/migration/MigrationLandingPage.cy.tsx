@@ -21,7 +21,7 @@ describe('<MigrationLandingPage />', { viewportWidth: 1280, viewportHeight: 720 
 
     cy.mount(<MigrationLandingPage onClearLandingPage={continueStub}/>)
     assertAllTextVisible()
-    assertVideoSize(688, 387)
+    assertVideoSize(680, 408)
     cy.contains('button', text.actionContinue).click()
     cy.wrap(continueStub).should('have.been.calledOnce')
 
@@ -31,12 +31,13 @@ describe('<MigrationLandingPage />', { viewportWidth: 1280, viewportHeight: 720 
   it('is responsive on smaller viewports', () => {
     cy.mount(<MigrationLandingPage/>)
 
-    // asserting a few viewports here since it's prett
+    // asserting a few viewports here since it's pretty easy to accidentally remove aspect ratio css
+    // and not notice right away
     cy.viewport(500, 500)
     assertAllTextVisible()
-    assertVideoSize(400, 225)
+    assertVideoSize(392, 235)
     cy.viewport(600, 600)
-    assertVideoSize(480, 270)
+    assertVideoSize(472, 283)
 
     cy.percySnapshot()
   })
