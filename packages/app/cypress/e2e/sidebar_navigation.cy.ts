@@ -12,7 +12,7 @@ describe('Sidebar Navigation', () => {
 
     it('can tab through navigation', () => {
       cy.get('body').focus()
-      .tab().should('have.attr', 'aria-label', 'toggle navigation').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'aria-label', 'Collapse navigation bar').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
       .tab().should('have.attr', 'data-cy', 'Specs').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'Runs').should('have.prop', 'tagName', 'BUTTON')
@@ -22,12 +22,6 @@ describe('Sidebar Navigation', () => {
 
     it('has no axe violations', () => {
       cy.injectAxe()
-      cy.checkA11y('[data-cy="sidebar"]')
-
-      cy.findByTestId('').click()
-      cy.checkA11y('[data-cy="sidebar"]')
-
-      cy.findByTestId('').click()
       cy.checkA11y('[data-cy="sidebar"]')
     })
   })
@@ -63,7 +57,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('expands the left nav bar by default', () => {
-      cy.findByTestId('toggle-nav').should('have.attr', 'aria-expanded', 'true')
+      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'true')
       cy.percySnapshot()
     })
 
@@ -81,47 +75,45 @@ describe('Sidebar Navigation', () => {
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'true')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
-      cy.findByLabelText('toggle navigation', {
+      cy.findByLabelText('Collapse navigation bar', {
         selector: 'button',
       }).click()
 
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'false')
       cy.get('@title').should('not.be.visible')
       cy.percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'true')
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
 
-      cy.findByLabelText('toggle navigation', {
+      cy.findByLabelText('Collapse navigation bar', {
         selector: 'button',
       }).click()
 
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'false')
       cy.get('@title').should('not.be.visible')
 
       cy.reload()
 
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'false')
       cy.findAllByText('todos').should('not.be.visible')
 
       cy.percySnapshot()
     })
 
-    it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
-      cy.findByLabelText('toggle navigation', {
+    it('has menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
+      cy.findByLabelText('Collapse navigation bar', {
         selector: 'button',
-      }).click()
+      }).click().should('have.attr', 'aria-expanded', 'false')
 
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
-
-      cy.get('[data-cy="keyboard-modal-trigger"]').should('be.visible').click()
+      cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
@@ -136,11 +128,9 @@ describe('Sidebar Navigation', () => {
     })
 
     it('shows a tooltip when hovering over menu item', () => {
-      cy.findByLabelText('toggle navigation', {
+      cy.findByLabelText('Collapse navigation bar', {
         selector: 'button',
-      }).click()
-
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      }).click().should('have.attr', 'aria-expanded', 'false')
 
       cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'todos')
@@ -161,24 +151,23 @@ describe('Sidebar Navigation', () => {
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
-      cy.findByLabelText('toggle navigation', {
+      cy.findByLabelText('Collapse navigation bar', {
         selector: 'button',
-      }).click()
+      })
+      .should('have.attr', 'aria-expanded', 'true')
+      .click()
 
       cy.findAllByText('todos').eq(1).should('not.be.visible')
 
-      cy.findByLabelText('toggle navigation', {
+      cy.findByLabelText('Expand navigation bar', {
         selector: 'button',
-      }).click()
+      })
+      .should('have.attr', 'aria-expanded', 'false')
 
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
       cy.findAllByText('todos').eq(1).should('be.visible')
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
-      cy.visitApp()
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-
       cy.get('[data-cy="sidebar-header"]').within(() => {
         cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
         cy.findByText('todos').should('be.visible')
@@ -223,18 +212,16 @@ describe('Sidebar Navigation', () => {
       cy.get('[aria-label="Close"]').click()
       cy.findByText('Choose a testing type').should('not.exist')
 
-      cy.findByLabelText('toggle navigation', {
+      cy.findByLabelText('Collapse navigation bar', {
         selector: 'button',
       }).click()
 
-      cy.get('[data-cy="sidebar-header"]').click()
+      cy.findByTestId('sidebar-header').click()
       cy.findByText('Choose a testing type').should('be.visible')
     })
 
-    it('has unlabeled menu item that shows the keyboard shortcuts modal (expanded state)', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-
-      cy.get('[data-cy="keyboard-modal-trigger"]').should('be.visible').click()
+    it('has menu item that shows the keyboard shortcuts modal (expanded state)', () => {
+      cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
@@ -247,8 +234,6 @@ describe('Sidebar Navigation', () => {
     })
 
     it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
       cy.findByText('Runs').should('be.visible')
       cy.findByText('Runs').click()
@@ -257,7 +242,6 @@ describe('Sidebar Navigation', () => {
     })
 
     it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
       cy.findByLabelText('Sidebar').within(() => {
         cy.findByText('Specs').should('be.visible')
         cy.findByText('Specs').click()
@@ -268,12 +252,10 @@ describe('Sidebar Navigation', () => {
     })
 
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-
-      cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('not.exist')
+      cy.findByTestId('app-header-bar').findByText('Settings').should('not.exist')
       cy.findByText('Settings').should('be.visible')
       cy.findByText('Settings').click()
-      cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
+      cy.findByTestId('app-header-bar').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
 
@@ -286,9 +268,9 @@ describe('Sidebar Navigation', () => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
       })
 
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 450)
+      cy.findByTestId('reporter-panel').invoke('outerWidth').should('eq', 450)
 
-      cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      cy.findByTestId('panel2ResizeHandle').trigger('mousedown', { eventConstructor: 'MouseEvent' })
       .trigger('mousemove', { clientX: 400 })
       .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 
