@@ -47,7 +47,20 @@ describe('SidebarNavigation', () => {
     mountComponent()
     cy.findByTestId('sidebar-header')
     .should('have.attr', 'aria-label', defaultMessages.testingType.modalTitle)
-    .focus()
     .click()
+    .percySnapshot()
+  })
+
+  it('opens a modal to show keyboard shortcuts', () => {
+    mountComponent()
+
+    cy.findByTestId('keyboard-modal').should('not.exist')
+
+    cy.findByTestId('keyboard-shortcuts')
+    .should('have.attr', 'aria-label', defaultMessages.sideBar.keyboardShortcuts.title)
+    .focus()
+    .type('{enter}')
+
+    cy.findByTestId('keyboard-modal').should('be.visible')
   })
 })

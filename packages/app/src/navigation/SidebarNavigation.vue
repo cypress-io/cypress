@@ -58,6 +58,7 @@
         :skidding="-16"
       >
         <button
+          data-cy="keyboard-shortcuts"
           type="button"
           class="border border-transparent rounded
               cursor-pointer h-32px m-16px
@@ -68,10 +69,7 @@
           :aria-label="t('sideBar.keyboardShortcuts.title')"
           @click="bindingsOpen = true"
         >
-          <i-cy-command-key_x16
-            class="h-16px w-16px icon-dark-gray-500"
-            data-cy="keyboard-shortcuts"
-          />
+          <i-cy-command-key_x16 class="h-16px w-16px icon-dark-gray-500" />
         </button>
         <template #popper>
           {{ t('sideBar.keyboardShortcuts.title') }}

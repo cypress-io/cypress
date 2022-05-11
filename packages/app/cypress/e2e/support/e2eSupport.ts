@@ -1,5 +1,4 @@
 import '@packages/frontend-shared/cypress/e2e/support/e2eSupport'
 import 'cypress-real-events/support'
 import './execute-spec'
-
-require('cypress-plugin-tab')
+import 'cypress-plugin-tab'
