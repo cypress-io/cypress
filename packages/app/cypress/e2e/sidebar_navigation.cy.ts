@@ -25,14 +25,14 @@ describe('Sidebar Navigation', () => {
       cy.checkA11y('[data-cy="sidebar"]')
     })
 
-    it('uses appropriate aria attributes', () => {
+    it('has appropriate aria attributes', () => {
       cy.findByTestId('toggle-sidebar')
       .should('have.attr', 'aria-controls', 'sidebar')
       .should('have.attr', 'aria-expanded', 'true')
-      .should('have.attr', 'aria-label', 'Collapse navigation bar')
+      .should('have.attr', 'aria-label', 'Collapse sidebar')
       .click()
       .should('have.attr', 'aria-expanded', 'false')
-      .should('have.attr', 'aria-label', 'Expand navigation bar')
+      .should('have.attr', 'aria-label', 'Expand sidebar')
 
       cy.findByTestId('keyboard-modal-trigger')
       .should('have.attr', 'aria-label', 'Keyboard Shortcuts')
@@ -201,7 +201,7 @@ describe('Sidebar Navigation', () => {
       cy.get('[aria-label="Close"]').click()
       cy.findByText('Choose a testing type').should('not.exist')
 
-      cy.findByLabelText('Collapse navigation bar', {
+      cy.findByLabelText('Collapse sidebar', {
         selector: 'button',
       }).click()
 
