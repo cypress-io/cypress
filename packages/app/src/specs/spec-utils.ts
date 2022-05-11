@@ -5,7 +5,8 @@ import _ from 'lodash'
 import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import { getRunnerConfigFromWindow } from '../runner'
 
-const platform = getRunnerConfigFromWindow().platform
+// @ts-ignore
+const platform = window.Cypress?.platform ?? getRunnerConfigFromWindow().platform
 const regexSeparator = platform === 'win32' ? /\\/ : /\//
 const separator = platform === 'win32' ? '\\' : '/'
 
