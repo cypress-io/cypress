@@ -93,8 +93,12 @@ export const mutation = mutationType({
       resolve: (_, args, ctx) => {
         let url = args.url
 
+        // the `port` param is included in external links to create a cloud organization
+        // so that the app can be notified when the org has been created
         if (args.includeGraphqlPort && process.env.CYPRESS_INTERNAL_GRAPHQL_PORT) {
-          url = `${args.url}?port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`
+          const joinCharacter = args.url.includes('?') ? '&' : '?'
+
+          url = `${args.url}${joinCharacter}port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`
         }
 
         ctx.actions.electron.openExternal(url)
