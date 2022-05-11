@@ -13,11 +13,4 @@ describe('KeyboardBindingsModal', () => {
       cy.contains(text).should('be.visible')
     })
   })
-
-  context('accessibility', () => {
-    it('has no axe violations', () => {
-      cy.injectAxe()
-      cy.checkA11y()
-    })
-  })
 })
