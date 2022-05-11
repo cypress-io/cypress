@@ -19,6 +19,11 @@ describe('Sidebar Navigation', () => {
       .tab().should('have.attr', 'data-cy', 'Settings').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'aria-label', 'Keyboard Shortcuts').should('have.prop', 'tagName', 'BUTTON')
     })
+
+    it('has no axe violations', () => {
+      cy.injectAxe()
+      cy.checkA11y('[data-cy="sidebar"]')
+    })
   })
 
   context('as e2e testing type with localSettings', () => {
