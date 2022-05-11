@@ -5,13 +5,15 @@
     :disabled="isNavBarExpanded"
     :distance="8"
   >
-    <button
-      type="button"
+    <div
+      role="button"
       class="border-b cursor-pointer flex border-gray-900 flex-shrink-0 h-64px pl-20px transition-all duration-300 items-center hover:bg-gray-900"
       :popper-top-offset="4"
       popper-class="h-56px"
       data-cy="sidebar-header"
+      tabindex="0"
       @click="showModal = true"
+      @keydown.enter="showModal = true"
     >
       <SwitchTestingTypeModal
         :show="showModal"
@@ -27,26 +29,20 @@
             children:transition
             children:duration-300"
       />
-      <span class="text-gray-50 text-size-16px leading-24px truncate">
+      <div class="text-gray-50 text-size-16px leading-24px truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <span
-          v-if="props.gql.currentProject?.branch"
-          class="text-gray-600 text-size-14px leading-20px truncate"
-        >
+        <p class="text-gray-600 text-size-14px leading-20px truncate">
           {{ props.gql.currentProject?.branch }}
-        </span>
-      </span>
-    </button>
+        </p>
+      </div>
+    </div>
     <template #popper>
-      <span class="text-left text-gray-50 text-size-16px leading-16px truncate">
+      <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <span
-          v-if="props.gql.currentProject?.branch"
-          class="text-gray-600 text-size-14px leading-20px truncate"
-        >
+        <p class="text-gray-600 text-size-14px leading-20px truncate">
           {{ props.gql.currentProject?.branch }}
-        </span>
-      </span>
+        </p>
+      </div>
     </template>
   </Tooltip>
 </template>
