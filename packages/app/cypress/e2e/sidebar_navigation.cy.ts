@@ -242,16 +242,14 @@ describe('Sidebar Navigation', () => {
 
     it('resize nav sends the correct value on the mutation', () => {
       cy.contains('fixture.js').click()
-
       cy.get('.toggle-specs-text').click()
-
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
       })
 
-      cy.findByTestId('reporter-panel').invoke('outerWidth').should('eq', 450)
+      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').should('eq', 450)
 
-      cy.findByTestId('panel2ResizeHandle').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      cy.get('[data-cy="panel2ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
       .trigger('mousemove', { clientX: 400 })
       .trigger('mouseup', { eventConstructor: 'MouseEvent' })
 
@@ -263,7 +261,6 @@ describe('Sidebar Navigation', () => {
     // TODO: Remove skip when we fix cy.reload() in Cypress in Cypress - UNIFY-1346
     it.skip('resize nav and persist the state after refresh', () => {
       cy.contains('fixture.js').click()
-
       cy.get('.toggle-specs-text').click()
 
       cy.withCtx((ctx, o) => {
