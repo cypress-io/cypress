@@ -4,24 +4,13 @@ import path from 'path'
 import { addToCypressConfigPlugin } from '../../src/ast-utils/addToCypressConfigPlugin'
 import { addComponentDefinition } from '../../src/ast-utils/astConfigHelpers'
 
-// pluginTester({
-//   pluginName: 'addToCypressConfigPlugin: component',
-//   plugin: () => {
-//     return addToCypressConfigPlugin(
-//       addComponentDefinition({ testingType: 'component', framework: 'react', bundler: 'webpack' }),
-//       { shouldThrow: false },
-//     )
-//   },
-//   fixtures: path.join(__dirname, '..', '__babel_fixtures__', 'adding-component'),
-// })
-
 pluginTester({
-  pluginName: 'addToCypressConfigPlugin: component with webpack config',
+  pluginName: 'addToCypressConfigPlugin: component',
   plugin: () => {
     return addToCypressConfigPlugin(
       addComponentDefinition({ testingType: 'component', framework: 'react', bundler: 'webpack' }),
       { shouldThrow: false },
     )
   },
-  fixtures: path.join(__dirname, '..', '__babel_fixtures__', 'adding-component-webpack-config'),
+  fixtures: path.join(__dirname, '..', '__babel_fixtures__', 'adding-component'),
 })

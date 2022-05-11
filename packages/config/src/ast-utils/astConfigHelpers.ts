@@ -27,7 +27,7 @@ export function addE2EDefinition (): t.ObjectProperty {
 export interface ASTComponentDefinitionConfig {
   testingType: 'component'
   bundler: 'vite' | 'webpack'
-  webpackConfig?: string
+  webpackConfigPath?: string;
   framework?: string
 }
 
@@ -42,7 +42,7 @@ export interface ASTComponentDefinitionConfig {
  * }
  */
 export function addComponentDefinition (config: ASTComponentDefinitionConfig): t.ObjectProperty {
-  if (config.webpackConfig) {
+  if (config.webpackConfigPath) {
     return extractProperty(`
       const toMerge = {
         component: {
@@ -63,7 +63,7 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
           framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
           bundler: '${config.bundler}',
           // provide your webpack config here...
-          // webpackConfig: /* ... */
+          // webpackConfig,
         },
       },
     }
@@ -98,22 +98,45 @@ function extractProperty (str: string) {
   return toAdd
 }
 
-export interface ASTModuleDefinitionConfig {
-  kind: 'ES' | 'CommonJS'
-  file: string
+interface ESModuleToAdd {
+  node: t.ImportDeclaration
+  type: 'ES'
 }
 
-export function addModuleDefinition(config: ASTModuleDefinitionConfig): t.ImportDeclaration {
-  return t.importDeclaration(
-    [t.importDefaultSpecifier(t.identifier("webpackConfig"))],
-    t.stringLiteral(config.file)
-  );
+interface CommonJSModuleToAdd {
+  node: t.Statement
+  type: 'CommonJS'
 }
 
-export function addCommonJSDefinition(file: string): t.File {
+export type ModuleToAdd = ESModuleToAdd | CommonJSModuleToAdd
+
+/**
+ * AST definition Node for:
+ *
+ * import webpackConfig from <file>
+ */
+export function addESModuleDefinition(file: string): ESModuleToAdd {
+  return {
+    node: t.importDeclaration(
+      [t.importDefaultSpecifier(t.identifier("webpackConfig"))],
+      t.stringLiteral(file)
+    ),
+    type: 'ES',
+  }
+}
+
+/**
+ * AST definition Node for:
+ *
+ * const webpackConfig = require(<file>)
+ */
+export function addCommonJSModuleDefinition(file: string): CommonJSModuleToAdd {
   const parsed = parse(`const webpackConfig = require('${file}')`, {
     parser: require('recast/parsers/typescript'),
   })
 
-  return parsed as t.File
+  return {
+    node: parsed as t.Statement,
+    type: 'CommonJS',
+  }
 }

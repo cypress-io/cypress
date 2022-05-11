@@ -6,8 +6,8 @@ import path from 'path'
 import debugLib from 'debug'
 import { parse, print } from 'recast'
 
-import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
-import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
+import { addCommonJSModuleImportToCypressConfigPlugin, addESModuleImportToCypressConfigPlugin, addToCypressConfigPlugin } from './addToCypressConfigPlugin'
+import { addCommonJSModuleDefinition, addComponentDefinition, addE2EDefinition, addESModuleDefinition, ASTComponentDefinitionConfig, ModuleToAdd } from './astConfigHelpers'
 
 const debug = debugLib('cypress:config:addToCypressConfig')
 
@@ -40,13 +40,27 @@ const debug = debugLib('cypress:config:addToCypressConfig')
  *      ...createConfigFn()
  *    }
  */
-export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
+export async function addToCypressConfig (filePath: string, code: string, toAdd: {
+  properties?: t.ObjectProperty[],
+  modules?: ModuleToAdd[],
+}) {
   try {
     const ast = parse(code, {
       parser: require('recast/parsers/typescript'),
     })
 
-    traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
+    for (const prop of toAdd.properties ?? []) {
+      traverse(ast, addToCypressConfigPlugin(prop).visitor)
+    }
+
+    for (const mod of toAdd.modules ?? []) {
+      if (mod.type === 'ES') {
+        traverse(ast, addESModuleImportToCypressConfigPlugin(mod.node).visitor)
+      } else if (mod.type === 'CommonJS') {
+        console.log(print(ast).code, print(mod.node).code)
+        traverse(ast, addCommonJSModuleImportToCypressConfigPlugin(mod.node).visitor)
+      }
+    }
 
     return print(ast).code
   } catch (e) {
@@ -63,10 +77,14 @@ export interface AddProjectIdToCypressConfigOptions {
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
     let result = await fs.readFile(options.filePath, 'utf8')
-    const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
-      t.identifier('projectId'),
-      t.identifier(options.projectId),
-    ))
+    const toPrint = await addToCypressConfig(options.filePath, result, {
+      properties: [
+        t.objectProperty(
+          t.identifier('projectId'),
+          t.identifier(options.projectId),
+        ),
+      ]
+    })
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 
@@ -95,29 +113,17 @@ export interface AddTestingTypeToCypressConfigOptions {
   }
 }
 
-function tryToFindWebpackConfig (projectPath: string) {
-  const p = path.join(projectPath, 'webpack.config.js')
-  if (fs.existsSync(p)) {
-    return p
-  }
-  return undefined
-}
-
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
-  let toAdd: t.ObjectProperty | undefined
-  const imports: string[] = []
+  const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
 
-  if (options.info.testingType === 'component') {
-    const projectPath = path.dirname(options.filePath)
-    const webpackConfig = options.info.webpackConfig ?? tryToFindWebpackConfig(projectPath)
-    toAdd = addComponentDefinition({ ...options.info, webpackConfig })
+  const modulesToAdd: ModuleToAdd[] = []
 
-    if (webpackConfig) {
-      // if ()
-      imports.push(webpackConfig)
+  if (options.info.testingType === 'component' && options.info.webpackConfigPath) {
+    if (options.isProjectUsingESModules) {
+      modulesToAdd.push(addESModuleDefinition(options.info.webpackConfigPath))
+    } else {
+      modulesToAdd.push(addCommonJSModuleDefinition(options.info.webpackConfigPath))
     }
-  } else {
-    toAdd = addE2EDefinition()
   }
 
   try {
@@ -139,8 +145,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
       result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules })
     }
 
-    // const i = t.import
-    const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
+    const toPrint = await addToCypressConfig(options.filePath, result, { properties: [toAdd], modules: modulesToAdd })
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 

@@ -232,13 +232,15 @@ export function addESModuleImportToCypressConfigPlugin (toAdd: t.ImportDeclarati
         const lastImport = last(path.get('body').filter(p => p.isImportDeclaration()));
         if (lastImport) {
           lastImport.insertAfter(toAdd)
+        } else {
+          path.get('body')?.[0]?.insertBefore(toAdd)
         }
       }
     }
   }
 }
 
-export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.File, opts: AddToCypressConfigPluginOptions = {}): PluginObj<any> {
+export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.Statement, opts: AddToCypressConfigPluginOptions = {}): PluginObj<any> {
   let lastRequireBeforeModuleExports: number
   let lastSeenRequire: number
 
@@ -264,12 +266,12 @@ export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.File, opt
              *                     <------- Insert it here 
              * module.exports = {}
              */
-            n.insertAfter(toAdd.program.body)
+            n.insertAfter(toAdd)
           } else {
             /**
              * Otherwise just put it at the top of the module.
              */
-            body.insertBefore(toAdd.program.body)
+            body.insertBefore(toAdd)
           }
         }
       },
@@ -280,7 +282,6 @@ export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.File, opt
           }
         }
       },
-      
       AssignmentExpression (path) {
         if (t.isMemberExpression(path.node.left) && isModuleExports(path.node.left)) {
           lastRequireBeforeModuleExports = lastSeenRequire
