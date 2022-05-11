@@ -59,7 +59,7 @@
         :skidding="-16"
       >
         <button
-          data-cy="keyboard-shortcuts"
+          data-cy="keyboard-modal-trigger"
           type="button"
           class="border border-transparent rounded
               cursor-pointer h-32px m-16px

@@ -61,7 +61,7 @@ describe('SidebarNavigation', () => {
 
     cy.findByTestId('keyboard-modal').should('not.exist')
 
-    cy.findByTestId('keyboard-shortcuts')
+    cy.findByTestId('keyboard-modal-trigger')
     .should('have.attr', 'aria-label', defaultMessages.sidebar.keyboardShortcuts.title)
     .focus()
     .type('{enter}')

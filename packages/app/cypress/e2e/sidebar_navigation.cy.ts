@@ -23,6 +23,12 @@ describe('Sidebar Navigation', () => {
     it('has no axe violations', () => {
       cy.injectAxe()
       cy.checkA11y('[data-cy="sidebar"]')
+
+      cy.findByTestId('').click()
+      cy.checkA11y('[data-cy="sidebar"]')
+
+      cy.findByTestId('').click()
+      cy.checkA11y('[data-cy="sidebar"]')
     })
   })
 
@@ -115,8 +121,7 @@ describe('Sidebar Navigation', () => {
 
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
-      cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
-      cy.get('[data-cy="keyboard-shortcuts"]').click()
+      cy.get('[data-cy="keyboard-modal-trigger"]').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
@@ -229,8 +234,7 @@ describe('Sidebar Navigation', () => {
     it('has unlabeled menu item that shows the keyboard shortcuts modal (expanded state)', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-      cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
-      cy.get('[data-cy="keyboard-shortcuts"]').click()
+      cy.get('[data-cy="keyboard-modal-trigger"]').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
