@@ -1,6 +1,8 @@
 <template>
   <div class="flex w-full gap-16px relative">
     <Input
+      id="spec-filter"
+      :input-ref="props.specsListInputRefFn"
       type="search"
       class="flex-grow h-full min-w-200px"
       prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
@@ -46,7 +48,11 @@
   </div>
 </template>
 
+<script lang="ts">
+</script>
+
 <script lang="ts" setup>
+import type { Ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
@@ -59,9 +65,11 @@ const props = withDefaults(defineProps<{
   modelValue: string
   resultCount?: number
   specCount?: number
+  specsListInputRefFn?: () => Ref<HTMLInputElement | undefined>
 }>(), {
   resultCount: 0,
   specCount: 0,
+  specsListInputRefFn: undefined,
 })
 
 const emit = defineEmits<{

@@ -42,8 +42,7 @@ export default function (Commands, Cypress, cy, state) {
   })
 
   return Commands.addAll({ type: 'utility' }, {
-    // TODO: change the options type from `any` to Partial<Loggable>.
-    clock (subject, now, methods, options: any = {}) {
+    clock (subject, now, methods, options: Partial<Cypress.Loggable> = {}) {
       let userOptions = options
       const ctx = state('ctx')
 

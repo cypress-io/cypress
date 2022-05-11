@@ -1,5 +1,5 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
 const platform = window.Cypress.platform
@@ -9,16 +9,6 @@ const renameManualStep = `[data-cy="migration-step renameManual"]`
 const renameSupportStep = `[data-cy="migration-step renameSupport"]`
 const configFileStep = `[data-cy="migration-step configFile"]`
 const setupComponentStep = `[data-cy="migration-step setupComponent"]`
-
-function getPathForPlatform (posixPath: string) {
-  // @ts-ignore
-  const cy = window.Cypress
-  const platform = cy?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
-
-  if (platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
 
 declare global {
   namespace Cypress {
@@ -213,30 +203,28 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       checkOutcome()
     })
 
-    it('renames only the folder renaming migration-e2e-component-default-everything', () => {
-      startMigrationFor('migration-e2e-component-default-everything')
+    it('renames only the folder renaming migration-e2e-defaults-rename-folder-only', () => {
+      startMigrationFor('migration-e2e-defaults-rename-folder-only')
       // default testFiles - auto
       cy.get(renameAutoStep).should('exist')
-      cy.get(renameManualStep).should('exist')
+      cy.get(renameManualStep).should('not.exist')
       // supportFile is false - cannot migrate
       cy.get(renameSupportStep).should('exist')
-      cy.get(setupComponentStep).should('exist')
+      cy.get(setupComponentStep).should('not.exist')
       cy.get(configFileStep).should('exist')
 
       // Migration workflow
       // before auto migration
-      cy.contains('cypress/integration/foo.spec.ts')
-      cy.contains('cypress/component/button.spec.js')
 
       // after auto migration
-      cy.contains('cypress/e2e/foo.cy.ts')
-      cy.contains('cypress/component/button.cy.js')
 
       cy.get('[data-cy="migrate-before"]').within(() => {
+        cy.contains('cypress/integration/foo.spec.js')
         cy.get('.text-red-500').should('contain', 'spec')
       })
 
       cy.get('[data-cy="migrate-after"]').within(() => {
+        cy.contains('cypress/e2e/foo.cy.js')
         cy.get('.text-jade-500').should('contain', 'cy')
       })
 
@@ -263,15 +251,11 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
       cy.findByText('Rename the folder for me').click()
 
-      // move component specs later
-      skipCTMigration()
-
       cy.wait(100)
 
       cy.withCtx(async (ctx) => {
         const specs = [
-          'cypress/e2e/foo.spec.ts',
-          'cypress/component/button.spec.js',
+          'cypress/e2e/foo.spec.js',
         ]
 
         for (const spec of specs) {
@@ -283,7 +267,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
       renameSupport()
       migrateAndVerifyConfig()
-      finishMigrationAndContinue()
       checkOutcome()
     })
   })

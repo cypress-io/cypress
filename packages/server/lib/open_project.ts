@@ -39,6 +39,10 @@ export class OpenProject {
     return this.projectBase?.getConfig()
   }
 
+  getRemoteStates () {
+    return this.projectBase?.remoteStates
+  }
+
   getProject () {
     return this.projectBase
   }
@@ -78,6 +82,7 @@ export class OpenProject {
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
+      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
     })
 
     // if we don't have the isHeaded property

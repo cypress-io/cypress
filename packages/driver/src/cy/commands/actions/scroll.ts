@@ -5,6 +5,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
+import type { Log } from '../../../cypress/log'
 
 const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)
@@ -28,12 +29,26 @@ const isNaNOrInfinity = (item) => {
   return _.isNaN(num) || !_.isFinite(num)
 }
 
+interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
+  _log?: Log
+  $el: JQuery
+  $parent: any
+  axis: string
+  offset?: object
+}
+
+interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
+  _log?: Log
+  $el: any
+  x: number
+  y: number
+  error?: any
+  axis: string
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    // TODO: any -> Partial<Cypress.ScrollToOptions>
-    scrollIntoView (subject, options: any = {}) {
-      const userOptions = options
-
+    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
       if (!_.isObject(userOptions)) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_argument', { args: { arg: userOptions } })
       }
@@ -49,7 +64,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollIntoView.multiple_elements', { args: { num: subject.length } })
       }
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalScrollIntoViewOptions = _.defaults({}, userOptions, {
         $el: subject,
         $parent: state('window'),
         log: true,
@@ -115,9 +130,6 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
-          // TODO: done() came from jQuery animate(), specifically, EffectsOptions at misc.d.ts
-          // The type definition should be fixed at @types/jquery.scrollto.
-          // @ts-ignore
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,
@@ -157,10 +169,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window'] }, {
-    // TODO: any -> Partial<Cypress.ScrollToOptions>
-    scrollTo (subject, xOrPosition, yOrOptions, options: any = {}) {
+    scrollTo (subject, xOrPosition, yOrOptions, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
       let x; let y
-      let userOptions = options
 
       // check for undefined or null values
       if (xOrPosition === undefined || xOrPosition === null) {
@@ -261,7 +271,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollTo.multiple_containers', { args: { num: $container.length } })
       }
 
-      options = _.defaults({}, userOptions, {
+      const options: InternalScrollToOptions = _.defaults({}, userOptions, {
         $el: $container,
         log: true,
         duration: 0,
@@ -361,10 +371,7 @@ export default (Commands, Cypress, cy, state) => {
 
       const scrollTo = () => {
         return new Promise((resolve, reject) => {
-          // scroll our axis'
-          // TODO: done() came from jQuery animate(), specifically, EffectsOptions at misc.d.ts
-          // The type definition should be fixed at @types/jquery.scrollto.
-          // @ts-ignore
+          // scroll our axis
           $(options.$el).scrollTo({ left: x, top: y }, {
             axis: options.axis,
             easing: options.easing,

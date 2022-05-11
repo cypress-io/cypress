@@ -15,10 +15,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('test component', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('TestComponent.spec')
-      })
-
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.findByTestId('aut-url').should('not.exist')
@@ -29,7 +26,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       snapshotAUTPanel('browsers open')
       cy.contains('Canary').should('be.hidden')
-      cy.contains('The viewport determines the width and height of your application. By default the viewport will be 500px by 500px for Component Testing unless specified by a cy.viewport command.')
+      cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for component testing.')
       .should('be.visible')
 
       snapshotAUTPanel('viewport info open')
@@ -61,6 +58,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('navigation between specs and other parts of the app works', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Settings page and back to spec runner
@@ -68,6 +66,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Runs page and back to spec runner
@@ -75,6 +74,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(defaultMessages.runs.connect.title).should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
     })
 
@@ -122,6 +122,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('browser picker in runner calls mutation with current spec path', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.withCtx((ctx, o) => {
@@ -154,7 +155,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.withCtx(async (ctx, { sinon }) => {
         ctx.coreData.app.browserStatus = 'open'
 
-        sinon.spy(ctx.actions.project, 'initializeActiveProject')
+        sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
         const config = await ctx.file.readFileInProject('cypress.config.js')
         const newCypressConfig = config.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
@@ -176,6 +177,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
@@ -187,6 +189,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.window().then((win) => {
