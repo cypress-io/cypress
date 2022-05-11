@@ -1,7 +1,7 @@
 <template>
   <HideDuringScreenshot
+    id="sidebar"
     data-cy="sidebar"
-    :aria-expanded="isNavBarExpanded"
     class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
@@ -10,6 +10,8 @@
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       type="button"
       aria-label="toggle navigation"
+      :aria-expanded="isNavBarExpanded"
+      aria-controls="sidebar"
       @click="toggleNavbarIfAllowed"
     >
       <div
@@ -70,6 +72,7 @@
           <i-cy-command-key_x16
             class="h-16px w-16px icon-dark-gray-500"
             data-cy="keyboard-shortcuts"
+            :aria-label="t('sideBar.keyboardShortcuts.title')"
           />
         </button>
         <template #popper>
