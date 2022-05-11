@@ -4,7 +4,7 @@
     variant="bare"
     :title="t('sideBar.keyboardShortcuts.title')"
     :model-value="show"
-    data-cy="switch-modal"
+    data-cy="keyboard-modal"
     help-link=""
     @update:model-value="emits('close')"
   >

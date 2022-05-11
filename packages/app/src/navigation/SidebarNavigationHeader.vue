@@ -7,6 +7,7 @@
   >
     <div
       role="button"
+      aria-labelledby="switch-testing-type-modal"
       class="border-b cursor-pointer flex border-gray-900 flex-shrink-0 h-64px pl-20px transition-all duration-300 items-center hover:bg-gray-900"
       :popper-top-offset="4"
       popper-class="h-56px"
