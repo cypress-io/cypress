@@ -154,6 +154,9 @@ https://on.cypress.io/origin
 `
 
 exports['e2e web security / when disabled / passes'] = `
+Deprecation Warning: chromeWebSecurity configuration option will be removed in a future release.
+
+As of Cypress version 9.6.0, cy.origin() is available to replace chromeWebSecurity. It is recommended to implement cy.origin() and remove the chromeWebSecurity configuration option from cypress.json.
 
 ====================================================================================================
 
@@ -220,6 +223,9 @@ exports['e2e web security / when disabled / passes'] = `
 `
 
 exports['e2e web security / firefox / displays warning when firefox and chromeWebSecurity:false'] = `
+Deprecation Warning: chromeWebSecurity configuration option will be removed in a future release.
+
+As of Cypress version 9.6.0, cy.origin() is available to replace chromeWebSecurity. It is recommended to implement cy.origin() and remove the chromeWebSecurity configuration option from cypress.json.
 
 ====================================================================================================
 
