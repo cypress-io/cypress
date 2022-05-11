@@ -1,6 +1,5 @@
 <template>
   <StandardModal
-    id="switch-testing-type-modal"
     class="transition-all transition duration-200"
     variant="bare"
     :title="t('testingType.modalTitle')"
