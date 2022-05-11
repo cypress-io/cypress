@@ -27,7 +27,7 @@ export function addE2EDefinition (): t.ObjectProperty {
 export interface ASTComponentDefinitionConfig {
   testingType: 'component'
   bundler: 'vite' | 'webpack'
-  webpackConfigPath?: string;
+  webpackConfigPath?: string
   framework?: string
 }
 
@@ -115,11 +115,11 @@ export type ModuleToAdd = ESModuleToAdd | CommonJSModuleToAdd
  *
  * import webpackConfig from <file>
  */
-export function addESModuleDefinition(file: string): ESModuleToAdd {
+export function addESModuleDefinition (file: string): ESModuleToAdd {
   return {
     node: t.importDeclaration(
-      [t.importDefaultSpecifier(t.identifier("webpackConfig"))],
-      t.stringLiteral(file)
+      [t.importDefaultSpecifier(t.identifier('webpackConfig'))],
+      t.stringLiteral(file),
     ),
     type: 'ES',
   }
@@ -130,13 +130,13 @@ export function addESModuleDefinition(file: string): ESModuleToAdd {
  *
  * const webpackConfig = require(<file>)
  */
-export function addCommonJSModuleDefinition(file: string): CommonJSModuleToAdd {
+export function addCommonJSModuleDefinition (file: string): CommonJSModuleToAdd {
   const parsed = parse(`const webpackConfig = require('${file}')`, {
     parser: require('recast/parsers/typescript'),
-  })
+  }) as t.File
 
   return {
-    node: parsed as t.Statement,
+    node: parsed.program.body[0] as t.Statement,
     type: 'CommonJS',
   }
 }
