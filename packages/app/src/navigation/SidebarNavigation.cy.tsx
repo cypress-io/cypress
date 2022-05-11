@@ -1,4 +1,5 @@
 import SidebarNavigation from './SidebarNavigation.vue'
+import { defaultMessages } from '@cy/i18n'
 
 function mountComponent (initialNavExpandedVal = true) {
   cy.mount(() => {
@@ -16,7 +17,10 @@ describe('SidebarNavigation', () => {
   it('expands the bar when clicking the expand button', () => {
     mountComponent()
 
-    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+    cy.get('[aria-expanded]')
+    .should('have.attr', 'aria-controls', 'sidebar')
+    .should('have.attr', 'aria-expanded', 'false')
+
     cy.findByText('test-project').should('not.be.visible')
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
@@ -29,9 +33,9 @@ describe('SidebarNavigation', () => {
 
   it('shows tooltips on hover', () => {
     mountComponent(false)
-    cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
+    cy.findByTestId('sidebar-header').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
-    cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
+    cy.findByTestId('sidebar-header').trigger('mouseout')
 
     cy.findByTestId('Runs').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
@@ -41,7 +45,9 @@ describe('SidebarNavigation', () => {
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
-    cy.findByTestId('sidebar-header').click()
-    cy.percySnapshot()
+    cy.findByTestId('sidebar-header')
+    .should('have.attr', 'aria-label', defaultMessages.testingType.modalTitle)
+    .focus()
+    .click()
   })
 })
