@@ -41,8 +41,8 @@ const debug = debugLib('cypress:config:addToCypressConfig')
  *    }
  */
 export async function addToCypressConfig (filePath: string, code: string, toAdd: {
-  properties?: t.ObjectProperty[],
-  modules?: ModuleToAdd[],
+  properties?: t.ObjectProperty[]
+  modules?: ModuleToAdd[]
 }) {
   try {
     const ast = parse(code, {
@@ -57,7 +57,6 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
       if (mod.type === 'ES') {
         traverse(ast, addESModuleImportToCypressConfigPlugin(mod.node).visitor)
       } else if (mod.type === 'CommonJS') {
-        console.log(print(ast).code, print(mod.node).code)
         traverse(ast, addCommonJSModuleImportToCypressConfigPlugin(mod.node).visitor)
       }
     }
@@ -83,7 +82,7 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
           t.identifier('projectId'),
           t.identifier(options.projectId),
         ),
-      ]
+      ],
     })
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))

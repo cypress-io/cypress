@@ -174,7 +174,7 @@ describe('addToCypressConfig', () => {
     expect(result.result).to.eq('MERGED')
   })
 
-  it.only('adds component testing and webpack config to e2e config', async () => {
+  it('adds component testing and webpack config to e2e config', async () => {
     const result = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.js'),
       info: {

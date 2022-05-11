@@ -229,14 +229,15 @@ export function addESModuleImportToCypressConfigPlugin (toAdd: t.ImportDeclarati
     manipulateOptions,
     visitor: {
       Program (path) {
-        const lastImport = last(path.get('body').filter(p => p.isImportDeclaration()));
+        const lastImport = last(path.get('body').filter((p) => p.isImportDeclaration()))
+
         if (lastImport) {
           lastImport.insertAfter(toAdd)
         } else {
           path.get('body')?.[0]?.insertBefore(toAdd)
         }
-      }
-    }
+      },
+    },
   }
 }
 
@@ -256,14 +257,14 @@ export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.Statement
             return
           }
 
-          const n = body.find(x => x.node?.loc?.end.line === lastRequireBeforeModuleExports)
+          const n = body.find((x) => x.node?.loc?.end.line === lastRequireBeforeModuleExports)
 
           if (n) {
-            /** 
+            /**
              * insert the require after the last require that appears before
              * module.exports, if there is some other require statements.
              * const { defineConfig } = require('cypress')
-             *                     <------- Insert it here 
+             *                     <------- Insert it here
              * module.exports = {}
              */
             n.insertAfter(toAdd)
@@ -273,7 +274,7 @@ export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.Statement
              */
             body.insertBefore(toAdd)
           }
-        }
+        },
       },
       CallExpression (path) {
         if (isRequire(path)) {
@@ -287,7 +288,7 @@ export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.Statement
           lastRequireBeforeModuleExports = lastSeenRequire
         }
       },
-    }
+    },
   }
 }
 
