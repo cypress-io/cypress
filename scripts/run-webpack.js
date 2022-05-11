@@ -2,7 +2,7 @@ const cp = require('child_process')
 const path = require('path')
 const semver = require('semver')
 
-const webpackCli = path.join(__dirname, '../node_modules/.bin/webpack-cli')
+const webpackCli = path.join(__dirname, '..', 'node_modules', 'webpack-cli', 'bin', 'cli.js')
 
 // https://github.com/cypress-io/cypress/issues/18914
 // Node 17+ ships with OpenSSL 3 by default, so we may need the option
