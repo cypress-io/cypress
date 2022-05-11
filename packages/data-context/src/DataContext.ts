@@ -26,7 +26,6 @@ import {
   UtilDataSource,
   BrowserApiShape,
   MigrationDataSource,
-  NodeDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
@@ -155,11 +154,6 @@ export class DataContext {
   @cached
   get file () {
     return new FileDataSource(this)
-  }
-
-  @cached
-  get node () {
-    return new NodeDataSource(this)
   }
 
   @cached

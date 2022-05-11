@@ -114,7 +114,7 @@ export const Query = objectType({
       },
       resolve: (root, args, ctx, info) => {
         // Cast as any, because this is extremely difficult to type correctly
-        return ctx.node.resolveNode(args.id, info) as any
+        return ctx.graphql.resolveNode(args.id, ctx, info) as any
       },
     })
   },
