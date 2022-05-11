@@ -144,4 +144,34 @@ describe('addToCypressConfig', () => {
 
     expect(result.result).to.eq('MERGED')
   })
+
+  it.only('adds component testing and webpack config to e2e config', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.ts'),
+      info: {
+        testingType: 'component',
+        bundler: 'webpack',
+        framework: 'react',
+        webpackConfig: './webpack.config.js',
+      },
+      isProjectUsingESModules: false,
+    })
+
+    expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
+    import webpackConfig from './webpack.config.js'
+
+    export default {
+      e2e: {},
+    
+      component: {
+        devServer: {
+          framework: "react",
+          bundler: "webpack",
+          webpackConfig,
+        },
+      },
+    };`.trim())
+
+    expect(result.result).to.eq('MERGED')
+  })
 })

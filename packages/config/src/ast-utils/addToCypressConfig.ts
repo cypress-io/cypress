@@ -95,8 +95,30 @@ export interface AddTestingTypeToCypressConfigOptions {
   }
 }
 
+function tryToFindWebpackConfig (projectPath: string) {
+  const p = path.join(projectPath, 'webpack.config.js')
+  if (fs.existsSync(p)) {
+    return p
+  }
+  return undefined
+}
+
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
-  const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
+  let toAdd: t.ObjectProperty | undefined
+  const imports: string[] = []
+
+  if (options.info.testingType === 'component') {
+    const projectPath = path.dirname(options.filePath)
+    const webpackConfig = options.info.webpackConfig ?? tryToFindWebpackConfig(projectPath)
+    toAdd = addComponentDefinition({ ...options.info, webpackConfig })
+
+    if (webpackConfig) {
+      // if ()
+      imports.push(webpackConfig)
+    }
+  } else {
+    toAdd = addE2EDefinition()
+  }
 
   try {
     let result: string | undefined = undefined
@@ -117,6 +139,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
       result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules })
     }
 
+    // const i = t.import
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))

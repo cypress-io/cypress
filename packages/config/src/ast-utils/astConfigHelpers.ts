@@ -27,6 +27,7 @@ export function addE2EDefinition (): t.ObjectProperty {
 export interface ASTComponentDefinitionConfig {
   testingType: 'component'
   bundler: 'vite' | 'webpack'
+  webpackConfig?: string
   framework?: string
 }
 
@@ -41,6 +42,20 @@ export interface ASTComponentDefinitionConfig {
  * }
  */
 export function addComponentDefinition (config: ASTComponentDefinitionConfig): t.ObjectProperty {
+  if (config.webpackConfig) {
+    return extractProperty(`
+      const toMerge = {
+        component: {
+          devServer: {
+            framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
+            bundler: '${config.bundler}',
+            webpackConfig,
+          },
+        },
+      }
+    `)
+  }
+
   return extractProperty(`
     const toMerge = {
       component: {
@@ -81,4 +96,24 @@ function extractProperty (str: string) {
   assert(toAdd, `Missing property to merge into config from string: ${str}`)
 
   return toAdd
+}
+
+export interface ASTModuleDefinitionConfig {
+  kind: 'ES' | 'CommonJS'
+  file: string
+}
+
+export function addModuleDefinition(config: ASTModuleDefinitionConfig): t.ImportDeclaration {
+  return t.importDeclaration(
+    [t.importDefaultSpecifier(t.identifier("webpackConfig"))],
+    t.stringLiteral(config.file)
+  );
+}
+
+export function addCommonJSDefinition(file: string): t.File {
+  const parsed = parse(`const webpackConfig = require('${file}')`, {
+    parser: require('recast/parsers/typescript'),
+  })
+
+  return parsed as t.File
 }
