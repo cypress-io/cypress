@@ -16,6 +16,12 @@ import { CypressBuilderOptions } from './cypressBuilderOptions'
 type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
 Partial<CypressCommandLine.CypressOpenOptions>;
 
+type StartDevServerProps = {
+  devServerTarget: string
+  watch: boolean
+  context: any
+}
+
 function runCypress (
   options: CypressBuilderOptions,
   context: BuilderContext,
@@ -40,10 +46,12 @@ function runCypress (
     }),
     switchMap((options: CypressBuilderOptions) => {
       return (options.devServerTarget
-        ? startDevServer(options.devServerTarget, options.watch, context)
+        ? startDevServer({ devServerTarget: options.devServerTarget, watch: options.watch, context }).pipe(
+          map((devServerBaseUrl: string) => options.baseUrl || devServerBaseUrl),
+        )
         : of(options.baseUrl)
       ).pipe(
-        concatMap((baseUrl: string) => initCypress({ ...options, baseUrl })),
+        concatMap((devServerBaseUrl: string) => initCypress({ ...options, devServerBaseUrl })),
         options.watch ? tap(noop) : first(),
         catchError((error) => {
           return of({ success: false }).pipe(
@@ -89,11 +97,10 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   )
 }
 
-export function startDevServer (
-  devServerTarget: string,
-  watch: boolean,
-  context: any,
-): Observable<string> {
+export function startDevServer ({
+  devServerTarget,
+  watch,
+  context }: StartDevServerProps): Observable<string> {
   const overrides = {
     watch,
   }
