@@ -28,14 +28,12 @@
     <div class="flex flex-col flex-1 overflow-y-auto ">
       <SidebarNavigationHeader
         v-if="query.data.value"
-        id="sidebar-navigation-header"
         :gql="query.data.value"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
-        aria-labelledby="sidebar-navigation-header"
       >
         <RouterLink
           v-for="item in navigation"
