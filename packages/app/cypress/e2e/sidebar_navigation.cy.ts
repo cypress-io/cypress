@@ -225,17 +225,35 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Keyboard Shortcuts').should('not.exist')
     })
 
-    const navItems = ['Runs', 'Specs', 'Settings']
+    it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    navItems.forEach((navItem) => {
-      it(`has a nav item labeled "${navItem}" which takes you to the ${navItem} page`, () => {
-        cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-        cy.get('[data-cy="app-header-bar"]').findByText(navItem).should('not.exist')
-        cy.findByText(navItem).should('be.visible')
-        cy.findByText(navItem).click()
-        cy.get('[data-cy="app-header-bar"]').findByText(navItem).should('be.visible')
-        cy.get('[data-selected="true"]').findByText(navItem).should('be.visible')
+      cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
+      cy.findByText('Runs').should('be.visible')
+      cy.findByText('Runs').click()
+      cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
+      cy.get('.router-link-active').findByText('Runs').should('be.visible')
+    })
+
+    it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findByLabelText('Sidebar').within(() => {
+        cy.findByText('Specs').should('be.visible')
+        cy.findByText('Specs').click()
       })
+
+      cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
+      cy.get('.router-link-active').findByText('Specs').should('be.visible')
+    })
+
+    it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+
+      cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('not.exist')
+      cy.findByText('Settings').should('be.visible')
+      cy.findByText('Settings').click()
+      cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
+      cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
 
     it('resize nav sends the correct value on the mutation', () => {
