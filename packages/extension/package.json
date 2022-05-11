@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "node ../../scripts/run-webpack",
+    "build": "gulp build",
     "build-prod": "yarn build",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
