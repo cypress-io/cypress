@@ -7,7 +7,14 @@
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
     "deps": "deps-ok && dependency-check --no-dev .",
+    "example-react-app-start": "cd examples/react-app && yarn start",
+    "example-react-app-test": "cd examples/react-app && yarn test",
+    "example-use-babelrc-test": "cd examples/use-babelrc && yarn test",
+    "example-use-ts-loader-install": "cd examples/use-ts-loader && yarn install",
+    "example-use-ts-loader-test": "cd examples/use-ts-loader && yarn test",
+    "example-use-ts-loader-types": "cd examples/use-ts-loader && yarn types",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -16,13 +23,13 @@
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
-    "check-ts": "tsc --noEmit",
     "watch": "yarn build --watch"
   },
   "dependencies": {
     "bluebird": "3.7.1",
     "debug": "^4.3.2",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "webpack": "^5.39.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.1",
@@ -30,7 +37,6 @@
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/mocha": "9.0.0",
-    "@types/webpack": "^4.41.12",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-loader": "^8.0.2",
@@ -58,8 +64,7 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.2.1",
-    "webpack": "^4.44.2"
+    "ts-node": "^10.2.1"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",

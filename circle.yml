@@ -1477,8 +1477,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn build-for-tests
-          working_directory: packages/reporter
+          command: nx run @packages/reporter:build-for-tests
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -1545,8 +1544,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn build-for-tests
-          working_directory: packages/ui-components
+          command: nx run @packages/ui-components:build-for-tests
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -1566,35 +1564,29 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: nx run webpack-preprocessor:build
       - run:
           name: Test babelrc
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/use-babelrc
+          command: nx run webpack-preprocessor:example-use-babelrc-test
       - run:
           name: Build ts-loader
-          command: yarn install
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+          command: nx run webpack-preprocessor:example-use-ts-loader-install
       - run:
           name: Types ts-loader
-          command: yarn types
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+          command: nx run webpack-preprocessor:example-use-ts-loader-types
       - run:
           name: Test ts-loader
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+          command: nx run webpack-preprocessor:example-use-ts-loader-test
       - run:
           name: Start React app
-          command: yarn start
+          command: nx run webpack-preprocessor:example-react-app-start
           background: true
-          working_directory: npm/webpack-preprocessor/examples/react-app
       - run:
           name: Test React app
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/react-app
+          command: nx run webpack-preprocessor:example-react-app-test
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-preprocessor test
+          command: nx run webpack-preprocessor:test
       - store-npm-logs
 
   npm-webpack-dev-server:
@@ -1604,10 +1596,10 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server test
+          command: nx run webpack-dev-server:test
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server test
+          command: nx run webpack-dev-server:test
 
   npm-vite-dev-server:
     <<: *defaults
@@ -1615,8 +1607,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn test
-          working_directory: npm/vite-dev-server
+          command: nx run vite-dev-server:test
       - store_test_results:
           path: npm/vite-dev-server/test_results
       - store-npm-logs
@@ -1628,7 +1619,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+          command: nx run webpack-batteries-included-preprocessor:test
 
   npm-vue:
     <<: *defaults
@@ -1636,11 +1627,10 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vue build
+          command: nx run vue:build
       - run:
           name: Type Check
-          command: yarn typecheck
-          working_directory: npm/vue
+          command: nx run vue:typecheck
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -1670,11 +1660,10 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: nx run react:build
       - run:
           name: Run tests
-          command: yarn test
-          working_directory: npm/react
+          command: nx run react:test
       - store_test_results:
           path: npm/react/test_results
       - store_artifacts:
@@ -1687,7 +1676,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: nx run mount-utils:build
       - store-npm-logs
 
   npm-create-cypress-tests:
@@ -1695,7 +1684,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run: nx run create-cypress-tests:build
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1703,7 +1692,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn workspace @cypress/eslint-plugin-dev test
+          command: nx run eslint-plugin-dev:test
 
   npm-cypress-schematic:
     <<: *defaults
@@ -1713,18 +1702,15 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build:all
-          working_directory: npm/cypress-schematic
+            nx run schematic:build-all
       - run:
           name: Launch
           command: |
-            yarn launch:test
-          working_directory: npm/cypress-schematic
+            nx run schematic:test
       - run:
           name: Run unit tests
           command: |
-            yarn test
-          working_directory: npm/cypress-schematic
+            nx run schematic:test
       - store-npm-logs
 
   npm-release:

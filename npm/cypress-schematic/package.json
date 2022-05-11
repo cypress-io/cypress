@@ -6,8 +6,8 @@
   "main": "./src",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build-all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
     "build:test": "tsc -p tsconfig.spec.json",
-    "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
     "build:watch": "tsc -p tsconfig.json --watch",
     "clean": "git checkout HEAD -- sandbox && git clean -f -d sandbox",
     "launch": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic && cd ..",
