@@ -280,12 +280,14 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName () {
-    const defaultFileName = 'cypress/e2e/spec.cy.js'
+    let defaultFileName = 'cypress/e2e/spec.cy.js'
 
     try {
       if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-        return null
+        return defaultFileName
       }
+
+      defaultFileName = this.ctx.coreData.currentTestingType === 'e2e' ? 'cypress/e2e/spec.cy.js' : 'src/ComponentName.cy.js'
 
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()

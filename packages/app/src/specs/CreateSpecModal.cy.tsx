@@ -153,9 +153,7 @@ describe('defaultSpecFileName', () => {
     </div>))
 
     cy.findByText('Create new empty spec').click()
-    cy.get('input').invoke('val').then((val) => {
-      expect(val).to.contain('spec.cy.js')
-    })
+    cy.get('input').invoke('val').should('contain', 'spec.cy.js')
   })
 
   it('shows correct default filename for component testing', () => {
@@ -195,8 +193,6 @@ describe('defaultSpecFileName', () => {
       />
     </div>))
 
-    cy.get('input').invoke('val').then((val) => {
-      expect(val).to.contain('ComponentName.spec.js')
-    })
+    cy.get('input').invoke('val').should('contain', 'ComponentName.spec.js')
   })
 })
