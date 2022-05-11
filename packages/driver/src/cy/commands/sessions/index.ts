@@ -402,13 +402,8 @@ export default function (Commands, Cypress, cy) {
         name: 'session',
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
-        snapshot: false,
-      })
-
-      const dataLog = Cypress.log({
-        name: 'session',
         sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        snapshot: false,
       })
 
       function runSetup (existingSession) {
@@ -449,7 +444,7 @@ export default function (Commands, Cypress, cy) {
 
           setActiveSession({ [existingSession.id]: existingSession })
 
-          dataLog.set({
+          _log.set({
             consoleProps: () => getConsoleProps(existingSession),
           })
 
@@ -658,16 +653,13 @@ export default function (Commands, Cypress, cy) {
         await navigateAboutBlank()
 
         _log.set({
+          consoleProps: () => getConsoleProps(existingSession),
           renderProps: () => {
             return {
               indicator: 'pending',
               message: `(saved) ${_log.get().message}`,
             }
           },
-        })
-
-        dataLog.set({
-          consoleProps: () => getConsoleProps(existingSession),
         })
 
         await sessions.setSessionData(existingSession)
