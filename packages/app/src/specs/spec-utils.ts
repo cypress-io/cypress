@@ -2,11 +2,10 @@ import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import { ComputedRef, Ref, ref, watch } from 'vue'
 import _ from 'lodash'
+import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import { getRunnerConfigFromWindow } from '../runner'
 
-import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
-import { decodeBase64Unicode } from './decodeBase64'
-
-const platform = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
+const platform = getRunnerConfigFromWindow().platform
 const regexSeparator = platform === 'win32' ? /\\/ : /\//
 const separator = platform === 'win32' ? '\\' : '/'
 
