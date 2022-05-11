@@ -127,7 +127,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the e2e testing header', () => {
-      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'E2E Specs')
+      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'E2E specs')
     })
   })
 
