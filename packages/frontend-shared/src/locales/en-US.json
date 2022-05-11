@@ -143,8 +143,8 @@
       "toggle": "Toggle specs list"
     },
     "toggleLabel": {
-      "expanded": "Collapse navigation bar",
-      "collapsed": "Expand navigation bar"
+      "expanded": "Collapse sidebar",
+      "collapsed": "Expand sidebar"
     }
   },
   "topNav": {

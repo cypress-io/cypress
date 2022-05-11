@@ -45,20 +45,14 @@ describe('SidebarNavigation', () => {
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
-    cy.findByTestId('sidebar-header')
-    .click()
-    .percySnapshot()
+    cy.findByTestId('sidebar-header').click()
+    cy.percySnapshot()
   })
 
   it('opens a modal to show keyboard shortcuts', () => {
     mountComponent()
-
     cy.findByTestId('keyboard-modal').should('not.exist')
-
-    cy.findByTestId('keyboard-modal-trigger')
-    .focus()
-    .type('{enter}')
-
+    cy.findByTestId('keyboard-modal-trigger').focus().type('{enter}')
     cy.findByTestId('keyboard-modal').should('be.visible')
   })
 })
