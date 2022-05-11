@@ -141,6 +141,10 @@
       "rerun": "Re-run tests",
       "stop": "Stop tests",
       "toggle": "Toggle specs list"
+    },
+    "toggleLabel": {
+      "expanded": "Collapse navigation bar",
+      "collapsed": "Expand navigation bar"
     }
   },
   "topNav": {

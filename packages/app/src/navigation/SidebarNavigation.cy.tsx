@@ -22,12 +22,17 @@ describe('SidebarNavigation', () => {
     .should('have.attr', 'aria-expanded', 'false')
 
     cy.findByText('test-project').should('not.be.visible')
-    cy.findByLabelText('toggle navigation', {
+    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
       selector: 'button',
     }).click()
 
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.expanded, {
+      selector: 'button',
+    })
+
     cy.findByText('test-project').should('be.visible')
+
     cy.percySnapshot()
   })
 

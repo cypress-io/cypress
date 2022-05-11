@@ -57,13 +57,13 @@ describe('Sidebar Navigation', () => {
     })
 
     it('expands the left nav bar by default', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findByTestId('toggle-nav').should('have.attr', 'aria-expanded', 'true')
       cy.percySnapshot()
     })
 
     it('highlights indicator on hover showing you can click to expand', () => {
-      const navIndicatorSelector = '[data-testid=sidebar-nav-indicator]'
-      const navExpansionToggleSelector = '[aria-label="toggle navigation"]'
+      const navIndicatorSelector = '[data-cy=sidebar-nav-indicator]'
+      const navExpansionToggleSelector = '[aria-label="Collapse navigation bar"]'
 
       cy.get(navIndicatorSelector)
       .should('not.be.visible')
