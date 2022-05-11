@@ -24,6 +24,15 @@ describe('Sidebar Navigation', () => {
       cy.injectAxe()
       cy.checkA11y('[data-cy="sidebar"]')
     })
+
+    it('renders appropriate aria attributes for toggle button expanded/collapsed states', () => {
+      cy.findByTestId('toggle-navbar')
+      .should('have.attr', 'aria-expanded', 'true')
+      .should('have.attr', 'aria-label', 'Collapse navigation bar')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false')
+      .should('have.attr', 'aria-label', 'Expand navigation bar')
+    })
   })
 
   context('as e2e testing type with localSettings', () => {
