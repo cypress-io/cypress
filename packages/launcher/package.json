@@ -18,7 +18,6 @@
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
     "plist": "3.0.5",
-    "semver": "7.3.5",
     "which": "2.0.2"
   },
   "devDependencies": {
