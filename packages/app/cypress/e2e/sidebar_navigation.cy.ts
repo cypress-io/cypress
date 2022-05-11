@@ -1,15 +1,32 @@
 import type { SinonStub } from 'sinon'
 
 describe('Sidebar Navigation', () => {
-  context('as e2e testing type with localSettings', () => {
-    it('meh', () => {
+  context('accessibility', () => {
+    beforeEach(() => {
       cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
-      cy.findByTestId('Runs').click()
+      cy.contains('todos')
     })
 
+    it('can tab through navigation', () => {
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.startAppServer()
+      cy.visitApp()
+
+      cy.get('body').focus()
+      .tab().should('have.attr', 'aria-label', 'toggle navigation').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
+      .tab().should('have.attr', 'data-cy', 'Specs').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'Runs').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'Settings').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'aria-label', 'Keyboard Shortcuts').should('have.prop', 'tagName', 'BUTTON')
+    })
+  })
+
+  context('as e2e testing type with localSettings', () => {
     it('use saved state for nav size', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
