@@ -10,7 +10,7 @@
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       type="button"
       :aria-label="isNavBarExpanded ? t('sidebar.toggleLabel.expanded') : t('sidebar.toggleLabel.collapsed')"
-      data-cy="toggle-navbar"
+      data-cy="toggle-sidear"
       :aria-expanded="isNavBarExpanded"
       aria-controls="sidebar"
       @click="toggleNavbarIfAllowed"
@@ -34,7 +34,7 @@
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
-        aria-label="Sidebar"
+        aria-label="Navigation"
       >
         <RouterLink
           v-for="item in navigation"

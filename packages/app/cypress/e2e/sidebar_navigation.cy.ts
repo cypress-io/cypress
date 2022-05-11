@@ -12,12 +12,12 @@ describe('Sidebar Navigation', () => {
 
     it('can tab through navigation', () => {
       cy.get('body').focus()
-      .tab().should('have.attr', 'data-cy', 'toggle-navbar').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'toggle-sidebar').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
-      .tab().should('have.attr', 'data-cy', 'Specs').should('have.prop', 'tagName', 'BUTTON')
-      .tab().should('have.attr', 'data-cy', 'Runs').should('have.prop', 'tagName', 'BUTTON')
-      .tab().should('have.attr', 'data-cy', 'Settings').should('have.prop', 'tagName', 'BUTTON')
-      .tab().should('have.attr', 'aria-label', 'Keyboard Shortcuts').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'nav-row-specs').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'nav-row-runs').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'nav-row-settings').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
     })
 
     it('has no axe violations', () => {
@@ -25,13 +25,20 @@ describe('Sidebar Navigation', () => {
       cy.checkA11y('[data-cy="sidebar"]')
     })
 
-    it('renders appropriate aria attributes for toggle button expanded/collapsed states', () => {
-      cy.findByTestId('toggle-navbar')
+    it('uses appropriate aria attributes', () => {
+      cy.findByTestId('toggle-sidebar')
+      .should('have.attr', 'aria-controls', 'sidebar')
       .should('have.attr', 'aria-expanded', 'true')
       .should('have.attr', 'aria-label', 'Collapse navigation bar')
       .click()
       .should('have.attr', 'aria-expanded', 'false')
       .should('have.attr', 'aria-label', 'Expand navigation bar')
+
+      cy.findByTestId('keyboard-modal-trigger')
+      .should('have.attr', 'aria-label', 'Keyboard Shortcuts')
+
+      cy.get('nav')
+      .should('have.attr', 'aria-label', 'Navigation')
     })
   })
 
@@ -50,7 +57,7 @@ describe('Sidebar Navigation', () => {
 
       cy.get('.toggle-specs-text').click()
 
-      cy.get('[data-cy="reporter-panel"]').invoke('outerWidth').then(($initialWidth) => {
+      cy.findByTestId('reporter-panel').invoke('outerWidth').then(($initialWidth) => {
         expect($initialWidth).eq(100)
       })
     })
@@ -66,7 +73,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('expands the left nav bar by default', () => {
-      cy.findByTestId('toggle-navbar').should('have.attr', 'aria-expanded', 'true')
+      cy.findByTestId('toggle-sidebar').should('have.attr', 'aria-expanded', 'true')
       cy.percySnapshot()
     })
 
@@ -75,7 +82,7 @@ describe('Sidebar Navigation', () => {
 
       cy.get(navIndicatorSelector)
       .should('not.be.visible')
-      .findByTestId('toggle-navbar')
+      .findByTestId('toggle-sidebar')
       .realHover()
       .get(navIndicatorSelector)
       .should('be.visible')
@@ -85,7 +92,7 @@ describe('Sidebar Navigation', () => {
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
-      cy.findByTestId('toggle-navbar').click()
+      cy.findByTestId('toggle-sidebar').click()
       cy.get('@title').should('not.be.visible')
       cy.percySnapshot()
     })
@@ -93,7 +100,7 @@ describe('Sidebar Navigation', () => {
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
       cy.findAllByText('todos').eq(1).as('title')
       cy.get('@title').should('be.visible')
-      cy.findByTestId('toggle-navbar').click()
+      cy.findByTestId('toggle-sidebar').click()
 
       cy.get('@title').should('not.be.visible')
 
@@ -105,7 +112,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('has menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
-      cy.findByTestId('toggle-navbar').click()
+      cy.findByTestId('toggle-sidebar').click()
 
       cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
@@ -122,36 +129,36 @@ describe('Sidebar Navigation', () => {
     })
 
     it('shows a tooltip when hovering over menu item', () => {
-      cy.findByTestId('toggle-navbar').click()
+      cy.findByTestId('toggle-sidebar').click()
 
       cy.findByTestId('sidebar-header').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'todos')
       cy.percySnapshot()
       cy.findByTestId('sidebar-header').trigger('mouseout')
 
-      cy.findByTestId('Runs').trigger('mouseenter')
+      cy.findByTestId('nav-row-runs').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
-      cy.findByTestId('Runs').trigger('mouseout')
+      cy.findByTestId('nav-row-runs').trigger('mouseout')
 
-      cy.findByTestId('Specs').trigger('mouseenter')
+      cy.findByTestId('nav-row-specs').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
-      cy.findByTestId('Specs').trigger('mouseout')
+      cy.findByTestId('nav-row-specs').trigger('mouseout')
 
-      cy.findByTestId('Settings').trigger('mouseenter')
+      cy.findByTestId('nav-row-settings').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
-      cy.findByTestId('Settings').trigger('mouseout')
+      cy.findByTestId('nav-row-settings').trigger('mouseout')
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
-      cy.findByTestId('toggle-navbar').click()
+      cy.findByTestId('toggle-sidebar').click()
       cy.findAllByText('todos').eq(1).should('not.be.visible')
-      cy.findByTestId('toggle-navbar').click()
+      cy.findByTestId('toggle-sidebar').click()
       cy.findAllByText('todos').eq(1).should('be.visible')
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
-      cy.get('[data-cy="sidebar-header"]').within(() => {
-        cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
+      cy.findByTestId('sidebar-header').within(() => {
+        cy.findByTestId('testing-type-e2e').should('be.visible')
         cy.findByText('todos').should('be.visible')
       }).as('switchTestingType').click()
 
@@ -220,7 +227,7 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Runs').should('be.visible')
       cy.findByText('Runs').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
-      cy.get('.router-link-active').findByText('Runs').should('be.visible')
+      cy.findByTestId('nav-row-runs').should('have.attr', 'data-selected', 'true')
     })
 
     it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
@@ -230,7 +237,7 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
-      cy.get('.router-link-active').findByText('Specs').should('be.visible')
+      cy.findByTestId('nav-row-specs').should('have.attr', 'data-selected', 'true')
     })
 
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
@@ -238,7 +245,7 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Settings').should('be.visible')
       cy.findByText('Settings').click()
       cy.findByTestId('app-header-bar').findByText('Settings').should('be.visible')
-      cy.get('.router-link-active').findByText('Settings').should('be.visible')
+      cy.findByTestId('nav-row-settings').should('have.attr', 'data-selected', 'true')
     })
 
     it('resize nav sends the correct value on the mutation', () => {
