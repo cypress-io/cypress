@@ -162,8 +162,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(logs[6].get()).to.contain({
           name: 'Clear Page',
-          // FIX ME...
-          // group: sessionGroupId,
+          group: sessionGroupId,
         })
       })
 
@@ -247,8 +246,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate Session: valid',
-          // FIXME....
-          // group: sessionGroupId,
+          group: sessionGroupId,
         })
 
         expect(logs[7].get()).to.deep.contain({
@@ -258,8 +256,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(logs[8].get()).to.contain({
           name: 'Clear Page',
-          // FIXME...
-          // group: sessionGroupId,
+          group: sessionGroupId,
         })
       })
     })
@@ -317,11 +314,8 @@ describe('cy.session', { retries: 0 }, () => {
           const validateSessionGroup = logs[6].get()
 
           expect(validateSessionGroup).to.contain({
-            displayName: 'Validate Session',
-            // FIXME....
-            // displayName: 'Validate Session: invalid',
-            // FIXME....
-            // group: sessionGroupId,
+            displayName: 'Validate Session: invalid',
+            group: sessionGroupId,
           })
 
           done()
@@ -669,8 +663,7 @@ describe('cy.session', { retries: 0 }, () => {
           const secondValidateSessionGroup = logs[11].get()
 
           expect(secondValidateSessionGroup).to.contain({
-            displayName: 'Validate Session',
-            // displayName: 'Validate Session: invalid',
+            displayName: 'Validate Session: invalid',
             group: sessionGroupId,
           })
 
