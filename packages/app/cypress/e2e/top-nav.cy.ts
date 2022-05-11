@@ -367,7 +367,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.remoteGraphQLIntercept((obj) => {
           if (obj.result.data?.cloudProjectBySlug) {
-            throw new Error('Unauthorized')
+            return new obj.Response('Unauthorized', { status: 401 })
           }
 
           return obj.result

@@ -108,9 +108,8 @@ export class CloudDataSource {
         }),
         errorExchange({
           onError: (err, operation) => {
-            // Ignore the error when there's no internet connection or when the
-            // cloud session is not valid, we want to logout the user on the app
-            if (err.graphQLErrors.some((e) => e.message.includes('Unauthorized'))) {
+            // If we receive a 401 from the dashboard, we need to logout the user
+            if (err.response?.status === 401) {
               this.params.logout()
 
               return

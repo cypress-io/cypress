@@ -14,6 +14,7 @@ import type { E2ETaskMap } from '../e2ePluginSetup'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
+import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -45,9 +46,10 @@ export interface RemoteGraphQLInterceptPayload {
   document: DocumentNode
   result: ExecutionResult
   callCount: number
+  Response: typeof Response
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult>
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult> | Response
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output

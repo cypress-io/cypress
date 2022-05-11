@@ -204,7 +204,13 @@ export class DataContext {
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
       onError: (err) => {
-        return this.onError(getError('DASHBOARD_GRAPHQL_ERROR', err), 'Cypress Dashboard Error')
+        // This should never happen in prod, and if it does, it means we've intentionally broken the
+        // remote contract with the test runner. Showing the main overlay is too heavy-handed of an action
+        // to take here, so we only show it in development, when we maybe did something wrong in our e2e
+        // Cypress test mocking and want to know immediately in the UI that things are broken
+        if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+          return this.onError(getError('DASHBOARD_GRAPHQL_ERROR', err), 'Cypress Dashboard Error')
+        }
       },
     })
   }
