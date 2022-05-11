@@ -33,7 +33,7 @@ type RunWebpackCfg = {
 // Can be removed once the webpack version is upgraded to >= 5.61,
 // which no longer relies on Node's builtin crypto.hash function.
 function useLegacyOpenSSLProvider (env: Env) {
-  if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && process.versions.openssl.startsWith('3.')) {
+  if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
     return { NODE_OPTIONS: `${env.NODE_OPTIONS ?? ''} --openssl-legacy-provider` }
   }
 

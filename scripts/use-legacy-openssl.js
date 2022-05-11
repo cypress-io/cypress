@@ -12,7 +12,7 @@ const semver = require('semver')
 
 let opts = process.env.NODE_OPTIONS || ''
 
-if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && process.versions.openssl.startsWith('3.')) {
+if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
   opts = `${opts} --openssl-legacy-provider`
 }
 
