@@ -14,6 +14,8 @@ import { hasDefaultExport } from './parserUtils'
 import type { LegacyCypressConfigJson } from '..'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
+// import _ from 'lodash'
+// import { getBreakingKeys } from '@packages/config'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -383,9 +385,14 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
         const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
         const isDefaultCT = key === 'component' && specPattern === ext
 
+        // const restWithoutBreakingKeys = _.omit(rest, getBreakingKeys())
+        // const existingWithoutBreakingKeys = _.omit(acc[key], getBreakingKeys())
+
         if (isDefaultE2E || isDefaultCT) {
           return {
             ...acc, [key]: {
+              // ...restWithoutBreakingKeys,
+              // ...existingWithoutBreakingKeys,
               ...rest,
               ...acc[key],
             },
@@ -394,6 +401,8 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
 
         return {
           ...acc, [key]: {
+            // ...restWithoutBreakingKeys,
+            // ...existingWithoutBreakingKeys,
             ...rest,
             ...acc[key],
             specPattern,
