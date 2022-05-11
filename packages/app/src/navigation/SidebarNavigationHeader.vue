@@ -27,20 +27,26 @@
             children:transition
             children:duration-300"
       />
-      <div class="text-gray-50 text-size-16px leading-24px truncate">
+      <span class="text-gray-50 text-size-16px leading-24px truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-20px truncate">
+        <span
+          v-if="props.gql.currentProject?.branch"
+          class="text-gray-600 text-size-14px leading-20px truncate"
+        >
           {{ props.gql.currentProject?.branch }}
-        </p>
-      </div>
+        </span>
+      </span>
     </button>
     <template #popper>
-      <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
+      <span class="text-left text-gray-50 text-size-16px leading-16px truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-20px truncate">
+        <span
+          v-if="props.gql.currentProject?.branch"
+          class="text-gray-600 text-size-14px leading-20px truncate"
+        >
           {{ props.gql.currentProject?.branch }}
-        </p>
-      </div>
+        </span>
+      </span>
     </template>
   </Tooltip>
 </template>
