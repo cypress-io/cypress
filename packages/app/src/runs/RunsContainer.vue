@@ -148,10 +148,10 @@ const refetcher = useMutation(RunsContainer_FetchNewerRunsDocument)
 
 // 15 seconds polling
 const POLL_FOR_LATEST = 1000 * 15
-const timeout = ref<null | number>(null)
+let timeout: null | number = null
 
 function startPolling () {
-  timeout.value = window.setTimeout(function fetchNewerRuns () {
+  timeout = window.setTimeout(function fetchNewerRuns () {
     if (variables.value && props.online) {
       refetcher.executeMutation(variables.value)
       .then(() => {
@@ -164,15 +164,20 @@ function startPolling () {
 }
 
 onMounted(() => {
+  // Always fetch when the component mounts, and we're not already fetching
+  if (props.online && !refetcher.fetching) {
+    refetcher.executeMutation(variables.value)
+  }
+
   startPolling()
 })
 
 onUnmounted(() => {
-  if (timeout.value) {
-    clearTimeout(timeout.value)
+  if (timeout) {
+    clearTimeout(timeout)
   }
 
-  timeout.value = null
+  timeout = null
 })
 
 const props = defineProps<{
