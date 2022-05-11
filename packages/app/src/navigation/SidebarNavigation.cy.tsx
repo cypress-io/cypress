@@ -32,13 +32,13 @@ describe('SidebarNavigation', () => {
     cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-    cy.findByTestId('/runs').trigger('mouseenter')
+    cy.findByTestId('Runs').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
-    cy.findByTestId('/runs').trigger('mouseout')
+    cy.findByTestId('Runs').trigger('mouseout')
   })
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
-    cy.get('[data-cy="sidebar-header"]').click()
+    cy.findByTestId('sidebar-header').click()
   })
 })

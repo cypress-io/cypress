@@ -23,7 +23,7 @@
         />
       </div>
     </button>
-    <div class="flex flex-col flex-1 overflow-y-auto overflow-x-hidden ">
+    <div class="flex flex-col flex-1 overflow-y-auto">
       <SidebarNavigationHeader
         v-if="query.data.value"
         id="sidebar-navigation-header"
