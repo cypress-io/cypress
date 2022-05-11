@@ -40,6 +40,7 @@
           v-slot="{ isActive }"
           :key="item.name"
           :to="item.href"
+          custom
         >
           <SidebarNavigationRow
             :data-cy="item.href"
