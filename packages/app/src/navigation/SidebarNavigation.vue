@@ -37,17 +37,17 @@
       >
         <RouterLink
           v-for="item in navigation"
-          v-slot="{ isActive }"
+          v-slot="{ isActive, navigate }"
           :key="item.name"
           :to="item.href"
           custom
         >
           <SidebarNavigationRow
-            :data-cy="item.href"
             :active="isActive"
             :icon="item.icon"
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
+            :navigate="navigate"
           />
         </RouterLink>
       </nav>

@@ -2,6 +2,14 @@ import type { SinonStub } from 'sinon'
 
 describe('Sidebar Navigation', () => {
   context('as e2e testing type with localSettings', () => {
+    it('meh', () => {
+      cy.scaffoldProject('todos')
+      cy.openProject('todos')
+      cy.startAppServer()
+      cy.visitApp()
+      cy.findByTestId('Runs').click()
+    })
+
     it('use saved state for nav size', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.localSettings.setPreferences(JSON.stringify({ reporterWidth: 100 }))
@@ -117,17 +125,17 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
       cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-      cy.findByTestId('/runs').trigger('mouseenter')
+      cy.findByTestId('Runs').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
-      cy.findByTestId('/runs').trigger('mouseout')
+      cy.findByTestId('Runs').trigger('mouseout')
 
-      cy.findByTestId('/specs').trigger('mouseenter')
+      cy.findByTestId('Specs').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
-      cy.findByTestId('/specs').trigger('mouseout')
+      cy.findByTestId('Specs').trigger('mouseout')
 
-      cy.findByTestId('/settings').trigger('mouseenter')
+      cy.findByTestId('Settings').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
-      cy.findByTestId('/settings').trigger('mouseout')
+      cy.findByTestId('Settings').trigger('mouseout')
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
