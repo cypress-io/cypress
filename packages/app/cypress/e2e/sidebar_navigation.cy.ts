@@ -218,16 +218,14 @@ describe('Sidebar Navigation', () => {
 
     it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
-      cy.findByText('Runs').should('be.visible')
-      cy.findByText('Runs').click()
+      cy.findByText('Runs').should('be.visible').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
       cy.findByTestId('nav-row-runs').should('have.attr', 'data-selected', 'true')
     })
 
     it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
       cy.findByTestId('sidebar').within(() => {
-        cy.findByText('Specs').should('be.visible')
-        cy.findByText('Specs').click()
+        cy.findByText('Specs').should('be.visible').click()
       })
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
