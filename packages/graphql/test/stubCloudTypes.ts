@@ -175,6 +175,8 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     totalTests: 10,
     totalPassed: 10,
     totalDuration: 300,
+    totalFlakyTests: 0,
+    tags: [],
     url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date('1995-12-17T03:17:00').toISOString(),
     commitInfo: createCloudRunCommitInfo({
