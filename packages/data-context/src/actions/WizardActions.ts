@@ -1,15 +1,14 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import { detectFramework, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
-import { detectRelativeWebpackConfig } from '@packages/config/src/detect/webpack'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
 import fs from 'fs-extra'
+import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions, detectRelativeViteConfig, detectRelativeWebpackConfig } from '@packages/config'
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
-import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -223,13 +222,15 @@ export class WizardActions {
     }
 
     const configFilePath = this.ctx.lifecycleManager.configFilePath
+    const bundler = this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack'
+
     const testingTypeInfo: AddTestingTypeToCypressConfigOptions['info'] = testingType === 'e2e' ? {
       testingType: 'e2e',
     } : {
       testingType: 'component',
-      bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
+      bundler,
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
-      configPath: detectRelativeWebpackConfig(this.ctx.currentProject),
+      configPath: bundler === 'vite' ? detectRelativeViteConfig(this.ctx.currentProject) : detectRelativeWebpackConfig(this.ctx.currentProject),
       needsExplicitConfig: this.ctx.coreData.wizard.chosenFramework?.category === 'library' ?? false,
     }
 
