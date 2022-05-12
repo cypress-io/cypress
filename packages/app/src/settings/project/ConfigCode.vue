@@ -29,6 +29,7 @@
             :browsers="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
             :data-cy-config="from"
+            :from="from"
           />
           <RenderObject
             v-else-if="value && typeof value === 'object'"

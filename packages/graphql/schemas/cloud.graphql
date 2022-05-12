@@ -228,6 +228,7 @@ type CloudRun implements Node {
   """
   id: ID!
   status: CloudRunStatus
+  tags: [CloudRunTag]
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -238,6 +239,11 @@ type CloudRun implements Node {
   This is the number of failed tests across all groups in the run
   """
   totalFailed: Int
+
+  """
+  Number of flaky tests
+  """
+  totalFlakyTests: Int
 
   """
   This is the number of passed tests across all groups in the run
@@ -328,6 +334,14 @@ enum CloudRunStatus {
   PASSED
   RUNNING
   TIMEDOUT
+}
+
+type CloudRunTag implements Node {
+  """
+  Globally unique identifier representing a concrete GraphQL ObjectType
+  """
+  id: ID!
+  name: String
 }
 
 """
