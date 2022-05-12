@@ -33,6 +33,7 @@ fragment RunsEmpty on CurrentProject {
   title
   projectId
   configFile
+  currentTestingType
   cloudProject {
     __typename
     ... on CloudProject {
@@ -58,7 +59,9 @@ const firstRecordKey = computed(() => {
     : '<record-key>'
 })
 const recordCommand = computed(() => {
-  return `cypress run --record --key ${firstRecordKey.value}`
+  const componentFlagOrSpace = props.gql.currentTestingType === 'component' ? ' --component ' : ' '
+
+  return `cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
 })
 </script>
 
