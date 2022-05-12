@@ -430,16 +430,12 @@ describe('App: Settings without cloud', () => {
 
       expect(browsers).to.have.length.greaterThan(1)
 
-      cy.contains(`browsers: [{`)
+      cy.contains(`browsers: [`)
       cy.contains(`name: 'chrome',`)
       cy.contains(`family: 'chromium',`)
       cy.contains(`channel: 'stable',`)
       cy.contains(`displayName: 'Chrome',`)
-      cy.contains(`version: '101.0.4951.54',`)
       cy.contains(`path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',`)
-      cy.contains(`minSupportedVersion: 64,`)
-      cy.contains(`majorVersion: 101,`)
-      cy.contains(`},{`)
 
       cy.percySnapshot()
     })

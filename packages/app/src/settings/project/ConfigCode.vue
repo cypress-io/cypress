@@ -24,15 +24,8 @@
           :key="field"
         >
           {{ field }}:
-          <Browsers
-            v-if="field === 'browsers' && Array.isArray(value)"
-            :browsers="value"
-            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
-            :data-cy-config="from"
-            :from="from"
-          />
           <RenderObject
-            v-else-if="value && typeof value === 'object'"
+            v-if="value && typeof value === 'object'"
             :value="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
             :from="from"
@@ -56,7 +49,6 @@ import Button from '@cy/components/Button.vue'
 import IconCode from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
-import Browsers from './renderers/Browsers.vue'
 import RenderObject from './renderers/RenderObject.vue'
 import { renderPrimitive } from './renderers/renderPrimitive'
 import { gql } from '@urql/core'

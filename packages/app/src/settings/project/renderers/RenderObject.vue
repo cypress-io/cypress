@@ -5,6 +5,7 @@
     :depth="props.depth"
     :color-classes="props.colorClasses"
     :data-cy-config="props.from"
+    :from="props.from"
   /><template v-else>
     <span
       :class="props.colorClasses"
