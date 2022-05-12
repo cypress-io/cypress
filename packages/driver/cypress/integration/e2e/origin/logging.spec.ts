@@ -42,7 +42,13 @@ describe('cy.origin logging', () => {
 
       expect(originLog.groupStart).to.be.true
 
-      done()
+      // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+      // commands may have origin's unload event bleed into subsequent tests
+      // and prevent stability from being reached, causing those tests to hang.
+      // We execute done after a brief timeout to ensure stability
+      // is reached for the next test. This timeout can be removed with the
+      // completion of: https://github.com/cypress-io/cypress/issues/21300
+      setTimeout(done, 0)
     })
 
     cy.visit('/fixtures/primary-origin.html')
@@ -64,7 +70,13 @@ describe('cy.origin logging', () => {
 
       expect(originLog.groupStart).to.be.true
 
-      done()
+      // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+      // commands may have origin's unload event bleed into subsequent tests
+      // and prevent stability from being reached, causing those tests to hang.
+      // We execute done after a brief timeout to ensure stability
+      // is reached for the next test. This timeout can be removed with the
+      // completion of: https://github.com/cypress-io/cypress/issues/21300
+      setTimeout(done, 0)
     })
 
     cy.visit('/fixtures/primary-origin.html')

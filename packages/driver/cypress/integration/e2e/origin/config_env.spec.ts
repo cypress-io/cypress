@@ -10,11 +10,6 @@
       error: 'cy-origin-error',
     }
 
-    beforeEach(() => {
-      cy.visit('/fixtures/primary-origin.html')
-      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
-    })
-
     afterEach(() => {
       // @ts-ignore
       window.top.__cySkipValidateConfig = true
