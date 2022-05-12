@@ -99,7 +99,7 @@ describe('App: Settings', () => {
       cy.waitForSpecToFinish()
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
-      cy.get(`[href='#/settings']`).click()
+      cy.findByTestId('nav-row-settings').click()
       cy.contains('Dashboard Settings').click()
       // Assert the data is not there before it arrives
       cy.contains('Record Key').should('not.exist')
@@ -114,7 +114,7 @@ describe('App: Settings', () => {
         o.sinon.spy(ctx.actions.auth, 'logout')
       })
 
-      cy.get(`[href='#/settings']`).click()
+      cy.findByTestId('nav-row-settings').click()
       cy.contains('Dashboard Settings').click()
       cy.contains('Record Key').should('exist')
       cy.get(`[href='#/runs']`).click()
@@ -125,7 +125,7 @@ describe('App: Settings', () => {
         expect(ctx.actions.auth.logout).to.have.been.calledOnce
       })
 
-      cy.get(`[href='#/settings']`).click()
+      cy.findByTestId('nav-row-settings').click()
       cy.contains('Dashboard Settings').click()
       cy.contains('Record Key').should('not.exist')
     })

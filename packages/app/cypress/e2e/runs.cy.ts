@@ -12,8 +12,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('resolves the runs page', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.get('[href="#/runs"]', { timeout: 1000 }).click()
-      cy.get('[data-cy="runs"]')
+      cy.findByTestId('nav-row-runs', { timeout: 1000 }).click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
     })
 
