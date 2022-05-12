@@ -482,7 +482,15 @@ declare namespace Cypress {
      */
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
+      /**
+       * @deprecated Use `cy.session()` instead.
+       * @see https://on.cypress.io/session
+       */
       preserveOnce(...names: string[]): void
+      /**
+       * @deprecated Use `cy.session()` instead.
+       * @see https://on.cypress.io/session
+       */
       defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 

@@ -224,8 +224,7 @@ describe('cy.origin Cypress API', () => {
       })
 
       cy.origin('http://foobar.com:3500', () => {
-        // @ts-ignore
-        Cypress.Cookies.preserveOnce({})
+        Cypress.Cookies.preserveOnce('')
       })
     })
 
