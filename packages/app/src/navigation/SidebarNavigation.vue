@@ -33,7 +33,7 @@
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
-        class="space-y-1 bg-gray-1000 flex-1"
+        class="bg-gray-1000 flex-1"
         :aria-label="t('sidebar.nav.ariaLabel')"
       >
         <RouterLink
