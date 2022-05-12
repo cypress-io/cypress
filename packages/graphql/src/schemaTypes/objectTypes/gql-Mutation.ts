@@ -570,7 +570,13 @@ export const mutation = mutationType({
         projectId: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+        try {
+          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+        } catch {
+          // We were unable to set the project id, the error isn't useful
+          // to show the user here, because they're prompted to update the id manually
+          return null
+        }
 
         // Wait for the project config to be reloaded
         await ctx.lifecycleManager.refreshLifecycle()
@@ -638,6 +644,35 @@ export const mutation = mutationType({
         await ctx.actions.project.pingBaseUrl()
 
         return {}
+      },
+    })
+
+    t.field('refreshOrganizations', {
+      type: Query,
+      description: 'Clears the cloudViewer cache to refresh the organizations',
+      resolve: async (source, args, ctx) => {
+        await ctx.cloud.invalidate('Query', 'cloudViewer')
+
+        return {}
+      },
+    })
+
+    t.field('refetchRemote', {
+      type: Query,
+      description: 'Signal that we are explicitly refetching remote data and should not use the server cache',
+      resolve: () => {
+        return {
+          requestPolicy: 'network-only',
+        } as const
+      },
+    })
+
+    t.boolean('_clearCloudCache', {
+      description: 'Internal use only, clears the cloud cache',
+      resolve: (source, args, ctx) => {
+        ctx.cloud.reset()
+
+        return true
       },
     })
   },
