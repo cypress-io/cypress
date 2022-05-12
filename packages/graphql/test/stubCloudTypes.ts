@@ -22,10 +22,10 @@ import type {
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
   CloudRunStatus,
-} from '../generated/test-cloud-graphql-types.gen'
+} from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
-type ConfigFor<T> = Omit<T, 'id' | '__typename'>
+ type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
 export type CloudTypesWithId = {
   [K in keyof CodegenTypeMap]: 'id' extends keyof CodegenTypeMap[K] ? K : never
@@ -95,6 +95,19 @@ export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
     recordKeys: [CloudRecordKeyStubs.componentProject],
     latestRun: CloudRunStubs.running,
     runs (args: CloudProjectRunsArgs) {
+      if (args.before) {
+        return {
+          pageInfo: {
+            hasNextPage: true,
+            hasPreviousPage: false,
+          },
+          nodes: [
+            createCloudRun({ status: 'RUNNING' }),
+            createCloudRun({ status: 'RUNNING' }),
+          ],
+        }
+      }
+
       const twentyRuns = _.times(20, (i) => {
         const statusIndex = i % STATUS_ARRAY.length
         const status = STATUS_ARRAY[statusIndex]
@@ -155,20 +168,23 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
   const cloudRunData: Required<CloudRun> = {
     ...testNodeId('CloudRun'),
     status: 'PASSED',
+    runNumber: 432,
     totalFailed: 0,
     totalSkipped: 0,
     totalPending: 0,
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
-    totalFlakyTests: null,
-    commitInfo: null,
     totalDuration: 300,
+    totalFlakyTests: 0,
+    tags: [],
     url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date('1995-12-17T03:17:00').toISOString(),
-    completedAt: new Date('1995-12-17T03:17:00').toISOString(),
-    runNumber: 1,
-    tags: null,
+    completedAt: null,
+    commitInfo: createCloudRunCommitInfo({
+      sha: `fake-sha-${getNodeIdx('CloudRun')}`,
+      summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
+    }),
     ...config,
   }
 
@@ -268,17 +284,22 @@ interface CloudTypesContext {
   __server__?: NexusGen['context']
 }
 
-type MaybeResolver<T> = {
-  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: CloudTypesContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
-}
+ type MaybeResolver<T> = {
+   [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: CloudTypesContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
+ }
 
-export const CloudRunQuery: MaybeResolver<Query> = {
+export const CloudQuery: MaybeResolver<Query> = {
   __typename: 'Query',
   cloudNode (args: QueryCloudNodeArgs) {
     return nodeRegistry[args.id] ?? null
   },
   cloudProjectBySlug (args: QueryCloudProjectBySlugArgs) {
-    return CloudProjectStubs.componentProject
+    return projectsBySlug[args.slug] ?? createCloudProject({
+      slug: args.slug,
+      name: `cloud-project-${args.slug}`,
+      cloudProjectSettingsUrl: 'http:/test.cloud/cloud-project/settings',
+      cloudProjectUrl: 'http:/test.cloud/cloud-project/settings',
+    })
   },
   cloudProjectsBySlugs (args: QueryCloudProjectsBySlugsArgs) {
     return args.slugs.map((s) => {
@@ -300,5 +321,8 @@ export const CloudRunQuery: MaybeResolver<Query> = {
     }
 
     return CloudUserStubs.me
+  },
+  cloudNodesByIds ({ ids }) {
+    return ids.map((id) => nodeRegistry[id] ?? null)
   },
 }

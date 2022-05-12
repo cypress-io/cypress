@@ -8,7 +8,7 @@
   >
     <ListRowHeader
       :icon="icon"
-      data-cy="run-card-icon"
+      :data-cy="`run-card-icon-${run.status}`"
     >
       <template #header>
         {{ run.commitInfo?.summary }}

@@ -1,5 +1,5 @@
 import { defaultMessages } from '@cy/i18n'
-import { CloudRunStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunResults from './RunResults.vue'
 

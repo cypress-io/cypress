@@ -5,6 +5,7 @@
       :key="i"
       class="flex px-2 items-center hover:bg-indigo-50"
       :title="result.name"
+      :data-cy="`runResults-${result.name}-count`"
     >
       <component
         :is="result.icon"
@@ -26,7 +27,7 @@ export interface RunResultProps {
   totalSkipped: number|string|null
 }
 
-// import { RunResultProps } from './RunResultProps'
+import { computed } from 'vue'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
@@ -36,30 +37,33 @@ const { t } = useI18n()
 
 const props = defineProps<RunResultProps>()
 
-const results = [
-  {
-    value: props.totalSkipped,
-    class: 'icon-dark-gray-400',
-    icon: SkippedIcon,
-    name: t('runs.results.skipped'),
-  },
-  {
-    value: props.totalPending,
-    class: 'icon-dark-gray-400 icon-light-white',
-    icon: PendingIcon,
-    name: t('runs.results.pending'),
-  },
-  {
-    value: props.totalPassed,
-    class: 'icon-dark-jade-400',
-    icon: PassedIcon,
-    name: t('runs.results.passed'),
-  },
-  {
-    value: props.totalFailed,
-    class: 'icon-dark-red-400',
-    icon: FailedIcon,
-    name: t('runs.results.failed'),
-  },
-]
+const results = computed(() => {
+  return [
+    {
+      value: props.totalSkipped,
+      class: 'icon-dark-gray-400',
+      icon: SkippedIcon,
+      name: t('runs.results.skipped'),
+    },
+    {
+      value: props.totalPending,
+      class: 'icon-dark-gray-400 icon-light-white',
+      icon: PendingIcon,
+      name: t('runs.results.pending'),
+    },
+    {
+      value: props.totalPassed,
+      class: 'icon-dark-jade-400',
+      icon: PassedIcon,
+      name: t('runs.results.passed'),
+    },
+    {
+      value: props.totalFailed,
+      class: 'icon-dark-red-400',
+      icon: FailedIcon,
+      name: t('runs.results.failed'),
+    },
+  ]
+})
+
 </script>

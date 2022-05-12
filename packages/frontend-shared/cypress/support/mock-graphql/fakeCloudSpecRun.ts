@@ -19,7 +19,7 @@ export const fakeRuns: (statuses: CloudRunStatus[]) => CloudSpecRun[] = (statuse
       id: `SpecRun_${idx}`,
       status: s,
       createdAt: new Date('2022-05-08T03:17:00').toISOString(),
-      buildNumber: 432,
+      runNumber: 432,
       groupCount: 2,
       specDuration: {
         min: 143.3333, // 2:23
