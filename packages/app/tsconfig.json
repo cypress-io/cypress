@@ -24,8 +24,7 @@
       "cypress", 
       "cypress-real-events", 
       "@intlify/vite-plugin-vue-i18n/client",
-      "@testing-library/cypress",
-      "cypress-axe"
+      "@testing-library/cypress"
     ]
   }
 }
