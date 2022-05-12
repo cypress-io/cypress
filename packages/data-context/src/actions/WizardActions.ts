@@ -229,7 +229,8 @@ export class WizardActions {
       testingType: 'component',
       bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
-      webpackConfigPath: detectRelativeWebpackConfig(this.ctx.currentProject),
+      configPath: detectRelativeWebpackConfig(this.ctx.currentProject),
+      needsExplicitConfig: this.ctx.coreData.wizard.chosenFramework?.category === 'library' ?? false,
     }
 
     const result = await addTestingTypeToCypressConfig({

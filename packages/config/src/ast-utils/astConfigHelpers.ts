@@ -27,8 +27,9 @@ export function addE2EDefinition (): t.ObjectProperty {
 export interface ASTComponentDefinitionConfig {
   testingType: 'component'
   bundler: 'vite' | 'webpack'
-  webpackConfigPath?: string
+  configPath?: string
   framework?: string
+  needsExplicitConfig: boolean
 }
 
 /**
@@ -42,7 +43,18 @@ export interface ASTComponentDefinitionConfig {
  * }
  */
 export function addComponentDefinition (config: ASTComponentDefinitionConfig): t.ObjectProperty {
-  if (config.webpackConfigPath) {
+  const bundlers = {
+    vite: {
+      name: 'Vite',
+      key: 'viteConfig',
+    },
+    webpack: {
+      name: 'webpack',
+      key: 'webpackConfig',
+    },
+  } as const
+
+  if (config.bundler === 'webpack' && config.needsExplicitConfig && config.configPath) {
     return extractProperty(`
       const toMerge = {
         component: {
@@ -56,14 +68,41 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
     `)
   }
 
+  if (config.bundler === 'vite' && config.needsExplicitConfig && config.configPath) {
+    return extractProperty(`
+      const toMerge = {
+        component: {
+          devServer: {
+            framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
+            bundler: '${config.bundler}',
+            viteConfig,
+          },
+        },
+      }
+    `)
+  }
+
+  if (config.needsExplicitConfig) {
+    return extractProperty(`
+      const toMerge = {
+        component: {
+          devServer: {
+            framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
+            bundler: '${config.bundler}', 
+            // provide your ${bundlers[config.bundler].name} config here...
+            // ${bundlers[config.bundler].key},
+          },
+        },
+      }
+    `)
+  }
+
   return extractProperty(`
     const toMerge = {
       component: {
         devServer: {
           framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
           bundler: '${config.bundler}', 
-          // provide your webpack config here...
-          // webpackConfig,
         },
       },
     }
@@ -115,10 +154,10 @@ export type ModuleToAdd = ESModuleToAdd | CommonJSModuleToAdd
  *
  * import webpackConfig from <file>
  */
-export function addESModuleDefinition (file: string): ESModuleToAdd {
+export function addESModuleDefinition (file: string, identifier: 'viteConfig' | 'webpackConfig'): ESModuleToAdd {
   return {
     node: t.importDeclaration(
-      [t.importDefaultSpecifier(t.identifier('webpackConfig'))],
+      [t.importDefaultSpecifier(t.identifier(identifier))],
       t.stringLiteral(file),
     ),
     type: 'ES',
@@ -130,8 +169,8 @@ export function addESModuleDefinition (file: string): ESModuleToAdd {
  *
  * const webpackConfig = require(<file>)
  */
-export function addCommonJSModuleDefinition (file: string): CommonJSModuleToAdd {
-  const parsed = parse(`const webpackConfig = require('${file}')`, {
+export function addCommonJSModuleDefinition (file: string, identifier: 'viteConfig' | 'webpackConfig'): CommonJSModuleToAdd {
+  const parsed = parse(`const ${identifier} = require('${file}')`, {
     parser: require('recast/parsers/typescript'),
   }) as t.File
 

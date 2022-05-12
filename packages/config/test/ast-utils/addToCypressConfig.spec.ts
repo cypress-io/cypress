@@ -145,6 +145,34 @@ describe('addToCypressConfig', () => {
     expect(result.result).to.eq('MERGED')
   })
 
+  it('adds vite bundler in component testing to e2e config', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.ts'),
+      info: {
+        testingType: 'component',
+        bundler: 'vite',
+        framework: 'react',
+      },
+      isProjectUsingESModules: false,
+    })
+
+    expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
+    export default {
+      e2e: {},
+    
+      component: {
+        devServer: {
+          framework: "react",
+          bundler: "vite",
+          // provide your Vite config here...
+          // viteConfig,
+        },
+      },
+    };`.trim())
+
+    expect(result.result).to.eq('MERGED')
+  })
+
   it('adds component testing and webpack config to e2e config', async () => {
     const result = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.ts'),
@@ -152,7 +180,7 @@ describe('addToCypressConfig', () => {
         testingType: 'component',
         bundler: 'webpack',
         framework: 'react',
-        webpackConfigPath: './webpack.config.ts',
+        configPath: './webpack.config.ts',
       },
       isProjectUsingESModules: true,
     })
@@ -181,7 +209,7 @@ describe('addToCypressConfig', () => {
         testingType: 'component',
         bundler: 'webpack',
         framework: 'react',
-        webpackConfigPath: './webpack.config.js',
+        configPath: './webpack.config.js',
       },
       isProjectUsingESModules: false,
     })

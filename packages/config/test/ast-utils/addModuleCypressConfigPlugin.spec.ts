@@ -7,7 +7,7 @@ pluginTester({
   pluginName: 'addToCypressConfigPlugin: ESM config w/ component with webpack config',
   plugin: () => {
     return addESModuleImportToCypressConfigPlugin(
-      addESModuleDefinition('./webpack.config.js').node,
+      addESModuleDefinition('./webpack.config.js', 'webpackConfig').node,
       { shouldThrow: false },
     )
   },
@@ -18,7 +18,7 @@ pluginTester({
   pluginName: 'addToCypressConfigPlugin: CJS config w/ component with webpack config',
   plugin: () => {
     return addCommonJSModuleImportToCypressConfigPlugin(
-      addCommonJSModuleDefinition('./webpack.config.js').node,
+      addCommonJSModuleDefinition('./webpack.config.js', 'webpackConfig').node,
       { shouldThrow: false },
     )
   },

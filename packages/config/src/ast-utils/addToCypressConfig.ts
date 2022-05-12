@@ -117,11 +117,21 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
 
   const modulesToAdd: ModuleToAdd[] = []
 
-  if (options.info.testingType === 'component' && options.info.webpackConfigPath) {
-    if (options.isProjectUsingESModules) {
-      modulesToAdd.push(addESModuleDefinition(options.info.webpackConfigPath))
-    } else {
-      modulesToAdd.push(addCommonJSModuleDefinition(options.info.webpackConfigPath))
+  if (options.info.testingType === 'component') {
+    if (options.info.bundler === 'webpack' && options.info.configPath) {
+      if (options.isProjectUsingESModules) {
+        modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'webpackConfig'))
+      } else {
+        modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'webpackConfig'))
+      }
+    }
+
+    if (options.info.bundler === 'vite' && options.info.configPath) {
+      if (options.isProjectUsingESModules) {
+        modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'viteConfig'))
+      } else {
+        modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'viteConfig'))
+      }
     }
   }
 
