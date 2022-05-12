@@ -1,6 +1,6 @@
 import CloudConnectButton from './CloudConnectButton.vue'
 import { CloudConnectButtonFragmentDoc } from '../generated/graphql-test'
-import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<CloudConnectButton />', () => {
   it('show user connect if not connected', () => {
