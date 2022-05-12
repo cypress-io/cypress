@@ -1,5 +1,7 @@
 import type { DataContext } from './DataContext'
 
+export { DocumentNodeBuilder } from './util/DocumentNodeBuilder'
+
 export {
   DataContext,
 } from './DataContext'

@@ -3,6 +3,12 @@ import { EventEmitter } from 'stream'
 
 import type { DataContext } from '../DataContext'
 
+export interface PushFragmentData {
+  data: any
+  target: string
+  fragment: string
+}
+
 abstract class DataEmitterEvents {
   protected pub = new EventEmitter()
 
@@ -74,6 +80,14 @@ abstract class DataEmitterEvents {
     this._emit('specsChange')
   }
 
+  /**
+   * When we want to update the cache with known values from the server, without
+   * triggering a full refresh, we can send down a specific fragment / data to update
+   */
+  pushFragment (toPush: PushFragmentData[]) {
+    this._emit('pushFragment', toPush)
+  }
+
   private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
     this.pub.emit(evt, ...args)
   }
@@ -125,7 +139,8 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, sendInitial = true): AsyncGenerator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean}): AsyncGenerator<any> {
+    const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
     let pending: any[] = []
