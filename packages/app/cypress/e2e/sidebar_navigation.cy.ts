@@ -73,7 +73,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('expands the left nav bar by default', () => {
-      cy.findByTestId('sidebar').should('have.css', 'width', '248px')
+      cy.findByTestId('sidebar').should('have.css', 'width', '248px') // assert width to ensure transition has finished
       cy.percySnapshot()
     })
 
@@ -109,7 +109,7 @@ describe('Sidebar Navigation', () => {
 
     it('has menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
       cy.findByTestId('toggle-sidebar').click()
-      cy.findByTestId('sidebar').should('have.css', 'width', '64px')
+      cy.findByTestId('sidebar').should('have.css', 'width', '64px') // assert width to ensure transition has finished
 
       cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
@@ -127,7 +127,7 @@ describe('Sidebar Navigation', () => {
 
     it('shows a tooltip when hovering over menu item', () => {
       cy.findByTestId('toggle-sidebar').click()
-      cy.findByTestId('sidebar').should('have.css', 'width', '64px')
+      cy.findByTestId('sidebar').should('have.css', 'width', '64px') // assert width to ensure transition has finished
 
       cy.findByTestId('sidebar-header').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'todos')
