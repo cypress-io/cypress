@@ -110,9 +110,10 @@ export async function generateFrontendSchema () {
   const testExtensions = generateTestExtensions(schema)
   const extendedSchema = extendSchema(schema, parse(testExtensions))
 
-  const URQL_INTROSPECTION_PATH = path.join(monorepoPaths.pkgFrontendShared, 'src/generated/urql-introspection.gen.ts')
+  const URQL_INTROSPECTION_PATH = path.join(monorepoPaths.pkgDataContext, 'src/gen/urql-introspection.gen.ts')
 
   await fs.ensureDir(path.dirname(URQL_INTROSPECTION_PATH))
+  await fs.ensureDir(path.join(monorepoPaths.pkgFrontendShared, 'src/generated'))
   await fs.writeFile(path.join(monorepoPaths.pkgFrontendShared, 'src/generated/schema-for-tests.gen.json'), JSON.stringify(introspectionFromSchema(extendedSchema), null, 2))
 
   await fs.promises.writeFile(

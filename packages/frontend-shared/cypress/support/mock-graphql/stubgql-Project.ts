@@ -7,7 +7,7 @@ import type {
   GlobalProject,
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './clientTestUtils'
-import { CloudProjectStubs } from './stubgql-CloudTypes'
+import { CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { stubBrowsers } from './stubgql-Browser'
 
 export const createTestGlobalProject = (title: string, additionalConfig: Partial<GlobalProject> = {}): GlobalProject => {
@@ -43,11 +43,6 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     ],
     config,
     cloudProject: CloudProjectStubs.componentProject,
-    codeGenGlobs: {
-      id: 'super-unique-id',
-      __typename: 'CodeGenGlobs',
-      component: '**/*.vue',
-    },
     activeBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
