@@ -92,10 +92,10 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const childProcess = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
     const ipc = new LegacyPluginsIpc(childProcess)
 
-    childProcess.on('error', (err) => {
-      err = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, err)
+    childProcess.on('error', (error) => {
+      error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
 
-      reject(err)
+      reject(error)
       ipc.killChildProcess()
     })
 
@@ -120,6 +120,8 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     })
 
     ipc.on('loadLegacyPlugins:error', (error) => {
+      error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
+
       reject(error)
       ipc.killChildProcess()
     })
