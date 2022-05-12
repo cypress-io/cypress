@@ -34,7 +34,7 @@
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
-        aria-label="Pages"
+        :aria-label="t('sidebar.nav.ariaLabel')"
       >
         <RouterLink
           v-for="item in navigation"

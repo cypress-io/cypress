@@ -144,6 +144,9 @@
     "toggleLabel": {
       "expanded": "Collapse sidebar",
       "collapsed": "Expand sidebar"
+    },
+    "nav": {
+      "ariaLabel": "Pages"
     }
   },
   "topNav": {
