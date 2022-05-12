@@ -117,8 +117,8 @@ describe('App: Settings', () => {
       cy.findByTestId('nav-row-settings').click()
       cy.contains('Dashboard Settings').click()
       cy.contains('Record Key').should('exist')
-      cy.get(`[href='#/runs']`).click()
-      cy.get('[data-cy="user-avatar-title"]').click()
+      cy.findByTestId('nav-row-runs').click()
+      cy.findByTestId('user-avatar-title').click()
       cy.findByRole('button', { name: 'Log Out' }).click()
 
       cy.withRetryableCtx((ctx, o) => {
