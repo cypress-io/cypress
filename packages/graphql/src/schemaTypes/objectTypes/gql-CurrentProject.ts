@@ -2,7 +2,6 @@ import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum } from '..'
-import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
@@ -35,6 +34,10 @@ export const CurrentProject = objectType({
       description: 'Whether we are currently loading the setupNodeEvents',
     })
 
+    t.boolean('isFullConfigReady', {
+      description: 'Whether or not the full config is ready',
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
@@ -64,7 +67,12 @@ export const CurrentProject = objectType({
           return null
         }
 
-        return cloudProjectBySlug(projectId, ctx, info)
+        return ctx.cloud.delegateCloudField({
+          field: 'cloudProjectBySlug',
+          args: { slug: projectId },
+          ctx,
+          info,
+        })
       },
     })
 

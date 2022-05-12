@@ -1,24 +1,35 @@
 <template>
-  <div class="h-full grid gap-9px grid-cols-[16px,auto] git-info-row items-center">
-    <span
-      class="flex w-16px items-center justify-center"
-      :data-cy="`git-status-${props.gql.statusType}`"
+  <div
+    class="h-full grid gap-9px grid-cols-[16px,auto] git-info-row items-center"
+    data-cy="git-info-row"
+  >
+    <Tooltip
+      placement="top"
+      class="h-full grid items-center"
+      :disabled="!classes.showTooltip"
     >
-      <span
-        v-if="props.gql.statusType !== 'unmodified'"
-        class="rounded-full border-1 min-w-6px min-h-6px max-w-6px max-h-6px"
-        :class="classes?.indicator"
+      <component
+        :is="classes.icon"
+        :class="classes.iconClasses"
       />
-      <IconGithub
-        v-else
-        class="min-w-16px min-h-16px max-w-16px max-h-16px icon-dark-gray-300 group-hocus:icon-dark-indigo-500"
-      />
-    </span>
+      <template
+        v-if="classes.showTooltip"
+        #popper
+      >
+        <div>
+          <p class="max-w-sm text-sm truncate overflow-hidden">
+            {{ props.gql.subject }}
+          </p>
+          <p class="text-xs">
+            {{ gitTooltipSubtext }}
+          </p>
+        </div>
+      </template>
+    </Tooltip>
     <div
-      class="overflow-hidden truncate"
-      :class="classes?.gitText"
+      class="text-gray-700 overflow-hidden truncate"
     >
-      {{ gitInfoText }}
+      {{ props.gql?.lastModifiedHumanReadable ?? '' }}
     </div>
   </div>
 </template>
@@ -28,9 +39,10 @@ import { gql } from '@urql/core'
 import type { SpecListRowFragment } from '../generated/graphql'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import DocumentIconPlus from '~icons/cy/document-plus_x16'
 import DocumentIconPlusMinus from '~icons/cy/document-plus-minus_x16'
-import IconGithub from '~icons/cy/github'
+import CommitIcon from '~icons/cy/commit_x14'
 
 const { t } = useI18n()
 
@@ -40,6 +52,8 @@ fragment SpecListRow on GitInfo {
   lastModifiedHumanReadable
   author
   statusType
+  shortHash
+  subject
 }
 `
 
@@ -50,36 +64,32 @@ const props = defineProps<{
 const classes = computed(() => {
   return {
     created: {
-      indicator: 'border-jade-400 bg-jade-300',
-      gitText: 'text-jade-500',
       icon: DocumentIconPlus,
       iconClasses: 'icon-dark-jade-400 icon-light-jade-50',
+      showTooltip: false,
     },
     modified: {
-      indicator: 'border-orange-400 bg-orange-300',
-      gitText: 'text-orange-500',
       icon: DocumentIconPlusMinus,
       iconClasses: 'icon-dark-orange-400 icon-light-orange-50',
+      showTooltip: false,
     },
     unmodified: {
-      indicator: 'border-transparent bg-transparent',
-      gitText: 'text-gray-600 group-hocus:text-indigo-500',
+      icon: CommitIcon,
+      iconClasses: 'icon-light-gray-500',
+      showTooltip: true,
     },
-  }[props.gql.statusType || 'modified']
+  }[props.gql?.statusType || 'unmodified']
 })
 
-const gitInfoText = computed(() => {
-  if (props.gql.statusType === 'unmodified') {
-    return t('specPage.rows.gitInfoWithAuthor', {
-      fileState: t(`file.git.${props.gql.statusType}`),
-      timeAgo: props.gql.lastModifiedHumanReadable,
+const gitTooltipSubtext = computed(() => {
+  if (props.gql?.statusType === 'unmodified') {
+    return t('specPage.rows.gitTooltipSubtext', {
       author: props.gql.author,
+      shortHash: props.gql.shortHash,
     })
   }
 
-  return t('specPage.rows.gitInfo', {
-    fileState: t(`file.git.${props.gql.statusType}`),
-    timeAgo: props.gql.lastModifiedHumanReadable,
-  })
+  return ''
 })
+
 </script>
