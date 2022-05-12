@@ -87,7 +87,6 @@
     "@graphql-codegen/typescript": "2.4.2",
     "@graphql-codegen/typescript-operations": "2.2.3",
     "@graphql-codegen/typescript-urql-graphcache": "2.2.3",
-    "@graphql-tools/batch-delegate": "8.1.0",
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/utils": "8.2.3",
     "@graphql-tools/wrap": "8.1.1",

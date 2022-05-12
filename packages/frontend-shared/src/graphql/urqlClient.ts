@@ -1,5 +1,5 @@
-import type { Exchange, Client } from '@urql/core'
-import {
+import { pipe, subscribe } from 'wonka'
+import { Exchange, Client, gql,
   createClient,
   dedupExchange,
   errorExchange,
@@ -14,13 +14,13 @@ import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
-
-import { urqlSchema } from '../generated/urql-introspection.gen'
+import { urqlSchema } from '@packages/data-context/src/gen/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
+import type { DocumentNode } from 'graphql'
 
 const toast = useToast()
 
@@ -29,6 +29,15 @@ export function makeCacheExchange (schema: any = urqlSchema) {
     ...urqlCacheKeys,
     schema,
     updates: {
+      Subscription: {
+        pushFragment (parent, args, cache, info) {
+          const { pushFragment } = parent as { pushFragment: { id?: string, fragment: DocumentNode, data: any, typename: string }[] }
+
+          for (const toPush of pushFragment) {
+            cache.writeFragment(toPush.fragment, toPush.data)
+          }
+        },
+      },
       Mutation: {
         logout (parent, args, cache, info) {
           // Invalidate all queries locally upon logging out, to ensure there's no stale cloud data
@@ -155,6 +164,22 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
   })
 
   await connectPromise
+
+  // https://formidable.com/open-source/urql/docs/advanced/subscriptions/#one-off-subscriptions
+  pipe(
+    client.subscription(gql`
+      subscription urqlClient_PushFragment {
+        pushFragment {
+          target
+          fragment
+          data
+        }
+      }
+    `),
+    subscribe((val) => {
+      // console.log(val)
+    }),
+  )
 
   return client
 }
