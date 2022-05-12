@@ -14,6 +14,10 @@ export type RemoteFieldDefinitionConfig<TypeName extends string, FieldName exten
    */
   type: CloudRemoteTargets
   /**
+   * Args to make available to the field definition
+   */
+  args?: core.ArgsRecord
+  /**
    * Optional description for the field
    */
   description?: string
@@ -41,18 +45,18 @@ export type RemoteFieldDefinitionConfig<TypeName extends string, FieldName exten
 } & AdditionalRemoteFieldProps<TypeName, FieldName, RemoteField>
 
 // If not every member of CloudQueryArgs is provided, then we will not issue the request
-export type AdditionalRemoteFieldProps<TypeName extends string, FieldName extends string, RemoteField extends CloudQueryFields> = CloudQueryArgs<RemoteField> extends never ? {
-  queryArgs?: RemoteQueryArgsResolver<TypeName, FieldName, CloudQueryArgs<RemoteField>>
+export type AdditionalRemoteFieldProps<TypeName extends string, FieldName extends string, RemoteField extends CloudQueryFields> = RemoteField extends never ? {
+  queryArgs?: RemoteQueryArgsResolver<TypeName, FieldName, any>
 } : {
-  queryArgs: RemoteQueryArgsResolver<TypeName, FieldName, CloudQueryArgs<RemoteField>>
+  queryArgs: RemoteQueryArgsResolver<TypeName, FieldName, RemoteField>
 }
 
-export type RemoteQueryArgsResolver<TypeName extends string, FieldName extends string, RemoteArgs> = (
+export type RemoteQueryArgsResolver<TypeName extends string, FieldName extends string, RemoteField extends CloudQueryFields> = (
   source: core.SourceValue<TypeName>,
   args: core.ArgsValue<TypeName, FieldName>,
   ctx: DataContext,
   info: GraphQLResolveInfo
-) => core.MaybePromise<RemoteArgs | false>
+) => core.MaybePromise<CloudQueryArgs<RemoteField> | false>
 
 export const remoteFieldPlugin = plugin({
   name: 'remoteFieldPlugin',
@@ -117,7 +121,7 @@ export const remoteFieldPlugin = plugin({
         t.field(fieldName, {
           type: fieldType as any,
           description: fieldConfig.description ?? 'Wrapper for resolving remote data associated with this field',
-
+          args: fieldConfig.args ?? {},
           // Wrap with a batch resolver, so we aren't doing the same info parsing for each row
           resolve: createBatchResolver((sources, args, ctx, info) => {
             return ctx.remoteRequest.batchResolveRemoteFields(fieldConfig, sources, args, ctx, info)

@@ -99,24 +99,24 @@ export class RemoteRequestDataSource {
 
     const cachedData = ctx.cloud.readFromCache(params)
 
+    // If we have stale data, and we should fetch - fetch the data
+    if (cachedData?.stale && shouldFetch) {
+      // Otherwise, fetch it
+      this.#executeRemote(params)
+
+      return {
+        ...partialResult,
+        status: 'FETCHING',
+      }
+    }
+
     if (cachedData) {
       // If we have the data, but it's marked as stale (meaning this is a partial eager response)
       if (cachedData.stale) {
         // If we're not fetching, say it's not fetched but put the data under dataRaw for debugging
-        if (!shouldFetch) {
-          return {
-            ...partialResult,
-            status: 'NOT_FETCHED',
-            dataRaw: cachedData.data,
-          }
-        }
-
-        // Otherwise, fetch it
-        this.#executeRemote(params)
-
         return {
           ...partialResult,
-          status: 'FETCHING',
+          status: 'NOT_FETCHED',
           dataRaw: cachedData.data,
         }
       }
@@ -137,6 +137,7 @@ export class RemoteRequestDataSource {
       }
     }
 
+    // Otherwise, fetch it
     this.#executeRemote(params)
 
     return {
