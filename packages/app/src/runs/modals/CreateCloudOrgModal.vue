@@ -10,7 +10,7 @@
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
       <ExternalLink
-        class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
+        class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-11px px-16px inline-block hocus-default"
         :href="createOrgUrl"
         :include-graphql-port="true"
         @click="startWaitingOrgToBeCreated()"
