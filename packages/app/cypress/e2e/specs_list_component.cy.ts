@@ -10,7 +10,7 @@ describe('App: Spec List (Component)', () => {
     cy.contains('button', 'View spec pattern').click()
 
     cy.get('[data-cy="spec-pattern-modal"]').should('be.visible')
-    cy.get('[data-cy="spec-pattern"]').contains('cypress/component-tests/**/*')
+    cy.get('[data-cy="spec-pattern"]').contains('cypress/component-tests/*.spec.js')
 
     cy.contains('button', 'Update Spec Pattern').click()
     cy.get('[data-cy="choose-editor-modal"]').should('be.visible').within(() => {
