@@ -57,7 +57,7 @@ generates:
           nonOptionalTypename: true
       - 'packages/frontend-shared/script/codegen-type-map.js'
 
-  './packages/frontend-shared/cypress/support/generated/test-cloud-graphql-types.gen.ts':
+  './packages/graphql/src/gen/test-cloud-graphql-types.gen.ts':
     schema: 'packages/graphql/schemas/cloud.graphql'
     plugins:
       - add:
