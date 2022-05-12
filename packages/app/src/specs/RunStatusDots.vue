@@ -1,50 +1,72 @@
 <template>
-  <div
-    class="flex justify-center"
-    data-cy="run-status-dots"
+  <Tooltip
+    v-if="latestRun"
+    placement="top"
+    :is-interactive="true"
+    :interactive-highlight-color="latestRunColor"
   >
-    <ol
-      class="list-none h-16px mb-0 pl-0 inline-block"
+    <div
+      class="flex justify-center"
+      data-cy="run-status-dots"
     >
-      <li
-        v-for="(dot,i) in dotClasses"
-        :key="i"
-        class="ml-4px inline-block align-middle"
+      <ol
+        class="list-none h-16px mb-0 pl-0 inline-block"
       >
-        <i-cy-dot-solid_x4
-          width="4"
-          height="4"
-          :class="dot"
-        />
-      </li>
-      <li class="ml-4px inline-block align-middle">
-        <component
-          :is="latestStatus.icon"
-          width="16"
-          height="16"
-          :class="{'animate-spin': latestStatus.spin}"
-        />
-      </li>
-    </ol>
-  </div>
+        <li
+          v-for="(dot,i) in dotClasses"
+          :key="i"
+          class="ml-4px inline-block align-middle"
+        >
+          <i-cy-dot-solid_x4
+            width="4"
+            height="4"
+            :class="dot"
+          />
+        </li>
+        <li class="ml-4px inline-block align-middle">
+          <component
+            :is="latestStatus.icon"
+            width="16"
+            height="16"
+            :class="{'animate-spin': latestStatus.spin}"
+          />
+        </li>
+      </ol>
+    </div>
+    <template
+      #popper
+    >
+      <SpecRunSummary
+        v-if="latestRun"
+        :run="latestRun"
+        :spec-file="props.specFile"
+      />
+    </template>
+  </Tooltip>
 </template>
 
 <script setup lang="ts">
 
-import type { CloudRun } from '../../../graphql/src/gen/cloud-source-types.gen'
-import { computed } from 'vue'
+import type { CloudSpecRun } from '../../../graphql/src/gen/cloud-source-types.gen'
+import Tooltip, { InteractiveHighlightColor } from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { computed, ComputedRef } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
 import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
+import SpecRunSummary from './SpecRunSummary.vue'
 
 type Maybe<T> = T | null;
 
 const props = withDefaults(defineProps<{
-  runs: Maybe<CloudRun>[]
-}>(), { runs: () => [] })
+  runs: Maybe<CloudSpecRun>[]
+  specFile: string|null
+}>(), {
+  runs: () => [],
+  specFile: null,
+})
 
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
@@ -76,12 +98,22 @@ const dotClasses = computed(() => {
   })
 })
 
-const latestStatus = computed(() => {
+const latestRun = computed(() => {
   if (props.runs == null || props.runs.length === 0 || props.runs[0] === null) {
+    return null
+  }
+
+  return props.runs[0]
+})
+
+const latestStatus = computed(() => {
+  const run = latestRun.value
+
+  if (!run) {
     return { icon: PlaceholderIcon, spin: false }
   }
 
-  switch (props.runs[0]?.status) {
+  switch (run.status) {
     case 'PASSED':
       return { icon: PassedIcon, spin: false }
     case 'RUNNING':
@@ -97,6 +129,32 @@ const latestStatus = computed(() => {
       return { icon: CancelledIcon, spin: false }
     default:
       return { icon: PlaceholderIcon, spin: false }
+  }
+})
+
+const latestRunColor: ComputedRef<InteractiveHighlightColor> = computed(() => {
+  const run = latestRun.value
+
+  if (!run) {
+    return 'GRAY'
+  }
+
+  switch (run.status) {
+    case 'PASSED':
+      return 'JADE'
+    case 'RUNNING':
+      return 'INDIGO'
+    case 'FAILED':
+      return 'RED'
+    case 'ERRORED':
+    case 'OVERLIMIT':
+    case 'TIMEDOUT':
+      return 'ORANGE'
+    case 'NOTESTS':
+    case 'CANCELLED':
+      return 'GRAY'
+    default:
+      return 'GRAY'
   }
 })
 

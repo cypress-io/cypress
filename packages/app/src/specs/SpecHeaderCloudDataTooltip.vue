@@ -14,6 +14,7 @@
       >
         <div
           :class="{'m-2': projectConnectionStatus!== 'CONNECTED'}"
+          class="max-w-210px"
         >
           {{ projectConnectionStatus === 'CONNECTED' ? connectedText: notConnectedText }}
         </div>

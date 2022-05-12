@@ -6,6 +6,7 @@
     :hide-triggers="['hover']"
     :auto-hide="!isInteractive"
     :theme="theme"
+    :placement="placement ?? 'auto'"
   >
     <slot />
     <template
@@ -31,12 +32,14 @@ const props = withDefaults(defineProps<{
   disabled?: boolean
   isInteractive?: boolean
   interactiveHighlightColor?: InteractiveHighlightColor
+  placement?: 'top' | 'right' | 'bottom' | 'left'
 }>(), {
   color: 'dark',
   hideArrow: false,
   disabled: false,
   isInteractive: false,
   interactiveHighlightColor: undefined,
+  placement: undefined,
 })
 
 FloatingVue.options.themes['interactive'] = {
@@ -148,23 +151,39 @@ const theme = computed(() => {
 }
 
 .v-popper__popper.v-popper--theme-interactive {
-  .v-popper__wrapper {
-    }
   .v-popper__inner {
     @apply bg-white border-dark-900 text-black py-2 px-4;
     border-radius: 4px !important;
-    // border-color: black;
-    // border-width: 1px;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
     padding: 16px;
-    max-width: 250px;
   }
-  .v-popper__arrow-inner,
+
   .v-popper__arrow-outer {
-    // NOTE: we can't use @apply to here because having !important breaks things
-    text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
-    // border-radius: 4px;
     border-color: white;
+  }
+
+  &[data-popper-placement="top"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(0 1px 1px $gray-100);
+    }
+  }
+
+  &[data-popper-placement="bottom"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(0 -1px 1px $gray-100);
+    }
+  }
+
+  &[data-popper-placement="left"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(1px 0px 1px $gray-100);
+    }
+  }
+
+  &[data-popper-placement="right"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(-1px 0px 1px $gray-100);
+    }
   }
 }
 

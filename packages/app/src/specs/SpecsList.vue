@@ -118,7 +118,8 @@
           <template #latest-runs>
             <RunStatusDots
               v-if="row.data.isLeaf"
-              :runs="testingRuns"
+              :runs="testingRuns()"
+              :spec-file="row.data.data?.baseName"
             />
           </template>
         </SpecsListRowItem>
@@ -157,10 +158,19 @@ import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useRoute } from 'vue-router'
-import type { CloudProjectSpecs, CloudRun } from '../../../graphql/src/gen/cloud-source-types.gen'
+import { randomRunStatus, fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
 
 const route = useRoute()
 const { t } = useI18n()
+
+const testingRuns = () => {
+  return fakeRuns([
+    randomRunStatus(),
+    randomRunStatus(),
+    randomRunStatus(),
+    randomRunStatus(),
+  ])
+}
 
 gql`
 subscription SpecsList_GitInfoUpdated {
@@ -228,12 +238,6 @@ const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
-const testingRuns: CloudRun[] = [
-  { id: '4', status: 'RUNNING', completedAt: new Date('2022-04-17T03:17:00').toISOString() },
-  { id: '3', status: 'PASSED', completedAt: new Date('2022-04-17T03:17:00').toISOString() },
-  { id: '2', status: 'FAILED', completedAt: new Date('2022-04-17T03:17:00').toISOString() },
-]
-
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
 }>()
@@ -280,7 +284,7 @@ const specs = computed(() => {
 
 const collapsible = computed(() => {
   return useCollapsibleTree(
-    buildSpecTree<FuzzyFoundSpec<SpecsListFragment & {runInfo: CloudProjectSpecs}>>(specs.value), { dropRoot: true },
+    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true },
   )
 })
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))

@@ -1,5 +1,5 @@
 <template>
-  <div class="border rounded flex border-gray-200 h-6 text-gray-500 text-size-14px leading-20px">
+  <div class="border rounded flex border-gray-200 h-6 text-gray-600 text-size-14px leading-20px">
     <div
       v-for="(result, i) in results"
       :key="i"
@@ -18,8 +18,15 @@
 </template>
 
 <script lang="ts" setup>
-import type { RunResultsFragment } from '../generated/graphql'
-import { gql } from '@urql/core'
+export interface RunResultProps {
+  id: string
+  totalPassed: number|string|null
+  totalFailed: number|string|null
+  totalPending: number|string|null
+  totalSkipped: number|string|null
+}
+
+// import { RunResultProps } from './RunResultProps'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
@@ -27,41 +34,29 @@ import PendingIcon from '~icons/cy/status-pending_x12.svg'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
-gql`
-fragment RunResults on CloudRun {
-  id
-  totalPassed
-  totalFailed
-  totalPending
-  totalSkipped
-}
-`
-
-const props = defineProps<{
-  gql: RunResultsFragment
-}>()
+const props = defineProps<RunResultProps>()
 
 const results = [
   {
-    value: props.gql.totalSkipped,
+    value: props.totalSkipped,
     class: 'icon-dark-gray-400',
     icon: SkippedIcon,
     name: t('runs.results.skipped'),
   },
   {
-    value: props.gql.totalPending,
+    value: props.totalPending,
     class: 'icon-dark-gray-400 icon-light-white',
     icon: PendingIcon,
     name: t('runs.results.pending'),
   },
   {
-    value: props.gql.totalPassed,
+    value: props.totalPassed,
     class: 'icon-dark-jade-400',
     icon: PassedIcon,
     name: t('runs.results.passed'),
   },
   {
-    value: props.gql.totalFailed,
+    value: props.totalFailed,
     class: 'icon-dark-red-400',
     icon: FailedIcon,
     name: t('runs.results.failed'),

@@ -50,7 +50,7 @@
       </template>
       <template #right>
         <RunResults
-          :gql="run"
+          v-bind="run"
         />
       </template>
     </ListRowHeader>
@@ -76,7 +76,11 @@ fragment RunCard on CloudRun {
 	createdAt
 	status
   url
-	...RunResults
+	totalTests
+  totalPassed
+  totalFailed
+  totalPending
+  totalSkipped
 	commitInfo {
 		authorName
 		authorEmail

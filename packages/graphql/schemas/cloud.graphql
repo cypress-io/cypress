@@ -194,7 +194,9 @@ type CloudProjectSpecs {
     """
     fromBranch: String!
   ): Boolean
-  runs(
+  specHash: String
+  specPath: String
+  specRuns(
     """
     Returns the elements in the list that come after the specified cursor
     """
@@ -219,9 +221,7 @@ type CloudProjectSpecs {
     Returns the last n elements from the list.
     """
     last: Int
-  ): CloudRunConnection
-  specHash: String
-  specPath: String
+  ): CloudSpecRunConnection
 }
 
 """
@@ -371,6 +371,61 @@ enum CloudRunStatus {
 }
 
 """
+A Recorded run of a given spec from the Test Runner, typically to the cloud
+"""
+type CloudSpecRun implements Node {
+  buildNumber: Int!
+  completedAt: DateTime
+  createdAt: DateTime!
+  groupCount: Int!
+
+  """
+  Globally unique identifier representing a concrete GraphQL ObjectType
+  """
+  id: ID!
+  specDuration: SpecDataAggregate!
+  status: CloudRunStatus!
+  testsFailed: SpecDataAggregate!
+  testsPassed: SpecDataAggregate!
+  testsPending: SpecDataAggregate!
+  testsSkipped: SpecDataAggregate!
+
+  """
+  A link to the run overview page filtered by spec
+  """
+  url: String!
+}
+
+type CloudSpecRunConnection {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [CloudSpecRunEdge!]!
+
+  """
+  Flattened list of CloudSpecRun type
+  """
+  nodes: [CloudSpecRun!]!
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+type CloudSpecRunEdge {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor
+  """
+  cursor: String!
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Node
+  """
+  node: CloudSpecRun!
+}
+
+"""
 A CloudUser represents an User stored in the Cypress Cloud
 """
 type CloudUser implements Node {
@@ -510,16 +565,6 @@ type Query {
   ): Node
 
   """
-  Returns a list of cloud nodes, by ID. Max 100 nodes per batch
-  """
-  cloudNodesByIds(
-    """
-    A list of IDs for a Node, conforming to the Relay spec
-    """
-    ids: [ID!]!
-  ): [Node]
-
-  """
   Lookup an individual project by the slug
   """
   cloudProjectBySlug(slug: String!): CloudProjectResult
@@ -578,4 +623,19 @@ type Query {
   A user within the Cypress Cloud
   """
   cloudViewer: CloudUser
+}
+
+"""
+Aggregate data from multiple groups for a spec run
+"""
+type SpecDataAggregate {
+  """
+  Maximum value in the groups
+  """
+  max: Int
+
+  """
+  Minimum value in the groups
+  """
+  min: Int
 }
