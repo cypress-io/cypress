@@ -78,6 +78,51 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
+describe('global mode', () => {
+  it('migrates 2 projects in global mode', () => {
+    cy.openGlobalMode()
+    cy.addProject('migration-e2e-export-default')
+    cy.addProject('migration-e2e-custom-integration-with-projectId')
+    cy.visitLaunchpad()
+
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').returns('10.0.0')
+    })
+
+    cy.contains('migration-e2e-export-default').click()
+    // rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
+
+    // cypress/support/index.ts -> cypress/support/e2e.ts
+    cy.get(renameSupportStep).should('exist')
+    // no component specs
+    cy.get(setupComponentStep).should('not.exist')
+
+    cy.get(configFileStep).should('exist')
+
+    runAutoRename()
+    renameSupport('ts')
+    migrateAndVerifyConfig('cypress.config.ts')
+    checkOutcome()
+
+    cy.contains('Projects').click()
+    cy.contains('migration-e2e-custom-integration-with-projectId').click()
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('not.exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+})
+
 describe('Opening unmigrated project', () => {
   it('legacy project with --e2e', () => {
     cy.scaffoldProject('migration')
@@ -1293,71 +1338,6 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
     cy.get('button').contains('I still want to change the spec file extension').click()
     cy.get('button').contains('Cancel').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-  })
-
-  it('migrates 2 projects in global mode', () => {
-    cy.openGlobalMode()
-    cy.addProject('migration-component-testing-defaults')
-    cy.addProject('migration-e2e-custom-integration-with-projectId')
-    cy.visitLaunchpad()
-
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').returns('10.0.0')
-    })
-
-    cy.contains('migration-component-testing-defaults').click()
-    // default testFiles - auto
-    cy.get(renameAutoStep).should('exist')
-    cy.get(renameManualStep).should('exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('not.exist')
-    cy.get(setupComponentStep).should('exist')
-    cy.get(configFileStep).should('exist')
-
-    // Migration workflow
-    // before auto migration
-    cy.contains('cypress/component/button.spec.js')
-    cy.contains('cypress/component/input-spec.tsx')
-
-    // after auto migration
-    cy.contains('cypress/component/button.cy.js')
-    cy.contains('cypress/component/input.cy.tsx')
-
-    runAutoRename()
-
-    cy.wait(100)
-    cy.withCtx(async (ctx) => {
-      const specs = [
-        'cypress/component/button.cy.js',
-        'cypress/component/input.cy.tsx',
-      ]
-
-      for (const spec of specs) {
-        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
-
-        expect(stats).to.not.be.null
-      }
-    })
-
-    skipCTMigration()
-    migrateAndVerifyConfig()
-    finishMigrationAndContinue()
-    checkOutcome()
-
-    cy.contains('Projects').click()
-    cy.contains('migration-e2e-custom-integration-with-projectId').click()
-    // default testFiles but custom integration - can rename automatically
-    cy.get(renameAutoStep).should('not.exist')
-    // no CT
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('not.exist')
-    cy.get(configFileStep).should('exist')
-
-    renameSupport()
-    migrateAndVerifyConfig()
-    checkOutcome()
   })
 })
 
