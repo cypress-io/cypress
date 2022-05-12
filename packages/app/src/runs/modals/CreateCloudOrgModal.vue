@@ -54,12 +54,11 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
-import { CloudOrganizationsCheckDocument } from '../../generated/graphql'
+import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useDebounceFn } from '@vueuse/core'
 
@@ -77,8 +76,10 @@ fragment CreateCloudOrgModal on CloudUser {
 `
 
 gql`
-query CloudOrganizationsCheck {
-  ...CloudConnectModals
+mutation CreateCloudOrgModal_CloudOrganizationsCheck {
+  refreshOrganizations {
+    ...CloudConnectModals
+  }
 }
 `
 
@@ -86,13 +87,9 @@ const props = defineProps<{
   gql: CreateCloudOrgModalFragment
 }>()
 
-const query = useQuery({
-  query: CloudOrganizationsCheckDocument,
-  requestPolicy: 'network-only',
-  pause: true,
-})
+const refreshOrgs = useMutation(CreateCloudOrgModal_CloudOrganizationsCheckDocument)
 
-const refetch = useDebounceFn(() => query.executeQuery(), 1000)
+const refetch = useDebounceFn(() => refreshOrgs.executeMutation({}), 1000)
 
 const waitingOrgToBeCreated = ref(false)
 
