@@ -415,7 +415,7 @@ describe('reduceConfig', () => {
     hasE2ESpec: false,
     hasPluginsFile: false,
     projectRoot: '',
-    hasTypescript: false,
+    isUsingTypeScript: false,
     isProjectUsingESModules: false,
     shouldAddCustomE2ESpecPattern: false,
   }
@@ -448,6 +448,7 @@ describe('reduceConfig', () => {
     }
     const newConfig = reduceConfig(config, options)
 
+    expect(newConfig.component.componentFolder).to.not.exist
     expect(newConfig.component.specPattern).to.eq('src/**/**.cy.js')
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
