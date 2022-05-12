@@ -5,6 +5,7 @@
       :key="i"
       class="flex px-2 items-center hover:bg-indigo-50"
       :title="result.name"
+      :data-cy="`runResults-${result.name}-count`"
     >
       <component
         :is="result.icon"
@@ -18,6 +19,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import type { RunResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
@@ -41,30 +43,32 @@ const props = defineProps<{
   gql: RunResultsFragment
 }>()
 
-const results = [
-  {
-    value: props.gql.totalSkipped,
-    class: 'icon-dark-gray-400',
-    icon: SkippedIcon,
-    name: t('runs.results.skipped'),
-  },
-  {
-    value: props.gql.totalPending,
-    class: 'icon-dark-gray-400 icon-light-white',
-    icon: PendingIcon,
-    name: t('runs.results.pending'),
-  },
-  {
-    value: props.gql.totalPassed,
-    class: 'icon-dark-jade-400',
-    icon: PassedIcon,
-    name: t('runs.results.passed'),
-  },
-  {
-    value: props.gql.totalFailed,
-    class: 'icon-dark-red-400',
-    icon: FailedIcon,
-    name: t('runs.results.failed'),
-  },
-]
+const results = computed(() => {
+  return [
+    {
+      value: props.gql.totalSkipped,
+      class: 'icon-dark-gray-400',
+      icon: SkippedIcon,
+      name: t('runs.results.skipped'),
+    },
+    {
+      value: props.gql.totalPending,
+      class: 'icon-dark-gray-400 icon-light-white',
+      icon: PendingIcon,
+      name: t('runs.results.pending'),
+    },
+    {
+      value: props.gql.totalPassed,
+      class: 'icon-dark-jade-400',
+      icon: PassedIcon,
+      name: t('runs.results.passed'),
+    },
+    {
+      value: props.gql.totalFailed,
+      class: 'icon-dark-red-400',
+      icon: FailedIcon,
+      name: t('runs.results.failed'),
+    },
+  ]
+})
 </script>
