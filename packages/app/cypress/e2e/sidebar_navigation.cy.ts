@@ -73,7 +73,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('expands the left nav bar by default', () => {
-      cy.findByTestId('toggle-sidebar').should('have.attr', 'aria-expanded', 'true')
+      cy.findByTestId('sidebar').should('have.css', 'width', '248px')
       cy.percySnapshot()
     })
 
@@ -88,29 +88,28 @@ describe('Sidebar Navigation', () => {
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {
-      cy.findAllByText('todos').eq(1).as('title')
-      cy.get('@title').should('be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('be.visible')
       cy.findByTestId('toggle-sidebar').click()
-      cy.get('@title').should('not.be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('not.be.visible')
       cy.percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
-      cy.findAllByText('todos').eq(1).as('title')
-      cy.get('@title').should('be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('be.visible')
       cy.findByTestId('toggle-sidebar').click()
 
-      cy.get('@title').should('not.be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('not.be.visible')
 
       cy.reload()
 
-      cy.findAllByText('todos').should('not.be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('not.be.visible')
 
       cy.percySnapshot()
     })
 
     it('has menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
       cy.findByTestId('toggle-sidebar').click()
+      cy.findByTestId('sidebar').should('have.css', 'width', '64px')
 
       cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
       cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
@@ -128,6 +127,7 @@ describe('Sidebar Navigation', () => {
 
     it('shows a tooltip when hovering over menu item', () => {
       cy.findByTestId('toggle-sidebar').click()
+      cy.findByTestId('sidebar').should('have.css', 'width', '64px')
 
       cy.findByTestId('sidebar-header').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'todos')
@@ -149,15 +149,15 @@ describe('Sidebar Navigation', () => {
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
       cy.findByTestId('toggle-sidebar').click()
-      cy.findAllByText('todos').eq(1).should('not.be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('not.be.visible')
       cy.findByTestId('toggle-sidebar').click()
-      cy.findAllByText('todos').eq(1).should('be.visible')
+      cy.findByTestId('sidebar').contains('todos').should('be.visible')
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
       cy.findByTestId('sidebar-header').within(() => {
         cy.findByTestId('testing-type-e2e').should('be.visible')
-        cy.findByText('todos').should('be.visible')
+        cy.contains('todos').should('be.visible')
       }).as('switchTestingType').click()
 
       cy.findByRole('dialog', {
