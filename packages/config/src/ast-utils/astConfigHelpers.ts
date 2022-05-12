@@ -1,4 +1,5 @@
 import * as t from '@babel/types'
+import type { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { parse, visit } from 'recast'
 import dedent from 'dedent'
 import assert from 'assert'
@@ -26,9 +27,9 @@ export function addE2EDefinition (): t.ObjectProperty {
 
 export interface ASTComponentDefinitionConfig {
   testingType: 'component'
-  bundler: 'vite' | 'webpack'
+  bundler: typeof WIZARD_BUNDLERS[number]['type']
   configPath?: string
-  framework?: string
+  framework?: typeof WIZARD_FRAMEWORKS[number]['configFramework']
   needsExplicitConfig: boolean
 }
 

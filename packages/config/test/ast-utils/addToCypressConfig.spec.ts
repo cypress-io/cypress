@@ -124,6 +124,7 @@ describe('addToCypressConfig', () => {
         testingType: 'component',
         bundler: 'webpack',
         framework: 'react',
+        needsExplicitConfig: true,
       },
       isProjectUsingESModules: false,
     })
@@ -152,6 +153,7 @@ describe('addToCypressConfig', () => {
         testingType: 'component',
         bundler: 'vite',
         framework: 'react',
+        needsExplicitConfig: true,
       },
       isProjectUsingESModules: false,
     })
@@ -181,6 +183,7 @@ describe('addToCypressConfig', () => {
         bundler: 'webpack',
         framework: 'react',
         configPath: './webpack.config.ts',
+        needsExplicitConfig: true,
       },
       isProjectUsingESModules: true,
     })
@@ -210,6 +213,7 @@ describe('addToCypressConfig', () => {
         bundler: 'webpack',
         framework: 'react',
         configPath: './webpack.config.js',
+        needsExplicitConfig: true,
       },
       isProjectUsingESModules: false,
     })
