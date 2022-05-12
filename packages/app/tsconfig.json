@@ -9,8 +9,7 @@
     "*.d.ts",
     "../frontend-shared/src/**/*.vue", 
     "../frontend-shared/src/**/*.tsx", 
-    "../frontend-shared/cypress/**/*.ts",
-    "*.d.ts"
+    "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
     "noImplicitThis": true,
@@ -26,7 +25,7 @@
       "cypress-real-events", 
       "@intlify/vite-plugin-vue-i18n/client",
       "@testing-library/cypress",
-      "cypress-axe-core"
+      "cypress-axe"
     ]
   }
 }

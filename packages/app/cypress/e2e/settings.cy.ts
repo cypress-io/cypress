@@ -345,7 +345,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('nav-row-settings').click()
       cy.wait(200)
       cy.get('[data-cy="Device Settings"]').click()
 
@@ -366,7 +366,7 @@ describe('App: Settings', () => {
 
       // navigate away and come back
       // preferred editor entered from input should have been persisted
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('nav-row-settings').click()
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
 
@@ -394,7 +394,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
-      cy.get('[href="#/settings"]').click()
+      cy.findByTestId('nav-row-settings').click()
       cy.wait(200)
       cy.get('[data-cy="Device Settings"]').click()
 

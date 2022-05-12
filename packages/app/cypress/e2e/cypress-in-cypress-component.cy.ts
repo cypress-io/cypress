@@ -62,17 +62,17 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Settings page and back to spec runner
-      cy.contains('a', 'Settings').click()
+      cy.findByTestId('nav-row-settings').click()
       cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
-      cy.contains('a', 'Specs').click()
+      cy.findByTestId('nav-row-specs').click()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Runs page and back to spec runner
-      cy.contains('a', 'Runs').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.contains(defaultMessages.runs.connect.title).should('be.visible')
-      cy.contains('a', 'Specs').click()
+      cy.findByTestId('nav-row-specs').click()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -182,10 +182,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
 
-      cy.get('[href="#/specs"]').click()
+      cy.findByTestId('nav-row-specs').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
       cy.contains('TestComponent.spec').click()

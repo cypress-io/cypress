@@ -26,7 +26,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy="runs-loader"]')
       cy.get('[data-cy="runs"]')
     })
@@ -41,13 +41,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('when logged out, shows call to action', () => {
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.contains(defaultMessages.runs.connect.buttonUser).should('exist')
     })
 
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.contains('Log In').click()
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
         cy.get('button').contains('Log In')
@@ -58,7 +58,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.contains('a', 'OVERLIMIT').click()
 
       cy.withCtx((ctx) => {
@@ -84,7 +84,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
@@ -124,7 +124,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
@@ -154,7 +154,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
@@ -196,7 +196,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect(config.projectId).to.not.equal('newProjectId')
       })
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
       cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
@@ -242,7 +242,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
     })
 
     it('if project Id is specified in config file that does not exist, shows call to action', () => {
@@ -368,7 +368,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
     })
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
@@ -398,7 +398,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
@@ -421,7 +421,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.contains(defaultMessages.runs.empty.title)
       cy.contains(defaultMessages.runs.empty.description)
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
@@ -450,7 +450,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
@@ -469,14 +469,14 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays a list of recorded runs if a run has been recorded', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy="runs"]')
     })
 
     it('displays each run with correct information', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
         cy.findByText('fix: make gql work CANCELLED')
@@ -513,7 +513,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy^="runCard-"]').first().click()
 
       cy.withCtx((ctx) => {
@@ -537,7 +537,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy="runs"]')
 
       cy.goOffline()
@@ -551,7 +551,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)
-      cy.get('[href="#/runs"]').click()
+      cy.findByTestId('nav-row-runs').click()
       cy.get('[data-cy="runs"]')
 
       cy.goOffline()

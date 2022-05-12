@@ -11,10 +11,10 @@ describe('SidebarNavigationRow', () => {
         class="resize-x overflow-auto space-y-4 h-500px w-256px bg-gray-900"
       >
         <h2 class="text-white text-sm uppercase truncate">Tab Style</h2>
-        <SidebarNavigationRow icon={BookIcon} name="book" active isNavBarExpanded/>
-        <SidebarNavigationRow icon={SettingsIcon} name="settings" isNavBarExpanded/>
-        <SidebarNavigationRow icon={TestResultsIcon} name="test-results" isNavBarExpanded/>
-        <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" isNavBarExpanded/>
+        <SidebarNavigationRow icon={BookIcon} name="book" active navigate isNavBarExpanded/>
+        <SidebarNavigationRow icon={SettingsIcon} name="settings" navigate isNavBarExpanded/>
+        <SidebarNavigationRow icon={TestResultsIcon} name="test-results" navigate isNavBarExpanded/>
+        <SidebarNavigationRow icon={PlaceholderIcon} name="placeholder" navigate isNavBarExpanded/>
       </div>
     </div>))
   })
