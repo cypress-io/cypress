@@ -1,5 +1,5 @@
 import { defaultMessages } from '@cy/i18n'
-import { CloudOrganizationConnectionStubs, CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { CloudOrganizationConnectionStubs, CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
 import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
 

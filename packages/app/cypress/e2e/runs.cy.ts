@@ -248,18 +248,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
+        if (obj.result.data?.cloudProjectBySlug && obj.variables._v0_slug === 'abcdef42') {
+          const proj = obj.result.data.cloudProjectBySlug
 
-        if (obj.result.data?.cloudProjectsBySlugs && obj.variables._v0_slugs.includes('abcdef42')) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectNotFound'
-            proj.message = 'Cloud Project Not Found'
-          }
+          proj.__typename = 'CloudProjectNotFound'
+          proj.message = 'Cloud Project Not Found'
         }
 
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           const projectNodes = obj.result.data?.cloudViewer.organizations.nodes[0].projects.nodes
 
           projectNodes.push({
+            __typename: 'CloudProject',
             id: '1',
             slug: 'ghijkl',
             name: 'Mock Project',
@@ -299,12 +299,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-          }
+        if (obj.result.data?.cloudProjectBySlug) {
+          const proj = obj.result.data.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = false
         }
 
         return obj.result
@@ -328,12 +328,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           return obj.result
         }
 
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-          }
+        if (obj.result.data?.cloudProjectBySlug) {
+          const proj = obj.result.data.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = false
         }
 
         return obj.result
@@ -350,13 +350,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('updates the button text when the request access button is clicked', () => {
       cy.remoteGraphQLIntercept(async (obj, testState) => {
-        if (obj.operationName === 'Runs_currentProject_cloudProject_batched') {
-          for (const proj of obj!.result!.data!.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = false
-            testState.project = proj
-          }
+        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+          const proj = obj!.result!.data!.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = false
+          testState.project = proj
         } else if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
           obj!.result!.data!.cloudProjectRequestAccess = {
             ...testState.project,
@@ -384,12 +384,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
 
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            proj.__typename = 'CloudProjectUnauthorized'
-            proj.message = 'Cloud Project Unauthorized'
-            proj.hasRequestedAccess = true
-          }
+        if (obj.result.data?.cloudProjectBySlug) {
+          const proj = obj.result.data.cloudProjectBySlug
+
+          proj.__typename = 'CloudProjectUnauthorized'
+          proj.message = 'Cloud Project Unauthorized'
+          proj.hasRequestedAccess = true
         }
 
         return obj.result
@@ -415,12 +415,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
+        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes) {
+          obj.result.data.cloudProjectBySlug.runs.nodes = []
         }
 
         return obj.result
@@ -494,17 +490,17 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
         cy.findByText('fix: make gql work CANCELLED')
-        cy.get('[data-cy="run-card-icon"]')
+        cy.get('[data-cy="run-card-icon-CANCELLED"]')
       })
 
       cy.get('[href="http://dummy.cypress.io/runs/1"]').first().within(() => {
         cy.findByText('fix: make gql work ERRORED')
-        cy.get('[data-cy="run-card-icon"]')
+        cy.get('[data-cy="run-card-icon-ERRORED"]')
       })
 
       cy.get('[href="http://dummy.cypress.io/runs/2"]').first().within(() => {
         cy.findByText('fix: make gql work FAILED')
-        cy.get('[data-cy="run-card-icon"]')
+        cy.get('[data-cy="run-card-icon-FAILED"]')
       })
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
@@ -577,6 +573,112 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.goOnline()
 
       cy.get('[data-cy=warning-alert]').should('not.exist')
+    })
+  })
+
+  describe('refetching', () => {
+    let obj: {toCall?: Function} = {}
+    const RUNNING_COUNT = 3
+
+    beforeEach(() => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests')
+      cy.startAppServer('component')
+      cy.loginUser()
+      cy.remoteGraphQLIntercept((obj, testState) => {
+        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
+          obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
+            run.status = 'RUNNING'
+          })
+
+          obj.result.data.cloudProjectBySlug.runs.nodes = obj.result.data.cloudProjectBySlug.runs.nodes.slice(0, 3)
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp('/runs', {
+        onBeforeLoad (win) {
+          const setTimeout = win.setTimeout
+
+          // @ts-expect-error
+          win.setTimeout = function (fn, time) {
+            if (fn.name === 'fetchNewerRuns') {
+              obj.toCall = fn
+            } else {
+              setTimeout(fn, time)
+            }
+          }
+        },
+      })
+    })
+
+    it('should re-query for executing runs', () => {
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        if (obj.result.data?.cloudNode?.newerRuns?.nodes) {
+          obj.result.data.cloudNode.newerRuns.nodes = []
+        }
+
+        if (obj.result.data?.cloudNodesByIds) {
+          obj.result.data?.cloudNodesByIds.map((node) => {
+            node.status = 'RUNNING'
+          })
+
+          obj.result.data.cloudNodesByIds[0].status = 'PASSED'
+        }
+
+        return obj.result
+      })
+
+      function completeNext (passed) {
+        cy.wrap(obj).invoke('toCall').then(() => {
+          cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
+          if (passed < RUNNING_COUNT) {
+            completeNext(passed + 1)
+          }
+        })
+      }
+
+      completeNext(1)
+    })
+
+    it('should fetch newer runs and maintain them when navigating', () => {
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        if (obj.result.data?.cloudNodesByIds) {
+          obj.result.data?.cloudNodesByIds.map((node) => {
+            node.status = 'PASSED'
+            node.totalPassed = 100
+          })
+        }
+
+        return obj.result
+      })
+
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 3).should('be.visible')
+      cy.wrap(obj).invoke('toCall')
+
+      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible').within(() => {
+        cy.get('[data-cy="runResults-passed-count"]').should('contain', 100)
+      })
+
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
+
+      // If we navigate away & back, we should see the same runs
+      cy.get('[href="#/settings"]').click()
+      cy.remoteGraphQLIntercept((obj) => obj.result)
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible')
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
     })
   })
 })
