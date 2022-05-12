@@ -1,4 +1,6 @@
 import type { CacheExchangeOpts } from '@urql/exchange-graphcache'
+import { relayPagination } from '@urql/exchange-graphcache/extras'
+
 import type { GraphCacheConfig } from '../gen/graphcache-config.gen'
 
 /**
@@ -37,5 +39,10 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     CloudProjectUnauthorized: (data) => data.__typename,
     GeneratedSpecError: () => null,
     GenerateSpecResponse: (data) => data.__typename,
+  },
+  resolvers: {
+    CloudProject: {
+      runs: relayPagination({ mergeMode: 'outwards' }),
+    },
   },
 }

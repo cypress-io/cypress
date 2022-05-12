@@ -1,6 +1,6 @@
 import { plugin } from 'nexus'
 import debugLib from 'debug'
-import { getNamedType, isNonNullType } from 'graphql'
+import { defaultFieldResolver, getNamedType, isNonNullType } from 'graphql'
 import type { DataContext } from '@packages/data-context'
 import { remoteSchema } from '../stitching/remoteSchema'
 
@@ -8,8 +8,25 @@ const NO_RESULT = {}
 // 2ms should be enough time to resolve from the local cache of the
 // cloudUrqlClient in CloudDataSource
 const RACE_MAX_EXECUTION_MS = 2
-const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 const debug = debugLib('cypress:graphql:nexusDeferIfNotLoadedPlugin')
+
+export const nexusDeferResolveGuard = plugin({
+  name: 'nexusDeferResolveGuard',
+  onCreateFieldResolver () {
+    return (source, args, ctx, info, next) => {
+      // If we are hitting the resolver with the "source" value, we can just resolve with this,
+      // no need to continue to the rest of the resolver stack, we just need to continue completing
+      // the execution of the field
+      if (source?.[ctx.graphql.RESOLVED_SOURCE]) {
+        debug(`Resolving %s for pushFragment with %j`, info.fieldName, source[info.fieldName])
+
+        return defaultFieldResolver(source, args, ctx, info)
+      }
+
+      return next(source, args, ctx, info)
+    }
+  },
+})
 
 /**
  * This plugin taps into each of the requests and checks for the existence
@@ -70,7 +87,7 @@ export const nexusDeferIfNotLoadedPlugin = plugin({
 
       const raceResult: unknown = await Promise.race([
         new Promise((resolve) => setTimeout(() => resolve(NO_RESULT), RACE_MAX_EXECUTION_MS)),
-        Promise.resolve(next(source, args, ctx, info)).then((result) => {
+        Promise.resolve(next(source, args, ctx, info)).then(async (result) => {
           if (!didRace) {
             debug(`Racing %s resolved immediately`, qualifiedField)
 
@@ -79,29 +96,7 @@ export const nexusDeferIfNotLoadedPlugin = plugin({
 
           debug(`Racing %s eventually resolved with %o`, qualifiedField, result, ctx.graphqlRequestInfo?.operationName)
 
-          // If we raced the query, and this looks like a client request we can re-execute,
-          // we will look to do so.
-          if (ctx.graphqlRequestInfo?.operationName) {
-            // We don't want to notify the client if we see a refetch header, and we want to warn if
-            // we raced twice, as this means we're not caching the data properly
-            if (ctx.graphqlRequestInfo.headers['x-cypress-graphql-refetch']) {
-              // If we've hit this during a refetch, but the refetch was unrelated to the original request,
-              // that's fine, it just means that we might receive a notification to refetch in the future for the other field
-              if (IS_DEVELOPMENT && ctx.graphqlRequestInfo.headers['x-cypress-graphql-refetch'] === `${ctx.graphqlRequestInfo?.operationName}.${qualifiedField}`) {
-                // eslint-disable-next-line no-console
-                console.error(new Error(`
-                  It looks like we hit the Promise.race while re-executing the operation ${ctx.graphqlRequestInfo.operationName}
-                  this means that we sent the client a signal to refetch, but the data wasn't stored when it did.
-                  This likely means we're not caching the result of the the data properly.
-                `))
-              }
-            } else {
-              debug(`Notifying app %s, %s of updated field %s`, ctx.graphqlRequestInfo.app, ctx.graphqlRequestInfo.operationName, qualifiedField)
-              ctx.emitter.notifyClientRefetch(ctx.graphqlRequestInfo.app, ctx.graphqlRequestInfo.operationName, qualifiedField, ctx.graphqlRequestInfo.variables)
-            }
-          } else {
-            debug(`No operation to notify of result for %s`, qualifiedField)
-          }
+          ctx.graphql.pushResult({ source, result, info, ctx })
         }).catch((e) => {
           debug(`Remote execution error %o`, e)
 
