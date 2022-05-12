@@ -5,9 +5,7 @@ it('visits foobar.com and types foobar inside an input', () => {
   cy.origin('http://foobar.com:4466', () => {
     cy.get('[data-cy="text-input"]').type('foobar')
   })
-
-  // ensure stability
-  cy.then(() => {
+  .then(() => {
     const specBridgeIframe: HTMLIFrameElement = window.top.document.querySelector('.spec-bridge-iframe')
     const currentBody = window.top.document.querySelector('body')
 
