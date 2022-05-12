@@ -34,7 +34,7 @@
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
-        aria-label="Navigation"
+        aria-label="Pages"
       >
         <RouterLink
           v-for="item in navigation"

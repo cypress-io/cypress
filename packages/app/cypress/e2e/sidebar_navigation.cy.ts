@@ -38,7 +38,7 @@ describe('Sidebar Navigation', () => {
       .should('have.attr', 'aria-label', 'Keyboard Shortcuts')
 
       cy.get('nav')
-      .should('have.attr', 'aria-label', 'Navigation')
+      .should('have.attr', 'aria-label', 'Pages')
     })
   })
 
