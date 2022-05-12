@@ -267,11 +267,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('if project Id is specified in config file that does not exist, shows call to action', () => {
-      cy.findByText(defaultMessages.runs.errors.notfound.button).should('be.visible')
+      cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible')
     })
 
     it('opens Connect Project modal after clicking Reconnect Project button', () => {
-      cy.findByText(defaultMessages.runs.errors.notfound.button).click()
+      cy.findByText(defaultMessages.runs.errors.notFound.button).click()
       cy.get('[aria-modal="true"]').should('exist')
       cy.get('[data-cy="selectProject"] button').click()
       cy.findByText('Mock Project').click()
@@ -497,18 +497,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
 
-      cy.get('@firstRun').get('[data-cy="run-card-author"]').contains('John Appleseed')
-      cy.get('@firstRun').get('[data-cy="run-card-avatar')
-      cy.get('@firstRun').get('[data-cy="run-card-branch"]').contains('main')
+      cy.get('@firstRun').within(() => {
+        cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
+        cy.get('[data-cy="run-card-avatar"]')
+        cy.get('[data-cy="run-card-branch"]').contains('main')
+        cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
+        cy.get('[data-cy="run-card-duration"]').contains('01:00')
 
-      // the exact timestamp string will depend on the user's browser's locale settings
-      const localeTimeString = (new Date('2022-02-02T08:17:00.005Z')).toLocaleTimeString()
-
-      cy.get('@firstRun').contains(localeTimeString)
-      cy.get('@firstRun').contains('span', 'skipped')
-      cy.get('@firstRun').get('span').contains('pending')
-      cy.get('@firstRun').get('span').contains('passed')
-      cy.get('@firstRun').get('span').contains('failed')
+        cy.contains('span', 'skipped')
+        cy.get('span').contains('pending')
+        cy.get('span').contains('passed')
+        cy.get('span').contains('failed')
+      })
     })
 
     it('opens the run page if a run is clicked', () => {
@@ -521,6 +521,38 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.withCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/0')
       })
+    })
+
+    it('shows connection failed error if no cloudProject', () => {
+      let cloudData: any
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept((obj) => {
+        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+          cloudData = obj.result
+          obj.result = {}
+
+          return obj.result
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
+
+      cy.remoteGraphQLIntercept((obj) => {
+        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+          return cloudData
+        }
+
+        return obj.result
+      })
+
+      cy.contains('button', 'Try again').click()
+      cy.contains('button', 'Try again').should('not.exist')
     })
   })
 
