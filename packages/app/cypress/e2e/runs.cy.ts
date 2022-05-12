@@ -2,24 +2,16 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component') {
-  if (testingType === 'component') {
-    cy.scaffoldProject('component-tests')
-    cy.openProject('component-tests')
-    cy.startAppServer('component')
-  } else {
-    cy.scaffoldProject('e2e-with-project-id')
-    cy.openProject('e2e-with-project-id')
-    cy.startAppServer('e2e')
-  }
+  cy.scaffoldProject('cypress-in-cypress')
+  cy.openProject('cypress-in-cypress')
+  cy.startAppServer(testingType)
 
   cy.loginUser()
+
+  // make sure there are no runs found for the project ID
   cy.remoteGraphQLIntercept(async (obj) => {
-    if (obj.result.data?.cloudProjectsBySlugs) {
-      for (const proj of obj.result.data.cloudProjectsBySlugs) {
-        if (proj.runs?.nodes) {
-          proj.runs.nodes = []
-        }
-      }
+    if (obj.result.data?.cloudProjectBySlug) {
+      obj.result.data.cloudProjectBySlug.runs.nodes = []
     }
 
     return obj.result
