@@ -26,5 +26,13 @@ export const GitInfo = objectType({
       type: GitInfoStatusTypeEnum,
       description: 'status type - created or modified',
     })
+
+    t.string('subject', {
+      description: 'subject for latest commit',
+    })
+
+    t.string('shortHash', {
+      description: 'short hash for latest commit',
+    })
   },
 })
