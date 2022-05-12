@@ -314,7 +314,7 @@ export class ProjectDataSource {
 
       return specFileName
     } catch {
-      return getDefaultFileName('e2e')
+      return getDefaultFileName(this.ctx.coreData.currentTestingType ?? 'e2e')
     }
   }
 
