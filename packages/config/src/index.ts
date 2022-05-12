@@ -7,4 +7,4 @@ export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypres
 export {
   detectRelativeWebpackConfig,
   detectRelativeViteConfig,
-} from './detect/webpack'
+} from './detect/bundleConfig'
