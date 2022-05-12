@@ -497,7 +497,6 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
 
 function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
   function _tabUntil (step: number) {
-    // @ts-ignore
     return cy.tab().focused({ log: false }).then((el) => {
       const pass = fn(el)
 
