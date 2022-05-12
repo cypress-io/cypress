@@ -4,7 +4,7 @@ import { addESModuleImportToCypressConfigPlugin, addCommonJSModuleImportToCypres
 import { addESModuleDefinition, addCommonJSModuleDefinition } from '../../src/ast-utils/astConfigHelpers'
 
 pluginTester({
-  pluginName: 'addToCypressConfigPlugin: component with webpack config',
+  pluginName: 'addToCypressConfigPlugin: ESM config w/ component with webpack config',
   plugin: () => {
     return addESModuleImportToCypressConfigPlugin(
       addESModuleDefinition('./webpack.config.js').node,
@@ -15,7 +15,7 @@ pluginTester({
 })
 
 pluginTester({
-  pluginName: 'addToCypressConfigPlugin: component with webpack config',
+  pluginName: 'addToCypressConfigPlugin: CJS config w/ component with webpack config',
   plugin: () => {
     return addCommonJSModuleImportToCypressConfigPlugin(
       addCommonJSModuleDefinition('./webpack.config.js').node,

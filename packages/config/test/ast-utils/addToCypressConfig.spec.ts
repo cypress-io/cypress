@@ -186,19 +186,23 @@ describe('addToCypressConfig', () => {
       isProjectUsingESModules: false,
     })
 
-    expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
-    const webpackConfig = require("./webpack.config.js");
-    module.exports = {
+    // we generate this using Babel which intentionally does **NOT**
+    // handle formatting, so the output format is kind of weird.
+    // we rely on the user's eslint or prettier to format this properly.
+    const expected = dedent`
+    const webpackConfig = require('./webpack.config.js')module.exports = {
       e2e: {},
     
       component: {
         devServer: {
-          framework: "react",
-          bundler: "webpack",
+          framework: 'react',
+          bundler: 'webpack',
           webpackConfig,
         },
-      },
-    };`.trim())
+      }
+    }`
+
+    expect(stub.getCall(0).lastArg.trim()).to.eq(expected)
 
     expect(result.result).to.eq('MERGED')
   })
