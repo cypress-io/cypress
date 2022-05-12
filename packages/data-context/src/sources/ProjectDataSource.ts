@@ -20,6 +20,7 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { ProjectShape } from '../data'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -442,5 +443,22 @@ export class ProjectDataSource {
     }
 
     return isEqual(specPattern, [component])
+  }
+
+  async maybeGetProjectId (source: ProjectShape) {
+    // If this is the currently active project, we can look at the project id
+    if (source.projectRoot === this.ctx.currentProject) {
+      return await this.projectId()
+    }
+
+    // Get the saved state & resolve the lastProjectId
+    const savedState = await source.savedState()
+
+    if (savedState?.lastProjectId) {
+      return savedState.lastProjectId
+    }
+
+    // Otherwise, we can try to derive the projectId by reading it from the config file (todo)
+    return null
   }
 }

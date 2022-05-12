@@ -385,6 +385,12 @@ type CurrentProject implements Node & ProjectLike {
   """The remote associated project from Cypress Dashboard"""
   cloudProject: CloudProjectResult
 
+  """
+  A refetchable remote field implementation to fetch the cloudProject,
+  this can safely be used when rendering a list of projects
+  """
+  cloudProjectRemote: RemoteFetchableCloudProjectResult
+
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
   codeGenGlobs: CodeGenGlobs!
@@ -764,6 +770,12 @@ enum GitInfoStatusType {
 
 """A project which exists on the filesystem but has not been opened"""
 type GlobalProject implements Node & ProjectLike {
+  """
+  A refetchable remote field implementation to fetch the cloudProject,
+  this can safely be used when rendering a list of projects
+  """
+  cloudProjectRemote: RemoteFetchableCloudProjectResult
+
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
@@ -1001,6 +1013,12 @@ type Mutation {
     id: ID!
   ): CurrentProject
 
+  """Fetches the remote data for a RemoteFetchable ID"""
+  loadRemoteFetchables(
+    """The identifier for the RemoteFetchable we are loading"""
+    ids: [ID!]!
+  ): [RemoteFetchable]!
+
   """Auth with Cypress Dashboard"""
   login: Query
 
@@ -1155,6 +1173,12 @@ enum PluginsState {
 
 """Common base fields inherited by GlobalProject / CurrentProject"""
 interface ProjectLike {
+  """
+  A refetchable remote field implementation to fetch the cloudProject,
+  this can safely be used when rendering a list of projects
+  """
+  cloudProjectRemote: RemoteFetchableCloudProjectResult
+
   """Used to associate project with Cypress dashboard"""
   projectId: String
 
@@ -1239,6 +1263,82 @@ type Query {
 
   """Metadata about the wizard"""
   wizard: Wizard!
+}
+
+"""
+Represents a container for a piece of remote data stitched into the graph
+"""
+interface RemoteFetchable implements Node {
+  """The raw data response when resolving the data"""
+  dataRaw: JSON
+
+  """JSON representation of the error response"""
+  error: JSON
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+
+  """Latest time the fetch was successful"""
+  latestSuccessfulFetch: DateTime
+
+  """Prints the full operation sent for this query, for debugging purposes"""
+  operation: String!
+
+  """The hash of the operation, for debugging purposes"""
+  operationHash: String!
+
+  """The variables passed to the operation, for debugging purposes"""
+  operationVariables: JSON!
+
+  """The current status of the fetchable data"""
+  status: RemoteFetchableStatus!
+}
+
+"""
+Wrapper for the resolution remote RemoteFetchableCloudProjectResult data
+"""
+type RemoteFetchableCloudProjectResult implements Node & RemoteFetchable {
+  """Data resolved for the RemoteFetchableCloudProjectResult from the cloud"""
+  data: CloudProjectResult
+
+  """The raw data response when resolving the data"""
+  dataRaw: JSON
+
+  """JSON representation of the error response"""
+  error: JSON
+  id: ID!
+
+  """Latest time the fetch was successful"""
+  latestSuccessfulFetch: DateTime
+
+  """Prints the full operation sent for this query, for debugging purposes"""
+  operation: String!
+
+  """The hash of the operation, for debugging purposes"""
+  operationHash: String!
+
+  """The variables passed to the operation, for debugging purposes"""
+  operationVariables: JSON!
+
+  """The current status of the fetchable data"""
+  status: RemoteFetchableStatus!
+}
+
+enum RemoteFetchableStatus {
+  """Errored while fetching"""
+  ERRORED
+
+  """We have loaded the remote data"""
+  FETCHED
+
+  """Currently fetching"""
+  FETCHING
+
+  """Has not been fetched yet"""
+  NOT_FETCHED
+
+  """We have loaded the remote data, and are in the process of reloading"""
+  REFETCHING
 }
 
 """A file that we just added to the filesystem during project setup"""

@@ -22,7 +22,7 @@ export interface ProjectApiShape {
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
-  getProjectRootsFromCache(): Promise<string[]>
+  getProjectRootsFromCache(): Promise<ProjectShape[]>
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
@@ -121,10 +121,9 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.projects = [
-      ...this.projects,
-      ...projectRoots.map((projectRoot) => ({ projectRoot })),
-    ]
+    this.ctx.update((d) => {
+      d.app.projects = [...projectRoots]
+    })
 
     return this.projects
   }

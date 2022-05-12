@@ -31,10 +31,10 @@ export function makeCacheExchange (schema: any = urqlSchema) {
     updates: {
       Subscription: {
         pushFragment (parent, args, cache, info) {
-          const { pushFragment } = parent as { pushFragment: { id?: string, fragment: DocumentNode, data: any, typename: string }[] }
+          const { pushFragment } = parent as { pushFragment: { variables?: any, fragment: DocumentNode, data: any, typename: string }[] }
 
           for (const toPush of pushFragment) {
-            cache.writeFragment(toPush.fragment, toPush.data)
+            cache.writeFragment(toPush.fragment, toPush.data, toPush.variables ?? undefined)
           }
         },
       },

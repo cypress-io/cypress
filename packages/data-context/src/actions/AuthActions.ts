@@ -33,13 +33,15 @@ export class AuthActions {
   }
 
   async checkAuth () {
+    const operation = `query Cypress_CheckAuth { cloudViewer { id email fullName } }`
     const result = await this.ctx.cloud.executeRemoteGraphQL({
       operationType: 'query',
-      document: parse(`query Cypress_CheckAuth { cloudViewer { id email fullName } }`),
-      variables: {},
+      operation,
+      operationDoc: parse(operation),
+      operationVariables: {},
     })
 
-    if (!result.data?.cloudViewer) {
+    if (!result.data?.cloudViewer && !result.error?.networkError) {
       this.ctx.coreData.user = null
       await this.logout()
     }

@@ -1,4 +1,9 @@
-import type { DocumentNode, FragmentDefinitionNode, GraphQLResolveInfo } from 'graphql'
+import type { DocumentNode, FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, VariableDefinitionNode } from 'graphql'
+
+export interface RemoteQueryConfig {
+  fieldNodes: FieldNode[]
+  variableDefinitions: VariableDefinitionNode[]
+}
 
 /**
  * Builds a DocumentNode from a given GraphQLResolveInfo payload
@@ -9,10 +14,10 @@ export class DocumentNodeBuilder {
   readonly frag: FragmentDefinitionNode
   readonly clientWriteFragment: DocumentNode
 
-  constructor (info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'>, isNode: boolean = false) {
+  constructor (info: Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean}) {
     let selections = info.fieldNodes
 
-    if (isNode) {
+    if (info.isNode && !selections.some((s) => s.kind === 'Field' && s.name.value === 'id')) {
       selections = [{
         kind: 'Field',
         name: { kind: 'Name', value: 'id' },

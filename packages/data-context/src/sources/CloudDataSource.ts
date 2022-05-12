@@ -3,10 +3,11 @@ import pkg from '@packages/root'
 import debugLib from 'debug'
 import { cacheExchange, Cache } from '@urql/exchange-graphcache'
 import fetch, { Response } from 'cross-fetch'
+import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, print } from 'graphql'
+import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -41,12 +42,14 @@ type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
 export interface CloudExecuteQuery {
-  document: DocumentNode
-  variables: any
+  operation: string
+  operationHash?: string
+  operationDoc: DocumentNode
+  operationVariables: any
 }
 
 export interface CloudExecuteRemote extends CloudExecuteQuery {
-  operationType: OperationTypeNode
+  operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
 }
@@ -171,7 +174,11 @@ export class CloudDataSource {
   #pendingPromises = new Map<string, Promise<OperationResult>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
-    return `${print(config.document)}-${stringifyVariables(config.variables)}`
+    return `${config.operationHash ?? this.#sha1(config.operation)}-${stringifyVariables(config.operationVariables)}`
+  }
+
+  #sha1 (str: string) {
+    return crypto.createHash('sha1').update(str).digest('hex')
   }
 
   #maybeQueueDeferredExecute (config: CloudExecuteRemote, initialResult?: OperationResult) {
@@ -183,7 +190,7 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#cloudUrqlClient.query(config.document, config.variables, { requestPolicy: 'network-only' }).toPromise().then((op) => {
+    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then((op) => {
       this.#pendingPromises.delete(stableKey)
 
       if (initialResult && !_.isEqual(op.data, initialResult.data)) {
@@ -211,9 +218,13 @@ export class CloudDataSource {
   }
 
   hasResolved (config: CloudExecuteQuery) {
-    const eagerResult = this.#cloudUrqlClient.readQuery(config.document, config.variables)
+    const eagerResult = this.#cloudUrqlClient.readQuery(config.operationDoc, config.operationVariables)
 
     return Boolean(eagerResult)
+  }
+
+  readFromCache (config: CloudExecuteQuery) {
+    return this.#cloudUrqlClient.readQuery(config.operationDoc, config.operationVariables)
   }
 
   /**
@@ -228,11 +239,11 @@ export class CloudDataSource {
     }
 
     if (config.operationType === 'mutation') {
-      return this.#cloudUrqlClient.mutation(config.document, config.variables).toPromise()
+      return this.#cloudUrqlClient.mutation(config.operationDoc, config.operationVariables).toPromise()
     }
 
     // First, we check the cache to see if we have the data to fulfill this query
-    const eagerResult = this.#cloudUrqlClient.readQuery(config.document, config.variables)
+    const eagerResult = this.readFromCache(config)
 
     // If we do have a synchronous result, return it, and determine if we want to check for
     // updates to this field

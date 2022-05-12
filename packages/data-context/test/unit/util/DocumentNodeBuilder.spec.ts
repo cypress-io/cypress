@@ -75,6 +75,7 @@ describe('DocumentNodeBuilder', () => {
     const selections = ((CLOUD_PROJECT_QUERY.definitions[0] as OperationDefinitionNode).selectionSet.selections as ReadonlyArray<FieldNode>)
 
     const docNodeBuilder = new DocumentNodeBuilder({
+      isNode: true,
       fieldNodes: (selections[0].selectionSet.selections) as ReadonlyArray<FieldNode>,
       parentType: graphqlSchema.getType('CloudProject') as GraphQLObjectType,
     })

@@ -2,6 +2,8 @@ import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import type { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
+import Bluebird from 'bluebird'
+
 import { isListening } from './util/ensure-url'
 
 import type {
@@ -96,8 +98,13 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       insertProjectToCache (projectRoot: string) {
         return cache.insertProject(projectRoot)
       },
-      getProjectRootsFromCache () {
-        return cache.getProjectRoots()
+      async getProjectRootsFromCache () {
+        return await Bluebird.map(cache.getProjectRoots(), async (projectRoot: string) => {
+          return {
+            projectRoot,
+            savedState: () => savedState.create(projectRoot).then((s) => s.get()),
+          }
+        })
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()

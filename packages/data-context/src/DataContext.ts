@@ -39,6 +39,7 @@ import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecy
 import { CypressError, getError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
+import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -109,6 +110,11 @@ export class DataContext {
   @cached
   get graphql () {
     return new GraphQLDataSource()
+  }
+
+  @cached
+  get remoteRequest () {
+    return new RemoteRequestDataSource()
   }
 
   get electronApp () {

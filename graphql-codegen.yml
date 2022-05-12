@@ -72,6 +72,7 @@ generates:
       - add:
           content: '/* eslint-disable */'
       - 'typescript'
+      - 'typescript-resolvers'
 
   ###
   # Generates types for us to infer the correct keys for graphcache
