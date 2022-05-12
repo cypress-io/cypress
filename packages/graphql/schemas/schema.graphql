@@ -746,8 +746,14 @@ type GitInfo {
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
 
+  """short hash for latest commit"""
+  shortHash: String
+
   """status type - created or modified"""
   statusType: GitInfoStatusType
+
+  """subject for latest commit"""
+  subject: String
 }
 
 enum GitInfoStatusType {
@@ -936,6 +942,12 @@ enum MigrationStepEnum {
 }
 
 type Mutation {
+  """Internal use only, clears the cloud cache"""
+  _clearCloudCache: Boolean
+
+  """Used internally to update the URQL cache in the CloudDataSource"""
+  _cloudCacheInvalidate(args: JSON): Boolean
+
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -1041,6 +1053,14 @@ type Mutation {
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
+
+  """
+  Signal that we are explicitly refetching remote data and should not use the server cache
+  """
+  refetchRemote: Query
+
+  """Clears the cloudViewer cache to refresh the organizations"""
+  refreshOrganizations: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
@@ -1149,6 +1169,12 @@ type ProjectPreferences {
   testingType: String
 }
 
+type PushFragmentPayload {
+  data: JSON
+  fragment: JSON!
+  target: String!
+}
+
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   """The latest state of the auth process"""
@@ -1194,6 +1220,7 @@ type Query {
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
+  node(id: ID!): Node
 
   """Whether the project was specified from the --project flag"""
   projectRootFromCI: Boolean!
@@ -1296,6 +1323,11 @@ type Subscription {
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
+
+  """
+  When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
+  """
+  pushFragment: [PushFragmentPayload]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

@@ -1,3 +1,4 @@
+import { parse } from 'graphql'
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
@@ -34,9 +35,8 @@ export class AuthActions {
   async checkAuth () {
     const result = await this.ctx.cloud.executeRemoteGraphQL({
       operationType: 'query',
-      query: `query Cypress_CheckAuth { cloudViewer { id } }`,
+      document: parse(`query Cypress_CheckAuth { cloudViewer { id email fullName } }`),
       variables: {},
-      requestPolicy: 'network-only',
     })
 
     if (!result.data?.cloudViewer) {

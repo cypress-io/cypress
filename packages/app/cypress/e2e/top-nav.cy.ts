@@ -366,8 +366,8 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer('component')
 
         cy.remoteGraphQLIntercept((obj) => {
-          if (obj.result.data?.cloudProjectsBySlugs) {
-            throw new Error('Unauthorized')
+          if (obj.result.data?.cloudProjectBySlug) {
+            return new obj.Response('Unauthorized', { status: 401 })
           }
 
           return obj.result
@@ -660,7 +660,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
     cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
@@ -677,7 +677,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })
