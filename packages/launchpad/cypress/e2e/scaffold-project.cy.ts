@@ -66,7 +66,6 @@ function scaffoldAndOpenCTProject (opts: {
   cy.visitLaunchpad()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
-  cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
   cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('Component Testing').click()
 
@@ -181,6 +180,17 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     const language = 'js'
 
     scaffoldAndOpenCTProject({ name: 'pristine-npm', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Vue.js 3 Webpack' })
+
+    // since we added a valid webpack.config, the dev server starts and we are greeted
+    // with the choose browser screen.
+    cy.contains('Choose your preferred browser for component testing.')
+  })
+
+  it('adds CT to an E2E project', () => {
+    const language = 'js'
+
+    scaffoldAndOpenCTProject({ name: 'pristine-with-e2e-testing', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
     assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Vue.js 3 Webpack' })
 
     // since we added a valid webpack.config, the dev server starts and we are greeted
