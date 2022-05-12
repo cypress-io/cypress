@@ -1,5 +1,6 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import { detectFramework, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
+import { detectRelativeWebpackConfig } from '@packages/config/src/detect/webpack'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -215,6 +216,7 @@ export class WizardActions {
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
+    assert(this.ctx.currentProject)
 
     if (!this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
       this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
@@ -227,6 +229,7 @@ export class WizardActions {
       testingType: 'component',
       bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
+      webpackConfigPath: detectRelativeWebpackConfig(this.ctx.currentProject),
     }
 
     const result = await addTestingTypeToCypressConfig({

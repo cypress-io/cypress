@@ -61,7 +61,9 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
       component: {
         devServer: {
           framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
-          bundler: '${config.bundler}',
+          bundler: '${config.bundler}', 
+          // provide your webpack config here...
+          // webpackConfig,
         },
       },
     }
