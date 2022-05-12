@@ -122,7 +122,7 @@ export function getDefaultSpecFileName (specPattern: string, testingType: Cypres
   }
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, 'e2e')).join('/')
-  const fileName = testingType === 'e2e' ? replaceWildCard(parsedGlob.path.filename, 'spec') : replaceWildCard(parsedGlob.path.filename, 'ComponentName')
+  const fileName = replaceWildCard(parsedGlob.path.filename, testingType === 'e2e' ? 'spec' : 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
   let extname = replaceWildCard(extnameWithoutExt, 'cy')

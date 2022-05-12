@@ -8,8 +8,19 @@ import fs from 'fs'
 import path from 'path'
 import { buildSchema } from 'graphql'
 
+const LOCAL_SCHEMA_EXTENSIONS = `
+scalar JSON
+
+extend type Mutation {
+  """
+  Used internally to update the URQL cache in the CloudDataSource
+  """
+  _cloudCacheInvalidate(args: JSON): Boolean
+}
+`
+
 // Get the Remote schema we've sync'ed locally
 export const remoteSchema = buildSchema(
-  fs.readFileSync(path.join(__dirname, '../../schemas', 'cloud.graphql'), 'utf-8'),
+  fs.readFileSync(path.join(__dirname, '../../schemas', 'cloud.graphql'), 'utf-8') + LOCAL_SCHEMA_EXTENSIONS,
   { assumeValid: true },
 )
