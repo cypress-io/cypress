@@ -189,13 +189,15 @@ type CloudProjectNotFound {
 
 union CloudProjectResult = CloudProject | CloudProjectNotFound | CloudProjectUnauthorized
 
-type CloudProjectSpecs {
+type CloudProjectSpec implements Node {
   averageDuration: Float
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
   isConsideredFlaky(
     """The branch to measure flakiness against"""
     fromBranch: String!
   ): Boolean
-  specHash: String
   specPath: String
   specRuns(
     """Returns the elements in the list that come after the specified cursor"""
@@ -245,6 +247,7 @@ type CloudRun implements Node {
   id: ID!
   runNumber: Int
   status: CloudRunStatus
+  tags: [CloudRunTag]
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -253,6 +256,9 @@ type CloudRun implements Node {
 
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
+
+  """Number of flaky tests, null if flake detection is not enabled"""
+  totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -323,26 +329,32 @@ enum CloudRunStatus {
   TIMEDOUT
 }
 
+type CloudRunTag implements Node {
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+  name: String
+}
+
 """
 A Recorded run of a given spec from the Test Runner, typically to the cloud
 """
 type CloudSpecRun implements Node {
-  buildNumber: Int!
   completedAt: DateTime
-  createdAt: DateTime!
-  groupCount: Int!
+  createdAt: DateTime
+  groupCount: Int
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
-  specDuration: SpecDataAggregate!
-  status: CloudRunStatus!
-  testsFailed: SpecDataAggregate!
-  testsPassed: SpecDataAggregate!
-  testsPending: SpecDataAggregate!
-  testsSkipped: SpecDataAggregate!
+  runNumber: Int
+  specDuration: SpecDataAggregate
+  status: CloudRunStatus
+  testsFailed: SpecDataAggregate
+  testsPassed: SpecDataAggregate
+  testsPending: SpecDataAggregate
+  testsSkipped: SpecDataAggregate
 
   """A link to the run overview page filtered by spec"""
-  url: String!
+  url: String
 }
 
 type CloudSpecRunConnection {
@@ -1241,6 +1253,12 @@ type Query {
     id: ID!
   ): Node
 
+  """Returns a list of cloud nodes, by ID. Max 100 nodes per batch"""
+  cloudNodesByIds(
+    """A list of IDs for a Node, conforming to the Relay spec"""
+    ids: [ID!]!
+  ): [Node]
+
   """Lookup an individual project by the slug"""
   cloudProjectBySlug(slug: String!): CloudProjectResult
 
@@ -1274,7 +1292,7 @@ type Query {
 
     """A set of specs to include identified by spec path"""
     specPaths: [String!]!
-  ): [CloudProjectSpecs]
+  ): [CloudProjectSpec]
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser

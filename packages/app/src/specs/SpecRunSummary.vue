@@ -4,7 +4,7 @@
     class="flex flex-col gap-2 items-center"
   >
     <div class="font-semibold text-gray-800">
-      Run #{{ props.run.buildNumber }}
+      Run #{{ props.run.runNumber }}
     </div>
     <div class="max-w-80 text-gray-600 truncate overflow-hidden">
       {{ props.specFile }}
@@ -14,7 +14,7 @@
       v-bind="runResults"
     />
     <div class="flex flex-row text-gray-600 text-size-14px gap-2 items-center">
-      <div>{{ getAggDurationString(props.run.specDuration) }}</div>
+      <div>{{ getAggDurationString(props.run.specDuration ?? {}) }}</div>
       <i-cy-dot-solid_x4
         width="4px"
         height="4px"
@@ -26,7 +26,9 @@
         height="4px"
         class="icon-light-gray-400"
       />
-      <div>{{ getTimeAgo(props.run.createdAt) }}</div>
+      <div v-if="props.run.createdAt">
+        {{ getTimeAgo(props.run.createdAt!) }}
+      </div>
     </div>
   </div>
 </template>
@@ -67,10 +69,10 @@ const runResults = computed(() => {
 
   return {
     id: props.run.id,
-    totalFailed: getAggregateTestCountString(props.run.testsFailed),
-    totalPassed: getAggregateTestCountString(props.run.testsPassed),
-    totalPending: getAggregateTestCountString(props.run.testsPending),
-    totalSkipped: getAggregateTestCountString(props.run.testsSkipped),
+    totalFailed: getAggregateTestCountString(props.run.testsFailed ?? {}),
+    totalPassed: getAggregateTestCountString(props.run.testsPassed ?? {}),
+    totalPending: getAggregateTestCountString(props.run.testsPending ?? {}),
+    totalSkipped: getAggregateTestCountString(props.run.testsSkipped ?? {}),
   } as RunResultProps
 })
 
