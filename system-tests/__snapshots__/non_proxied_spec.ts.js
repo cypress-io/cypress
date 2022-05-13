@@ -8,13 +8,13 @@ exports['e2e non-proxied spec / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/e2e/spec.js                                                                │
+  │ Searched:   cypress/e2e/spec.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  spec.js                                                                         (1 of 1)
+  Running:  spec.cy.js                                                                      (1 of 1)
 
 
   non proxied e2e
@@ -37,7 +37,7 @@ exports['e2e non-proxied spec / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     spec.js                                                                          │
+  │ Spec Ran:     spec.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -48,7 +48,7 @@ exports['e2e non-proxied spec / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  spec.js                                  XX:XX        3        3        -        -        - │
+  │ ✔  spec.cy.js                               XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
