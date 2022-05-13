@@ -43,11 +43,6 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     ],
     config,
     cloudProject: CloudProjectStubs.componentProject,
-    codeGenGlobs: {
-      id: 'super-unique-id',
-      __typename: 'CodeGenGlobs',
-      component: '**/*.vue',
-    },
     activeBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
