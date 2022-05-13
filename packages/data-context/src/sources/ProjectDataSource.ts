@@ -1,8 +1,6 @@
 import os from 'os'
 import chokidar from 'chokidar'
-import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
-import { scanFSForAvailableDependency } from 'create-cypress-tests'
+import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
 import minimatch from 'minimatch'
 import { debounce, isEqual } from 'lodash'
 import path from 'path'
@@ -121,7 +119,7 @@ export function getDefaultSpecFileName (specPattern: string, testingType: Cypres
     dirname = dirname.replace('**', 'cypress')
   }
 
-  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, 'e2e')).join('/')
+  const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
   const fileName = testingType === 'e2e' ? replaceWildCard(parsedGlob.path.filename, 'spec') : replaceWildCard(parsedGlob.path.filename, 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
@@ -282,14 +280,13 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName () {
-    let defaultFileName = 'cypress/e2e/spec.cy.js'
+    const getDefaultFileName = (testingType: TestingType) => `cypress/${testingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+
+    assert(this.ctx.currentProject)
+    assert(this.ctx.coreData.currentTestingType)
 
     try {
-      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-        return defaultFileName
-      }
-
-      defaultFileName = this.ctx.coreData.currentTestingType === 'e2e' ? 'cypress/e2e/spec.cy.js' : 'src/ComponentName.cy.js'
+      const defaultFileName = getDefaultFileName(this.ctx.coreData.currentTestingType)
 
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()
@@ -302,6 +299,10 @@ export class ProjectDataSource {
         return defaultFileName
       }
 
+      if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
+        return defaultFileName
+      }
+
       const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
 
       if (!specFileName) {
@@ -310,7 +311,7 @@ export class ProjectDataSource {
 
       return specFileName
     } catch {
-      return defaultFileName
+      return getDefaultFileName(this.ctx.coreData.currentTestingType ?? 'e2e')
     }
   }
 
@@ -359,31 +360,6 @@ export class ProjectDataSource {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
     return preferences[projectTitle] ?? null
-  }
-
-  private guessFramework (projectRoot: string) {
-    const guess = WIZARD_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map((x) => x.package).reduce(
-        (acc, dep) => ({ ...acc, [dep]: '*' }),
-        {},
-      )
-
-      return scanFSForAvailableDependency(projectRoot, lookingForDeps)
-    })
-
-    return guess ?? null
-  }
-
-  async getCodeGenGlobs () {
-    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
-
-    const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
-
-    const framework = this.guessFramework(this.ctx.currentProject)
-
-    return {
-      component: framework?.glob ?? looseComponentGlob,
-    }
   }
 
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {

@@ -1,17 +1,14 @@
 import chai from 'chai'
 import os from 'os'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getDefaultSpecFileName } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getDefaultSpecFileName } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
 import chokidar from 'chokidar'
 import _ from 'lodash'
 import sinonChai from 'sinon-chai'
-import { graphqlSchema } from '@packages/graphql/src/schema'
 import { FoundSpec, TestingType } from '@packages/types'
 import { DataContext } from '../../../src'
-import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
-import { InjectedConfigApi } from '../../../src/data'
 import { createTestDataContext } from '../helper'
 
 chai.use(sinonChai)
@@ -343,18 +340,7 @@ describe('startSpecWatcher', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
-    ctx = new DataContext({
-      schema: graphqlSchema,
-      mode: 'run',
-      modeOptions: {},
-      appApi: {} as AppApiShape,
-      localSettingsApi: {} as LocalSettingsApiShape,
-      authApi: {} as AuthApiShape,
-      configApi: {} as InjectedConfigApi,
-      projectApi: {} as ProjectApiShape,
-      electronApi: {} as ElectronApiShape,
-      browserApi: {} as BrowserApiShape,
-    })
+    ctx = createTestDataContext('run')
 
     ctx.coreData.currentProject = temporary
   })

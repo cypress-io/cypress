@@ -2,16 +2,24 @@
 import 'mocha'
 import path from 'path'
 import fs from 'fs-extra'
-import Fixtures, { fixtureDirs } from '@tooling/system-tests'
+import { Response } from 'cross-fetch'
+import Fixtures, { fixtureDirs, scaffoldProject } from '@tooling/system-tests'
 import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
+import { remoteSchemaWrapped as schemaCloud } from '@packages/graphql/src/stitching/remoteSchemaWrapped'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
 import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
 import { InjectedConfigApi } from '../../src/data'
 import sinon from 'sinon'
+import { execute, parse } from 'graphql'
+import { getOperationName } from '@urql/core'
+import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
+import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
 
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
+
+export { scaffoldProject }
 
 export function getSystemTestProject<T extends typeof fixtureDirs[number]> (project: T): SystemTestProjectPath<T> {
   return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>
@@ -29,9 +37,10 @@ export async function scaffoldMigrationProject (project: typeof fixtureDirs[numb
   return Fixtures.projectPath(project)
 }
 
-export function createTestDataContext (mode: DataContextConfig['mode'] = 'run') {
-  return new DataContext({
+export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', stubFetch = true) {
+  const ctx = new DataContext({
     schema: graphqlSchema,
+    schemaCloud,
     mode,
     modeOptions: {},
     appApi: {} as AppApiShape,
@@ -41,7 +50,9 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run') 
       resetAuthState: sinon.stub(),
     } as unknown as AuthApiShape,
     configApi: {} as InjectedConfigApi,
-    projectApi: {} as ProjectApiShape,
+    projectApi: {
+      closeActiveProject: sinon.stub(),
+    } as unknown as ProjectApiShape,
     electronApi: {
       isMainWindowFocused: sinon.stub().returns(false),
       focusMainWindow: sinon.stub(),
@@ -49,6 +60,38 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run') 
     } as unknown as ElectronApiShape,
     browserApi: {
       focusActiveBrowserWindow: sinon.stub(),
+      getBrowsers: sinon.stub().resolves([]),
     } as unknown as BrowserApiShape,
   })
+
+  if (stubFetch) {
+    const origFetch = ctx.util.fetch
+
+    ctx.util.fetch = async function (url, init) {
+      await new Promise((resolve) => setTimeout(resolve, 5))
+
+      if (String(url).endsWith('/test-runner-graphql')) {
+        const { query, variables } = JSON.parse(String(init?.body))
+        const document = parse(query)
+        const operationName = getOperationName(document)
+
+        const result = await Promise.resolve(execute({
+          operationName,
+          variableValues: variables,
+          rootValue: CloudQuery,
+          contextValue: {
+            __server__: ctx,
+          },
+          schema: remoteSchema,
+          document,
+        }))
+
+        return new Response(JSON.stringify(result), { status: 200 })
+      }
+
+      return origFetch.call(this, url, init)
+    }
+  }
+
+  return ctx
 }
