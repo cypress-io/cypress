@@ -155,10 +155,16 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cookies_spec_no_baseurl.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_no_baseurl.cy.js.m     (X second)
+                          p4                                                                        
 
 
 ====================================================================================================
