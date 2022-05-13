@@ -124,9 +124,10 @@ export class GraphQLDataSource {
 
   #pushFragment (params: PushNodeFragmentParams | PushQueryFragmentParams, isNode: boolean = false) {
     const docBuilder = new DocumentNodeBuilder({
+      isNode,
       parentType: params.info.parentType,
       fieldNodes: params.info.fieldNodes,
-    }, isNode)
+    })
 
     Promise.resolve(execute({
       schema: params.info.schema,

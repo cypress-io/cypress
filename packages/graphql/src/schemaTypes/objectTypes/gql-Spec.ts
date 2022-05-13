@@ -47,5 +47,23 @@ export const Spec = objectType({
         return ctx.lifecycleManager.git?.gitInfoFor(source.absolute) ?? null
       },
     })
+
+    t.remoteField('cloudSpec', {
+      type: 'CloudProjectSpec',
+      remoteQueryField: 'cloudSpecByPath',
+      shouldEagerFetch: (source, args, ctx, info, idx) => idx <= 11,
+      queryArgs: async (source, args, ctx) => {
+        const projectId = await ctx.project.projectId()
+
+        if (!projectId) {
+          return false
+        }
+
+        return {
+          projectSlug: projectId,
+          specPath: source.relative,
+        }
+      },
+    })
   },
 })

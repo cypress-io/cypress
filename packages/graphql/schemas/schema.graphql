@@ -462,6 +462,12 @@ type CurrentProject implements Node & ProjectLike {
   """The remote associated project from Cypress Dashboard"""
   cloudProject: CloudProjectResult
 
+  """
+  A refetchable remote field implementation to fetch the cloudProject,
+  this can safely be used when rendering a list of projects
+  """
+  cloudProjectRemote: RemoteFetchableCloudProjectResult
+
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
 
@@ -840,6 +846,12 @@ enum GitInfoStatusType {
 
 """A project which exists on the filesystem but has not been opened"""
 type GlobalProject implements Node & ProjectLike {
+  """
+  A refetchable remote field implementation to fetch the cloudProject,
+  this can safely be used when rendering a list of projects
+  """
+  cloudProjectRemote: RemoteFetchableCloudProjectResult
+
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
@@ -1077,6 +1089,12 @@ type Mutation {
     id: ID!
   ): CurrentProject
 
+  """Fetches the remote data for a RemoteFetchable ID"""
+  loadRemoteFetchables(
+    """The identifier for the RemoteFetchable we are loading"""
+    ids: [ID!]!
+  ): [RemoteFetchable]!
+
   """Auth with Cypress Dashboard"""
   login: Query
 
@@ -1231,6 +1249,12 @@ enum PluginsState {
 
 """Common base fields inherited by GlobalProject / CurrentProject"""
 interface ProjectLike {
+  """
+  A refetchable remote field implementation to fetch the cloudProject,
+  this can safely be used when rendering a list of projects
+  """
+  cloudProjectRemote: RemoteFetchableCloudProjectResult
+
   """Used to associate project with Cypress dashboard"""
   projectId: String
 
@@ -1297,6 +1321,15 @@ type Query {
   ): Boolean
 
   """Gets a set of specs on a given project and branch"""
+  cloudSpecByPath(
+    """Slug of the project to which the set of specs belong"""
+    projectSlug: String!
+
+    """The spec path to find"""
+    specPath: String!
+  ): CloudProjectSpec
+
+  """Gets a set of specs on a given project and branch"""
   cloudSpecsByPath(
     """Slug of the project to which the set of specs belong"""
     projectSlug: String!
@@ -1343,6 +1376,110 @@ type Query {
   wizard: Wizard!
 }
 
+"""
+Represents a container for a piece of remote data stitched into the graph
+"""
+interface RemoteFetchable implements Node {
+  """The raw data response when resolving the data"""
+  dataRaw: JSON
+
+  """JSON representation of the error response"""
+  error: JSON
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+
+  """Latest time the fetch was successful"""
+  latestSuccessfulFetch: DateTime
+
+  """Prints the full operation sent for this query, for debugging purposes"""
+  operation: String!
+
+  """The hash of the operation, for debugging purposes"""
+  operationHash: String!
+
+  """The variables passed to the operation, for debugging purposes"""
+  operationVariables: JSON!
+
+  """The current status of the fetchable data"""
+  status: RemoteFetchableStatus!
+}
+
+"""
+Wrapper for the resolution remote RemoteFetchableCloudProjectResult data
+"""
+type RemoteFetchableCloudProjectResult implements Node & RemoteFetchable {
+  """Data resolved for the RemoteFetchableCloudProjectResult from the cloud"""
+  data: CloudProjectResult
+
+  """The raw data response when resolving the data"""
+  dataRaw: JSON
+
+  """JSON representation of the error response"""
+  error: JSON
+  id: ID!
+
+  """Latest time the fetch was successful"""
+  latestSuccessfulFetch: DateTime
+
+  """Prints the full operation sent for this query, for debugging purposes"""
+  operation: String!
+
+  """The hash of the operation, for debugging purposes"""
+  operationHash: String!
+
+  """The variables passed to the operation, for debugging purposes"""
+  operationVariables: JSON!
+
+  """The current status of the fetchable data"""
+  status: RemoteFetchableStatus!
+}
+
+"""Wrapper for the resolution remote RemoteFetchableCloudProjectSpec data"""
+type RemoteFetchableCloudProjectSpec implements Node & RemoteFetchable {
+  """Data resolved for the RemoteFetchableCloudProjectSpec from the cloud"""
+  data: CloudProjectSpec
+
+  """The raw data response when resolving the data"""
+  dataRaw: JSON
+
+  """JSON representation of the error response"""
+  error: JSON
+  id: ID!
+
+  """Latest time the fetch was successful"""
+  latestSuccessfulFetch: DateTime
+
+  """Prints the full operation sent for this query, for debugging purposes"""
+  operation: String!
+
+  """The hash of the operation, for debugging purposes"""
+  operationHash: String!
+
+  """The variables passed to the operation, for debugging purposes"""
+  operationVariables: JSON!
+
+  """The current status of the fetchable data"""
+  status: RemoteFetchableStatus!
+}
+
+enum RemoteFetchableStatus {
+  """Errored while fetching"""
+  ERRORED
+
+  """We have loaded the remote data"""
+  FETCHED
+
+  """Currently fetching"""
+  FETCHING
+
+  """Has not been fetched yet"""
+  NOT_FETCHED
+
+  """We have loaded the remote data, and are in the process of reloading"""
+  REFETCHING
+}
+
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
   """Info about the file we just scaffolded"""
@@ -1364,6 +1501,9 @@ type Spec implements Node {
 
   """Full name of spec file (e.g. MySpec.test.tsx)"""
   baseName: String!
+
+  """Wrapper for resolving remote data associated with this field"""
+  cloudSpec: RemoteFetchableCloudProjectSpec
 
   """The file extension (e.g. tsx, jsx)"""
   fileExtension: String!

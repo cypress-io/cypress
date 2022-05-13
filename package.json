@@ -86,6 +86,7 @@
     "@graphql-codegen/typed-document-node": "2.2.8",
     "@graphql-codegen/typescript": "2.4.2",
     "@graphql-codegen/typescript-operations": "2.2.3",
+    "@graphql-codegen/typescript-resolvers": "^2.6.4",
     "@graphql-codegen/typescript-urql-graphcache": "2.2.3",
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/utils": "8.2.3",

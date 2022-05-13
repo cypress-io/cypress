@@ -4,7 +4,7 @@ import type { DataContext } from '@packages/data-context'
 import type { RequestPolicy } from '@urql/core'
 import assert from 'assert'
 import debugLib from 'debug'
-import { BREAK, OperationDefinitionNode, visit } from 'graphql'
+import { BREAK, OperationDefinitionNode, print, visit } from 'graphql'
 import { remoteSchema } from './remoteSchema'
 
 const debug = debugLib('cypress:graphql:remoteSchemaWrapped')
@@ -44,21 +44,24 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
 
     debug('executing: %j', { rootValue: obj.rootValue, operationName, requestPolicy })
 
+    const operationDoc = visit(obj.document, {
+      OperationDefinition (node) {
+        if (!node.name) {
+          return {
+            ...node, name: { kind: 'Name', value: operationName },
+          } as OperationDefinitionNode
+        }
+
+        return BREAK
+      },
+    })
+
     return obj.context.cloud.executeRemoteGraphQL({
       requestPolicy,
       operationType: obj.operationType ?? 'query',
-      document: visit(obj.document, {
-        OperationDefinition (node) {
-          if (!node.name) {
-            return {
-              ...node, name: { kind: 'Name', value: operationName },
-            } as OperationDefinitionNode
-          }
-
-          return BREAK
-        },
-      }),
-      variables: obj.variables,
+      operation: print(operationDoc),
+      operationDoc,
+      operationVariables: obj.variables,
       // When we respond eagerly with a result, but receive an updated value
       // for the query, we can "push" the data down using the pushFragment subscription
       onUpdatedResult (result) {

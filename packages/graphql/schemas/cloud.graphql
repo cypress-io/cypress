@@ -635,6 +635,21 @@ type Query {
   """
   Gets a set of specs on a given project and branch
   """
+  cloudSpecByPath(
+    """
+    Slug of the project to which the set of specs belong
+    """
+    projectSlug: String!
+
+    """
+    The spec path to find
+    """
+    specPath: String!
+  ): CloudProjectSpec
+
+  """
+  Gets a set of specs on a given project and branch
+  """
   cloudSpecsByPath(
     """
     Slug of the project to which the set of specs belong

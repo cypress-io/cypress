@@ -7,6 +7,7 @@ export interface PushFragmentData {
   data: any
   target: string
   fragment: string
+  variables?: any
 }
 
 abstract class DataEmitterEvents {

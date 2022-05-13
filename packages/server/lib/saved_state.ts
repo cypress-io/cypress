@@ -83,7 +83,7 @@ const normalizeAndAllowSet = (set, key, value) => {
 
   if (invalidKeys.length) {
     // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
+    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.ts`)
   }
 
   return set(_.pick(valueObject, allowedKeys))
