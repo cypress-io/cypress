@@ -2391,8 +2391,8 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/e2e/b_record.spec.js             │
+  │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
+  │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2400,14 +2400,14 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record_instantfail.spec.js                                                    (1 of 2)
+  Running:  a_record_instantfail.cy.js                                                      (1 of 2)
   Estimated: 8 seconds
 
   This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  b_record.spec.js                                                                (2 of 2)
+  Running:  b_record.cy.js                                                                  (2 of 2)
   Estimated: 8 seconds
 
 
@@ -2430,7 +2430,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     b_record.spec.js                                                                 │
+  │ Spec Ran:     b_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2445,9 +2445,9 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ -  a_record_instantfail.spec.js           SKIPPED        -        -        -        -        - │
+  │ -  a_record_instantfail.cy.js             SKIPPED        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  b_record.cy.js                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     -  The run was canceled                     XX:XX        1        1        -        -        -  
 
@@ -2470,8 +2470,8 @@ exports['e2e record api skips specs records tests and exits without executing in
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/e2e/b_record.spec.js             │
+  │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
+  │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
   │ Params:     Tag: false, Group: abc, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2479,14 +2479,14 @@ exports['e2e record api skips specs records tests and exits without executing in
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record_instantfail.spec.js                                                    (1 of 2)
+  Running:  a_record_instantfail.cy.js                                                      (1 of 2)
   Estimated: 8 seconds
 
   This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  b_record.spec.js                                                                (2 of 2)
+  Running:  b_record.cy.js                                                                  (2 of 2)
   Estimated: 8 seconds
 
 
@@ -2509,7 +2509,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     b_record.spec.js                                                                 │
+  │ Spec Ran:     b_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2524,9 +2524,9 @@ exports['e2e record api skips specs records tests and exits without executing in
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ -  a_record_instantfail.spec.js           SKIPPED        -        -        -        -        - │
+  │ -  a_record_instantfail.cy.js             SKIPPED        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  b_record.cy.js                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     -  The run was canceled                     XX:XX        1        1        -        -        -  
 

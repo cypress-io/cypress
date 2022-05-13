@@ -462,7 +462,7 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
-        `PUT /instances/${instanceId}/stdout`,
+        `PUT /instances/${instanceId} notstdout`,
 
         `POST /runs/${runId}/instances`,
       ])
@@ -619,7 +619,7 @@ describe('e2e record', () => {
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id-without-video.config.js',
-          spec: 'a_record.spec.js,b_record.spec.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
           record: true,
           snapshot: false,
         })
@@ -660,7 +660,7 @@ describe('e2e record', () => {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        spec: 'a_record_instantfail.cy.js,b_record.cy.js',
         record: true,
         snapshot: true,
         expectedExitCode: 1,
@@ -688,7 +688,7 @@ describe('e2e record', () => {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        spec: 'a_record_instantfail.cy.js,b_record.cy.js',
         record: true,
         snapshot: true,
         group: 'abc',
