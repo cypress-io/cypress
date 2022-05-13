@@ -2549,8 +2549,8 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (empty_suite.spec.js, empty.spec.js)                                       │
-  │ Searched:   cypress/e2e/empty_suite.spec.js, cypress/e2e/empty.spec.js                         │
+  │ Specs:      2 found (empty_suite.cy.js, empty.cy.js)                                           │
+  │ Searched:   cypress/e2e/empty_suite.cy.js, cypress/e2e/empty.cy.js                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2558,7 +2558,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  empty_suite.spec.js                                                             (1 of 2)
+  Running:  empty_suite.cy.js                                                               (1 of 2)
   Estimated: 8 seconds
 
 
@@ -2577,7 +2577,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     empty_suite.spec.js                                                              │
+  │ Spec Ran:     empty_suite.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2587,7 +2587,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  empty.spec.js                                                                   (2 of 2)
+  Running:  empty.cy.js                                                                     (2 of 2)
   Estimated: 8 seconds
 
 
@@ -2606,7 +2606,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     empty.spec.js                                                                    │
+  │ Spec Ran:     empty.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2621,9 +2621,9 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  empty_suite.spec.js                      XX:XX        -        -        -        -        - │
+  │ ✔  empty_suite.cy.js                        XX:XX        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  empty.spec.js                            XX:XX        -        -        -        -        - │
+  │ ✔  empty.cy.js                              XX:XX        -        -        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        -        -        -        -        -  
 

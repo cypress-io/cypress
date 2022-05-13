@@ -447,7 +447,7 @@ describe('e2e record', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id.config.js',
         record: true,
-        spec: 'empty_suite.spec.js,empty.spec.js',
+        spec: 'empty_suite.cy.js,empty.cy.js',
         snapshot: true,
         expectedExitCode: 0,
       })
