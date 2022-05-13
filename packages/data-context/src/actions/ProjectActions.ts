@@ -4,7 +4,7 @@ import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
-import type { ProjectShape } from '../data/coreDataShape'
+import type { Maybe, ProjectShape, SavedStateShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
@@ -34,6 +34,7 @@ export interface ProjectApiShape {
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
+  makeProjectSavedState(projectRoot: string): () => Promise<Maybe<SavedStateShape>>
   getDevServer (): {
     updateSpecs(specs: FoundSpec[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
@@ -181,7 +182,7 @@ export class ProjectActions {
     const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
-      this.projects.push({ projectRoot })
+      this.projects.push({ projectRoot, savedState: this.api.makeProjectSavedState(projectRoot) })
       await this.api.insertProjectToCache(projectRoot)
     }
 

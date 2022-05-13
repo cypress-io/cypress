@@ -134,7 +134,7 @@ describe('Launchpad: Open Mode', () => {
           },
         ]
 
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+        ctx.coreData.app.projects = [{ projectRoot: '/some/project', savedState: () => Promise.resolve({}) }]
       })
 
       cy.visitLaunchpad()
@@ -161,7 +161,7 @@ describe('Launchpad: Open Mode', () => {
 
     it('opens using finder', () => {
       cy.withCtx(async (ctx, o) => {
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+        ctx.coreData.app.projects = [{ projectRoot: '/some/project', savedState: () => Promise.resolve({}) }]
       })
 
       cy.visitLaunchpad()

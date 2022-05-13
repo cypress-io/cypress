@@ -186,6 +186,48 @@ union CloudProjectResult =
   | CloudProjectNotFound
   | CloudProjectUnauthorized
 
+type CloudProjectSpec implements Node {
+  averageDuration: Float
+
+  """
+  Globally unique identifier representing a concrete GraphQL ObjectType
+  """
+  id: ID!
+  isConsideredFlaky(
+    """
+    The branch to measure flakiness against
+    """
+    fromBranch: String!
+  ): Boolean
+  specPath: String
+  specRuns(
+    """
+    Returns the elements in the list that come after the specified cursor
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor
+    """
+    before: String
+
+    """
+    Returns the first n elements from the list.
+    """
+    first: Int
+
+    """
+    The branch to filter on for the specs
+    """
+    fromBranch: String!
+
+    """
+    Returns the last n elements from the list.
+    """
+    last: Int
+  ): CloudSpecRunConnection
+}
+
 """
 Unauthorized access
 """
@@ -221,12 +263,14 @@ A Recorded run of the Test Runner, typically to the cloud
 """
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
+  completedAt: DateTime
   createdAt: DateTime
 
   """
   Globally unique identifier representing a concrete GraphQL ObjectType
   """
   id: ID!
+  runNumber: Int
   status: CloudRunStatus
   tags: [CloudRunTag]
 
@@ -241,7 +285,7 @@ type CloudRun implements Node {
   totalFailed: Int
 
   """
-  Number of flaky tests
+  Number of flaky tests, null if flake detection is not enabled
   """
   totalFlakyTests: Int
 
@@ -342,6 +386,61 @@ type CloudRunTag implements Node {
   """
   id: ID!
   name: String
+}
+
+"""
+A Recorded run of a given spec from the Test Runner, typically to the cloud
+"""
+type CloudSpecRun implements Node {
+  completedAt: DateTime
+  createdAt: DateTime
+  groupCount: Int
+
+  """
+  Globally unique identifier representing a concrete GraphQL ObjectType
+  """
+  id: ID!
+  runNumber: Int
+  specDuration: SpecDataAggregate
+  status: CloudRunStatus
+  testsFailed: SpecDataAggregate
+  testsPassed: SpecDataAggregate
+  testsPending: SpecDataAggregate
+  testsSkipped: SpecDataAggregate
+
+  """
+  A link to the run overview page filtered by spec
+  """
+  url: String
+}
+
+type CloudSpecRunConnection {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [CloudSpecRunEdge!]!
+
+  """
+  Flattened list of CloudSpecRun type
+  """
+  nodes: [CloudSpecRun!]!
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+type CloudSpecRunEdge {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor
+  """
+  cursor: String!
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Node
+  """
+  node: CloudSpecRun!
 }
 
 """
@@ -509,7 +608,77 @@ type Query {
   ): [CloudProjectResult]
 
   """
+  Poll this query to determine when it's required to refresh run data for a given spec or branch
+  """
+  cloudShouldRequestNewSpecData(
+    """
+    Clients active branch to search for builds
+    """
+    commitBranch: String!
+
+    """
+    A list of Project slugs
+    """
+    projectSlug: String!
+
+    """
+    Datetime since the fetched data
+    """
+    sinceDateTime: DateTime!
+
+    """
+    The spec paths we want to test for
+    """
+    specPaths: [String!]
+  ): Boolean
+
+  """
+  Gets a set of specs on a given project and branch
+  """
+  cloudSpecByPath(
+    """
+    Slug of the project to which the set of specs belong
+    """
+    projectSlug: String!
+
+    """
+    The spec path to find
+    """
+    specPath: String!
+  ): CloudProjectSpec
+
+  """
+  Gets a set of specs on a given project and branch
+  """
+  cloudSpecsByPath(
+    """
+    Slug of the project to which the set of specs belong
+    """
+    projectSlug: String!
+
+    """
+    A set of specs to include identified by spec path
+    """
+    specPaths: [String!]!
+  ): [CloudProjectSpec]
+
+  """
   A user within the Cypress Cloud
   """
   cloudViewer: CloudUser
+}
+
+"""
+Aggregate data from multiple groups for a spec run
+"""
+type SpecDataAggregate {
+  """
+  Maximum value in the groups
+  """
+  max: Int
+
+  """
+  Minimum value in the groups
+  """
+  min: Int
 }

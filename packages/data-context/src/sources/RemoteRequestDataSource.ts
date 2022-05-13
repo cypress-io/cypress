@@ -161,8 +161,8 @@ export class RemoteRequestDataSource {
 
       assert(toSend, `Missing fragment for ${operationHash}`)
 
-      let data = null
-      let error = null
+      let data: any = null
+      let error: any = null
       let status: RemoteFetchableStatus = 'FETCHED'
 
       if (result.error) {
@@ -246,7 +246,7 @@ export class RemoteRequestDataSource {
 
       const { operation, operationDoc, operationHash } = operationDef
       const operationVariables: Record<string, any> = {}
-      const queryArgs = fieldConfig.queryArgs as RemoteQueryArgsResolver<any, any, Record<string, any>>
+      const queryArgs = fieldConfig.queryArgs as RemoteQueryArgsResolver<any, any, any>
 
       if (typeof queryArgs === 'function') {
         const queryArgResult = await queryArgs(source, args, ctx, info)

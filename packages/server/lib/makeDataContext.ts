@@ -156,6 +156,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           },
         })
       },
+      makeProjectSavedState (projectRoot: string) {
+        return () => savedState.create(projectRoot).then((s) => s.get())
+      },
       getDevServer () {
         return devServer
       },

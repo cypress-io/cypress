@@ -1,4 +1,5 @@
 import { interfaceType } from 'nexus'
+import assert from 'assert'
 
 export const Node = interfaceType({
   name: 'Node',
@@ -11,11 +12,9 @@ export const Node = interfaceType({
       },
     })
   },
-  resolveType: (t) => {
-    if (t.__typename) {
-      return t.__typename
-    }
+  resolveType: (t: any) => {
+    assert(t.__typename, `Cannot resolve Node without __typename: saw ${JSON.stringify(t)}`)
 
-    return t.id
+    return t.__typename
   },
 })

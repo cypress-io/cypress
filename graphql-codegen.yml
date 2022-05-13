@@ -67,6 +67,8 @@ generates:
       - 'packages/frontend-shared/script/codegen-type-map.js'
 
   './packages/graphql/src/gen/cloud-source-types.gen.ts':
+    config:
+      useTypeImports: true
     schema: 'packages/graphql/schemas/cloud.graphql'
     plugins:
       - add:
