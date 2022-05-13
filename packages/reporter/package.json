@@ -4,7 +4,7 @@
   "private": true,
   "browser": "src/main.tsx",
   "scripts": {
-    "build-for-tests": "webpack",
+    "build-for-tests": "node ../../scripts/run-webpack",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
