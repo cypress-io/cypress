@@ -3,7 +3,6 @@ import charset from 'charset'
 import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils, uri } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
-import debugModule from 'debug'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
@@ -29,7 +28,10 @@ interface ResponseMiddlewareProps {
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
 
-const debug = debugModule('cypress:proxy:http:response-middleware')
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 // https://github.com/cypress-io/cypress/issues/1756
 const zlibOptions = {
@@ -38,7 +40,7 @@ const zlibOptions = {
 }
 
 // https://github.com/cypress-io/cypress/issues/1543
-function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer) {
+function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer, debug: Debug) {
   const httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
 
   debug('inferred charset from response %o', { httpCharset })
@@ -133,7 +135,7 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
-  debug('received response %o', {
+  this.debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
   })
@@ -143,10 +145,10 @@ const LogResponse: ResponseMiddleware = function () {
 
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
-    debug('ensuring resStream is plaintext')
+    this.debug('ensuring resStream is plaintext')
 
     if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
-      debug('gunzipping response body')
+      this.debug('gunzipping response body')
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
@@ -209,7 +211,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
         throw err
       }
 
-      debug('setHeader error ignored %o', { name, value, code: err.code, err })
+      this.debug('setHeader error ignored %o', { name, value, code: err.code, err })
 
       if (!kOutHeaders) {
         kOutHeaders = getKOutHeadersSymbol()
@@ -334,7 +336,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     || resContentTypeIsJavaScript(this.incomingRes)
   )
 
-  debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+  this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
   this.next()
 }
@@ -417,13 +419,13 @@ const cookieSecureRegex = /(^|\W)Secure(\W|$)/i
 const cookieSecureSemicolonRegex = /;\s*Secure/i
 
 const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSiteNoneProps) => {
-  debug('original cookie: %s', cookie)
+  this.debug('original cookie: %s', cookie)
 
   if (cookieSameSiteRegex.test(cookie)) {
-    debug('change cookie to SameSite=None')
+    this.debug('change cookie to SameSite=None')
     cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
   } else {
-    debug('add SameSite=None to cookie')
+    this.debug('add SameSite=None to cookie')
     cookie += '; SameSite=None'
   }
 
@@ -439,15 +441,15 @@ const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSit
   // remove Secure from http://localhost cookies in Firefox.
   if (cookieSecureRegex.test(cookie)) {
     if (isFirefox && isLocalhost && url.protocol === 'http:') {
-      debug('remove Secure from cookie')
+      this.debug('remove Secure from cookie')
       cookie = cookie.replace(cookieSecureSemicolonRegex, '')
     }
   } else if (!isFirefox || url.protocol === 'https:') {
-    debug('add Secure to cookie')
+    this.debug('add Secure to cookie')
     cookie += '; Secure'
   }
 
-  debug('resulting cookie: %s', cookie)
+  this.debug('resulting cookie: %s', cookie)
 
   return cookie
 }
@@ -464,7 +466,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
     const url = new URL(this.req.proxiedUrl)
     const isLocalhost = uri.isLocalhost(url)
 
-    debug('force SameSite=None?', needsCrossOriginHandling)
+    this.debug('force SameSite=None?', needsCrossOriginHandling)
 
     ;([] as string[]).concat(cookies).forEach((cookie) => {
       if (needsCrossOriginHandling) {
@@ -474,7 +476,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
       try {
         this.res.append('Set-Cookie', cookie)
       } catch (err) {
-        debug('failed to Set-Cookie, continuing %o', { err, cookie })
+        this.debug('failed to Set-Cookie, continuing %o', { err, cookie })
       }
     })
   }
@@ -495,7 +497,7 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
 
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
-  debug('redirecting to new url %o', { statusCode, newUrl })
+  this.debug('redirecting to new url %o', { statusCode, newUrl })
   this.res.redirect(Number(statusCode), newUrl)
 
   return this.end()
@@ -528,12 +530,13 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   this.skipMiddleware('MaybeRemoveSecurity') // we only want to do one or the other
 
-  debug('injecting into HTML')
+  this.debug('injecting into HTML')
 
   this.makeResStreamPlainText()
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
+    const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body, this.debug)
+
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
@@ -561,7 +564,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     return this.next()
   }
 
-  debug('removing JS framebusting code')
+  this.debug('removing JS framebusting code')
 
   this.makeResStreamPlainText()
 
@@ -578,7 +581,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = function () {
   if (this.isGunzipped) {
-    debug('regzipping response body')
+    this.debug('regzipping response body')
     this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
   }
 
