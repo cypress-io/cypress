@@ -39,7 +39,7 @@
     "sass-loader": "10.1.0",
     "sinon-chai": "3.3.0",
     "webpack": "^4.44.2",
-    "webpack-cli": "3.3.11",
+    "webpack-cli": "3.3.2",
     "webpack-livereload-plugin": "2.3.0"
   }
 }

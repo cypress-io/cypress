@@ -68,7 +68,7 @@ function webpackDevServer4 (
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
   const webpackDevServerConfig = {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 'auto',
     // @ts-ignore
     ...finalWebpackConfig?.devServer,
