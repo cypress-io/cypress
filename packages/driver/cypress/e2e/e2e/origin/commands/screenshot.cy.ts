@@ -281,13 +281,13 @@ context('cy.origin screenshot', () => {
   })
 
   describe('dimensions', () => {
-    before(() => {
-      cy.task('trash:screenshot:assets')
-    })
+    // before(() => {
+    //   cy.task('trash:screenshot:assets')
+    // })
 
-    after(() => {
-      cy.task('trash:screenshot:assets')
-    })
+    // after(() => {
+    //   cy.task('trash:screenshot:assets')
+    // })
 
     it('crops app captures to just app size', () => {
       cy.viewport(600, 400)
