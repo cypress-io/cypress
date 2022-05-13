@@ -393,9 +393,9 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by specific spec with default configuration', function () {
-      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/e2e/bar.js`, '--config', 'port=2020'])
+      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/e2e/qux.cy.js`, '--config', 'port=2020'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/bar.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/qux.cy.js' })
         this.expectExitWith(0)
       })
     })
