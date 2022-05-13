@@ -81,7 +81,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
           result.currentProject!.cloudProject = null
         },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} onReExecuteRunsQuery={cy.spy().as('reExecuteRunsQuery')}/>
+          return <RunsContainer gql={gqlVal} online onReExecuteRunsQuery={cy.spy().as('reExecuteRunsQuery')}/>
         },
       })
 
