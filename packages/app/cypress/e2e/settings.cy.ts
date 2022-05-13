@@ -435,7 +435,6 @@ describe('App: Settings without cloud', () => {
       cy.contains(`family: 'chromium',`)
       cy.contains(`channel: 'stable',`)
       cy.contains(`displayName: 'Chrome',`)
-      cy.contains(`path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',`)
 
       cy.percySnapshot()
     })
