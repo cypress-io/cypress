@@ -1,13 +1,13 @@
 it('visits foobar.com and types foobar inside an input', () => {
-  cy.visit('primary_origin.html')
-  cy.get('[data-cy="cross_origin_secondary_link"]').click()
+  cy.visit('/fixtures/primary-origin.html')
+  cy.get('[data-cy="cross-origin-secondary-link"]').click()
 
-  cy.origin('http://foobar.com:4466', () => {
+  cy.origin('http://foobar.com:3500', () => {
     cy.get('[data-cy="text-input"]').type('foobar')
   })
   .then(() => {
-    const specBridgeIframe: HTMLIFrameElement = window.top.document.querySelector('.spec-bridge-iframe')
-    const currentBody = window.top.document.querySelector('body')
+    const specBridgeIframe: HTMLIFrameElement = window?.top?.document.querySelector('.spec-bridge-iframe') || {} as HTMLIFrameElement
+    const currentBody = window?.top?.document.querySelector('body') || {} as HTMLBodyElement
 
     // make sure the spec bridge overlays the reporter/AUT and is not off the screen
     expect(specBridgeIframe.offsetTop).to.equal(currentBody.offsetTop)
