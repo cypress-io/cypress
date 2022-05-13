@@ -229,7 +229,6 @@ const { defineConfig } = require('cypress')
 module.exports = defineConfig({
   component: {
     setupNodeEvents(on, config) {},
-    componentFolder: '.',
     specPattern: './**/*.spec.cy.{js,ts,jsx,tsx}',
   },
 })

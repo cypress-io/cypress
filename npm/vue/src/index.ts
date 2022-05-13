@@ -39,8 +39,6 @@ export type CyMountOptions<Props, Data= {}> = Omit<MountingOptions<Props, Data>,
   }
 } & Partial<StyleOptions>
 
-let initialInnerHtml = ''
-
 Cypress.on('run:start', () => {
   // `mount` is designed to work with component testing only.
   // it assumes ROOT_SELECTOR exists, which is not the case in e2e.
@@ -52,13 +50,11 @@ Cypress.on('run:start', () => {
     return
   }
 
-  initialInnerHtml = document.head.innerHTML
   Cypress.on('test:before:run', () => {
     Cypress.vueWrapper?.unmount()
     const el = getContainerEl()
 
     el.innerHTML = ''
-    document.head.innerHTML = initialInnerHtml
   })
 })
 

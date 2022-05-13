@@ -217,6 +217,7 @@ type CloudRun implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   status: CloudRunStatus
+  tags: [CloudRunTag]
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -225,6 +226,9 @@ type CloudRun implements Node {
 
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
+
+  """Number of flaky tests"""
+  totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -295,6 +299,12 @@ enum CloudRunStatus {
   TIMEDOUT
 }
 
+type CloudRunTag implements Node {
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+  name: String
+}
+
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
@@ -347,14 +357,6 @@ type CodeFrame {
   line: Int
 }
 
-"""Glob patterns for detecting files for code gen."""
-type CodeGenGlobs implements Node {
-  component: String!
-
-  """Relay style Node ID field for the CodeGenGlobs field"""
-  id: ID!
-}
-
 enum CodeGenType {
   component
   e2e
@@ -393,7 +395,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
-  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
