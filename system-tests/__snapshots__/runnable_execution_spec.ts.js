@@ -216,14 +216,14 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (runnables_already_run_suite.js)                                           │
-  │ Searched:   cypress/e2e/runnables_already_run_suite.js                                         │
+  │ Specs:      1 found (runnables_already_run_suite.cy.js)                                        │
+  │ Searched:   cypress/e2e/runnables_already_run_suite.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  runnables_already_run_suite.js                                                  (1 of 1)
+  Running:  runnables_already_run_suite.cy.js                                               (1 of 1)
 
 
   Top level describe 
@@ -256,14 +256,14 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     runnables_already_run_suite.js                                                   │
+  │ Spec Ran:     runnables_already_run_suite.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.js/Top level descri     (1280x720)
-     be -- suite 2 -- should fail (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.cy.js/Top level des     (1280x720)
+     cribe -- suite 2 -- should fail (failed).png                                                   
 
 
 ====================================================================================================
@@ -273,7 +273,7 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  runnables_already_run_suite.js           XX:XX        2        1        1        -        - │
+  │ ✖  runnables_already_run_suite.cy.js        XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
 
