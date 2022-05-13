@@ -151,7 +151,9 @@ export const $Cookies = (namespace, domain) => {
   return API
 }
 
-$Cookies.create = (namespace, domain) => {
+$Cookies.create = (namespace, domain): ICookies => {
   // set the $Cookies function onto the Cypress instance
   return $Cookies(namespace, domain)
 }
+
+export type ICookies = ReturnType<typeof $Cookies>

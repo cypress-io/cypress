@@ -29,10 +29,11 @@ import $SetterGetter from './cypress/setter_getter'
 import $utils from './cypress/utils'
 
 import { $Chainer } from './cypress/chainer'
-import { $Cookies } from './cypress/cookies'
+import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
 import { $Location } from './cypress/location'
 import ProxyLogging from './cypress/proxy-logging'
+import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
@@ -90,12 +91,12 @@ class $Cypress {
   browser: any
   platform: any
   testingType: any
-  state: any
+  state!: StateFunc
   originalConfig: any
   config: any
   env: any
   getTestRetries: any
-  Cookies: any
+  Cookies!: ICookies
   ProxyLogging: any
   _onInitialize: any
   isCy: any
@@ -108,6 +109,7 @@ class $Cypress {
   primaryOriginCommunicator: PrimaryOriginCommunicator
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
+  on: any
 
   // attach to $Cypress to access
   // all of the constructors
@@ -210,7 +212,7 @@ class $Cypress {
 
     _.extend(this, browserInfo(config))
 
-    this.state = $SetterGetter.create({})
+    this.state = $SetterGetter.create({}) as unknown as StateFunc
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       if (this.isCrossOriginSpecBridge ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
@@ -223,7 +225,7 @@ class $Cypress {
             errProperty,
           })
 
-          throw new this.state('specWindow').Error(errMsg)
+          throw new (this.state('specWindow').Error)(errMsg)
         })
       }
 
@@ -239,7 +241,7 @@ class $Cypress {
           ? errResult
           : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
-        throw new this.state('specWindow').Error(errMsg)
+        throw new (this.state('specWindow').Error)(errMsg)
       })
     })
 
@@ -304,7 +306,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow, scripts) {
+  onSpecWindow (specWindow: Window, scripts) {
     // create cy and expose globally
     this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
@@ -765,3 +767,5 @@ class $Cypress {
 $Cypress.$ = $
 $Cypress.utils = $utils
 export default $Cypress
+
+export type ICypress = ReturnType<typeof $Cypress.create>
