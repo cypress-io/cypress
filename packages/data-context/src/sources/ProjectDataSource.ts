@@ -1,8 +1,6 @@
 import os from 'os'
 import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
-import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
 import { debounce, isEqual } from 'lodash'
 import path from 'path'
@@ -363,31 +361,6 @@ export class ProjectDataSource {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
     return preferences[projectTitle] ?? null
-  }
-
-  private guessFramework (projectRoot: string) {
-    const guess = WIZARD_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map((x) => x.package).reduce(
-        (acc, dep) => ({ ...acc, [dep]: '*' }),
-        {},
-      )
-
-      return scanFSForAvailableDependency(projectRoot, lookingForDeps)
-    })
-
-    return guess ?? null
-  }
-
-  async getCodeGenGlobs () {
-    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
-
-    const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
-
-    const framework = this.guessFramework(this.ctx.currentProject)
-
-    return {
-      component: framework?.glob ?? looseComponentGlob,
-    }
   }
 
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
