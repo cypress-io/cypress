@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import charset from 'charset'
+import type Debug from 'debug'
 import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils, uri } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
@@ -40,7 +41,7 @@ const zlibOptions = {
 }
 
 // https://github.com/cypress-io/cypress/issues/1543
-function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer, debug: Debug) {
+function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer, debug: Debug.Debugger) {
   const httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
 
   debug('inferred charset from response %o', { httpCharset })
@@ -195,6 +196,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   let kOutHeaders
 
+  const ctxDebug = this.debug
+
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -211,7 +214,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
         throw err
       }
 
-      this.debug('setHeader error ignored %o', { name, value, code: err.code, err })
+      ctxDebug('setHeader error ignored %o', { name, value, code: err.code, err })
 
       if (!kOutHeaders) {
         kOutHeaders = getKOutHeadersSymbol()
@@ -412,20 +415,21 @@ interface EnsureSameSiteNoneProps {
   browser: Browser | { family: string | null }
   isLocalhost: boolean
   url: URL
+  ctxDebug: Debug.Debugger
 }
 
 const cookieSameSiteRegex = /SameSite=(\w+)/i
 const cookieSecureRegex = /(^|\W)Secure(\W|$)/i
 const cookieSecureSemicolonRegex = /;\s*Secure/i
 
-const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSiteNoneProps) => {
-  this.debug('original cookie: %s', cookie)
+const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url, ctxDebug }: EnsureSameSiteNoneProps) => {
+  ctxDebug('original cookie: %s', cookie)
 
   if (cookieSameSiteRegex.test(cookie)) {
-    this.debug('change cookie to SameSite=None')
+    ctxDebug('change cookie to SameSite=None')
     cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
   } else {
-    this.debug('add SameSite=None to cookie')
+    ctxDebug('add SameSite=None to cookie')
     cookie += '; SameSite=None'
   }
 
@@ -441,15 +445,15 @@ const ensureSameSiteNone = ({ cookie, browser, isLocalhost, url }: EnsureSameSit
   // remove Secure from http://localhost cookies in Firefox.
   if (cookieSecureRegex.test(cookie)) {
     if (isFirefox && isLocalhost && url.protocol === 'http:') {
-      this.debug('remove Secure from cookie')
+      ctxDebug('remove Secure from cookie')
       cookie = cookie.replace(cookieSecureSemicolonRegex, '')
     }
   } else if (!isFirefox || url.protocol === 'https:') {
-    this.debug('add Secure to cookie')
+    ctxDebug('add Secure to cookie')
     cookie += '; Secure'
   }
 
-  this.debug('resulting cookie: %s', cookie)
+  ctxDebug('resulting cookie: %s', cookie)
 
   return cookie
 }
@@ -470,7 +474,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
 
     ;([] as string[]).concat(cookies).forEach((cookie) => {
       if (needsCrossOriginHandling) {
-        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url })
+        cookie = ensureSameSiteNone({ cookie, browser, isLocalhost, url, ctxDebug: this.debug })
       }
 
       try {
