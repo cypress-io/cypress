@@ -10,6 +10,8 @@ describe('Spec List - Git Status', () => {
   })
 
   it('shows correct git status for files using real git repo', () => {
+    cy.wait(500)
+
     // newly created, not yet committed
     // this is performed by the task `initGitRepoForTestProject`
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
@@ -34,6 +36,7 @@ describe('Spec List - Git Status', () => {
       )
     })
 
+    cy.wait(500)
     // should update via GraphQL subscription, now the status is modified.
     cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-orange-50')
@@ -46,13 +49,21 @@ describe('Spec List - Git Status', () => {
       )
     })
 
+    cy.wait(500)
+
     // even if a created file is updated, the status should stay created
     cy.get('[data-cy-row="foo.spec.js"] [data-cy="git-info-row"] svg')
     .should('have.class', 'icon-light-jade-50')
 
-    cy.withCtx((ctx) => {
-      ctx.fs.writeFileSync(
-        ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'dom-container.spec.js'),
+    if (Cypress.platform !== 'win32') {
+      // skip this test in Windows because of possible divergence in git behavior related to file permissions/stats
+      // TLDR: git config value `core.filemode` should be set to false
+      // See https://stackoverflow.com/questions/14564946/git-status-shows-changed-files-but-git-diff-doesnt and
+      // https://github.com/microsoft/WSL/issues/184 for reference
+
+      cy.withCtx((ctx) => {
+        ctx.fs.writeFileSync(
+          ctx.path.join(ctx.currentProject!, 'cypress', 'e2e', 'dom-container.spec.js'),
 `describe('Dom Content', () => {
   it('renders a container', () => {
     cy.get('.container')
@@ -60,10 +71,13 @@ describe('Spec List - Git Status', () => {
 })
 `,
 'utf-8',
-      )
-    })
+        )
+      })
 
-    cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
-    .should('have.class', 'icon-light-gray-500')
+      cy.wait(500)
+
+      cy.get('[data-cy-row="dom-container.spec.js"] [data-cy="git-info-row"] svg')
+      .should('have.class', 'icon-light-gray-500')
+    }
   })
 })
