@@ -119,6 +119,8 @@ export const $Cookies = (namespace, domain) => {
     },
 
     preserveOnce (...keys) {
+      $errUtils.warnByPath('cookies.deprecated', { args: { cmd: 'Cypress.Cookies.preserveOnce' } })
+
       return _.each(keys, (key) => {
         return preserved[key] = true
       })
@@ -140,6 +142,7 @@ export const $Cookies = (namespace, domain) => {
     },
 
     defaults (obj = {}) {
+      $errUtils.warnByPath('cookies.deprecated', { args: { cmd: 'Cypress.Cookies.defaults' } })
       warnOnWhitelistRenamed(obj, 'Cypress.Cookies.defaults')
 
       // merge obj into defaults
