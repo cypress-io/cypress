@@ -9,7 +9,7 @@ describe('e2e plugins', () => {
 
   it('fails when spec does not exist', function () {
     return systemTests.exec(this, {
-      spec: 'spec.js',
+      spec: 'spec.cy.js',
       project: 'non-existent-spec',
       sanitizeScreenshotDimensions: true,
       snapshot: true,

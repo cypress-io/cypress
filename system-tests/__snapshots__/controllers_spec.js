@@ -7,18 +7,18 @@ exports['e2e plugins fails when spec does not exist 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/e2e/spec.js                                                                │
+  │ Specs:      1 found (spec.cy.js)                                                               │
+  │ Searched:   cypress/e2e/spec.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  spec.js                                                                         (1 of 1)
+  Running:  spec.cy.js                                                                      (1 of 1)
 
 Oops...we found an error preparing this test file:
 
-  > cypress/e2e/spec.js
+  > cypress/e2e/spec.cy.js
 
 The error was:
 
@@ -42,14 +42,14 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     spec.js                                                                          │
+  │ Spec Ran:     spec.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4                      (X second)
 
 
 ====================================================================================================
@@ -59,7 +59,7 @@ Fix the error in your code and re-run your tests.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  spec.js                                  XX:XX        -        -        1        -        - │
+  │ ✖  spec.cy.js                               XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
