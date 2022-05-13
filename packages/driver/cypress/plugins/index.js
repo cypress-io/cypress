@@ -6,6 +6,7 @@ const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 const wp = require('@cypress/webpack-preprocessor')
+const Jimp = require('jimp')
 
 process.env.NO_LIVERELOAD = '1'
 const [webpackOptions] = require('@packages/runner/webpack.config.ts').default
@@ -58,6 +59,28 @@ module.exports = (on, config) => {
       }).join('\n\n')
 
       fs.outputFileSync(filePath, longText)
+
+      return null
+    },
+    'check:screenshot:size' ({ name, width, height, devicePixelRatio }) {
+      return Jimp.read(path.join(__dirname, '..', 'screenshots', name))
+      .then((image) => {
+        width = width * devicePixelRatio
+        height = height * devicePixelRatio
+
+        if (image.bitmap.width !== width || image.bitmap.height !== height) {
+          throw new Error(`Screenshot does not match dimensions! Expected: ${width} x ${height} but got ${image.bitmap.width} x ${image.bitmap.height}`)
+        }
+
+        return null
+      })
+    },
+    'trash:screenshot:assets' () {
+      const screenshotsPath = path.join(__dirname, '..', 'screenshots')
+
+      if (fs.existsSync(screenshotsPath)) {
+        fs.rmdirSync(screenshotsPath, { recursive: true, force: true })
+      }
 
       return null
     },
