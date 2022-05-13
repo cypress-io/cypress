@@ -12,7 +12,7 @@ import './support'
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
     const opts = {
-      host: 'localhost',
+      host: '127.0.0.1',
       port,
       path: encodeURI(file),
     }
