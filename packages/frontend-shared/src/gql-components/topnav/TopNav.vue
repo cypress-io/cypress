@@ -53,7 +53,7 @@
     </TopNavListItem>
 
     <TopNavListItem
-      class="bg-yellow-50 py-8px px-16px"
+      class="bg-orange-50 py-8px px-16px"
       data-cy="current-hint"
     >
       <div class="whitespace-nowrap">
@@ -68,7 +68,7 @@
         <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
       </div>
       <template #suffix>
-        <span class="rounded-md bg-yellow-100">
+        <span class="rounded-md bg-orange-100">
           <span class="p-5px text-amber-800">
             {{ t('topNav.installed') }}
           </span>
