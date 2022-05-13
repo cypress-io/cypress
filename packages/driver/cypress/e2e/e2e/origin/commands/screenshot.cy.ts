@@ -1,3 +1,5 @@
+import path from 'path'
+
 context('cy.origin screenshot', () => {
   const { devicePixelRatio } = window
 
@@ -297,7 +299,9 @@ context('cy.origin screenshot', () => {
       })
 
       cy.task('check:screenshot:size', {
-        name: `crop-check.png`,
+        // if in run mode, screenshots are grouped under their spec name
+        // @ts-ignore
+        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'crop-check.png'),
         width: 600,
         height: 400,
         devicePixelRatio,
@@ -314,7 +318,9 @@ context('cy.origin screenshot', () => {
       })
 
       cy.task('check:screenshot:size', {
-        name: `fullPage.png`,
+        // if in run mode, screenshots are grouped under their spec name
+        // @ts-ignore
+        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'fullPage.png'),
         width: 600,
         height: 500,
         devicePixelRatio,
@@ -331,7 +337,9 @@ context('cy.origin screenshot', () => {
       })
 
       cy.task('check:screenshot:size', {
-        name: `fullPage-same.png`,
+        // if in run mode, screenshots are grouped under their spec name
+        // @ts-ignore
+        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'fullPage-same.png'),
         width: 600,
         height: 500,
         devicePixelRatio,
@@ -348,7 +356,9 @@ context('cy.origin screenshot', () => {
       })
 
       cy.task('check:screenshot:size', {
-        name: `element.png`,
+        // if in run mode, screenshots are grouped under their spec name
+        // @ts-ignore
+        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'element.png'),
         width: 400,
         height: 300,
         devicePixelRatio,
@@ -368,7 +378,9 @@ context('cy.origin screenshot', () => {
         })
 
         cy.task('check:screenshot:size', {
-          name: `app-clip.png`,
+          // if in run mode, screenshots are grouped under their spec name
+          // @ts-ignore
+          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'app-clip.png'),
           width: 100,
           height: 50,
           devicePixelRatio,
@@ -387,7 +399,9 @@ context('cy.origin screenshot', () => {
         })
 
         cy.task('check:screenshot:size', {
-          name: `runner-clip.png`,
+          // if in run mode, screenshots are grouped under their spec name
+          // @ts-ignore
+          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'runner-clip.png'),
           width: 120,
           height: 60,
           devicePixelRatio,
@@ -406,7 +420,9 @@ context('cy.origin screenshot', () => {
         })
 
         cy.task('check:screenshot:size', {
-          name: `fullPage-clip.png`,
+          // if in run mode, screenshots are grouped under their spec name
+          // @ts-ignore
+          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'fullPage-clip.png'),
           width: 140,
           height: 70,
           devicePixelRatio,
@@ -425,7 +441,9 @@ context('cy.origin screenshot', () => {
         })
 
         cy.task('check:screenshot:size', {
-          name: `element-clip.png`,
+          // if in run mode, screenshots are grouped under their spec name
+          // @ts-ignore
+          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'element-clip.png'),
           width: 160,
           height: 80,
           devicePixelRatio,
