@@ -4,7 +4,7 @@
   "private": true,
   "browser": "src/index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "node ../../scripts/run-webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
@@ -14,7 +14,7 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.* --exit",
     "test-watch": "yarn test-unit --watch",
-    "watch": "webpack --watch --progress"
+    "watch": "node ../../scripts/run-webpack --watch --progress"
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
