@@ -1191,7 +1191,7 @@ export const AllCypressErrors = {
 
   LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
     return errTemplate`
-        Your ${fmt.highlight(file)} at ${fmt.path(`${file}`)} threw an error. ${fmt.stackTrace(error)}
+        Your ${fmt.highlight(file)} file threw an error. ${fmt.stackTrace(error)}
 
         Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
       `
