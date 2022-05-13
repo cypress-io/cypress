@@ -1,55 +1,68 @@
 <template>
-  <Tooltip
+  <component
+    :is="latestRun? ExternalLink : Fragment"
     v-if="latestRun"
-    placement="top"
-    :is-interactive="true"
-    :interactive-highlight-color="latestRunColor"
+    :href="latestRun?.url ?? '#'"
+    :use-default-hocus="false"
   >
-    <div
-      class="flex justify-center"
-      data-cy="run-status-dots"
+    <component
+      :is="latestRun? Tooltip : Fragment"
+      placement="top"
+      :is-interactive="true"
+      :interactive-highlight-color="latestRunColor"
     >
-      <ol
-        class="list-none h-16px mb-0 pl-0 inline-block"
+      <div
+        class="flex justify-center"
+        data-cy="run-status-dots"
       >
-        <li
-          v-for="(dot,i) in dotClasses"
-          :key="i"
-          class="ml-4px inline-block align-middle"
+        <ol
+          class="list-none h-16px mb-0 pl-0 inline-block"
+          q
         >
-          <i-cy-dot-solid_x4
-            width="4"
-            height="4"
-            :class="dot"
+          <li
+            v-for="(dot,i) in dotClasses"
+            :key="i"
+            class="ml-4px inline-block align-middle"
+          >
+            <i-cy-dot-solid_x4
+              width="4"
+              height="4"
+              :class="dot"
+            />
+          </li>
+          <li class="ml-4px inline-block align-middle">
+            <component
+              :is="latestStatus.icon"
+              width="16"
+              height="16"
+              :class="{'animate-spin': latestStatus.spin}"
+            />
+          </li>
+        </ol>
+      </div>
+      <template
+        #popper
+      >
+        <ExternalLink
+          :href="latestRun.url ?? '#'"
+          :use-default-hocus="false"
+        >
+          <SpecRunSummary
+            :run="latestRun"
+            :spec-file="props.specFile"
           />
-        </li>
-        <li class="ml-4px inline-block align-middle">
-          <component
-            :is="latestStatus.icon"
-            width="16"
-            height="16"
-            :class="{'animate-spin': latestStatus.spin}"
-          />
-        </li>
-      </ol>
-    </div>
-    <template
-      #popper
-    >
-      <SpecRunSummary
-        v-if="latestRun"
-        :run="latestRun"
-        :spec-file="props.specFile"
-      />
-    </template>
-  </Tooltip>
+        </ExternalLink>
+      </template>
+    </component>
+  </component>
 </template>
 
 <script setup lang="ts">
 
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { CloudSpecRun } from '../../../graphql/src/gen/cloud-source-types.gen'
 import Tooltip, { InteractiveHighlightColor } from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed, ComputedRef } from 'vue'
+import { computed, ComputedRef, Fragment } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'

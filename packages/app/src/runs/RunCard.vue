@@ -50,7 +50,7 @@
       </template>
       <template #right>
         <RunResults
-          v-bind="run"
+          :gql="run"
         />
       </template>
     </ListRowHeader>

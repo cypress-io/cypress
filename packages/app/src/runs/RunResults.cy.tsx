@@ -15,7 +15,7 @@ describe('<RunResults />', { viewportHeight: 150, viewportWidth: 250 }, () => {
           })
         },
         render (props) {
-          return <RunResults {...props} />
+          return <RunResults gql={props} />
         },
       })
 

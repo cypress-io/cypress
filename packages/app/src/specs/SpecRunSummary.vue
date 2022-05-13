@@ -9,7 +9,7 @@
     <div class="max-w-80 text-gray-600 truncate overflow-hidden">
       {{ props.specFile }}
     </div>
-    <RunResults
+    <ResultCounts
       v-if="runResults"
       v-bind="runResults"
     />
@@ -37,7 +37,7 @@
 
 import { computed } from 'vue'
 import type { CloudSpecRun, SpecDataAggregate } from '../../../graphql/src/gen/cloud-source-types.gen'
-import RunResults, { RunResultProps } from '../runs/RunResults.vue'
+import ResultCounts, { ResultCountsProps } from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import { getTimeAgo, getDurationString } from '@packages/frontend-shared/src/utils/time'
 
 const props = withDefaults(defineProps<{
@@ -51,7 +51,7 @@ const props = withDefaults(defineProps<{
 const getAggregateTestCountString = (agg: SpecDataAggregate) => {
   if (agg.min == null) return '--'
 
-  if (!agg.max || agg.min === agg.max) return agg.min!
+  if (!agg.max || agg.min === agg.max) return agg.min
 
   return `${agg.min}-${agg.max}`
 }
@@ -59,7 +59,7 @@ const getAggregateTestCountString = (agg: SpecDataAggregate) => {
 const getAggDurationString = (agg: SpecDataAggregate) => {
   if (agg.min == null) return '--'
 
-  if (!agg.max || Math.round(agg.min) === Math.round(agg.max)) return getDurationString(agg.min)
+  if (!agg.max || agg.min === agg.max) return getDurationString(agg.min)
 
   return `${getDurationString(agg.min)} - ${getDurationString(agg.max)}`
 }
@@ -73,7 +73,7 @@ const runResults = computed(() => {
     totalPassed: getAggregateTestCountString(props.run.testsPassed ?? {}),
     totalPending: getAggregateTestCountString(props.run.testsPending ?? {}),
     totalSkipped: getAggregateTestCountString(props.run.testsSkipped ?? {}),
-  } as RunResultProps
+  } as ResultCountsProps
 })
 
 const groupText = computed(() => {
