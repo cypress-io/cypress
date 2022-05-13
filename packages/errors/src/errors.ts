@@ -1567,8 +1567,6 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
   // @ts-expect-error
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
-  // console.log('------------>', result)
-
   const { message, details, originalError, messageMarkdown } = result
 
   const err = new Error(message) as CypressError
