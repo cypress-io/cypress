@@ -190,7 +190,7 @@ const props = defineProps<{
 }>()
 
 const showConnectSuccessAlert = ref(false)
-const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && online.value)
+const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
 </script>
 
 <style scoped>
