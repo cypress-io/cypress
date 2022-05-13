@@ -11,7 +11,7 @@ describe('cy.origin - uncaught errors', () => {
     // We enqueue another cy command after each test to ensure stability
     // is reached for the next test. This additional command can be removed with the
     // completion of: https://github.com/cypress-io/cypress/issues/21300
-    cy.then(() => { /* ensuring stability */ })
+    // cy.then(() => { /* ensuring stability */ })
   })
 
   describe('sync errors', () => {
