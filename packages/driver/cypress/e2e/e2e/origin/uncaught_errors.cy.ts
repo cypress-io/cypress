@@ -16,7 +16,7 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('sync errors', () => {
     it('appropriately reports negative assertions', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.eq('AssertionError')
         expect(err.message).to.include('expected true to be false')
         done()
@@ -34,7 +34,7 @@ describe('cy.origin - uncaught errors', () => {
       const r = cy.state('runnable')
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
-      cy.on('fail', (err, runnable) => {
+      cy.once('fail', (err, runnable) => {
         // TODO: we likely need to change the messaging around this error to make it clear to cy.origin users that
         // this behavior is configurable with 'uncaught:exception', but it MUST be declared inside the cy.origin callback
         // and that 'uncaught:exception' will NOT be triggered outside that callback (inside the primary origin)
@@ -63,7 +63,7 @@ describe('cy.origin - uncaught errors', () => {
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
 
-      cy.on('fail', failureSpy)
+      cy.once('fail', failureSpy)
 
       cy.origin('http://foobar.com:3500', () => {
         cy.on('uncaught:exception', () => false)
@@ -75,7 +75,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('returns true from cy.on(uncaught:exception), resulting in cy:fail to be called in the primary', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('sync error')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
@@ -106,7 +106,7 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('async errors', () => {
     it('fails the current test/command if async errors are thrown from the cy.origin callback', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
         expect(err.message).to.include('The following error originated from your test code, not from Cypress.')
@@ -132,7 +132,7 @@ describe('cy.origin - uncaught errors', () => {
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
 
-      cy.on('fail', (err, runnable) => {
+      cy.once('fail', (err, runnable) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('async error')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
@@ -162,7 +162,7 @@ describe('cy.origin - uncaught errors', () => {
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
 
-      cy.on('fail', failureSpy)
+      cy.once('fail', failureSpy)
 
       cy.origin('http://foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
@@ -229,7 +229,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('fails the current test/command if a promise is rejected from the test code in cy.origin', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')
         expect(err.message).to.include('The following error originated from your test code, not from Cypress. It was caused by an unhandled promise rejection.')
@@ -248,7 +248,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('fails the current test/command if a promise is rejected from the cy.origin callback after it is finished running', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')
         expect(err.message).to.include('The following error originated from your test code, not from Cypress. It was caused by an unhandled promise rejection.')
@@ -267,7 +267,7 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('unserializable errors', () => {
     it('handles users throwing dom elements', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('CypressError')
         expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
@@ -279,7 +279,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing functions', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('CypressError')
         expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
@@ -291,7 +291,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing symbols', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('CypressError')
         expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
@@ -303,7 +303,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing promises', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('CypressError')
         expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
@@ -317,7 +317,7 @@ describe('cy.origin - uncaught errors', () => {
 
   describe('serializable errors', () => {
     it('handles users throwing complex errors/classes', (done) => {
-      cy.on('fail', (err: any) => {
+      cy.once('fail', (err: any) => {
         expect(err.name).to.equal('CustomError')
         expect(err.message).to.equal('custom error')
         expect(err._name).to.equal('CustomError')
@@ -358,7 +358,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing complex objects/classes', (done) => {
-      cy.on('fail', (err: any) => {
+      cy.once('fail', (err: any) => {
         expect(err.customMethod).to.be.undefined
         expect(err.customProp).to.equal('foobar')
         expect(err._metasyntaticList).to.deep.equal(['foo', 'bar'])
@@ -388,7 +388,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing strings', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('Error')
         expect(err.message).to.equal(`oops`)
         done()
@@ -400,7 +400,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing arrays', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('Error')
         expect(err.message).to.equal('why would anyone do this?,this is odd')
         done()
@@ -412,7 +412,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing numbers', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('Error')
         expect(err.message).to.equal('2')
         done()
@@ -424,7 +424,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing booleans', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('Error')
         expect(err.message).to.equal('true')
         done()
@@ -436,7 +436,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing null', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('Error')
         expect(err.message).to.equal('null')
         done()
@@ -448,7 +448,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles users throwing undefined', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('Error')
         expect(err.message).to.equal('undefined')
         done()
@@ -460,7 +460,7 @@ describe('cy.origin - uncaught errors', () => {
     })
 
     it('handles throwing of arbitrary data types that are serializable but cannot be mapped to an error', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.equal('CypressError')
         expect(err.message).to.equal('`cy.origin()` could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.')
         done()
