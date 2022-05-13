@@ -120,11 +120,10 @@
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
     "componentSpecsHeader": "Component Specs",
-    "e2eSpecsHeader": "E2E Specs",
-    "gitStatusHeader": "Git Status",
+    "e2eSpecsHeader": "E2E specs",
+    "lastUpdatedHeader": "Last updated",
     "rows": {
-      "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
-      "gitInfo": "{fileState} {timeAgo}"
+      "gitTooltipSubtext": "{shortHash} by {author}"
     },
     "noResultsMessage": "No specs matched your search:",
     "noSpecErrorTitle": "Spec not found",

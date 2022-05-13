@@ -15,12 +15,14 @@ describe('App: Spec List (E2E)', () => {
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
           statusType: 'unmodified',
+          subject: 'commit subject',
+          shortHash: '1234567890',
         }
       })
     })
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
   })
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
@@ -37,13 +39,13 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
   })
 
-  it('shows the "E2E Specs" label as the header for the Spec Name column', () => {
-    cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E Specs')
+  it('shows the "E2E specs" label as the header for the Spec Name column', () => {
+    cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E specs')
   })
 
   it('shows a git status for each spec', () => {
-    cy.get('[data-cy="spec-list-file"]').each((row) => {
-      cy.wrap(row).contains('.git-info-row', 'Test Author')
+    cy.get('[data-cy="git-info-row"]').each((row) => {
+      cy.wrap(row).find('svg').should('have.length', 1)
     })
   })
 
@@ -70,6 +72,7 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="spec-item-link"]').should('have.attr', 'href')
     cy.get('[data-cy="spec-item-link"]').contains('dom-content.spec.js').click()
 
+    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.findByText('Your tests are loading...').should('not.be.visible')
     cy.get('body').type('f')
 

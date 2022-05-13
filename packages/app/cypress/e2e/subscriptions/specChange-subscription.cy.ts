@@ -157,6 +157,7 @@ e2e: {
   describe('inline specs list', () => {
     it('responds to specChange event for an added file', () => {
       cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
       cy.get('body').type('f')
@@ -182,6 +183,7 @@ e2e: {
 
     it('responds to specChange event for a removed file', () => {
       cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
       cy.get('body').type('f')
@@ -205,6 +207,7 @@ e2e: {
 
     it('handles removing the last file', () => {
       cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
       cy.withCtx(async (ctx, o) => {
@@ -241,6 +244,7 @@ e2e: {
 
     it('responds to a cypress.config.js file change', () => {
       cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
       cy.get('body').type('f')

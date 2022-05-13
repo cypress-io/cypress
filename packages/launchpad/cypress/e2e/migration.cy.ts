@@ -1,5 +1,5 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
 const platform = window.Cypress.platform
@@ -9,16 +9,6 @@ const renameManualStep = `[data-cy="migration-step renameManual"]`
 const renameSupportStep = `[data-cy="migration-step renameSupport"]`
 const configFileStep = `[data-cy="migration-step configFile"]`
 const setupComponentStep = `[data-cy="migration-step setupComponent"]`
-
-function getPathForPlatform (posixPath: string) {
-  // @ts-ignore
-  const cy = window.Cypress
-  const platform = cy?.platform || JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)).platform
-
-  if (platform === 'win32') return posixPath.replaceAll('/', '\\')
-
-  return posixPath
-}
 
 declare global {
   namespace Cypress {
@@ -88,6 +78,51 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
     ).not.to.be.null
   }, { lang })
 }
+
+describe('global mode', () => {
+  it('migrates 2 projects in global mode', () => {
+    cy.openGlobalMode()
+    cy.addProject('migration-e2e-export-default')
+    cy.addProject('migration-e2e-custom-integration-with-projectId')
+    cy.visitLaunchpad()
+
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').returns('10.0.0')
+    })
+
+    cy.contains('migration-e2e-export-default').click()
+    // rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
+
+    // cypress/support/index.ts -> cypress/support/e2e.ts
+    cy.get(renameSupportStep).should('exist')
+    // no component specs
+    cy.get(setupComponentStep).should('not.exist')
+
+    cy.get(configFileStep).should('exist')
+
+    runAutoRename()
+    renameSupport('ts')
+    migrateAndVerifyConfig('cypress.config.ts')
+    checkOutcome()
+
+    cy.contains('Projects').click()
+    cy.contains('migration-e2e-custom-integration-with-projectId').click()
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('not.exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+})
 
 describe('Opening unmigrated project', () => {
   it('legacy project with --e2e', () => {

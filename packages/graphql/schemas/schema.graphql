@@ -217,6 +217,7 @@ type CloudRun implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   status: CloudRunStatus
+  tags: [CloudRunTag]
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -225,6 +226,9 @@ type CloudRun implements Node {
 
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
+
+  """Number of flaky tests"""
+  totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -295,6 +299,12 @@ enum CloudRunStatus {
   TIMEDOUT
 }
 
+type CloudRunTag implements Node {
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+  name: String
+}
+
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
@@ -347,14 +357,6 @@ type CodeFrame {
   line: Int
 }
 
-"""Glob patterns for detecting files for code gen."""
-type CodeGenGlobs implements Node {
-  component: String!
-
-  """Relay style Node ID field for the CodeGenGlobs field"""
-  id: ID!
-}
-
 enum CodeGenType {
   component
   e2e
@@ -387,7 +389,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
-  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -421,6 +422,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
+
+  """Whether or not the full config is ready"""
+  isFullConfigReady: Boolean
 
   """Whether we are currently loading the configFile"""
   isLoadingConfigFile: Boolean
@@ -743,8 +747,14 @@ type GitInfo {
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
 
+  """short hash for latest commit"""
+  shortHash: String
+
   """status type - created or modified"""
   statusType: GitInfoStatusType
+
+  """subject for latest commit"""
+  subject: String
 }
 
 enum GitInfoStatusType {
@@ -933,6 +943,12 @@ enum MigrationStepEnum {
 }
 
 type Mutation {
+  """Internal use only, clears the cloud cache"""
+  _clearCloudCache: Boolean
+
+  """Used internally to update the URQL cache in the CloudDataSource"""
+  _cloudCacheInvalidate(args: JSON): Boolean
+
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -1038,6 +1054,14 @@ type Mutation {
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
+
+  """
+  Signal that we are explicitly refetching remote data and should not use the server cache
+  """
+  refetchRemote: Query
+
+  """Clears the cloudViewer cache to refresh the organizations"""
+  refreshOrganizations: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
@@ -1146,6 +1170,12 @@ type ProjectPreferences {
   testingType: String
 }
 
+type PushFragmentPayload {
+  data: JSON
+  fragment: JSON!
+  target: String!
+}
+
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   """The latest state of the auth process"""
@@ -1191,6 +1221,7 @@ type Query {
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
+  node(id: ID!): Node
 
   """Whether the project was specified from the --project flag"""
   projectRootFromCI: Boolean!
@@ -1296,6 +1327,11 @@ type Subscription {
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
+
+  """
+  When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
+  """
+  pushFragment: [PushFragmentPayload]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

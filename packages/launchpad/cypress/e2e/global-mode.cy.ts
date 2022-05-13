@@ -2,7 +2,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
 import type { SinonSpy } from 'sinon'
 
-const sep = Cypress.platform === 'win32' ? '\\\\' : '/'
+const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
 describe('Launchpad: Global Mode', () => {
   describe('when no projects have been added', () => {
