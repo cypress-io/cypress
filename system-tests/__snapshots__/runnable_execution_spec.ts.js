@@ -7,14 +7,14 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (beforehook-and-test-navigation.js)                                        │
-  │ Searched:   cypress/e2e/beforehook-and-test-navigation.js                                      │
+  │ Specs:      1 found (beforehook-and-test-navigation.cy.js)                                     │
+  │ Searched:   cypress/e2e/beforehook-and-test-navigation.cy.js                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  beforehook-and-test-navigation.js                                               (1 of 1)
+  Running:  beforehook-and-test-navigation.cy.js                                            (1 of 1)
 
 
   initial domain change
@@ -97,6 +97,13 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
 
 
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
+
 
   (Results)
 
@@ -107,17 +114,10 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     beforehook-and-test-navigation.js                                                │
+  │ Spec Ran:     beforehook-and-test-navigation.cy.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/beforehook-and-test-navigation.     (X second)
-                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -127,7 +127,8 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  beforehook-and-test-navigation.js        XX:XX        4        2        2        -        - │
+  │ ✖  beforehook-and-test-navigation.cy.j      XX:XX        4        2        2        -        - │
+  │    s                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        2        2        -        -  
 
