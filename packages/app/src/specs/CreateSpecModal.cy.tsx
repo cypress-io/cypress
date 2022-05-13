@@ -113,11 +113,6 @@ describe('defaultSpecFileName', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-            },
             currentTestingType: 'e2e',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
@@ -154,11 +149,6 @@ describe('defaultSpecFileName', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-            },
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
