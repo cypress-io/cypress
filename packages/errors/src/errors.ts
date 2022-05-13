@@ -1183,9 +1183,11 @@ export const AllCypressErrors = {
     return errTemplate`
         There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
 
-        ${fmt.cypressVersion('10.0.0')} no longer supports cypress.json.
+        ${fmt.cypressVersion('10.0.0')} no longer supports ${fmt.highlight(`cypress.json`)}.
 
-        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
+        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{js,ts,mjs,cjs}')}.
+
+        https://on.cypress.io/migration-guide
       `
   },
 

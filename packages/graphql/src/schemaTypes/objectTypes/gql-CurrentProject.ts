@@ -15,7 +15,7 @@ export const PackageManagerEnum = enumType({
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
-  description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
+  description: 'The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file',
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
