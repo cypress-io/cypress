@@ -1,7 +1,6 @@
 require('../../spec_helper')
 
 const auth = require(`../../../lib/gui/auth`)
-const windows = require(`../../../lib/gui/windows`)
 const user = require(`../../../lib/user`)
 
 const electron = require('electron')
@@ -123,38 +122,24 @@ describe('lib/gui/auth', function () {
   })
 
   context('.start', () => {
-    it('focuses main window upon successful auth', async () => {
+    it('resolves upon successful auth', async () => {
       sinon.stub(user, 'getBaseLoginUrl').resolves('www.foo.bar')
       sinon.stub(Promise, 'fromCallback').resolves()
       sinon.stub(auth._internal, 'launchServer').resolves()
       sinon.stub(auth._internal, 'buildLoginRedirectUrl').resolves('www.redirect.url')
       sinon.stub(auth._internal, 'launchNativeAuth').resolves()
       sinon.stub(auth._internal, 'stopServer')
-      sinon.stub(windows, 'focusMainWindow').callsFake(() => {})
 
-      await auth.start(() => {}, 'code', () => {
-        windows.focusMainWindow()
-      })
+      await auth.start(() => {}, 'code')
 
       expect(auth._internal.stopServer).to.be.calledOnce
-      expect(windows.focusMainWindow).to.be.calledOnce
     })
 
-    it('focuses main window when auth fails', async () => {
+    it('resolves when auth fails', async () => {
       sinon.stub(user, 'getBaseLoginUrl').rejects(new Error('test error'))
       sinon.stub(auth._internal, 'stopServer')
-      sinon.stub(windows, 'focusMainWindow').callsFake(() => {})
 
-      try {
-        await auth.start(() => {}, 'code', () => {
-          windows.focusMainWindow()
-        })
-      } catch (e) {
-        expect(e.message).to.eql('test error')
-      }
-
-      expect(auth._internal.stopServer).to.be.calledOnce
-      expect(windows.focusMainWindow).to.be.calledOnce
+      await auth.start(() => {}, 'code')
     })
 
     it('sends an AUTH_ERROR_DURING_LOGIN message on unhandled errors', async () => {
@@ -163,15 +148,13 @@ describe('lib/gui/auth', function () {
 
       const onMessageSpy = sinon.spy()
 
-      try {
-        await auth.start(onMessageSpy, 'code')
-      } catch (e) {
-        expect(onMessageSpy).to.be.calledWith({
-          name: 'AUTH_ERROR_DURING_LOGIN',
-          message: 'unexpected error',
-          browserOpened: false,
-        })
-      }
+      await auth.start(onMessageSpy, 'code')
+
+      expect(onMessageSpy).to.be.calledWith({
+        name: 'AUTH_ERROR_DURING_LOGIN',
+        message: 'unexpected error',
+        browserOpened: false,
+      })
     })
   })
 })

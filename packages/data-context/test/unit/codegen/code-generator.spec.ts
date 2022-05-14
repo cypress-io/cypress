@@ -1,10 +1,8 @@
 import { parse } from '@babel/parser'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import {
   Action, codeGenerator, CodeGenResult, CodeGenResults,
@@ -221,8 +219,6 @@ describe('code-generator', () => {
       target,
     }
 
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[0])
-
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
@@ -242,8 +238,6 @@ describe('code-generator', () => {
       templateDir: templates.component,
       target,
     }
-
-    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(WIZARD_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
       codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),

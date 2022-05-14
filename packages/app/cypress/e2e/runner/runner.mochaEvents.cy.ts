@@ -2,6 +2,13 @@ import { runSpec } from './support/spec-loader'
 import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
 import { snapshots } from './runner.mochaEvents.snapshots'
 
+/**
+ * The mochaEvent tests require a spec to be loaded and executed within an inner Cypress context.
+ * The spec must load and execute within the duration of the Cypress command timeout.
+ * The execution time of the inner Cypress is resource/OS dependant and can exceed the default value (4s),
+ * so we have increased the command timeout to allow the inner spec more time to complete and report
+ * its mocha event log.
+ */
 describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   describe('tests finish with correct state', () => {
     describe('hook failures', () => {

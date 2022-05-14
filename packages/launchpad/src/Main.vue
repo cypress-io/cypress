@@ -22,13 +22,6 @@
           :gql="query.data.value"
         />
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
-        <template v-else-if="currentProject?.isLoadingNodeEvents">
-          <LaunchpadHeader
-            :title="t('components.loading.config.title')"
-            :description="t('components.loading.config.description')"
-          />
-          <Spinner />
-        </template>
         <template v-else-if="!currentProject?.currentTestingType">
           <WarningList :gql="query.data.value" />
           <LaunchpadHeader
@@ -61,10 +54,13 @@
           v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
-        <ScaffoldLanguageSelect
-          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
-          :gql="query.data.value"
-        />
+        <template v-else-if="!currentProject?.isFullConfigReady">
+          <LaunchpadHeader
+            :title="t('components.loading.config.title')"
+            :description="t('components.loading.config.description')"
+          />
+          <Spinner />
+        </template>
         <OpenBrowser v-else />
       </template>
     </div>
@@ -77,9 +73,8 @@ import { gql, useMutation, useQuery } from '@urql/vue'
 import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
-import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
-import BaseError from './error/BaseError.vue'
+import BaseError from '@cy/gql-components/error/BaseError.vue'
 import WarningList from './warning/WarningList.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
@@ -100,7 +95,6 @@ gql`
 fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
-  ...ScaffoldLanguageSelect
   baseError {
     ...BaseError
   }
@@ -110,6 +104,7 @@ fragment MainLaunchpadQueryData on Query {
     isE2EConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
+    isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
   }

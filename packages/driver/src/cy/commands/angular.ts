@@ -3,8 +3,13 @@ import $ from 'jquery'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
+import type { Log } from '../../cypress/log'
 
 const ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
+
+interface InternalNgOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  _log?: Log
+}
 
 export default (Commands, Cypress, cy, state) => {
   const findByNgBinding = (binding, options) => {
@@ -89,10 +94,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    // TODO: Change the options type from `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`.
-    ng (type, selector, options: any = {}) {
-      const userOptions = options
-
+    ng (type: string, selector: string, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       // what about requirejs / browserify?
       // we need to intelligently check to see if we're using those
       // and if angular is available through them.  throw a very specific
@@ -102,7 +104,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('ng.no_global')
       }
 
-      options = _.defaults({}, userOptions, { log: true })
+      const options: InternalNgOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
         options._log = Cypress.log({

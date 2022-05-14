@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
+import { remoteSchemaWrapped } from '@packages/graphql'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -41,6 +42,7 @@ export { getCtx, setCtx, clearCtx }
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
     schema: graphqlSchema,
+    schemaCloud: remoteSchemaWrapped,
     ...options,
     browserApi: {
       close: browsers.close,
@@ -52,6 +54,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
+      },
+      relaunchBrowser () {
+        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
       },
     },
     configApi: {
@@ -71,20 +76,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage) {
-        const windows = require('./gui/windows')
-        const originalIsMainWindowFocused = windows.isMainWindowFocused()
-        const onLoginFlowComplete = async () => {
-          const isFocusSupported = await ctx.browser.isFocusSupported(ctx.coreData.activeBrowser)
-
-          if (originalIsMainWindowFocused || !isFocusSupported) {
-            windows.focusMainWindow()
-          } else {
-            await ctx.actions.browser.focusActiveBrowserWindow()
-          }
-        }
-
-        return auth.start(onMessage, 'launchpad', onLoginFlowComplete)
+      logIn (onMessage, utmCode) {
+        return auth.start(onMessage, utmCode)
       },
       logOut () {
         return user.logOut()
@@ -119,6 +112,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cache.removeAllProjectPreferences()
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+        // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
+        // https://cypress-io.atlassian.net/browse/UNIFY-1705
         cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
@@ -132,6 +127,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       getConfig () {
         return openProject.getConfig()
+      },
+      getRemoteStates () {
+        return openProject.getRemoteStates()
       },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,
@@ -173,6 +171,14 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       copyTextToClipboard (text: string) {
         require('electron').clipboard.writeText(text)
+      },
+      // These instances of JIT requiring gui/windows can be removed
+      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
+      isMainWindowFocused () {
+        return require('./gui/windows').isMainWindowFocused()
+      },
+      focusMainWindow () {
+        return require('./gui/windows').focusMainWindow()
       },
     },
     localSettingsApi: {

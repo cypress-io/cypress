@@ -6,11 +6,9 @@ import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { TestingType } from '@packages/types'
 import type { BreakingErrResult } from '@packages/config'
-
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -1052,6 +1050,12 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/migration-guide`
   },
+  EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)} and replaced with ${fmt.highlight(`experimentalSessionAndOrigin`)}. Please update your config to use ${fmt.highlight(`experimentalSessionAndOrigin`)} instead.
+        
+        https://on.cypress.io/session`
+  },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalShadowDomSupport`)} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.
@@ -1179,15 +1183,17 @@ export const AllCypressErrors = {
     return errTemplate`
         There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
 
-        ${fmt.cypressVersion('10.0.0')} no longer supports cypress.json.
+        ${fmt.cypressVersion('10.0.0')} no longer supports ${fmt.highlight(`cypress.json`)}.
 
-        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
+        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{js,ts,mjs,cjs}')}.
+
+        https://on.cypress.io/migration-guide
       `
   },
 
   LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
     return errTemplate`
-        Your ${fmt.highlight(file)} at ${fmt.path(`${file}`)} threw an error. ${fmt.stackTrace(error)}
+        Your ${fmt.highlight(file)} file threw an error. ${fmt.stackTrace(error)}
 
         Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
       `
@@ -1370,6 +1376,20 @@ export const AllCypressErrors = {
     `
   },
 
+  CONFIG_FILE_DEV_SERVER_INVALID_RETURN: (devServerOptions: any) => {
+    return errTemplate`
+      The returned value of the ${fmt.highlight('devServer')} function is not valid.
+
+      The returned value must be an object with a ${fmt.highlight('port')} property of the dev-server that is running.
+
+      Instead, we saw:
+
+      ${fmt.stringify(devServerOptions)}
+
+      Learn more: https://on.cypress.io/dev-server
+    `
+  },
+
   UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
     return errTemplate`
       An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
@@ -1491,6 +1511,25 @@ export const AllCypressErrors = {
       `
   },
 
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+    return errTemplate`
+      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+
+      Ensure the project you are migrating has Cypress version 10 installed.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+
+  MIGRATION_CYPRESS_NOT_FOUND: () => {
+    return errTemplate`
+      You are running Cypress 10 in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
+
+      Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to open or migrate.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

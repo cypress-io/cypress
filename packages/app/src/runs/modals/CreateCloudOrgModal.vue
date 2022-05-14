@@ -10,7 +10,7 @@
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
       <ExternalLink
-        class="border rounded mx-auto outline-none py-11px px-16px border-indigo-500 bg-indigo-500 text-white inline-block hocus-default max-h-60px"
+        class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-11px px-16px inline-block hocus-default"
         :href="createOrgUrl"
         :include-graphql-port="true"
         @click="startWaitingOrgToBeCreated()"
@@ -54,12 +54,11 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
-import { CloudOrganizationsCheckDocument } from '../../generated/graphql'
+import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useDebounceFn } from '@vueuse/core'
 
@@ -73,17 +72,14 @@ gql`
 fragment CreateCloudOrgModal on CloudUser {
   id
   createCloudOrganizationUrl
-  organizationControl: organizations (first: 1) {
-    nodes {
-      id
-    }
-  }
 }
 `
 
 gql`
-query CloudOrganizationsCheck {
-  ...CloudConnectModals
+mutation CreateCloudOrgModal_CloudOrganizationsCheck {
+  refreshOrganizations {
+    ...CloudConnectModals
+  }
 }
 `
 
@@ -91,13 +87,9 @@ const props = defineProps<{
   gql: CreateCloudOrgModalFragment
 }>()
 
-const query = useQuery({
-  query: CloudOrganizationsCheckDocument,
-  requestPolicy: 'network-only',
-  pause: true,
-})
+const refreshOrgs = useMutation(CreateCloudOrgModal_CloudOrganizationsCheckDocument)
 
-const refetch = useDebounceFn(() => query.executeQuery(), 1000)
+const refetch = useDebounceFn(() => refreshOrgs.executeMutation({}), 1000)
 
 const waitingOrgToBeCreated = ref(false)
 

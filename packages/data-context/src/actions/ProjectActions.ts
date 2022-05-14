@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -30,11 +30,15 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
+  getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
   getDevServer (): {
-    updateSpecs: (specs: FoundSpec[]) => void
+    updateSpecs(specs: FoundSpec[]): void
+    start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
+    close(): void
+    emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
 }
@@ -298,13 +302,17 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
-    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
+    this.refreshSpecs(specs)
 
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
     }
 
     this.ctx.emitter.specsChange()
+  }
+
+  refreshSpecs (specs: FoundSpec[]) {
+    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -436,7 +444,7 @@ export class ProjectActions {
   async reconfigureProject () {
     await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
-    await this.ctx.actions.wizard.initialize()
+    this.ctx.actions.wizard.initialize()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }

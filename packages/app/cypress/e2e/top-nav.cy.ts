@@ -264,34 +264,35 @@ describe('App Top Nav Workflows', () => {
       cy.findByRole('heading', { name: 'References', level: 2 })
       cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
 
-      cy.validateExternalLink({
-        name: 'Write your first test',
-        href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test',
-      })
+      const expectedLinks = [
+        {
+          name: 'Write your first test',
+          href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Testing your app',
+          href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Organizing Tests',
+          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Best Practices',
+          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Configuration',
+          href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'API',
+          href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+App',
+        },
+      ]
 
-      cy.validateExternalLink({
-        name: 'Testing your app',
-        href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App',
-      })
-
-      cy.validateExternalLink({
-        name: 'Organizing Tests',
-        href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests',
-      })
-
-      cy.validateExternalLink({
-        name: 'Best Practices',
-        href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices',
-      })
-
-      cy.validateExternalLink({
-        name: 'Configuration',
-        href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration',
-      })
-
-      cy.validateExternalLink({
-        name: 'API',
-        href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
+      expectedLinks.forEach((link) => {
+        cy.validateExternalLink(link)
       })
     })
 
@@ -359,6 +360,36 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').findByText('Log In').should('be.visible')
       })
+
+      it('logouts user if cloud request returns unauthorized', () => {
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer('component')
+
+        cy.remoteGraphQLIntercept((obj) => {
+          if (obj.result.data?.cloudProjectBySlug) {
+            return new obj.Response('Unauthorized', { status: 401 })
+          }
+
+          return obj.result
+        })
+
+        cy.loginUser()
+        cy.visitApp()
+
+        cy.get('@logInButton').click()
+
+        cy.findByTestId('login-panel').contains('Test User').should('be.visible')
+        cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
+
+        cy.get('[href="#/runs"]').click()
+        cy.get('@logInButton').click()
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
+      })
     })
 
     context('user not logged in', () => {
@@ -375,6 +406,7 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
+          options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
               onMessage({ browserOpened: true })
@@ -629,7 +661,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
     cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
@@ -646,7 +678,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })

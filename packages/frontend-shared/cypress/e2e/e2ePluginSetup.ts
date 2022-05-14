@@ -10,10 +10,10 @@ import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
-import { buildSchema, execute, GraphQLError, parse } from 'graphql'
+import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
 
-import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
+import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
 
@@ -199,12 +199,12 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown'] = operationCount[operationName ?? 'unknown'] ?? 0
 
-          let result = await execute({
+          let result: ExecutionResult | Response = await execute({
             operationName,
             document,
             variableValues: variables,
             schema: cloudSchema,
-            rootValue: CloudRunQuery,
+            rootValue: CloudQuery,
             contextValue: {
               __server__: ctx,
             },
@@ -221,12 +221,17 @@ async function makeE2ETasks () {
                 query,
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
+                Response,
               }, testState)
             } catch (e) {
               const err = e as Error
 
               result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
             }
+          }
+
+          if (result instanceof Response) {
+            return result
           }
 
           return new Response(JSON.stringify(result), { status: 200 })
@@ -341,7 +346,7 @@ async function makeE2ETasks () {
           return { value }
         } catch (e: any) {
           if (i <= retries) {
-            await ctx.util.delayMs(obj.options.retryDelay ?? 1000)
+            await new Promise((resolve) => setTimeout(resolve, obj.options.retryDelay ?? 1000))
           }
 
           lastErr = e

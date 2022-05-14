@@ -39,6 +39,10 @@ export class OpenProject {
     return this.projectBase?.getConfig()
   }
 
+  getRemoteStates () {
+    return this.projectBase?.remoteStates
+  }
+
   getProject () {
     return this.projectBase
   }
@@ -78,6 +82,7 @@ export class OpenProject {
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
+      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
     })
 
     // if we don't have the isHeaded property
@@ -266,15 +271,7 @@ export class OpenProject {
     })
 
     try {
-      const cfg = await this.projectBase.initializeConfig()
-
-      await this._ctx.actions.project.setSpecsFoundBySpecPattern({
-        path,
-        testingType,
-        specPattern: options.spec || cfg.specPattern,
-        excludeSpecPattern: cfg.excludeSpecPattern,
-        additionalIgnorePattern: cfg.additionalIgnorePattern,
-      })
+      await this.projectBase.initializeConfig()
 
       await this.projectBase.open()
     } catch (err: any) {

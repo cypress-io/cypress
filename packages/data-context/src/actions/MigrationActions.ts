@@ -1,10 +1,13 @@
 /* eslint-disable no-dupe-class-members */
 import path from 'path'
 import { fork } from 'child_process'
+import fs from 'fs-extra'
+import semver from 'semver'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
 import _ from 'lodash'
 import type { DataContext } from '..'
+import { getError } from '@packages/errors'
 import {
   cleanUpIntegrationFolder,
   formatConfig,
@@ -85,7 +88,16 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
-    const ipc = new LegacyPluginsIpc(fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions))
+
+    const childProcess = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const ipc = new LegacyPluginsIpc(childProcess)
+
+    childProcess.on('error', (error) => {
+      error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
+
+      reject(error)
+      ipc.killChildProcess()
+    })
 
     const legacyConfigWithDefaults = getConfigWithDefaults(legacyConfig)
 
@@ -104,17 +116,19 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
       const legacyConfigWithChanges = _.merge(legacyConfig, diff)
 
       resolve(legacyConfigWithChanges)
-      ipc.childProcess.kill()
+      ipc.killChildProcess()
     })
 
     ipc.on('loadLegacyPlugins:error', (error) => {
+      error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
+
       reject(error)
-      ipc.childProcess.kill()
+      ipc.killChildProcess()
     })
 
     ipc.on('childProcess:unhandledError', (error) => {
       reject(error)
-      ipc.childProcess.kill()
+      ipc.killChildProcess()
     })
   })
 }
@@ -132,6 +146,23 @@ export class MigrationActions {
       throw Error('cannot do migration without currentProject!')
     }
 
+    if (this.ctx.isGlobalMode) {
+      const version = this.locallyInstalledCypressVersion(this.ctx.currentProject)
+
+      if (!version) {
+        // Could not resolve Cypress. Unlikely, but they are using a
+        // project with Cypress that is nested more deeply than
+        // another project, which has a `cypress.json` but has not had
+        // it's node_modules installed, or it relies on a global version
+        // of Cypress that is missing for whatever reason.
+        return this.ctx.onError(getError('MIGRATION_CYPRESS_NOT_FOUND'))
+      }
+
+      if (!semver.satisfies(version, '^10.0.0')) {
+        return this.ctx.onError(getError('MIGRATION_MISMATCHED_CYPRESS_VERSIONS', version))
+      }
+    }
+
     await this.initializeFlags()
 
     const legacyConfigFileExist = this.ctx.migration.legacyConfigFileExists()
@@ -145,6 +176,21 @@ export class MigrationActions {
       coreData.migration.filteredSteps = filteredSteps
       coreData.migration.step = filteredSteps[0]
     })
+  }
+
+  locallyInstalledCypressVersion (currentProject: string) {
+    try {
+      const localCypressPkgJsonPath = require.resolve(path.join('cypress', 'package.json'), {
+        paths: [currentProject],
+      })
+      const localCypressPkgJson = fs.readJsonSync(path.join(localCypressPkgJsonPath)) as { version: string }
+
+      return localCypressPkgJson?.version ?? undefined
+    } catch (e) {
+      // node_modules was not found, or some other unexpected error
+      // return undefined and surface the correct error.
+      return undefined
+    }
   }
 
   /**
@@ -164,6 +210,8 @@ export class MigrationActions {
     const hasCustomIntegrationFolder = getIntegrationFolder(legacyConfigForMigration) !== 'cypress/integration'
     const hasCustomIntegrationTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'integration')
 
+    const shouldAddCustomE2ESpecPattern = Boolean(this.ctx.migration.legacyConfigProjectId)
+
     let hasE2ESpec = integrationFolder
       ? await hasSpecFile(this.ctx.currentProject, integrationFolder, integrationTestFiles)
       : false
@@ -173,7 +221,7 @@ export class MigrationActions {
     // this allows users to stop migration halfway,
     // then to pick up where they left migration off
     if (!hasE2ESpec && (!hasCustomIntegrationTestFiles || !hasCustomIntegrationFolder)) {
-      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e')
+      const newE2eSpecPattern = getSpecPattern(legacyConfigForMigration, 'e2e', shouldAddCustomE2ESpecPattern)
 
       hasE2ESpec = await hasSpecFile(this.ctx.currentProject, '', newE2eSpecPattern)
     }
@@ -184,9 +232,12 @@ export class MigrationActions {
     const hasCustomComponentFolder = componentFolder !== 'cypress/component'
     const hasCustomComponentTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'component')
 
-    const hasComponentTesting = componentFolder
-      ? await hasSpecFile(this.ctx.currentProject, componentFolder, componentTestFiles)
-      : false
+    // A user is considered to "have" component testing if either
+    // 1. they have a default component folder (cypress/component) with at least 1 spec file
+    // OR
+    // 2. they have configured a non-default componentFolder (even if it doesn't have any specs.)
+    const hasSpecInDefaultComponentFolder = await hasSpecFile(this.ctx.currentProject, componentFolder, componentTestFiles)
+    const hasComponentTesting = (hasCustomComponentFolder || hasSpecInDefaultComponentFolder) ?? false
 
     this.ctx.update((coreData) => {
       coreData.migration.flags = {
@@ -198,6 +249,7 @@ export class MigrationActions {
         hasComponentTesting,
         hasE2ESpec,
         hasPluginsFile: true,
+        shouldAddCustomE2ESpecPattern,
       }
     })
   }
@@ -219,9 +271,11 @@ export class MigrationActions {
       throw error
     })
 
-    // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
-    // with the new file, instead of the deleted one which is not supported anymore
-    this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
+    if (this.ctx.modeOptions.configFile) {
+      // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
+      // with the new file, instead of the deleted one which is not supported anymore
+      this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
+    }
   }
 
   async setLegacyConfigForMigration (config: LegacyCypressConfigJson) {
@@ -243,6 +297,13 @@ export class MigrationActions {
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
     const from = path.join(projectRoot, 'cypress', 'integration')
     const to = path.join(projectRoot, 'cypress', 'e2e')
+
+    this.ctx.update((coreData) => {
+      coreData.migration.flags = {
+        ...coreData.migration.flags,
+        shouldAddCustomE2ESpecPattern: true,
+      }
+    })
 
     await this.ctx.fs.move(from, to)
   }

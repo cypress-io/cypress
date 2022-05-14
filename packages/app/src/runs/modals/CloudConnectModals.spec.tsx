@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs,
   CloudOrganizationConnectionStubs,
-} from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+} from '@packages/graphql/test/stubCloudTypes'
 import { CloudConnectModalsFragmentDoc } from '../../generated/graphql-test'
 import CloudConnectModals from './CloudConnectModals.vue'
 
@@ -18,7 +18,6 @@ describe('<CloudConnectModals />', () => {
 
         result.cloudViewer = {
           ...CloudUserStubs.me,
-          organizationControl: null,
           organizations: noOrg ? null : CloudOrganizationConnectionStubs,
         }
       },

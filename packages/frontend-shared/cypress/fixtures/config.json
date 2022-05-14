@@ -101,7 +101,7 @@
   {
     "value": false,
     "from": "default",
-    "field": "experimentalSessionSupport"
+    "field": "experimentalSessionAndOrigin"
   },
   {
     "value": "",
