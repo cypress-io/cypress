@@ -1,19 +1,22 @@
 <template>
   <HideDuringScreenshot
+    id="sidebar"
     data-cy="sidebar"
-    :aria-expanded="isNavBarExpanded"
     class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
       v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
-      role="button"
-      aria-label="toggle navigation"
+      type="button"
+      :aria-label="isNavBarExpanded ? t('sidebar.toggleLabel.expanded') : t('sidebar.toggleLabel.collapsed')"
+      data-cy="toggle-sidebar"
+      :aria-expanded="isNavBarExpanded"
+      aria-controls="sidebar"
       @click="toggleNavbarIfAllowed"
     >
       <div
-        data-testid="sidebar-nav-indicator"
+        data-cy="sidebar-nav-indicator"
         class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100"
       >
         <div class="h-full bg-indigo-400 w-3px" />
@@ -31,7 +34,7 @@
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
-        aria-label="Sidebar"
+        :aria-label="t('sidebar.nav.ariaLabel')"
       >
         <RouterLink
           v-for="item in navigation"
@@ -40,7 +43,6 @@
           :to="item.href"
         >
           <SidebarNavigationRow
-            :data-e2e-href="item.href"
             :active="isActive"
             :icon="item.icon"
             :name="item.name"
@@ -54,22 +56,22 @@
         :distance="8"
         :skidding="-16"
       >
-        <div
+        <button
+          data-cy="keyboard-modal-trigger"
+          type="button"
           class="border border-transparent rounded
               cursor-pointer h-32px m-16px
               p-7px transform transition-all
               right-0 bottom-0 w-32px duration-300
               inline-block absolute hover:border-gray-500"
           :class="{ '-translate-y-48px': !isNavBarExpanded }"
+          :aria-label="t('sidebar.keyboardShortcuts.title')"
           @click="bindingsOpen = true"
         >
-          <i-cy-command-key_x16
-            class="h-16px w-16px icon-dark-gray-500"
-            data-cy="keyboard-shortcuts"
-          />
-        </div>
+          <i-cy-command-key_x16 class="h-16px w-16px icon-dark-gray-500" />
+        </button>
         <template #popper>
-          {{ t('sideBar.keyboardShortcuts.title') }}
+          {{ t('sidebar.keyboardShortcuts.title') }}
         </template>
       </Tooltip>
       <KeyboardBindingsModal
@@ -79,6 +81,7 @@
       <img
         :src="CypressLogo"
         class="h-32px m-16px w-32px"
+        alt="Cypress"
       >
     </div>
   </HideDuringScreenshot>

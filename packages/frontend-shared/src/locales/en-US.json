@@ -134,12 +134,19 @@
     "defaultMessage": "No results matched your search:",
     "clearSearch": "Clear Search"
   },
-  "sideBar": {
+  "sidebar": {
     "keyboardShortcuts": {
       "title": "Keyboard Shortcuts",
       "rerun": "Re-run tests",
       "stop": "Stop tests",
       "toggle": "Toggle specs list"
+    },
+    "toggleLabel": {
+      "expanded": "Collapse sidebar",
+      "collapsed": "Expand sidebar"
+    },
+    "nav": {
+      "ariaLabel": "Pages"
     }
   },
   "topNav": {
@@ -668,7 +675,8 @@
       "printTooltip": "Print to console",
       "printTooltipAction": "Printed!",
       "invalidSelector": "Invalid",
-      "selectorMethodsLabel": "Selector Methods"
+      "selectorMethodsLabel": "Selector Methods",
+      "toggle": "Toggle playground"
     },
     "automation": {
       "disconnected": {
