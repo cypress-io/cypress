@@ -34,13 +34,6 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
 
 
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -51,7 +44,7 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cy_origin_retries.cy.ts                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -68,6 +61,12 @@ TimeoutError: operation timed out
   -  /XXX/XXX/XXX/cypress/screenshots/cy_origin_retries.cy.ts/cy.origin test retries      (1280x720)
      -- appropriately retries test within cy.origin without propagating other errors                
      errors (failed) (attempt 3).png                                                                
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cy_origin_retries.cy.ts.mp4         (X second)
 
 
 ====================================================================================================
