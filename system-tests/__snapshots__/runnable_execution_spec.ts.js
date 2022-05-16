@@ -144,14 +144,14 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (runnable-run-count.spec.cy.js)                                            │
-  │ Searched:   cypress/e2e/runnable-run-count.spec.cy.js                                          │
+  │ Specs:      1 found (runnable-run-count.cy.js)                                                 │
+  │ Searched:   cypress/e2e/runnable-run-count.cy.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  runnable-run-count.spec.cy.js                                                   (1 of 1)
+  Running:  runnable-run-count.cy.js                                                        (1 of 1)
 
 
   suite 1.0
@@ -182,14 +182,14 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     runnable-run-count.spec.cy.js                                                    │
+  │ Spec Ran:     runnable-run-count.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/runnable-run-count.spec.cy.js.mp4   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/runnable-run-count.cy.js.mp4        (X second)
 
 
 ====================================================================================================
@@ -199,7 +199,7 @@ exports['e2e runnable execution / runnables run correct number of times with nav
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  runnable-run-count.spec.cy.js            XX:XX        7        7        -        -        - │
+  │ ✔  runnable-run-count.cy.js                 XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
