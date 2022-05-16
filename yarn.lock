@@ -2898,6 +2898,16 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
+"@cypress-design/css@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.1.1.tgz#2a5a41cc9d744037193c02f5fe69102bd17f1c52"
+  integrity sha512-apiVe6TaWeVgpj/zak5VC1BK4FqvZSNTraNYxRYGPW5id/NbuiguZFNLuIbMbH0Gwl5dU0dYn7V2QiWMI0nGZg==
+  dependencies:
+    "@windicss/plugin-interaction-variants" "^1.0.0"
+    vite-plugin-windicss "^1.8.4"
+    windicss "^3.5.1"
+    windicss-webpack-plugin "^1.6.10"
+
 "@cypress/browserify-preprocessor@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-3.0.0.tgz#2d1fa6a96ed7130a1b172c540448a5955cbc1264"
