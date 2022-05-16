@@ -287,9 +287,7 @@ function run (ipc, file, projectRoot) {
 
       ipc.send('loadLegacyPlugins:reply', mergedLegacyConfig)
     } catch (e) {
-      ipc.send('loadLegacyPlugins:error', util.serializeError(
-        require('@packages/errors').getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', file, e),
-      ))
+      ipc.send('loadLegacyPlugins:error', util.serializeError(e))
     }
   })
 

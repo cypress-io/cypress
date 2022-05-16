@@ -32,4 +32,13 @@ export class LegacyPluginsIpc extends EventEmitter {
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
+
+  killChildProcess () {
+    this.childProcess.kill()
+    this.childProcess.stdout?.removeAllListeners()
+    this.childProcess.stderr?.removeAllListeners()
+    this.childProcess.removeAllListeners()
+
+    this.removeAllListeners()
+  }
 }
