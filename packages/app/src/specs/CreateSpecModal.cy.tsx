@@ -1,5 +1,6 @@
 import CreateSpecModal from './CreateSpecModal.vue'
 import { ref } from 'vue'
+import { CreateSpecModalFragmentDoc } from '../generated/graphql-test'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
@@ -105,74 +106,23 @@ describe('playground', () => {
 })
 
 describe('defaultSpecFileName', () => {
-  it('shows correct default filename for e2e testing', () => {
+  it('shows correct default filename for the currentProject', () => {
     const show = ref(true)
 
-    cy.mount(() => (<div>
-      <CreateSpecModal
-        gql={{
-          currentProject: {
-            id: 'id',
-            currentTestingType: 'e2e',
-            configFile: 'cypress.config.js',
-            configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: [{
-              field: 'e2e',
-              value: {
-                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }, {
-              field: 'component',
-              value: {
-                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }],
-            specs: [],
-            fileExtensionToUse: 'js',
-            defaultSpecFileName: 'spec.cy.js',
-          },
-        }}
-        show={show.value}
-        onClose={() => show.value = false}
-      />
-    </div>))
+    cy.mountFragment(CreateSpecModalFragmentDoc, {
+      onResult: (result) => {
+        if (result.currentProject) {
+          result.currentProject.defaultSpecFileName = 'path/for/spec.cy.js'
+        }
+      },
+      render: (gql) => {
+        return <CreateSpecModal gql={gql} show onClose={() => show.value = false} />
+      },
+    })
 
     cy.findByText('Create new empty spec').click()
     cy.get('input').invoke('val').should('contain', 'spec.cy.js')
-  })
 
-  it('shows correct default filename for component testing', () => {
-    const show = ref(true)
-
-    cy.mount(() => (<div>
-      <CreateSpecModal
-        gql={{
-          currentProject: {
-            id: 'id',
-            currentTestingType: 'component',
-            configFile: 'cypress.config.js',
-            configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: [{
-              field: 'e2e',
-              value: {
-                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }, {
-              field: 'component',
-              value: {
-                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }],
-            specs: [],
-            fileExtensionToUse: 'js',
-            defaultSpecFileName: 'ComponentName.spec.js',
-          },
-        }}
-        show={show.value}
-        onClose={() => show.value = false}
-      />
-    </div>))
-
-    cy.get('input').invoke('val').should('contain', 'ComponentName.spec.js')
+    cy.percySnapshot()
   })
 })
