@@ -177,7 +177,7 @@ export class RemoteRequestDataSource {
         ctx.emitter.pushFragment([{
           target: params.__typename,
           fragment: toSend,
-          variables: operationVariables,
+          variables: {}, // operationVariables, need this to be stripped down to only the inner variables
           data: {
             id: params.id,
             status,
