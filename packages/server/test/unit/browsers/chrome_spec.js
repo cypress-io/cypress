@@ -381,7 +381,7 @@ describe('lib/browsers/chrome', () => {
               {
                 frame: {
                   id: 'aut-frame-id',
-                  name: 'Your App: "FakeBlock"',
+                  name: 'Your project: "FakeBlock"',
                 },
               },
               {
