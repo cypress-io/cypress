@@ -21,9 +21,6 @@ beforeEach(() => {
     // necessary or else snapshots will not be taken
     // and we can't test them
     Cypress.config('numTestsKeptInMemory', 1)
-    // isCypressRunMode flag currently used as a substitute to isInteractive
-    // to test cy.origin snapshots to check snapshot size in correct directory, which changes from open/run mode.
-    Cypress.config('isCypressRunMode', true)
   }
 
   // remove all event listeners
