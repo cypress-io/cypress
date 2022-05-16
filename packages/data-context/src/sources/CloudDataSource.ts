@@ -124,6 +124,8 @@ export class CloudDataSource {
             if (err.graphQLErrors[0]) {
               this.params.onError(err.graphQLErrors[0])
             }
+
+            this.invalidate({ __typename: 'Query' })
           },
         }),
         fetchExchange,

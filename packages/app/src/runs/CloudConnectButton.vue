@@ -12,8 +12,8 @@
     :gql="props.gql"
   />
   <CloudConnectModals
-    v-if="isProjectConnectOpen"
-    :show="isProjectConnectOpen"
+    v-if="isProjectConnectOpen && !hasError"
+    :show="isProjectConnectOpen && !hasError"
     :gql="props.gql"
     @cancel="isProjectConnectOpen = false"
     @success="isProjectConnectOpen = false; emit('success')"
@@ -35,6 +35,9 @@ const { t } = useI18n()
 
 gql`
 fragment CloudConnectButton on Query {
+  baseError {
+    title
+  }
   ...CloudConnectModals
   ...LoginModal
 }
@@ -52,6 +55,7 @@ const props = defineProps<{
 const isLoginOpen = ref(false)
 const isProjectConnectOpen = ref(false)
 const isLoggedIn = computed(() => Boolean(props.gql.cloudViewer?.id))
+const hasError = computed(() => Boolean(props.gql.baseError))
 
 function openConnection () {
   if (!isLoggedIn.value) {
