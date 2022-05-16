@@ -14,6 +14,8 @@ import type { E2ETaskMap } from '../e2ePluginSetup'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
+import 'cypress-plugin-tab'
+import 'cypress-axe'
 import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
@@ -497,7 +499,6 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
 
 function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
   function _tabUntil (step: number) {
-    // @ts-expect-error
     return cy.tab().focused({ log: false }).then((el) => {
       const pass = fn(el)
 

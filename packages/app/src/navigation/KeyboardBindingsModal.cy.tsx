@@ -7,7 +7,7 @@ describe('KeyboardBindingsModal', () => {
       return <KeyboardBindingsModal show />
     })
 
-    const expectedContent = defaultMessages.sideBar.keyboardShortcuts
+    const expectedContent = defaultMessages.sidebar.keyboardShortcuts
 
     Object.values(expectedContent).forEach((text) => {
       cy.contains(text).should('be.visible')
