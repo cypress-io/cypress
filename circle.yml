@@ -1524,7 +1524,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter
+            yarn nx cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
@@ -1547,13 +1547,13 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server
+            yarn nx cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs      
+      - store-npm-logs
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -1569,26 +1569,26 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server
+            yarn nx cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs            
+      - store-npm-logs
 
   ui-components-integration-tests:
     <<: *defaults
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn build-for-tests
+          command: yarn nx build-for-tests
           working_directory: packages/ui-components
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            yarn cypress:run --record --parallel --group ui-components
+            yarn nx cypress:run --record --parallel --group ui-components
           working_directory: packages/ui-components
       - verify-mocha-results
       - store_test_results:
@@ -1603,7 +1603,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: yarn nx build @cypress/webpack-preprocessor
       - run:
           name: Test babelrc
           command: yarn test
@@ -1631,7 +1631,7 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-preprocessor test
+          command: yarn nx test @cypress/webpack-preprocessor
       - store-npm-logs
 
   npm-webpack-dev-server:
@@ -1641,10 +1641,10 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server test
+          command: yarn nx test @cypress/webpack-dev-server
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-dev-server test
+          command: yarn nx test @cypress/webpack-dev-server
 
   npm-vite-dev-server:
     <<: *defaults
@@ -1652,7 +1652,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn nx test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
@@ -1665,7 +1665,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+          command: yarn nx test @cypress/webpack-batteries-included-preprocessor
 
   npm-vue:
     <<: *defaults
@@ -1673,10 +1673,10 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vue build
+          command: yarn nx build @cypress/vue
       - run:
           name: Type Check
-          command: yarn typecheck
+          command: yarn nx typecheck
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1690,10 +1690,10 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn nx build @cypress/angular
       - run:
           name: Run tests
-          command: yarn test-ci
+          command: yarn nx test-ci
           working_directory: npm/angular
       - store_test_results:
           path: npm/angular/test_results
@@ -1708,10 +1708,10 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn nx build @cypress/react
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn nx test
           working_directory: npm/react
       - store_test_results:
           path: npm/react/test_results
@@ -1725,7 +1725,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: yarn nx build @cypress/mount-utils
       - store-npm-logs
 
   npm-create-cypress-tests:
@@ -1733,7 +1733,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run: yarn nx build create-cypress-tests
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1741,7 +1741,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn workspace @cypress/eslint-plugin-dev test
+          command: yarn nx test @cypress/eslint-plugin-dev
 
   npm-cypress-schematic:
     <<: *defaults
@@ -1751,17 +1751,17 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build:all
+            yarn nx build:all @cypress/schematic
           working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
           command: |
-            yarn test
+            yarn nx launch:test
           working_directory: npm/cypress-schematic
       - run:
           name: Launch Sandbox and Install Schematic
           command: |
-            yarn launch:test12
+            yarn nx launch:test12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 
@@ -2351,7 +2351,7 @@ linux-workflow: &linux-workflow
     - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install          
+          - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
