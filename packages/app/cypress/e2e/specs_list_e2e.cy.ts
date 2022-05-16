@@ -6,12 +6,12 @@ describe('App: Spec List (E2E)', () => {
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('e2e')
 
-    cy.withCtx((ctx) => {
+    cy.withCtx((ctx, o) => {
       const yesterday = new Date()
 
       yesterday.setDate(yesterday.getDate() - 1)
 
-      sinon.stub(ctx.lifecycleManager.git!, 'gitInfoFor').callsFake(() => {
+      o.sinon.stub(ctx.lifecycleManager.git!, 'gitInfoFor').callsFake(() => {
         return {
           author: 'Test Author',
           lastModifiedTimestamp: yesterday.toDateString(),

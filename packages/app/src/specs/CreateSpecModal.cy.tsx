@@ -129,7 +129,7 @@ describe('defaultSpecFileName', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: null,
+            defaultSpecFileName: 'spec.cy.js',
           },
         }}
         show={show.value}
@@ -165,7 +165,7 @@ describe('defaultSpecFileName', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: null,
+            defaultSpecFileName: 'ComponentName.spec.js',
           },
         }}
         show={show.value}
