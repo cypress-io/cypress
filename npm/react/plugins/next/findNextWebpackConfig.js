@@ -29,11 +29,14 @@ async function getNextWebpackConfig (config) {
       buildId: `@cypress/react-${Math.random().toString()}`,
       config: nextConfig,
       dev: true,
-      isServer: false,
       pagesDir: findPagesDir(config.projectRoot),
       entrypoints: {},
       rewrites: { fallback: [], afterFiles: [], beforeFiles: [] },
       ...runWebpackSpan,
+      // Client webpack config for Next.js <= 12.1.5
+      isServer: false,
+      // Client webpack config for Next.js > 12.1.5
+      compilerType: 'client',
     },
   )
 
