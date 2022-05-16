@@ -55,5 +55,10 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "!@packages/driver"
+    ]
+  }
 }
