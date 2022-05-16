@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-full outline-none border-gray-50 ring-inset grid grid-cols-6 group focus-within:ring-indigo-300 focus-within:ring-1"
+    class="h-full outline-none border-gray-50 ring-inset grid grid-cols-7 group focus-within:ring-indigo-300 focus-within:ring-1"
     data-cy="specs-list-row"
   >
     <div class="col-span-3">
@@ -13,6 +13,9 @@
 
     <div>
       <slot name="latest-runs" />
+    </div>
+    <div>
+      <slot name="average-duration" />
     </div>
   </div>
 </template>

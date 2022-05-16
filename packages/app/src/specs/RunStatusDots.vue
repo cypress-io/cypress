@@ -127,9 +127,11 @@ fragment RunStatusDots on Spec {
 const props = withDefaults(defineProps<{
   gql: RunStatusDotsFragment | null
   specFile: string|null
+  isProjectDisconnected: boolean
 }>(), {
   runs: () => [],
   specFile: null,
+  isProjectDisconnected: false,
 })
 
 const runs = computed(() => {
@@ -139,7 +141,7 @@ const runs = computed(() => {
 const isLoading = computed(() => {
   const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
 
-  return loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
+  return !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
 })
 
 const dotClasses = computed(() => {

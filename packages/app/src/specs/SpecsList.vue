@@ -33,7 +33,7 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-6 children:font-medium children:text-gray-800 "
+      class="mb-4 grid grid-cols-7 children:font-medium children:text-gray-800 "
     >
       <div
         class="flex col-span-3 items-center justify-between"
@@ -51,6 +51,14 @@
           :header-text="t('specPage.latestRuns.header')"
           :connected-text="t('specPage.latestRuns.tooltip.connected')"
           :not-connected-text="t('specPage.latestRuns.tooltip.notConnected')"
+        />
+      </div>
+      <div class="flex items-center justify-between">
+        <SpecHeaderCloudDataTooltip
+          :gql="props.gql"
+          :header-text="t('specPage.averageDuration.header')"
+          :connected-text="t('specPage.averageDuration.tooltip.connected')"
+          :not-connected-text="t('specPage.averageDuration.tooltip.notConnected')"
         />
       </div>
     </div>
@@ -123,6 +131,14 @@
               v-if="row.data.isLeaf"
               :gql="row.data.data ?? null"
               :spec-file="row.data.data?.baseName"
+              :is-project-disconnected="props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'"
+            />
+          </template>
+          <template #average-duration>
+            <AverageDuration
+              v-if="row.data.isLeaf"
+              :gql="row.data.data ?? null"
+              :is-project-disconnected="props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'"
             />
           </template>
         </SpecsListRowItem>
@@ -143,6 +159,7 @@ import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
+import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
@@ -161,19 +178,9 @@ import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useRoute } from 'vue-router'
-// import { randomRunStatus, fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
 
 const route = useRoute()
 const { t } = useI18n()
-
-// const testingRuns = () => {
-//   return fakeRuns([
-//     randomRunStatus(),
-//     randomRunStatus(),
-//     randomRunStatus(),
-//     randomRunStatus(),
-//   ])
-// }
 
 gql`
 subscription SpecsList_GitInfoUpdated {
@@ -202,6 +209,7 @@ fragment SpecsList on Spec {
     ...SpecListRow
   }
   ...RunStatusDots
+  ...AverageDuration
 }
 `
 
@@ -211,6 +219,9 @@ fragment Specs_SpecsList on Query {
     id
     projectRoot
     currentTestingType
+    cloudProject{
+      __typename
+    }
     specs {
       id
       ...SpecsList
@@ -255,13 +266,6 @@ const specs = computed(() => {
   const specs2 = cachedSpecs.value.map((x) => {
     const s = makeFuzzyFoundSpec(x)
 
-    // if(props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'){
-    //   const runInfo = props.gql.currentProject?.cloudProject?.specs?.find(ss=>ss?.specPath === s.name)
-    //   return {
-    //     ...s,
-    //     runInfo
-    //   }
-    // }
     return s
   })
 
