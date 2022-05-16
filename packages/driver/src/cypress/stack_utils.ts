@@ -144,6 +144,12 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
 }
 
 const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
+  if (!ErrorConstructor) {
+    // if we don't have an error constructor, then we can't capture the stack
+    // https://github.com/cypress-io/cypress/issues/21428
+    return
+  }
+
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
 

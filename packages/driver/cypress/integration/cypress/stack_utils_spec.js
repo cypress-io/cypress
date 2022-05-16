@@ -465,4 +465,10 @@ message 2
     at stack2 (bar.js:2:2)`)
     })
   })
+
+  context('.captureUserInvocationStack', () => {
+    it('returns undefined without Error constructor', () => {
+      expect($stackUtils.captureUserInvocationStack()).to.equal(undefined)
+    })
+  })
 })
