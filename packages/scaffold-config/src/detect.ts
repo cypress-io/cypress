@@ -135,7 +135,7 @@ export function detectLanguage (projectRoot: string, pkgJson: PkgJson): 'js' | '
     joinPosix(projectRoot, 'cypress', '**/*.{ts,tsx}'),
   ]
 
-  const tsFiles = globby.sync(globs, { onlyFiles: true, gitignore: true })
+  const tsFiles = globby.sync(globs, { onlyFiles: true, gitignore: true, cwd: projectRoot })
 
   if (tsFiles.length > 0) {
     debug(`Detected ts file(s) ${tsFiles.join(',')} - using TS`)
