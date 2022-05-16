@@ -74,6 +74,9 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
             },
           },
         ],
+        provide: {
+          platform: Cypress.platform,
+        },
       },
     }
 
