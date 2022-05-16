@@ -81,17 +81,17 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     // go to Settings page and back to spec runner
-    cy.get('[href="#/settings"]').click()
+    cy.contains('a', 'Settings').click()
     cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
-    cy.get('[href="#/specs"]').click()
+    cy.contains('a', 'Specs').click()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     // go to Runs page and back to spec runner
-    cy.get('[href="#/runs"]').click()
+    cy.contains('a', 'Runs').click()
     cy.contains(defaultMessages.runs.connect.title).should('be.visible')
-    cy.get('[href="#/specs"]').click()
+    cy.contains('a', 'Specs').click()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
@@ -187,7 +187,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-    cy.get('[href="#/specs"]').click()
+    cy.contains('a', 'Specs').click()
     cy.withCtx(async (ctx, o) => {
       await ctx.actions.file.writeFileInProject(o.path, `describe('Simple Test', () => { it('true is true', () => { expect(true).to.be.true }) })`)
     }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
@@ -205,10 +205,10 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('.passed > .num').should('contain', 1)
     cy.get('.failed > .num').should('contain', '--')
 
-    cy.get('[href="#/runs"]').click()
+    cy.contains('a', 'Runs').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
 
-    cy.get('[href="#/specs"]').click()
+    cy.contains('a', 'Specs').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
     cy.contains('dom-content.spec').click()
