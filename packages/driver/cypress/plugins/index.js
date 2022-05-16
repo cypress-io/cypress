@@ -62,8 +62,8 @@ module.exports = (on, config) => {
 
       return null
     },
-    'check:screenshot:size' ({ name, width, height, devicePixelRatio }) {
-      return Jimp.read(path.join(__dirname, '..', 'screenshots', name))
+    'check:screenshot:size' ({ filePath, width, height, devicePixelRatio }) {
+      return Jimp.read(filePath)
       .then((image) => {
         width = width * devicePixelRatio
         height = height * devicePixelRatio
@@ -74,15 +74,6 @@ module.exports = (on, config) => {
 
         return null
       })
-    },
-    'trash:screenshot:assets' () {
-      const screenshotsPath = path.join(__dirname, '..', 'screenshots')
-
-      if (fs.existsSync(screenshotsPath)) {
-        fs.rmdirSync(screenshotsPath, { recursive: true, force: true })
-      }
-
-      return null
     },
   })
 

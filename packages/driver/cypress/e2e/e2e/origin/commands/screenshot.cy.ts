@@ -1,5 +1,3 @@
-import path from 'path'
-
 context('cy.origin screenshot', () => {
   const { devicePixelRatio } = window
 
@@ -281,30 +279,29 @@ context('cy.origin screenshot', () => {
   })
 
   describe('dimensions', () => {
-    // before(() => {
-    //   cy.task('trash:screenshot:assets')
-    // })
-
-    // after(() => {
-    //   cy.task('trash:screenshot:assets')
-    // })
-
     it('crops app captures to just app size', () => {
       cy.viewport(600, 400)
 
       cy.visit('/')
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
-        cy.screenshot('crop-check', { capture: 'viewport' })
-      })
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.screenshot('crop-check', {
+            capture: 'viewport',
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
 
-      cy.task('check:screenshot:size', {
-        // if in run mode, screenshots are grouped under their spec name
-        // @ts-ignore
-        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'crop-check.png'),
-        width: 600,
-        height: 400,
-        devicePixelRatio,
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 600,
+          height: 400,
+          devicePixelRatio,
+        })
       })
     })
 
@@ -314,16 +311,23 @@ context('cy.origin screenshot', () => {
       cy.visit('/')
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page.html')
-        cy.screenshot('fullPage', { capture: 'fullPage' })
-      })
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.screenshot('fullPage', {
+            capture: 'fullPage',
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
 
-      cy.task('check:screenshot:size', {
-        // if in run mode, screenshots are grouped under their spec name
-        // @ts-ignore
-        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'fullPage.png'),
-        width: 600,
-        height: 500,
-        devicePixelRatio,
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 600,
+          height: 500,
+          devicePixelRatio,
+        })
       })
     })
 
@@ -333,16 +337,24 @@ context('cy.origin screenshot', () => {
       cy.visit('/')
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page-same.html')
-        cy.screenshot('fullPage-same', { capture: 'fullPage' })
-      })
 
-      cy.task('check:screenshot:size', {
-        // if in run mode, screenshots are grouped under their spec name
-        // @ts-ignore
-        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'fullPage-same.png'),
-        width: 600,
-        height: 500,
-        devicePixelRatio,
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.screenshot('fullPage-same', {
+            capture: 'fullPage',
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
+
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 600,
+          height: 500,
+          devicePixelRatio,
+        })
       })
     })
 
@@ -352,16 +364,23 @@ context('cy.origin screenshot', () => {
       cy.visit('/')
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-element.html')
-        cy.get('.element').screenshot('element')
-      })
 
-      cy.task('check:screenshot:size', {
-        // if in run mode, screenshots are grouped under their spec name
-        // @ts-ignore
-        name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'element.png'),
-        width: 400,
-        height: 300,
-        devicePixelRatio,
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.get('.element').screenshot('element', {
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
+
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 400,
+          height: 300,
+          devicePixelRatio,
+        })
       })
     })
 
@@ -372,18 +391,23 @@ context('cy.origin screenshot', () => {
         cy.visit('/')
         cy.origin('http://foobar.com:3500', () => {
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
-          cy.screenshot('app-clip', {
-            capture: 'viewport', clip: { x: 10, y: 10, width: 100, height: 50 },
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.screenshot('app-clip', {
+              capture: 'viewport', clip: { x: 10, y: 10, width: 100, height: 50 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
           })
-        })
 
-        cy.task('check:screenshot:size', {
-          // if in run mode, screenshots are grouped under their spec name
-          // @ts-ignore
-          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'app-clip.png'),
-          width: 100,
-          height: 50,
-          devicePixelRatio,
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 100,
+            height: 50,
+            devicePixelRatio,
+          })
         })
       })
 
@@ -393,18 +417,24 @@ context('cy.origin screenshot', () => {
         cy.visit('/')
         cy.origin('http://foobar.com:3500', () => {
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
-          cy.screenshot('runner-clip', {
-            capture: 'runner', clip: { x: 15, y: 15, width: 120, height: 60 },
-          })
-        })
 
-        cy.task('check:screenshot:size', {
-          // if in run mode, screenshots are grouped under their spec name
-          // @ts-ignore
-          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'runner-clip.png'),
-          width: 120,
-          height: 60,
-          devicePixelRatio,
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.screenshot('runner-clip', {
+              capture: 'runner', clip: { x: 15, y: 15, width: 120, height: 60 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
+          })
+
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 120,
+            height: 60,
+            devicePixelRatio,
+          })
         })
       })
 
@@ -414,18 +444,24 @@ context('cy.origin screenshot', () => {
         cy.visit('/')
         cy.origin('http://foobar.com:3500', () => {
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page.html')
-          cy.screenshot('fullPage-clip', {
-            capture: 'fullPage', clip: { x: 20, y: 20, width: 140, height: 70 },
-          })
-        })
 
-        cy.task('check:screenshot:size', {
-          // if in run mode, screenshots are grouped under their spec name
-          // @ts-ignore
-          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'fullPage-clip.png'),
-          width: 140,
-          height: 70,
-          devicePixelRatio,
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.screenshot('fullPage-clip', {
+              capture: 'fullPage', clip: { x: 20, y: 20, width: 140, height: 70 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
+          })
+
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 140,
+            height: 70,
+            devicePixelRatio,
+          })
         })
       })
 
@@ -435,18 +471,23 @@ context('cy.origin screenshot', () => {
         cy.visit('/')
         cy.origin('http://foobar.com:3500', () => {
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-element.html')
-          cy.get('.element').screenshot('element-clip', {
-            clip: { x: 25, y: 25, width: 160, height: 80 },
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.get('.element').screenshot('element-clip', {
+              clip: { x: 25, y: 25, width: 160, height: 80 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
           })
-        })
 
-        cy.task('check:screenshot:size', {
-          // if in run mode, screenshots are grouped under their spec name
-          // @ts-ignore
-          name: path.join(Cypress.config('isCypressRunMode') ? Cypress.spec.name : '', 'element-clip.png'),
-          width: 160,
-          height: 80,
-          devicePixelRatio,
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 160,
+            height: 80,
+            devicePixelRatio,
+          })
         })
       })
     })
