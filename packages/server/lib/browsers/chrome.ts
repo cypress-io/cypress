@@ -400,7 +400,7 @@ const _isAUTFrame = async (frameId: string) => {
   }
 
   const frame = _.find(frameTree?.childFrames || [], ({ frame }) => {
-    return frame?.name?.startsWith('Your App:')
+    return frame?.name?.startsWith('Your project:')
   }) as HasFrame | undefined
 
   if (frame) {
