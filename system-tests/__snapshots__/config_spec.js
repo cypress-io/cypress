@@ -310,14 +310,14 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (a_record-spec.js)                                                         │
-  │ Searched:   cypress/e2e/*-spec.js                                                              │
+  │ Specs:      1 found (a_record.cy.js)                                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record-spec.js                                                                (1 of 1)
+  Running:  a_record.cy.js                                                                  (1 of 1)
 
 
   a spec
@@ -338,14 +338,14 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     a_record-spec.js                                                                 │
+  │ Spec Ran:     a_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/a_record-spec.js.mp4                (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/a_record.cy.js.mp4                  (X second)
 
 
 ====================================================================================================
@@ -355,7 +355,7 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  a_record-spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  a_record.cy.js                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
