@@ -251,8 +251,6 @@ describe('Sidebar Navigation', () => {
     it('resize nav sends the correct value on the mutation', () => {
       cy.contains('fixture.js').click()
 
-      cy.get('.toggle-specs-text').click()
-
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
       })

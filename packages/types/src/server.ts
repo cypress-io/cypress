@@ -65,7 +65,7 @@ export interface OpenProjectLaunchOptions {
   // spec pattern to use when launching from CLI
   spec?: string
 
-  // Callback to reload the Desktop GUI when cypress.config.{ts|js} is changed.
+  // Callback to reload the Desktop GUI when cypress.config.{js,ts,mjs,cjs} is changed.
   onSettingsChanged?: false | (() => void)
   browsers?: FoundBrowser[]
 
