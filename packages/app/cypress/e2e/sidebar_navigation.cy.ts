@@ -223,7 +223,7 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
       cy.findByText('Runs').should('be.visible').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
-      cy.get('[href="#/runs"]').should('have.attr', 'data-selected', 'true')
+      cy.get('.router-link-active').findByText('Runs').should('be.visible')
     })
 
     it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
@@ -232,7 +232,7 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
-      cy.get('[href="#/specs"]').should('have.attr', 'data-selected', 'true')
+      cy.get('.router-link-active').findByText('Specs').should('be.visible')
     })
 
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
@@ -240,7 +240,7 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Settings').should('be.visible')
       cy.findByText('Settings').click()
       cy.findByTestId('app-header-bar').findByText('Settings').should('be.visible')
-      cy.get('[href="#/settings"]').should('have.attr', 'data-selected', 'true')
+      cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
 
     it('resize nav sends the correct value on the mutation', () => {
