@@ -304,7 +304,7 @@ function getComponentDisplayName (componentOptions: any): string {
 
   if (componentOptions.__file) {
     const filepathSplit = componentOptions.__file.split('/')
-    const fileName = filepathSplit[filepathSplit.length - 1]
+    const fileName = filepathSplit[filepathSplit.length - 1] ?? DEFAULT_COMP_NAME
 
     // remove the extension .js, .ts or .vue from the filename to get the name of the component
     const baseFileName = fileName.replace(/\.(js|ts|vue)?$/, '')
