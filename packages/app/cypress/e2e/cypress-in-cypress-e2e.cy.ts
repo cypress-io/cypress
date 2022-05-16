@@ -81,17 +81,17 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     // go to Settings page and back to spec runner
-    cy.findByTestId('nav-row-settings').click()
+    cy.findByTestId('navigate-to-settings-page').click()
     cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
-    cy.findByTestId('nav-row-specs').click()
+    cy.findByTestId('navigate-to-specs-page').click()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     // go to Runs page and back to spec runner
-    cy.findByTestId('nav-row-runs').click()
+    cy.findByTestId('navigate-to-runs-page').click()
     cy.contains(defaultMessages.runs.connect.title).should('be.visible')
-    cy.findByTestId('nav-row-specs').click()
+    cy.findByTestId('navigate-to-specs-page').click()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
@@ -187,7 +187,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-    cy.findByTestId('nav-row-specs').click()
+    cy.findByTestId('navigate-to-specs-page').click()
     cy.withCtx(async (ctx, o) => {
       await ctx.actions.file.writeFileInProject(o.path, `describe('Simple Test', () => { it('true is true', () => { expect(true).to.be.true }) })`)
     }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
@@ -205,10 +205,10 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('.passed > .num').should('contain', 1)
     cy.get('.failed > .num').should('contain', '--')
 
-    cy.findByTestId('nav-row-runs').click()
+    cy.findByTestId('navigate-to-runs-page').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
 
-    cy.findByTestId('nav-row-specs').click()
+    cy.findByTestId('navigate-to-specs-page').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
     cy.contains('dom-content.spec').click()

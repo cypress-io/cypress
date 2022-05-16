@@ -14,9 +14,9 @@ describe('Sidebar Navigation', () => {
       cy.get('body').focus()
       .tab().should('have.attr', 'data-cy', 'toggle-sidebar').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
-      .tab().should('have.attr', 'data-cy', 'nav-row-specs').should('have.prop', 'tagName', 'BUTTON')
-      .tab().should('have.attr', 'data-cy', 'nav-row-runs').should('have.prop', 'tagName', 'BUTTON')
-      .tab().should('have.attr', 'data-cy', 'nav-row-settings').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'navigate-to-specs-page').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'navigate-to-runs-page').should('have.prop', 'tagName', 'BUTTON')
+      .tab().should('have.attr', 'data-cy', 'navigate-to-settings-page').should('have.prop', 'tagName', 'BUTTON')
       .tab().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
     })
 
@@ -134,17 +134,17 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
       cy.findByTestId('sidebar-header').trigger('mouseout')
 
-      cy.findByTestId('nav-row-runs').trigger('mouseenter')
+      cy.findByTestId('navigate-to-runs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Runs')
-      cy.findByTestId('nav-row-runs').trigger('mouseout')
+      cy.findByTestId('navigate-to-runs-page').trigger('mouseout')
 
-      cy.findByTestId('nav-row-specs').trigger('mouseenter')
+      cy.findByTestId('navigate-to-specs-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
-      cy.findByTestId('nav-row-specs').trigger('mouseout')
+      cy.findByTestId('navigate-to-specs-page').trigger('mouseout')
 
-      cy.findByTestId('nav-row-settings').trigger('mouseenter')
+      cy.findByTestId('navigate-to-settings-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
-      cy.findByTestId('nav-row-settings').trigger('mouseout')
+      cy.findByTestId('navigate-to-settings-page').trigger('mouseout')
     })
 
     it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
@@ -220,7 +220,7 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
       cy.findByText('Runs').should('be.visible').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
-      cy.findByTestId('nav-row-runs').should('have.attr', 'data-selected', 'true')
+      cy.findByTestId('navigate-to-runs-page').should('have.attr', 'data-selected', 'true')
     })
 
     it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
@@ -229,7 +229,7 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
-      cy.findByTestId('nav-row-specs').should('have.attr', 'data-selected', 'true')
+      cy.findByTestId('navigate-to-specs-page').should('have.attr', 'data-selected', 'true')
     })
 
     it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
@@ -237,7 +237,7 @@ describe('Sidebar Navigation', () => {
       cy.findByText('Settings').should('be.visible')
       cy.findByText('Settings').click()
       cy.findByTestId('app-header-bar').findByText('Settings').should('be.visible')
-      cy.findByTestId('nav-row-settings').should('have.attr', 'data-selected', 'true')
+      cy.findByTestId('navigate-to-settings-page').should('have.attr', 'data-selected', 'true')
     })
 
     it('resize nav sends the correct value on the mutation', () => {

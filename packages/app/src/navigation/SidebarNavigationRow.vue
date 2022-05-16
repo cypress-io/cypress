@@ -5,7 +5,7 @@
     :distance="8"
   >
     <button
-      :data-cy="`nav-row-${name.toLowerCase()}`"
+      :data-cy="`navigate-to-${name.toLowerCase()}-page`"
       type="button"
       :class="active
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'

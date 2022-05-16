@@ -27,7 +27,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.findByTestId('nav-row-runs').click()
+      cy.findByTestId('navigate-to-runs-page').click()
 
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
