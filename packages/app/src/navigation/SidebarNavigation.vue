@@ -33,22 +33,20 @@
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
-        class="bg-gray-1000 flex-1"
+        class="space-y-1 bg-gray-1000 flex-1"
         :aria-label="t('sidebar.nav.ariaLabel')"
       >
         <RouterLink
           v-for="item in navigation"
-          v-slot="{ isActive, navigate }"
+          v-slot="{ isActive }"
           :key="item.name"
           :to="item.href"
-          custom
         >
           <SidebarNavigationRow
             :active="isActive"
             :icon="item.icon"
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
-            :navigate="navigate"
           />
         </RouterLink>
       </nav>

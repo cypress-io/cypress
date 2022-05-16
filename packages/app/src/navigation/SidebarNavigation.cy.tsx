@@ -37,9 +37,9 @@ describe('SidebarNavigation', () => {
     cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
     cy.findByTestId('sidebar-header').trigger('mouseout')
 
-    cy.findByTestId('navigate-to-runs-page').trigger('mouseenter')
+    cy.get('[href="#/runs"]').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
-    cy.findByTestId('navigate-to-runs-page').trigger('mouseout')
+    cy.get('[href="#/runs"]').trigger('mouseout')
     cy.percySnapshot()
   })
 

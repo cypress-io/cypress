@@ -4,9 +4,7 @@
     :disabled="isNavBarExpanded"
     :distance="8"
   >
-    <button
-      :data-cy="`navigate-to-${name.toLowerCase()}-page`"
-      type="button"
+    <div
       :class="active
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
         : 'before:(scale-x-0 transition-transform bg-gray-300)'"
@@ -19,9 +17,9 @@
         relative
         items-center
         group
+        focus-visible:outline-none
         before:(rounded-r-md h-40px mr-4px text-transparent transform origin-left w-4px duration-300 content-open-square) hover:before:scale-x-100 "
       :data-selected="active"
-      @click="navigate()"
     >
       <component
         :is="icon"
@@ -35,7 +33,7 @@
       >
         {{ name }}
       </span>
-    </button>
+    </div>
     <template #popper>
       {{ name }}
     </template>
@@ -52,7 +50,6 @@ withDefaults(defineProps <{
   // Currently active row (generally the current route)
   active?: boolean
   isNavBarExpanded: boolean
-  navigate: Function
 }>(), {
   active: false,
 })
