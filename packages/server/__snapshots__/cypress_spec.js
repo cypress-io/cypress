@@ -282,7 +282,7 @@ Cypress encountered an error while parsing the argument: --config
 
 You passed: xyz
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot read properties of undefined (reading 'split')
 `
 
 exports['could not parse env error'] = `
@@ -290,7 +290,7 @@ Cypress encountered an error while parsing the argument: --env
 
 You passed: a123
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot read properties of undefined (reading 'split')
 `
 
 exports['could not parse reporter options error'] = `
@@ -298,7 +298,7 @@ Cypress encountered an error while parsing the argument: --reporterOptions
 
 You passed: nonono
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot read properties of undefined (reading 'split')
 `
 
 exports['INVALID_CONFIG_OPTION'] = `

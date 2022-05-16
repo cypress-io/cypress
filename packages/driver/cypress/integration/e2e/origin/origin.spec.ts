@@ -1,4 +1,14 @@
 describe('cy.origin', () => {
+  afterEach(() => {
+    // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+    // commands may have origin's unload event bleed into subsequent tests
+    // and prevent stability from being reached, causing those tests to hang.
+    // We enqueue another cy command after each test to ensure stability
+    // is reached for the next test. This additional command can be removed with the
+    // completion of: https://github.com/cypress-io/cypress/issues/21300
+    cy.then(() => { /* ensuring stability */ })
+  })
+
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 
@@ -237,12 +247,13 @@ describe('cy.origin', () => {
           expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
           expect(err.codeFrame).to.exist
           expect(err.codeFrame!.frame).to.include('cy.origin')
+
           done()
         })
 
         const variable = () => {}
 
-        cy.origin('http://idp.com:3500', { args: variable }, (variable) => {
+        cy.origin('http://foobar.com:3500', { args: variable }, (variable) => {
           variable()
         })
       })

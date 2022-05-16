@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.6.0",
+  "version": "9.6.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -169,7 +169,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=16.5.0",
+    "node": ">=16.13.2",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
