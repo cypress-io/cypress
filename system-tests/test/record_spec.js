@@ -462,7 +462,7 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
-        `PUT /instances/${instanceId} notstdout`,
+        `PUT /instances/${instanceId}/stdout`,
 
         `POST /runs/${runId}/instances`,
       ])
