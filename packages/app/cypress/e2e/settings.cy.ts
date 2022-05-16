@@ -246,7 +246,7 @@ describe('App: Settings', () => {
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
         cy.get('.bg-teal-100').contains('config')
-        cy.get('.bg-yellow-100').contains('env')
+        cy.get('.bg-orange-100').contains('env')
         cy.get('.bg-red-50').contains('cli')
       })
 
@@ -289,7 +289,7 @@ describe('App: Settings', () => {
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
         cy.get('.bg-teal-100').contains('config')
-        cy.get('.bg-yellow-100').contains('env')
+        cy.get('.bg-orange-100').contains('env')
         cy.get('.bg-red-50').contains('cli')
       })
 
@@ -430,7 +430,13 @@ describe('App: Settings without cloud', () => {
 
       expect(browsers).to.have.length.greaterThan(1)
 
-      cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
+      cy.contains(`browsers: [`)
+      cy.contains(`name: 'chrome',`)
+      cy.contains(`family: 'chromium',`)
+      cy.contains(`channel: 'stable',`)
+      cy.contains(`displayName: 'Chrome',`)
+
+      cy.percySnapshot()
     })
   })
 })

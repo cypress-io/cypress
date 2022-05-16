@@ -11,6 +11,7 @@ import chokidar from 'chokidar'
 import _ from 'lodash'
 
 const debug = Debug('cypress:data-context:GitDataSource')
+const debugVerbose = Debug('cypress-verbose:data-context:GitDataSource')
 
 dayjs.extend(relativeTime)
 
@@ -237,7 +238,7 @@ export class GitDataSource {
       // Go through each file, updating our gitInfo cache and detecting which
       // entries have changed, to notify the UI
       for (const [i, file] of absolutePaths.entries()) {
-        debug(`checking %s`, file)
+        debugVerbose(`checking %s`, file)
         const current = this.#gitMeta.get(file)
 
         // first check unstaged/untracked files
@@ -332,7 +333,7 @@ export class GitDataSource {
   }
 
   async #getInfoWindows (absolutePaths: readonly string[]) {
-    const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
+    const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
     const result = await execa(cmd, { shell: true, cwd: this.config.projectRoot })
 

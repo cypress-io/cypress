@@ -16,6 +16,7 @@ import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import 'cypress-axe'
+import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -47,9 +48,10 @@ export interface RemoteGraphQLInterceptPayload {
   document: DocumentNode
   result: ExecutionResult
   callCount: number
+  Response: typeof Response
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult>
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult> | Response
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -138,7 +140,7 @@ declare global {
       /**
        * Visits the Cypress app, for Cypress-in-Cypress testing
        */
-      visitApp(href?: string): Chainable<AUTWindow>
+      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
       /**
        * Visits the Cypress launchpad
        */
@@ -311,7 +313,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
   })
 }
 
-function visitApp (href?: string) {
+function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -328,7 +330,7 @@ function visitApp (href?: string) {
 
       return config.clientRoute
     }).then((clientRoute) => {
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
+      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
     })
   })
 }

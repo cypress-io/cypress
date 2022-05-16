@@ -818,6 +818,7 @@ const systemTests = {
     const args = options.withBinary ? [
       `run`,
       `--project=${projectPath}`,
+      options.testingType === 'component' ? '--component' : '--e2e',
     ] : [
       require.resolve('@packages/server'),
       // hides a user warning to go through NPM module
