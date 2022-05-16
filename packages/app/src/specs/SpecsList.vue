@@ -18,6 +18,7 @@
     </Alert>
     <SpecsListHeader
       v-model="search"
+      :specs-list-input-ref-fn="specsListInputRefFn"
       class="pb-32px"
       :result-count="specs.length"
       :spec-count="cachedSpecs.length"
@@ -42,7 +43,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex items-center justify-between">
-        <div>{{ t('specPage.gitStatusHeader') }}</div>
+        <div>{{ t('specPage.lastUpdatedHeader') }}</div>
       </div>
     </div>
     <!--
@@ -102,7 +103,7 @@
           <template #git-info>
             <SpecListGitInfo
               v-if="row.data.isLeaf && row.data.data?.gitInfo"
-              :gql="row.data.data.gitInfo"
+              :gql="row.data.data?.gitInfo"
             />
           </template>
         </SpecsListRowItem>
@@ -207,10 +208,14 @@ const cachedSpecs = useCachedSpecs(
 )
 
 const search = ref('')
+const specsListInputRef = ref<HTMLInputElement>()
 const debouncedSearchString = useDebounce(search, 200)
+
+const specsListInputRefFn = () => specsListInputRef
 
 function handleClear () {
   search.value = ''
+  specsListInputRef.value?.focus()
 }
 
 const specs = computed(() => {

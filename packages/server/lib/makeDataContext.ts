@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
+import { remoteSchemaWrapped } from '@packages/graphql'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -41,6 +42,7 @@ export { getCtx, setCtx, clearCtx }
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
     schema: graphqlSchema,
+    schemaCloud: remoteSchemaWrapped,
     ...options,
     browserApi: {
       close: browsers.close,
@@ -52,6 +54,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
+      },
+      relaunchBrowser () {
+        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
       },
     },
     configApi: {
@@ -122,6 +127,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       getConfig () {
         return openProject.getConfig()
+      },
+      getRemoteStates () {
+        return openProject.getRemoteStates()
       },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,

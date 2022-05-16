@@ -161,7 +161,7 @@ describe('App: Specs', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.js'))
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.ts'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
@@ -509,6 +509,8 @@ describe('App: Specs', () => {
 
         it('shows success modal when empty spec is created', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/filename.cy.ts'))
+
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
             cy.findByRole('button', { name: 'Create Spec' }).click()
@@ -533,6 +535,8 @@ describe('App: Specs', () => {
 
         it('navigates to spec runner when selected', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/filename.cy.ts'))
+
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
             cy.findByRole('button', { name: 'Create Spec' }).click()
@@ -551,6 +555,8 @@ describe('App: Specs', () => {
 
         it('displays alert with docs link on new spec', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/filename.cy.ts'))
+
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
             cy.findByRole('button', { name: 'Create Spec' }).click()
@@ -567,10 +573,10 @@ describe('App: Specs', () => {
 
           cy.log('should not contain the link if you navigate away and back')
           cy.get('body').type('f')
-          cy.get('[data-testid=spec-file-item]').first().click()
+          cy.get('[data-cy=spec-file-item]').first().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
 
-          cy.get('[data-testid=spec-file-item]').last().click()
+          cy.get('[data-cy=spec-file-item]').last().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
         })
       })

@@ -1,5 +1,5 @@
-@forward '~@cypress/design-system';
-@use '~@cypress/design-system' as *;
+@forward './legacy-styles';
+@use './legacy-styles' as *;
 
 $border-color: $metal-20;
 

@@ -17,10 +17,12 @@ import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
 import { GitDataSource, LegacyCypressConfigJson } from '../sources'
-import { ProjectConfigManager } from './ProjectConfigManager'
+import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
+import { detectLanguage } from '@packages/scaffold-config'
+import { validateNeedToRestartOnChange } from '@packages/config'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -51,23 +53,25 @@ export interface InjectedConfigApi {
 }
 
 export interface ProjectMetaState {
-  hasTypescript: boolean
+  isUsingTypeScript: boolean
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean
   hasSpecifiedConfigViaCLI: false | string
   allFoundConfigFiles: string[]
   needsCypressJsonMigration: boolean
+  isProjectUsingESModules: boolean
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
-  hasTypescript: false,
+  isUsingTypeScript: false,
   hasLegacyCypressJson: false,
   allFoundConfigFiles: [],
   hasCypressEnvFile: false,
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
+  isProjectUsingESModules: false,
 }
 
 export class ProjectLifecycleManager {
@@ -103,7 +107,7 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
-      const contents = await this.getConfigFileContents()
+      const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
     } catch {
@@ -150,8 +154,8 @@ export class ProjectLifecycleManager {
     return this._configManager?.isLoadingNodeEvents
   }
 
-  get isReady () {
-    return this._configManager?.isReady
+  get isFullConfigReady () {
+    return this._configManager?.isFullConfigReady
   }
 
   get loadedConfigFile (): Partial<Cypress.ConfigOptions> | null {
@@ -173,7 +177,7 @@ export class ProjectLifecycleManager {
   }
 
   get fileExtensionToUse () {
-    return this.metaState.hasTypescript ? 'ts' : 'js'
+    return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
   clearCurrentProject () {
@@ -217,8 +221,9 @@ export class ProjectLifecycleManager {
         this._cachedInitialConfig = initialConfig
 
         this.ctx.emitter.toLaunchpad()
+        this.ctx.emitter.toApp()
       },
-      onFinalConfigLoaded: async (finalConfig: FullConfig) => {
+      onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             path: this.projectRoot,
@@ -229,6 +234,8 @@ export class ProjectLifecycleManager {
           })
         }
 
+        const restartOnChange = validateNeedToRestartOnChange(this._cachedFullConfig, finalConfig)
+
         if (this._currentTestingType === 'component') {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
@@ -237,14 +244,29 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+
+          // Devserver can pick a random port, this solve the edge case where closing
+          // and spawning the devserver can result in a different baseUrl
+          if (this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl) {
+            restartOnChange.server = true
+          }
         }
 
         this._cachedFullConfig = finalConfig
 
         // This happens automatically with openProjectCreate in run mode
         if (!this.ctx.isRunMode) {
+          const shouldRelaunchBrowser = this.ctx.coreData.app.browserStatus !== 'closed'
+
           if (!this._initializedProject) {
             this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else if (restartOnChange.server) {
+            this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
+            this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+          } else if ((restartOnChange.browser || options.shouldRestartBrowser) && shouldRelaunchBrowser) {
+            this.ctx.project.setRelaunchBrowser(shouldRelaunchBrowser)
+            await this.ctx.actions.browser.closeBrowser()
+            await this.ctx.actions.browser.relaunchBrowser()
           }
         }
 
@@ -299,10 +321,15 @@ export class ProjectLifecycleManager {
       return
     }
 
+    // Make sure remote states in the server are reset when the project is reloaded.
+    // TODO: maybe we should also reset the server state here as well?
+    this.ctx._apis.projectApi.getRemoteStates()?.reset()
+
     this._configManager.resetLoadingState()
 
     // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
     this.ctx.emitter.toLaunchpad()
+    this.ctx.emitter.toApp()
 
     await this.initializeConfig()
 
@@ -562,12 +589,13 @@ export class ProjectLifecycleManager {
     }
 
     try {
-      // Find the suggested framework, starting with meta-frameworks first
       const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
-      if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
-        metaState.hasTypescript = true
+      if (packageJson.type === 'module') {
+        metaState.isProjectUsingESModules = true
       }
+
+      metaState.isUsingTypeScript = detectLanguage(this.projectRoot, packageJson) === 'ts'
     } catch {
       // No need to handle
     }
@@ -577,7 +605,7 @@ export class ProjectLifecycleManager {
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
 
-        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
 
         if (this.ctx.fs.existsSync(this._pathToFile(configFileNameAfterMigration))) {
           if (this.ctx.fs.existsSync(this._pathToFile(configFile))) {
@@ -624,7 +652,7 @@ export class ProjectLifecycleManager {
     // We finished looping through all of the possible config files
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!configFilePathSet) {
-      this.setConfigFilePath(`cypress.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+      this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
       configFilePathSet = true
     }
 
@@ -678,6 +706,11 @@ export class ProjectLifecycleManager {
   async initializeOpenMode (testingType: TestingType | null) {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
       this.setAndLoadCurrentTestingType(testingType)
+
+      if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration() && !this.isTestingTypeConfigured(testingType)) {
+        // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
+        await this.ctx.actions.wizard.scaffoldTestingType()
+      }
     }
   }
 
@@ -730,7 +763,7 @@ export class ProjectLifecycleManager {
     if (this.ctx.isRunMode && this._configManager) {
       this._configManager.onLoadError(err)
     } else {
-      this.ctx.onError(err, 'Error Loading Config')
+      this.ctx.onError(err, 'Cypress configuration error')
     }
   }
 }

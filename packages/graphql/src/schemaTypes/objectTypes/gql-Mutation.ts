@@ -93,8 +93,12 @@ export const mutation = mutationType({
       resolve: (_, args, ctx) => {
         let url = args.url
 
+        // the `port` param is included in external links to create a cloud organization
+        // so that the app can be notified when the org has been created
         if (args.includeGraphqlPort && process.env.CYPRESS_INTERNAL_GRAPHQL_PORT) {
-          url = `${args.url}?port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`
+          const joinCharacter = args.url.includes('?') ? '&' : '?'
+
+          url = `${args.url}${joinCharacter}port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`
         }
 
         ctx.actions.electron.openExternal(url)
@@ -171,9 +175,14 @@ export const mutation = mutationType({
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         // if necessary init the wizard for configuration
-        if (ctx.coreData.currentTestingType
-          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          await ctx.actions.wizard.initialize()
+        if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          // Component Testing has a wizard to help users configure their project
+          if (ctx.coreData.currentTestingType === 'component') {
+            ctx.actions.wizard.initialize()
+          } else {
+            // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
+            await ctx.actions.wizard.scaffoldTestingType()
+          }
         }
 
         return {}
@@ -204,10 +213,6 @@ export const mutation = mutationType({
 
         if (args.input.bundler) {
           ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
-        }
-
-        if (args.input.codeLanguage) {
-          ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
         // TODO: remove when live-mutations are implements
@@ -569,7 +574,13 @@ export const mutation = mutationType({
         projectId: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+        try {
+          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+        } catch {
+          // We were unable to set the project id, the error isn't useful
+          // to show the user here, because they're prompted to update the id manually
+          return null
+        }
 
         // Wait for the project config to be reloaded
         await ctx.lifecycleManager.refreshLifecycle()
@@ -595,7 +606,7 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.project.setRelaunchBrowser(true)
+        ctx.project.setRelaunchBrowser(ctx.lifecycleManager.isTestingTypeConfigured(args.testingType))
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
 
@@ -637,6 +648,35 @@ export const mutation = mutationType({
         await ctx.actions.project.pingBaseUrl()
 
         return {}
+      },
+    })
+
+    t.field('refreshOrganizations', {
+      type: Query,
+      description: 'Clears the cloudViewer cache to refresh the organizations',
+      resolve: async (source, args, ctx) => {
+        await ctx.cloud.invalidate('Query', 'cloudViewer')
+
+        return {}
+      },
+    })
+
+    t.field('refetchRemote', {
+      type: Query,
+      description: 'Signal that we are explicitly refetching remote data and should not use the server cache',
+      resolve: () => {
+        return {
+          requestPolicy: 'network-only',
+        } as const
+      },
+    })
+
+    t.boolean('_clearCloudCache', {
+      description: 'Internal use only, clears the cloud cache',
+      resolve: (source, args, ctx) => {
+        ctx.cloud.reset()
+
+        return true
       },
     })
   },

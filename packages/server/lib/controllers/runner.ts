@@ -22,7 +22,7 @@ const _serveNonProxiedError = (res: Response) => {
   })
 }
 
-export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'exit'> {
+export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'remoteStates' | 'exit'> {
   testingType: Cypress.TestingType
 }
 
@@ -54,7 +54,7 @@ export const runner = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, getCurrentBrowser, getSpec, exit } = options
+    let { config, remoteStates, getCurrentBrowser, getSpec, exit } = options
 
     config = _.clone(config)
     // at any given point, rather than just arbitrarily modifying it.
@@ -70,7 +70,7 @@ export const runner = {
     // }
     // TODO: Find out what the problem.
     if (options.testingType === 'e2e') {
-      config.remote = getRemoteState()
+      config.remote = remoteStates.getPrimary()
     }
 
     const spec = getSpec()
@@ -91,8 +91,9 @@ export const runner = {
     return serveRunner(runnerPkg, config, res)
   },
 
-  handle (req: Request, res: Response) {
-    const pathToFile = getPathToDist('runner-ct', req.params[0])
+  handle (testingType, req: Request, res: Response) {
+    // FIXME: Why is runner-ct being used for all injections? Can anyone comment here as to why this changed?
+    const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)

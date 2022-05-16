@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import $utils from '../../cypress/utils'
+import type { Log } from '../../cypress/log'
 
 const resume = (state, resumeAll = true) => {
   const onResume = state('onResume')
@@ -32,6 +33,14 @@ const getNextQueuedCommand = (state, queue) => {
   return search(state('index'))
 }
 
+interface InternalPauseOptions extends Partial<Cypress.Loggable> {
+  _log?: Log
+}
+
+interface InternalDebugOptions extends Partial<Cypress.Loggable> {
+  _log?: Log
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   Cypress.on('resume:next', () => {
     return resume(state, false)
@@ -42,18 +51,15 @@ export default (Commands, Cypress, cy, state, config) => {
   })
 
   Commands.addAll({ type: 'utility', prevSubject: 'optional' }, {
-    // TODO: change the options type from `any` to `Loggable`.
     // pause should indefinitely pause until the user
     // presses a key or clicks in the UI to continue
-    pause (subject, options: any = {}) {
+    pause (subject, userOptions: Partial<Cypress.Loggable> = {}) {
       // bail if we're in run mode, unless --headed and --no-exit flags are passed
       if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
         return subject
       }
 
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, { log: true })
+      const options: InternalPauseOptions = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
         options._log = Cypress.log({
@@ -72,8 +78,8 @@ export default (Commands, Cypress, cy, state, config) => {
           // pause on the very next one
             state('onPaused', null)
 
-            if (options.log) {
-              options._log.end()
+            if (options._log) {
+              options._log!.end()
             }
           }
 
@@ -103,11 +109,8 @@ export default (Commands, Cypress, cy, state, config) => {
       return subject
     },
 
-    // TODO: change `any` to Loggable
-    debug (subject, options: any = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    debug (subject, userOptions: Partial<Cypress.Loggable> = {}) {
+      const options: InternalDebugOptions = _.defaults({}, userOptions, {
         log: true,
       })
 

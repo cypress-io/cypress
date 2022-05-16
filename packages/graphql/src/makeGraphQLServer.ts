@@ -48,7 +48,12 @@ export async function makeGraphQLServer () {
 
     switch (operationName) {
       case 'orgCreated':
-        ctx.emitter.cloudViewerChange()
+        ctx.cloud.invalidate('Query', 'cloudViewer')
+        .then(() => {
+          ctx.emitter.cloudViewerChange()
+        })
+        .catch(ctx.logTraceError)
+
         break
 
       default:

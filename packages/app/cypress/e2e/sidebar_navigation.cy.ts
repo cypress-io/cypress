@@ -181,7 +181,7 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
-        cy.contains('Not Configured')
+        cy.contains('Configured')
       }).click()
 
       cy.withCtx((ctx) => {
@@ -250,8 +250,6 @@ describe('Sidebar Navigation', () => {
 
     it('resize nav sends the correct value on the mutation', () => {
       cy.contains('fixture.js').click()
-
-      cy.get('.toggle-specs-text').click()
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()
@@ -336,7 +334,7 @@ describe('Sidebar Navigation', () => {
       }).click()
 
       cy.withCtx((ctx) => {
-        expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.coreData.app.relaunchBrowser).eq(false)
         expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
       })

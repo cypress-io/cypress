@@ -36,8 +36,9 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import type { CypressError } from '@packages/errors'
+import { CypressError, getError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
+import { GraphQLDataSource } from './sources/GraphQLDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -51,6 +52,7 @@ export interface InternalDataContextOptions {
 
 export interface DataContextConfig {
   schema: GraphQLSchema
+  schemaCloud: GraphQLSchema
   mode: 'run' | 'open'
   modeOptions: Partial<AllModeOptions>
   electronApp?: ElectronApp
@@ -92,8 +94,21 @@ export class DataContext {
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
+  get schema () {
+    return this._config.schema
+  }
+
+  get schemaCloud () {
+    return this._config.schemaCloud
+  }
+
   get isRunMode () {
     return this._config.mode === 'run'
+  }
+
+  @cached
+  get graphql () {
+    return new GraphQLDataSource()
   }
 
   get electronApp () {
@@ -109,7 +124,7 @@ export class DataContext {
   }
 
   get isGlobalMode () {
-    return !this.currentProject
+    return this.appData.isInGlobalMode
   }
 
   get modeOptions () {
@@ -184,7 +199,20 @@ export class DataContext {
 
   @cached
   get cloud () {
-    return new CloudDataSource(this)
+    return new CloudDataSource({
+      fetch: (...args) => this.util.fetch(...args),
+      getUser: () => this.user,
+      logout: () => this.actions.auth.logout().catch(this.logTraceError),
+      onError: (err) => {
+        // This should never happen in prod, and if it does, it means we've intentionally broken the
+        // remote contract with the test runner. Showing the main overlay is too heavy-handed of an action
+        // to take here, so we only show it in development, when we maybe did something wrong in our e2e
+        // Cypress test mocking and want to know immediately in the UI that things are broken
+        if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+          return this.onError(getError('DASHBOARD_GRAPHQL_ERROR', err), 'Cypress Dashboard Error')
+        }
+      },
+    })
   }
 
   @cached
@@ -336,7 +364,10 @@ export class DataContext {
         coreData.baseError = { title, cypressError }
       })
 
+      this.emitter.baseErrorChange()
+
       this.emitter.toLaunchpad()
+      this.emitter.toApp()
     }
   }
 
@@ -363,10 +394,6 @@ export class DataContext {
     ])
   }
 
-  get loader () {
-    return this.util.loader
-  }
-
   /**
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
@@ -389,7 +416,6 @@ export class DataContext {
     return Promise.all([
       this.lifecycleManager.destroy(),
       this.cloud.reset(),
-      this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])

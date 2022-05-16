@@ -323,6 +323,12 @@
           <button type="submit">submit me</button>
         </form>
 
+        <form id="multiple-inputs-and-button-submit.outside-form">
+          <input name="fname" />
+          <input name="lname" />
+        </form>
+        <button form="multiple-inputs-and-button-submit.outside-form" type="submit">submit me</button>
+
         <form id="multiple-inputs-and-reset-and-submit-buttons">
           <input name="fname" />
           <input name="lname" />
@@ -437,8 +443,8 @@
       </select>
 
       <select name="foods">
-        <option value="Japanese">Ramen</option>
-        <option value="Ramen">Japanese</option>
+        <option value="Ramen">Ramen</option>
+        <option value="Japanese">Japanese</option>
       </select>
 
       <select name="names">
@@ -463,7 +469,7 @@
       </select>
 
       <fieldset disabled>
-        <select name="fielset-disabled">
+        <select name="fieldset-disabled">
           <option value="foo">foo</option>
           <option value="bar">bar</option>
         </select>

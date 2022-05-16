@@ -130,6 +130,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.cfg.state
   }
 
+  get remoteStates () {
+    return this._server?.remoteStates
+  }
+
   injectCtSpecificConfig (cfg) {
     cfg.resolved.testingType = { value: 'component' }
 
@@ -468,7 +472,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._cfg
   }
 
-  // returns project config (user settings + defaults + cypress.config.{ts|js})
+  // returns project config (user settings + defaults + cypress.config.{js,ts,mjs,cjs})
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
@@ -480,7 +484,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     return {
       ...this._cfg,
-      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],

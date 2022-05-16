@@ -15,12 +15,14 @@ describe('App: Spec List (E2E)', () => {
           lastModifiedTimestamp: yesterday.toDateString(),
           lastModifiedHumanReadable: yesterday.toDateString(),
           statusType: 'unmodified',
+          subject: 'commit subject',
+          shortHash: '1234567890',
         }
       })
     })
 
     cy.visitApp()
-    cy.contains('E2E Specs')
+    cy.contains('E2E specs')
   })
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
@@ -37,30 +39,13 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
   })
 
-  it('shows the "E2E Specs" label as the header for the Spec Name column', () => {
-    cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E Specs')
-  })
-
-  it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('6 Matches')
-
-    cy.get('input').type('content', { force: true })
-
-    cy.get('[data-cy="spec-item"]').should('have.length', 2)
-    .should('contain', 'dom-content.spec.js')
-
-    cy.get('button').contains('2 of 6 Matches')
-
-    cy.get('input').clear().type('asdf', { force: true })
-
-    cy.get('[data-cy="spec-item"]').should('have.length', 0)
-
-    cy.get('button').contains('0 of 6 Matches')
+  it('shows the "E2E specs" label as the header for the Spec Name column', () => {
+    cy.get('[data-cy="specs-testing-type-header"]').should('contain', 'E2E specs')
   })
 
   it('shows a git status for each spec', () => {
-    cy.get('[data-cy="spec-list-file"]').each((row) => {
-      cy.wrap(row).contains('.git-info-row', 'Test Author')
+    cy.get('[data-cy="git-info-row"]').each((row) => {
+      cy.wrap(row).find('svg').should('have.length', 1)
     })
   })
 
@@ -87,6 +72,7 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="spec-item-link"]').should('have.attr', 'href')
     cy.get('[data-cy="spec-item-link"]').contains('dom-content.spec.js').click()
 
+    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.findByText('Your tests are loading...').should('not.be.visible')
     cy.get('body').type('f')
 
@@ -109,6 +95,113 @@ describe('App: Spec List (E2E)', () => {
         expect(numTargets).to.eq(newNumTargets)
 
         done()
+      })
+    })
+  })
+
+  describe('typing the filter', function () {
+    it('displays only matching spec', function () {
+      cy.get('button').contains('14 Matches')
+      cy.findByLabelText('Search Specs').type('content')
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 2)
+      .and('contain', 'dom-content.spec.js')
+
+      cy.get('button').contains('2 of 14 Matches')
+
+      cy.findByLabelText('Search Specs').clear().type('asdf')
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 0)
+
+      cy.get('button').contains('0 of 14 Matches')
+    })
+
+    it('only shows matching folders', () => {
+      cy.findByLabelText('Search Specs').type('new')
+      cy.get('[data-cy="spec-list-directory"]')
+      .should('have.length', 1)
+
+      cy.findByLabelText('Search Specs').clear().type('admin')
+      cy.get('[data-cy="spec-list-directory"]')
+      .should('have.length', 2)
+    })
+
+    it('ignores non-letter characters', function () {
+      cy.findByLabelText('Search Specs').clear().type('appspec')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 1)
+      .and('contain', 'app.spec.js')
+    })
+
+    it('ignores non-number characters', function () {
+      cy.findByLabelText('Search Specs').clear().type('123spec')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 1)
+      .and('contain', '123.spec.js')
+    })
+
+    it('ignores commonly used path characters', function () {
+      cy.findByLabelText('Search Specs').clear().type('defg')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 1)
+      .and('contain', 'd~e(f)g.spec.js')
+    })
+
+    it('treats non-Latin characters as letters', function () {
+      cy.findByLabelText('Search Specs').clear().type('柏树很棒')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 1)
+      .and('contain', '柏树很棒.spec.js')
+    })
+
+    // TODO: https://cypress-io.atlassian.net/browse/UNIFY-682
+    it.skip('clears the filter on search bar clear button click', function () {
+      cy.get('.clear-filter').click()
+      cy.findByLabelText('Search Specs')
+      .should('have.value', '')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 14)
+    })
+
+    it('clears the filter if the user presses ESC key', function () {
+      cy.findByLabelText('Search Specs').type('asdf')
+
+      cy.findByLabelText('Search Specs').realType('{esc}')
+
+      cy.findByLabelText('Search Specs')
+      .should('have.value', '')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 14)
+    })
+
+    it('shows empty message if no results', function () {
+      cy.findByLabelText('Search Specs').clear().type('foobarbaz')
+      cy.get('[data-cy="spec-item"]').should('not.exist')
+
+      cy.findByText('No specs matched your search:')
+    })
+
+    it('clears and focuses the filter field when clear search is clicked', function () {
+      cy.findByLabelText('Search Specs').type('asdf')
+      cy.findByText('Clear Search').click()
+      cy.focused().should('have.id', 'spec-filter')
+
+      cy.get('[data-cy="spec-item"]')
+      .should('have.length', 14)
+    })
+
+    //TODO: https://cypress-io.atlassian.net/browse/UNIFY-1588
+    it.skip('saves the filter to local storage for the project', function () {
+      cy.window().then((win) => {
+        expect(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`]).to.be.a('string')
+
+        expect(JSON.parse(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`])).to.equal('new')
       })
     })
   })

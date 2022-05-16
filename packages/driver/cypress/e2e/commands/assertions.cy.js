@@ -35,20 +35,10 @@ const captureCommands = () => {
 }
 
 describe('src/cy/commands/assertions', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/jquery.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
   let testCommands
 
   beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+    cy.visit('/fixtures/jquery.html')
 
     testCommands = captureCommands()
   })
@@ -70,6 +60,7 @@ describe('src/cy/commands/assertions', () => {
       .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
       .then((obj) => {
         expect(testCommands()).to.eql([
+          { name: 'visit', snapshots: 1, retries: 0 },
           { name: 'noop', snapshots: 0, retries: 0 },
           { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
@@ -204,6 +195,7 @@ describe('src/cy/commands/assertions', () => {
         })
         .then(() => {
           expect(testCommands()).to.eql([
+            { name: 'visit', snapshots: 1, retries: 0 },
             // cy.get() has 2 snapshots, 1 for itself, and 1
             // for the .should(...) assertion.
 
@@ -1159,7 +1151,7 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
-  context('format quotation marks', () => {
+  describe('message formatting', () => {
     const expectMarkdown = (test, message, done) => {
       cy.then(() => {
         test()
@@ -1176,70 +1168,83 @@ describe('src/cy/commands/assertions', () => {
       })
     }
 
-    it('preserves quotation marks in number strings', (done) => {
-      expectMarkdown(() => {
-        try {
-          expect(25).to.eq('25')
-        } catch (error) {} /* eslint-disable-line no-empty */
-      },
-      `expected **25** to equal **'25'**`,
-      done)
-    })
+    // https://github.com/cypress-io/cypress/issues/19116
+    it('text with backslashes', (done) => {
+      const text = '"<OE_D]dQ\\'
 
-    it('preserves quotation marks in empty string', (done) => {
-      expectMarkdown(() => {
-        try {
-          expect(42).to.eq('')
-        } catch (error) {} /* eslint-disable-line no-empty */
-      },
-      `expected **42** to equal **''**`,
-      done)
-    })
-
-    it('preserves quotation marks if escaped', (done) => {
       expectMarkdown(
-        () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
-        // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
-        `expected **'cypress'** to equal ****'cypress'****`,
+        () => expect(text).to.equal(text),
+        `expected **"<OE_D]dQ\\\\** to equal **"<OE_D]dQ\\\\**`,
         done,
       )
     })
 
-    it('removes quotation marks in DOM elements', (done) => {
-      expectMarkdown(
-        () => {
-          cy.get('body').then(($body) => {
-            expect($body).to.contain('div')
-          })
+    describe('messages with quotation marks', () => {
+      it('preserves quotation marks in number strings', (done) => {
+        expectMarkdown(() => {
+          try {
+            expect(25).to.eq('25')
+          } catch (error) {} /* eslint-disable-line no-empty */
         },
-        `expected **<body>** to contain **div**`,
-        done,
-      )
-    })
+        `expected **25** to equal **'25'**`,
+        done)
+      })
 
-    it('removes quotation marks in strings', (done) => {
-      expectMarkdown(() => expect('cypress').to.eq('cypress'), `expected **cypress** to equal **cypress**`, done)
-    })
+      it('preserves quotation marks in empty string', (done) => {
+        expectMarkdown(() => {
+          try {
+            expect(42).to.eq('')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **42** to equal **''**`,
+        done)
+      })
 
-    it('removes quotation marks in objects', (done) => {
-      expectMarkdown(
-        () => expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' }),
-        `expected **{ foo: bar }** to deeply equal **{ foo: bar }**`,
-        done,
-      )
-    })
+      it('preserves quotation marks if escaped', (done) => {
+        expectMarkdown(
+          () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
+          // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
+          `expected **'cypress'** to equal ****'cypress'****`,
+          done,
+        )
+      })
 
-    it('formats keys properly for "have.all.keys"', (done) => {
-      const person = {
-        name: 'Joe',
-        age: 20,
-      }
+      it('removes quotation marks in DOM elements', (done) => {
+        expectMarkdown(
+          () => {
+            cy.get('body').then(($body) => {
+              expect($body).to.contain('div')
+            })
+          },
+          `expected **<body>** to contain **div**`,
+          done,
+        )
+      })
 
-      expectMarkdown(
-        () => expect(person).to.have.all.keys('name', 'age'),
-        `expected **{ name: Joe, age: 20 }** to have keys **name**, and **age**`,
-        done,
-      )
+      it('removes quotation marks in strings', (done) => {
+        expectMarkdown(() => expect('cypress').to.eq('cypress'), `expected **cypress** to equal **cypress**`, done)
+      })
+
+      it('removes quotation marks in objects', (done) => {
+        expectMarkdown(
+          () => expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' }),
+          `expected **{ foo: bar }** to deeply equal **{ foo: bar }**`,
+          done,
+        )
+      })
+
+      it('formats keys properly for "have.all.keys"', (done) => {
+        const person = {
+          name: 'Joe',
+          age: 20,
+        }
+
+        expectMarkdown(
+          () => expect(person).to.have.all.keys('name', 'age'),
+          `expected **{ name: Joe, age: 20 }** to have keys **name**, and **age**`,
+          done,
+        )
+      })
     })
 
     describe('formats strings with spaces', (done) => {
@@ -1326,6 +1331,15 @@ describe('src/cy/commands/assertions', () => {
         cy.$$($span).appendTo(cy.$$('body'))
 
         cy.get('#escape-quotes').should('contain', 'shouldn\'t')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/19116
+      it('escapes backslashes', () => {
+        const $span = '<span id="escape-backslashes">"&lt;OE_D]dQ\\</span>'
+
+        cy.$$($span).appendTo(cy.$$('body'))
+
+        cy.get('#escape-backslashes').should('contain', '"<OE_D]dQ\\')
       })
     })
 
@@ -2997,11 +3011,10 @@ describe('src/cy/commands/assertions', () => {
     // should be taken.
     it('only snapshots once when failing to find DOM elements and not retrying', (done) => {
       cy.on('fail', (err) => {
-        expect(testCommands()).to.eql([{
-          name: 'get',
-          snapshots: 1,
-          retries: 0,
-        }])
+        expect(testCommands()).to.eql([
+          { name: 'visit', snapshots: 1, retries: 0 },
+          { name: 'get', snapshots: 1, retries: 0 },
+        ])
 
         done()
       })

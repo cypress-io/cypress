@@ -1,0 +1,13 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "retries": 2,
+  "defaultCommandTimeout": 5000,
+  "fixturesFolder": false,
+  "componentFolder": "src",
+  "testFiles": "**/*.spec.{tsx,js}",
+  "pluginsFile": "foo/bar",
+  "e2e": {
+    "defaultCommandTimeout": 10000,
+    "slowTestThreshold": 5000
+  }
+}

@@ -1,4 +1,5 @@
 import type { NodePath, ParserOptions, PluginObj, Visitor } from '@babel/core'
+import { last } from 'lodash'
 import * as t from '@babel/types'
 import debugLib from 'debug'
 import { print } from 'recast'
@@ -7,6 +8,20 @@ const debug = debugLib('cypress:config:addToCypressConfigPlugin')
 
 interface AddToCypressConfigPluginOptions {
   shouldThrow?: boolean
+}
+
+function manipulateOptions (_t: any, parserOpts: ParserOptions) {
+  parserOpts.errorRecovery = true
+  parserOpts.plugins ??= []
+  if (
+    parserOpts.plugins.some(
+      (p: any) => (Array.isArray(p) ? p[0] : p) === 'typescript',
+    )
+  ) {
+    return
+  }
+
+  parserOpts.plugins.push('typescript')
 }
 
 /**
@@ -141,19 +156,7 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCy
 
   return {
     name: 'addToCypressConfigPlugin',
-    manipulateOptions (t, parserOpts: ParserOptions) {
-      parserOpts.errorRecovery = true
-      parserOpts.plugins ??= []
-      if (
-        parserOpts.plugins.some(
-          (p: any) => (Array.isArray(p) ? p[0] : p) === 'typescript',
-        )
-      ) {
-        return
-      }
-
-      parserOpts.plugins.push('typescript')
-    },
+    manipulateOptions,
     visitor: {
       Program: {
         enter (path) {
@@ -220,11 +223,77 @@ export function addToCypressConfigPlugin (toAdd: t.ObjectProperty, opts: AddToCy
   }
 }
 
-function spreadResult (expr: t.Expression, toAdd: t.ObjectProperty): t.ObjectExpression {
-  return t.objectExpression([
-    t.spreadElement(expr),
-    toAdd,
-  ])
+export function addESModuleImportToCypressConfigPlugin (toAdd: t.ImportDeclaration, opts: AddToCypressConfigPluginOptions = {}): PluginObj<any> {
+  return {
+    name: 'addESModuleImportToCypressConfigPlugin',
+    manipulateOptions,
+    visitor: {
+      Program (path) {
+        const lastImport = last(path.get('body').filter((p) => p.isImportDeclaration()))
+
+        if (lastImport) {
+          lastImport.insertAfter(toAdd)
+        } else {
+          path.get('body')?.[0]?.insertBefore(toAdd)
+        }
+      },
+    },
+  }
+}
+
+export function addCommonJSModuleImportToCypressConfigPlugin (toAdd: t.Statement, opts: AddToCypressConfigPluginOptions = {}): PluginObj<any> {
+  let lastRequireBeforeModuleExports: number
+  let lastSeenRequire: number
+
+  return {
+    name: 'addCommonJSModuleImportToCypressConfigPlugin',
+    visitor: {
+      Program: {
+        exit (path) {
+          const body = path.get('body')?.[0]
+
+          // Should never happen, unless `cypress.config.js` is empty.
+          if (!body) {
+            return
+          }
+
+          const n = body.find((x) => x.node?.loc?.end.line === lastRequireBeforeModuleExports)
+
+          if (n) {
+            /**
+             * insert the require after the last require that appears before
+             * module.exports, if there is some other require statements.
+             * const { defineConfig } = require('cypress')
+             *                     <------- Insert it here
+             * module.exports = {}
+             */
+            n.insertAfter(toAdd)
+          } else {
+            /**
+             * Otherwise just put it at the top of the module.
+             */
+            body.insertBefore(toAdd)
+          }
+        },
+      },
+      CallExpression (path) {
+        if (isRequire(path)) {
+          if (path.node.loc?.end?.line) {
+            lastSeenRequire = path.node.loc?.end?.line
+          }
+        }
+      },
+      AssignmentExpression (path) {
+        if (t.isMemberExpression(path.node.left) && isModuleExports(path.node.left)) {
+          lastRequireBeforeModuleExports = lastSeenRequire
+        }
+      },
+    },
+  }
+}
+
+function isRequire (p: NodePath<t.CallExpression>) {
+  return p.node.callee.type === 'Identifier' && p.node.callee.name === 'require'
 }
 
 function isModuleExports (node: t.MemberExpression) {
@@ -234,4 +303,11 @@ function isModuleExports (node: t.MemberExpression) {
     t.isIdentifier(node.property) &&
     node.property.name === 'exports'
   )
+}
+
+function spreadResult (expr: t.Expression, toAdd: t.ObjectProperty): t.ObjectExpression {
+  return t.objectExpression([
+    t.spreadElement(expr),
+    toAdd,
+  ])
 }

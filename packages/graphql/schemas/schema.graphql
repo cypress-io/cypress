@@ -217,6 +217,7 @@ type CloudRun implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   status: CloudRunStatus
+  tags: [CloudRunTag]
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -225,6 +226,9 @@ type CloudRun implements Node {
 
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
+
+  """Number of flaky tests"""
+  totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -295,6 +299,12 @@ enum CloudRunStatus {
   TIMEDOUT
 }
 
+type CloudRunTag implements Node {
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+  name: String
+}
+
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
@@ -347,14 +357,6 @@ type CodeFrame {
   line: Int
 }
 
-"""Glob patterns for detecting files for code gen."""
-type CodeGenGlobs implements Node {
-  component: String!
-
-  """Relay style Node ID field for the CodeGenGlobs field"""
-  id: ID!
-}
-
 enum CodeGenType {
   component
   e2e
@@ -367,7 +369,7 @@ enum CodeLanguageEnum {
 }
 
 """
-The currently opened Cypress project, represented by a cypress.config.{ts|js} file
+The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
 type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the project"""
@@ -387,7 +389,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
-  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -407,9 +408,6 @@ type CurrentProject implements Node & ProjectLike {
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
-  """Whether the project has Typescript"""
-  hasTypescript: Boolean
-
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
@@ -425,11 +423,17 @@ type CurrentProject implements Node & ProjectLike {
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
 
+  """Whether or not the full config is ready"""
+  isFullConfigReady: Boolean
+
   """Whether we are currently loading the configFile"""
   isLoadingConfigFile: Boolean
 
   """Whether we are currently loading the setupNodeEvents"""
   isLoadingNodeEvents: Boolean
+
+  """Whether the project has Typescript"""
+  isUsingTypeScript: Boolean
 
   """Whether the project needs to be migrated before proceeding"""
   needsLegacyConfigMigration: Boolean
@@ -557,6 +561,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
@@ -581,6 +586,8 @@ enum ErrorTypeEnum {
   LEGACY_CONFIG_ERROR_DURING_MIGRATION
   LEGACY_CONFIG_FILE
   MIGRATION_ALREADY_OCURRED
+  MIGRATION_CYPRESS_NOT_FOUND
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
   NODE_VERSION_DEPRECATION_BUNDLED
   NODE_VERSION_DEPRECATION_SYSTEM
@@ -740,8 +747,14 @@ type GitInfo {
   """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
   lastModifiedTimestamp: String
 
+  """short hash for latest commit"""
+  shortHash: String
+
   """status type - created or modified"""
   statusType: GitInfoStatusType
+
+  """subject for latest commit"""
+  subject: String
 }
 
 enum GitInfoStatusType {
@@ -843,14 +856,17 @@ type Migration {
   """whether the testFiles member is custom or not in integration"""
   hasCustomIntegrationTestFiles: Boolean!
 
-  """Whether the project has Typescript"""
-  hasTypescript: Boolean
-
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
+  """Whether the project has Typescript"""
+  isUsingTypeScript: Boolean
+
   """List of files needing manual conversion"""
   manualFiles: ManualMigration
+
+  """whether the pre extension info should be displayed"""
+  shouldMigratePreExtension: Boolean
 
   """All spec files after conversion"""
   specFiles: [MigrationFile!]!
@@ -927,6 +943,12 @@ enum MigrationStepEnum {
 }
 
 type Mutation {
+  """Internal use only, clears the cloud cache"""
+  _clearCloudCache: Boolean
+
+  """Used internally to update the URQL cache in the CloudDataSource"""
+  _cloudCacheInvalidate(args: JSON): Boolean
+
   """Add project to projects array and cache it"""
   addProject(
     """Whether to open the project when added"""
@@ -1032,6 +1054,14 @@ type Mutation {
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
+
+  """
+  Signal that we are explicitly refetching remote data and should not use the server cache
+  """
+  refetchRemote: Query
+
+  """Clears the cloudViewer cache to refresh the organizations"""
+  refreshOrganizations: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
@@ -1140,6 +1170,12 @@ type ProjectPreferences {
   testingType: String
 }
 
+type PushFragmentPayload {
+  data: JSON
+  fragment: JSON!
+  target: String!
+}
+
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   """The latest state of the auth process"""
@@ -1185,6 +1221,7 @@ type Query {
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
+  node(id: ID!): Node
 
   """Whether the project was specified from the --project flag"""
   projectRootFromCI: Boolean!
@@ -1263,6 +1300,9 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
+  """Triggered when the base error state changes"""
+  baseErrorChange: Query
+
   """Issued when the current branch of a project changes"""
   branchChange: CurrentProject
 
@@ -1284,6 +1324,11 @@ type Subscription {
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
+
+  """
+  When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
+  """
+  pushFragment: [PushFragmentPayload]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
@@ -1342,9 +1387,6 @@ The Wizard is a container for any state associated with initial onboarding to Cy
 type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
-
-  """All of the languages to choose from"""
-  allLanguages: [WizardCodeLanguage!]!
   bundler: WizardBundler
   framework: WizardFrontendFramework
 
@@ -1353,7 +1395,6 @@ type Wizard {
 
   """Command to install required command"""
   installDependenciesCommand: String
-  language: WizardCodeLanguage
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
@@ -1374,26 +1415,6 @@ type WizardBundler implements Node {
 
   """The name of the framework"""
   type: SupportedBundlers!
-}
-
-"""
-A code language that the user can choose from to create their cypress.config
-"""
-type WizardCodeLanguage implements Node {
-  """Relay style Node ID field for the WizardCodeLanguage field"""
-  id: ID!
-
-  """Whether this is the detected language"""
-  isDetected: Boolean!
-
-  """Whether this is the selected language in the wizard"""
-  isSelected: Boolean!
-
-  """The name of the language"""
-  name: String!
-
-  """The key of the language"""
-  type: CodeLanguageEnum!
 }
 
 enum WizardConfigFileStatusEnum {
@@ -1458,6 +1479,5 @@ type WizardNpmPackage implements Node {
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
-  codeLanguage: CodeLanguageEnum
   framework: FrontendFrameworkEnum
 }

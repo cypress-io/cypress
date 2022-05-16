@@ -1,14 +1,14 @@
-import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detect, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
+import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+import { detectFramework, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
 import fs from 'fs-extra'
+import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions, detectRelativeViteConfig, detectRelativeWebpackConfig } from '@packages/config'
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
-import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -59,14 +59,6 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  setCodeLanguage (lang: NexusGenEnums['CodeLanguageEnum']) {
-    this.ctx.update((coreData) => {
-      coreData.wizard.chosenLanguage = lang
-    })
-
-    return this.ctx.coreData.wizard
-  }
-
   async completeSetup () {
     debug('completeSetup')
     this.ctx.update((d) => {
@@ -81,7 +73,6 @@ export class WizardActions {
     this.ctx.update((coreData) => {
       coreData.wizard.chosenBundler = null
       coreData.wizard.chosenFramework = null
-      coreData.wizard.chosenLanguage = 'js'
       coreData.wizard.detectedBundler = null
       coreData.wizard.detectedFramework = null
     })
@@ -89,18 +80,14 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  async initialize () {
+  initialize () {
     if (!this.ctx.currentProject) {
       return
     }
 
     this.resetWizard()
 
-    await this.detectLanguage()
-    debug('detectedLanguage %s', this.data.detectedLanguage)
-    this.data.chosenLanguage = this.data.detectedLanguage || 'js'
-
-    const detected = detect(this.ctx.currentProject)
+    const detected = detectFramework(this.ctx.currentProject)
 
     debug('detected %o', detected)
 
@@ -119,25 +106,13 @@ export class WizardActions {
     }
   }
 
-  private async detectLanguage () {
-    const { hasTypescript } = this.ctx.lifecycleManager.metaState
-
-    if (
-      hasTypescript ||
-      (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
-      this.ctx.wizardData.detectedLanguage = 'ts'
-    } else {
-      this.ctx.wizardData.detectedLanguage = 'js'
-    }
-  }
-
   /**
    * Scaffolds the testing type, by creating the necessary files & assigning to
    */
   async scaffoldTestingType () {
-    const { currentTestingType, wizard: { chosenLanguage } } = this.ctx.coreData
+    const { currentTestingType } = this.ctx.coreData
 
-    assert(currentTestingType && chosenLanguage, 'currentTestingType & chosenLanguage are required')
+    assert(currentTestingType && 'currentTestingType is required')
 
     switch (currentTestingType) {
       case 'e2e': {
@@ -177,8 +152,8 @@ export class WizardActions {
     // Order of the scaffoldedFiles is intentional, confirm before changing
     const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('e2e'),
-      this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
-      this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
+      this.scaffoldSupport('e2e', this.ctx.lifecycleManager.fileExtensionToUse),
+      this.scaffoldSupport('commands', this.ctx.lifecycleManager.fileExtensionToUse),
       this.scaffoldFixtures(),
     ])
 
@@ -187,15 +162,15 @@ export class WizardActions {
 
   private async scaffoldComponent () {
     debug('scaffoldComponent')
-    const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.coreData.wizard
+    const { chosenBundler, chosenFramework } = this.ctx.coreData.wizard
 
-    assert(chosenFramework && chosenLanguage && chosenBundler)
+    assert(chosenFramework && chosenBundler)
 
     // Order of the scaffoldedFiles is intentional, confirm before changing
     const scaffoldedFiles = await Promise.all([
       this.scaffoldConfig('component'),
-      this.scaffoldSupport('component', chosenLanguage),
-      this.scaffoldSupport('commands', chosenLanguage),
+      this.scaffoldSupport('component', this.ctx.lifecycleManager.fileExtensionToUse),
+      this.scaffoldSupport('commands', this.ctx.lifecycleManager.fileExtensionToUse),
       this.scaffoldComponentIndexHtml(chosenFramework),
       this.scaffoldFixtures(),
     ])
@@ -203,7 +178,7 @@ export class WizardActions {
     return scaffoldedFiles
   }
 
-  private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: 'js' | 'ts'): Promise<NexusGenObjects['ScaffoldedFile']> {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
@@ -240,21 +215,27 @@ export class WizardActions {
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
+    assert(this.ctx.currentProject)
 
     if (!this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
-      this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
+      this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
     }
 
     const configFilePath = this.ctx.lifecycleManager.configFilePath
+    const bundler = this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack'
+
     const testingTypeInfo: AddTestingTypeToCypressConfigOptions['info'] = testingType === 'e2e' ? {
       testingType: 'e2e',
     } : {
       testingType: 'component',
-      bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
+      bundler,
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
+      configPath: bundler === 'vite' ? detectRelativeViteConfig(this.ctx.currentProject) : detectRelativeWebpackConfig(this.ctx.currentProject),
+      needsExplicitConfig: this.ctx.coreData.wizard.chosenFramework?.category === 'library' ?? false,
     }
 
     const result = await addTestingTypeToCypressConfig({
+      isProjectUsingESModules: this.ctx.lifecycleManager.metaState.isProjectUsingESModules,
       filePath: configFilePath,
       info: testingTypeInfo,
     })

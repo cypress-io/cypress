@@ -30,6 +30,7 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
+  getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
@@ -301,13 +302,17 @@ export class ProjectActions {
 
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
-    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
+    this.refreshSpecs(specs)
 
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
     }
 
     this.ctx.emitter.specsChange()
+  }
+
+  refreshSpecs (specs: FoundSpec[]) {
+    this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -439,7 +444,7 @@ export class ProjectActions {
   async reconfigureProject () {
     await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
-    await this.ctx.actions.wizard.initialize()
+    this.ctx.actions.wizard.initialize()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }

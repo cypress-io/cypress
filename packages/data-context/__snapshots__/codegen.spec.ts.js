@@ -181,14 +181,73 @@ export default defineConfig({
 
 `
 
+exports['cypress.config.js generation should add custom specPattern if project has projectId 1'] = `
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  projectId: 'abc1234',
+  e2e: {
+    // We've imported your old cypress plugins here.
+    // You may want to clean this up later by importing these.
+    setupNodeEvents(on, config) {
+      return require('./cypress/plugins/index.js')(on, config)
+    },
+    baseUrl: 'http://localhost:3000',
+    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+  },
+  component: {
+    setupNodeEvents(on, config) {},
+  },
+})
+
+`
+
+exports['cypress.config.js generation should not add custom specPattern if project has projectId and integrationFolder 1'] = `
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  projectId: 'abc1234',
+  e2e: {
+    // We've imported your old cypress plugins here.
+    // You may want to clean this up later by importing these.
+    setupNodeEvents(on, config) {
+      return require('./cypress/plugins/index.js')(on, config)
+    },
+    baseUrl: 'http://localhost:3000',
+    specPattern: 'cypress/custom/e2e/**/*.{js,jsx,ts,tsx}',
+  },
+  component: {
+    setupNodeEvents(on, config) {},
+  },
+})
+
+`
+
 exports['cypress.config.js generation generates correct config for component testing migration with custom testFiles glob 1'] = `
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   component: {
     setupNodeEvents(on, config) {},
-    componentFolder: '.',
     specPattern: './**/*.spec.cy.{js,ts,jsx,tsx}',
+  },
+})
+
+`
+
+exports['cypress.config.js generation should create a string when passed an empty object for an ECMA Script project 1'] = `
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  e2e: {
+    // We've imported your old cypress plugins here.
+    // You may want to clean this up later by importing these.
+    setupNodeEvents(on, config) {
+      return require('./cypress/plugins/index.js')(on, config)
+    },
+  },
+  component: {
+    setupNodeEvents(on, config) {},
   },
 })
 

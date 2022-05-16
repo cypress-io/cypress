@@ -1,6 +1,6 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
-import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 
 import { defaultMessages } from '@cy/i18n'
 
@@ -8,7 +8,6 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
     ...CloudUserStubs.me,
     organizations: null,
-    organizationControl: null,
   }
 
   context('when the user is logged in', () => {
@@ -18,7 +17,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
           result.cloudViewer = cloudViewer
         },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} />
+          return <RunsContainer gql={gqlVal} online />
         },
       })
 
@@ -40,7 +39,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
           }
         },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} />
+          return <RunsContainer gql={gqlVal} online />
         },
       })
 
@@ -59,7 +58,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
     it('renders instructions and login button', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} />
+          return <RunsContainer gql={gqlVal} online />
         },
       })
 

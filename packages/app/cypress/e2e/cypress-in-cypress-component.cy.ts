@@ -15,10 +15,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('test component', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('TestComponent.spec')
-      })
-
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.findByTestId('aut-url').should('not.exist')
@@ -29,7 +26,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       snapshotAUTPanel('browsers open')
       cy.contains('Canary').should('be.hidden')
-      cy.contains('The viewport determines the width and height of your application. By default the viewport will be 500px by 500px for Component Testing unless specified by a cy.viewport command.')
+      cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for component testing.')
       .should('be.visible')
 
       snapshotAUTPanel('viewport info open')
@@ -61,6 +58,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('navigation between specs and other parts of the app works', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Settings page and back to spec runner
@@ -68,6 +66,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Runs page and back to spec runner
@@ -75,6 +74,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains(defaultMessages.runs.connect.title).should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
     })
 
@@ -122,6 +122,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('browser picker in runner calls mutation with current spec path', () => {
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.withCtx((ctx, o) => {
@@ -147,31 +148,27 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       })
     })
 
-    it('restarts dev server on config change', () => {
+    it('restarts server on devServer config change', () => {
       cy.visitApp()
+      cy.get('[data-cy="spec-item"]')
 
-      cy.withCtx(async (ctx, { testState, sinon }) => {
-        sinon.stub(ctx._apis.projectApi.getDevServer(), 'close')
-        const devServerReady =
-        new Promise<void>((res) => {
-          ctx._apis.projectApi.getDevServer().emitter.on('dev-server:compile:success', () => res())
-        })
+      cy.withCtx(async (ctx, { sinon }) => {
+        ctx.coreData.app.browserStatus = 'open'
 
-        testState.originalCypressConfig = await ctx.file.readFileInProject('cypress.config.js')
-        const newCypressConfig = testState.originalCypressConfig.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
+        sinon.stub(ctx.actions.project, 'initializeActiveProject')
+
+        const config = await ctx.file.readFileInProject('cypress.config.js')
+        const newCypressConfig = config.replace(`webpackConfig: require('./webpack.config.js')`, `webpackConfig: {}`)
 
         await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
-        await devServerReady
       })
 
-      cy.contains('TestComponent.spec').click()
-      cy.get('.failed > .num').should('contain', 1)
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.contains('[role="alert"]', 'Loading')
 
-      cy.withCtx(async (ctx, { testState }) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', testState.originalCypressConfig)
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.actions.project.initializeActiveProject).to.be.called
       })
-
-      cy.get('.passed > .num').should('contain', 1)
     })
 
     it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
@@ -180,6 +177,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       cy.visitApp()
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
@@ -191,6 +189,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
       cy.contains('TestComponent.spec').click()
+      cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.window().then((win) => {

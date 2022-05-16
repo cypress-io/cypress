@@ -43,4 +43,22 @@ describe('<RenameSpecsAuto/>', { viewportWidth: 1119 }, () => {
     cy.findByText(defaultMessages.migration.renameAuto.modals.step2.buttonSave).click()
     cy.findByText(defaultMessages.migration.renameAuto.folderRenameMessage).should('be.visible')
   })
+
+  it('hides preExtension migration messages if the project has projectId', () => {
+    cy.mountFragment(RenameSpecsAutoFragmentDoc, {
+      onResult: (res) => {
+        res.shouldMigratePreExtension = false
+      },
+      render (gql) {
+        return (<div class="p-16px">
+          <RenameSpecsAuto gql={gql} />
+        </div>)
+      },
+    })
+
+    cy.findByText(defaultMessages.migration.renameAuto.optedOutMessage).should('not.exist')
+    cy.findByText(defaultMessages.migration.renameAuto.changedSpecExt).should('not.exist')
+    cy.findByText(defaultMessages.migration.renameAuto.changeButton).should('not.exist')
+    cy.findByText(defaultMessages.migration.renameAuto.folderRenameMessage).should('not.exist')
+  })
 })

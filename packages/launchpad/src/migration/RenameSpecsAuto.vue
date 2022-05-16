@@ -12,7 +12,7 @@
           class="text-jade-500"
         >cypress/e2e</CodeTag>
       </MigrationListItem>
-      <MigrationListItem>
+      <MigrationListItem v-if="props.gql.shouldMigratePreExtension">
         <template
           v-if="selectOption === 'skip'"
         >
@@ -43,7 +43,7 @@
           {{ t('migration.renameAuto.changeButton') }}
         </a>
       </MigrationListItem>
-      <MigrationListItem v-if="!selectOption">
+      <MigrationListItem v-if="!selectOption && props.gql.shouldMigratePreExtension">
         <i18n-t
           scope="global"
           keypath="migration.renameAuto.changedSpecPatternExplain"
@@ -99,6 +99,7 @@ const { t } = useI18n()
 
 gql`
 fragment RenameSpecsAuto on Migration {
+  shouldMigratePreExtension
   hasCustomIntegrationFolder
   specFiles {
     before {
