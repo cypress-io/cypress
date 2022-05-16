@@ -10,7 +10,7 @@ import type {
 } from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx } from './clientTestUtils'
 import { stubBrowsers } from './stubgql-Browser'
-import * as cloudTypes from './stubgql-CloudTypes'
+import * as cloudTypes from '@packages/graphql/test/stubCloudTypes'
 import { createTestCurrentProject, createTestGlobalProject, stubGlobalProject } from './stubgql-Project'
 import { allBundlers } from './stubgql-Wizard'
 

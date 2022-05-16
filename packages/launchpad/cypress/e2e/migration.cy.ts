@@ -78,6 +78,51 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
+describe('global mode', () => {
+  it('migrates 2 projects in global mode', () => {
+    cy.openGlobalMode()
+    cy.addProject('migration-e2e-export-default')
+    cy.addProject('migration-e2e-custom-integration-with-projectId')
+    cy.visitLaunchpad()
+
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').returns('10.0.0')
+    })
+
+    cy.contains('migration-e2e-export-default').click()
+    // rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
+
+    // cypress/support/index.ts -> cypress/support/e2e.ts
+    cy.get(renameSupportStep).should('exist')
+    // no component specs
+    cy.get(setupComponentStep).should('not.exist')
+
+    cy.get(configFileStep).should('exist')
+
+    runAutoRename()
+    renameSupport('ts')
+    migrateAndVerifyConfig('cypress.config.ts')
+    checkOutcome()
+
+    cy.contains('Projects').click()
+    cy.contains('migration-e2e-custom-integration-with-projectId').click()
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('not.exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+})
+
 describe('Opening unmigrated project', () => {
   it('legacy project with --e2e', () => {
     cy.scaffoldProject('migration')
@@ -1294,6 +1339,14 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
     cy.get('button').contains('Cancel').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
   })
+
+  it('shows error if plugins file throws an error', () => {
+    scaffoldAndVisitLaunchpad('migration-e2e-plugins-throw-error')
+
+    cy.contains('cypress/plugins/index.js file threw an error.')
+    cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
+    cy.contains('throw new Error(\'New error from plugin\')')
+  })
 })
 
 describe('Migrate custom config files', () => {
@@ -1464,6 +1517,13 @@ describe('Migrate custom config files', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
-    cy.contains('ypress no longer supports customConfig.json, please remove it from your project.')
+    cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')
+  })
+
+  it('shows error if plugins file do not exist', () => {
+    scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
+
+    cy.contains('foo/bar file threw an error.')
+    cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
   })
 })

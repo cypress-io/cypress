@@ -472,7 +472,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._cfg
   }
 
-  // returns project config (user settings + defaults + cypress.config.{ts|js})
+  // returns project config (user settings + defaults + cypress.config.{js,ts,mjs,cjs})
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
