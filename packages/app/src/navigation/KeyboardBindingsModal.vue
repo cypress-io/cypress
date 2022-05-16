@@ -2,9 +2,9 @@
   <StandardModal
     class="transition transition-all duration-200"
     variant="bare"
-    :title="t('sideBar.keyboardShortcuts.title')"
+    :title="t('sidebar.keyboardShortcuts.title')"
     :model-value="show"
-    data-cy="switch-modal"
+    data-cy="keyboard-modal"
     help-link=""
     @update:model-value="emits('close')"
   >
@@ -46,15 +46,15 @@ const emits = defineEmits<{
 const keyBindings = [
   {
     key: ['r'],
-    description: t('sideBar.keyboardShortcuts.rerun'),
+    description: t('sidebar.keyboardShortcuts.rerun'),
   },
   {
     key: ['s'],
-    description: t('sideBar.keyboardShortcuts.stop'),
+    description: t('sidebar.keyboardShortcuts.stop'),
   },
   {
     key: ['f'],
-    description: t('sideBar.keyboardShortcuts.toggle'),
+    description: t('sidebar.keyboardShortcuts.toggle'),
   },
 ]
 </script>

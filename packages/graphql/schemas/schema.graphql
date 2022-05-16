@@ -369,7 +369,7 @@ enum CodeLanguageEnum {
 }
 
 """
-The currently opened Cypress project, represented by a cypress.config.{ts|js} file
+The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
 type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the project"""

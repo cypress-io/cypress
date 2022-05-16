@@ -25,7 +25,8 @@ export class AutIframe {
 
   create (): JQuery<HTMLIFrameElement> {
     const $iframe = this.$('<iframe>', {
-      id: `Your App: '${this.projectName}'`,
+      id: `Your project: '${this.projectName}'`,
+      title: `Your project: '${this.projectName}'`,
       class: 'aut-iframe',
     })
 
