@@ -4,11 +4,11 @@ import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
 import fs from 'fs-extra'
+import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions, detectRelativeViteConfig, detectRelativeWebpackConfig } from '@packages/config'
 
 const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
-import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -215,18 +215,23 @@ export class WizardActions {
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
+    assert(this.ctx.currentProject)
 
     if (!this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
       this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.lifecycleManager.fileExtensionToUse}`)
     }
 
     const configFilePath = this.ctx.lifecycleManager.configFilePath
+    const bundler = this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack'
+
     const testingTypeInfo: AddTestingTypeToCypressConfigOptions['info'] = testingType === 'e2e' ? {
       testingType: 'e2e',
     } : {
       testingType: 'component',
-      bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
+      bundler,
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
+      configPath: bundler === 'vite' ? detectRelativeViteConfig(this.ctx.currentProject) : detectRelativeWebpackConfig(this.ctx.currentProject),
+      needsExplicitConfig: this.ctx.coreData.wizard.chosenFramework?.category === 'library' ?? false,
     }
 
     const result = await addTestingTypeToCypressConfig({

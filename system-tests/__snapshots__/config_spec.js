@@ -187,12 +187,14 @@ There is a cypress.json file at the path: /foo/bar/.projects/pristine
 
 Cypress version 10.0.0 no longer supports cypress.json.
 
-Please run cypress open to launch the migration tool to migrate to cypress.config.{ts|js}.
+Please run cypress open to launch the migration tool to migrate to cypress.config.{js,ts,mjs,cjs}.
+
+https://on.cypress.io/migration-guide
 
 
 `
 
-exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
+exports['e2e config throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well 1'] = `
 There is both a cypress.config.js and a cypress.json file at the location below:
 
 /foo/bar/.projects/multiple-config-files-with-json
