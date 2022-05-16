@@ -873,6 +873,11 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
+
+  """
+  stringified JSON from an onlink, containing markup for the migration landing page video embed
+  """
+  videoEmbedJson: String
 }
 
 type MigrationFile {

@@ -5,10 +5,10 @@
     />
 
     <MigrationLandingPage
-      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && videoHtml"
+      v-if="currentProject?.needsLegacyConfigMigration && !wasLandingPageShown && online && videoHtml"
       class="pt-64px"
       :video-html="videoHtml"
-      @clearLandingPage="showLandingPage = false"
+      @clearLandingPage="wasLandingPageShown = true"
     />
     <div
       v-else
@@ -24,7 +24,7 @@
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration && !showLandingPage"
+        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageShown"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -101,7 +101,7 @@ import { useOnline } from '@vueuse/core'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
-const showLandingPage = ref(true)
+const wasLandingPageShown = ref(false)
 const online = useOnline()
 
 gql`
@@ -120,6 +120,9 @@ fragment MainLaunchpadQueryData on Query {
     isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
+  }
+  migration {
+    videoEmbedJson
   }
   isInGlobalMode
   ...GlobalPage
@@ -149,16 +152,16 @@ const resetErrorsAndLoadConfig = () => {
     mutation.executeMutation({})
   }
 }
-const videoHtml = ref(null)
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+const videoHtml = computed(() => {
+  const json = query.data.value?.migration?.videoEmbedJson
 
-fetch('https://on.cypress.io/v10-video-embed/10.0.0').then((res) => {
-  return res.json()
-}).then((json) => {
-  if (json.videoHtml?.length) {
-    videoHtml.value = json.videoHtml
+  if (!json) {
+    return null
   }
+
+  return JSON.parse(json).videoHtml
 })
 
 </script>

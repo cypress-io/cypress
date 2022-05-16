@@ -92,8 +92,6 @@ describe('global mode', () => {
 
     cy.contains('migration-e2e-export-default').click()
 
-    cy.pause()
-
     cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     // rename integration->e2e
