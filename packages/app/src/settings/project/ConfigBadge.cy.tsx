@@ -14,7 +14,7 @@ describe('<ConfigBadge />', () => {
     cy.mount(() => (
       <div class="p-12 children:pb-4">
         <ConfigBadge label="Superb" class="bg-gray-100 text-gray-600">This is a pretty <pre class="inline">great</pre> badge</ConfigBadge>
-        <ConfigBadge label="Sub-par" class="bg-yellow-100 text-yellow-600">A warning would probably go here</ConfigBadge>
+        <ConfigBadge label="Sub-par" class="bg-orange-100 text-orange-600">A warning would probably go here</ConfigBadge>
         <ConfigBadge label="So cool" class="bg-indigo-100 text-indigo-600">Populated by lorem ipsum</ConfigBadge>
         <ConfigBadge label="...Super?" class="bg-rose-100 text-rose-600">...is <a>this</a> expected?</ConfigBadge>
       </div>
