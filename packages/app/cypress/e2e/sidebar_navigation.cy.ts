@@ -39,6 +39,9 @@ describe('Sidebar Navigation', () => {
 
       cy.get('nav')
       .should('have.attr', 'aria-label', 'Pages')
+
+      cy.findByTestId('sidebar-header')
+      .should('have.attr', 'aria-label', 'todos - Choose a testing type')
     })
   })
 
