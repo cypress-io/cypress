@@ -586,7 +586,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   resolveFrom('env', envProc)
   resolveFrom('cli', envCLI)
 
-  // envCfg is from cypress.config.{ts|js}
+  // envCfg is from cypress.config.{js,ts,mjs,cjs}
   // envFile is from cypress.env.json
   // envProc is from process env vars
   // envCLI is from CLI arguments

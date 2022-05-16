@@ -430,7 +430,13 @@ describe('App: Settings without cloud', () => {
 
       expect(browsers).to.have.length.greaterThan(1)
 
-      cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
+      cy.contains(`browsers: [`)
+      cy.contains(`name: 'chrome',`)
+      cy.contains(`family: 'chromium',`)
+      cy.contains(`channel: 'stable',`)
+      cy.contains(`displayName: 'Chrome',`)
+
+      cy.percySnapshot()
     })
   })
 })
