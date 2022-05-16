@@ -182,10 +182,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('.passed > .num').should('contain', 1)
       cy.get('.failed > .num').should('contain', '--')
 
-      cy.contains('a', 'Runs').click()
+      cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
 
-      cy.contains('a', 'Specs').click()
+      cy.get('[href="#/specs"]').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
 
       cy.contains('TestComponent.spec').click()
