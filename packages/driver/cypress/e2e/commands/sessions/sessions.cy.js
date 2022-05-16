@@ -131,13 +131,7 @@ describe('cy.session', { retries: 0 }, () => {
           message: '(new) session-1',
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'session',
-          message: 'session-1',
-          group: sessionGroupId,
-        })
-
-        const createNewSessionGroup = logs[2].get()
+        const createNewSessionGroup = logs[1].get()
 
         expect(createNewSessionGroup).to.contain({
           displayName: 'Create New Session',
@@ -145,29 +139,29 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[3].get()).to.contain({
+        expect(logs[2].get()).to.contain({
           name: 'Clear Page',
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[4].get()).to.deep.contain({
+        expect(logs[3].get()).to.deep.contain({
           alias: ['setupSession'],
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[5].get()).to.contain({
+        expect(logs[4].get()).to.contain({
           name: 'Clear Page',
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[6].get()).to.contain({
+        expect(logs[5].get()).to.contain({
           name: 'Clear Page',
           group: sessionGroupId,
         })
       })
 
       it('creates new session instrument with session details', () => {
-        const sessionInfo = logs[1].get('sessionInfo')
+        const sessionInfo = logs[0].get('sessionInfo')
 
         expect(sessionInfo).to.deep.eq({
           id: 'session-1',
@@ -176,10 +170,11 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       it('has session details in the consoleProps', () => {
-        const consoleProps = logs[1].get('consoleProps')()
+        const consoleProps = logs[0].get('consoleProps')()
 
         expect(consoleProps).to.deep.eq({
           Command: 'session',
+          Snapshot: 'The snapshot is missing. Displaying current state of the DOM.',
           id: 'session-1',
           table: [],
         })
@@ -213,13 +208,7 @@ describe('cy.session', { retries: 0 }, () => {
           message: '(new) session-1',
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'session',
-          message: 'session-1',
-          group: sessionGroupId,
-        })
-
-        const createNewSessionGroup = logs[2].get()
+        const createNewSessionGroup = logs[1].get()
 
         expect(createNewSessionGroup).to.contain({
           displayName: 'Create New Session',
@@ -227,34 +216,34 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[3].get()).to.contain({
+        expect(logs[2].get()).to.contain({
           name: 'Clear Page',
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[4].get()).to.deep.contain({
+        expect(logs[3].get()).to.deep.contain({
           alias: ['setupSession'],
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[5].get()).to.contain({
+        expect(logs[4].get()).to.contain({
           name: 'Clear Page',
           group: createNewSessionGroup.id,
         })
 
-        const validateSessionGroup = logs[6].get()
+        const validateSessionGroup = logs[5].get()
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate Session: valid',
           group: sessionGroupId,
         })
 
-        expect(logs[7].get()).to.deep.contain({
+        expect(logs[6].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
 
-        expect(logs[8].get()).to.contain({
+        expect(logs[7].get()).to.contain({
           name: 'Clear Page',
           group: sessionGroupId,
         })
@@ -282,13 +271,7 @@ describe('cy.session', { retries: 0 }, () => {
             message: '(new) session-1',
           })
 
-          expect(logs[1].get()).to.contain({
-            name: 'session',
-            message: 'session-1',
-            group: sessionGroupId,
-          })
-
-          const createNewSessionGroup = logs[2].get()
+          const createNewSessionGroup = logs[1].get()
 
           expect(createNewSessionGroup).to.contain({
             displayName: 'Create New Session',
@@ -296,22 +279,22 @@ describe('cy.session', { retries: 0 }, () => {
             group: sessionGroupId,
           })
 
-          expect(logs[3].get()).to.contain({
+          expect(logs[2].get()).to.contain({
             name: 'Clear Page',
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[4].get()).to.deep.contain({
+          expect(logs[3].get()).to.deep.contain({
             alias: ['setupSession'],
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[5].get()).to.contain({
+          expect(logs[4].get()).to.contain({
             name: 'Clear Page',
             group: createNewSessionGroup.id,
           })
 
-          const validateSessionGroup = logs[6].get()
+          const validateSessionGroup = logs[5].get()
 
           expect(validateSessionGroup).to.contain({
             displayName: 'Validate Session: invalid',
@@ -359,13 +342,7 @@ describe('cy.session', { retries: 0 }, () => {
           message: '(saved) session-1',
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'session',
-          message: 'session-1',
-          group: sessionGroupId,
-        })
-
-        const restoreSavedSessionGroup = logs[2].get()
+        const restoreSavedSessionGroup = logs[1].get()
 
         expect(restoreSavedSessionGroup).to.contain({
           displayName: 'Restore Saved Session',
@@ -373,12 +350,12 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[3].get()).to.contain({
+        expect(logs[2].get()).to.contain({
           name: 'Clear Page',
           group: restoreSavedSessionGroup.id,
         })
 
-        expect(logs[4].get()).to.contain({
+        expect(logs[3].get()).to.contain({
           name: 'Clear Page',
           group: sessionGroupId,
         })
@@ -417,13 +394,7 @@ describe('cy.session', { retries: 0 }, () => {
           message: '(saved) session-1',
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'session',
-          message: 'session-1',
-          group: sessionGroupId,
-        })
-
-        const restoreSavedSessionGroup = logs[2].get()
+        const restoreSavedSessionGroup = logs[1].get()
 
         expect(restoreSavedSessionGroup).to.contain({
           displayName: 'Restore Saved Session',
@@ -431,24 +402,24 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[3].get()).to.contain({
+        expect(logs[2].get()).to.contain({
           name: 'Clear Page',
           group: restoreSavedSessionGroup.id,
         })
 
-        const validateSessionGroup = logs[4].get()
+        const validateSessionGroup = logs[3].get()
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate Session: valid',
           group: sessionGroupId,
         })
 
-        expect(logs[5].get()).to.deep.contain({
+        expect(logs[4].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
 
-        expect(logs[6].get()).to.contain({
+        expect(logs[5].get()).to.contain({
           name: 'Clear Page',
           group: sessionGroupId,
         })
@@ -492,13 +463,7 @@ describe('cy.session', { retries: 0 }, () => {
           message: '(recreated) session-1',
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'session',
-          message: 'session-1',
-          group: sessionGroupId,
-        })
-
-        const recreatedSavedSessionGroup = logs[2].get()
+        const recreatedSavedSessionGroup = logs[1].get()
 
         expect(recreatedSavedSessionGroup).to.contain({
           displayName: 'Restore Saved Session',
@@ -506,31 +471,31 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[3].get()).to.contain({
+        expect(logs[2].get()).to.contain({
           name: 'Clear Page',
           group: recreatedSavedSessionGroup.id,
         })
 
-        const validateSessionGroup = logs[4].get()
+        const validateSessionGroup = logs[3].get()
 
         expect(validateSessionGroup).to.contain({
           displayName: 'Validate Session: invalid',
           group: sessionGroupId,
         })
 
-        expect(logs[5].get()).to.deep.contain({
+        expect(logs[4].get()).to.deep.contain({
           alias: ['validateSession'],
           group: validateSessionGroup.id,
         })
 
-        expect(logs[6].get()).to.deep.contain({
+        expect(logs[5].get()).to.deep.contain({
           showError: true,
           group: validateSessionGroup.id,
         })
 
-        expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
+        expect(logs[5].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 
-        const createNewSessionGroup = logs[7].get()
+        const createNewSessionGroup = logs[6].get()
 
         expect(createNewSessionGroup).to.contain({
           displayName: 'Create New Session',
@@ -538,34 +503,34 @@ describe('cy.session', { retries: 0 }, () => {
           group: sessionGroupId,
         })
 
-        expect(logs[8].get()).to.contain({
+        expect(logs[7].get()).to.contain({
           name: 'Clear Page',
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[9].get()).to.deep.contain({
+        expect(logs[8].get()).to.deep.contain({
           alias: ['setupSession'],
           group: createNewSessionGroup.id,
         })
 
-        expect(logs[10].get()).to.contain({
+        expect(logs[9].get()).to.contain({
           name: 'Clear Page',
           group: createNewSessionGroup.id,
         })
 
-        const secondValidateSessionGroup = logs[11].get()
+        const secondValidateSessionGroup = logs[10].get()
 
         expect(secondValidateSessionGroup).to.contain({
           displayName: 'Validate Session: valid',
           group: sessionGroupId,
         })
 
-        expect(logs[12].get()).to.deep.contain({
+        expect(logs[11].get()).to.deep.contain({
           alias: ['validateSession'],
           group: secondValidateSessionGroup.id,
         })
 
-        expect(logs[13].get()).to.contain({
+        expect(logs[12].get()).to.contain({
           name: 'Clear Page',
           group: sessionGroupId,
         })
@@ -599,13 +564,7 @@ describe('cy.session', { retries: 0 }, () => {
             message: '(recreated) session-1',
           })
 
-          expect(logs[1].get()).to.contain({
-            name: 'session',
-            message: 'session-1',
-            group: sessionGroupId,
-          })
-
-          const recreatedSavedSessionGroup = logs[2].get()
+          const recreatedSavedSessionGroup = logs[1].get()
 
           expect(recreatedSavedSessionGroup).to.contain({
             displayName: 'Restore Saved Session',
@@ -613,31 +572,31 @@ describe('cy.session', { retries: 0 }, () => {
             group: sessionGroupId,
           })
 
-          expect(logs[3].get()).to.contain({
+          expect(logs[2].get()).to.contain({
             name: 'Clear Page',
             group: recreatedSavedSessionGroup.id,
           })
 
-          const validateSessionGroup = logs[4].get()
+          const validateSessionGroup = logs[3].get()
 
           expect(validateSessionGroup).to.contain({
             displayName: 'Validate Session: invalid',
             group: sessionGroupId,
           })
 
-          expect(logs[5].get()).to.deep.contain({
+          expect(logs[4].get()).to.deep.contain({
             alias: ['validateSession'],
             group: validateSessionGroup.id,
           })
 
-          expect(logs[6].get()).to.deep.contain({
+          expect(logs[5].get()).to.deep.contain({
             showError: true,
             group: validateSessionGroup.id,
           })
 
-          expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
+          expect(logs[5].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 
-          const createNewSessionGroup = logs[7].get()
+          const createNewSessionGroup = logs[6].get()
 
           expect(createNewSessionGroup).to.contain({
             displayName: 'Create New Session',
@@ -645,29 +604,29 @@ describe('cy.session', { retries: 0 }, () => {
             group: sessionGroupId,
           })
 
-          expect(logs[8].get()).to.contain({
+          expect(logs[7].get()).to.contain({
             name: 'Clear Page',
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[9].get()).to.deep.contain({
+          expect(logs[8].get()).to.deep.contain({
             alias: ['setupSession'],
             group: createNewSessionGroup.id,
           })
 
-          expect(logs[10].get()).to.contain({
+          expect(logs[9].get()).to.contain({
             name: 'Clear Page',
             group: createNewSessionGroup.id,
           })
 
-          const secondValidateSessionGroup = logs[11].get()
+          const secondValidateSessionGroup = logs[10].get()
 
           expect(secondValidateSessionGroup).to.contain({
             displayName: 'Validate Session: invalid',
             group: sessionGroupId,
           })
 
-          expect(logs[12].get()).to.deep.contain({
+          expect(logs[11].get()).to.deep.contain({
             alias: ['validateSession'],
             group: secondValidateSessionGroup.id,
           })

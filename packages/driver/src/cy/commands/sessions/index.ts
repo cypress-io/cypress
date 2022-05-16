@@ -121,13 +121,8 @@ export default function (Commands, Cypress, cy) {
         name: 'session',
         message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
-        snapshot: false,
-      })
-
-      const dataLog = Cypress.log({
-        name: 'session',
         sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.id.length > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
+        snapshot: false,
       })
 
       function createSession (existingSession, recreateSession = false) {
@@ -172,9 +167,7 @@ export default function (Commands, Cypress, cy) {
 
           sessionsManager.setActiveSession({ [existingSession.id]: existingSession })
 
-          dataLog.set({
-            consoleProps: () => getConsoleProps(existingSession),
-          })
+          _log.set({ consoleProps: () => getConsoleProps(existingSession) })
 
           // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
           // eslint-disable-next-line no-console
@@ -197,16 +190,13 @@ export default function (Commands, Cypress, cy) {
           await navigateAboutBlank()
 
           _log.set({
+            consoleProps: () => getConsoleProps(existingSession),
             renderProps: () => {
               return {
                 indicator: 'pending',
                 message: `(saved) ${_log.get().message}`,
               }
             },
-          })
-
-          dataLog.set({
-            consoleProps: () => getConsoleProps(existingSession),
           })
 
           await sessions.setSessionData(existingSession)
