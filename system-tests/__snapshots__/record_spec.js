@@ -2265,8 +2265,8 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec*                                                         │
+  │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: foo, Parallel: false                                            │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2274,7 +2274,7 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record.spec.js                                                                (1 of 2)
+  Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: 8 seconds
 We encountered an unexpected error talking to our servers.
 
