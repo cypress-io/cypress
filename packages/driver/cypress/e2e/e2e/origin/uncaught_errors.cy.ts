@@ -166,7 +166,9 @@ describe('cy.origin - uncaught errors', () => {
 
       cy.origin('http://foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
-        cy.get('.trigger-async-error').click()
+        setTimeout(() => {
+          cy.get('.trigger-async-error').click()
+        }, 0)
       }).then(() => {
         expect(uncaughtExceptionSpy).not.to.be.called
         expect(failureSpy).not.to.be.called
