@@ -264,34 +264,35 @@ describe('App Top Nav Workflows', () => {
       cy.findByRole('heading', { name: 'References', level: 2 })
       cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
 
-      cy.validateExternalLink({
-        name: 'Write your first test',
-        href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test',
-      })
+      const expectedLinks = [
+        {
+          name: 'Write your first test',
+          href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Testing your app',
+          href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Organizing Tests',
+          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Best Practices',
+          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'Configuration',
+          href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+App',
+        },
+        {
+          name: 'API',
+          href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+App',
+        },
+      ]
 
-      cy.validateExternalLink({
-        name: 'Testing your app',
-        href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App',
-      })
-
-      cy.validateExternalLink({
-        name: 'Organizing Tests',
-        href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests',
-      })
-
-      cy.validateExternalLink({
-        name: 'Best Practices',
-        href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices',
-      })
-
-      cy.validateExternalLink({
-        name: 'Configuration',
-        href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration',
-      })
-
-      cy.validateExternalLink({
-        name: 'API',
-        href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
+      expectedLinks.forEach((link) => {
+        cy.validateExternalLink(link)
       })
     })
 

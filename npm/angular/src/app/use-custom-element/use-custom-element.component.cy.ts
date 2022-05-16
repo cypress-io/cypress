@@ -1,7 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'
 import { initEnv, mount } from '@cypress/angular'
 // You have to import your custom element
-// And in cypress.config.{ts|js} activate "includeShadowDom" configuration
+// And in cypress.config.{js,ts,mjs,cjs} activate "includeShadowDom" configuration
 import '../my-custom-element'
 import { UseCustomElementComponent } from './use-custom-element.component'
 

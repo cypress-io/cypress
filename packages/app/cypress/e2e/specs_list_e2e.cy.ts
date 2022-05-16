@@ -26,7 +26,7 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('shows the "Specs" navigation as highlighted in the lefthand nav bar', () => {
-    cy.findByLabelText('Sidebar').within(() => {
+    cy.findByTestId('sidebar').within(() => {
       cy.findByText('Specs').should('be.visible')
       cy.findByText('Specs').click()
     })
