@@ -1281,7 +1281,7 @@ describe('e2e record', () => {
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
-          spec: '*_record.cy.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
           record: true,
           group: 'foo',
           ciBuildId: 'ciBuildId123',
