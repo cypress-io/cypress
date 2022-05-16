@@ -275,15 +275,15 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (spec.js, stdout_specfile.js, stdout_specfile_display_spec_with_a_really_l │
-  │             ong_name_that_never_has_a_line_break_or_new_line.js)                               │
+  │ Specs:      3 found (spec.cy.js, stdout_specfile.cy.js, stdout_specfile_display_spec_with_a_re │
+  │             ally_long_name_that_never_has_a_line_break_or_new_line.cy.js)                      │
   │ Searched:   cypress/e2e/nested-1/nested-2/nested-3/*                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  spec.js                                                                         (1 of 3)
+  Running:  spec.cy.js                                                                      (1 of 3)
 
 
   stdout_specfile_display_spec
@@ -304,19 +304,19 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     spec.js                                                                          │
+  │ Spec Ran:     spec.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4                      (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  stdout_specfile.js                                                              (2 of 3)
+  Running:  stdout_specfile.cy.js                                                           (2 of 3)
 
 
   stdout_specfile_display_spec
@@ -337,20 +337,20 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     stdout_specfile.js                                                               │
+  │ Spec Ran:     stdout_specfile.cy.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_specfile.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_specfile.cy.js.mp4           (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  stdout_specfile_display_spec_with_a_really_long_name_that_never_has_            (3 of 3)
-            a_line_break_or_new_line.js                                                             
+            a_line_break_or_new_line.cy.js                                                          
 
 
   stdout_specfile_display_spec
@@ -372,15 +372,15 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_specfile_display_spec_with_a_really_long_name_that_never_has_a_line_break │
-  │               _or_new_line.js                                                                  │
+  │               _or_new_line.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/stdout_specfile_display_spec_with_a_really_long     (1000x660)
-     _name_that_never_has_a_line_break_or_new_line.js/stdout_specfile_display_spec --               
-      passes.png                                                                                    
+     _name_that_never_has_a_line_break_or_new_line.cy.js/stdout_specfile_display_spec               
+      -- passes.png                                                                                 
 
 
   (Video)
@@ -388,7 +388,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_specfile_display_spec_wi     (X second)
                           th_a_really_long_name_that_never_has_a_line_break_or_new_li               
-                          ne.js.mp4                                                                 
+                          ne.cy.js.mp4                                                              
 
 
 ====================================================================================================
@@ -398,13 +398,13 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  spec.js                                  XX:XX        1        1        -        -        - │
+  │ ✔  spec.cy.js                               XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  stdout_specfile.js                       XX:XX        1        1        -        -        - │
+  │ ✔  stdout_specfile.cy.js                    XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  stdout_specfile_display_spec_with_a      XX:XX        1        1        -        -        - │
   │    _really_long_name_that_never_has_a_                                                         │
-  │    line_break_or_new_line.js                                                                   │
+  │    line_break_or_new_line.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
