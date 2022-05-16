@@ -66,13 +66,6 @@ exports['e2e cookies with baseurl'] = `
 
   32 passing
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -83,10 +76,16 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cookies_spec_baseurl.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_baseurl.cy.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -138,13 +137,6 @@ exports['e2e cookies with no baseurl'] = `
 
   9 passing
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -155,10 +147,17 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cookies_spec_no_baseurl.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_no_baseurl.cy.js.m     (X second)
+                          p4                                                                        
 
 
 ====================================================================================================
