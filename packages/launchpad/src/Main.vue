@@ -5,7 +5,7 @@
     />
 
     <MigrationLandingPage
-      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && query.data.value.videoEmbedCode"
+      v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && videoHtml"
       class="pt-64px"
       :video-html="videoHtml"
       @clearLandingPage="showLandingPage = false"
@@ -121,7 +121,6 @@ fragment MainLaunchpadQueryData on Query {
     needsLegacyConfigMigration
     currentTestingType
   }
-  videoEmbedCode
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
@@ -150,8 +149,16 @@ const resetErrorsAndLoadConfig = () => {
     mutation.executeMutation({})
   }
 }
-
+const videoHtml = ref(null)
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const videoHtml = computed(() => JSON.parse(query.data.value.videoEmbedCode).videoHtml || '')
+
+fetch('https://on.cypress.io/v10-video-embed/10.0.0').then((res) => {
+  return res.json()
+}).then((json) => {
+  if (json.videoHtml?.length) {
+    videoHtml.value = json.videoHtml
+  }
+})
+
 </script>

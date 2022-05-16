@@ -1235,9 +1235,6 @@ type Query {
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
-  """The code to embed a video"""
-  videoEmbedCode: String!
-
   """A list of warnings"""
   warnings: [ErrorWrapper!]!
 
