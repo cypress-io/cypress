@@ -2219,8 +2219,8 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec.js                                                       │
+  │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
