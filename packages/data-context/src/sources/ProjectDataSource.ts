@@ -2,7 +2,7 @@ import os from 'os'
 import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
 import minimatch from 'minimatch'
-import { debounce, isEqual } from 'lodash'
+import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
@@ -18,7 +18,6 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
-import _ from 'underscore'
 import type { FindSpecs } from '../actions'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
@@ -280,7 +279,7 @@ export class ProjectDataSource {
     // When file system changes are detected, we retrieve any spec files matching
     // the determined specPattern. This function is debounced to limit execution
     // during sequential file operations.
-    const onProjectFileSystemChange = debounce(async () => {
+    const onProjectFileSystemChange = _.debounce(async () => {
       const specs = await this.findSpecs({
         projectRoot,
         testingType,
@@ -290,7 +289,7 @@ export class ProjectDataSource {
         additionalIgnorePattern,
       })
 
-      if (isEqual(this.specs, specs)) {
+      if (_.isEqual(this.specs, specs)) {
         this.ctx.actions.project.refreshSpecs(specs)
 
         // If no differences are found, we do not need to emit events
@@ -451,9 +450,9 @@ export class ProjectDataSource {
     const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return isEqual(specPattern, [e2e])
+      return _.isEqual(specPattern, [e2e])
     }
 
-    return isEqual(specPattern, [component])
+    return _.isEqual(specPattern, [component])
   }
 }
