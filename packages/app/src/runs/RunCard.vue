@@ -29,7 +29,7 @@
               class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
               data-cy="run-card-avatar"
             />
-            {{ run.commitInfo.authorName }}
+            <span class="sr-only">Commit Author:</span>{{ run.commitInfo.authorName }}
           </li>
 
           <li
@@ -37,21 +37,21 @@
             data-cy="run-card-branch"
           >
             <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
-            {{ run.commitInfo.branch }}
+            <span class="sr-only">Branch Name:</span>{{ run.commitInfo.branch }}
           </li>
 
           <li
             v-if="run.createdAt"
             data-cy="run-card-created-at"
           >
-            {{ relativeCreatedAt }}
+            <span class="sr-only">Run Created At:</span>{{ relativeCreatedAt }}
           </li>
 
           <li
             v-if="run.totalDuration"
             data-cy="run-card-duration"
           >
-            {{ totalDuration }}
+            <span class="sr-only">Run Total Duration:</span>{{ totalDuration }}
           </li>
         </ul>
       </template>

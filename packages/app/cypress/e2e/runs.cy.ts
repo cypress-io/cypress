@@ -542,6 +542,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="#/runs"]').click()
       cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
+      cy.percySnapshot()
 
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
@@ -551,8 +552,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.contains('button', 'Try again').click()
-      cy.contains('button', 'Try again').should('not.exist')
+      cy.contains('button', 'Try again').click().should('not.exist')
     })
   })
 
