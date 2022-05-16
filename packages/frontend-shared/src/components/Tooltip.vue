@@ -24,21 +24,17 @@
 import { computed } from 'vue'
 import FloatingVue, { Tooltip } from 'floating-vue'
 
-export type InteractiveHighlightColor = 'INDIGO'|'ORANGE'|'RED'|'GRAY'|'JADE'
-
 const props = withDefaults(defineProps<{
   color?: string
   hideArrow?: boolean
   disabled?: boolean
   isInteractive?: boolean
-  interactiveHighlightColor?: InteractiveHighlightColor
   placement?: 'top' | 'right' | 'bottom' | 'left'
 }>(), {
   color: 'dark',
   hideArrow: false,
   disabled: false,
   isInteractive: false,
-  interactiveHighlightColor: undefined,
   placement: undefined,
 })
 
@@ -46,43 +42,8 @@ FloatingVue.options.themes['interactive'] = {
   $extend: 'tooltip',
 }
 
-FloatingVue.options.themes['interactive-indigo'] = {
-  $extend: 'interactive',
-}
-
-FloatingVue.options.themes['interactive-orange'] = {
-  $extend: 'interactive',
-}
-
-FloatingVue.options.themes['interactive-red'] = {
-  $extend: 'interactive',
-}
-
-FloatingVue.options.themes['interactive-gray'] = {
-  $extend: 'interactive',
-}
-
-FloatingVue.options.themes['interactive-jade'] = {
-  $extend: 'interactive',
-}
-
 const theme = computed(() => {
-  if (!props.isInteractive) return 'tooltip'
-
-  switch (props.interactiveHighlightColor) {
-    case 'INDIGO':
-      return 'interactive-indigo'
-    case 'RED':
-      return 'interactive-red'
-    case 'ORANGE':
-      return 'interactive-orange'
-    case 'GRAY':
-      return 'interactive-gray'
-    case 'JADE':
-      return 'interactive-jade'
-    default:
-      return 'interactive'
-  }
+  return props.isInteractive ? 'interactive' : 'tooltip'
 })
 
 </script>
@@ -152,10 +113,10 @@ const theme = computed(() => {
 
 .v-popper__popper.v-popper--theme-interactive {
   .v-popper__inner {
-    @apply bg-white border-dark-900 text-black py-2 px-4;
+    @apply bg-white border-dark-900 text-black;
     border-radius: 4px !important;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
-    padding: 16px;
+    padding: 0;
   }
 
   .v-popper__arrow-outer {
@@ -184,36 +145,6 @@ const theme = computed(() => {
     .v-popper__arrow-outer {
       filter: drop-shadow(-1px 0px 1px $gray-100);
     }
-  }
-}
-
-.v-popper__popper.v-popper--theme-interactive-indigo {
-  .v-popper__inner {
-    border-top: 4px solid $indigo-400 !important;
-  }
-}
-
-.v-popper__popper.v-popper--theme-interactive-orange {
-  .v-popper__inner {
-    border-top: 4px solid $orange-400 !important;
-  }
-}
-
-.v-popper__popper.v-popper--theme-interactive-red {
-  .v-popper__inner {
-    border-top: 4px solid $red-400 !important;
-  }
-}
-
-.v-popper__popper.v-popper--theme-interactive-gray {
-  .v-popper__inner {
-    border-top: 4px solid $gray-300 !important;
-  }
-}
-
-.v-popper__popper.v-popper--theme-interactive-jade {
-  .v-popper__inner {
-    border-top: 4px solid $jade-400 !important;
   }
 }
 

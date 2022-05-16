@@ -10,7 +10,7 @@
       #popper
     >
       <div
-        class="flex flex-col text-sm text-center items-center"
+        class="flex flex-col text-sm text-center p-4 items-center"
       >
         <div
           :class="{'m-2': projectConnectionStatus!== 'CONNECTED'}"

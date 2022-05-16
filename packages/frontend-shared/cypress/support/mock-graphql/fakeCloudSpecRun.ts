@@ -22,8 +22,8 @@ export const fakeRuns: (statuses: CloudRunStatus[]) => CloudSpecRun[] = (statuse
       runNumber: 432,
       groupCount: 2,
       specDuration: {
-        min: 143, // 2:23
-        max: 159, // 3:40
+        min: 143003, // 2:23
+        max: 159120, // 3:40
       },
       testsFailed: {
         min: 1,
@@ -45,7 +45,7 @@ export const fakeRuns: (statuses: CloudRunStatus[]) => CloudSpecRun[] = (statuse
 }
 
 export const exampleRuns = () => {
-  const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'])
+  const runs = fakeRuns(['PASSED', 'FAILED', 'CANCELLED', 'ERRORED', 'NOTESTS', 'OVERLIMIT', 'RUNNING', 'TIMEDOUT'])
 
   const now = new Date()
   const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate())
@@ -55,7 +55,7 @@ export const exampleRuns = () => {
   runs[1].testsFailed = { ...runs[1].testsFailed ?? {}, max: null }
   runs[1].testsPassed = { ...runs[1].testsPassed ?? {}, max: null }
   runs[1].testsPending = { ...runs[1].testsPending ?? {}, max: null }
-  runs[1].specDuration = { min: 3760, max: null }
+  runs[1].specDuration = { min: 3760000, max: null }
   runs[1].testsFailed = { ...runs[1].testsFailed ?? {}, max: null }
   runs[1].createdAt = twoYearsAgo.toISOString()
 
@@ -66,7 +66,7 @@ export const exampleRuns = () => {
   runs[3].testsPassed = { ...runs[1].testsPassed ?? {}, max: 4358 }
   runs[3].testsPending = { ...runs[1].testsPending ?? {}, max: 4358 }
   runs[3].testsSkipped = { min: 4, max: 4358 }
-  runs[3].specDuration = { min: 3760, max: 37600 }
+  runs[3].specDuration = { min: 3760000, max: 37600000 }
   runs[3].groupCount = 4358
 
   return runs

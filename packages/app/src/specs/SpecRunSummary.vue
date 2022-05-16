@@ -1,7 +1,8 @@
 <template>
   <div
     v-if="props.run"
-    class="flex flex-col gap-2 items-center"
+    class="flex flex-col p-4 gap-2 items-center"
+    :class="statusColor"
   >
     <div class="font-semibold text-gray-800">
       Run #{{ props.run.runNumber }}
@@ -9,12 +10,23 @@
     <div class="max-w-80 text-gray-600 truncate overflow-hidden">
       {{ props.specFile }}
     </div>
-    <ResultCounts
-      v-if="runResults"
-      v-bind="runResults"
-    />
     <div class="flex flex-row text-gray-600 text-size-14px gap-2 items-center">
-      <div>{{ getAggDurationString(props.run.specDuration ?? {}) }}</div>
+      <div
+        v-if="statusText"
+        :class="'text-'+statusColor"
+        class="font-medium"
+      >
+        {{ statusText }}
+      </div>
+      <i-cy-dot-solid_x4
+        v-if="statusText"
+        width="4px"
+        height="4px"
+        class="icon-light-gray-400"
+      />
+      <div v-if="props.run.createdAt">
+        {{ getTimeAgo(props.run.createdAt!) }}
+      </div>
       <i-cy-dot-solid_x4
         width="4px"
         height="4px"
@@ -26,10 +38,13 @@
         height="4px"
         class="icon-light-gray-400"
       />
-      <div v-if="props.run.createdAt">
-        {{ getTimeAgo(props.run.createdAt!) }}
-      </div>
+      <div>{{ getAggDurationString(props.run.specDuration ?? {}) }}</div>
     </div>
+    <ResultCounts
+      v-if="runResults"
+      v-bind="runResults"
+      class="my-2"
+    />
   </div>
 </template>
 
@@ -86,4 +101,58 @@ const groupText = computed(() => {
   return `${props.run.groupCount } groups`
 })
 
+const statusText = computed(() => {
+  if (!props.run?.status) return null
+
+  switch (props.run.status) {
+    case 'CANCELLED': return 'Cancelled'
+    case 'ERRORED': return 'Errored'
+    case 'FAILED': return 'Failed'
+    case 'NOTESTS': return 'No tests'
+    case 'OVERLIMIT': return 'Over limit'
+    case 'PASSED': return 'Passed'
+    case 'RUNNING': return 'Running'
+    case 'TIMEDOUT': return 'Timed out'
+    default: return null
+  }
+})
+
+const statusColor = computed(() => {
+  if (!props.run?.status) return 'gray-700'
+
+  switch (props.run.status) {
+    case 'OVERLIMIT':
+    case 'ERRORED':
+    case 'TIMEDOUT':
+      return 'orange-500'
+    case 'FAILED':
+      return 'red-500'
+    case 'PASSED':
+      return 'jade-500'
+    case 'RUNNING':
+      return 'indigo-700'
+    case 'CANCELLED':
+    case 'NOTESTS':
+    default: return 'gray-700'
+  }
+})
+
 </script>
+
+<style lang="scss" scoped>
+.orange-500 {
+    border-top: 4px solid $orange-500 !important;
+}
+.red-500 {
+    border-top: 4px solid $red-500 !important;
+}
+.jade-500 {
+    border-top: 4px solid $jade-500 !important;
+}
+.indigo-700 {
+    border-top: 4px solid $indigo-700 !important;
+}
+.gray-700 {
+    border-top: 4px solid $gray-700 !important;
+}
+</style>
