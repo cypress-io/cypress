@@ -61,7 +61,8 @@
       "@intlify/vite-plugin-vue-i18n/client",
       "@testing-library/cypress",
       "cypress-real-events", 
-      "cypress"
+      "cypress",
+      "cypress-axe"
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
