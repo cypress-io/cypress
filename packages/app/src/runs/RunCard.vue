@@ -76,11 +76,7 @@ fragment RunCard on CloudRun {
 	createdAt
 	status
   url
-	totalTests
-  totalPassed
-  totalFailed
-  totalPending
-  totalSkipped
+	...RunResults
 	commitInfo {
 		authorName
 		authorEmail

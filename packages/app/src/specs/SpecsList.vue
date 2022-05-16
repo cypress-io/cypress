@@ -116,9 +116,12 @@
           </template>
 
           <template #latest-runs>
+            <!-- <div>
+              <pre>{{ JSON.stringify(row.data.data?.cloudSpec?.data?.specRuns?.nodes?.length ?? "null",null,2) }}</pre>
+            </div> -->
             <RunStatusDots
               v-if="row.data.isLeaf"
-              :runs="testingRuns()"
+              :gql="row.data.data ?? null"
               :spec-file="row.data.data?.baseName"
             />
           </template>
@@ -158,19 +161,19 @@ import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useRoute } from 'vue-router'
-import { randomRunStatus, fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
+// import { randomRunStatus, fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
 
 const route = useRoute()
 const { t } = useI18n()
 
-const testingRuns = () => {
-  return fakeRuns([
-    randomRunStatus(),
-    randomRunStatus(),
-    randomRunStatus(),
-    randomRunStatus(),
-  ])
-}
+// const testingRuns = () => {
+//   return fakeRuns([
+//     randomRunStatus(),
+//     randomRunStatus(),
+//     randomRunStatus(),
+//     randomRunStatus(),
+//   ])
+// }
 
 gql`
 subscription SpecsList_GitInfoUpdated {
@@ -198,22 +201,9 @@ fragment SpecsList on Spec {
   gitInfo {
     ...SpecListRow
   }
+  ...RunStatusDots
 }
 `
-
-// gql`
-// fragment CloudSpecData on CloudProject {
-//   # temporarily use hardcoded paths, pending an update to the GQL layer
-//   specs(specPaths: ["cypress/e2e/practice/practice.cy.js","cypress/e2e/final/somethingelse.cy.js","cypress/e2e/final/app.cy.js","cypress/e2e/app.cy.js"]) {
-//       specPath
-//       averageDuration
-//       recentRuns {
-//         id
-//         status
-//       }
-//   }
-// }
-// `
 
 gql`
 fragment Specs_SpecsList on Query {

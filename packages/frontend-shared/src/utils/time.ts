@@ -9,7 +9,7 @@ export function getTimeAgo (iso8601: string) {
 }
 
 export function getDurationString (totalSeconds: number): string {
-  const roundedTotalSeconds = Math.round(totalSeconds)
+  const roundedTotalSeconds = Math.round(totalSeconds / 1000)
   const seconds = roundedTotalSeconds % 60
   const roundedTotalMinutes = Math.round(roundedTotalSeconds / 60)
   const minutes = roundedTotalMinutes % 60

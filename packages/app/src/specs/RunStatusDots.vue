@@ -1,14 +1,14 @@
 <template>
   <component
-    :is="latestRun? ExternalLink : Fragment"
-    v-if="latestRun"
+    :is="latestRun? ExternalLink : 'div'"
+    v-if="!isLoading"
     :href="latestRun?.url ?? '#'"
     :use-default-hocus="false"
   >
     <component
-      :is="latestRun? Tooltip : Fragment"
+      :is="latestRun? Tooltip : 'div'"
       placement="top"
-      :is-interactive="true"
+      :is-interactive="latestRun"
       :interactive-highlight-color="latestRunColor"
     >
       <div
@@ -44,6 +44,7 @@
         #popper
       >
         <ExternalLink
+          v-if="latestRun"
           :href="latestRun.url ?? '#'"
           :use-default-hocus="false"
         >
@@ -55,14 +56,21 @@
       </template>
     </component>
   </component>
+  <div
+    v-else
+    class="bg-gray-50 rounded-[20px]"
+  >
+    &nbsp;
+  <!-- {{ JSON.stringify(props.gql?.cloudSpec?.status) }} -->
+  </div>
 </template>
 
 <script setup lang="ts">
 
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { CloudSpecRun } from '../../../graphql/src/gen/cloud-source-types.gen'
+import type { RemoteFetchableStatus, RunStatusDotsFragment } from '../generated/graphql'
 import Tooltip, { InteractiveHighlightColor } from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed, ComputedRef, Fragment } from 'vue'
+import { computed, ComputedRef } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -70,23 +78,76 @@ import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
+import { gql } from '@urql/vue'
 
-type Maybe<T> = T | null;
+// type Maybe<T> = T | null;
+gql`
+fragment RunStatusDots on Spec {
+  id
+  cloudSpec {
+    id
+    status
+    data {
+      id
+      specRuns(first: 4, fromBranch: "muaz/test") {
+        nodes {
+          id
+          runNumber
+          testsFailed{
+            min
+            max
+          }
+          testsPassed{
+            min
+            max
+          }
+          testsPending{
+            min
+            max
+          }
+          testsSkipped{
+            min
+            max
+          }
+          createdAt
+          groupCount
+          specDuration{
+            min
+            max
+          }
+          status
+          url
+        }
+      }
+    }
+  }
+}
+`
 
 const props = withDefaults(defineProps<{
-  runs: Maybe<CloudSpecRun>[]
+  gql: RunStatusDotsFragment | null
   specFile: string|null
 }>(), {
   runs: () => [],
   specFile: null,
 })
 
+const runs = computed(() => {
+  return props.gql?.cloudSpec?.data?.specRuns?.nodes ?? []
+})
+
+const isLoading = computed(() => {
+  const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
+
+  return loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
+})
+
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
 
-  if (props.runs && props.runs.length > 0) {
-    for (let i = 1; i < Math.min(props.runs.length, 4); i++) {
-      statuses[i - 1] = props.runs[i]?.status ?? ''
+  if (runs.value && runs.value.length > 0) {
+    for (let i = 1; i < Math.min(runs.value.length, 4); i++) {
+      statuses[i - 1] = runs.value[i]?.status ?? ''
     }
   }
 
@@ -112,11 +173,11 @@ const dotClasses = computed(() => {
 })
 
 const latestRun = computed(() => {
-  if (props.runs == null || props.runs.length === 0 || props.runs[0] === null) {
+  if (runs.value == null || runs.value.length === 0 || runs.value[0] === null) {
     return null
   }
 
-  return props.runs[0]
+  return runs.value[0]
 })
 
 const latestStatus = computed(() => {

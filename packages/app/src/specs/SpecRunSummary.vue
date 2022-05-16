@@ -49,7 +49,7 @@ const props = withDefaults(defineProps<{
 })
 
 const getAggregateTestCountString = (agg: SpecDataAggregate) => {
-  if (agg.min == null) return '--'
+  if (agg.min == null) return '0'
 
   if (!agg.max || agg.min === agg.max) return agg.min
 
@@ -59,7 +59,9 @@ const getAggregateTestCountString = (agg: SpecDataAggregate) => {
 const getAggDurationString = (agg: SpecDataAggregate) => {
   if (agg.min == null) return '--'
 
-  if (!agg.max || agg.min === agg.max) return getDurationString(agg.min)
+  // since agg.min and agg.max are in milliseconds, we want to make sure the
+  // user won't get a string like "2 - 2" for {min: 2003, max: 2010}
+  if (!agg.max || Math.round(agg.min / 1000) === Math.round(agg.max / 1000)) return getDurationString(agg.min)
 
   return `${getDurationString(agg.min)} - ${getDurationString(agg.max)}`
 }
