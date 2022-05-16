@@ -1,7 +1,18 @@
 import OptOutModal from './OptOutModal.vue'
 
 describe('<OptOutModal/>', { viewportWidth: 1119 }, () => {
-  it('renders expected content', () => {
-    cy.mount(OptOutModal)
+  it('Displays additional text when renaming folder', () => {
+    cy.mount(() => <OptOutModal />)
+    cy.contains('I may need to change my').should('not.exist')
+
+    cy.findByText('Rename folder only.').click()
+    cy.contains('I may need to change my').should('be.visible')
+    cy.percySnapshot()
+  })
+
+  it('shows correct text with hasCustomIntegrationFolder', () => {
+    cy.mount(() => <OptOutModal hasCustomIntegrationFolder={true} />)
+    cy.findByText('Don\'t rename anything — keep what I have.').should('be.visible')
+    cy.percySnapshot()
   })
 })

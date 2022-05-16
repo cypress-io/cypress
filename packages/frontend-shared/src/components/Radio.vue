@@ -22,6 +22,7 @@
       <slot
         name="option"
         :option="opt"
+        :checked="props.value === opt.value"
       >
         <span class="text-gray-800">{{ opt.label }}</span>
         <span class="text-gray-500"> - {{ opt.description }}</span>

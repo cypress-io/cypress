@@ -55,15 +55,15 @@
       </MigrationListItem>
     </MigrationList>
     <Radio
-      v-model:value="value"
+      v-model:value="selectedValue"
       :options="options"
       name="skipRename"
       :label="t('migration.renameAuto.modal.label')"
     >
-      <template #option="{ option }">
+      <template #option="{ option, checked }">
         <span
           v-if="option.value === 'rename'"
-          class="text-jade-500"
+          class="text-jade-500 leading-7"
         >
           <i18n-t
             scope="global"
@@ -76,11 +76,11 @@
         </span>
         <span
           v-else
-          class="text-gray-800"
+          class="text-gray-800 leading-7"
         >
           {{ props.hasCustomIntegrationFolder ? t('migration.renameAuto.modal.option2') : t('migration.renameAuto.modal.option3') }}
           <i18n-t
-            v-if="value !== 'rename'"
+            v-if="checked"
             scope="global"
             keypath="migration.renameAuto.modal.optOutAdditional"
           >
@@ -94,7 +94,7 @@
     <template #footer>
       <div class="flex gap-16px">
         <Button
-          @click="emit('save', value)"
+          @click="emit('save', selectedValue)"
         >
           {{ t('migration.renameAuto.modal.buttonSave') }}
         </Button>
@@ -130,7 +130,7 @@ const emit = defineEmits<{
   (event: 'cancel'): void
 }>()
 
-const value = ref<PossibleOption>('rename')
+const selectedValue = ref<PossibleOption>('rename')
 
 const props = defineProps<{
   hasCustomIntegrationFolder: boolean
