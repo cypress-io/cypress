@@ -1,3 +1,5 @@
+import { getPathForPlatform } from '../../src/paths'
+
 describe('App: Spec List (E2E)', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
@@ -73,7 +75,7 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="standard-modal"]').get('h2').contains('Create a new spec')
     cy.get('button').contains('Scaffold example specs').should('be.visible')
     cy.get('button').contains('Create new empty spec').should('be.visible').click()
-    cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', 'cypress/e2e/spec.spec.js')
+    cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', getPathForPlatform('cypress/e2e/spec.spec.js'))
   })
 
   it('has an <a> tag in the Spec File Row that runs the selected spec when clicked', () => {
