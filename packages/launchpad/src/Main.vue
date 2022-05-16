@@ -31,10 +31,7 @@
           v-if="query.data.value.scaffoldedFiles"
           :gql="query.data.value"
         />
-        <template v-else-if="currentProject?.isLoadingConfigFile">
-          currentProject?.isLoadingConfigFile
-          <Spinner />
-        </template>
+        <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
         <template v-else-if="!currentProject?.currentTestingType">
           <WarningList :gql="query.data.value" />
           <LaunchpadHeader
@@ -72,7 +69,6 @@
             :title="t('components.loading.config.title')"
             :description="t('components.loading.config.description')"
           />
-          !currentProject?.isFullConfigReady
           <Spinner />
         </template>
         <OpenBrowser v-else />
