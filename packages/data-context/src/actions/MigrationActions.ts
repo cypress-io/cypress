@@ -88,7 +88,16 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
-    const ipc = new LegacyPluginsIpc(fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions))
+
+    const childProcess = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const ipc = new LegacyPluginsIpc(childProcess)
+
+    childProcess.on('error', (error) => {
+      error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
+
+      reject(error)
+      ipc.killChildProcess()
+    })
 
     const legacyConfigWithDefaults = getConfigWithDefaults(legacyConfig)
 
@@ -107,17 +116,19 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
       const legacyConfigWithChanges = _.merge(legacyConfig, diff)
 
       resolve(legacyConfigWithChanges)
-      ipc.childProcess.kill()
+      ipc.killChildProcess()
     })
 
     ipc.on('loadLegacyPlugins:error', (error) => {
+      error = getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', cwd, error)
+
       reject(error)
-      ipc.childProcess.kill()
+      ipc.killChildProcess()
     })
 
     ipc.on('childProcess:unhandledError', (error) => {
       reject(error)
-      ipc.childProcess.kill()
+      ipc.killChildProcess()
     })
   })
 }

@@ -1343,6 +1343,14 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
     cy.get('button').contains('Cancel').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
   })
+
+  it('shows error if plugins file throws an error', () => {
+    scaffoldAndVisitLaunchpad('migration-e2e-plugins-throw-error')
+
+    cy.contains('cypress/plugins/index.js file threw an error.')
+    cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
+    cy.contains('throw new Error(\'New error from plugin\')')
+  })
 })
 
 describe('Migrate custom config files', () => {
@@ -1513,6 +1521,13 @@ describe('Migrate custom config files', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
-    cy.contains('ypress no longer supports customConfig.json, please remove it from your project.')
+    cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')
+  })
+
+  it('shows error if plugins file do not exist', () => {
+    scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
+
+    cy.contains('foo/bar file threw an error.')
+    cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
   })
 })
