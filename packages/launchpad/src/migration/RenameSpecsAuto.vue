@@ -38,7 +38,7 @@
         <span class="m-8px text-gray-100">——</span>
         <a
           class="cursor-pointer text-indigo-500 hover:underline"
-          @click="optOutModal = true"
+          @click="showOptOutModal = true"
         >
           {{ t('migration.renameAuto.changeButton') }}
         </a>
@@ -69,13 +69,13 @@
       </template>
     </BeforeAfter>
     <OptOutModal
-      v-if="optOutModal"
+      v-if="showOptOutModal"
       :has-custom-integration-folder="props.gql.hasCustomIntegrationFolder"
       @save="(val) => {
-        optOutModal = false;
+        showOptOutModal = false;
         applySkipResult(val)
       }"
-      @cancel="optOutModal = false"
+      @cancel="showOptOutModal = false"
     />
   </div>
 </template>
@@ -132,7 +132,7 @@ const emits = defineEmits<{
   (eventName: 'selectOption', value: PossibleOption): void
 }>()
 
-const optOutModal = ref(false)
+const showOptOutModal = ref(false)
 
 const selectOption = ref<PossibleOption>()
 
