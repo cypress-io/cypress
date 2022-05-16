@@ -7,6 +7,7 @@
     <MigrationLandingPage
       v-if="currentProject?.needsLegacyConfigMigration && showLandingPage && online && query.data.value.videoEmbedCode"
       class="pt-64px"
+      :video-html="videoHtml"
       @clearLandingPage="showLandingPage = false"
     />
     <div
@@ -30,7 +31,10 @@
           v-if="query.data.value.scaffoldedFiles"
           :gql="query.data.value"
         />
-        <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
+        <template v-else-if="currentProject?.isLoadingConfigFile">
+          currentProject?.isLoadingConfigFile
+          <Spinner />
+        </template>
         <template v-else-if="!currentProject?.currentTestingType">
           <WarningList :gql="query.data.value" />
           <LaunchpadHeader
@@ -68,6 +72,7 @@
             :title="t('components.loading.config.title')"
             :description="t('components.loading.config.description')"
           />
+          !currentProject?.isFullConfigReady
           <Spinner />
         </template>
         <OpenBrowser v-else />
@@ -152,4 +157,5 @@ const resetErrorsAndLoadConfig = () => {
 
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+const videoHtml = computed(() => JSON.parse(query.data.value.videoEmbedCode).videoHtml || '')
 </script>

@@ -91,6 +91,9 @@ describe('global mode', () => {
     })
 
     cy.contains('migration-e2e-export-default').click()
+
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
+
     // rename integration->e2e
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')

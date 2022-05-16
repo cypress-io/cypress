@@ -13,15 +13,8 @@
       <div
         class="bg-white rounded-t border-4px-gray-500 w-full p-24px video"
         data-cy="video-container"
-      >
-        <iframe
-          src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-          class="rounded h-full bg-gray-1000 w-full"
-          frameborder="0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowfullscreen
-        />
-      </div>
+        v-html="props.videoHtml"
+      />
       <div class="rounded-b flex bg-gray-50 py-16px px-24px gap-8px overflow-hidden">
         <Button
           class="group"
@@ -52,6 +45,10 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
+
+const props = defineProps<{
+  videoHtml: string
+}>()
 
 const emit = defineEmits<{
   (eventName: 'clearLandingPage', value: void): void

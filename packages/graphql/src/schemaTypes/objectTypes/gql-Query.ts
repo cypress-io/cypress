@@ -87,7 +87,7 @@ export const Query = objectType({
       description: 'The code to embed a video',
       resolve: async (source, args, ctx) => {
         const res = await rp.get({
-          url: 'https://on.cypress.io/release-notes/7.0.1',
+          url: 'https://on.cypress.io/v10-video-embed/10.0.0',
         }).catch((err: Error) => {
           // eslint-disable-next-line no-console
           console.log('Error fetching video embed', err)

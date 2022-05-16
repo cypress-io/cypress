@@ -32,7 +32,13 @@ export const stubQuery: MaybeResolver<Query> = {
     return !ctx.currentProject
   },
   videoEmbedCode (source, args, ctx) {
-    return ''
+    return `<iframe
+    src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
+    class="rounded h-full bg-gray-1000 w-full"
+    frameborder="0"
+    allow="autoplay; fullscreen; picture-in-picture"
+    allowfullscreen
+  />`
   },
   baseError (source, args, ctx) {
     return {}
