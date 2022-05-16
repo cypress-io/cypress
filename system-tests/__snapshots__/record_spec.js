@@ -2242,8 +2242,8 @@ exports['e2e record api interaction errors create instance errors and exits on c
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (a_record_instantfail.spec.js)                                             │
-  │ Searched:   cypress/e2e/*_record_*                                                             │
+  │ Specs:      1 found (a_record_instantfail.cy.js)                                               │
+  │ Searched:   cypress/e2e/a_record_instantfail.cy.js                                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
