@@ -28,10 +28,10 @@ The version of `electron` that is bundled with Cypress should be kept as up-to-d
 Upgrading `electron` involves more than just bumping this package's `package.json`. Here are additional tasks to check off when upgrading Electron:
 
 - [ ] **Write accurate changelog items.** The "User-facing changelog" for an Electron upgrade should mention the new Node.js and Chromium versions bundled.
-    - For example:
-        - Upgraded `electron` from `12.0.0-beta.14` to `13.1.7`.
-        - Upgraded bundled Node.js version from `14.6.0` to `14.17.0`.
-        - Upgraded bundled Chromium version from 89.0.0.1234 to 91.0.0.2345.
+    - Example changelog items from previous Electron upgrades:
+      > * Upgraded `electron` from `12.0.0-beta.14` to `13.1.7`.
+      > * Upgraded bundled Node.js version from `14.6.0` to `14.17.0`.
+      > * Upgraded bundled Chromium version from 89.0.0.1234 to 91.0.0.2345.
 - [ ] **Determine if the Electron upgrade is a breaking change.** Electron upgrades constitute "breaking changes" in Cypress if:
     - the major version number of Node.js changes, since users rely on the bundled Node.js to load plugins and `.js` fixtures, or
     - there are changes to Electron that require new shared libraries to be installed on Linux, breaking existing CI setups, or
@@ -46,6 +46,8 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/circle.yml`](../../circle.yml)
         - Update the Docker `image`s to the new matching `browsers` image.
         - Update the `xcode` version to one with the same major Node.js version bundled. There is usually not an exact match, this is ok as long as the major version number as the same.
+    - [ ] If the Node.js major version number has changed, update `@types/node` across the monorepo to the latest version that is a semver-major match.
+        - Sometimes, this is not possible to do without a breaking change, because the `cli` uses `@types/node`. In this case, upgrade `@types/node` everywhere except `cli` and defer the `cli` types upgrade to the next breaking release.
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into the Dashboard, and launching Electron tests still work.
 - [ ] **Fix failing tests.** Usually, these are due to breaking changes in either Node.js or Electron. Check the changelogs of both to find relevant changes.
