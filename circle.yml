@@ -2047,6 +2047,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 773
           command: npm run test:ci
 
   # This is a special job. It allows you to test the current
