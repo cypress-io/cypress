@@ -1,7 +1,7 @@
 <template>
   <component
     :is="latestRun? ExternalLink : 'div'"
-    v-if="!isLoading"
+    v-if="props.gql?.cloudSpec?.status === 'FETCHED'"
     :href="latestRun?.url ?? '#'"
     :use-default-hocus="false"
   >
@@ -56,6 +56,37 @@
       </template>
     </component>
   </component>
+  <div v-else-if="props.gql?.cloudSpec?.status === 'ERRORED'">
+    <div
+      class="flex justify-center"
+    >
+      <ol
+        class="list-none h-16px mb-0 pl-0 inline-block"
+        q
+      >
+        <li
+          v-for="i in [0,1,2]"
+          :key="i"
+          class="ml-4px inline-block align-middle"
+        >
+          <i-cy-dot-solid_x4
+            width="4"
+            height="4"
+            class="icon-light-red-500"
+          />
+        </li>
+        <li class="ml-4px inline-block align-middle">
+          <a @click.prevent="refetch">
+            <i-cy-action-restart_x16
+              width="16px"
+              height="16px"
+              class="icon-light-red-500"
+            />
+          </a>
+        </li>
+      </ol>
+    </div>
+  </div>
   <div
     v-else
     class="bg-gray-50 rounded-[20px]"
@@ -68,7 +99,7 @@
 <script setup lang="ts">
 
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { RemoteFetchableStatus, RunStatusDotsFragment } from '../generated/graphql'
+import { /*RemoteFetchableStatus,*/ RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
 import Tooltip, { InteractiveHighlightColor } from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { computed, ComputedRef } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
@@ -78,7 +109,7 @@ import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 
 // type Maybe<T> = T | null;
 gql`
@@ -138,11 +169,11 @@ const runs = computed(() => {
   return props.gql?.cloudSpec?.data?.specRuns?.nodes ?? []
 })
 
-const isLoading = computed(() => {
-  const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
+// const isLoading = computed(() => {
+//   const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
 
-  return !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
-})
+//   return !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
+// })
 
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
@@ -233,6 +264,23 @@ const latestRunColor: ComputedRef<InteractiveHighlightColor> = computed(() => {
       return 'GRAY'
   }
 })
+
+gql`
+mutation RunStatusDots_Refetch ($ids: [ID!]!) {
+  loadRemoteFetchables(ids: $ids){
+    id
+    status
+  }
+}
+`
+
+const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
+
+const refetch = () => {
+  if (props.gql?.cloudSpec?.id && !refetchMutation.fetching.value) {
+    refetchMutation.executeMutation({ ids: [props.gql?.cloudSpec?.id] })
+  }
+}
 
 </script>
 
