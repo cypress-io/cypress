@@ -37,7 +37,7 @@
     <TransitionQuickFade>
       <PopoverPanel
         static
-        class="bg-white rounded shadow top-36px z-10 absolute"
+        class="bg-white rounded shadow-dropdown top-36px z-10 absolute"
         :class="{'hidden': !open, 'right-0': align === 'right', 'left-0': align === 'left'}"
       >
         <ul

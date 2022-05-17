@@ -1,15 +1,32 @@
 <template>
   <RunsError
-    v-if="currentProject?.cloudProject?.__typename === 'CloudProjectNotFound'"
+    v-if="!currentProject?.cloudProject"
     icon="error"
-    :button-text="t('runs.errors.notfound.button')"
+    :button-text="t('runs.errors.connectionFailed.button')"
     :button-icon="ConnectIcon"
-    :message="t('runs.errors.notfound.title')"
+    :message="t('runs.errors.connectionFailed.title')"
+    @button-click="emit('reExecuteRunsQuery')"
+  >
+    <i18n-t
+      scope="global"
+      keypath="runs.errors.connectionFailed.description"
+    >
+      <ExternalLink href="https://www.cypressstatus.com/">
+        {{ t('runs.errors.connectionFailed.link') }}
+      </ExternalLink>
+    </i18n-t>
+  </RunsError>
+  <RunsError
+    v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectNotFound'"
+    icon="error"
+    :button-text="t('runs.errors.notFound.button')"
+    :button-icon="ConnectIcon"
+    :message="t('runs.errors.notFound.title')"
     @button-click="showConnectDialog = true"
   >
     <i18n-t
       scope="global"
-      keypath="runs.errors.notfound.description"
+      keypath="runs.errors.notFound.description"
     >
       <CodeTag
         bg
@@ -61,6 +78,7 @@ import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
 import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 const { t } = useI18n()
 
@@ -86,6 +104,10 @@ fragment RunsErrorRenderer on Query {
 
 const props = defineProps<{
   gql: RunsErrorRendererFragment
+}>()
+
+const emit = defineEmits<{
+  (e: 'reExecuteRunsQuery'): void
 }>()
 
 const currentProject = computed(() => props.gql.currentProject)
