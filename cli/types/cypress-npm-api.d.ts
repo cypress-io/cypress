@@ -142,7 +142,7 @@ declare namespace CypressCommandLine {
     /**
      * Path to the config file to be used.
      *
-     * @default "cypress.config.{ts|js}"
+     * @default "cypress.config.{js,ts,mjs,cjs}"
      */
     configFile: string
     /**

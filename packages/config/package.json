@@ -9,7 +9,7 @@
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/!**__fixtures__**/**/*.js || echo 'cleaned'",
     "test": "yarn test-unit",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "test-debug": "yarn test-unit --inspect-brk=5566",

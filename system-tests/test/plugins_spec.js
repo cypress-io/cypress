@@ -206,7 +206,7 @@ describe('e2e plugins', function () {
     // https://github.com/cypress-io/cypress/issues/8361
     it('supports .mjs files', function () {
       return systemTests.exec(this, {
-        spec: 'mjs_spec.mjs',
+        spec: 'mjs_spec.cy.mjs',
       })
     })
   })

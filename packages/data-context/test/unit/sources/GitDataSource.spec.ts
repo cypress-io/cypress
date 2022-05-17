@@ -55,7 +55,7 @@ describe('GitDataSource', () => {
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)
     const fooSpec = path.join(e2eFolder, 'foo.cy.js')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.spec.js')
+    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
     const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
 
     fs.createFileSync(fooSpec)
