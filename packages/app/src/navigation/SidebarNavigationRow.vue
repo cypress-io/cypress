@@ -22,8 +22,7 @@
       :data-selected="active"
     >
       <component
-        :is="
-          icon"
+        :is="icon"
         :class="active ? 'icon-dark-indigo-300 icon-light-indigo-700' : 'icon-dark-gray-500 icon-light-gray-900 group-hover:(icon-dark-gray-300 icon-light-gray-800) group-focus:(icon-dark-gray-300 icon-light-gray-800)'"
         class="flex-shrink-0 h-24px m-12px w-24px
               children:transition children:duration-300"

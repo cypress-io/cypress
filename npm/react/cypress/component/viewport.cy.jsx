@@ -1,7 +1,7 @@
 const viewportWidth = 200
 const viewportHeight = 100
 
-describe('cypress.config.{ts|js} viewport',
+describe('cypress.config.{js,ts,mjs,cjs} viewport',
   { viewportWidth, viewportHeight },
   () => {
     it('should have the correct dimensions', () => {

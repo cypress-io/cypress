@@ -159,7 +159,7 @@ describe('lib/config', () => {
       it.skip('validates cypress.config.js', function () {
         this.setup({ reporter: 5 })
 
-        return this.expectValidationFails('cypress.config.{ts|js}')
+        return this.expectValidationFails('cypress.config.{js,ts,mjs,cjs}')
       })
 
       // NOTE: Validated in real use

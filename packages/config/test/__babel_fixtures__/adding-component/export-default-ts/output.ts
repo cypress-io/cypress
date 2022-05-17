@@ -3,7 +3,8 @@ export default {
   component: {
     devServer: {
       framework: "react",
-      bundler: "webpack",
+      bundler: "webpack", // provide your webpack config here...
+      // webpackConfig,
     },
   },
 };
