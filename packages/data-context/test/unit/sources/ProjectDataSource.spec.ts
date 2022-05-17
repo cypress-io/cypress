@@ -174,9 +174,9 @@ describe('findSpecs', () => {
       projectRoot,
       testingType: 'component',
       specPattern: ['**/*.cy.{ts,js}'],
-      configSpecPattern: ['e2e/*.{spec,cy}.{ts,js}'],
+      configSpecPattern: ['**/*.cy.{ts,js}'],
       excludeSpecPattern: [],
-      additionalIgnorePattern: [],
+      additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
     })
 
     expect(specs).to.have.length(2)
@@ -232,6 +232,19 @@ describe('findSpecs', () => {
     })
 
     expect(specs).to.have.length(3)
+  })
+
+  it('respects excludeSpecPattern', async () => {
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+      additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
+      excludeSpecPattern: ['**/*'],
+    })
+
+    expect(specs).to.have.length(0)
   })
 })
 
