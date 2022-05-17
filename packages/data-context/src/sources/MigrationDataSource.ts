@@ -97,7 +97,11 @@ export class MigrationDataSource {
   }
 
   async getVideoEmbedJson () {
-    const response = await this.ctx.util.fetch('https://on.cypress.io/v10-video-embed/10.0.0', { method: 'GET' })
+    const versionData = await this.ctx.versions.versionData()
+
+    const embedOnLink = `https://on.cypress.io/v10-video-embed/${versionData.current.version}`
+
+    const response = await this.ctx.util.fetch(embedOnLink, { method: 'GET' })
     .catch(() => {
       // fail silently, no user-facing error is needed
     })
