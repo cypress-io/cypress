@@ -25,7 +25,7 @@
     <TransitionQuickFade>
       <PopoverPanel
         static
-        class="bg-white rounded shadow top-36px right-0 z-10 absolute"
+        class="bg-white rounded shadow-dropdown top-36px right-0 z-10 absolute"
         :class="(forceOpenState === true) || open ? '' : 'hidden'"
       >
         <ul

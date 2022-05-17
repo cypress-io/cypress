@@ -35,8 +35,7 @@ describe('e2e system node', () => {
     expect(stderr).to.contain('Plugin Electron version: undefined')
   })
 
-  // TODO:(tgriesser) originally skipped this, not sure why
-  it.skip('uses bundled node when launching plugins file', async function () {
+  it('uses bundled node when launching plugins file', async function () {
     const { stderr } = await systemTests.exec(this, {
       project: 'system-node',
       config: {
