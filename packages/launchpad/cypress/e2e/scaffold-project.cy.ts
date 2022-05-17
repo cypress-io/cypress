@@ -179,7 +179,7 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
   it('scaffolds CT for a non-framework CJS JS project w/ webpack.config.js detected', () => {
     const language = 'js'
 
-    scaffoldAndOpenCTProject({ name: 'pristine-npm', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
+    scaffoldAndOpenCTProject({ name: 'pristine-cjs-project', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
     assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Vue.js 3 Webpack' })
 
     // since we added a valid webpack.config, the dev server starts and we are greeted
