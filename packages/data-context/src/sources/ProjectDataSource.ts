@@ -150,7 +150,7 @@ export function getFilenameFromSpecPattern (specPattern: string, testingType: Te
   if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
+  const fileName = replaceWildCard(parsedGlob.path.filename, testingType === 'e2e' ? 'spec' : 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
     || `.cy.${fileExtensionToUse}`
@@ -340,7 +340,7 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName (): Promise<string | null> {
-    const defaultFilename = `filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+    const defaultFilename = `${this.ctx.coreData.currentTestingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
     const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
 
     try {
