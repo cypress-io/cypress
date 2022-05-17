@@ -143,6 +143,28 @@ describe('Opening unmigrated project', () => {
     cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
+
+  it('migration landing page appears with a video', () => {
+    cy.scaffoldProject('migration-component-testing')
+    cy.openProject('migration-component-testing', ['--component'])
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+    cy.contains(cy.i18n.migration.landingPage.description).should('be.visible')
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).should('be.visible')
+    cy.contains('a', cy.i18n.migration.landingPage.linkReleaseNotes)
+    .should('be.visible')
+    .and('have.attr', 'href', 'https://on.cypress.io/changelog')
+
+    cy.findByTestId('video-container').within(() => {
+      cy.get('iframe')
+    })
+  })
+
+  it('landing page appears does not appear if there is no video', () => {
+    cy.scaffoldProject('migration-component-testing')
+    cy.openProject('migration-component-testing', ['--component'])
+    cy.visitLaunchpad()
+  })
 })
 
 describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
