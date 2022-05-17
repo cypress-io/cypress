@@ -6,6 +6,7 @@
         v-else
         :gql="query.data.value"
         :online="isOnlineRef"
+        @re-execute-runs-query="reExecuteRunsQuery"
       />
     </TransitionQuickFade>
   </div>
@@ -42,4 +43,8 @@ watchEffect(() => {
     query.executeQuery()
   }
 })
+
+function reExecuteRunsQuery () {
+  query.executeQuery()
+}
 </script>
