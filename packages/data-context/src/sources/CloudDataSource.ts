@@ -16,6 +16,7 @@ import {
   OperationResult,
   stringifyVariables,
   RequestPolicy,
+  OperationType,
 } from '@urql/core'
 import _ from 'lodash'
 import type { core } from 'nexus'
@@ -62,7 +63,7 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
-  onError(e: Error): void
+  onError(e: Error, operationType: OperationType): void
 }
 
 /**
@@ -115,17 +116,22 @@ export class CloudDataSource {
               return
             }
 
+            if (operation.kind === 'mutation') {
+              this.invalidate({ __typename: 'Query' })
+            }
+
             if (err.networkError) {
               // TODO: UNIFY-1691 handle the networkError via a GraphQL & UI representation
-              // this.params.onError(err.networkError)
+              if (operation.kind === 'mutation') {
+                this.params.onError(err.networkError, operation.kind)
+              }
+
               return
             }
 
             if (err.graphQLErrors[0]) {
-              this.params.onError(err.graphQLErrors[0])
+              this.params.onError(err.graphQLErrors[0], operation.kind)
             }
-
-            this.invalidate({ __typename: 'Query' })
           },
         }),
         fetchExchange,
