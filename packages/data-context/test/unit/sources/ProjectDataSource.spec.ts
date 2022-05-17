@@ -13,6 +13,7 @@ import { DataContext } from '../../../src'
 import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
 import { InjectedConfigApi } from '../../../src/data'
 import { createTestDataContext } from '../helper'
+import { defaultSpecPattern } from '@packages/config'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -494,5 +495,50 @@ describe('startSpecWatcher', () => {
 
     expect(ctx.project.findSpecs).to.have.been.calledWith(...watchOptions)
     expect(ctx.actions.project.setSpecs).to.have.been.calledWith(mockFoundSpecs)
+  })
+})
+
+describe('ProjectDataSource', () => {
+  let ctx: DataContext
+
+  beforeEach(() => {
+    ctx = createTestDataContext('run')
+    ctx.coreData.currentProject = 'foo-project'
+    ctx.coreData.currentTestingType = 'e2e'
+  })
+
+  context('#defaultSpecFilename', () => {
+    it('yields default if no spec pattern is set', async () => {
+      const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+      expect(defaultSpecFileName).to.equal('cypress/e2e/filename.cy.js')
+    })
+
+    it('yields default if the spec pattern is default', async () => {
+      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [defaultSpecPattern.e2e] })
+      const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+      expect(defaultSpecFileName).to.equal('cypress/e2e/filename.cy.js')
+    })
+
+    it('yields common prefix if there are existing specs', async () => {
+      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/e2e/**/*'] })
+      ctx.project.setSpecs([
+        { relative: 'cypress/e2e/foo/spec.js' },
+        { relative: 'cypress/e2e/foo/bar/spec.js' },
+      ] as FoundSpec[])
+
+      const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+      expect(defaultSpecFileName).to.equal('cypress/e2e/foo/filename.cy.js')
+    })
+
+    it('yields spec pattern guess if there are no existing specs', async () => {
+      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/integration/**/*'] })
+
+      const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+      expect(defaultSpecFileName).to.equal('cypress/integration/filename.cy.js')
+    })
   })
 })

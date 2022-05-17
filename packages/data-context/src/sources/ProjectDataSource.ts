@@ -337,7 +337,7 @@ export class ProjectDataSource {
 
       if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, defaultFilename)
 
-      // 4. Otherwise, return a filename that fulfills to the spec pattern.
+      // 4. Otherwise, return a filename that fulfills the spec pattern.
       const filenameFromGlob = getFilenameFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
 
       if (filenameFromGlob) return filenameFromGlob
