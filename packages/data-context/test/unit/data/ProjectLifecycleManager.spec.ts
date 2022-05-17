@@ -22,7 +22,6 @@ describe('ProjectLifecycleManager', () => {
       ctx.coreData.cliBrowser = undefined
 
       ctx._apis.browserApi.getBrowsers = sinon.stub().resolves(browsers)
-      ctx._apis.browserApi.relaunchBrowser = sinon.stub().resolves()
       ctx.actions.project.launchProject = sinon.stub().resolves()
       ctx.project.getProjectPreferences = sinon.stub().resolves(null)
       // @ts-expect-error
