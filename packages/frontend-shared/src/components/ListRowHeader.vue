@@ -10,8 +10,7 @@
         />
       </slot>
     </div>
-    <div class="bg-gray-100 h-40px w-1px" />
-    <div class="flex-grow h-auto px-16px">
+    <div class="flex-grow h-auto border-gray-100 border-l-1px px-16px">
       <h2
         class="text-indigo-500 whitespace-nowrap"
         :class="{'text-size-18px leading-24px': bigHeader}"

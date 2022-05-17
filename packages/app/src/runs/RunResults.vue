@@ -1,19 +1,25 @@
 <template>
-  <div class="border rounded flex border-gray-200 h-6 text-gray-500 text-size-14px leading-20px">
-    <div
-      v-for="(result, i) in results"
-      :key="i"
-      class="flex px-2 items-center hover:bg-indigo-50"
-      :title="result.name"
-      :data-cy="`runResults-${result.name}-count`"
-    >
-      <component
-        :is="result.icon"
-        class="h-12px mr-1 w-12px"
-        :class="result.class"
-      />
-      <span class="sr-only">{{ result.name }}</span>
-      {{ result.value }}
+  <div class="flex gap-8px items-center">
+    <span
+      v-if="props.gql.totalFlakyTests"
+      class="rounded-md font-semibold bg-warning-100 text-sm py-2px px-4px text-warning-600 whitespace-nowrap"
+    >{{ props.gql.totalFlakyTests }} Flaky</span>
+    <div class="border rounded flex border-gray-200 h-6 text-gray-700 text-size-14px leading-20px">
+      <div
+        v-for="(result, i) in results"
+        :key="i"
+        class="flex font-semibold px-2 items-center hover:bg-indigo-50"
+        :title="result.name"
+        :data-cy="`runResults-${result.name}-count`"
+      >
+        <component
+          :is="result.icon"
+          class="mt-px h-12px mr-1 w-12px"
+          :class="result.class"
+        />
+        <span class="sr-only">{{ result.name }}</span>
+        {{ result.value }}
+      </div>
     </div>
   </div>
 </template>
@@ -36,6 +42,7 @@ fragment RunResults on CloudRun {
   totalFailed
   totalPending
   totalSkipped
+  totalFlakyTests
 }
 `
 

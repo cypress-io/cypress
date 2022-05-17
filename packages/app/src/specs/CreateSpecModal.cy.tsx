@@ -1,5 +1,6 @@
 import CreateSpecModal from './CreateSpecModal.vue'
 import { ref } from 'vue'
+import { CreateSpecModalFragmentDoc } from '../generated/graphql-test'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
@@ -30,7 +31,7 @@ describe('<CreateSpecModal />', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
           },
         }}
         show={show.value}
@@ -90,7 +91,7 @@ describe('playground', () => {
             }],
             specs: [],
             fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/filename.cy.js',
+            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
           },
         }}
         show={show.value}
@@ -101,5 +102,27 @@ describe('playground', () => {
     .get(modalSelector)
     .should('be.visible')
     .get(modalCloseSelector)
+  })
+})
+
+describe('defaultSpecFileName', () => {
+  it('shows correct default filename for the currentProject', () => {
+    const show = ref(true)
+
+    cy.mountFragment(CreateSpecModalFragmentDoc, {
+      onResult: (result) => {
+        if (result.currentProject) {
+          result.currentProject.defaultSpecFileName = 'path/for/spec.cy.js'
+        }
+      },
+      render: (gql) => {
+        return <CreateSpecModal gql={gql} show onClose={() => show.value = false} />
+      },
+    })
+
+    cy.findByText('Create new empty spec').click()
+    cy.get('input').invoke('val').should('contain', 'spec.cy.js')
+
+    cy.percySnapshot()
   })
 })

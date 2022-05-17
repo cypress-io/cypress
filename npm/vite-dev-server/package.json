@@ -17,7 +17,6 @@
   "dependencies": {
     "debug": "4.3.3",
     "find-up": "6.3.0",
-    "get-port": "5.1.1",
     "local-pkg": "0.4.1",
     "pathe": "0.2.0"
   },
