@@ -105,7 +105,14 @@ describe('App: Specs', () => {
           })
 
           cy.withCtx(async (ctx, options) => {
-            const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'e2e', ['**/*.cy.js'], [], [])).map((spec) => spec.relative)
+            const generatedSpecPaths = (await ctx.project.findSpecs({
+              projectRoot: ctx.currentProject ?? '',
+              testingType: 'e2e',
+              specPattern: ['**/*.cy.js'],
+              configSpecPattern: ['**/*.cy.js'],
+              excludeSpecPattern: [],
+              additionalIgnorePattern: [],
+            })).map((spec) => spec.relative)
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {

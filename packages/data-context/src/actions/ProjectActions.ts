@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
@@ -44,12 +44,27 @@ export interface ProjectApiShape {
   isListening: (url: string) => Promise<void>
 }
 
-type SetSpecsFoundBySpecPattern = {
-  path: string
+export interface FindSpecs<T> {
+  projectRoot: string
   testingType: Cypress.TestingType
-  specPattern?: Cypress.Config['specPattern']
-  excludeSpecPattern?: Cypress.Config['excludeSpecPattern']
-  additionalIgnorePattern?: string | string[]
+  /**
+   * This can be over-ridden by the --spec argument (run mode only)
+   * Otherwise it will be the same as `configSpecPattern`
+   */
+  specPattern: T
+  /**
+   * The specPattern resolved from e2e.specPattern or component.specPattern
+   * inside of `cypress.config`.
+   */
+  configSpecPattern: T
+  /**
+   * User can opt to exclude certain patterns in cypress.config.
+   */
+  excludeSpecPattern: T
+  /**
+   * If in component testing mode, we exclude all specs matching the e2e.specPattern.
+   */
+  additionalIgnorePattern: T
 }
 
 type SetForceReconfigureProjectByTestingType = {
@@ -208,7 +223,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, options: LaunchOpts, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -385,9 +400,10 @@ export class ProjectActions {
       const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
 
       await this.setSpecsFoundBySpecPattern({
-        path: this.ctx.currentProject,
+        projectRoot: this.ctx.currentProject,
         testingType,
-        specPattern: cfg.specPattern,
+        specPattern: cfg.specPattern ?? [],
+        configSpecPattern: cfg.specPattern ?? [],
         excludeSpecPattern: cfg.excludeSpecPattern,
         additionalIgnorePattern: cfg.additionalIgnorePattern,
       })
@@ -400,9 +416,10 @@ export class ProjectActions {
     }
   }
 
-  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
-    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+  async setSpecsFoundBySpecPattern ({ projectRoot, testingType, specPattern, configSpecPattern, excludeSpecPattern, additionalIgnorePattern }: FindSpecs<string | string[] | undefined>) {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : []
 
+    configSpecPattern = toArray(configSpecPattern)
     specPattern = toArray(specPattern)
 
     excludeSpecPattern = toArray(excludeSpecPattern) || []
@@ -410,21 +427,29 @@ export class ProjectActions {
     // exclude all specs matching e2e if in component testing
     additionalIgnorePattern = toArray(additionalIgnorePattern) || []
 
-    if (!specPattern) {
+    if (!specPattern || !configSpecPattern) {
       throw Error('could not find pattern to load specs')
     }
 
-    const specs = await this.ctx.project.findSpecs(
-      path,
+    const specs = await this.ctx.project.findSpecs({
+      projectRoot,
       testingType,
       specPattern,
+      configSpecPattern,
       excludeSpecPattern,
       additionalIgnorePattern,
-    )
+    })
 
     this.ctx.actions.project.setSpecs(specs)
 
-    this.ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
+    this.ctx.project.startSpecWatcher({
+      projectRoot,
+      testingType,
+      specPattern,
+      configSpecPattern,
+      excludeSpecPattern,
+      additionalIgnorePattern,
+    })
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
