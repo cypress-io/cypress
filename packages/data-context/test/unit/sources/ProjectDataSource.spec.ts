@@ -1,7 +1,7 @@
 import chai from 'chai'
 import os from 'os'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getLongestCommonPrefixFromGlob } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getLongestCommonPrefixFromPaths, getLongestCommonPrefixFromGlob } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
 import chokidar from 'chokidar'
@@ -185,6 +185,44 @@ describe('findSpecs', () => {
     const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], ['e2e/*.{spec,cy}.{ts,js}'])
 
     expect(specs).to.have.length(3)
+  })
+})
+
+describe('getLongestCommonPrefixFromPaths', () => {
+  it('with cypress', () => {
+    const lcp = getLongestCommonPrefixFromPaths([
+      'cypress/component/foo/meta-component-test.cy.ts',
+      'cypress/component/bar/meta-component-test.cy.ts',
+    ])
+
+    expect(lcp).to.equal('cypress/component')
+  })
+
+  it('with src and cypress', () => {
+    const lcp = getLongestCommonPrefixFromPaths([
+      'cypress/component/foo/meta-component-test.cy.ts',
+      'cypress/component/bar/meta-component-test.cy.ts',
+      'src/frontend/MyComponent.cy.ts',
+    ])
+
+    expect(lcp).to.equal('')
+  })
+
+  it('with src', () => {
+    const lcp = getLongestCommonPrefixFromPaths([
+      'src/frontend/MyComponent.cy.ts',
+      'src/MyComponent.cy.ts',
+    ])
+
+    expect(lcp).to.equal('src')
+  })
+
+  it('with 1 path', () => {
+    const lcp = getLongestCommonPrefixFromPaths([
+      'src/frontend/MyComponent.cy.ts',
+    ])
+
+    expect(lcp).to.equal('src/frontend')
   })
 })
 

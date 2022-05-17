@@ -102,6 +102,35 @@ export function transformSpec ({
   }
 }
 
+export function getLongestCommonPrefixFromPaths (paths: string[]): string {
+  if (!paths[0]) return ''
+
+  function getPathParts (pathname: string) {
+    return pathname.split(/[\/\\]/g)
+  }
+
+  const lcp = getPathParts(paths[0])
+
+  if (paths.length === 1) return lcp.slice(0, -1).join(path.sep)
+
+  let end = lcp.length
+
+  for (const filename of paths.slice(1)) {
+    const pathParts = getPathParts(filename)
+
+    for (let i = pathParts.length - 1; i >= 0; i--) {
+      if (lcp[i] !== pathParts[i]) {
+        end = i
+        delete lcp[i]
+      }
+    }
+
+    if (lcp.length === 0) return ''
+  }
+
+  return lcp.slice(0, end).join(path.sep)
+}
+
 export function getLongestCommonPrefixFromGlob (inputGlob: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
@@ -279,7 +308,7 @@ export class ProjectDataSource {
     this._specWatcher.on('all', onProjectFileSystemChange)
   }
 
-  async defaultSpecFileName () {
+  async defaultSpecFileName (): Promise<string | null> {
     const defaultFilename = `cypress/${this.ctx.coreData.currentTestingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}/`
 
     try {
@@ -304,7 +333,10 @@ export class ProjectDataSource {
         return defaultFilename
       }
 
-      // 3. If there are existing specs, return the longest common path prefix between them.
+      // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
+      const filenameFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
+
+      if (filenameFromSpecs) return filenameFromSpecs
 
       // 4. Otherwise, return the longest possible prefix according to the spec pattern.
       const filenameFromGlob = getLongestCommonPrefixFromGlob(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
