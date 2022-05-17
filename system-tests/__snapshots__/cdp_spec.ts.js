@@ -7,14 +7,14 @@ exports['e2e cdp / handles disconnections as expected'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (spec.ts)                                                                  │
-  │ Searched:   cypress/e2e/spec.ts                                                                │
+  │ Specs:      1 found (spec.cy.ts)                                                               │
+  │ Searched:   cypress/e2e/spec.cy.ts                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  spec.ts                                                                         (1 of 1)
+  Running:  spec.cy.ts                                                                      (1 of 1)
 
 
   e2e remote debugging disconnect
