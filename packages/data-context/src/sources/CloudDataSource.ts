@@ -117,7 +117,8 @@ export class CloudDataSource {
             }
 
             if (operation.kind === 'mutation') {
-              this.invalidate({ __typename: 'Query' })
+              // Do nothing on failure here
+              this.invalidate({ __typename: 'Query' }).catch()
             }
 
             if (err.networkError) {
