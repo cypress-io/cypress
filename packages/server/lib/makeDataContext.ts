@@ -20,7 +20,6 @@ import user from './user'
 import * as config from './config'
 import { openProject } from './open_project'
 import cache from './cache'
-import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
@@ -68,9 +67,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     appApi: {
       appData,
-      findNodePath () {
-        return findSystemNode.findNodeInFullPath()
-      },
     },
     authApi: {
       getUser () {
