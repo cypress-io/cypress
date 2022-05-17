@@ -372,6 +372,12 @@ describe('getFilenameFromSpecPattern', () => {
 
       expect(defaultFileName).to.eq('e2e/filename.cy.js')
     })
+
+    it('creates specName for cypress/component-tests/**/*', () => {
+      const defaultFileName = getFilenameFromSpecPattern('cypress/component-tests/**/*', 'component', 'ts')
+
+      expect(defaultFileName).to.eq('cypress/component-tests/filename.cy.ts')
+    })
   })
 })
 

@@ -9,7 +9,7 @@ import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
 import { defaultSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
-import mm from 'micromatch'
+import micromatch from 'micromatch'
 import RandExp from 'randexp'
 
 const debug = Debug('cypress:data-context')
@@ -113,14 +113,14 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
 
   if (paths.length === 1) return lcp.slice(0, -1).join(path.sep)
 
-  let end = lcp.length
+  let endIndex
 
   for (const filename of paths.slice(1)) {
     const pathParts = getPathParts(filename)
 
     for (let i = pathParts.length - 1; i >= 0; i--) {
       if (lcp[i] !== pathParts[i]) {
-        end = i
+        endIndex = i
         delete lcp[i]
       }
     }
@@ -128,7 +128,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
     if (lcp.length === 0) return ''
   }
 
-  return lcp.slice(0, end).join(path.sep)
+  return lcp.slice(0, endIndex).join(path.sep)
 }
 
 export function getFilenameFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
@@ -142,36 +142,34 @@ export function getFilenameFromSpecPattern (specPattern: string, testingType: Te
     return specPattern
   }
 
-  let dirname = parsedGlob.path.dirname
+  // Remove double-slashes from dirname (like if specPattern has /**/*/)
+  let dirname = parsedGlob.path.dirname.replaceAll(/\/\/+/g, '/')
 
-  if (dirname.startsWith('**')) {
-    dirname = dirname.replace('**', 'cypress')
-  }
+  // If a spec can be in any root dir, go ahead and use "cypress/"
+  if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
   const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+    || `.cy.${fileExtensionToUse}`
+
   let extname = replaceWildCard(extnameWithoutExt, 'cy')
 
-  if (extname.startsWith('.')) {
-    extname = extname.substr(1)
-  }
+  if (extname.startsWith('.')) extname = extname.slice(1)
 
-  if (extname.endsWith('.')) {
-    extname = extname.slice(0, -1)
-  }
+  if (extname.endsWith('.')) extname = extname.slice(0, -1)
 
   const basename = [fileName, extname, parsedGlob.path.ext].filter(Boolean).join('.')
 
   const glob = splittedDirname + basename
 
-  const globWithoutBraces = mm.braces(glob, { expand: true })
+  const globWithoutBraces = micromatch.braces(glob, { expand: true })
 
   let finalGlob = globWithoutBraces[0]
 
   if (fileExtensionToUse) {
-    const filteredGlob = mm(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
+    const filteredGlob = micromatch(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
 
     if (filteredGlob?.length) {
       finalGlob = filteredGlob[0]
