@@ -123,7 +123,7 @@ const relativeCreatedAt = computed(() => dayjs(new Date(run.value.createdAt!)).f
 const totalDuration = computed(() => dayjs.duration(run.value.totalDuration!).format('HH:mm:ss').replace(/^0+:/, ''))
 
 const tags = computed(() => {
-  const tags = props.gql.tags?.map((tag) => tag?.name).filter(Boolean) as string[]
+  const tags = (props.gql.tags ?? []).map((tag) => tag?.name).filter(Boolean) as string[]
 
   return tags.length <= 2 ? tags : tags.slice(0, 2).concat(`+${tags.length - 2}`)
 })
