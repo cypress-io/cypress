@@ -146,7 +146,7 @@ describe('cy.origin - uncaught errors', () => {
       })
     })
 
-    it('passes the current test/command if async errors are thrown from the secondary origin AUT, but the cy.origin callback is finished running', (done) => {
+    it('passes the current test/command if async errors are thrown from the secondary origin AUT, but the cy.origin callback is finished running', () => {
       const uncaughtExceptionSpy = cy.spy()
       const failureSpy = cy.spy()
 
@@ -159,7 +159,6 @@ describe('cy.origin - uncaught errors', () => {
       }).then(() => {
         expect(uncaughtExceptionSpy).not.to.be.called
         expect(failureSpy).not.to.be.called
-        done()
       })
     })
 
