@@ -1,17 +1,15 @@
 import chai from 'chai'
 import os from 'os'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getDefaultSpecFileName } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getDefaultSpecFileName } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
 import chokidar from 'chokidar'
 import _ from 'lodash'
 import sinonChai from 'sinon-chai'
-import { graphqlSchema } from '@packages/graphql/src/schema'
-import { FoundSpec, TestingType } from '@packages/types'
+import { FoundSpec } from '@packages/types'
 import { DataContext } from '../../../src'
-import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
-import { InjectedConfigApi } from '../../../src/data'
+import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 
 chai.use(sinonChai)
@@ -132,7 +130,7 @@ describe('transformSpec', () => {
 })
 
 describe('findSpecs', () => {
-  const temporary = path.join(os.tmpdir(), 'findSpecs')
+  const projectRoot = path.join(os.tmpdir(), 'findSpecs')
 
   const fixture = [
     'node_modules/test/App.spec.js',
@@ -143,48 +141,110 @@ describe('findSpecs', () => {
     'e2e/onboarding.spec.ts',
     'e2e/onboarding.cy.ts',
     'e2e/onboarding.cy.js',
+    'e2e/onboarding.cy.js.mp4',
   ]
 
   let ctx: DataContext
 
   beforeEach(async () => {
     ctx = createTestDataContext('run')
-    await ctx.fs.ensureDir(temporary)
-    await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(temporary, element), '')))
+    await ctx.fs.ensureDir(projectRoot)
+    await Promise.all(fixture.map((element) => ctx.fs.outputFile(path.join(projectRoot, element), '')))
   })
 
   afterEach(async () => {
-    await ctx.fs.remove(temporary)
+    await ctx.fs.remove(projectRoot)
+  })
+
+  it('exludes specs outside `specPattern`, even if passing a generic glob', async () => {
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'e2e',
+      specPattern: ['**/onboarding*'],
+      configSpecPattern: ['e2e/*.{spec,cy}.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: [],
+    })
+
+    expect(specs).to.have.length(3)
   })
 
   it('find all the *.cy.{ts,js} excluding the e2e', async () => {
-    const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.cy.{ts,js}'], ['e2e/*.{spec,cy}.{ts,js}'], [])
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/*.cy.{ts,js}'],
+      configSpecPattern: ['**/*.cy.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
+    })
 
     expect(specs).to.have.length(2)
   })
 
   it('find all the *.{cy,spec}.{ts,js} excluding the e2e', async () => {
-    const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], ['e2e/*.{spec,cy}.{ts,js}'], [])
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
+    })
 
     expect(specs).to.have.length(3)
   })
 
   it('find all the e2e specs', async () => {
-    const specs = await ctx.project.findSpecs(temporary, 'e2e', ['e2e/*.{cy,spec}.{ts,js}'], [], [])
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'e2e',
+      specPattern: ['e2e/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['e2e/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: [],
+    })
 
     expect(specs).to.have.length(3)
   })
 
   it('ignores node_modules if excludeSpecPattern is empty array', async () => {
-    const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], [])
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: [],
+    })
 
     expect(specs).to.have.length(6)
   })
 
-  it('ignores e2e tests if globToRemove is set', async () => {
-    const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], ['e2e/*.{spec,cy}.{ts,js}'])
+  it('ignores e2e tests if additionalIgnorePattern is set', async () => {
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+      additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
+      excludeSpecPattern: [],
+    })
 
     expect(specs).to.have.length(3)
+  })
+
+  it('respects excludeSpecPattern', async () => {
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+      additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
+      excludeSpecPattern: ['**/*'],
+    })
+
+    expect(specs).to.have.length(0)
   })
 })
 
@@ -338,25 +398,14 @@ describe('getDefaultSpecFileName', () => {
 })
 
 describe('startSpecWatcher', () => {
-  const temporary = 'tmp'
+  const projectRoot = 'tmp'
 
   let ctx: DataContext
 
   beforeEach(async () => {
-    ctx = new DataContext({
-      schema: graphqlSchema,
-      mode: 'run',
-      modeOptions: {},
-      appApi: {} as AppApiShape,
-      localSettingsApi: {} as LocalSettingsApiShape,
-      authApi: {} as AuthApiShape,
-      configApi: {} as InjectedConfigApi,
-      projectApi: {} as ProjectApiShape,
-      electronApi: {} as ElectronApiShape,
-      browserApi: {} as BrowserApiShape,
-    })
+    ctx = createTestDataContext('run')
 
-    ctx.coreData.currentProject = temporary
+    ctx.coreData.currentProject = projectRoot
   })
 
   afterEach(async () => {
@@ -366,7 +415,16 @@ describe('startSpecWatcher', () => {
   it('throws if no current project defined', () => {
     ctx.coreData.currentProject = null
 
-    expect(() => ctx.project.startSpecWatcher(temporary, 'e2e', ['**/*.{cy,spec}.{ts,js}'], ['**/ignore.spec.ts'], [])).to.throw()
+    expect(() => {
+      return ctx.project.startSpecWatcher({
+        projectRoot,
+        testingType: 'e2e',
+        specPattern: ['**/*.{cy,spec}.{ts,js}'],
+        configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+        excludeSpecPattern: ['**/ignore.spec.ts'],
+        additionalIgnorePattern: [],
+      })
+    }).to.throw()
   })
 
   it('creates file watcher based on given config properties', () => {
@@ -389,13 +447,20 @@ describe('startSpecWatcher', () => {
       return handleFsChange as _.DebouncedFunc<any>
     })
 
-    ctx.project.startSpecWatcher(temporary, 'e2e', ['**/*.{cy,spec}.{ts,js}'], ['**/ignore.spec.ts'], ['additional.ignore.cy.js'])
+    ctx.project.startSpecWatcher({
+      projectRoot,
+      testingType: 'e2e',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
 
     expect(_.debounce).to.have.been.calledWith(sinon.match.func, 250)
 
     expect(chokidar.watch).to.have.been.calledWith('.', {
       ignoreInitial: true,
-      cwd: temporary,
+      cwd: projectRoot,
       ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
     })
 
@@ -429,16 +494,23 @@ describe('startSpecWatcher', () => {
       return handleFsChange as _.DebouncedFunc<any>
     })
 
-    const watchOptions: [string, TestingType, string[], string[], string[]] = [temporary, 'e2e', ['**/*.{cy,spec}.{ts,js}'], ['**/ignore.spec.ts'], ['additional.ignore.cy.js']]
+    const watchOptions: FindSpecs<string[]> = {
+      projectRoot,
+      testingType: 'e2e',
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      configSpecPattern: ['**/ignore.spec.ts'],
+      excludeSpecPattern: ['additional.ignore.cy.js'],
+      additionalIgnorePattern: [],
+    }
 
-    ctx.project.startSpecWatcher(...watchOptions)
+    ctx.project.startSpecWatcher(watchOptions)
 
     // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
     ctx.project.setSpecs(mockFoundSpecs)
 
     await handleFsChange()
 
-    expect(ctx.project.findSpecs).to.have.been.calledWith(...watchOptions)
+    expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
     expect(ctx.actions.project.setSpecs).not.to.have.been.called
 
     // Update internal specs state so that a change will be detected on next FS event
@@ -448,7 +520,7 @@ describe('startSpecWatcher', () => {
 
     await handleFsChange()
 
-    expect(ctx.project.findSpecs).to.have.been.calledWith(...watchOptions)
+    expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
     expect(ctx.actions.project.setSpecs).to.have.been.calledWith(mockFoundSpecs)
   })
 })

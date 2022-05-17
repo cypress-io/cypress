@@ -7,7 +7,7 @@ describe('retries', () => {
 
   it('supports retries', {
     project: 'retries-2',
-    spec: 'fail-twice.js',
+    spec: 'fail-twice.cy.js',
     snapshot: true,
   })
 
@@ -18,7 +18,7 @@ describe('retries', () => {
 
   it('warns about retries plugin', {
     project: 'plugin-retries',
-    spec: 'main.spec.js',
+    spec: 'main.spec.cy.js',
     snapshot: true,
   })
 })
