@@ -23,6 +23,9 @@ export const defaultConfig: FullConfig = {
       cursor: {
         'ew-resize': 'ew-resize',
       },
+      boxShadow: {
+        'dropdown': '0 1px 3px 0 rgba(0, 0, 0, 0.2)',
+      },
     },
   },
   safelist,

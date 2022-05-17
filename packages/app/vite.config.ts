@@ -14,6 +14,9 @@ export default makeConfig({
       'vue-router',
       '@urql/devtools',
       '@urql/exchange-graphcache',
+      'dayjs',
+      'dayjs/plugin/relativeTime',
+      'dayjs/plugin/duration',
     ],
   },
 }, {
