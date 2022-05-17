@@ -139,7 +139,7 @@ describe('e2e sessions', () => {
   })
 
   it('sessions persist on reload, and clear between specs', {
-    spec: 'session_persist_spec_1.js,session_persist_spec_2.js',
+    spec: 'session_persist_spec_1.cy.js,session_persist_spec_2.cy.js',
     snapshot: true,
     config: {
       experimentalSessionAndOrigin: true,

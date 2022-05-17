@@ -23,6 +23,10 @@ for (const project of PROJECTS) {
       cy.visitApp()
       cy.contains('HelloWorld.cy.js').click()
       cy.get('.passed > .num').should('contain', 1)
+      cy.get('.commands-container').within(() => {
+        cy.contains('mount')
+        cy.contains('<HelloWorld ... />')
+      })
     })
   })
 }
