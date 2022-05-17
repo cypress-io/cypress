@@ -226,9 +226,10 @@ export class ProjectLifecycleManager {
       onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
-            path: this.projectRoot,
+            projectRoot: this.projectRoot,
             testingType: this._currentTestingType,
             specPattern: this.ctx.modeOptions.spec || finalConfig.specPattern,
+            configSpecPattern: finalConfig.specPattern,
             excludeSpecPattern: finalConfig.excludeSpecPattern,
             additionalIgnorePattern: finalConfig.additionalIgnorePattern,
           })

@@ -95,7 +95,14 @@ module.exports = {
         // in this case, we want to remove anything that matches
         // - the component.specPattern
         // - the e2e.excludeSpecPattern
-        return ctx.project.findSpecs(config.projectRoot, 'e2e', e2ePatterns.specPattern, e2ePatterns.excludeSpecPattern, componentPatterns.specPattern)
+        return ctx.project.findSpecs({
+          projectRoot: config.projectRoot,
+          testingType: 'e2e',
+          specPattern: e2ePatterns.specPattern,
+          configSpecPattern: e2ePatterns.specPattern,
+          excludeSpecPattern: e2ePatterns.excludeSpecPattern,
+          additionalIgnorePattern: componentPatterns.specPattern,
+        })
         .then((specs) => {
           debug('found __all specs %o', specs)
 
