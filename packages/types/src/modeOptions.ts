@@ -7,7 +7,8 @@ export interface CommonModeOptions {
 
 export interface RunModeOptions extends CommonModeOptions {
   _?: (null)[] | null
-  runProject: string
+  runProject?: string
+  project?: string
   cwd: string
   testingType?: string
   config: Partial<Cypress.ConfigOptions>
