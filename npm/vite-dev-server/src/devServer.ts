@@ -25,7 +25,11 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   debug('Vite server created')
 
   await server.listen()
-  const port = server.config.server.port!
+  const { port } = server.config.server
+
+  if (!port) {
+    throw new Error('Missing vite dev server port.')
+  }
 
   debug('Successfully launched the vite server on port', port)
 
