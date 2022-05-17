@@ -58,7 +58,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ unify-1636-unify-spec-base-path, << pipeline.git.branch >> ]
-    - equal: [ muaz/UNIFY-1741-fix-git-cmd-win, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -70,7 +69,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.5.0-chrome94-ff93
+      - image: cypress/browsers:node16.13.2-chrome100-ff98
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -79,7 +78,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.5.0-chrome94-ff93
+      - image: cypress/browsers:node16.13.2-chrome100-ff98
         user: node
     environment:
       PLATFORM: linux
@@ -394,8 +393,10 @@ commands:
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
       - run:
-          name: Check  Node
-          command: yarn check-node-version
+          name: Check Node
+          command: |
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            yarn check-node-version
 
   install-chrome:
     description: Install Google Chrome
@@ -607,7 +608,11 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
+      - run: 
+          name: 'Verify Mocha Results'
+          command: |
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            yarn verify:mocha:results <<parameters.expectedResultCount>>
 
   clone-repo-and-checkout-branch:
     description: |
@@ -950,7 +955,9 @@ commands:
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
-          command: yarn binary-zip --platform $PLATFORM
+          command: |
+            [[ $PLATFORM == 'linux' ]] && apt-get update && apt-get install -y zip || [[ $PLATFORM != 'linux' ]]
+            yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
