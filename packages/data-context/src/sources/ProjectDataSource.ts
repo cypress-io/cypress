@@ -309,7 +309,8 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName (): Promise<string | null> {
-    const defaultFilename = `cypress/${this.ctx.coreData.currentTestingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}/`
+    const defaultFilename = `filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+    const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
 
     try {
       if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
@@ -325,18 +326,18 @@ export class ProjectDataSource {
 
       // 1. If there is no spec pattern, use the default for this testing type.
       if (!specPatternSet) {
-        return defaultFilename
+        return defaultPathname
       }
 
       // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
       if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
-        return defaultFilename
+        return defaultPathname
       }
 
       // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
-      const filenameFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
+      const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
 
-      if (filenameFromSpecs) return filenameFromSpecs
+      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, defaultFilename)
 
       // 4. Otherwise, return the longest possible prefix according to the spec pattern.
       const filenameFromGlob = getLongestCommonPrefixFromGlob(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
@@ -344,11 +345,11 @@ export class ProjectDataSource {
       if (filenameFromGlob) return filenameFromGlob
 
       // 5. Return the default for this testing type if we cannot decide from the spec pattern.
-      return defaultFilename
+      return defaultPathname
     } catch (err) {
       debug('Error intelligently detecting default filename, using safe default %o', err)
 
-      return defaultFilename
+      return defaultPathname
     }
   }
 
