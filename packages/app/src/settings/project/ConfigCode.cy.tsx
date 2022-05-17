@@ -110,9 +110,23 @@ describe('<ConfigCode />', () => {
 
     it('shows browser values properly', () => {
       const browserFieldValue = config.find((c) => c.field === 'browsers')?.value
-      const browserText = Array.isArray(browserFieldValue) ? browserFieldValue.map((b) => b.name).join(', ') : ''
 
-      cy.contains(`browsers:`).should('contain.text', browserText)
+      if (Array.isArray(browserFieldValue) && browserFieldValue.length) {
+        browserFieldValue.forEach((browser) => {
+          browser.name && cy.contains(`name: '${browser.name}',`)
+          browser.family && cy.contains(`family: '${browser.family}',`)
+          browser.channel && cy.contains(`channel: '${browser.channel}',`)
+          browser.displayName && cy.contains(`displayName: '${browser.displayName}',`)
+          browser.version && cy.contains(`version: '${browser.version}',`)
+          browser.path && cy.contains(`path: '${browser.path}',`)
+          browser.minSupportedVersion && cy.contains(`minSupportedVersion: ${browser.minSupportedVersion},`)
+          browser.majorVersion && cy.contains(`majorVersion: ${browser.majorVersion},`)
+        })
+
+        cy.percySnapshot()
+      } else {
+        throw new Error('Missing browsers to render')
+      }
     })
   })
 })

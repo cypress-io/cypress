@@ -3,7 +3,6 @@ import type { FoundBrowser } from '@packages/types'
 import type { DataContext } from '..'
 
 export interface AppApiShape {
-  findNodePath(): Promise<string>
   appData: ApplicationDataApiShape
 }
 

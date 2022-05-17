@@ -45,13 +45,11 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
-    .first()
     .within(() => {
       cy.get('i.command-message-indicator-successful')
       .siblings()
       .should('contain', '(new) blank_session')
 
-      cy.get('.command-name-session').contains('blank_session')
       validateCreateNewSessionGroup()
     })
 
@@ -70,13 +68,10 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
-    .first()
     .within(() => {
       cy.get('i.command-message-indicator-successful')
       .siblings()
       .should('contain', '(new) blank_session')
-
-      cy.get('.command-name-session').contains('blank_session')
 
       validateCreateNewSessionGroup()
 
@@ -106,13 +101,10 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
-    .first()
     .within(() => {
       cy.get('i.command-message-indicator-successful')
       .siblings()
       .should('contain', '(new) blank_session')
-
-      cy.get('.command-name-session').contains('blank_session')
 
       validateCreateNewSessionGroup()
 
@@ -151,12 +143,9 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
-      .first()
       .within(() => {
         cy.get('i.command-message-indicator-pending')
         .siblings().should('contain', '(saved) user1')
-
-        cy.get('.command-name-session').contains('user1')
 
         cy.contains('Restore Saved Session')
         .closest('.command')
@@ -208,12 +197,9 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
-      .first()
       .within(() => {
         cy.get('i.command-message-indicator-bad')
         .siblings().should('contain', '(recreated) user1')
-
-        cy.get('.command-name-session').contains('user1')
 
         cy.contains('Restore Saved Session')
         .closest('.command')
@@ -272,12 +258,9 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
-      .first()
       .within(() => {
         cy.get('i.command-message-indicator-bad')
         .siblings().should('contain', '(recreated) user1')
-
-        cy.get('.command-name-session').contains('user1')
 
         cy.contains('Restore Saved Session')
         .closest('.command')

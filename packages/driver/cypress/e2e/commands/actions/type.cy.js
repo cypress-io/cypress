@@ -349,34 +349,13 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      const $txt = cy.$$(':text:first')
-
-      const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-
       cy.spy(cy, 'ensureElementIsNotAnimating')
 
-      cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
+      cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
         const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-        const plusMinusOne = (n) => [n - 1, n + 1]
-
-        for (const key of Object.keys(fromElWindow)) {
-          // TODO: These should be pixel perfect, but they are off
-          // by 1px, on CI, for Firefox only.
-          if (typeof fromElWindow[key] === 'number') {
-            if (Cypress.isBrowser({ family: 'firefox' })) {
-              expect(args[1][0][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-              expect(args[1][1][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-            } else {
-              expect(args[1][0][key]).to.eq(fromElWindow[key])
-              expect(args[1][1][key]).to.eq(fromElWindow[key])
-            }
-          } else {
-            // non number arg - just do the comparison
-            expect(args[1][0][key]).to.eq(fromElWindow[key])
-            expect(args[1][1][key]).to.eq(fromElWindow[key])
-          }
-        }
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
         expect(args[2]).to.eq(1000)
       })
@@ -385,34 +364,13 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
       const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
 
-      const $txt = cy.$$(':text:first')
-
-      const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-
       cy.spy(cy, 'ensureElementIsNotAnimating')
 
-      cy.get(':text:first').type('foo').then(() => {
+      cy.get(':text:first').type('foo').then(($txt) => {
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
         const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-        const plusMinusOne = (n) => [n - 1, n + 1]
-
-        for (const key of Object.keys(fromElWindow)) {
-          // TODO: These should be pixel perfect, but they are off
-          // by 1px, on CI, for Firefox only.
-          if (typeof fromElWindow[key] === 'number') {
-            if (Cypress.isBrowser({ family: 'firefox' })) {
-              expect(args[1][0][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-              expect(args[1][1][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-            } else {
-              expect(args[1][0][key]).to.eq(fromElWindow[key])
-              expect(args[1][1][key]).to.eq(fromElWindow[key])
-            }
-          } else {
-            // non number arg - just do the comparison
-            expect(args[1][0][key]).to.eq(fromElWindow[key])
-            expect(args[1][1][key]).to.eq(fromElWindow[key])
-          }
-        }
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
         expect(args[2]).to.eq(animationDistanceThreshold)
       })

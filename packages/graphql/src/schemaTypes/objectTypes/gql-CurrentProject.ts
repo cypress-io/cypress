@@ -4,7 +4,6 @@ import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
-import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
@@ -16,7 +15,7 @@ export const PackageManagerEnum = enumType({
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
-  description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
+  description: 'The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file',
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
@@ -192,11 +191,6 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => {
         return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
       },
-    })
-
-    t.nonNull.field('codeGenGlobs', {
-      type: CodeGenGlobs,
-      resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
     })
 
     t.list.field('codeGenCandidates', {

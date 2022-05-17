@@ -210,7 +210,7 @@ describe('e2e cookies', () => {
         },
       },
       processEnv: FORCED_SAMESITE_ENV,
-      spec: 'cookies_spec_baseurl.js',
+      spec: 'cookies_spec_baseurl.cy.js',
       snapshot: true,
       onRun: (exec) => {
         return exec({
@@ -262,7 +262,7 @@ describe('e2e cookies', () => {
               otherHttpsUrl,
             },
           },
-          spec: 'cookies_spec_baseurl.js',
+          spec: 'cookies_spec_baseurl.cy.js',
           snapshot: true,
           onRun: (exec) => {
             return exec({
@@ -280,7 +280,7 @@ describe('e2e cookies', () => {
           },
         },
         originalTitle: sharedNoBaseUrlSpecSnapshot,
-        spec: 'cookies_spec_no_baseurl.js',
+        spec: 'cookies_spec_no_baseurl.cy.js',
         snapshot: true,
       })
     })
