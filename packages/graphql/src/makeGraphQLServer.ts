@@ -181,8 +181,8 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
 export const graphqlWS = (httpServer: Server, targetRoute: string) => {
   const graphqlWs = new WebSocketServer({ noServer: true })
 
-  httpServer.on('upgrade', (req, socket: Socket, head) => {
-    if (req.url.startsWith(targetRoute)) {
+  httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
+    if (req.url?.startsWith(targetRoute)) {
       return graphqlWs.handleUpgrade(req, socket, head, (client) => {
         graphqlWs.emit('connection', client, req)
       })

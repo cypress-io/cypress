@@ -1,6 +1,6 @@
 module.exports = {
   'e2e': {
-    'specPattern': '../integration/**/*',
+    'specPattern': '../e2e/**/*',
     'supportFile': false,
   },
 }
