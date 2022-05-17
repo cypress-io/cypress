@@ -145,9 +145,12 @@ describe('Opening unmigrated project', () => {
   })
 
   it('migration landing page appears with a video', () => {
-    cy.scaffoldProject('migration-component-testing')
-    cy.openProject('migration-component-testing', ['--component'])
+    cy.intercept(/vimeo.com/).as('iframeDocRequest')
+    cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
     cy.visitLaunchpad()
+
     cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
     cy.contains(cy.i18n.migration.landingPage.description).should('be.visible')
     cy.contains('button', cy.i18n.migration.landingPage.actionContinue).should('be.visible')
@@ -155,15 +158,26 @@ describe('Opening unmigrated project', () => {
     .should('be.visible')
     .and('have.attr', 'href', 'https://on.cypress.io/changelog')
 
-    cy.findByTestId('video-container').within(() => {
-      cy.get('iframe')
-    })
+    // Vimeo's implementation may change, this is just a high level check that
+    // the expected iframe code is being returned and that there is vimeo-related network traffic
+    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
+    cy.wait('@iframeDocRequest')
+    cy.wait('@vimeoCdnRequest')
+    cy.percySnapshot()
   })
 
-  it('landing page appears does not appear if there is no video', () => {
-    cy.scaffoldProject('migration-component-testing')
-    cy.openProject('migration-component-testing', ['--component'])
+  it('landing page does not appear if there is no video embed code', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.migration, 'getVideoEmbedJson').callsFake(async () => {
+        return null
+      })
+    })
+
     cy.visitLaunchpad()
+    cy.contains(cy.i18n.welcomePage.title).should('be.visible')
+    cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
   })
 })
 
