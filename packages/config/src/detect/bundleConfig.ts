@@ -7,7 +7,7 @@ function detectConfig (projectRoot: string, dirs: string[], files: string[]): st
       const p = path.join(projectRoot, dir, f)
 
       if (fs.existsSync(p)) {
-        return `./${path.posix.join(dir, f)}`
+        return `${path.posix.join('.', dir, f)}`
       }
     }
   }
