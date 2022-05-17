@@ -102,15 +102,15 @@ export function transformSpec ({
   }
 }
 
-export function getDefaultSpecFileName (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
+export function getLongestCommonPrefixFromGlob (inputGlob: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
 
-  const parsedGlob = parseGlob(specPattern)
+  const parsedGlob = parseGlob(inputGlob)
 
   if (!parsedGlob.is.glob) {
-    return specPattern
+    return inputGlob
   }
 
   let dirname = parsedGlob.path.dirname
@@ -280,14 +280,12 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName () {
-    const getDefaultFileName = (testingType: TestingType) => `cypress/${testingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+    const defaultFilename = `cypress/${this.ctx.coreData.currentTestingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}/`
 
     try {
       if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
         return null
       }
-
-      const defaultFileName = getDefaultFileName(this.ctx.coreData.currentTestingType)
 
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()
@@ -296,23 +294,29 @@ export class ProjectDataSource {
         specPatternSet = specPattern[0]
       }
 
+      // 1. If there is no spec pattern, use the default for this testing type.
       if (!specPatternSet) {
-        return defaultFileName
+        return defaultFilename
       }
 
+      // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
       if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
-        return defaultFileName
+        return defaultFilename
       }
 
-      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
+      // 3. If there are existing specs, return the longest common path prefix between them.
 
-      if (!specFileName) {
-        return defaultFileName
-      }
+      // 4. Otherwise, return the longest possible prefix according to the spec pattern.
+      const filenameFromGlob = getLongestCommonPrefixFromGlob(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
 
-      return specFileName
-    } catch {
-      return getDefaultFileName(this.ctx.coreData.currentTestingType ?? 'e2e')
+      if (filenameFromGlob) return filenameFromGlob
+
+      // 5. Return the default for this testing type if we cannot decide from the spec pattern.
+      return defaultFilename
+    } catch (err) {
+      debug('Error intelligently detecting default filename, using safe default %o', err)
+
+      return defaultFilename
     }
   }
 
