@@ -107,6 +107,11 @@ export const Query = objectType({
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
 
+    t.nonNull.boolean('invokedFromCli', {
+      description: 'Whether the app was invoked from the CLI',
+      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
+    })
+
     t.field('node', {
       type: 'Node',
       args: {

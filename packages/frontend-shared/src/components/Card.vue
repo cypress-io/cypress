@@ -1,17 +1,18 @@
 <template>
   <div
-    class="relative rounded cursor-pointer h-auto outline-none border-1
-      text-center block group focus-within-default hocus-default
+    class="rounded h-auto outline-none border-1 text-center
+      relative block group
       children:hyphens-manual"
     :class="{
-      'bg-gray-50 border-gray-100 pointer-events-none': disabled
+      'bg-gray-50 border-gray-100 cursor-default': disabled,
+      'cursor-pointer focus-within-default hocus-default': !disabled
     }"
     data-cy="card"
-    @click="emits('click')"
+    @click="!disabled && emits('click')"
   >
     <div
       v-if="title === t('testingType.component.name')"
-      class="ribbon absolute top-0 right-0 text-teal-600"
+      class="top-0 right-0 text-teal-600 ribbon absolute"
       aria-hidden="true"
     >
       {{ t('versions.beta') }}
@@ -23,14 +24,14 @@
       <component
         :is="hoverIcon"
         v-if="hoverIcon"
-        class="opacity-0 absolute group-focus:opacity-100 group-hover:opacity-100"
-        :class="iconClass"
+        class="opacity-0 absolute"
+        :class="[iconClass, {'group-hover:opacity-100 group-focus:opacity-100': !disabled}]"
         data-cy="card-icon"
       />
       <component
         :is="icon"
         class="opacity-100"
-        :class="[ hoverIcon ? 'group-hover:opacity-0' : undefined,
+        :class="[ hoverIcon && !disabled ? 'group-hover:opacity-0' : undefined,
                   iconClass]
         "
         data-cy="card-icon"
@@ -41,14 +42,14 @@
     <button
       class="font-medium mx-8px mb-8px text-indigo-500 text-18px leading-24px focus:outline-transparent"
       :class="{
-        'text-gray-700': disabled
+        'text-gray-700 cursor-default': disabled
       }"
       :disabled="disabled"
     >
       {{ title }}
     </button>
     <p class="tracking-tight text-gray-600 text-14px leading-20px">
-      {{ description }}
+      <slot>{{ description }}</slot>
     </p>
     <slot name="footer" />
     <div

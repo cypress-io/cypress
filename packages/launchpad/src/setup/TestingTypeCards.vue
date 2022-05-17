@@ -1,7 +1,6 @@
 <template>
   <TestingTypePicker
     :gql="props.gql"
-    :is-app="false"
     @pick="selectTestingType"
   />
 </template>
