@@ -34,6 +34,13 @@ let pinia: Pinia
 beforeEach(() => {
   pinia = createPinia()
   setActivePinia(pinia)
+
+  cy.window().then((win) => {
+    // @ts-ignore
+    win.__CYPRESS_CONFIG__ = {
+      base64Config: Cypress.Buffer.from(JSON.stringify({ platform: Cypress.platform })).toString('base64'),
+    }
+  })
 })
 
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })
