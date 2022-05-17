@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Screenshots Color Fixture</title>
+    <style>
+      body { 
+        margin: 0; 
+      }
+
+      div[data-cy="colored-element-block"]{
+        height: 2000px; 
+        width: 2000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-cy="colored-element-block"></div>
+  </body>
+  <script type="text/javascript">
+    const queryString = location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    document.querySelector('[data-cy="colored-element-block"]').style.backgroundColor = urlParams.get('color')
+  </script>
+</html>

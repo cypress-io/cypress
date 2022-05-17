@@ -41,10 +41,8 @@ context('cy.origin viewport', () => {
 
           cy.viewport(320, 480)
 
-          cy.window().then((win) => {
-            expect(win.innerHeight).to.equal(480)
-            expect(win.innerWidth).to.equal(320)
-          })
+          cy.window().its('innerHeight').should('eq', 480)
+          cy.window().its('innerWidth').should('eq', 320)
         })
       })
 
@@ -153,10 +151,9 @@ context('cy.origin viewport', () => {
       it('syncs the viewport across multiple origins', () => {
         cy.origin('http://foobar.com:3500', () => {
           cy.viewport(320, 480)
-          cy.window().then((win) => {
-            expect(win.innerWidth).to.equal(320)
-            expect(win.innerHeight).to.equal(480)
-          })
+
+          cy.window().its('innerHeight').should('eq', 480)
+          cy.window().its('innerWidth').should('eq', 320)
         })
 
         cy.window().then((win) => {

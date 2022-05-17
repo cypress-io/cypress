@@ -1,17 +1,19 @@
 import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
-import debugModule from 'debug'
 import type { HttpMiddleware } from './'
+
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
 }>
 
-const debug = debugModule('cypress:proxy:http:request-middleware')
-
 const LogRequest: RequestMiddleware = function () {
-  debug('proxying request %o', {
+  this.debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
 

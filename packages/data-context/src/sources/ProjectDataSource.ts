@@ -2,7 +2,7 @@ import os from 'os'
 import chokidar from 'chokidar'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
 import minimatch from 'minimatch'
-import { debounce, isEqual } from 'lodash'
+import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
@@ -18,6 +18,7 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { FindSpecs } from '../actions'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -210,20 +211,44 @@ export class ProjectDataSource {
     }
   }
 
-  async findSpecs (
-    projectRoot: string,
-    testingType: Cypress.TestingType,
-    specPattern: string[],
-    excludeSpecPattern: string[],
-    globToRemove: string[],
-  ): Promise<FoundSpec[]> {
-    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(
+  async findSpecs ({
+    projectRoot,
+    testingType,
+    specPattern,
+    configSpecPattern,
+    excludeSpecPattern,
+    additionalIgnorePattern,
+  }: FindSpecs<string[]>): Promise<FoundSpec[]> {
+    let specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
       specPattern, {
         absolute: true,
-        ignore: [...excludeSpecPattern, ...globToRemove],
+        ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
       },
     )
+
+    // If the specPattern and configSpecPattern are different,
+    // it means the user passed something non-default via --spec (run mode only)
+    // in this scenario, we want to grab everything that matches `--spec`
+    // that falls within their default specPattern. The reason is so we avoid
+    // attempting to run things that are not specs, eg source code, videos, etc.
+    //
+    // Example: developer wants to run tests associated with timers in packages/driver
+    // So they run yarn cypress:run --spec **/timers*
+    // we do **not** want to capture `timers.ts` (source code) or a video in
+    // cypress/videos/timers.cy.ts.mp4, so we take the intersection between specPattern
+    // and --spec.
+    if (!_.isEqual(specPattern, configSpecPattern)) {
+      const defaultSpecAbsolutePaths = await this.ctx.file.getFilesByGlob(
+        projectRoot,
+        configSpecPattern, {
+          absolute: true,
+          ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
+        },
+      )
+
+      specAbsolutePaths = _.intersection(specAbsolutePaths, defaultSpecAbsolutePaths)
+    }
 
     const matched = matchedSpecs({
       projectRoot,
@@ -235,13 +260,14 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher (
-    projectRoot: string,
-    testingType: Cypress.TestingType,
-    specPattern: string[],
-    excludeSpecPattern: string[],
-    additionalIgnore: string[],
-  ) {
+  startSpecWatcher ({
+    projectRoot,
+    testingType,
+    specPattern,
+    configSpecPattern,
+    excludeSpecPattern,
+    additionalIgnorePattern,
+  }: FindSpecs<string[]>) {
     this.stopSpecWatcher()
 
     const currentProject = this.ctx.currentProject
@@ -253,10 +279,17 @@ export class ProjectDataSource {
     // When file system changes are detected, we retrieve any spec files matching
     // the determined specPattern. This function is debounced to limit execution
     // during sequential file operations.
-    const onProjectFileSystemChange = debounce(async () => {
-      const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
+    const onProjectFileSystemChange = _.debounce(async () => {
+      const specs = await this.findSpecs({
+        projectRoot,
+        testingType,
+        specPattern,
+        configSpecPattern,
+        excludeSpecPattern,
+        additionalIgnorePattern,
+      })
 
-      if (isEqual(this.specs, specs)) {
+      if (_.isEqual(this.specs, specs)) {
         this.ctx.actions.project.refreshSpecs(specs)
 
         // If no differences are found, we do not need to emit events
@@ -272,7 +305,7 @@ export class ProjectDataSource {
     this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
       cwd: projectRoot,
-      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnore],
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
     })
 
     // the 'all' event includes: add, addDir, change, unlink, unlinkDir
@@ -417,9 +450,9 @@ export class ProjectDataSource {
     const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return isEqual(specPattern, [e2e])
+      return _.isEqual(specPattern, [e2e])
     }
 
-    return isEqual(specPattern, [component])
+    return _.isEqual(specPattern, [component])
   }
 }

@@ -18,7 +18,7 @@ describe('e2e cdp', function () {
   // NOTE: this test takes almost a minute and is largely redundant with protocol_spec
   systemTests.it.skip('fails when remote debugging port cannot be connected to', {
     project: 'remote-debugging-port-removed',
-    spec: 'spec.ts',
+    spec: 'spec.cy.ts',
     browser: 'chrome',
     expectedExitCode: 1,
   })
@@ -26,7 +26,7 @@ describe('e2e cdp', function () {
   // https://github.com/cypress-io/cypress/issues/5685
   systemTests.it('handles disconnections as expected', {
     project: 'remote-debugging-disconnect',
-    spec: 'spec.ts',
+    spec: 'spec.cy.ts',
     browser: 'chrome',
     expectedExitCode: 1,
     snapshot: true,
