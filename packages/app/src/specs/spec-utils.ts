@@ -5,8 +5,18 @@ import _ from 'lodash'
 import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import { getRunnerConfigFromWindow } from '../runner'
 
-const getRegexSeparator = () => getRunnerConfigFromWindow().platform === 'win32' ? /\\/ : /\//
-const getSeparator = () => getRunnerConfigFromWindow().platform === 'win32' ? '\\' : '/'
+// Platform may not be available when this file is loaded (e.g. during component our component tests) so
+// we defer loading it until it's used
+let platform
+const getPlatform = (): string => {
+  if (!platform) {
+    platform = getRunnerConfigFromWindow().platform
+  }
+
+  return platform
+}
+const getRegexSeparator = () => getPlatform() === 'win32' ? /\\/ : /\//
+const getSeparator = () => getPlatform() === 'win32' ? '\\' : '/'
 
 export type FuzzyFoundSpec<T = FoundSpec> = T & {
   fileIndexes: number[]
