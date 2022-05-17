@@ -1,7 +1,7 @@
 import chai from 'chai'
 import os from 'os'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getLongestCommonPrefixFromPaths, getLongestCommonPrefixFromGlob } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, BrowserApiShape, getLongestCommonPrefixFromPaths, getFilenameFromSpecPattern } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
 import chokidar from 'chokidar'
@@ -226,35 +226,35 @@ describe('getLongestCommonPrefixFromPaths', () => {
   })
 })
 
-describe('getLongestCommonPrefixFromGlob', () => {
+describe('getFilenameFromSpecPattern', () => {
   context('dirname', () => {
     it('returns pattern without change if it is do not a glob', () => {
       const specPattern = 'cypress/e2e/foo.spec.ts'
-      const defaultFileName = getLongestCommonPrefixFromGlob(specPattern, 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern(specPattern, 'e2e')
 
       expect(defaultFileName).to.eq(specPattern)
     })
 
     it('remove ** from glob if it is not in the beginning', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/**/foo.spec.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/**/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/foo.spec.ts')
     })
 
     it('replace ** for cypress if it starts with **', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('**/e2e/foo.spec.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('**/e2e/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
     })
 
     it('replace ** for cypress if it starts with ** and omit extra **', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('**/**/foo.spec.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('**/**/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/foo.spec.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('{cypress,tests}/{integration,e2e}/foo.spec.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('{cypress,tests}/{integration,e2e}/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/integration/foo.spec.ts')
     })
@@ -262,13 +262,13 @@ describe('getLongestCommonPrefixFromGlob', () => {
 
   context('filename', () => {
     it('replace * for filename', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/*.spec.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/*.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.spec.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/{foo,filename}.spec.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/{foo,filename}.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
     })
@@ -276,13 +276,13 @@ describe('getLongestCommonPrefixFromGlob', () => {
 
   context('test extension', () => {
     it('replace * for filename', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/filename.*.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.*.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/filename.{spec,cy}.ts', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.{spec,cy}.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.spec.ts')
     })
@@ -290,25 +290,25 @@ describe('getLongestCommonPrefixFromGlob', () => {
 
   context('lang extension', () => {
     it('if project use TS, set TS as extension if it exists in the glob', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/filename.cy.ts', 'e2e', 'ts')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.ts', 'e2e', 'ts')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
 
     it('if project use TS, set TS as extension if it exists in the options of extensions', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/filename.cy.{js,ts,tsx}', 'e2e', 'ts')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.{js,ts,tsx}', 'e2e', 'ts')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
 
     it('if project use TS, do not set TS as extension if it do not exists in the options of extensions', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/filename.cy.{js,jsx}', 'e2e', 'ts')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.{js,jsx}', 'e2e', 'ts')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.js')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('cypress/e2e/filename.cy.{ts,js}', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.{ts,js}', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
@@ -316,43 +316,43 @@ describe('getLongestCommonPrefixFromGlob', () => {
 
   context('extra cases', () => {
     it('creates specName for tests/*.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('tests/*.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('tests/*.js', 'e2e')
 
       expect(defaultFileName).to.eq('tests/filename.js')
     })
 
     it('creates specName for src/*-test.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('src/*-test.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('src/*-test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/filename-test.js')
     })
 
     it('creates specName for src/*.foo.bar.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('src/*.foo.bar.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('src/*.foo.bar.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/filename.foo.bar.js')
     })
 
     it('creates specName for src/prefix.*.test.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('src/prefix.*.test.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('src/prefix.*.test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/prefix.cy.test.js')
     })
 
     it('creates specName for src/*/*.test.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('src/*/*.test.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('src/*/*.test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/e2e/filename.test.js')
     })
 
     it('creates specName for src-*/**/*.test.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('src-*/**/*.test.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('src-*/**/*.test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src-e2e/filename.test.js')
     })
 
     it('creates specName for src/*.test.(js|jsx)', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('src/*.test.(js|jsx)', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('src/*.test.(js|jsx)', 'e2e')
 
       const possiblesFileNames = ['src/filename.test.jsx', 'src/filename.test.js']
 
@@ -360,7 +360,7 @@ describe('getLongestCommonPrefixFromGlob', () => {
     })
 
     it('creates specName for (src|components)/**/*.test.js', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('(src|components)/**/*.test.js', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('(src|components)/**/*.test.js', 'e2e')
 
       const possiblesFileNames = ['src/filename.test.js', 'components/filename.test.js']
 
@@ -368,7 +368,7 @@ describe('getLongestCommonPrefixFromGlob', () => {
     })
 
     it('creates specName for e2e/**/*.cy.{js,jsx,ts,tsx}', () => {
-      const defaultFileName = getLongestCommonPrefixFromGlob('e2e/**/*.cy.{js,jsx,ts,tsx}', 'e2e')
+      const defaultFileName = getFilenameFromSpecPattern('e2e/**/*.cy.{js,jsx,ts,tsx}', 'e2e')
 
       expect(defaultFileName).to.eq('e2e/filename.cy.js')
     })

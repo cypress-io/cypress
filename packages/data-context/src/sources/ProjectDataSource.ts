@@ -131,15 +131,15 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   return lcp.slice(0, end).join(path.sep)
 }
 
-export function getLongestCommonPrefixFromGlob (inputGlob: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
+export function getFilenameFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
 
-  const parsedGlob = parseGlob(inputGlob)
+  const parsedGlob = parseGlob(specPattern)
 
   if (!parsedGlob.is.glob) {
-    return inputGlob
+    return specPattern
   }
 
   let dirname = parsedGlob.path.dirname
@@ -339,8 +339,8 @@ export class ProjectDataSource {
 
       if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, defaultFilename)
 
-      // 4. Otherwise, return the longest possible prefix according to the spec pattern.
-      const filenameFromGlob = getLongestCommonPrefixFromGlob(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
+      // 4. Otherwise, return a filename that fulfills to the spec pattern.
+      const filenameFromGlob = getFilenameFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
 
       if (filenameFromGlob) return filenameFromGlob
 
