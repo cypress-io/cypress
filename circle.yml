@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - tbiethman/develop-into-10-with-electron
+        - tbiethman/flake
 
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
