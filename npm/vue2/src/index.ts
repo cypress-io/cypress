@@ -19,6 +19,8 @@ const defaultOptions: (keyof MountOptions)[] = [
   'extensions',
 ]
 
+const DEFAULT_COMP_NAME = 'unknown'
+
 const registerGlobalComponents = (Vue, options) => {
   const globalComponents = Cypress._.get(options, 'extensions.components')
 
@@ -291,6 +293,30 @@ const injectStyles = (options: StyleOptions) => {
 }
 
 /**
+ * Extract the component name from the object passed to mount
+ * @param componentOptions the compoennt passed to mount
+ * @returns name of the component
+ */
+function getComponentDisplayName (componentOptions: any): string {
+  if (componentOptions.name) {
+    return componentOptions.name
+  }
+
+  if (componentOptions.__file) {
+    const filepathSplit = componentOptions.__file.split('/')
+    const fileName = filepathSplit[filepathSplit.length - 1] ?? DEFAULT_COMP_NAME
+
+    // remove the extension .js, .ts or .vue from the filename to get the name of the component
+    const baseFileName = fileName.replace(/\.(js|ts|vue)?$/, '')
+
+    // if the filename is index, then we can use the direct parent foldername, else use the name itself
+    return (baseFileName === 'index' ? filepathSplit[filepathSplit.length - 2] : baseFileName)
+  }
+
+  return DEFAULT_COMP_NAME
+}
+
+/**
  * Mounts a Vue component inside Cypress browser.
  * @param {object} component imported from Vue file
  * @example
@@ -316,6 +342,9 @@ export const mount = (
     defaultOptions,
   )
 
+  const componentName = getComponentDisplayName(component)
+  const message = `<${componentName} ... />`
+
   return cy
   .window({
     log: false,
@@ -333,6 +362,13 @@ export const mount = (
     })
   })
   .then((win) => {
+    if (optionsOrProps.log !== false) {
+      Cypress.log({
+        name: 'mount',
+        message: [message],
+      }).snapshot('mounted').end()
+    }
+
     const localVue = createLocalVue()
 
     // @ts-ignore
