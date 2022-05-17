@@ -113,12 +113,12 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
 
   if (paths.length === 1) return lcp.slice(0, -1).join(path.sep)
 
-  let endIndex
+  let endIndex = paths[0].length
 
   for (const filename of paths.slice(1)) {
     const pathParts = getPathParts(filename)
 
-    for (let i = pathParts.length - 1; i >= 0; i--) {
+    for (let i = endIndex - 1; i >= 0; i--) {
       if (lcp[i] !== pathParts[i]) {
         endIndex = i
         delete lcp[i]
