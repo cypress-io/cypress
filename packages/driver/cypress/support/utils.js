@@ -107,10 +107,7 @@ const getAllFn = (...aliases) => {
   )
 }
 
-// FIXME: currently increasing the timeout here from 250ms to 3 second
-// due to some unknown performance issues with logs coming back in from the primary in the 10.0-release branch.
-// this timeout should be reduced in the future once these performance issues are addressed.
-const shouldWithTimeout = (cb, timeout = 3000) => {
+const shouldWithTimeout = (cb, timeout = 250) => {
   cy.wrap({}, { timeout }).should(cb)
 }
 

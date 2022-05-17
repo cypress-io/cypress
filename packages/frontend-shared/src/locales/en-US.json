@@ -489,7 +489,7 @@
       "failed": "failed"
     },
     "errors": {
-      "notfound": {
+      "notFound": {
         "title": "Couldn't find your project",
         "description": "We were unable to find an existing project matching the {0} set in your Cypress config file. You can reconnect with an existing project or create a new project.",
         "button": "Reconnect your project"
@@ -503,6 +503,12 @@
         "title": "Your access request for this project has been sent.",
         "description": "The owner of this project has been notified of your request. We'll notify you via email when your access request has been granted.",
         "button": "Request Sent"
+      },
+      "connectionFailed": {
+        "title": "Cannot connect to the Cypress Dashboard",
+        "description": "The request times out when trying to retrieve the recorded runs from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
+        "link": "Support Page",
+        "button": "Try again"
       }
     }
   },

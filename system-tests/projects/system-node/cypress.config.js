@@ -1,5 +1,6 @@
 module.exports = {
   'e2e': {
+    'specPattern': 'cypress/e2e/*',
     'supportFile': false,
     setupNodeEvents (on, config) {
       process.stderr.write('Plugin Loaded\n')

@@ -396,7 +396,7 @@ describe('e2e record', () => {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id.config.js',
-        spec: 'studio_written.spec.js',
+        spec: 'studio_written.cy.js',
         record: true,
         snapshot: true,
       })
@@ -447,7 +447,7 @@ describe('e2e record', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id.config.js',
         record: true,
-        spec: 'empty_suite.spec.js,empty.spec.js',
+        spec: 'empty_suite.cy.js,empty.cy.js',
         snapshot: true,
         expectedExitCode: 0,
       })
@@ -619,7 +619,7 @@ describe('e2e record', () => {
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id-without-video.config.js',
-          spec: 'a_record.spec.js,b_record.spec.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
           record: true,
           snapshot: false,
         })
@@ -660,7 +660,7 @@ describe('e2e record', () => {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        spec: 'a_record_instantfail.cy.js,b_record.cy.js',
         record: true,
         snapshot: true,
         expectedExitCode: 1,
@@ -688,7 +688,7 @@ describe('e2e record', () => {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        spec: 'a_record_instantfail.cy.js,b_record.cy.js',
         record: true,
         snapshot: true,
         group: 'abc',
@@ -891,7 +891,7 @@ describe('e2e record', () => {
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
-          spec: '*_record.spec.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
           record: true,
           snapshot: true,
           expectedExitCode: 1,
@@ -1203,7 +1203,7 @@ describe('e2e record', () => {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
-          spec: '*_record_*',
+          spec: 'a_record_instantfail.cy.js',
           record: true,
           snapshot: true,
           expectedExitCode: 1,
@@ -1257,7 +1257,7 @@ describe('e2e record', () => {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
-          spec: '*_record.spec*',
+          spec: 'a_record.cy.js,b_record.cy.js',
           group: 'foo',
           ciBuildId: 1,
           expectedExitCode: 1,
@@ -1281,7 +1281,7 @@ describe('e2e record', () => {
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
-          spec: '*_record.spec.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
           record: true,
           group: 'foo',
           ciBuildId: 'ciBuildId123',

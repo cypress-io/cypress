@@ -1,6 +1,8 @@
 context('cy.origin screenshot', () => {
+  const { devicePixelRatio } = window
+
   context('set viewport', () => {
-    beforeEach(() => {
+    beforeEach(function () {
       this.serverResult = {
         path: '/path/to/screenshot',
         size: 12,
@@ -20,7 +22,7 @@ context('cy.origin screenshot', () => {
       cy.get('a[data-cy="screenshots-link"]').click()
     })
 
-    it('captures the fullPage', () => {
+    it('captures the fullPage', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -34,7 +36,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('captures the runner', () => {
+    it('captures the runner', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -46,7 +48,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('captures the viewport', () => {
+    it('captures the viewport', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -60,7 +62,7 @@ context('cy.origin screenshot', () => {
   })
 
   context('without setting viewport', () => {
-    beforeEach(() => {
+    beforeEach(function () {
       this.serverResult = {
         path: '/path/to/screenshot',
         size: 12,
@@ -78,7 +80,7 @@ context('cy.origin screenshot', () => {
       cy.get('a[data-cy="screenshots-link"]').click()
     })
 
-    it('supports multiple titles', () => {
+    it('supports multiple titles', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -89,7 +91,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('supports the blackout option', () => {
+    it('supports the blackout option', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -107,7 +109,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('supports element screenshots', () => {
+    it('supports element screenshots', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -119,7 +121,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('supports screenshot retrying with appropriate naming', () => {
+    it('supports screenshot retrying with appropriate naming', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
@@ -132,7 +134,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('calls the onBeforeScreenshot callback', () => {
+    it('calls the onBeforeScreenshot callback', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onBeforeScreenshot = cy.stub()
@@ -142,7 +144,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('calls the onAfterScreenshot callback', () => {
+    it('calls the onAfterScreenshot callback', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onAfterScreenshot = cy.stub()
@@ -152,7 +154,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('supports the Cypress.screenshot callbacks', () => {
+    it('supports the Cypress.screenshot callbacks', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onAfterScreenshot = cy.stub()
@@ -169,7 +171,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('supports pausing timers', () => {
+    it('supports pausing timers', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
@@ -202,7 +204,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('does not pause timers when disableTimersAndAnimations is false', () => {
+    it('does not pause timers when disableTimersAndAnimations is false', function () {
       cy.origin('http://foobar.com:3500', { args: this.serverResult }, (serverResult) => {
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
@@ -227,7 +229,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('handles errors thrown from setTimeout after the timer is paused', () => {
+    it('handles errors thrown from setTimeout after the timer is paused', function () {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error after screenshot')
@@ -250,7 +252,7 @@ context('cy.origin screenshot', () => {
       })
     })
 
-    it('handles errors thrown from setTimeout when the timer is NOT paused', () => {
+    it('handles errors thrown from setTimeout when the timer is NOT paused', function () {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error during screenshot')
@@ -272,6 +274,221 @@ context('cy.origin screenshot', () => {
 
         // wait to ensure the timeout error has time to process
         cy.wait(100)
+      })
+    })
+  })
+
+  describe('dimensions', () => {
+    it('crops app captures to just app size', () => {
+      cy.viewport(600, 400)
+
+      cy.visit('/')
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.screenshot('crop-check', {
+            capture: 'viewport',
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
+
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 600,
+          height: 400,
+          devicePixelRatio,
+        })
+      })
+    })
+
+    it('can capture fullPage screenshots', () => {
+      cy.viewport(600, 200)
+
+      cy.visit('/')
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page.html')
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.screenshot('fullPage', {
+            capture: 'fullPage',
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
+
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 600,
+          height: 500,
+          devicePixelRatio,
+        })
+      })
+    })
+
+    it('accepts subsequent same captures after multiple tries', () => {
+      cy.viewport(600, 200)
+
+      cy.visit('/')
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page-same.html')
+
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.screenshot('fullPage-same', {
+            capture: 'fullPage',
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
+
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 600,
+          height: 500,
+          devicePixelRatio,
+        })
+      })
+    })
+
+    it('can capture element screenshots', () => {
+      cy.viewport(600, 200)
+
+      cy.visit('/')
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/screenshot-element.html')
+
+        const screenShotPromiseWithPath = new Promise((resolve) => {
+          cy.get('.element').screenshot('element', {
+            onAfterScreenshot ($el, props) {
+              resolve(props.path)
+            },
+          })
+        })
+
+        cy.wrap(screenShotPromiseWithPath)
+      }).then((screenshotPath) => {
+        cy.task('check:screenshot:size', {
+          filePath: screenshotPath,
+          width: 400,
+          height: 300,
+          devicePixelRatio,
+        })
+      })
+    })
+
+    describe('clipping', () => {
+      it('can clip app screenshots', () => {
+        cy.viewport(600, 200)
+
+        cy.visit('/')
+        cy.origin('http://foobar.com:3500', () => {
+          cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.screenshot('app-clip', {
+              capture: 'viewport', clip: { x: 10, y: 10, width: 100, height: 50 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
+          })
+
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 100,
+            height: 50,
+            devicePixelRatio,
+          })
+        })
+      })
+
+      it('can clip runner screenshots', () => {
+        cy.viewport(600, 200)
+
+        cy.visit('/')
+        cy.origin('http://foobar.com:3500', () => {
+          cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
+
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.screenshot('runner-clip', {
+              capture: 'runner', clip: { x: 15, y: 15, width: 120, height: 60 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
+          })
+
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 120,
+            height: 60,
+            devicePixelRatio,
+          })
+        })
+      })
+
+      it('can clip fullPage screenshots', () => {
+        cy.viewport(600, 200)
+
+        cy.visit('/')
+        cy.origin('http://foobar.com:3500', () => {
+          cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page.html')
+
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.screenshot('fullPage-clip', {
+              capture: 'fullPage', clip: { x: 20, y: 20, width: 140, height: 70 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
+          })
+
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 140,
+            height: 70,
+            devicePixelRatio,
+          })
+        })
+      })
+
+      it('can clip element screenshots', () => {
+        cy.viewport(600, 200)
+
+        cy.visit('/')
+        cy.origin('http://foobar.com:3500', () => {
+          cy.visit('http://www.foobar.com:3500/fixtures/screenshot-element.html')
+          const screenShotPromiseWithPath = new Promise((resolve) => {
+            cy.get('.element').screenshot('element-clip', {
+              clip: { x: 25, y: 25, width: 160, height: 80 },
+              onAfterScreenshot ($el, props) {
+                resolve(props.path)
+              },
+            })
+          })
+
+          cy.wrap(screenShotPromiseWithPath)
+        }).then((screenshotPath) => {
+          cy.task('check:screenshot:size', {
+            filePath: screenshotPath,
+            width: 160,
+            height: 80,
+            devicePixelRatio,
+          })
+        })
       })
     })
   })

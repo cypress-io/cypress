@@ -82,7 +82,7 @@ As the nodeVersion configuration option will be removed in a future release, it 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (bundled.spec.js)                                                          │
-  │ Searched:   cypress/integration/bundled.spec.js                                                │
+  │ Searched:   cypress/e2e/bundled.spec.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
