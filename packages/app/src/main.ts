@@ -23,8 +23,6 @@ const app = createApp(App)
 
 const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 
-app.provide('platform', config.platform)
-
 const ws = createWebsocket(config.socketIoRoute)
 
 window.ws = ws
