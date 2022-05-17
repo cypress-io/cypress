@@ -4,16 +4,6 @@ describe('cy.origin - uncaught errors', () => {
     cy.get('a[data-cy="errors-link"]').click()
   })
 
-  afterEach(() => {
-    // FIXME: Tests that end with a cy.origin command and enqueue no further cy
-    // commands may have origin's unload event bleed into subsequent tests
-    // and prevent stability from being reached, causing those tests to hang.
-    // We enqueue another cy command after each test to ensure stability
-    // is reached for the next test. This additional command can be removed with the
-    // completion of: https://github.com/cypress-io/cypress/issues/21300
-    cy.then(() => { /* ensuring stability */ })
-  })
-
   describe('sync errors', () => {
     it('appropriately reports negative assertions', (done) => {
       cy.on('fail', (err) => {
@@ -194,6 +184,16 @@ describe('cy.origin - uncaught errors', () => {
   })
 
   describe('unhandled rejections', () => {
+    afterEach(() => {
+      // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+      // commands may have origin's unload event bleed into subsequent tests
+      // and prevent stability from being reached, causing those tests to hang.
+      // We enqueue another cy command after each test to ensure stability
+      // is reached for the next test. This additional command can be removed with the
+      // completion of: https://github.com/cypress-io/cypress/issues/21300
+      cy.then(() => { /* ensuring stability */ })
+    })
+
     it('unhandled rejection triggers uncaught:exception and has promise as third argument', () => {
       cy.origin('http://foobar.com:3500', () => {
         const r = cy.state('runnable')
@@ -266,6 +266,16 @@ describe('cy.origin - uncaught errors', () => {
   })
 
   describe('unserializable errors', () => {
+    afterEach(() => {
+      // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+      // commands may have origin's unload event bleed into subsequent tests
+      // and prevent stability from being reached, causing those tests to hang.
+      // We enqueue another cy command after each test to ensure stability
+      // is reached for the next test. This additional command can be removed with the
+      // completion of: https://github.com/cypress-io/cypress/issues/21300
+      cy.then(() => { /* ensuring stability */ })
+    })
+
     it('handles users throwing dom elements', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.equal('CypressError')
@@ -316,6 +326,16 @@ describe('cy.origin - uncaught errors', () => {
   })
 
   describe('serializable errors', () => {
+    afterEach(() => {
+      // FIXME: Tests that end with a cy.origin command and enqueue no further cy
+      // commands may have origin's unload event bleed into subsequent tests
+      // and prevent stability from being reached, causing those tests to hang.
+      // We enqueue another cy command after each test to ensure stability
+      // is reached for the next test. This additional command can be removed with the
+      // completion of: https://github.com/cypress-io/cypress/issues/21300
+      cy.then(() => { /* ensuring stability */ })
+    })
+
     it('handles users throwing complex errors/classes', (done) => {
       cy.on('fail', (err: any) => {
         expect(err.name).to.equal('CustomError')
