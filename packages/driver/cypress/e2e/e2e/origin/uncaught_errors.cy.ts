@@ -156,23 +156,20 @@ describe('cy.origin - uncaught errors', () => {
       })
     })
 
-    // TODO: skipping to see if it's impacting next test
-    it.skip('passes the current test/command if async errors are thrown from the secondary origin AUT, but the cy.origin callback is finished running', () => {
+    it('passes the current test/command if async errors are thrown from the secondary origin AUT, but the cy.origin callback is finished running', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const failureSpy = cy.spy()
 
       cy.on('uncaught:exception', uncaughtExceptionSpy)
-
       cy.on('fail', failureSpy)
 
       cy.origin('http://foobar.com:3500', () => {
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
-        setTimeout(() => {
-          cy.get('.trigger-async-error').click()
-        }, 100)
+        cy.get('.trigger-async-error').click()
       }).then(() => {
         expect(uncaughtExceptionSpy).not.to.be.called
         expect(failureSpy).not.to.be.called
+        done()
       })
     })
 
