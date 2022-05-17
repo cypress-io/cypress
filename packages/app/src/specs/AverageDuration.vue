@@ -4,7 +4,7 @@
     class="flex justify-center"
     data-cy="run-status-dots"
   >
-    {{ getDurationString(props.gql?.cloudSpec?.data?.averageDuration ?? 0 ) }}
+    {{ getDurationString(props.gql?.avgDurationInfo?.data?.averageDuration ?? 0 ) }}
     <!-- {{ props.gql?.cloudSpec?.status }} -->
   </div>
 </template>
@@ -19,7 +19,8 @@ import { getDurationString } from '@packages/frontend-shared/src/utils/time'
 gql`
 fragment AverageDuration on Spec {
   id
-  cloudSpec {
+  # TODO: change this fragment to be "fragment AverageDuration on CloudProjectSpec" and move the status logic up
+  avgDurationInfo: cloudSpec(name: "AverageDuration") {
     id
     status
     data {
@@ -39,9 +40,9 @@ const props = withDefaults(defineProps<{
 })
 
 const isLoading = computed(() => {
-  // const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
+  const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
 
-  return false//props.gql?.cloudSpec?.status !== 'ERRORED' && !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
+  return props.gql?.avgDurationInfo?.status !== 'ERRORED' && !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.avgDurationInfo?.status)
 })
 
 </script>

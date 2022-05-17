@@ -466,7 +466,10 @@ type CurrentProject implements Node & ProjectLike {
   A refetchable remote field implementation to fetch the cloudProject,
   this can safely be used when rendering a list of projects
   """
-  cloudProjectRemote: RemoteFetchableCloudProjectResult
+  cloudProjectRemote(
+    """A globally unique name for this field"""
+    name: String!
+  ): RemoteFetchableCloudProjectResult
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
@@ -850,7 +853,10 @@ type GlobalProject implements Node & ProjectLike {
   A refetchable remote field implementation to fetch the cloudProject,
   this can safely be used when rendering a list of projects
   """
-  cloudProjectRemote: RemoteFetchableCloudProjectResult
+  cloudProjectRemote(
+    """A globally unique name for this field"""
+    name: String!
+  ): RemoteFetchableCloudProjectResult
 
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
@@ -1253,7 +1259,10 @@ interface ProjectLike {
   A refetchable remote field implementation to fetch the cloudProject,
   this can safely be used when rendering a list of projects
   """
-  cloudProjectRemote: RemoteFetchableCloudProjectResult
+  cloudProjectRemote(
+    """A globally unique name for this field"""
+    name: String!
+  ): RemoteFetchableCloudProjectResult
 
   """Used to associate project with Cypress dashboard"""
   projectId: String
@@ -1503,7 +1512,10 @@ type Spec implements Node {
   baseName: String!
 
   """Wrapper for resolving remote data associated with this field"""
-  cloudSpec: RemoteFetchableCloudProjectSpec
+  cloudSpec(
+    """A globally unique name for this field"""
+    name: String!
+  ): RemoteFetchableCloudProjectSpec
 
   """The file extension (e.g. tsx, jsx)"""
   fileExtension: String!

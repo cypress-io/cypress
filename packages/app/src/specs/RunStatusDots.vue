@@ -115,14 +115,15 @@ import { gql, useMutation } from '@urql/vue'
 gql`
 fragment RunStatusDots on Spec {
   id
-  cloudSpec {
+  cloudSpec(name: "RunStatusDots") @include(if: $hasBranch) {
     id
     status
     data {
       id
-      specRuns(first: 4, fromBranch: "muaz/test") {
+      specRuns(first: 4, fromBranch: $fromBranch) {
         nodes {
           id
+          # TODO: Move most of this (everything the popover needs) into a "cloudNode" query we run lazily in SpecRunSummary
           runNumber
           testsFailed{
             min

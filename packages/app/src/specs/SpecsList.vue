@@ -219,8 +219,11 @@ fragment Specs_SpecsList on Query {
     id
     projectRoot
     currentTestingType
-    cloudProject{
+    cloudProject {
       __typename
+      ... on CloudProject {
+        id
+      }
     }
     specs {
       id

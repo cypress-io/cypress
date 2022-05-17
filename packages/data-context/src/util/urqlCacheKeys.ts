@@ -32,6 +32,7 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
     ScaffoldedFile: () => null,
+    SpecDataAggregate: () => null,
     LocalSettings: (data) => data.__typename,
     LocalSettingsPreferences: () => null,
     AuthState: () => null,

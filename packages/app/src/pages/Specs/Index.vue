@@ -30,12 +30,21 @@ import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
-import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } from '../../generated/graphql'
+import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
 
 const { t } = useI18n()
 
 gql`
-query SpecsPageContainer {
+query SpecsPageContainer_BranchInfo {
+  currentProject {
+    id
+    branch
+  }
+}
+`
+
+gql`
+query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
   ...Specs_SpecsList
   ...NoSpecsPage
   ...CreateSpecModal
@@ -47,7 +56,7 @@ query SpecsPageContainer {
 `
 
 gql`
-subscription SpecsPageContainer_specsChange {
+subscription SpecsPageContainer_specsChange($fromBranch: String!, $hasBranch: Boolean!) {
   specsChange {
     id
     specs {
@@ -58,9 +67,24 @@ subscription SpecsPageContainer_specsChange {
 }
 `
 
-useSubscription({ query: SpecsPageContainer_SpecsChangeDocument })
+const branchInfo = useQuery({ query: SpecsPageContainer_BranchInfoDocument })
 
-const query = useQuery({ query: SpecsPageContainerDocument })
+const variables = computed(() => {
+  const fromBranch = branchInfo.data.value?.currentProject?.branch ?? ''
+  const hasBranch = Boolean(fromBranch)
+
+  return { hasBranch, fromBranch }
+})
+
+useSubscription({
+  query: SpecsPageContainer_SpecsChangeDocument,
+  variables,
+})
+
+const query = useQuery({
+  query: SpecsPageContainerDocument,
+  variables,
+})
 
 const isDefaultSpecPattern = computed(() => !!query.data.value?.currentProject?.isDefaultSpecPattern)
 

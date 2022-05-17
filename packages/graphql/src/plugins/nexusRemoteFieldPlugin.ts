@@ -1,6 +1,6 @@
 import dedent from 'dedent'
 import type { DocumentNode, GraphQLResolveInfo } from 'graphql'
-import { dynamicOutputMethod, plugin, core, objectType, mutationField, idArg, list, nonNull } from 'nexus'
+import { dynamicOutputMethod, plugin, core, objectType, mutationField, idArg, list, nonNull, stringArg } from 'nexus'
 import { createBatchResolver } from 'graphql-resolve-batch'
 
 import type { NexusGenAbstractTypeMembers } from '../gen/nxs.gen'
@@ -121,7 +121,10 @@ export const remoteFieldPlugin = plugin({
         t.field(fieldName, {
           type: fieldType as any,
           description: fieldConfig.description ?? 'Wrapper for resolving remote data associated with this field',
-          args: fieldConfig.args ?? {},
+          args: {
+            ...fieldConfig.args ?? {},
+            name: nonNull(stringArg({ description: 'A globally unique name for this field' })),
+          },
           // Wrap with a batch resolver, so we aren't doing the same info parsing for each row
           resolve: createBatchResolver((sources, args, ctx, info) => {
             return ctx.remoteRequest.batchResolveRemoteFields(fieldConfig, sources, args, ctx, info)
