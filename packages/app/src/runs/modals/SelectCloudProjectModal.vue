@@ -11,7 +11,7 @@
       v-if="!isOnline"
       class="mt-24px"
     >
-      {{ t('launchpadErrors.noInternet.connectProjectModal') }}
+      {{ t('launchpadErrors.noInternet.message') }}
     </NoInternetConnection>
     <div
       v-else
