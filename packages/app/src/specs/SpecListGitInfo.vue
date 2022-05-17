@@ -6,22 +6,23 @@
     <Tooltip
       placement="top"
       class="h-full grid items-center"
-      :disabled="!classes.showTooltip"
     >
       <component
         :is="classes.icon"
         :class="classes.iconClasses"
       />
       <template
-        v-if="classes.showTooltip"
         #popper
       >
         <div>
           <p class="max-w-sm text-sm truncate overflow-hidden">
-            {{ props.gql.subject }}
+            {{ tooltipMainText }}
           </p>
-          <p class="text-xs">
-            {{ gitTooltipSubtext }}
+          <p
+            v-if="tooltipSubtext"
+            class="text-xs"
+          >
+            {{ tooltipSubtext }}
           </p>
         </div>
       </template>
@@ -66,22 +67,28 @@ const classes = computed(() => {
     created: {
       icon: DocumentIconPlus,
       iconClasses: 'icon-dark-jade-400 icon-light-jade-50',
-      showTooltip: false,
     },
     modified: {
       icon: DocumentIconPlusMinus,
       iconClasses: 'icon-dark-orange-400 icon-light-orange-50',
-      showTooltip: false,
     },
     unmodified: {
       icon: CommitIcon,
       iconClasses: 'icon-light-gray-500',
-      showTooltip: true,
     },
   }[props.gql?.statusType || 'unmodified']
 })
 
-const gitTooltipSubtext = computed(() => {
+const tooltipMainText = computed(() => {
+  switch (props.gql?.statusType) {
+    case 'unmodified': return props.gql?.subject
+    case 'created': return t('file.git.created')
+    case 'modified': return t('file.git.modified')
+    default: return null
+  }
+})
+
+const tooltipSubtext = computed(() => {
   if (props.gql?.statusType === 'unmodified') {
     return t('specPage.rows.gitTooltipSubtext', {
       author: props.gql.author,
@@ -89,7 +96,7 @@ const gitTooltipSubtext = computed(() => {
     })
   }
 
-  return ''
+  return null
 })
 
 </script>
