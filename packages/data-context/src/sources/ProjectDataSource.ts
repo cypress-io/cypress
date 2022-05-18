@@ -343,11 +343,11 @@ export class ProjectDataSource {
     const defaultFilename = `${this.ctx.coreData.currentTestingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
     const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
 
-    try {
-      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-        throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
-      }
+    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+      throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
+    }
 
+    try {
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()
 

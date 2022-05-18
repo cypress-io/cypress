@@ -135,7 +135,8 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.nonNull.string('defaultSpecFileName', {
+    // nullable so we can throw if it can't be decided
+    t.string('defaultSpecFileName', {
       description: 'Default spec file name for spec creation',
       resolve: (source, args, ctx) => {
         return ctx.project.defaultSpecFileName()
