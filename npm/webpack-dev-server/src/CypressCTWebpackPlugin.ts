@@ -68,6 +68,16 @@ export class CypressCTWebpackPlugin {
     }
   };
 
+  private beforeCompile = () => {
+    if (!this.compilation) {
+      return
+    }
+
+    // Ensure we don't try to load files that have been removed from the file system
+    // but have not yet been detected by the onSpecsChange handler
+    this.files = (this.files || []).filter((file) => fs.existsSync(file.absolute))
+  }
+
   /*
    * After compiling, we check for errors and inform the server of them.
    */
@@ -96,7 +106,7 @@ export class CypressCTWebpackPlugin {
     }
   }
 
-  // After emitting assets, we tell the server complitation was successful
+  // After emitting assets, we tell the server compilation was successful
   // so it can trigger a reload the AUT iframe.
   private afterEmit = () => {
     if (!this.compilation?.getStats().hasErrors()) {
@@ -152,6 +162,7 @@ export class CypressCTWebpackPlugin {
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
+    _compiler.hooks.beforeCompile.tap('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.afterCompile.tap('CypressCTPlugin', this.afterCompile)
     _compiler.hooks.afterEmit.tap('CypressCTPlugin', this.afterEmit)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
