@@ -598,6 +598,73 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]').should('not.exist')
     })
+
+    it('shows correct message on create org modal', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.validateExternalLink({
+        name: defaultMessages.runs.connect.modal.createOrg.button,
+        href: 'http://dummy.cypress.io/organizations/create',
+      })
+
+      cy.goOffline()
+
+      cy.get('[data-cy=standard-modal]')
+      .should('contain.text', 'You have no internet connection')
+      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+    })
+
+    it('shows correct message on connect project modal', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          const nodes = obj.result.data.cloudViewer.organizations.nodes
+
+          nodes.push({ ...nodes[0], name: 'aaa', id: 'aaa-id' })
+        }
+
+        return obj.result
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.validateExternalLink({
+        name: defaultMessages.runs.connect.modal.selectProject.manageOrgs,
+        href: 'http://dummy.cypress.io/organizations',
+      })
+
+      cy.goOffline()
+
+      cy.get('[data-cy=standard-modal]')
+      .should('contain.text', 'You have no internet connection')
+      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+    })
   })
 
   describe('refetching', () => {

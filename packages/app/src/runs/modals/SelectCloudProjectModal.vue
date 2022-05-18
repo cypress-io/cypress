@@ -7,7 +7,16 @@
     help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
-    <div class="w-640px">
+    <NoInternetConnection
+      v-if="!isOnline"
+      class="mt-24px"
+    >
+      {{ t('launchpadErrors.noInternet.message') }}
+    </NoInternetConnection>
+    <div
+      v-else
+      class="w-640px"
+    >
       <Select
         v-model="pickedOrganization"
         :options="organizations"
@@ -120,7 +129,10 @@
         />
       </template>
     </div>
-    <template #footer>
+    <template
+      v-if="isOnline"
+      #footer
+    >
       <div class="flex gap-16px">
         <Button
           size="lg"
@@ -153,6 +165,7 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
 import Radio from '@cy/components/Radio.vue'
+import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
@@ -161,8 +174,10 @@ import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectM
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
+import { useOnline } from '@vueuse/core'
 
 const { t } = useI18n()
+const online = useOnline()
 
 gql`
 fragment SelectCloudProjectModal on Query {
@@ -295,4 +310,7 @@ async function createOrConnectProject () {
     }
   }
 }
+
+const isOnline = computed(() => online.value)
+
 </script>
