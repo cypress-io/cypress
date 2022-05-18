@@ -1,4 +1,3 @@
-/// <reference path="../support/e2e.ts" />
 describe('Config options', () => {
   it('supports supportFile = false', () => {
     cy.scaffoldProject('webpack5_wds4-react')
@@ -18,7 +17,7 @@ describe('Config options', () => {
 
     cy.visitApp()
 
-    // 1. assert test executes successfully
+    // 1. assert spec executes successfully
     cy.contains('App.cy.jsx').click()
     cy.get('.passed > .num').should('contain', 1)
 
@@ -30,7 +29,7 @@ describe('Config options', () => {
     // 3. assert redirect back to #/specs with alert presented
     cy.contains('[data-cy="alert"]', 'Spec not found')
 
-    // 4. recreate spec with same name as removed spec
+    // 4. recreate spec, with same name as removed spec
     cy.findByTestId('new-spec-button').click()
     cy.findByRole('dialog').within(() => {
       cy.get('input').clear().type('src/App.cy.jsx')
@@ -41,7 +40,7 @@ describe('Config options', () => {
       cy.contains('button', 'Okay, run the spec').click()
     })
 
-    // 5. assert recreated spec runs successfully
+    // 5. assert recreated spec executes successfully
     cy.get('.passed > .num').should('contain', 1)
   })
 })
