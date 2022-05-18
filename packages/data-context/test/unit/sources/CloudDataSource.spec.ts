@@ -165,6 +165,22 @@ describe('CloudDataSource', () => {
 
       expect(fetchStub).to.have.been.calledTwice
     })
+
+    it('returns error property on response', async () => {
+      fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
+
+      const result = cloudDataSource.executeRemoteGraphQL({
+        document: FAKE_USER_QUERY,
+        variables: {},
+        operationType: 'query',
+      })
+
+      const resolved = await result
+
+      expect(resolved.data).to.eql(undefined)
+      expect(resolved.errors).to.exist
+      expect(resolved.error.networkError.message).to.eql('No Content')
+    })
   })
 
   describe('isResolving', () => {
