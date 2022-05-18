@@ -228,6 +228,74 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         expect(config.projectId).to.equal('newProjectId')
       })
     })
+
+    it('displays correct error message if the cloud mutation returns UNAUTHORIZED', () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          throw new Error('Unauthorized: You are not member of the organization.')
+        }
+
+        return obj.result
+      })
+
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.not.equal('newProjectId')
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+
+      cy.get('[data-cy="alert"]').within(() => {
+        cy.contains(defaultMessages.runs.connect.errors.baseError.title)
+      })
+
+      cy.get('[data-cy="alert-body"]').within(() => {
+        cy.contains('Unauthorized: You are not member of the organization.')
+      })
+    })
+
+    it('displays correct error message if the cloud mutation returns INTERNAL_SERVER_ERROR', () => {
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
+          throw new Error('Unreachable')
+        }
+
+        return obj.result
+      })
+
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad')
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.withCtx(async (ctx) => {
+        const config = await ctx.project.getConfig()
+
+        expect(config.projectId).to.not.equal('newProjectId')
+      })
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+
+      cy.get('[data-cy="alert"]').within(() => {
+        cy.contains(defaultMessages.runs.connect.errors.internalServerError.title)
+      })
+
+      cy.get('[data-cy="alert-body"]').within(() => {
+        cy.contains(defaultMessages.runs.connect.errors.internalServerError.description.replace('{0}', 'Support Page'))
+      })
+    })
   })
 
   context('Runs - Cannot Find Project', () => {

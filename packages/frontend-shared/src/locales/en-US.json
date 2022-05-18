@@ -471,6 +471,16 @@
           "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
           "waitingButton": "Waiting for you to add the projectId..."
         }
+      },
+      "errors": {
+        "baseError": {
+          "title": "Cypress Dashboard Error"
+        },
+        "internalServerError": {
+          "title": "Cannot connect to the Cypress Dashboard",
+          "description": "The request times out when trying to retrieve the info from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
+          "link": "Support Page"
+        }
       }
     },
     "connectSuccessAlert": {

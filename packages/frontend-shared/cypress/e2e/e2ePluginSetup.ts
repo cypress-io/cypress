@@ -226,7 +226,9 @@ async function makeE2ETasks () {
             } catch (e) {
               const err = e as Error
 
-              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+              const code = err.message.includes('Unauthorized') ? 'UNAUTHORIZED' : 'INTERNAL_SERVER_ERROR'
+
+              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err, { code })] }
             }
           }
 

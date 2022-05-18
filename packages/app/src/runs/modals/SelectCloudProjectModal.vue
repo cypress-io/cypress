@@ -17,6 +17,28 @@
       v-else
       class="w-640px"
     >
+      <Alert
+        v-if="graphqlError"
+        :v-model="Boolean(graphqlError)"
+        status="error"
+        :title="isInternalServerError ? t('runs.connect.errors.internalServerError.title') : t('runs.connect.errors.baseError.title')"
+        class="mb-16px"
+        :icon="WarningIcon"
+        dismissible
+      >
+        <p v-if="!isInternalServerError">
+          {{ graphqlError.message }}
+        </p>
+        <i18n-t
+          v-else
+          scope="global"
+          keypath="runs.connect.errors.internalServerError.description"
+        >
+          <ExternalLink href="https://www.cypressstatus.com/">
+            {{ t('runs.connect.errors.internalServerError.link') }}
+          </ExternalLink>
+        </i18n-t>
+      </Alert>
       <Select
         v-model="pickedOrganization"
         :options="organizations"
@@ -166,6 +188,7 @@ import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
 import Radio from '@cy/components/Radio.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
+import Alert from '@cy/components/Alert.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
@@ -175,6 +198,7 @@ import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
+import WarningIcon from '~icons/cy/warning_x16.svg'
 
 const { t } = useI18n()
 const online = useOnline()
@@ -249,6 +273,8 @@ const emit = defineEmits<{
   (event: 'update-projectId-failed', projectId: string): void
 }>()
 
+const isInternalServerError = ref(false)
+const graphqlError = ref<{ extension: string, message: string} | undefined>()
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
@@ -287,11 +313,26 @@ async function createOrConnectProject () {
   const isNewProject = Boolean(newProject.value && pickedOrganization.value)
 
   if (isNewProject) {
-    const { data } = await createCloudProjectMutation.executeMutation({
+    const { data, error } = await createCloudProjectMutation.executeMutation({
       orgId: pickedOrganization.value!.id,
       name: projectName.value,
       public: projectAccess.value === 'public',
     })
+
+    if (error?.graphQLErrors.length) {
+      const err = error.graphQLErrors[0]
+
+      const extension = err.extensions?.code
+
+      isInternalServerError.value = extension === 'INTERNAL_SERVER_ERROR'
+
+      graphqlError.value = {
+        extension,
+        message: err.message,
+      }
+    } else {
+      graphqlError.value = undefined
+    }
 
     projectId = data?.cloudProjectCreate?.slug
   } else {
