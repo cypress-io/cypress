@@ -188,11 +188,14 @@ describe('addToCypressConfig', () => {
       isProjectUsingESModules: true,
     })
 
+    // we generate this using Babel which intentionally does **NOT**
+    // handle formatting, so the output format is kind of weird.
+    // we rely on the user's eslint or prettier to format this properly.
     expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
     import webpackConfig from "./webpack.config.ts";
     export default {
       e2e: {},
-    
+
       component: {
         devServer: {
           framework: "react",
@@ -201,40 +204,6 @@ describe('addToCypressConfig', () => {
         },
       },
     };`.trim())
-
-    expect(result.result).to.eq('MERGED')
-  })
-
-  it('adds component testing and webpack config to e2e config', async () => {
-    const result = await addTestingTypeToCypressConfig({
-      filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.js'),
-      info: {
-        testingType: 'component',
-        bundler: 'webpack',
-        framework: 'react',
-        configPath: './webpack.config.js',
-        needsExplicitConfig: true,
-      },
-      isProjectUsingESModules: false,
-    })
-
-    // we generate this using Babel which intentionally does **NOT**
-    // handle formatting, so the output format is kind of weird.
-    // we rely on the user's eslint or prettier to format this properly.
-    const expected = dedent`
-    const webpackConfig = require('./webpack.config.js')module.exports = {
-      e2e: {},
-    
-      component: {
-        devServer: {
-          framework: 'react',
-          bundler: 'webpack',
-          webpackConfig,
-        },
-      }
-    }`
-
-    expect(stub.getCall(0).lastArg.trim()).to.eq(expected)
 
     expect(result.result).to.eq('MERGED')
   })
