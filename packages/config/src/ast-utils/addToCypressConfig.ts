@@ -112,14 +112,22 @@ export interface AddTestingTypeToCypressConfigOptions {
   }
 }
 
+type ModuleType = 'es' | 'cjs'
+
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
   const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
+
+  const pathExt = path.extname(options.filePath)
+
+  const moduleType: ModuleType = (pathExt === '.ts' || pathExt === '.mjs' || options.isProjectUsingESModules)
+    ? 'es'
+    : 'cjs'
 
   const modulesToAdd: ModuleToAdd[] = []
 
   if (options.info.testingType === 'component') {
     if (options.info.bundler === 'webpack' && options.info.configPath) {
-      if (options.isProjectUsingESModules) {
+      if (moduleType === 'es') {
         modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'webpackConfig'))
       } else {
         modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'webpackConfig'))
@@ -127,7 +135,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     }
 
     if (options.info.bundler === 'vite' && options.info.configPath) {
-      if (options.isProjectUsingESModules) {
+      if (moduleType === 'es') {
         modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'viteConfig'))
       } else {
         modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'viteConfig'))
@@ -145,13 +153,11 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
       // If we can't find the file, or it's an empty file, let's create a new one
     }
 
-    const pathExt = path.extname(options.filePath)
-
     // If for some reason they have deleted the contents of the file, we want to recover
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
       resultStatus = 'ADDED'
-      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules })
+      result = getEmptyCodeBlock(moduleType)
     }
 
     const toPrint = await addToCypressConfig(options.filePath, result, { properties: [toAdd], modules: modulesToAdd })
@@ -170,12 +176,10 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
   }
 }
 
-type OutputExtension = '.ts' | '.mjs' | '.js'
-
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules }: { outputType: OutputExtension, isProjectUsingESModules: boolean}) {
-  if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+function getEmptyCodeBlock (moduleType: ModuleType) {
+  if (moduleType === 'es') {
     return dedent`
       import { defineConfig } from 'cypress'
 
