@@ -152,10 +152,15 @@ export class CloudDataSource {
     return `${print(config.document)}-${stringifyVariables(config.variables)}`
   }
 
-  #formatWithErrors (data: OperationResult<any, any>) {
+  #formatWithErrors = (data: OperationResult<any, any>) => {
     // If we receive a 401 from the dashboard, we need to logout the user
     if (data.error?.response?.status === 401) {
       this.params.logout()
+    }
+
+    if (data.error && data.operation.kind === 'mutation') {
+      // Do nothing on failure here
+      this.invalidate({ __typename: 'Query' }).catch()
     }
 
     return {
