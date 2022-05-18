@@ -61,8 +61,8 @@
 <script setup lang="ts">
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import { buildSpecTree, getDirIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
-import type { SpecTreeNode, FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, getDirIndexes } from './spec-utils'
+import type { SpecTreeNode, FuzzyFoundSpec } from './spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'

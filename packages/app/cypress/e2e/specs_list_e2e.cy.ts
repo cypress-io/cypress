@@ -1,15 +1,17 @@
+import { getPathForPlatform } from '../../src/paths'
+
 describe('App: Spec List (E2E)', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('e2e')
 
-    cy.withCtx((ctx) => {
+    cy.withCtx((ctx, o) => {
       const yesterday = new Date()
 
       yesterday.setDate(yesterday.getDate() - 1)
 
-      sinon.stub(ctx.lifecycleManager.git!, 'gitInfoFor').callsFake(() => {
+      o.sinon.stub(ctx.lifecycleManager.git!, 'gitInfoFor').callsFake(() => {
         return {
           author: 'Test Author',
           lastModifiedTimestamp: yesterday.toDateString(),
@@ -65,6 +67,15 @@ describe('App: Spec List (E2E)', () => {
     cy.get('button').contains('Create new empty spec').should('be.visible')
     cy.get('button').get('[aria-label="Close"]').click()
     cy.get('[data-cy="standard-modal"]').should('not.exist')
+  })
+
+  it('has the correct defaultSpecFileName in the "Create a new spec" modal', () => {
+    cy.get('[data-cy="standard-modal"]').should('not.exist')
+    cy.get('[data-cy="new-spec-button"]').click()
+    cy.get('[data-cy="standard-modal"]').get('h2').contains('Create a new spec')
+    cy.get('button').contains('Scaffold example specs').should('be.visible')
+    cy.get('button').contains('Create new empty spec').should('be.visible').click()
+    cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', getPathForPlatform('cypress/e2e/spec.spec.js'))
   })
 
   it('has an <a> tag in the Spec File Row that runs the selected spec when clicked', () => {
