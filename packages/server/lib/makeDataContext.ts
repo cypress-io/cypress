@@ -3,6 +3,7 @@ import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'e
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
+import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 
 import type {
   AllModeOptions,
@@ -168,13 +169,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       copyTextToClipboard (text: string) {
         electron.clipboard.writeText(text)
       },
-      // These instances of JIT requiring gui/windows can be removed
-      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
       isMainWindowFocused () {
-        return require('./gui/windows').isMainWindowFocused()
+        return isMainWindowFocused()
       },
       focusMainWindow () {
-        return require('./gui/windows').focusMainWindow()
+        return focusMainWindow()
       },
     },
     localSettingsApi: {
