@@ -1,4 +1,5 @@
 export interface CommonModeOptions {
+  _?: (string | null)[] | null
   invokedFromCli: boolean
   userNodePath?: string
   userNodeVersion?: string
@@ -6,11 +7,10 @@ export interface CommonModeOptions {
 }
 
 export interface RunModeOptions extends CommonModeOptions {
-  _?: (null)[] | null
   runProject?: string
   project?: string
   cwd: string
-  testingType?: string
+  testingType?: TestingType
   config: Partial<Cypress.ConfigOptions>
   projectRoot: string
   headless?: boolean | null
@@ -29,7 +29,6 @@ export interface RunModeOptions extends CommonModeOptions {
 export type TestingType = 'e2e' | 'component'
 
 export interface OpenModeOptions extends CommonModeOptions {
-  _?: (string | null)[] | null
   config: Partial<Cypress.ConfigOptions>
   cwd: string
   global?: boolean
