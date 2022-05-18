@@ -2,10 +2,21 @@ import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import { ComputedRef, Ref, ref, watch } from 'vue'
 import _ from 'lodash'
+import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import { getRunnerConfigFromWindow } from '../runner'
 
-import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
+// Platform may not be available when this file is loaded (e.g. during component our component tests) so
+// we defer loading it until it's used
+let platform
+const getPlatform = (): string => {
+  if (!platform) {
+    platform = getRunnerConfigFromWindow().platform
+  }
 
-const PATH_SEP = /[\/\\]/
+  return platform
+}
+const getRegexSeparator = () => getPlatform() === 'win32' ? /\\/ : /\//
+const getSeparator = () => getPlatform() === 'win32' ? '\\' : '/'
 
 export type FuzzyFoundSpec<T = FoundSpec> = T & {
   fileIndexes: number[]
@@ -29,8 +40,8 @@ export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: Sp
 }
 
 export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
-  const [firstFile, ...rest] = path.split(PATH_SEP)
-  const id = tree.id ? [tree.id, firstFile].join('/') : firstFile
+  const [firstFile, ...rest] = path.split(getRegexSeparator())
+  const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
 
   if (rest.length < 1) {
     tree.children.push({ name: firstFile, isLeaf: true, children: [], parent: tree, data, id })
@@ -41,12 +52,12 @@ export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree:
   const foundChild = tree.children.find((child) => child.name === firstFile)
 
   if (foundChild) {
-    buildSpecTreeRecursive(rest.join('/'), foundChild, data)
+    buildSpecTreeRecursive(rest.join(getSeparator()), foundChild, data)
 
     return tree
   }
 
-  const newTree = buildSpecTreeRecursive(rest.join('/'), { name: firstFile, isLeaf: false, children: [], parent: tree, id, data }, data)
+  const newTree = buildSpecTreeRecursive(rest.join(getSeparator()), { name: firstFile, isLeaf: false, children: [], parent: tree, id, data }, data)
 
   tree.children.push(newTree)
 
@@ -64,8 +75,8 @@ function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   // Root name of our tree is '/'. We don't want to collapse into the root node
   // so we check node.parent.parent
   if (node.parent && node.parent.parent && (node.parent.children.length === 1)) {
-    node.parent.name = [node.parent.name, node.name].join('/')
-    node.parent.id = [node.parent.id, node.name].join('/')
+    node.parent.name = [node.parent.name, node.name].join(getSeparator())
+    node.parent.id = [node.parent.id, node.name].join(getSeparator())
     node.parent.children = node.children
   }
 
@@ -109,7 +120,7 @@ function addDirectoryToSpecs <T extends FuzzyFoundSpec> (specs: Partial<T>[]) {
 }
 
 function getDirectoryPath (path: string) {
-  return path.slice(0, path.lastIndexOf('/') ?? path.lastIndexOf('\\'))
+  return path.slice(0, path.lastIndexOf(getSeparator()))
 }
 
 export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {

@@ -6,7 +6,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*',
   },
   component: {
-    specPattern: 'cypress/component-tests/**/*',
+    specPattern: 'cypress/component-tests/*.spec.js',
     devServer: {
       bundler: 'webpack',
     },

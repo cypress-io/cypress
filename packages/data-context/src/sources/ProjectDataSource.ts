@@ -9,7 +9,7 @@ import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
 import { defaultSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
-import mm from 'micromatch'
+import micromatch from 'micromatch'
 import RandExp from 'randexp'
 
 const debug = Debug('cypress:data-context')
@@ -103,7 +103,36 @@ export function transformSpec ({
   }
 }
 
-export function getDefaultSpecFileName (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
+export function getLongestCommonPrefixFromPaths (paths: string[]): string {
+  if (!paths[0]) return ''
+
+  function getPathParts (pathname: string) {
+    return pathname.split(/[\/\\]/g)
+  }
+
+  const lcp = getPathParts(paths[0])
+
+  if (paths.length === 1) return lcp.slice(0, -1).join(path.sep)
+
+  let endIndex = paths[0].length
+
+  for (const filename of paths.slice(1)) {
+    const pathParts = getPathParts(filename)
+
+    for (let i = endIndex - 1; i >= 0; i--) {
+      if (lcp[i] !== pathParts[i]) {
+        endIndex = i
+        delete lcp[i]
+      }
+    }
+
+    if (lcp.length === 0) return ''
+  }
+
+  return lcp.slice(0, endIndex).join(path.sep)
+}
+
+export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -114,36 +143,34 @@ export function getDefaultSpecFileName (specPattern: string, testingType: Testin
     return specPattern
   }
 
-  let dirname = parsedGlob.path.dirname
+  // Remove double-slashes from dirname (like if specPattern has /**/*/)
+  let dirname = parsedGlob.path.dirname.replaceAll(/\/\/+/g, '/')
 
-  if (dirname.startsWith('**')) {
-    dirname = dirname.replace('**', 'cypress')
-  }
+  // If a spec can be in any root dir, go ahead and use "cypress/"
+  if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, 'filename')
+  const fileName = replaceWildCard(parsedGlob.path.filename, testingType === 'e2e' ? 'spec' : 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+    || `.cy.${fileExtensionToUse}`
+
   let extname = replaceWildCard(extnameWithoutExt, 'cy')
 
-  if (extname.startsWith('.')) {
-    extname = extname.substr(1)
-  }
+  if (extname.startsWith('.')) extname = extname.slice(1)
 
-  if (extname.endsWith('.')) {
-    extname = extname.slice(0, -1)
-  }
+  if (extname.endsWith('.')) extname = extname.slice(0, -1)
 
   const basename = [fileName, extname, parsedGlob.path.ext].filter(Boolean).join('.')
 
   const glob = splittedDirname + basename
 
-  const globWithoutBraces = mm.braces(glob, { expand: true })
+  const globWithoutBraces = micromatch.braces(glob, { expand: true })
 
   let finalGlob = globWithoutBraces[0]
 
   if (fileExtensionToUse) {
-    const filteredGlob = mm(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
+    const filteredGlob = micromatch(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
 
     if (filteredGlob?.length) {
       finalGlob = filteredGlob[0]
@@ -312,16 +339,15 @@ export class ProjectDataSource {
     this._specWatcher.on('all', onProjectFileSystemChange)
   }
 
-  async defaultSpecFileName () {
-    const getDefaultFileName = (testingType: TestingType) => `cypress/${testingType}/filename.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+  async defaultSpecFileName (): Promise<string> {
+    const defaultFilename = `${this.ctx.coreData.currentTestingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
+    const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
+
+    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+      throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
+    }
 
     try {
-      if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-        return null
-      }
-
-      const defaultFileName = getDefaultFileName(this.ctx.coreData.currentTestingType)
-
       let specPatternSet: string | undefined
       const { specPattern = [] } = await this.ctx.project.specPatterns()
 
@@ -329,23 +355,33 @@ export class ProjectDataSource {
         specPatternSet = specPattern[0]
       }
 
+      // 1. If there is no spec pattern, use the default for this testing type.
       if (!specPatternSet) {
-        return defaultFileName
+        return defaultPathname
       }
 
+      // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
       if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
-        return defaultFileName
+        return defaultPathname
       }
 
-      const specFileName = getDefaultSpecFileName(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
+      const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
+      const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
 
-      if (!specFileName) {
-        return defaultFileName
-      }
+      // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
+      const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
 
-      return specFileName
-    } catch {
-      return getDefaultFileName(this.ctx.coreData.currentTestingType ?? 'e2e')
+      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
+
+      // 4. Otherwise, return a path that fulfills the spec pattern.
+      if (pathFromSpecPattern) return pathFromSpecPattern
+
+      // 5. Return the default for this testing type if we cannot decide from the spec pattern.
+      return defaultPathname
+    } catch (err) {
+      debug('Error intelligently detecting default filename, using safe default %o', err)
+
+      return defaultPathname
     }
   }
 
