@@ -79,25 +79,21 @@ const emits = defineEmits<{
   (eventName: 'pick', testingType: TestingTypeEnum, currentTestingType: TestingTypeEnum): void
 }>()
 
-const testingTypeStatus = computed(() => {
-  return {
-    e2eStatus: props.gql.currentProject?.isE2EConfigured && props.gql.currentProject.currentTestingType === 'e2e'
-      ? 'running'
-      : props.gql.currentProject?.isE2EConfigured
-        ? 'configured'
-        : 'notConfigured',
-    componentStatus: !props.gql.invokedFromCli
-      ? 'disabled' : props.gql.currentProject?.isCTConfigured && props.gql.currentProject.currentTestingType === 'component'
-        ? 'running'
-        : props.gql.currentProject?.isCTConfigured
-          ? 'configured'
-          : 'notConfigured',
-  }
+const e2eStatus = computed(() => {
+  if (!props.gql.currentProject?.isE2EConfigured) return 'notConfigured'
+
+  return props.gql.currentProject.currentTestingType === 'e2e' ? 'running' : 'configured'
+})
+
+const componentStatus = computed(() => {
+  if (!props.gql.invokedFromCli) return 'disabled'
+
+  if (!props.gql.currentProject?.isCTConfigured) return 'notConfigured'
+
+  return props.gql.currentProject.currentTestingType === 'component' ? 'running' : 'configured'
 })
 
 const testingTypes = computed(() => {
-  const { e2eStatus, componentStatus } = testingTypeStatus.value
-
   return [
     {
       key: 'e2e',
@@ -105,7 +101,7 @@ const testingTypes = computed(() => {
       description: t('testingType.e2e.description'),
       icon: IconE2E,
       iconSolid: IconE2ESolid,
-      status: e2eStatus,
+      status: e2eStatus.value,
     },
     {
       key: 'component',
@@ -113,7 +109,7 @@ const testingTypes = computed(() => {
       description: t('testingType.component.description'),
       icon: IconComponent,
       iconSolid: IconComponentSolid,
-      status: componentStatus,
+      status: componentStatus.value,
     },
   ] as const
 })

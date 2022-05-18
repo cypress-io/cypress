@@ -108,7 +108,7 @@ export const Query = objectType({
     })
 
     t.nonNull.boolean('invokedFromCli', {
-      description: 'Whether the app was invoked from the CLI',
+      description: 'Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)',
       resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
     })
 
