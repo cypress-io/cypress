@@ -48,7 +48,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypre
     // not have a cy.origin for the intermediary origin.
     timeoutId = setTimeout(() => {
       Cypress.backend('cross:origin:release:html')
-    }, 1000)
+    }, 300)
   })
 
   Commands.addAll({
