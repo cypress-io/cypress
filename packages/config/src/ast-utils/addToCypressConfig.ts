@@ -114,6 +114,20 @@ export interface AddTestingTypeToCypressConfigOptions {
 
 type ModuleType = 'es' | 'cjs'
 
+function maybeGetBundlerConfigModule (options: AddTestingTypeToCypressConfigOptions, moduleType: ModuleType): ModuleToAdd | undefined {
+  if (options.info.testingType !== 'component' || !options.info.bundlerConfigPath) {
+    return undefined
+  }
+
+  const configFileName = `${options.info.bundler}Config` as const
+
+  switch (moduleType) {
+    case 'es': return addESModuleDefinition(options.info.bundlerConfigPath, configFileName)
+    case 'cjs': return addCommonJSModuleDefinition(options.info.bundlerConfigPath, configFileName)
+    default: return undefined
+  }
+}
+
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
   const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
 
@@ -125,22 +139,10 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
 
   const modulesToAdd: ModuleToAdd[] = []
 
-  if (options.info.testingType === 'component') {
-    if (options.info.bundler === 'webpack' && options.info.bundlerConfigPath) {
-      if (moduleType === 'es') {
-        modulesToAdd.push(addESModuleDefinition(options.info.bundlerConfigPath, 'webpackConfig'))
-      } else {
-        modulesToAdd.push(addCommonJSModuleDefinition(options.info.bundlerConfigPath, 'webpackConfig'))
-      }
-    }
+  const bundlerConfigModule = maybeGetBundlerConfigModule(options, moduleType)
 
-    if (options.info.bundler === 'vite' && options.info.bundlerConfigPath) {
-      if (moduleType === 'es') {
-        modulesToAdd.push(addESModuleDefinition(options.info.bundlerConfigPath, 'viteConfig'))
-      } else {
-        modulesToAdd.push(addCommonJSModuleDefinition(options.info.bundlerConfigPath, 'viteConfig'))
-      }
-    }
+  if (bundlerConfigModule) {
+    modulesToAdd.push(bundlerConfigModule)
   }
 
   try {
