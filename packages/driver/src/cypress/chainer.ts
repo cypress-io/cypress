@@ -25,11 +25,13 @@ export class $Chainer {
 
   static add (key, fn) {
     $Chainer.prototype[key] = function (...args) {
-      const userInvocationStack = this.useInitialStack
-        ? this.userInvocationStack
-        : $stackUtils.normalizedUserInvocationStack(
-          (new this.specWindow.Error('command invocation stack')).stack,
-        )
+      let userInvocationStack = this.useInitialStack
+
+      if (!userInvocationStack) {
+        if (this.specWindow.Error) {
+          userInvocationStack = $stackUtils.normalizedUserInvocationStack(new this.specWindow.Error().stack)
+        }
+      }
 
       // call back the original function with our new args
       // pass args an as array and not a destructured invocation
