@@ -227,10 +227,10 @@ export const Migration = objectType({
       },
     })
 
-    t.string('videoEmbedJson', {
-      description: 'stringified JSON from an onlink, containing markup for the migration landing page video embed',
+    t.string('videoEmbedHtml', {
+      description: 'Markup for the migration landing page video embed',
       resolve: (source, args, ctx) => {
-        return ctx.migration.getVideoEmbedJson()
+        return ctx.migration.getVideoEmbedHtml()
       },
     })
 

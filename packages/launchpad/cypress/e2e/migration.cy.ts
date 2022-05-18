@@ -170,7 +170,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
     cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.migration, 'getVideoEmbedJson').callsFake(async () => {
+      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
         return null
       })
     })

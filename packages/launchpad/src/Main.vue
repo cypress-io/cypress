@@ -122,7 +122,7 @@ fragment MainLaunchpadQueryData on Query {
     currentTestingType
   }
   migration {
-    videoEmbedJson
+    videoEmbedHtml
   }
   isInGlobalMode
   ...GlobalPage
@@ -154,14 +154,6 @@ const resetErrorsAndLoadConfig = () => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const videoHtml = computed(() => {
-  const json = query.data.value?.migration?.videoEmbedJson
-
-  if (!json) {
-    return null
-  }
-
-  return JSON.parse(json).videoHtml
-})
+const videoHtml = computed(() => query.data.value?.migration?.videoEmbedHtml)
 
 </script>

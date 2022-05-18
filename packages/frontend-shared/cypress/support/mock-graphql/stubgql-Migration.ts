@@ -92,7 +92,7 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
-  videoEmbedJson () {
+  videoEmbedHtml () {
     return `<iframe
     src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
     class="rounded h-full bg-gray-1000 w-full"
