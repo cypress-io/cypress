@@ -218,7 +218,8 @@ describe('detectLanguage', () => {
 
   it('pristine project with typescript in package.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-yarn')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
+    const actual = detectLanguage(projectRoot, pkgJson)
 
     expect(actual).to.eq('ts')
   })
