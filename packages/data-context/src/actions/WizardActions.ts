@@ -230,7 +230,7 @@ export class WizardActions {
       testingType: 'component',
       bundler,
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
-      configPath: bundler === 'vite' ? detectRelativeViteConfig(this.ctx.currentProject) : detectRelativeWebpackConfig(this.ctx.currentProject),
+      bundlerConfigPath: bundler === 'vite' ? detectRelativeViteConfig(this.ctx.currentProject) : detectRelativeWebpackConfig(this.ctx.currentProject),
       needsExplicitConfig: this.ctx.coreData.wizard.chosenFramework?.category === 'library' ?? false,
     }
 

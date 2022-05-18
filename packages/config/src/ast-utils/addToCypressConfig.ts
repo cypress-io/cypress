@@ -126,19 +126,19 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
   const modulesToAdd: ModuleToAdd[] = []
 
   if (options.info.testingType === 'component') {
-    if (options.info.bundler === 'webpack' && options.info.configPath) {
+    if (options.info.bundler === 'webpack' && options.info.bundlerConfigPath) {
       if (moduleType === 'es') {
-        modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'webpackConfig'))
+        modulesToAdd.push(addESModuleDefinition(options.info.bundlerConfigPath, 'webpackConfig'))
       } else {
-        modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'webpackConfig'))
+        modulesToAdd.push(addCommonJSModuleDefinition(options.info.bundlerConfigPath, 'webpackConfig'))
       }
     }
 
-    if (options.info.bundler === 'vite' && options.info.configPath) {
+    if (options.info.bundler === 'vite' && options.info.bundlerConfigPath) {
       if (moduleType === 'es') {
-        modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'viteConfig'))
+        modulesToAdd.push(addESModuleDefinition(options.info.bundlerConfigPath, 'viteConfig'))
       } else {
-        modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'viteConfig'))
+        modulesToAdd.push(addCommonJSModuleDefinition(options.info.bundlerConfigPath, 'viteConfig'))
       }
     }
   }
