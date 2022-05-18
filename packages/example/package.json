@@ -37,5 +37,14 @@
     "resolve-pkg": "2.0.0",
     "rimraf": "3.0.2",
     "shelljs": "0.8.5"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "build"
+        ]
+      }
+    }
   }
 }

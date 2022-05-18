@@ -3,7 +3,11 @@
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
-      "options": {}
+      "options": {
+        "cacheableOperations": [
+          "build"
+        ]
+      }
     }
   },
   "targetDependencies": {

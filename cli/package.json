@@ -145,5 +145,14 @@
     "nohoist": [
       "@types/*"
     ]
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "build"
+        ]
+      }
+    }
   }
 }
