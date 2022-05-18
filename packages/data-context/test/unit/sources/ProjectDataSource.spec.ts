@@ -1,7 +1,7 @@
 import chai from 'chai'
 import os from 'os'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getFilenameFromSpecPattern } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
 import path from 'path'
 import sinon from 'sinon'
 import chokidar from 'chokidar'
@@ -287,35 +287,35 @@ describe('getLongestCommonPrefixFromPaths', () => {
   })
 })
 
-describe('getFilenameFromSpecPattern', () => {
+describe('getPathFromSpecPattern', () => {
   context('dirname', () => {
     it('returns pattern without change if it is do not a glob', () => {
       const specPattern = 'cypress/e2e/foo.spec.ts'
-      const defaultFileName = getFilenameFromSpecPattern(specPattern, 'e2e')
+      const defaultFileName = getPathFromSpecPattern(specPattern, 'e2e')
 
       expect(defaultFileName).to.eq(specPattern)
     })
 
     it('remove ** from glob if it is not in the beginning', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/**/foo.spec.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('cypress/**/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/foo.spec.ts')
     })
 
     it('replace ** for cypress if it starts with **', () => {
-      const defaultFileName = getFilenameFromSpecPattern('**/e2e/foo.spec.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('**/e2e/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
     })
 
     it('replace ** for cypress if it starts with ** and omit extra **', () => {
-      const defaultFileName = getFilenameFromSpecPattern('**/**/foo.spec.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('**/**/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/foo.spec.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getFilenameFromSpecPattern('{cypress,tests}/{integration,e2e}/foo.spec.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('{cypress,tests}/{integration,e2e}/foo.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/integration/foo.spec.ts')
     })
@@ -323,13 +323,13 @@ describe('getFilenameFromSpecPattern', () => {
 
   context('filename', () => {
     it('replace * for filename', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/*.spec.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/*.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/spec.spec.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/{foo,filename}.spec.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/{foo,filename}.spec.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
     })
@@ -337,13 +337,13 @@ describe('getFilenameFromSpecPattern', () => {
 
   context('test extension', () => {
     it('replace * for filename', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.*.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/filename.*.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.{spec,cy}.ts', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/filename.{spec,cy}.ts', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.spec.ts')
     })
@@ -351,25 +351,25 @@ describe('getFilenameFromSpecPattern', () => {
 
   context('lang extension', () => {
     it('if project use TS, set TS as extension if it exists in the glob', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.ts', 'e2e', 'ts')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/filename.cy.ts', 'e2e', 'ts')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
 
     it('if project use TS, set TS as extension if it exists in the options of extensions', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.{js,ts,tsx}', 'e2e', 'ts')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/filename.cy.{js,ts,tsx}', 'e2e', 'ts')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
 
     it('if project use TS, do not set TS as extension if it do not exists in the options of extensions', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.{js,jsx}', 'e2e', 'ts')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/filename.cy.{js,jsx}', 'e2e', 'ts')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.js')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/e2e/filename.cy.{ts,js}', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('cypress/e2e/filename.cy.{ts,js}', 'e2e')
 
       expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
     })
@@ -377,43 +377,43 @@ describe('getFilenameFromSpecPattern', () => {
 
   context('extra cases', () => {
     it('creates specName for tests/*.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('tests/*.js', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('tests/*.js', 'e2e')
 
       expect(defaultFileName).to.eq('tests/spec.js')
     })
 
     it('creates specName for src/*-test.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('src/*-test.js', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('src/*-test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/spec-test.js')
     })
 
     it('creates specName for src/*.foo.bar.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('src/*.foo.bar.js', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('src/*.foo.bar.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/spec.foo.bar.js')
     })
 
     it('creates specName for src/prefix.*.test.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('src/prefix.*.test.js', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('src/prefix.*.test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/prefix.cy.test.js')
     })
 
     it('creates specName for src/*/*.test.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('src/*/*.test.js', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('src/*/*.test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src/e2e/spec.test.js')
     })
 
     it('creates specName for src-*/**/*.test.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('src-*/**/*.test.js', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('src-*/**/*.test.js', 'e2e')
 
       expect(defaultFileName).to.eq('src-e2e/spec.test.js')
     })
 
     it('creates specName for src/*.test.(js|jsx)', () => {
-      const defaultFileName = getFilenameFromSpecPattern('src/*.test.(js|jsx)', 'component')
+      const defaultFileName = getPathFromSpecPattern('src/*.test.(js|jsx)', 'component')
 
       const possiblesFileNames = ['src/ComponentName.test.jsx', 'src/ComponentName.test.js']
 
@@ -421,7 +421,7 @@ describe('getFilenameFromSpecPattern', () => {
     })
 
     it('creates specName for (src|components)/**/*.test.js', () => {
-      const defaultFileName = getFilenameFromSpecPattern('(src|components)/**/*.test.js', 'component')
+      const defaultFileName = getPathFromSpecPattern('(src|components)/**/*.test.js', 'component')
 
       const possiblesFileNames = ['src/ComponentName.test.js', 'components/ComponentName.test.js']
 
@@ -429,13 +429,13 @@ describe('getFilenameFromSpecPattern', () => {
     })
 
     it('creates specName for e2e/**/*.cy.{js,jsx,ts,tsx}', () => {
-      const defaultFileName = getFilenameFromSpecPattern('e2e/**/*.cy.{js,jsx,ts,tsx}', 'e2e')
+      const defaultFileName = getPathFromSpecPattern('e2e/**/*.cy.{js,jsx,ts,tsx}', 'e2e')
 
       expect(defaultFileName).to.eq('e2e/spec.cy.js')
     })
 
     it('creates specName for cypress/component-tests/**/*', () => {
-      const defaultFileName = getFilenameFromSpecPattern('cypress/component-tests/**/*', 'component', 'ts')
+      const defaultFileName = getPathFromSpecPattern('cypress/component-tests/**/*', 'component', 'ts')
 
       expect(defaultFileName).to.eq('cypress/component-tests/ComponentName.cy.ts')
     })
@@ -611,6 +611,19 @@ describe('ProjectDataSource', () => {
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
       expect(defaultSpecFileName).to.equal('cypress/integration/spec.cy.js')
+    })
+
+    it('yields correct filename from specpattern if there are existing specs', async () => {
+      ctx.coreData.currentTestingType = 'component'
+      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/component-tests/*.spec.js'] })
+      ctx.project.setSpecs([
+        { relative: 'cypress/component-tests/foo/spec.spec.js' },
+        { relative: 'cypress/component-tests/foo/spec2.spec.js' },
+      ] as FoundSpec[])
+
+      const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+      expect(defaultSpecFileName).to.equal('cypress/component-tests/foo/ComponentName.spec.js')
     })
   })
 })

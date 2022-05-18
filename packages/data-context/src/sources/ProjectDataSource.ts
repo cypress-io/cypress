@@ -132,7 +132,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   return lcp.slice(0, endIndex).join(path.sep)
 }
 
-export function getFilenameFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
+export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -365,15 +365,16 @@ export class ProjectDataSource {
         return defaultPathname
       }
 
+      const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
+      const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
+
       // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
       const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
 
-      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, defaultFilename)
+      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
 
-      // 4. Otherwise, return a filename that fulfills the spec pattern.
-      const filenameFromGlob = getFilenameFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
-
-      if (filenameFromGlob) return filenameFromGlob
+      // 4. Otherwise, return a path that fulfills the spec pattern.
+      if (pathFromSpecPattern) return pathFromSpecPattern
 
       // 5. Return the default for this testing type if we cannot decide from the spec pattern.
       return defaultPathname
