@@ -28,7 +28,6 @@ describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource
   let fetchStub: sinon.SinonStub
   let getUserStub: sinon.SinonStub
-  let onErrorStub: sinon.SinonStub
   let ctx: DataContext
 
   beforeEach(() => {
@@ -37,13 +36,11 @@ describe('CloudDataSource', () => {
     fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
     getUserStub = sinon.stub()
     getUserStub.returns({ authToken: '1234' })
-    onErrorStub = sinon.stub()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
       getUser: getUserStub,
       logout: sinon.stub(),
-      onError: onErrorStub,
     })
   })
 

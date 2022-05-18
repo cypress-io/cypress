@@ -61,7 +61,6 @@ export interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
-  onError(e: Error): void
 }
 
 /**
@@ -157,10 +156,6 @@ export class CloudDataSource {
     // If we receive a 401 from the dashboard, we need to logout the user
     if (data.error?.response?.status === 401) {
       this.params.logout()
-    }
-
-    if (data.error?.graphQLErrors[0]) {
-      this.params.onError(data.error?.graphQLErrors[0])
     }
 
     return {
