@@ -1,7 +1,6 @@
 import { defineConfig } from 'windicss/helpers'
 import InteractionVariants from '@windicss/plugin-interaction-variants'
 import { IconDuotoneColorsPlugin } from './.windicss/icon-color-plugins'
-import { safelist } from './.windicss/safelist'
 import { colors } from './.windicss/colors'
 import { shortcuts } from './.windicss/shortcuts'
 import path from 'path'
@@ -28,7 +27,6 @@ export const defaultConfig: FullConfig = {
       },
     },
   },
-  safelist,
   variants: {
     // What's hocus?
     // Hocus is a portmanteau of hover + focus. This is useful because
