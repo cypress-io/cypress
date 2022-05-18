@@ -2898,10 +2898,10 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
-"@cypress-design/css@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.1.1.tgz#2a5a41cc9d744037193c02f5fe69102bd17f1c52"
-  integrity sha512-apiVe6TaWeVgpj/zak5VC1BK4FqvZSNTraNYxRYGPW5id/NbuiguZFNLuIbMbH0Gwl5dU0dYn7V2QiWMI0nGZg==
+"@cypress-design/css@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.3.0.tgz#dc5da1552c0e99cb2b3752c392b9ddf3a46302fa"
+  integrity sha512-JaEgcfJVoedb2yL+sE2XJf1Cx/NWHQBnuhXaHkOX+cByUM1h2s/M7S5HoLnnIBsFXpA7CI4fX9YdFpLW+Kt6bA==
   dependencies:
     "@windicss/plugin-interaction-variants" "^1.0.0"
     vite-plugin-windicss "^1.8.4"
