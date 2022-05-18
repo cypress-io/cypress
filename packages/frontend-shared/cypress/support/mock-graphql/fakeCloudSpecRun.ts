@@ -62,10 +62,10 @@ export const exampleRuns = () => {
   runs[2].createdAt = twoMonthsAgo.toISOString()
   runs[2].testsFailed = { ...runs[2].testsFailed ?? {}, max: runs[2].testsFailed?.min ?? null }
 
-  runs[3].testsFailed = { ...runs[1].testsFailed ?? {}, max: 4358 }
-  runs[3].testsPassed = { ...runs[1].testsPassed ?? {}, max: 4358 }
-  runs[3].testsPending = { ...runs[1].testsPending ?? {}, max: 4358 }
-  runs[3].testsSkipped = { min: 4, max: 4358 }
+  runs[3].testsFailed = { ...runs[1].testsFailed ?? {}, max: 435 }
+  runs[3].testsPassed = { ...runs[1].testsPassed ?? {}, max: 435 }
+  runs[3].testsPending = { ...runs[1].testsPending ?? {}, max: 435 }
+  runs[3].testsSkipped = { min: 4, max: 435 }
   runs[3].specDuration = { min: 3760000, max: 37600000 }
   runs[3].groupCount = 4358
 

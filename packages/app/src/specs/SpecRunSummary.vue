@@ -2,18 +2,15 @@
   <div
     v-if="props.run"
     class="flex flex-col p-4 gap-2 items-center"
-    :class="statusColor"
+    :class="highlightColor"
   >
-    <div class="font-semibold text-gray-800">
-      Run #{{ props.run.runNumber }}
+    <div class="max-w-60 truncate overflow-hidden">
+      <span class="font-semibold text-gray-800">{{ props.specFileNoExtension }}</span><span class="text-gray-600">{{ props.specFileExtension }}</span>
     </div>
-    <div class="max-w-80 text-gray-600 truncate overflow-hidden">
-      {{ props.specFile }}
-    </div>
-    <div class="flex flex-row text-gray-600 text-size-14px gap-2 items-center">
+    <div class="flex flex-row text-gray-700 text-size-14px gap-2 items-center">
       <div
         v-if="statusText"
-        :class="'text-'+statusColor"
+        :class="'text-'+statusTextColor"
         class="font-medium"
       >
         {{ statusText }}
@@ -22,7 +19,7 @@
         v-if="statusText"
         width="4px"
         height="4px"
-        class="icon-light-gray-400"
+        class="icon-light-gray-200"
       />
       <div v-if="props.run.createdAt">
         {{ getTimeAgo(props.run.createdAt!) }}
@@ -30,15 +27,18 @@
       <i-cy-dot-solid_x4
         width="4px"
         height="4px"
-        class="icon-light-gray-400"
+        class="icon-light-gray-200"
       />
-      <div>{{ groupText }}</div>
-      <i-cy-dot-solid_x4
-        width="4px"
-        height="4px"
-        class="icon-light-gray-400"
-      />
-      <div>{{ getAggDurationString(props.run.specDuration ?? {}) }}</div>
+      <div>{{ durationText1 }}</div>
+      <div
+        v-if="durationText2"
+        class="m-[-5px] text-gray-200"
+      >
+        -
+      </div>
+      <div v-if="durationText2">
+        {{ durationText2 }}
+      </div>
     </div>
     <ResultCounts
       v-if="runResults"
@@ -55,13 +55,11 @@ import type { CloudSpecRun, SpecDataAggregate } from '../../../graphql/src/gen/c
 import ResultCounts, { ResultCountsProps } from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import { getTimeAgo, getDurationString } from '@packages/frontend-shared/src/utils/time'
 
-const props = withDefaults(defineProps<{
-  run: CloudSpecRun|null
-  specFile: string|null
-}>(), {
-  run: null,
-  specFile: null,
-})
+const props = defineProps<{
+  run: CloudSpecRun
+  specFileNoExtension: string
+  specFileExtension: string
+}>()
 
 const getAggregateTestCountString = (agg: SpecDataAggregate) => {
   if (agg.min == null) return '0'
@@ -71,15 +69,21 @@ const getAggregateTestCountString = (agg: SpecDataAggregate) => {
   return `${agg.min}-${agg.max}`
 }
 
-const getAggDurationString = (agg: SpecDataAggregate) => {
-  if (agg.min == null) return '--'
+const durationText1 = computed(() => {
+  if (props.run?.specDuration?.min == null) return '--'
 
-  // since agg.min and agg.max are in milliseconds, we want to make sure the
+  return getDurationString(props.run?.specDuration?.min)
+})
+
+const durationText2 = computed(() => {
+  if (props.run?.specDuration?.min == null) return null
+
+  // since props.run?.specDuration?.min and props.run?.specDuration?.max are in milliseconds, we want to make sure the
   // user won't get a string like "2 - 2" for {min: 2003, max: 2010}
-  if (!agg.max || Math.round(agg.min / 1000) === Math.round(agg.max / 1000)) return getDurationString(agg.min)
+  if (!props.run?.specDuration?.max || Math.round(props.run?.specDuration?.min / 1000) === Math.round(props.run?.specDuration?.max / 1000)) return null
 
-  return `${getDurationString(agg.min)} - ${getDurationString(agg.max)}`
-}
+  return getDurationString(props.run?.specDuration?.max)
+})
 
 const runResults = computed(() => {
   if (!props.run) return null
@@ -93,19 +97,11 @@ const runResults = computed(() => {
   } as ResultCountsProps
 })
 
-const groupText = computed(() => {
-  if (!props.run) return null
-
-  if (props.run.groupCount === 1) return '1 group'
-
-  return `${props.run.groupCount } groups`
-})
-
 const statusText = computed(() => {
   if (!props.run?.status) return null
 
   switch (props.run.status) {
-    case 'CANCELLED': return 'Cancelled'
+    case 'CANCELLED': return 'Canceled'
     case 'ERRORED': return 'Errored'
     case 'FAILED': return 'Failed'
     case 'NOTESTS': return 'No tests'
@@ -117,8 +113,8 @@ const statusText = computed(() => {
   }
 })
 
-const statusColor = computed(() => {
-  if (!props.run?.status) return 'gray-700'
+const highlightColor = computed(() => {
+  if (!props.run?.status) return 'gray-500'
 
   switch (props.run.status) {
     case 'OVERLIMIT':
@@ -133,8 +129,16 @@ const statusColor = computed(() => {
       return 'indigo-700'
     case 'CANCELLED':
     case 'NOTESTS':
-    default: return 'gray-700'
+    default: return 'gray-500'
   }
+})
+
+const statusTextColor = computed(() => {
+  const color = highlightColor.value
+
+  if (color === 'gray-500') return 'gray-700'
+
+  return color
 })
 
 </script>
@@ -152,7 +156,7 @@ const statusColor = computed(() => {
 .indigo-700 {
     border-top: 4px solid $indigo-700 !important;
 }
-.gray-700 {
-    border-top: 4px solid $gray-700 !important;
+.gray-500 {
+    border-top: 4px solid $gray-500 !important;
 }
 </style>

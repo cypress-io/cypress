@@ -19,17 +19,21 @@
           {{ projectConnectionStatus === 'CONNECTED' ? connectedText: notConnectedText }}
         </div>
         <div>
-          <Auth
+          <Button
             v-if="projectConnectionStatus === 'LOGGED_OUT'"
-            :gql="props.gql"
-            :show-retry="false"
-          />
+            :prefix-icon="ConnectIcon"
+            prefix-icon-class="icon-dark-white icon-light-transparent"
+            :disabled="false"
+            @click="emits('showLogin')"
+          >
+            {{ t('topNav.login.actionLogin') }}
+          </Button>
           <Button
             v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             :disabled="false"
-            @click="showConnectDialog = true"
+            @click="emits('showConnectToProject')"
           >
             {{ t("specPage.connectProjectButton") }}
           </Button>
@@ -38,7 +42,7 @@
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             :disabled="false"
-            @click="showConnectDialog = true"
+            @click="emits('showConnectToProject')"
           >
             {{ t("specPage.reconnectProjectButton") }}
           </Button>
@@ -55,27 +59,23 @@
       </div>
     </template>
   </Tooltip>
-  <CloudConnectModals
-    v-if="showConnectDialog"
-    :show="showConnectDialog"
-    :gql="props.gql"
-    @cancel="showConnectDialog = false"
-    @success="showConnectDialog = false"
-  />
 </template>
 
 <script setup lang="ts">
-import Auth from '@packages/frontend-shared/src/gql-components/Auth.vue'
-import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 import Button from '@cy/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { RunsErrorRenderer_RequestAccessDocument, SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 const { t } = useI18n()
+
+const emits = defineEmits<{
+  (eventName: 'showLogin'): void
+  (eventName: 'showConnectToProject'): void
+}>()
 
 const props = defineProps<{
   gql: SpecHeaderCloudDataTooltipFragment
@@ -83,8 +83,6 @@ const props = defineProps<{
   connectedText: string
   notConnectedText: string
 }>()
-
-const showConnectDialog = ref(false)
 
 gql`
 fragment SpecHeaderCloudDataTooltip on Query {

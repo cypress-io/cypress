@@ -171,6 +171,7 @@ export class RemoteRequestDataSource {
         this.#operationErrors.set(params.id, result.error)
       } else if (result.data) {
         data = result.data[params.remoteQueryField]
+        this.#operationErrors.delete(params.id)
       }
 
       if (data || error) {

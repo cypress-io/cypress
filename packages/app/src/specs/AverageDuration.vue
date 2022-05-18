@@ -1,18 +1,23 @@
 <template>
   <div
-    v-if="!isLoading"
+    v-if="props.gql?.avgDurationInfo?.status === 'FETCHED' && props.gql?.avgDurationInfo?.data?.averageDuration"
     class="flex justify-center"
     data-cy="run-status-dots"
   >
     {{ getDurationString(props.gql?.avgDurationInfo?.data?.averageDuration ?? 0 ) }}
-    <!-- {{ props.gql?.cloudSpec?.status }} -->
   </div>
+  <!-- <div
+    v-else-if="props.gql?.avgDurationInfo?.status === 'ERRORED'"
+    class="flex justify-center"
+    data-cy="run-status-dots"
+  >
+    {{ props.gql?.avgDurationInfo?.status }}
+  </div> -->
 </template>
 
 <script setup lang="ts">
 
-import type { /*RemoteFetchableStatus,*/ AverageDurationFragment } from '../generated/graphql'
-import { computed } from 'vue'
+import type { AverageDurationFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 import { getDurationString } from '@packages/frontend-shared/src/utils/time'
 
@@ -37,12 +42,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   gql: null,
   isProjectDisconnected: false,
-})
-
-const isLoading = computed(() => {
-  const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
-
-  return props.gql?.avgDurationInfo?.status !== 'ERRORED' && !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.avgDurationInfo?.status)
 })
 
 </script>

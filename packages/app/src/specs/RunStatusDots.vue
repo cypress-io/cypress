@@ -1,7 +1,7 @@
 <template>
   <component
     :is="latestRun? ExternalLink : 'div'"
-    v-if="props.gql?.cloudSpec?.status === 'FETCHED'"
+    v-if="props.isProjectDisconnected || props.gql.cloudSpec?.status === 'FETCHED' || props.gql.cloudSpec?.status === 'ERRORED'"
     :href="latestRun?.url ?? '#'"
     :use-default-hocus="false"
   >
@@ -9,7 +9,6 @@
       :is="latestRun? Tooltip : 'div'"
       placement="top"
       :is-interactive="latestRun"
-      :interactive-highlight-color="latestRunColor"
     >
       <div
         class="flex justify-center"
@@ -50,13 +49,14 @@
         >
           <SpecRunSummary
             :run="latestRun"
-            :spec-file="props.specFile"
+            :spec-file-no-extension="props.gql.fileName"
+            :spec-file-extension="props.gql.specFileExtension"
           />
         </ExternalLink>
       </template>
     </component>
   </component>
-  <div v-else-if="props.gql?.cloudSpec?.status === 'ERRORED'">
+  <!-- <div v-else-if="props.gql.cloudSpec?.status === 'ERRORED'">
     <div
       class="flex justify-center"
     >
@@ -86,22 +86,22 @@
         </li>
       </ol>
     </div>
-  </div>
+  </div> -->
   <div
     v-else
     class="bg-gray-50 rounded-[20px]"
   >
     &nbsp;
-  <!-- {{ JSON.stringify(props.gql?.cloudSpec?.status) }} -->
+  <!-- {{ JSON.stringify(props.gql.cloudSpec?.status) }} -->
   </div>
 </template>
 
 <script setup lang="ts">
 
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { /*RemoteFetchableStatus,*/ RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
-import Tooltip, { InteractiveHighlightColor } from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { computed, ComputedRef } from 'vue'
+import type { RunStatusDotsFragment /*, RunStatusDots_RefetchDocument*/ } from '../generated/graphql'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { computed } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
 import FailedIcon from '~icons/cy/failed-solid_x16.svg'
@@ -109,12 +109,13 @@ import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import PlaceholderIcon from '~icons/cy/placeholder-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
-import { gql, useMutation } from '@urql/vue'
+import { gql /*, useMutation*/ } from '@urql/vue'
 
-// type Maybe<T> = T | null;
 gql`
 fragment RunStatusDots on Spec {
   id
+  specFileExtension
+  fileName  
   cloudSpec(name: "RunStatusDots") @include(if: $hasBranch) {
     id
     status
@@ -123,7 +124,6 @@ fragment RunStatusDots on Spec {
       specRuns(first: 4, fromBranch: $fromBranch) {
         nodes {
           id
-          # TODO: Move most of this (everything the popover needs) into a "cloudNode" query we run lazily in SpecRunSummary
           runNumber
           testsFailed{
             min
@@ -157,24 +157,15 @@ fragment RunStatusDots on Spec {
 `
 
 const props = withDefaults(defineProps<{
-  gql: RunStatusDotsFragment | null
-  specFile: string|null
+  gql: RunStatusDotsFragment
   isProjectDisconnected: boolean
 }>(), {
-  runs: () => [],
-  specFile: null,
   isProjectDisconnected: false,
 })
 
 const runs = computed(() => {
-  return props.gql?.cloudSpec?.data?.specRuns?.nodes ?? []
+  return props.gql.cloudSpec?.data?.specRuns?.nodes ?? []
 })
-
-// const isLoading = computed(() => {
-//   const loadingStatuses: RemoteFetchableStatus[] = ['FETCHING', 'NOT_FETCHED']
-
-//   return !props.isProjectDisconnected && loadingStatuses.some((s) => s === props.gql?.cloudSpec?.status)
-// })
 
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
@@ -240,48 +231,22 @@ const latestStatus = computed(() => {
   }
 })
 
-const latestRunColor: ComputedRef<InteractiveHighlightColor> = computed(() => {
-  const run = latestRun.value
+// gql`
+// mutation RunStatusDots_Refetch ($ids: [ID!]!) {
+//   loadRemoteFetchables(ids: $ids){
+//     id
+//     status
+//   }
+// }
+// `
 
-  if (!run) {
-    return 'GRAY'
-  }
+// const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
 
-  switch (run.status) {
-    case 'PASSED':
-      return 'JADE'
-    case 'RUNNING':
-      return 'INDIGO'
-    case 'FAILED':
-      return 'RED'
-    case 'ERRORED':
-    case 'OVERLIMIT':
-    case 'TIMEDOUT':
-      return 'ORANGE'
-    case 'NOTESTS':
-    case 'CANCELLED':
-      return 'GRAY'
-    default:
-      return 'GRAY'
-  }
-})
-
-gql`
-mutation RunStatusDots_Refetch ($ids: [ID!]!) {
-  loadRemoteFetchables(ids: $ids){
-    id
-    status
-  }
-}
-`
-
-const refetchMutation = useMutation(RunStatusDots_RefetchDocument)
-
-const refetch = () => {
-  if (props.gql?.cloudSpec?.id && !refetchMutation.fetching.value) {
-    refetchMutation.executeMutation({ ids: [props.gql?.cloudSpec?.id] })
-  }
-}
+// const refetch = () => {
+//   if (props.gql.cloudSpec?.id && !refetchMutation.fetching.value) {
+//     refetchMutation.executeMutation({ ids: [props.gql.cloudSpec?.id] })
+//   }
+// }
 
 </script>
 

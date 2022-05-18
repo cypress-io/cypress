@@ -51,6 +51,8 @@
           :header-text="t('specPage.latestRuns.header')"
           :connected-text="t('specPage.latestRuns.tooltip.connected')"
           :not-connected-text="t('specPage.latestRuns.tooltip.notConnected')"
+          @showLogin="showLogin"
+          @showConnectToProject="showConnectToProject"
         />
       </div>
       <div class="flex items-center justify-between">
@@ -59,6 +61,8 @@
           :header-text="t('specPage.averageDuration.header')"
           :connected-text="t('specPage.averageDuration.tooltip.connected')"
           :not-connected-text="t('specPage.averageDuration.tooltip.notConnected')"
+          @showLogin="showLogin"
+          @showConnectToProject="showConnectToProject"
         />
       </div>
     </div>
@@ -128,8 +132,8 @@
               <pre>{{ JSON.stringify(row.data.data?.cloudSpec?.data?.specRuns?.nodes?.length ?? "null",null,2) }}</pre>
             </div> -->
             <RunStatusDots
-              v-if="row.data.isLeaf"
-              :gql="row.data.data ?? null"
+              v-if="row.data.isLeaf && row.data.data"
+              :gql="row.data.data"
               :spec-file="row.data.data?.baseName"
               :is-project-disconnected="props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject'"
             />
@@ -152,10 +156,23 @@
       @clear="handleClear"
     />
   </div>
+  <LoginModal
+    v-model="isLoginOpen"
+    :gql="props.gql"
+  />
+  <CloudConnectModals
+    v-if="isProjectConnectOpen"
+    :show="isProjectConnectOpen"
+    :gql="props.gql"
+    @cancel="isProjectConnectOpen = false"
+    @success="isProjectConnectOpen = false; emit('success')"
+  />
 </template>
 
 <script setup lang="ts">
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
+import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
+import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
@@ -181,6 +198,17 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const { t } = useI18n()
+
+const isProjectConnectOpen = ref(false)
+const isLoginOpen = ref(false)
+
+const showLogin = () => {
+  isLoginOpen.value = true
+}
+
+const showConnectToProject = () => {
+  isProjectConnectOpen.value = true
+}
 
 gql`
 subscription SpecsList_GitInfoUpdated {
