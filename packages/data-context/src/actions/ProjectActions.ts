@@ -67,11 +67,6 @@ export interface FindSpecs<T> {
   additionalIgnorePattern: T
 }
 
-type SetForceReconfigureProjectByTestingType = {
-  forceReconfigureProject: boolean
-  testingType?: TestingType
-}
-
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
 
@@ -83,7 +78,6 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.currentProject = null
       d.currentTestingType = null
-      d.forceReconfigureProject = null
       d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
@@ -450,29 +444,6 @@ export class ProjectActions {
       excludeSpecPattern,
       additionalIgnorePattern,
     })
-  }
-
-  setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
-    const testingTypeToReconfigure = testingType ?? this.ctx.coreData.currentTestingType
-
-    if (!testingTypeToReconfigure) {
-      return
-    }
-
-    this.ctx.update((coreData) => {
-      coreData.forceReconfigureProject = {
-        ...coreData.forceReconfigureProject,
-        [testingTypeToReconfigure]: forceReconfigureProject,
-      }
-    })
-  }
-
-  async reconfigureProject () {
-    await this.ctx.actions.browser.closeBrowser()
-    this.ctx.actions.wizard.resetWizard()
-    this.ctx.actions.wizard.initialize()
-    this.ctx.actions.electron.refreshBrowserWindow()
-    this.ctx.actions.electron.showBrowserWindow()
   }
 
   get defaultE2EPath () {

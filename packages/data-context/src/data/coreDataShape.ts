@@ -136,7 +136,6 @@ export interface CoreDataShape {
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
-  forceReconfigureProject: ForceReconfigureProjectDataShape | null
   versionData: {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
@@ -209,7 +208,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     scaffoldedFiles: null,
     packageManager: 'npm',
-    forceReconfigureProject: null,
     versionData: null,
   }
 }

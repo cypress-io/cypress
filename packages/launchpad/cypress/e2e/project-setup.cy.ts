@@ -400,23 +400,6 @@ describe('Launchpad: Setup Project', () => {
         verifyChooseABrowserPage()
       })
 
-      it('can reconfigure config after CT has been set up', () => {
-        scaffoldAndOpenProject('pristine-with-ct-testing')
-        cy.withCtx((ctx) => {
-          ctx.coreData.forceReconfigureProject = {
-            component: true,
-          }
-        })
-
-        cy.visitLaunchpad()
-
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
-
-        cy.get('[data-cy-testingtype="component"]').click()
-
-        cy.contains('Project Setup')
-      })
-
       it('can move forward to choose browser if e2e is configured', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()

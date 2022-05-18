@@ -76,9 +76,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     }
   },
-  reconfigureProject (src, args, ctx) {
-    return true
-  },
   resetWizard (src, args, ctx) {
     return true
   },

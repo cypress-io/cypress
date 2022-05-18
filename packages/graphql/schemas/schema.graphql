@@ -1054,9 +1054,6 @@ type Mutation {
   """Ping configured Base URL"""
   pingBaseUrl: Query
 
-  """show the launchpad windows"""
-  reconfigureProject: Boolean!
-
   """
   Signal that we are explicitly refetching remote data and should not use the server cache
   """
@@ -1101,9 +1098,6 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
-
-  """Set the selected testing type, and reconfigure the project"""
-  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean

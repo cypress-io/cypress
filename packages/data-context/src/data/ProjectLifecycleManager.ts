@@ -513,7 +513,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
+    if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType))) {
       this._configManager.loadTestingType()
     }
   }

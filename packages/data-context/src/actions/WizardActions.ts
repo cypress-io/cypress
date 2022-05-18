@@ -123,7 +123,6 @@ export class WizardActions {
         })
 
         this.ctx.lifecycleManager.refreshMetaState()
-        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
         return
       }
@@ -139,7 +138,6 @@ export class WizardActions {
         })
 
         this.ctx.lifecycleManager.refreshMetaState()
-        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
         return
       }
