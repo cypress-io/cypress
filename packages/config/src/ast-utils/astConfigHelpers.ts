@@ -28,7 +28,12 @@ export function addE2EDefinition (): t.ObjectProperty {
 export interface ASTComponentDefinitionConfig {
   testingType: 'component'
   bundler: typeof WIZARD_BUNDLERS[number]['type']
-  configPath?: string
+  /**
+   * Path to the config file - typically:
+   * webpack - `wepback.config.js`
+   * vite - `vite.config.js`
+   */
+  bundlerConfigPath?: string
   framework?: typeof WIZARD_FRAMEWORKS[number]['configFramework']
   needsExplicitConfig: boolean
 }
@@ -55,7 +60,7 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
     },
   } as const
 
-  if (config.bundler === 'webpack' && config.needsExplicitConfig && config.configPath) {
+  if (config.bundler === 'webpack' && config.needsExplicitConfig && config.bundlerConfigPath) {
     return extractProperty(`
       const toMerge = {
         component: {
@@ -69,7 +74,7 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
     `)
   }
 
-  if (config.bundler === 'vite' && config.needsExplicitConfig && config.configPath) {
+  if (config.bundler === 'vite' && config.needsExplicitConfig && config.bundlerConfigPath) {
     return extractProperty(`
       const toMerge = {
         component: {

@@ -125,11 +125,14 @@ describe('addToCypressConfig', () => {
         bundler: 'webpack',
         framework: 'react',
         needsExplicitConfig: true,
+        bundlerConfigPath: './webpack.config.js',
       },
       isProjectUsingESModules: false,
     })
 
     expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
+    import webpackConfig from "./webpack.config.js";
+
     export default {
       e2e: {},
     
@@ -182,7 +185,7 @@ describe('addToCypressConfig', () => {
         testingType: 'component',
         bundler: 'webpack',
         framework: 'react',
-        configPath: './webpack.config.ts',
+        bundlerConfigPath: './webpack.config.ts',
         needsExplicitConfig: true,
       },
       isProjectUsingESModules: true,
@@ -212,7 +215,7 @@ describe('addToCypressConfig', () => {
         testingType: 'component',
         bundler: 'webpack',
         framework: 'react',
-        configPath: './webpack.config.js',
+        bundlerConfigPath: './webpack.config.js',
         needsExplicitConfig: true,
       },
       isProjectUsingESModules: false,
