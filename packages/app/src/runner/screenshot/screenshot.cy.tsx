@@ -72,6 +72,7 @@ describe('screenshot', () => {
     html, body {
       margin: 0;
       padding: 0;
+      font-family: serif !important; 
     }
     * {
     box-sizing: content-box;
