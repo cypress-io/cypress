@@ -17,4 +17,4 @@
 import '@packages/frontend-shared/cypress/e2e/support/e2eSupport'
 
 // Alternatively you can use CommonJS syntax:
-// require('./commands')
+require('./commands')

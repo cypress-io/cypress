@@ -28,6 +28,7 @@ for (const project of WEBPACK_REACT) {
 
       cy.visitApp()
       cy.contains('App.cy.jsx').click()
+      cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
     })
 
@@ -39,6 +40,7 @@ for (const project of WEBPACK_REACT) {
 
       cy.visitApp()
       cy.contains('MissingReact.cy.jsx').click()
+      cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReact.jsx`,
@@ -57,6 +59,7 @@ for (const project of WEBPACK_REACT) {
 
       cy.visitApp()
       cy.contains('MissingReactInSpec.cy.jsx').click()
+      cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
@@ -74,6 +77,7 @@ for (const project of WEBPACK_REACT) {
 
       cy.visitApp()
       cy.contains('AppCompilationError.cy.jsx').click()
+      cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
       cy.contains('An uncaught error was detected outside of a test')
       cy.contains('The following error originated from your test code, not from Cypress.')
