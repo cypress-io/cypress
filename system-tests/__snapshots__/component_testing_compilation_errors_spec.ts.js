@@ -88,7 +88,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at eval (webpack:///./src/AppCompilationError.cy.jsx?:1:7)
       [stack trace lines]
 
 
@@ -137,16 +136,7 @@ We dynamically generated a new test to display this failure.
   > React is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      at MissingReact (webpack:///./src/MissingReact.jsx?:4:3)
-      at renderWithHooks (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:12938:18)
-      at mountIndeterminateComponent (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15020:13)
-      at beginWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15625:16)
-      at performUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19312:12)
-      at workLoop (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19352:24)
-      at HTMLUnknownElement.callCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:149:14)
-      at Object.invokeGuardedCallbackDev (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:199:16)
-      at invokeGuardedCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:256:31)
-      at replayUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:18578:5)
+      [stack trace lines]
 
 
 
@@ -190,7 +180,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   1) is missing React in this file:
      ReferenceError: React is not defined
-      at Context.eval (webpack:///./src/MissingReactInSpec.cy.jsx?:8:77)
       [stack trace lines]
 
 
@@ -333,7 +322,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at eval (webpack:///./src/AppCompilationError.cy.jsx?:1:7)
       [stack trace lines]
 
 
@@ -382,16 +370,7 @@ We dynamically generated a new test to display this failure.
   > React is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      at MissingReact (webpack:///./src/MissingReact.jsx?:4:3)
-      at renderWithHooks (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:12938:18)
-      at mountIndeterminateComponent (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15020:13)
-      at beginWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15625:16)
-      at performUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19312:12)
-      at workLoop (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19352:24)
-      at HTMLUnknownElement.callCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:149:14)
-      at Object.invokeGuardedCallbackDev (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:199:16)
-      at invokeGuardedCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:256:31)
-      at replayUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:18578:5)
+      [stack trace lines]
 
 
 
@@ -435,7 +414,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   1) is missing React in this file:
      ReferenceError: React is not defined
-      at Context.eval (webpack:///./src/MissingReactInSpec.cy.jsx?:8:77)
       [stack trace lines]
 
 
@@ -578,7 +556,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at eval (webpack:///./src/AppCompilationError.cy.jsx?:1:7)
       [stack trace lines]
 
 
@@ -627,16 +604,7 @@ We dynamically generated a new test to display this failure.
   > React is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      at MissingReact (webpack:///./src/MissingReact.jsx?:4:3)
-      at renderWithHooks (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:12938:18)
-      at mountIndeterminateComponent (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15020:13)
-      at beginWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15625:16)
-      at performUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19312:12)
-      at workLoop (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19352:24)
-      at HTMLUnknownElement.callCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:149:14)
-      at Object.invokeGuardedCallbackDev (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:199:16)
-      at invokeGuardedCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:256:31)
-      at replayUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:18578:5)
+      [stack trace lines]
 
 
 
@@ -680,7 +648,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   1) is missing React in this file:
      ReferenceError: React is not defined
-      at Context.eval (webpack:///./src/MissingReactInSpec.cy.jsx?:8:77)
       [stack trace lines]
 
 
@@ -823,7 +790,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at eval (webpack:///./src/AppCompilationError.cy.jsx?:1:7)
       [stack trace lines]
 
 
@@ -872,16 +838,7 @@ We dynamically generated a new test to display this failure.
   > React is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      at MissingReact (webpack:///./src/MissingReact.jsx?:4:3)
-      at renderWithHooks (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:12938:18)
-      at mountIndeterminateComponent (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15020:13)
-      at beginWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:15625:16)
-      at performUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19312:12)
-      at workLoop (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:19352:24)
-      at HTMLUnknownElement.callCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:149:14)
-      at Object.invokeGuardedCallbackDev (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:199:16)
-      at invokeGuardedCallback (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:256:31)
-      at replayUnitOfWork (webpack:////Users/ryanm/pr-validations/cypress/node_modules/react-dom/cjs/react-dom.development.js?:18578:5)
+      [stack trace lines]
 
 
 
@@ -925,7 +882,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   1) is missing React in this file:
      ReferenceError: React is not defined
-      at Context.eval (webpack:///./src/MissingReactInSpec.cy.jsx?:8:77)
       [stack trace lines]
 
 
