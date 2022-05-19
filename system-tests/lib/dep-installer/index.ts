@@ -162,7 +162,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
-  const cacheNodeModulesDir = await getRealFolderPath(path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules'))
+  const cacheNodeModulesDir = path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules')
   const tmpNodeModulesDir = path.join(projectPath(project), 'node_modules')
 
   async function removeWorkspacePackages (packages: string[]): Promise<void> {
@@ -251,7 +251,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
     // 8. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
     if (persistCacheCb) await persistCacheCb()
 
-    return cacheNodeModulesDir
+    return await getRealFolderPath(cacheNodeModulesDir)
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
