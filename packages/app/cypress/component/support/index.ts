@@ -34,6 +34,15 @@ let pinia: Pinia
 beforeEach(() => {
   pinia = createPinia()
   setActivePinia(pinia)
+
+  cy.window().then((win) => {
+    // Specify the platform on the config attached to window so that it is available during our component tests
+    // For now, it is the only thing that we are referencing on the config
+    // @ts-ignore
+    win.__CYPRESS_CONFIG__ = {
+      base64Config: Cypress.Buffer.from(JSON.stringify({ platform: Cypress.platform })).toString('base64'),
+    }
+  })
 })
 
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })

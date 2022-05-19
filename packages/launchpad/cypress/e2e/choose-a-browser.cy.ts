@@ -15,6 +15,11 @@ describe('Choose a Browser Page', () => {
     })
 
     it('preselects browser that is provided through the command line', () => {
+      cy.withCtx((ctx, o) => {
+        // stub launching project since we have `--browser --testingType --project` here
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
@@ -24,6 +29,10 @@ describe('Choose a Browser Page', () => {
       cy.findByRole('radio', { name: 'Edge v8', checked: true })
 
       cy.percySnapshot()
+
+      cy.withCtx((ctx, o) => {
+        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      })
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {

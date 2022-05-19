@@ -390,3 +390,23 @@ describe('addToCypressConfig', () => {
     })
   })
 })
+
+//   // we generate this using Babel which intentionally does **NOT**
+//   // handle formatting, so the output format is kind of weird.
+//   // we rely on the user's eslint or prettier to format this properly.
+//   expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
+//   import webpackConfig from "./webpack.config.ts";
+//   export default {
+//     e2e: {},
+
+//     component: {
+//       devServer: {
+//         framework: "react",
+//         bundler: "webpack",
+//         webpackConfig,
+//       },
+//     },
+//   };`.trim())
+
+//   expect(result.result).to.eq('MERGED')
+// })

@@ -139,7 +139,7 @@ describe('Opening unmigrated project', () => {
   })
 })
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
+describe('Full migration flow for each project', { retries: { openMode: 0, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -274,8 +274,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       })
 
       cy.findByText('change').click()
-
-      cy.get('[data-cy=migration-button-proceed]').click()
 
       // this project has a default integration folder and default testFiles.
       // We rename the integration folder, even if the user skips the spec rename
@@ -1118,9 +1116,9 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
       cy.findByText('change').click()
 
-      cy.get('[data-cy=migration-button-proceed]').click()
-
+      cy.contains('I may need to change my specPattern later').should('not.exist')
       cy.findByText('Don\'t rename anything — keep what I have.').click()
+      cy.contains('I may need to change my specPattern later')
 
       cy.findByText('Save Changes').click()
 
@@ -1272,7 +1270,7 @@ describe.skip('component testing migration - defaults', () => {
   })
 })
 
-describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 } }, () => {
+describe('Migration', { viewportWidth: 1200, retries: { openMode: 0, runMode: 2 } }, () => {
   it('should create the cypress.config.js file and delete old config', () => {
     startMigrationFor('migration')
 
@@ -1324,18 +1322,11 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('Cancel, keep the default extension').click()
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still want to change the spec file extension').click()
     cy.get('button').contains('Save Changes').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still want to change the spec file extension').click()
     cy.get('button').contains('Cancel').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
   })
@@ -1343,7 +1334,7 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
   it('shows error if plugins file throws an error', () => {
     scaffoldAndVisitLaunchpad('migration-e2e-plugins-throw-error')
 
-    cy.contains('cypress/plugins/index.js file threw an error.')
+    cy.contains(`${getPathForPlatform('cypress/plugins/index.js')} file threw an error.`)
     cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
     cy.contains('throw new Error(\'New error from plugin\')')
   })
@@ -1523,7 +1514,7 @@ describe('Migrate custom config files', () => {
   it('shows error if plugins file do not exist', () => {
     scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
 
-    cy.contains('foo/bar file threw an error.')
+    cy.contains(`${getPathForPlatform('foo/bar')} file threw an error.`)
     cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
   })
 })

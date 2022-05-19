@@ -227,7 +227,7 @@ type CloudRun implements Node {
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
 
-  """Number of flaky tests"""
+  """Number of flaky tests, null if flake detection is not enabled"""
   totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
@@ -402,8 +402,10 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """Default spec file name for spec creation"""
-  defaultSpecFileName: String!
+  """
+  Default spec file name for spec creation, nullable so we can throw if it can't be decided
+  """
+  defaultSpecFileName: String
 
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
