@@ -403,19 +403,20 @@ describe('addToCypressConfig', () => {
           // handle formatting, so the output format is kind of weird.
           // we rely on the user's eslint or prettier to format this properly.
           const expected = dedent`
-          const webpackConfig = require('./webpack.config.js')module.exports = {
+          const webpackConfig = require("./webpack.config.js");
+          module.exports = {
             e2e: {},
           
             component: {
               devServer: {
-                framework: 'react',
-                bundler: 'webpack',
+                framework: "react",
+                bundler: "webpack",
                 webpackConfig,
               },
-            }
-          }`
+            },
+          };`
 
-          expect(stub.getCall(0).lastArg.trim()).to.eq(expected)
+          expect(expected).to.eq(stub.getCall(0).lastArg.trim())
           expect(result.result).to.eq('MERGED')
         })
       })

@@ -182,7 +182,7 @@ export function addESModuleDefinition (file: string, identifier: 'viteConfig' | 
  * const webpackConfig = require(<file>)
  */
 export function addCommonJSModuleDefinition (file: string, identifier: 'viteConfig' | 'webpackConfig'): CommonJSModuleToAdd {
-  const parsed = parse(`const ${identifier} = require('${file}')`, {
+  const parsed = parse(`const ${identifier} = require('${file}');`, {
     parser: require('recast/parsers/typescript'),
   }) as t.File
 
