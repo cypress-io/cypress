@@ -80,6 +80,11 @@ export function makeWebpackConfig (
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
   const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
+
+  if (!userWebpackConfig && !frameworkWebpackConfig) {
+    throw new Error(`Your Cypress devServer config is missing a required webpackConfig property, since we could not automatically detect one.\n Please add one to your ${config.devServerConfig.cypressConfig.configFile}`)
+  }
+
   const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
     merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
   )

@@ -30,9 +30,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   } else if (viteOverrides) {
     debug('Couldn\'t find a Vite config file, however we received a custom viteConfig', viteOverrides)
   } else {
-    debug(`
-    Didn\'t resolve a Vite config AND the user didn\'t pass in a custom viteConfig.
-    Falling back to Vite\'s defaults.`)
+    throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
   }
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
