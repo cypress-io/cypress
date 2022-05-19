@@ -125,12 +125,3 @@ const componentConfigViteVue: Cypress.ConfigOptions = {
     }
   }
 }
-
-const errComponentConfigViteCRA: Cypress.ConfigOptions = {
-  component: {
-    devServer: {
-      bundler: 'vite',
-      framework: 'create-react-app', // $ExpectError
-    }
-  }
-}
