@@ -20,15 +20,13 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 
@@ -72,15 +70,13 @@ SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.j
      Error: The following error originated from your test code, not from Cypress.
 
   > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
@@ -254,15 +250,13 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 
@@ -306,15 +300,13 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
      Error: The following error originated from your test code, not from Cypress.
 
   > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
@@ -488,15 +480,13 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 
@@ -540,15 +530,13 @@ SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.j
      Error: The following error originated from your test code, not from Cypress.
 
   > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
@@ -722,15 +710,13 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 
@@ -774,15 +760,13 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
      Error: The following error originated from your test code, not from Cypress.
 
   > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
-SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (6:15)
+SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
-  4 |
-  5 | it('renders hello world', () => {
-> 6 |   mount(<App />adf)
-    |                ^
-  7 |   cy.get('h1').contains('Hello World')
-  8 | })
-  9 |
+   7 |   cy.get('h1').contains('Hello World')
+   8 | }
+>  9 | })
+     | ^
+  10 |
       [stack trace lines]
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
