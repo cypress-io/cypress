@@ -41,7 +41,7 @@ function skipCTMigration () {
 function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js') {
   cy.contains('Migrate the configuration for me').click()
 
-  cy.withCtx(async (ctx, o) => {
+  cy.withRetryableCtx(async (ctx, o) => {
     const configStats = await ctx.file.checkIfFileExists(o.migratedConfigFile)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
