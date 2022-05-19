@@ -8,7 +8,7 @@ pluginTester({
   pluginName: 'addToCypressConfigPlugin: component',
   plugin: () => {
     return addToCypressConfigPlugin(
-      addComponentDefinition({ testingType: 'component', framework: 'react', bundler: 'webpack', needsExplicitConfig: true }),
+      addComponentDefinition({ testingType: 'component', framework: 'react', bundler: 'webpack' }),
       { shouldThrow: false },
     )
   },

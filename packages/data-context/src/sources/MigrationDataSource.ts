@@ -96,6 +96,21 @@ export class MigrationDataSource {
     return this.ctx.lifecycleManager.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExists)
   }
 
+  async getVideoEmbedHtml () {
+    const versionData = await this.ctx.versions.versionData()
+    const embedOnLink = `https://on.cypress.io/v10-video-embed/${versionData.current.version}`
+
+    try {
+      const response = await this.ctx.util.fetch(embedOnLink, { method: 'GET' })
+      const { videoHtml } = await response.json()
+
+      return videoHtml
+    } catch {
+      // fail silently, no user-facing error is needed
+      return null
+    }
+  }
+
   async getComponentTestingMigrationStatus () {
     debug('getComponentTestingMigrationStatus: start')
     if (!this.legacyConfig || !this.ctx.currentProject) {
