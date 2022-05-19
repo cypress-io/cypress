@@ -1,7 +1,7 @@
 <template>
   <div
-    class="relative rounded cursor-pointer h-auto outline-none border-1
-      text-center block group focus-within-default hocus-default
+    class="rounded cursor-pointer h-auto outline-none border-1 text-center
+      relative block group focus-within-default hocus-default
       children:hyphens-manual"
     :class="{
       'bg-gray-50 border-gray-100 pointer-events-none': disabled
@@ -11,7 +11,7 @@
   >
     <div
       v-if="title === t('testingType.component.name')"
-      class="ribbon absolute top-0 right-0 text-teal-600"
+      class="top-0 right-0 text-teal-600 ribbon absolute"
       aria-hidden="true"
     >
       {{ t('versions.beta') }}
@@ -23,7 +23,7 @@
       <component
         :is="hoverIcon"
         v-if="hoverIcon"
-        class="opacity-0 absolute group-focus:opacity-100 group-hover:opacity-100"
+        class="opacity-0 absolute group-hover:opacity-100 group-focus:opacity-100"
         :class="iconClass"
         data-cy="card-icon"
       />
@@ -39,9 +39,10 @@
     <!-- this button can be focused via tab key and allows card hocus styles to appear
     as well as allows a keyboard user to "activate" the card with spacebar or enter keys -->
     <button
-      class="font-medium mx-8px mb-8px text-indigo-500 text-18px leading-24px focus:outline-transparent"
+      class="font-medium mx-8px mb-8px text-18px leading-24px focus:outline-transparent"
       :class="{
-        'text-gray-700': disabled
+        'text-gray-700': disabled,
+        'text-indigo-500': !disabled
       }"
       :disabled="disabled"
     >
