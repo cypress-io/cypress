@@ -315,7 +315,7 @@ describe('Launchpad: Setup Project', () => {
         verifyChooseABrowserPage()
       })
 
-      it('can setup e2e testing for a project', () => {
+      it('can setup e2e testing for a project selecting TS', () => {
         // has `typescript` in `package.json`
         scaffoldAndOpenProject('pristine-yarn')
         cy.visitLaunchpad()
@@ -326,7 +326,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .click()
+        .realPress('Enter')
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project:')
