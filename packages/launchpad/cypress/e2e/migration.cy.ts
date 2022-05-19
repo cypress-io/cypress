@@ -30,6 +30,7 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
+  cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
   cy.waitForWizard()
 }
 
@@ -90,6 +91,9 @@ describe('global mode', () => {
     })
 
     cy.contains('migration-e2e-export-default').click()
+
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
+
     // rename integration->e2e
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
@@ -128,6 +132,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
 
@@ -135,7 +140,44 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
+  })
+
+  it('migration landing page appears with a video', () => {
+    cy.intercept(/vimeo.com/).as('iframeDocRequest')
+    cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+    cy.visitLaunchpad()
+
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+    cy.contains(cy.i18n.migration.landingPage.description).should('be.visible')
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).should('be.visible')
+    cy.contains('a', cy.i18n.migration.landingPage.linkReleaseNotes)
+    .should('be.visible')
+    .and('have.attr', 'href', 'https://on.cypress.io/changelog')
+
+    // Vimeo's implementation may change, this is just a high level check that
+    // the expected iframe code is being returned and that there is vimeo-related network traffic
+    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
+    cy.wait('@iframeDocRequest')
+    cy.wait('@vimeoCdnRequest')
+    cy.percySnapshot()
+  })
+
+  it('landing page does not appear if there is no video embed code', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+        return null
+      })
+    })
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.welcomePage.title).should('be.visible')
+    cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
   })
 })
 
@@ -1164,6 +1206,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     }, { path: getPathForPlatform('cypress/plugins/index.js') })
 
     cy.findByRole('button', { name: 'Try again' }).click()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.waitForWizard()
   })
@@ -1506,6 +1549,7 @@ describe('Migrate custom config files', () => {
 
   it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
     cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')
