@@ -69,42 +69,6 @@ export class CypressCTWebpackPlugin {
   };
 
   /*
-   * After compiling, we check for errors and inform the server of them.
-   */
-  private afterCompile = () => {
-    if (!this.compilation) {
-      return
-    }
-
-    const stats = this.compilation.getStats()
-
-    if (stats.hasErrors()) {
-      this.errorEmitted = true
-
-      // webpack 4: string[]
-      // webpack 5: Error[]
-      const errors = stats.toJson().errors as Array<Error | string> | undefined
-
-      if (!errors || !errors.length) {
-        return
-      }
-
-      this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-    } else if (this.errorEmitted) {
-      // compilation succeed but assets haven't emitted to the output yet
-      this.devServerEvents.emit('dev-server:compile:error', null)
-    }
-  }
-
-  // After emitting assets, we tell the server complitation was successful
-  // so it can trigger a reload the AUT iframe.
-  private afterEmit = () => {
-    if (!this.compilation?.getStats().hasErrors()) {
-      this.devServerEvents.emit('dev-server:compile:success')
-    }
-  }
-
-  /*
    * `webpack --watch` watches the existing specs and their dependencies for changes,
    * but we also need to add additional dependencies to our dynamic "browser.js" (generated
    * using loader.ts) when new specs are created. This hook informs webpack that browser.js
@@ -152,8 +116,6 @@ export class CypressCTWebpackPlugin {
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
-    _compiler.hooks.afterCompile.tap('CypressCTPlugin', this.afterCompile)
-    _compiler.hooks.afterEmit.tap('CypressCTPlugin', this.afterEmit)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
   }
 }

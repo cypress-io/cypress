@@ -62,10 +62,9 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
         const errors = stats.compilation.errors
 
         devServerConfig.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-        if (devServerConfig.cypressConfig.isTextTerminal) {
-          process.exit(1)
-        }
       }
+
+      devServerConfig.devServerEvents.emit('dev-server:compile:success')
     })
 
     if (result.version === 3) {
