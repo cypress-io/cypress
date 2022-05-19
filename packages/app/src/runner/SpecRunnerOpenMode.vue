@@ -296,6 +296,8 @@ onBeforeUnmount(() => {
   cleanupRunner()
 })
 
+// TODO: UNIFY-1704 - avoid special case for FF
+const isFirefox = window.__CYPRESS_BROWSER__?.family === 'firefox'
 </script>
 
 <route>
