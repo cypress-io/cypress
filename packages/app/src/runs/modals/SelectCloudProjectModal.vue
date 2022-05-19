@@ -199,6 +199,7 @@ import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
 import WarningIcon from '~icons/cy/warning_x16.svg'
+import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
 
 const { t } = useI18n()
 const online = useOnline()
@@ -330,6 +331,8 @@ async function createOrConnectProject () {
         extension,
         message: err.message,
       }
+
+      clearPendingError()
     } else {
       graphqlError.value = undefined
     }
