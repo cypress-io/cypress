@@ -5,6 +5,7 @@ import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
 import ordinal from 'ordinal'
 
 import $errUtils from '../../cypress/error_utils'
+import { preprocessForSerialization } from '../../util/serialization'
 
 const getNumRequests = (state, alias) => {
   const requests = state('aliasRequests') || {}
@@ -53,10 +54,13 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   const waitString = (subject, str, options) => {
-    let log
+    let log: Cypress.InternalLogConfig & Cypress.Log
 
     if (options.log !== false) {
       log = options._log = Cypress.log({
+        displayName: 'wait',
+        name: 'wait',
+        message: '',
         type: 'parent',
         aliasType: 'route',
         // avoid circular reference
@@ -270,8 +274,51 @@ export default (Commands, Cypress, cy, state) => {
     })
   }
 
+  Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, originPolicy) => {
+    options.isCrossOriginSpecBridge = true
+    waitString(null, str, options).then((responses) => {
+      // remove props that aren't serializable (these aren't used by consumers so are okay to remove)
+      const omitFn = (response) => _.omit(response, ['subscriptions', 'setLogFlag'])
+      const preprocessedResponses = _.isArray(responses) ? responses.map(omitFn) : omitFn(responses)
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { responses: preprocessedResponses })
+    }).catch((err) => {
+      options._log?.error(err)
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { err: preprocessForSerialization(err) })
+    })
+  })
+
+  const deferToPrimaryOrigin = ([_subject, str, options]) => {
+    return new Promise((resolve, reject) => {
+      Cypress.specBridgeCommunicator.once('wait:for:xhr:end', ({ responses, err }) => {
+        if (err) {
+          if (options.log) {
+            Cypress.state('onBeforeLog', (log) => {
+              // skip this 'wait' log since it was already added through the primary
+              if (log.get('name') === 'wait') {
+                // unbind this function so we don't impact any other logs
+                cy.state('onBeforeLog', null)
+
+                return false
+              }
+
+              return
+            })
+          }
+
+          reject(err)
+        }
+
+        resolve(responses)
+      })
+
+      // subject is not needed when waiting on aliased requests since the request/response will be yielded
+      Cypress.specBridgeCommunicator.toPrimary('wait:for:xhr', { args: [str, options] })
+    })
+  }
+
   Commands.addAll({ prevSubject: 'optional' }, {
-    wait (subject, msOrAlias, options = {}) {
+    wait (subject, msOrAlias, options: { log?: boolean } = {}) {
       // check to ensure options is an object
       // if its a string the user most likely is trying
       // to wait on multiple aliases and forget to make this
@@ -292,11 +339,11 @@ export default (Commands, Cypress, cy, state) => {
           return waitNumber.apply(window, args)
         }
 
-        if (_.isString(msOrAlias)) {
-          return waitString.apply(window, args)
-        }
+        if (_.isString(msOrAlias) || (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias))) {
+          if (Cypress.isCrossOriginSpecBridge) {
+            return deferToPrimaryOrigin(args)
+          }
 
-        if (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias)) {
           return waitString.apply(window, args)
         }
 
