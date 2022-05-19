@@ -4,6 +4,10 @@ describe('Config options', () => {
     cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-no-support.config.ts'])
     cy.startAppServer('component')
 
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.removeFileInProject(`src/AppCompilationError.cy.jsx`)
+    })
+
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
