@@ -112,22 +112,17 @@ function run (ipc, file, projectRoot) {
       debug('Trying to use esbuild to run their config file.')
       // We prefer doing this because it supports TypeScript files
       require.resolve('esbuild')
+    } catch {
+      debug(`User doesn't have esbuild. Going to use native node imports.`)
 
-      debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
-      const { bundleRequire } = require('bundle-require')
-
-      return (await bundleRequire({ filepath: file })).mod
-    } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
-        debug(`User doesn't have esbuild. Going to use native node imports.`)
-
-        // We cannot replace the initial `require` with `await import` because
-        // Certain modules cannot be dynamically imported
-        return await import(file)
-      }
-
-      throw err
+      // We cannot replace the initial `require` with `await import` because
+      // Certain modules cannot be dynamically imported
+      return await import(file)
     }
+    debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
+    const { bundleRequire } = require('bundle-require')
+
+    return (await bundleRequire({ filepath: file })).mod
   }
 
   ipc.on('loadConfig', async () => {
