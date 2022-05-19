@@ -22,13 +22,17 @@ for (const project of WEBPACK_REACT) {
     })
 
     it('should mount a passing test', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject(`src/AppCompilationError.cy.jsx`)
+      })
+
       cy.visitApp()
       cy.contains('App.cy.jsx').click()
       cy.get('.passed > .num').should('contain', 1)
     })
 
     it('MissingReact: should fail, rerun, succeed', () => {
-      cy.once('uncaught:exception', () => {
+      cy.on('uncaught:exception', () => {
         // Ignore the uncaught exception in the AUT
         return false
       })
@@ -46,6 +50,11 @@ for (const project of WEBPACK_REACT) {
     })
 
     it('MissingReactInSpec: should fail, rerun, succeed', () => {
+      cy.on('uncaught:exception', () => {
+        // Ignore the uncaught exception in the AUT
+        return false
+      })
+
       cy.visitApp()
       cy.contains('MissingReactInSpec.cy.jsx').click()
       cy.get('.failed > .num').should('contain', 1)
@@ -55,6 +64,19 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.get('.passed > .num').should('contain', 1)
+    })
+
+    it('AppCompilationError: should fail with uncaught exception error', () => {
+      cy.on('uncaught:exception', () => {
+        // Ignore the uncaught exception in the AUT
+        return false
+      })
+
+      cy.visitApp()
+      cy.contains('AppCompilationError.cy.jsx').click()
+      cy.get('.failed > .num').should('contain', 1)
+      cy.contains('An uncaught error was detected outside of a test')
+      cy.contains('The following error originated from your test code, not from Cypress.')
     })
   })
 }

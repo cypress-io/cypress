@@ -56,5 +56,13 @@ for (const project of VITE_REACT) {
 
       cy.get('.passed > .num').should('contain', 1)
     })
+
+    it('AppCompilationError: should fail with uncaught exception error', () => {
+      cy.visitApp()
+      cy.contains('AppCompilationError.cy.jsx').click()
+      cy.get('.failed > .num').should('contain', 1)
+      cy.contains('An uncaught error was detected outside of a test')
+      cy.contains('The following error originated from your test code, not from Cypress.')
+    })
   })
 }
