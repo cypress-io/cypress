@@ -1,43 +1,24 @@
 import systemTests from '../lib/system-tests'
+import type { fixtureDirs } from '@tooling/system-tests'
+
+type ProjectDirs = typeof fixtureDirs
+
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react']
 
 describe('@cypress/webpack-dev-server', function () {
   systemTests.setup()
 
   describe('react', () => {
-    systemTests.it('runs specs in webpack4, webpack_dev_server 3', {
-      project: 'webpack4_wds3-react',
-      testingType: 'component',
-      browser: 'chrome',
-      spec: null,
-      configFile: 'cypress-webpack.config.ts',
-      expectedExitCode: 2,
-    })
-
-    systemTests.it('runs specs in webpack4, webpack_dev_server 4', {
-      project: 'webpack4_wds4-react',
-      testingType: 'component',
-      browser: 'chrome',
-      spec: null,
-      configFile: 'cypress-webpack.config.ts',
-      expectedExitCode: 2,
-    })
-
-    systemTests.it('runs specs in webpack5, webpack_dev_server 3', {
-      project: 'webpack5_wds3-react',
-      testingType: 'component',
-      browser: 'chrome',
-      spec: null,
-      configFile: 'cypress-webpack.config.ts',
-      expectedExitCode: 2,
-    })
-
-    systemTests.it('runs specs in webpack5, webpack_dev_server 4', {
-      project: 'webpack5_wds4-react',
-      testingType: 'component',
-      browser: 'chrome',
-      spec: null,
-      configFile: 'cypress-webpack.config.ts',
-      expectedExitCode: 2,
-    })
+    for (const project of WEBPACK_REACT) {
+      it(`executes all of the tests for ${project}`, function () {
+        return systemTests.exec(this, {
+          project,
+          configFile: 'cypress-webpack.config.ts',
+          testingType: 'component',
+          snapshot: true,
+          expectedExitCode: 3,
+        })
+      })
+    }
   })
 })
