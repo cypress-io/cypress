@@ -58,11 +58,11 @@ describe('Launchpad: Open Mode', () => {
     })
 
     it('auto-launches the browser when launched with --browser --testingType --project', () => {
+      cy.scaffoldProject('launchpad')
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
       })
 
-      cy.scaffoldProject('launchpad')
       cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
 
       // Need to visit after args have been configured, todo: fix in #18776
