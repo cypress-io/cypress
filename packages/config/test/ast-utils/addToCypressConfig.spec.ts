@@ -185,7 +185,7 @@ describe('addToCypressConfig', () => {
         })
       })
 
-      context('with bundleConfigPath', () => {
+      context('with bundleConfigPath (.js)', () => {
         it('adds component testing to e2e config', async () => {
           const result = await addTestingTypeToCypressConfig({
             filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.ts'),
@@ -201,6 +201,38 @@ describe('addToCypressConfig', () => {
 
           expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
           import webpackConfig from "./webpack.config.js";
+          export default {
+            e2e: {},
+          
+            component: {
+              devServer: {
+                framework: "react",
+                bundler: "webpack",
+                webpackConfig,
+              },
+            },
+          };`.trim())
+
+          expect(result.result).to.eq('MERGED')
+        })
+      })
+
+      context('with bundleConfigPath (.ts)', () => {
+        it('adds component testing to e2e config', async () => {
+          const result = await addTestingTypeToCypressConfig({
+            filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.ts'),
+            info: {
+              testingType: 'component',
+              bundler: 'webpack',
+              framework: 'react',
+              needsExplicitConfig: true,
+              bundlerConfigPath: './webpack.config.ts',
+            },
+            isProjectUsingESModules: true,
+          })
+
+          expect(stub.getCall(0).lastArg.trim()).to.eq(dedent`
+          import webpackConfig from "./webpack.config";
           export default {
             e2e: {},
           

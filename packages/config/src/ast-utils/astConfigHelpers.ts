@@ -161,6 +161,12 @@ export type ModuleToAdd = ESModuleToAdd | CommonJSModuleToAdd
  * import webpackConfig from <file>
  */
 export function addESModuleDefinition (file: string, identifier: 'viteConfig' | 'webpackConfig'): ESModuleToAdd {
+  if (file.endsWith('.ts')) {
+    const withoutExt = file.slice(0, file.length - 3)
+
+    file = withoutExt.length ? withoutExt : file
+  }
+
   return {
     node: t.importDeclaration(
       [t.importDefaultSpecifier(t.identifier(identifier))],
