@@ -2,7 +2,7 @@ import type { Compiler, Compilation } from 'webpack'
 import type webpack from 'webpack'
 import type { EventEmitter } from 'events'
 import _ from 'lodash'
-import fs, { PathLike } from 'fs'
+import fs, { PathLike } from 'fs-extra'
 import path from 'path'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
@@ -68,14 +68,26 @@ export class CypressCTWebpackPlugin {
     }
   };
 
-  private beforeCompile = () => {
+  private beforeCompile = async () => {
     if (!this.compilation) {
       return
     }
 
     // Ensure we don't try to load files that have been removed from the file system
     // but have not yet been detected by the onSpecsChange handler
-    this.files = (this.files || []).filter((file) => fs.existsSync(file.absolute))
+
+    const files = this.files.map((file) => {
+      return {
+        file,
+        exists: () => fs.pathExists(file.absolute),
+      }
+    })
+
+    for (const f of files) {
+      if (await f.exists()) {
+        this.files.push(f.file)
+      }
+    }
   }
 
   /*
@@ -162,7 +174,7 @@ export class CypressCTWebpackPlugin {
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
-    _compiler.hooks.beforeCompile.tap('CypressCTPlugin', this.beforeCompile)
+    _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.afterCompile.tap('CypressCTPlugin', this.afterCompile)
     _compiler.hooks.afterEmit.tap('CypressCTPlugin', this.afterEmit)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
