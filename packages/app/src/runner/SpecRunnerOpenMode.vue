@@ -13,7 +13,10 @@
     />
     <ResizablePanels
       v-else
-      :style="{width: `calc(100vw - ${collapsedNavBarWidth}px)`}"
+      :style="{
+        width: `calc(100vw - ${collapsedNavBarWidth}px)`,
+        overflowX: (isFirefox || screenshotStore.isScreenshotting) ? 'hidden' : 'auto'
+      }"
       :offset-left="collapsedNavBarWidth"
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"

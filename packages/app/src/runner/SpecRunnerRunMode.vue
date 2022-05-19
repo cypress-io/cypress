@@ -13,6 +13,7 @@
     <ResizablePanels
       v-else
       class="w-full"
+      :class="{'overflow-x-hidden': screenshotStore.isScreenshotting}"
       :max-total-width="windowWidth"
       :initial-panel1-width="0"
       :initial-panel2-width="runnerUiStore.reporterWidth"
