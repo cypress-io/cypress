@@ -44,9 +44,9 @@ export const defaultConfig: FullConfig = {
     include: [
       'index.html',
       '**/*.{vue,html,tsx}',
-      path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
-      path.resolve(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
-      path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
+      path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,ts,svg}'),
+      path.resolve(__dirname, '../app/**/*.{vue,html,tsx,ts,svg}'),
+      path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,ts,svg}'),
     ],
     exclude: ['node_modules/**/*', '.git/**/*'],
   },
