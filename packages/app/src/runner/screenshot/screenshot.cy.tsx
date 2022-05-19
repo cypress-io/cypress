@@ -3,7 +3,8 @@ import type { FunctionalComponent } from 'vue-demi'
 
 const styles = `
   body {
-    margin: 0; 
+    margin: 0;
+    font-family: serif !important; 
   }
   #wrapper {
     display: flex;
