@@ -5,7 +5,7 @@ import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import type { ErrorWrapperSource } from '@packages/errors'
+import type { ErrorWrapperSource, WarningWrapperSource } from '@packages/errors'
 import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
@@ -135,7 +135,7 @@ export interface CoreDataShape {
   electron: ElectronShape
   authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
-  warnings: ErrorWrapperSource[]
+  warnings: WarningWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
   versionData: {

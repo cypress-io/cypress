@@ -412,7 +412,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
           baseUrl,
         })
 
-        return onWarning(warning)
+        return onWarning(warning, true)
       },
     })
   }

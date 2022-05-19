@@ -31,6 +31,7 @@ type ProjectConfigManagerOptions = {
   onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => void
   onFinalConfigLoaded: (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => Promise<void>
   refreshLifecycle: () => Promise<void>
+  refreshSelectedTestingTypeWarnings: () => Promise<void>
 }
 
 type ConfigManagerState = 'pending' | 'loadingConfig' | 'loadedConfig' | 'loadingNodeEvents' | 'ready' | 'errored'
@@ -150,6 +151,8 @@ export class ProjectConfigManager {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
       this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
+    } else {
+      this.options.refreshSelectedTestingTypeWarnings()
     }
   }
 

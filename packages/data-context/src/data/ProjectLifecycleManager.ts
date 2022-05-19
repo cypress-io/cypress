@@ -277,6 +277,15 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.configChange()
       },
       refreshLifecycle: async () => this.refreshLifecycle(),
+      refreshSelectedTestingTypeWarnings: async () => {
+        if (!this.ctx.isRunMode && (!this.ctx.coreData.warnings.length || !this._currentTestingType)) {
+          return
+        }
+
+        if (this._currentTestingType === 'e2e') {
+          await this.ctx.actions.project.pingBaseUrl()
+        }
+      },
     })
   }
 

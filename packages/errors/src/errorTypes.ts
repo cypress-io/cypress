@@ -75,9 +75,17 @@ export interface SerializedError extends Omit<CypressError, 'messageMarkdown' | 
 }
 
 /**
- * Used in the GraphQL Error / Warning objects
+ * Used in the GraphQL Error objects
  */
 export interface ErrorWrapperSource {
   title?: string | null
   cypressError: CypressError
+}
+
+/**
+ * Used in the GraphQL Warning objects
+ */
+export interface WarningWrapperSource extends ErrorWrapperSource {
+  // If the warning is related to a specific testing type or global mode
+  isTestingTypeRelated: boolean
 }

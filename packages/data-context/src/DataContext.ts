@@ -36,7 +36,7 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import { CypressError, getError } from '@packages/errors'
+import { CypressError, getError, WarningWrapperSource } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
 
@@ -371,7 +371,7 @@ export class DataContext {
     }
   }
 
-  onWarning = (err: CypressError) => {
+  onWarning = (err: CypressError, isTestingTypeRelated: boolean = false) => {
     if (this.isRunMode) {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
@@ -379,10 +379,25 @@ export class DataContext {
       this.coreData.warnings.push({
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
         cypressError: err,
+        isTestingTypeRelated,
       })
 
       this.emitter.toLaunchpad()
     }
+  }
+
+  cleanupWarnings = (isTestingTypeRelated?: boolean) => {
+    let warnings: WarningWrapperSource[] = []
+
+    if (isTestingTypeRelated) {
+      warnings = this.coreData.warnings.filter((w) => !w.isTestingTypeRelated)
+    }
+
+    this.update((coreData) => {
+      coreData.warnings = warnings
+    })
+
+    this.emitter.toLaunchpad()
   }
 
   async destroy () {

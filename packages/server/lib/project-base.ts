@@ -192,7 +192,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     debug('project config: %o', _.omit(cfg, 'resolved'))
 
     if (warning) {
-      this.options.onWarning(warning)
+      this.options.onWarning(warning, true)
     }
 
     // save the last time they opened the project

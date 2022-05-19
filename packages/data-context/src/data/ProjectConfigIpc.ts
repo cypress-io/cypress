@@ -46,7 +46,7 @@ export class ProjectConfigIpc extends EventEmitter {
     readonly configFilePath: string,
     readonly configFile: string | false,
     readonly onError: (cypressError: CypressError, title?: string | undefined) => void,
-    readonly onWarning: (cypressError: CypressError) => void,
+    readonly onWarning: (cypressError: CypressError, isTestingTypeRelated: boolean) => void,
   ) {
     super()
     this._childProcess = this.forkConfigProcess()
@@ -205,7 +205,7 @@ export class ProjectConfigIpc extends EventEmitter {
       const handleWarning = (warningErr: CypressError) => {
         debug('plugins process warning:', warningErr.stack)
 
-        return this.onWarning(warningErr)
+        return this.onWarning(warningErr, true)
       }
 
       this.on('warning', handleWarning)

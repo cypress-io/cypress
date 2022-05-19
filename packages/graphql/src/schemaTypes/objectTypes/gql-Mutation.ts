@@ -161,6 +161,7 @@ export const mutation = mutationType({
       type: 'Query',
       resolve: (_, args, ctx) => {
         ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
+        ctx.cleanupWarnings(true)
 
         return {}
       },
