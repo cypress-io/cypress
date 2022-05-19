@@ -118,7 +118,7 @@ function run (ipc, file, projectRoot) {
 
       return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
+      if (err.stack.includes(`Cannot find package 'esbuild'`) || err.stack.includes(`Cannot find the module 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
