@@ -3,12 +3,15 @@ import Promise from 'bluebird'
 
 import $errUtils from '../cypress/error_utils'
 import * as cors from '@packages/network/lib/cors'
+import type { ICypress } from '../cypress'
+import type { $Cy } from '../cypress/cy'
+import type { StateFunc } from '../cypress/state'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) => ({
-  retry (fn, options, log) {
+export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeout'], clearTimeout: $Cy['clearTimeout'], whenStable: $Cy['whenStable'], finishAssertions: (...args: any) => any) => ({
+  retry (fn, options, log?) {
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
     // want to accidentally time out via mocha
