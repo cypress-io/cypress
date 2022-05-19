@@ -30,7 +30,7 @@ describe('Choose a Browser Page', () => {
 
       cy.percySnapshot()
 
-      cy.withCtx((ctx, o) => {
+      cy.withRetryableCtx((ctx, o) => {
         expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
       })
     })

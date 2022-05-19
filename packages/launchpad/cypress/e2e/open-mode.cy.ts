@@ -71,7 +71,7 @@ describe('Launchpad: Open Mode', () => {
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
 
-      cy.withCtx((ctx) => {
+      cy.withRetryableCtx((ctx) => {
         expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
       })
     })
