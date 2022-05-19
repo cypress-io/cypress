@@ -1,4 +1,5 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
+import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
@@ -178,6 +179,20 @@ describe('Opening unmigrated project', () => {
     cy.visitLaunchpad()
     cy.contains(cy.i18n.welcomePage.title).should('be.visible')
     cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
+  })
+
+  it('should only hit the video on link once & cache it', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+    cy.withCtx((ctx, o) => {
+      expect((ctx.util.fetch as SinonStub).args.filter((a) => String(a[0]).includes('v10-video-embed')).length).to.eq(1)
+    })
   })
 })
 
