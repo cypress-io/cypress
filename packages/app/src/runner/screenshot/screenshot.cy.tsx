@@ -4,7 +4,8 @@ import type { FunctionalComponent } from 'vue-demi'
 const styles = `
   body {
     margin: 0;
-    font-family: serif !important; 
+    font-family: serif !important;
+    line-height: 1 !important;
   }
   #wrapper {
     display: flex;
@@ -73,6 +74,7 @@ describe('screenshot', () => {
       margin: 0;
       padding: 0;
       font-family: serif !important; 
+      line-height: 1 !important;
     }
     * {
     box-sizing: content-box;
