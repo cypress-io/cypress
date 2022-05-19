@@ -2,9 +2,7 @@ import _ from 'lodash'
 import utils from './utils'
 
 export class $Command {
-  // `attributes` is initiated at reset(), but ts cannot detect it.
-  // @ts-ignore
-  attributes: Record<string, any>
+  attributes!: Record<string, any>
 
   constructor (attrs: any = {}) {
     this.reset()
@@ -136,6 +134,12 @@ export class $Command {
     return this
   }
 
+  pick (...args) {
+    args.unshift(this.attributes)
+
+    return _.pick.apply(_, args as [Record<string, any>, any[]])
+  }
+
   static create (obj) {
     if (utils.isInstanceOf(obj, $Command)) {
       return obj
@@ -144,14 +148,5 @@ export class $Command {
     return new $Command(obj)
   }
 }
-
-// mixin lodash methods
-_.each(['pick'], (method) => {
-  return $Command.prototype[method] = function (...args) {
-    args.unshift(this.attributes)
-
-    return _[method].apply(_, args)
-  }
-})
 
 export default $Command
