@@ -20,6 +20,10 @@ const hasCrossFrameStacks = (specWindow) => {
     return stack.replace(/^.*\n/, '')
   }
 
+  if (!specWindow.Error) {
+    return false
+  }
+
   const topStack = normalize((new Error()).stack)
   const specStack = normalize((new specWindow.Error()).stack)
 
