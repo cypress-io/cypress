@@ -402,7 +402,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """Default spec file name for spec creation"""
+  """
+  Default spec file name for spec creation, nullable so we can throw if it can't be decided
+  """
   defaultSpecFileName: String
 
   """File extension to use based on if the project has typescript or not"""
@@ -873,6 +875,9 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
+
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
 }
 
 type MigrationFile {

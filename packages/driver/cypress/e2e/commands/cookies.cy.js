@@ -1254,7 +1254,7 @@ describe('src/cy/commands/cookies', () => {
     })
   })
 
-  context('Cypress.cookies.defaults', () => {
+  context('Cypress.Cookies.defaults', () => {
     it('throws error on use of renamed whitelist option', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('`Cypress.Cookies.defaults` `whitelist` option has been renamed to `preserve`. Please rename `whitelist` to `preserve`.')
@@ -1265,6 +1265,22 @@ describe('src/cy/commands/cookies', () => {
       Cypress.Cookies.defaults({
         whitelist: 'session_id',
       })
+    })
+
+    it('logs deprecation warning', () => {
+      cy.stub(Cypress.utils, 'warning')
+
+      Cypress.Cookies.defaults({})
+      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.defaults()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
+    })
+  })
+
+  context('Cypress.Cookies.preserveOnce', () => {
+    it('logs deprecation warning', () => {
+      cy.stub(Cypress.utils, 'warning')
+
+      Cypress.Cookies.preserveOnce({})
+      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.preserveOnce()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
     })
   })
 })

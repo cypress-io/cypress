@@ -3,5 +3,11 @@ const { defineConfig } = require("cypress");
 const webpackConfig = require("./webpack.config.js");
 
 module.exports = defineConfig({
-  e2e: {},
+  component: {
+    devServer: {
+      framework: "vue",
+      bundler: "webpack",
+      webpackConfig,
+    },
+  },
 });

@@ -30,6 +30,7 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
+  cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
   cy.waitForWizard()
 }
 
@@ -90,6 +91,9 @@ describe('global mode', () => {
     })
 
     cy.contains('migration-e2e-export-default').click()
+
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
+
     // rename integration->e2e
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
@@ -128,6 +132,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
 
@@ -135,11 +140,48 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
+  })
+
+  it('migration landing page appears with a video', () => {
+    cy.intercept(/vimeo.com/).as('iframeDocRequest')
+    cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+    cy.visitLaunchpad()
+
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+    cy.contains(cy.i18n.migration.landingPage.description).should('be.visible')
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).should('be.visible')
+    cy.contains('a', cy.i18n.migration.landingPage.linkReleaseNotes)
+    .should('be.visible')
+    .and('have.attr', 'href', 'https://on.cypress.io/changelog')
+
+    // Vimeo's implementation may change, this is just a high level check that
+    // the expected iframe code is being returned and that there is vimeo-related network traffic
+    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
+    cy.wait('@iframeDocRequest')
+    cy.wait('@vimeoCdnRequest')
+    cy.percySnapshot()
+  })
+
+  it('landing page does not appear if there is no video embed code', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+        return null
+      })
+    })
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.welcomePage.title).should('be.visible')
+    cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
   })
 })
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
+describe('Full migration flow for each project', { retries: { openMode: 0, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -274,8 +316,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       })
 
       cy.findByText('change').click()
-
-      cy.get('[data-cy=migration-button-proceed]').click()
 
       // this project has a default integration folder and default testFiles.
       // We rename the integration folder, even if the user skips the spec rename
@@ -1118,9 +1158,9 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
       cy.findByText('change').click()
 
-      cy.get('[data-cy=migration-button-proceed]').click()
-
+      cy.contains('I may need to change my specPattern later').should('not.exist')
       cy.findByText('Don\'t rename anything — keep what I have.').click()
+      cy.contains('I may need to change my specPattern later')
 
       cy.findByText('Save Changes').click()
 
@@ -1166,6 +1206,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     }, { path: getPathForPlatform('cypress/plugins/index.js') })
 
     cy.findByRole('button', { name: 'Try again' }).click()
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.waitForWizard()
   })
@@ -1272,7 +1313,7 @@ describe.skip('component testing migration - defaults', () => {
   })
 })
 
-describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 } }, () => {
+describe('Migration', { viewportWidth: 1200, retries: { openMode: 0, runMode: 2 } }, () => {
   it('should create the cypress.config.js file and delete old config', () => {
     startMigrationFor('migration')
 
@@ -1324,18 +1365,11 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('Cancel, keep the default extension').click()
-    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
-
-    cy.findByText('change').click()
-    cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still want to change the spec file extension').click()
     cy.get('button').contains('Save Changes').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('I still want to change the spec file extension').click()
     cy.get('button').contains('Cancel').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
   })
@@ -1343,7 +1377,7 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 
   it('shows error if plugins file throws an error', () => {
     scaffoldAndVisitLaunchpad('migration-e2e-plugins-throw-error')
 
-    cy.contains('cypress/plugins/index.js file threw an error.')
+    cy.contains(`${getPathForPlatform('cypress/plugins/index.js')} file threw an error.`)
     cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
     cy.contains('throw new Error(\'New error from plugin\')')
   })
@@ -1515,6 +1549,7 @@ describe('Migrate custom config files', () => {
 
   it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
+    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
     cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')
@@ -1523,7 +1558,7 @@ describe('Migrate custom config files', () => {
   it('shows error if plugins file do not exist', () => {
     scaffoldAndVisitLaunchpad('migration', ['--config-file', 'erroredConfigFiles/incorrectPluginsFile.json'])
 
-    cy.contains('foo/bar file threw an error.')
+    cy.contains(`${getPathForPlatform('foo/bar')} file threw an error.`)
     cy.contains('Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to Cypress version 10.0.0.')
   })
 })

@@ -27,4 +27,19 @@ describe('<RunResults />', { viewportHeight: 150, viewportWidth: 250 }, () => {
 
     cy.percySnapshot()
   })
+
+  it('renders flaky ribbon', () => {
+    cy.mountFragment(RunCardFragmentDoc, {
+      onResult (result) {
+        result.totalFlakyTests = 4
+      },
+      render (gql) {
+        return <RunResults gql={gql} />
+      },
+    })
+
+    cy.contains('4 Flaky')
+
+    cy.percySnapshot()
+  })
 })

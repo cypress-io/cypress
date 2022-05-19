@@ -131,7 +131,14 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     mountModule: 'cypress/react',
     supportStatus: 'alpha',
-    componentIndexHtml: componentIndexHtmlGenerator('<div id="__next_css__DO_NOT_USE__"></div>'),
+    /**
+     * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
+     * @see: https://github.com/vercel/next.js/blob/5f3351dbb8de71bcdbc91d869c04bc862a25da5f/packages/next/build/webpack/config/blocks/css/loaders/client.ts#L24
+     */
+    componentIndexHtml: componentIndexHtmlGenerator([
+      `<!-- Used by Next.js to inject CSS. -->\n`,
+      `<div id="__next_css__DO_NOT_USE__"></div>`,
+    ].join(' '.repeat(8))),
   },
   {
     type: 'nuxtjs',

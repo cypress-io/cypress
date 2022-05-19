@@ -227,6 +227,13 @@ export const Migration = objectType({
       },
     })
 
+    t.string('videoEmbedHtml', {
+      description: 'Markup for the migration landing page video embed',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.getVideoEmbedHtml()
+      },
+    })
+
     t.nonNull.string('integrationFolder', {
       description: 'the integration folder path used to store e2e tests',
       resolve: async (source, args, ctx) => (await ctx.migration.integrationFolder()).toString(),

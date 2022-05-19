@@ -4,8 +4,7 @@ export default myDefineConfig({
   component: {
     devServer: {
       framework: "react",
-      bundler: "webpack", // provide your webpack config here...
-      // webpackConfig,
+      bundler: "webpack",
     },
   },
 });
