@@ -15,6 +15,7 @@ describe('@cypress/webpack-dev-server', function () {
           project,
           configFile: 'cypress-webpack.config.ts',
           testingType: 'component',
+          browser: 'chrome',
           snapshot: true,
           expectedExitCode: 3,
         })

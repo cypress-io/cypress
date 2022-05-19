@@ -15,6 +15,7 @@ describe('@cypress/vite-dev-server', function () {
           project,
           configFile: 'cypress-vite.config.ts',
           testingType: 'component',
+          browser: 'chrome',
           snapshot: true,
           expectedExitCode: 3,
         })
