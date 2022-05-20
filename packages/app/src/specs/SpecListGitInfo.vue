@@ -1,9 +1,11 @@
 <template>
   <div
-    class="h-full grid gap-9px grid-cols-[16px,auto] git-info-row items-center"
+    class="h-full grid gap-9px git-info-row items-center"
+    :class="{'grid-cols-[16px,auto]': classes.icon}"
     data-cy="git-info-row"
   >
     <Tooltip
+      v-if="classes.icon"
       placement="top"
       class="h-full grid items-center"
     >
@@ -74,6 +76,10 @@ const classes = computed(() => {
     },
     unmodified: {
       icon: CommitIcon,
+      iconClasses: 'icon-light-gray-500',
+    },
+    no_git_info: {
+      icon: null,
       iconClasses: 'icon-light-gray-500',
     },
   }[props.gql?.statusType || 'unmodified']

@@ -241,7 +241,7 @@ type CloudRun implements Node {
   totalFailed: Int
 
   """
-  Number of flaky tests
+  Number of flaky tests, null if flake detection is not enabled
   """
   totalFlakyTests: Int
 
