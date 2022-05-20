@@ -66,6 +66,8 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
           process.exit(1)
         }
       }
+
+      devServerConfig.devServerEvents.emit('dev-server:compile:done')
     })
 
     if (result.version === 3) {
