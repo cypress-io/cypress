@@ -11,7 +11,7 @@ describe('baseUrl', () => {
       ctx._apis.projectApi.isListening = sinon.stub().resolves(null)
     })
 
-    cy.contains('button', 'Retry').click()
+    cy.contains('button', 'Try again').click()
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 })
