@@ -215,6 +215,38 @@ describe('#devServer', () => {
     })
   })
 
+  it('does not inject files into loader that do not exist at compile time', async () => {
+    const devServerEvents = new EventEmitter()
+    const { close } = await devServer({
+      webpackConfig,
+      cypressConfig,
+      specs: [...createSpecs('foo.spec.js'), ...createSpecs('does_not_exist.spec.js')],
+      devServerEvents,
+    })
+
+    let compileErrorOccurred
+
+    devServerEvents.on('dev-server:compile:error', () => {
+      compileErrorOccurred = true
+    })
+
+    await once(devServerEvents, 'dev-server:compile:done')
+
+    // An error event should not have been emitted, as we should have
+    // filtered any missing specs out of the set provided to the loader.
+    expect(compileErrorOccurred).to.not.be.true
+
+    await new Promise<void>((resolve, reject) => {
+      close((err) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve()
+      })
+    })
+  })
+
   it('touches browser.js when a spec file is added and recompile', async function () {
     const devServerEvents = new EventEmitter()
     const { close } = await devServer({
