@@ -288,7 +288,7 @@ export default (Commands, Cypress, cy, state) => {
     })
   })
 
-  const deferToPrimaryOrigin = ([_subject, str, options]) => {
+  const delegateToPrimaryOrigin = ([_subject, str, options]) => {
     return new Promise((resolve, reject) => {
       Cypress.specBridgeCommunicator.once('wait:for:xhr:end', ({ responses, err }) => {
         if (err) {
@@ -341,7 +341,7 @@ export default (Commands, Cypress, cy, state) => {
 
         if (_.isString(msOrAlias) || (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias))) {
           if (Cypress.isCrossOriginSpecBridge) {
-            return deferToPrimaryOrigin(args)
+            return delegateToPrimaryOrigin(args)
           }
 
           return waitString.apply(window, args)
