@@ -181,7 +181,6 @@ const eventManager = getEventManager()
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 
-window.screenshotStore = screenshotStore
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
 const {
