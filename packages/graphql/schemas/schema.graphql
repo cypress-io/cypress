@@ -402,7 +402,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """Default spec file name for spec creation"""
+  """
+  Default spec file name for spec creation, nullable so we can throw if it can't be decided
+  """
   defaultSpecFileName: String
 
   """File extension to use based on if the project has typescript or not"""
@@ -874,6 +876,9 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
+
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
 }
 
 type MigrationFile {
@@ -1213,6 +1218,11 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """
+  Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)
+  """
+  invokedFromCli: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!

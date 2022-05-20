@@ -1,8 +1,9 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import type { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
+import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import * as configUtils from '@packages/config'
 import { isListening } from './util/ensure-url'
+import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 
 import type {
   AllModeOptions,
@@ -20,7 +21,6 @@ import user from './user'
 import * as config from './config'
 import { openProject } from './open_project'
 import cache from './cache'
-import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
@@ -68,9 +68,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     appApi: {
       appData,
-      findNodePath () {
-        return findSystemNode.findNodeInFullPath()
-      },
     },
     authApi: {
       getUser () {
@@ -161,24 +158,22 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         })
       },
       showItemInFolder (folder: string) {
-        require('electron').shell.showItemInFolder(folder)
+        electron.shell.showItemInFolder(folder)
       },
       showOpenDialog (props: OpenDialogOptions) {
-        return require('electron').dialog.showOpenDialog(props)
+        return electron.dialog.showOpenDialog(props)
       },
       showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
-        return require('electron').dialog.showSaveDialog(window, props)
+        return electron.dialog.showSaveDialog(window, props)
       },
       copyTextToClipboard (text: string) {
-        require('electron').clipboard.writeText(text)
+        electron.clipboard.writeText(text)
       },
-      // These instances of JIT requiring gui/windows can be removed
-      // once https://github.com/cypress-io/cypress/issues/21236 is fixed
       isMainWindowFocused () {
-        return require('./gui/windows').isMainWindowFocused()
+        return isMainWindowFocused()
       },
       focusMainWindow () {
-        return require('./gui/windows').focusMainWindow()
+        return focusMainWindow()
       },
     },
     localSettingsApi: {

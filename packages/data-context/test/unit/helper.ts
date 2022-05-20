@@ -15,6 +15,7 @@ import { execute, parse } from 'graphql'
 import { getOperationName } from '@urql/core'
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
+import type { OpenModeOptions, RunModeOptions } from '@packages/types'
 
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
@@ -37,12 +38,12 @@ export async function scaffoldMigrationProject (project: typeof fixtureDirs[numb
   return Fixtures.projectPath(project)
 }
 
-export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', stubFetch = true) {
+export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', modeOptions: Partial<RunModeOptions | OpenModeOptions> = {}) {
   const ctx = new DataContext({
     schema: graphqlSchema,
     schemaCloud,
     mode,
-    modeOptions: {},
+    modeOptions,
     appApi: {} as AppApiShape,
     localSettingsApi: {} as LocalSettingsApiShape,
     authApi: {
@@ -64,33 +65,31 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     } as unknown as BrowserApiShape,
   })
 
-  if (stubFetch) {
-    const origFetch = ctx.util.fetch
+  const origFetch = ctx.util.fetch
 
-    ctx.util.fetch = async function (url, init) {
-      await new Promise((resolve) => setTimeout(resolve, 5))
+  ctx.util.fetch = async function (url, init) {
+    await new Promise((resolve) => setTimeout(resolve, 5))
 
-      if (String(url).endsWith('/test-runner-graphql')) {
-        const { query, variables } = JSON.parse(String(init?.body))
-        const document = parse(query)
-        const operationName = getOperationName(document)
+    if (String(url).endsWith('/test-runner-graphql')) {
+      const { query, variables } = JSON.parse(String(init?.body))
+      const document = parse(query)
+      const operationName = getOperationName(document)
 
-        const result = await Promise.resolve(execute({
-          operationName,
-          variableValues: variables,
-          rootValue: CloudQuery,
-          contextValue: {
-            __server__: ctx,
-          },
-          schema: remoteSchema,
-          document,
-        }))
+      const result = await Promise.resolve(execute({
+        operationName,
+        variableValues: variables,
+        rootValue: CloudQuery,
+        contextValue: {
+          __server__: ctx,
+        },
+        schema: remoteSchema,
+        document,
+      }))
 
-        return new Response(JSON.stringify(result), { status: 200 })
-      }
-
-      return origFetch.call(this, url, init)
+      return new Response(JSON.stringify(result), { status: 200 })
     }
+
+    return origFetch.call(this, url, init)
   }
 
   return ctx

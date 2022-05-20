@@ -1,5 +1,4 @@
 import debugFn from 'debug'
-import getPort from 'get-port'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 
@@ -24,10 +23,13 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   const server = await devServer.create(config, vite)
 
   debug('Vite server created')
-  const port = await getPort({ port: 3000 })
 
-  debug('Starting Vite Server on port %i', port)
-  await server.listen(port)
+  await server.listen()
+  const { port } = server.config.server
+
+  if (!port) {
+    throw new Error('Missing vite dev server port.')
+  }
 
   debug('Successfully launched the vite server on port', port)
 

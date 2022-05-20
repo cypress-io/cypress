@@ -1,6 +1,6 @@
 <template>
   <label
-    class="mt-24px text-gray-800 block"
+    class="mt-24px text-gray-800 block font-bold"
     :for="props.name"
   >{{ props.label }}</label>
   <div
@@ -22,6 +22,7 @@
       <slot
         name="option"
         :option="opt"
+        :checked="props.value === opt.value"
       >
         <span class="text-gray-800">{{ opt.label }}</span>
         <span class="text-gray-500"> - {{ opt.description }}</span>

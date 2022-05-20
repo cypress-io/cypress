@@ -276,7 +276,8 @@
       "notConfigured": "Not Configured",
       "running": "Running",
       "chooseABrowser": "Choose a Browser",
-      "reconfigure": "Reconfigure"
+      "reconfigure": "Reconfigure",
+      "disabled": "Disabled"
     }
   },
   "globalPage": {
@@ -487,7 +488,7 @@
       "failed": "failed"
     },
     "errors": {
-      "notfound": {
+      "notFound": {
         "title": "Couldn't find your project",
         "description": "We were unable to find an existing project matching the {0} set in your Cypress config file. You can reconnect with an existing project or create a new project.",
         "button": "Reconnect your project"
@@ -501,6 +502,12 @@
         "title": "Your access request for this project has been sent.",
         "description": "The owner of this project has been notified of your request. We'll notify you via email when your access request has been granted.",
         "button": "Request Sent"
+      },
+      "connectionFailed": {
+        "title": "Cannot connect to the Cypress Dashboard",
+        "description": "The request times out when trying to retrieve the recorded runs from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
+        "link": "Support Page",
+        "button": "Try again"
       }
     }
   },
@@ -513,6 +520,10 @@
     "component": {
       "name": "Component Testing",
       "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
+    },
+    "componentDisabled": {
+      "description": "To test your components you must {0} as an NPM dependency for this project.",
+      "link": "install Cypress"
     }
   },
   "migration": {
@@ -520,35 +531,29 @@
     "after": "After",
     "heresWhy": "here's why:",
     "renameAuto": {
-      "title": "We'll automatically rename your specs in this step",
+      "title": "We recommend automatically renaming your specs in this step",
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
-      "optedOutMessage": "You've opted not to rename your spec file extension",
-      "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
-      "modals": {
+      "optedOutMessage": "You've opted not to rename your spec file extension. You may need to change your specPattern later so we can still find your spec files.",
+      "folderRenameMessage": "You've opted not to rename your spec file extension, we'll only rename the folder",
+      "modal": {
         "title": "Change the existing spec file extension",
-        "step1": {
-          "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team.",
-          "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
-          "line2": "All new spec files created within Cypress will use the default pattern of: ",
-          "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
-          "line4": "All documentation and example code will be using: ",
-          "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-          "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
-          "buttonProceed": "I still want to change the spec file extension",
-          "buttonCancel": "Cancel, keep the default extension"
-        },
-        "step2": {
-          "warning": "You may need to change your specPattern later if you don't use the recommended filename extension.",
-          "label": "Choose from the following filename patterns:",
-          "option1": "{0} (Recommended)",
-          "option2": "Don't rename anything — keep what I have.",
-          "option3": "Rename folder only.",
-          "buttonSave": "Save Changes",
-          "buttonCancel": "Cancel"
-        }
+        "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team.",
+        "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
+        "line2": "All new spec files created within Cypress will use the default pattern of: ",
+        "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
+        "line4": "All documentation and example code will be using: ",
+        "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
+        "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
+        "label": "Choose from the following filename patterns:",
+        "option1": "{0} (Recommended)",
+        "option2": "Don't rename anything — keep what I have.",
+        "option3": "Rename folder only.",
+        "optOutAdditional": "I may need to change my {0} later if I don't use the recommended filename extension.",
+        "buttonSave": "Save Changes",
+        "buttonCancel": "Cancel"
       }
     },
     "renameManual": {
@@ -608,6 +613,12 @@
         "description": "In this step, we'll explain how you will reconfigure Cypress for component testing.",
         "button": "Finish migration and continue"
       }
+    },
+    "landingPage": {
+      "title": "Welcome to Cypress 10!",
+      "description": "Check out the highlights in the video below to explore what’s changed recently.",
+      "actionContinue": "Continue to Cypress 10",
+      "linkReleaseNotes": "Release notes"
     }
   },
   "setupWizard": {

@@ -41,11 +41,11 @@ describe('<Radio />', () => {
         label="Project Access"
         options={options}
         v-slots={{
-          option: ({ option }) => <div>foo - {option.label}</div>,
+          option: ({ option, checked }) => <div>foo - {option.label} {checked ? '(checked)' : ''}</div>,
         }}/>
     </div>))
 
+    cy.findByText('foo - Private (checked)').should('be.visible')
     cy.findByText('foo - Public').should('be.visible')
-    cy.findByText('foo - Private').should('be.visible')
   })
 })

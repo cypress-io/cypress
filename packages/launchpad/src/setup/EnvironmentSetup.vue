@@ -153,6 +153,9 @@ const onBack = () => {
 }
 
 const canNavigateForward = computed(() => {
-  return props.gql.bundler !== null && props.gql.framework !== null
+  const { bundler, framework } = props.gql
+
+  return bundler !== null && framework !== null
 })
+
 </script>

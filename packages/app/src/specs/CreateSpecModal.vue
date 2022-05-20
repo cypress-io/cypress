@@ -102,11 +102,7 @@ const helpLink = computed(() => {
 })
 
 const specFileName = computed(() => {
-  const extension = props.gql.currentProject?.fileExtensionToUse ?? 'js'
-
-  const fileName = props.gql.currentProject?.defaultSpecFileName ?? `cypress/e2e/filename.cy.${extension}`
-
-  return getPathForPlatform(fileName)
+  return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
 const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
