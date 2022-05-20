@@ -54,7 +54,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   const waitString = (subject, str, options) => {
-    let log: Cypress.InternalLogConfig & Cypress.Log
+    let log
 
     if (options.log !== false) {
       log = options._log = Cypress.log({

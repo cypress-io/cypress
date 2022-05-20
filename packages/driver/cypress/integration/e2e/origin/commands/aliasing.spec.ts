@@ -1,8 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 context('cy.origin aliasing', () => {
-  let logs: Map<string, any>
-
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
   })
@@ -32,6 +30,8 @@ context('cy.origin aliasing', () => {
   })
 
   context('#consoleProps', () => {
+    let logs: Map<string, any>
+
     beforeEach(() => {
       logs = new Map()
 
@@ -42,6 +42,7 @@ context('cy.origin aliasing', () => {
 
     it('.as()', () => {
       cy.get('a[data-cy="dom-link"]').click()
+
       cy.origin('http://foobar.com:3500', () => {
         cy.get('#button').as('buttonAlias')
       })
