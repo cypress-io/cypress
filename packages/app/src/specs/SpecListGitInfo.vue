@@ -78,7 +78,7 @@ const classes = computed(() => {
       icon: CommitIcon,
       iconClasses: 'icon-light-gray-500',
     },
-    no_git_info: {
+    noGitInfo: {
       icon: null,
       iconClasses: 'icon-light-gray-500',
     },

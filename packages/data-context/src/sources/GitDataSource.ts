@@ -284,7 +284,7 @@ export class GitDataSource {
             lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
             lastModifiedHumanReadable: ctime.fromNow(),
             author: '', // unstaged file don't have an author
-            statusType: 'no_git_info',
+            statusType: 'noGitInfo',
             subject: null,
             shortHash: null,
           }
