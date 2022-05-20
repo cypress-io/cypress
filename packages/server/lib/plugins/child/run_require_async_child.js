@@ -173,12 +173,19 @@ function run (ipc, file, projectRoot) {
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
+            const onConfigNotFound = (devServer, root, searchedFor) => {
+              ipc.send('setupTestingType:error', util.serializeError(
+                require('@packages/errors').getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServer, root, searchedFor),
+              ))
+            }
+
             on('dev-server:start', (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
                 return devServer({
                   cypressConfig: config,
+                  onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,

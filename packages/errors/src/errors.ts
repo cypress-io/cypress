@@ -1530,6 +1530,22 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide
     `
   },
+
+  DEV_SERVER_CONFIG_FILE_NOT_FOUND: (devServer: 'vite' | 'webpack', root: string, searchedFor: string[]) => {
+    const devServerConfigFile = `${devServer}Config`
+
+    return errTemplate`\
+      You are using ${fmt.highlight(devServer)} for your dev server, but the required configuration file was not found. We traversed upwards from:
+      
+      ${fmt.highlightSecondary(root)}
+      
+      looking for a file named:
+
+      ${fmt.listItems(searchedFor, { prefix: ' - ' })}
+
+      Either ensure a configuration file exists with the above names, or pass a custom configuration file using the ${fmt.highlight(devServerConfigFile)} option.
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

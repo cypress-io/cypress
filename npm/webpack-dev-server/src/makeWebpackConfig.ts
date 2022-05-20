@@ -1,10 +1,12 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import { importModule } from 'local-pkg'
 import type { Configuration } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
+import { configFiles } from './constants'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -74,21 +76,12 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
  */
-export function makeWebpackConfig (
+export async function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  const userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  let userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
-
-  if (!userWebpackConfig && !frameworkWebpackConfig) {
-    throw new Error(`Your Cypress devServer config is missing a required webpackConfig property, since we could not automatically detect one.\n Please add one to your ${config.devServerConfig.cypressConfig.configFile}`)
-  }
-
-  const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
-    merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
-  )
-
   const {
     cypressConfig: {
       projectRoot,
@@ -98,6 +91,33 @@ export function makeWebpackConfig (
     specs: files,
     devServerEvents,
   } = config.devServerConfig
+
+  let configFile: string | undefined = undefined
+
+  if (!userWebpackConfig && !frameworkWebpackConfig) {
+    debug('Not user or framework webpack config received. Trying to automatically source it')
+
+    const { default: findUp } = await importModule('find-up')
+
+    configFile = await findUp(configFiles, { cwd: projectRoot } as { cwd: string })
+
+    if (configFile) {
+      debug('found webpack config %s', configFile)
+      userWebpackConfig = require(configFile)
+      debug('config contains %o', userWebpackConfig)
+    } else {
+      debug('could not find webpack.config!')
+      if (config.devServerConfig?.onConfigNotFound) {
+        config.devServerConfig.onConfigNotFound('webpack', projectRoot, configFiles)
+      } else {
+        throw new Error(`Your Cypress devServer config is missing a required webpackConfig property, since we could not automatically detect one.\nPlease add one to your ${config.devServerConfig.cypressConfig.configFile}`)
+      }
+    }
+  }
+
+  const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
+    merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
+  )
 
   debug(`User passed in user and framework webpack config with values %o`, userAndFrameworkWebpackConfig)
   debug(`New webpack entries %o`, files)

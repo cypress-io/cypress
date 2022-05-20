@@ -199,6 +199,7 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('setupTestingType:error', (err) => {
+        this.onError(err)
         reject(err)
       })
 

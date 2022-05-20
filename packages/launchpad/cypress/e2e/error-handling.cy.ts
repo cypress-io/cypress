@@ -61,4 +61,58 @@ describe('Error handling', () => {
     cy.get('body')
     .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
   })
+
+  describe('using bundler: "vite" with missing config', () => {
+    it('displays informative error about what when wrong and where we looked', () => {
+      cy.scaffoldProject('missing-vite-config')
+      cy.openProject('missing-vite-config', ['--component'])
+      cy.visitLaunchpad()
+
+      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs'].forEach((idiomaticConfigFile) => {
+        cy.contains(idiomaticConfigFile)
+      })
+
+      cy.contains('You are using vite for your dev server, but the required configuration file was not found')
+      cy.contains('Either ensure a configuration file exists with the above names, or pass a custom configuration file using the viteConfig option.')
+    })
+
+    context('has config file in common location', () => {
+      it('automatically sources vite.config.js', () => {
+        cy.scaffoldProject('react-vite-ts-configured')
+        cy.openProject('react-vite-ts-configured', ['--component'])
+        cy.visitLaunchpad()
+
+        // should successful start dev server and move to launch screen!
+        cy.contains('Choose a Browser')
+      })
+    })
+  })
+
+  describe('using bundler: "webpack"', () => {
+    context('with missing config', () => {
+      it('handles missing webpack.config', () => {
+        cy.scaffoldProject('missing-webpack-config')
+        cy.openProject('missing-webpack-config', ['--component'])
+        cy.visitLaunchpad()
+
+        ;['webpack.config.js', 'webpack.config.ts', 'webpack.config.mjs', 'webpack.config.cjs'].forEach((idiomaticConfigFile) => {
+          cy.contains(idiomaticConfigFile)
+        })
+
+        cy.contains('You are using webpack for your dev server, but the required configuration file was not found')
+        cy.contains('Either ensure a configuration file exists with the above names, or pass a custom configuration file using the webpackConfig option.')
+      })
+    })
+
+    context('has config file in common location', () => {
+      it('automatically sources webpack.config.js', () => {
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests', ['--component'])
+        cy.visitLaunchpad()
+
+        // should successful start dev server and move to launch screen!
+        cy.contains('Choose a Browser')
+      })
+    })
+  })
 })

@@ -17,7 +17,7 @@ import type { Vite } from './getVite'
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
-  const { specs, cypressConfig, viteConfig: viteOverrides = {} } = config
+  const { specs, cypressConfig, viteConfig: viteOverrides } = config
   const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
@@ -28,9 +28,13 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   if (configFile) {
     debug('resolved config file at', configFile, 'using root', root)
   } else if (viteOverrides) {
-    debug('Couldn\'t find a Vite config file, however we received a custom viteConfig', viteOverrides)
+    debug(`Couldn't find a Vite config file, however we received a custom viteConfig`, viteOverrides)
   } else {
-    throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+    if (config.onConfigNotFound) {
+      config.onConfigNotFound('vite', root, configFiles)
+    } else {
+      throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+    }
   }
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
