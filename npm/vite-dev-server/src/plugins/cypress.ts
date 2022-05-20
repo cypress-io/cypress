@@ -79,9 +79,6 @@ export const Cypress = (
         return res.end(transformedIndexHtml)
       })
     },
-    buildEnd: () => {
-      devServerEvents.emit('dev-server:compile:success')
-    },
     handleHotUpdate: ({ server, file }) => {
       debug('handleHotUpdate - file', file)
 
