@@ -523,8 +523,8 @@
       "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
     },
     "componentDisabled": {
-      "description": "Testing your components requires {0} as an NPM dependency for this project.",
-      "link": "installing Cypress"
+      "description": "To test your components you must {0} as an NPM dependency for this project.",
+      "link": "install Cypress"
     }
   },
   "migration": {
