@@ -166,14 +166,10 @@ context('cy.origin waiting', () => {
     })
 
     it('doesn\'t log when log: false', () => {
-      const response = { foo: 'foo' }
+      cy.intercept('/foo', {}).as('foo')
 
-      cy.intercept('/foo', response).as('foo')
-
-      cy.origin('http://www.foobar.com:3500', { args: { response } }, ({ response }) => {
-        cy.then(() => {
-          window.xhrGet('/foo')
-        })
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.then(() => window.xhrGet('/foo'))
 
         cy.wait('@foo', { log: false })
       })

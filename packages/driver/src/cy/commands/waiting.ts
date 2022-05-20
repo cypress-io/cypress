@@ -57,22 +57,24 @@ export default (Commands, Cypress, cy, state) => {
     let log
 
     if (options.log !== false) {
+      let specBridgeLogOptions = {}
+
+      // if this came from the spec bridge, we need to set a few additional
+      // properties to ensure the log displays correctly
+      if (options.isCrossOriginSpecBridge) {
+        specBridgeLogOptions = {
+          name: 'wait',
+          message: '',
+        }
+      }
+
       log = options._log = Cypress.log({
         type: 'parent',
         aliasType: 'route',
         // avoid circular reference
         options: _.omit(options, '_log'),
+        ...specBridgeLogOptions,
       })
-
-      // if this came from the spec bridge, we need to set a few additional
-      // properties to ensure the log displays correctly
-      if (options.isCrossOriginSpecBridge) {
-        log.set({
-          displayName: 'wait',
-          name: 'wait',
-          message: '',
-        })
-      }
     }
 
     const checkForXhr = async function (alias, type, index, num, options) {
@@ -284,11 +286,7 @@ export default (Commands, Cypress, cy, state) => {
   Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, originPolicy) => {
     options.isCrossOriginSpecBridge = true
     waitString(null, str, options).then((responses) => {
-      // remove props that aren't serializable (these aren't used by consumers so are okay to remove)
-      const omitFn = (response) => _.omit(response, ['subscriptions', 'setLogFlag'])
-      const preprocessedResponses = _.isArray(responses) ? responses.map(omitFn) : omitFn(responses)
-
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { responses: preprocessedResponses })
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { responses: preprocessForSerialization(responses) })
     }).catch((err) => {
       options._log?.error(err)
       Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { err: preprocessForSerialization(err) })
