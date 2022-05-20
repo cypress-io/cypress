@@ -14,7 +14,7 @@
     <ResizablePanels
       v-else
       :style="{
-        width: `calc(100vw - ${collapsedNavBarWidth}px)`,
+        width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)`,
         overflowX: (isFirefox || screenshotStore.isScreenshotting) ? 'hidden' : 'auto'
       }"
       :offset-left="collapsedNavBarWidth"
@@ -180,6 +180,8 @@ const eventManager = getEventManager()
 
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
+
+window.screenshotStore = screenshotStore
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
 const {
