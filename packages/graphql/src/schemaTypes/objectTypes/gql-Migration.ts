@@ -230,6 +230,10 @@ export const Migration = objectType({
     t.string('videoEmbedHtml', {
       description: 'Markup for the migration landing page video embed',
       resolve: (source, args, ctx) => {
+        if (!ctx.lifecycleManager.metaState.needsCypressJsonMigration) {
+          return null
+        }
+
         return ctx.migration.getVideoEmbedHtml()
       },
     })

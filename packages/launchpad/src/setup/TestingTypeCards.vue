@@ -42,7 +42,9 @@ const props = defineProps<{
 }>()
 
 function selectTestingType (testingType: 'e2e' | 'component') {
-  mutation.executeMutation({ testingType })
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({ testingType })
+  }
 }
 
 </script>
