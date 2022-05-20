@@ -1539,7 +1539,6 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            DEBUG=cypress:* \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
