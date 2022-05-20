@@ -6,8 +6,6 @@ const styles = `
     margin: 0;
     font-family: serif !important;
     line-height: 1.15 !important;
-    overflow: scroll !important;
-    height: unset !important;
   }
   #wrapper {
     display: flex;
@@ -77,8 +75,6 @@ describe('screenshot', () => {
       padding: 0;
       font-family: serif !important; 
       line-height: 1.15 !important;
-      overflow: scroll !important;
-      height: unset !important;
     }
     * {
     box-sizing: content-box;
