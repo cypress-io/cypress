@@ -6,9 +6,16 @@ import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 interface CodeGenOptions {
   codeGenPath: string
   codeGenType: CodeGenType
-  specFileExtension: string
   erroredCodegenCandidate?: string | null
 }
+
+// Spec file extensions that we will preserve when updating the file name
+// due to a file with that name already existing on the file system.
+// Example:
+//   Button.cy.ts   -> Button-copy-1.cy.ts
+//   Button_spec.js -> Button-copy-1_spec.js
+//   Button.foo.js  -> Button.foo-copy-1.js
+export const expectedSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
 export class SpecOptions {
   private parsedPath: ParsedPath;
@@ -25,9 +32,21 @@ export class SpecOptions {
     }
   }
 
+  private getSpecExtension = () => {
+    if (this.options.erroredCodegenCandidate) {
+      return ''
+    }
+
+    const candidateSpecExtension = expectedSpecExtensions.find((specExtension) => {
+      return this.parsedPath.base.endsWith(specExtension + this.parsedPath.ext)
+    })
+
+    return candidateSpecExtension || ''
+  }
+
   private async getFilename () {
     const { dir, base, ext } = this.parsedPath
-    const cyWithExt = this.options.specFileExtension + ext
+    const cyWithExt = this.getSpecExtension() + ext
     const name = base.slice(0, -cyWithExt.length)
 
     // At this point, for a filePath of `/foo/bar/baz.cy.js`
