@@ -433,7 +433,9 @@ describe('App: Specs', () => {
             await ctx.actions.file.writeFileInProject('cypress.config.js', config)
           })
 
-          cy.contains('No Specs Found').should('be.visible')
+          // Timeout is increased here to allow ample time for the config change to be processed
+          cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+
           cy.findByRole('button', { name: 'New Spec' }).click()
           cy.contains('Create new empty spec').click()
 
@@ -708,7 +710,8 @@ describe('App: Specs', () => {
           await ctx.actions.file.writeFileInProject('cypress.config.js', config)
         })
 
-        cy.contains('No Specs Found').should('be.visible')
+        // Timeout is increased here to allow ample time for the config change to be processed
+        cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
         cy.findByRole('button', { name: 'New Spec' }).click()
 
         cy.findByRole('dialog', {

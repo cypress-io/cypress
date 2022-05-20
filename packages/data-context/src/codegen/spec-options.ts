@@ -10,7 +10,8 @@ interface CodeGenOptions {
 }
 
 // Spec file extensions that we will preserve when updating the file name
-// due to a file with that name already existing on the file system.
+// due the existence of duplicate files.
+//
 // Example:
 //   Button.cy.ts   -> Button-copy-1.cy.ts
 //   Button_spec.js -> Button-copy-1_spec.js
@@ -37,11 +38,11 @@ export class SpecOptions {
       return ''
     }
 
-    const candidateSpecExtension = expectedSpecExtensions.find((specExtension) => {
+    const foundSpecExtension = expectedSpecExtensions.find((specExtension) => {
       return this.parsedPath.base.endsWith(specExtension + this.parsedPath.ext)
     })
 
-    return candidateSpecExtension || ''
+    return foundSpecExtension || ''
   }
 
   private async getFilename () {
