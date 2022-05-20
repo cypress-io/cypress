@@ -58,14 +58,21 @@ export default (Commands, Cypress, cy, state) => {
 
     if (options.log !== false) {
       log = options._log = Cypress.log({
-        displayName: 'wait',
-        name: 'wait',
-        message: '',
         type: 'parent',
         aliasType: 'route',
         // avoid circular reference
         options: _.omit(options, '_log'),
       })
+
+      // if this came from the spec bridge, we need to set a few additional
+      // properties to ensure the log displays correctly
+      if (options.isCrossOriginSpecBridge) {
+        log.set({
+          displayName: 'wait',
+          name: 'wait',
+          message: '',
+        })
+      }
     }
 
     const checkForXhr = async function (alias, type, index, num, options) {

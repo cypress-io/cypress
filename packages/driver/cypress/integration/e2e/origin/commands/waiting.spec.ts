@@ -22,7 +22,7 @@ const abortRequests = () => {
   reqQueue = []
 }
 
-context('cy.origin #.wait()', () => {
+context('cy.origin waiting', () => {
   before(() => {
     cy.origin('http://foobar.com:3500', () => {
       let reqQueue: XMLHttpRequest[] = []
@@ -135,6 +135,33 @@ context('cy.origin #.wait()', () => {
         cy.then(() => window.xhrGet('/foo'))
 
         cy.wait('@foo').its('response.body').should('deep.equal', response)
+      })
+    })
+
+    it('has the correct log properties', () => {
+      const response = { foo: 'foo' }
+
+      cy.intercept('/foo', response).as('foo')
+
+      cy.origin('http://www.foobar.com:3500', { args: { response } }, ({ response }) => {
+        cy.then(() => window.xhrGet('/foo'))
+        cy.wait('@foo').its('response.body').should('deep.equal', response)
+      })
+
+      cy.shouldWithTimeout(() => {
+        const actualLog = Cypress._.pick(findCrossOriginLogs('wait', logs, 'localhost'),
+          ['name', 'referencesAlias', 'aliasType', 'type', 'instrument', 'message'])
+
+        const expectedLog = {
+          name: 'wait',
+          referencesAlias: [{ name: 'foo', cardinal: 1, ordinal: '1st' }],
+          aliasType: 'route',
+          type: 'parent',
+          instrument: 'command',
+          message: '',
+        }
+
+        expect(actualLog).to.deep.equal(expectedLog)
       })
     })
 
