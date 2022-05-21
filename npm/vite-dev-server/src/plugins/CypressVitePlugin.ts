@@ -2,10 +2,10 @@ import debugFn from 'debug'
 import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
-import fs from 'fs'
 
 import type { ViteDevServerConfig } from '../devServer'
 import path from 'path'
+import { transformIndexHtml } from '../transformIndexHtml'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 
@@ -24,7 +24,7 @@ function getSpecsPathsSet (specs: Spec[]) {
   )
 }
 
-export const Cypress = (
+export const CypressVitePlugin = (
   options: ViteDevServerConfig,
   vite: Vite,
 ): Plugin => {
@@ -38,7 +38,6 @@ export const Cypress = (
   const indexHtmlFile = options.cypressConfig.indexHtmlFile
 
   let specsPathsSet = getSpecsPathsSet(specs)
-  let loader = fs.readFileSync(INIT_FILEPATH, 'utf8')
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
@@ -50,21 +49,8 @@ export const Cypress = (
     configResolved (config) {
       base = config.base
     },
-    async transformIndexHtml () {
-      const indexHtmlPath = resolve(projectRoot, indexHtmlFile)
-
-      debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
-      const indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
-      // find </body> last index
-      const endOfBody = indexHtmlContent.lastIndexOf('</body>')
-
-      // insert the script in the end of the body
-      return `${indexHtmlContent.substring(0, endOfBody)
-    }<script>
-    ${loader}
-    </script>${
-      indexHtmlContent.substring(endOfBody)
-    }`
+    async transformIndexHtml (): Promise<string> {
+      return transformIndexHtml(projectRoot, indexHtmlFile)
     },
     configureServer: async (server: ViteDevServer) => {
       server.middlewares.use(`${base}index.html`, async (req, res) => {

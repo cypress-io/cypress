@@ -11,12 +11,12 @@ import path from 'path'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
-import { Cypress, CypressInspect } from './plugins/index'
+import { CypressVitePlugin, CypressViteInspectPlugin } from './plugins/index'
 import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
   const { specs, cypressConfig, viteConfig: viteOverrides = {} } = config
   const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
@@ -61,8 +61,8 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
       },
     },
     plugins: [
-      Cypress(config, vite),
-      CypressInspect(config),
+      CypressVitePlugin(config, vite),
+      CypressViteInspectPlugin(config),
     ],
   }
 

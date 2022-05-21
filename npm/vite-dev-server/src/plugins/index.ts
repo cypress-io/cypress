@@ -1,3 +1,3 @@
-export * from './inspect'
+export * from './CypressViteInspectPlugin'
 
-export * from './cypress'
+export * from './CypressVitePlugin'

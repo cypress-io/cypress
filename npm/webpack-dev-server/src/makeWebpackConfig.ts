@@ -125,6 +125,8 @@ export function makeWebpackConfig (
     ],
   }
 
+  console.log(userAndFrameworkWebpackConfig.plugins?.[6])
+
   const mergedConfig = merge(
     userAndFrameworkWebpackConfig,
     makeDefaultWebpackConfig(config),
