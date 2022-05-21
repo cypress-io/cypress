@@ -43,7 +43,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex items-center justify-between">
-        <div>{{ t('specPage.lastUpdatedHeader') }}</div>
+        <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
     </div>
     <!--
@@ -121,6 +121,7 @@
 
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
+import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useSubscription } from '@urql/vue'
@@ -200,6 +201,10 @@ const emit = defineEmits<{
 }>()
 
 const showSpecPatternModal = ref(false)
+
+const isGitAvailable = computed(() => {
+  return !props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo')
+})
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 

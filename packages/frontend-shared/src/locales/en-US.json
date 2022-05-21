@@ -120,7 +120,15 @@
     "searchPlaceholder": "Search Specs",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
-    "lastUpdatedHeader": "Last updated",
+    "lastUpdated": {
+      "header": "Last updated",
+      "tooltip": {
+        "gitStatus": "Git status",
+        "gitInfo": "git info",
+        "gitInfoAvailable": "{0} of the spec files within this project",
+        "gitInfoUnavailable": "Cypress is unable to detect {0} for this project and has defaulted to showing file system data instead"
+      }
+    },
     "rows": {
       "gitTooltipSubtext": "{shortHash} by {author}"
     },

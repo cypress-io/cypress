@@ -2,7 +2,11 @@
   <Tooltip
     v-if="!disabled"
     :popper-class="{'no-arrow': hideArrow}"
-    :popper-hide-triggers="['hover']"
+    :popper-triggers="['hover']"
+    :hide-triggers="['hover']"
+    :auto-hide="!isInteractive"
+    :theme="theme"
+    :placement="placement ?? 'auto'"
   >
     <slot />
     <template #popper>
@@ -13,16 +17,29 @@
 </template>
 
 <script setup lang="ts">
-import { Tooltip } from 'floating-vue'
+import { computed } from 'vue'
+import FloatingVue, { Tooltip } from 'floating-vue'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   color?: string
   hideArrow?: boolean
   disabled?: boolean
+  isInteractive?: boolean
+  placement?: 'top' | 'right' | 'bottom' | 'left'
 }>(), {
   color: 'dark',
   hideArrow: false,
   disabled: false,
+  isInteractive: false,
+  placement: undefined,
+})
+
+FloatingVue.options.themes['interactive'] = {
+  $extend: 'tooltip',
+}
+
+const theme = computed(() => {
+  return props.isInteractive ? 'interactive' : 'tooltip'
 })
 
 </script>
@@ -86,6 +103,43 @@ withDefaults(defineProps<{
 
     &.v-popper__popper.v-popper__popper--show-to .v-popper__wrapper {
       transform: scaleX(1);
+    }
+  }
+}
+
+.v-popper__popper.v-popper--theme-interactive {
+  .v-popper__inner {
+    @apply bg-white border-dark-900 text-black;
+    border-radius: 4px !important;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
+    padding: 0;
+  }
+
+  .v-popper__arrow-outer {
+    border-color: white;
+  }
+
+  &[data-popper-placement="top"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(0 1px 1px $gray-100);
+    }
+  }
+
+  &[data-popper-placement="bottom"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(0 -1px 1px $gray-100);
+    }
+  }
+
+  &[data-popper-placement="left"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(1px 0px 1px $gray-100);
+    }
+  }
+
+  &[data-popper-placement="right"] {
+    .v-popper__arrow-outer {
+      filter: drop-shadow(-1px 0px 1px $gray-100);
     }
   }
 }
