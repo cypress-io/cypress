@@ -39,13 +39,28 @@ const Layout: FunctionalComponent = () => {
 
 const captureTypes = ['fullPage', 'viewport', 'runner'] as const
 
+function removeGlobalStyles () {
+  const styleTags = Array.from(document.querySelectorAll('style'))
+
+  styleTags.forEach((item) => {
+    if (item.dataset.cy !== 'injected-style-tag') {
+      item.remove()
+    }
+  })
+
+  return cy.get('style').should('have.length', 1)
+}
+
 describe('screenshot', () => {
   captureTypes.forEach((capture) => {
     it(`takes a standard screenshot with viewport: ${capture}`, () => {
       cy.viewport(500, 500)
+
       mount(() => <Layout />, {
         styles,
       })
+
+      removeGlobalStyles()
 
       cy.screenshot(`percy/component_testing_takes_a_screenshot_viewport_${capture}`, { capture })
     })
@@ -57,6 +72,7 @@ describe('screenshot', () => {
       styles,
     })
 
+    removeGlobalStyles()
     cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
   })
 
@@ -66,6 +82,7 @@ describe('screenshot', () => {
       styles,
     })
 
+    removeGlobalStyles()
     cy.screenshot('percy/component_testing_screenshot_long_viewport')
   })
 
@@ -138,6 +155,7 @@ describe('screenshot', () => {
       }
 
       mount(() => <Comp />, { style }).then(() => {
+        removeGlobalStyles()
         cy.screenshot(`percy/large_component_hardcoded_size_viewport_${viewport[0]}_${viewport[1]}`, { capture: 'viewport' })
         cy.screenshot(`percy/large_component_hardcoded_size_fullPage_${viewport[0]}_${viewport[1]}`, { capture: 'fullPage' })
       })
