@@ -46,6 +46,19 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     base: `${cypressConfig.devServerPublicPathRoute}/`,
     configFile,
     optimizeDeps: {
+      esbuildOptions: {
+        incremental: true,
+        plugins: [
+          {
+            name: 'esbuild-plugin',
+            setup (build) {
+              build.onEnd(function (result) {
+                result.errors = []
+              })
+            },
+          },
+        ],
+      },
       entries: [
         ...specs.map((s) => relative(root, s.relative)),
         ...(cypressConfig.supportFile ? [resolve(root, cypressConfig.supportFile)] : []),
