@@ -2,7 +2,6 @@ import { action, computed, observable } from 'mobx'
 import $ from 'jquery'
 import $driverUtils from '@packages/driver/src/cypress/utils'
 import { dom } from '../dom'
-import { eventManager } from '../event-manager'
 
 const saveErrorMessage = (message) => {
   return `\
@@ -70,6 +69,10 @@ export class StudioRecorder {
   _currentId = 1
   _previousMouseEvent = null
 
+  constructor (eventManager) {
+    this.eventManager = eventManager
+  }
+
   @computed get hasRunnableId () {
     return !!this.testId || !!this.suiteId
   }
@@ -110,7 +113,7 @@ export class StudioRecorder {
   }
 
   get Cypress () {
-    return eventManager.getCypress()
+    return this.eventManager.getCypress()
   }
 
   saveError (err) {
@@ -287,7 +290,7 @@ export class StudioRecorder {
     this.closeSaveModal()
     this.stop()
 
-    eventManager.emit('studio:save', {
+    this.eventManager.emit('studio:save', {
       fileDetails: this.fileDetails,
       absoluteFile: this.absoluteFile,
       runnableTitle: this.runnableTitle,
@@ -558,7 +561,7 @@ export class StudioRecorder {
     this.logs.splice(index, 1)
 
     this._generateBothLogs(log).forEach((commandLog) => {
-      eventManager.emit('reporter:log:remove', commandLog)
+      this.eventManager.emit('reporter:log:remove', commandLog)
     })
   }
 
@@ -602,7 +605,7 @@ export class StudioRecorder {
     this.logs.push(log)
 
     this._generateBothLogs(log).forEach((commandLog) => {
-      eventManager.emit('reporter:log:add', commandLog)
+      this.eventManager.emit('reporter:log:add', commandLog)
     })
   }
 
@@ -623,7 +626,7 @@ export class StudioRecorder {
   _updateLog = (log) => {
     const { id, name, message } = log
 
-    eventManager.emit('reporter:log:state:changed', this._generateLog({
+    this.eventManager.emit('reporter:log:state:changed', this._generateLog({
       id: `s${id}`,
       name,
       message,
@@ -689,7 +692,7 @@ export class StudioRecorder {
     }
 
     this._generateBothLogs(reporterLog).forEach((commandLog) => {
-      eventManager.emit('reporter:log:add', commandLog)
+      this.eventManager.emit('reporter:log:add', commandLog)
     })
 
     this._closeAssertionsMenu()
@@ -835,5 +838,3 @@ export class StudioRecorder {
     return possibleAssertions
   }
 }
-
-export const studioRecorder = new StudioRecorder()

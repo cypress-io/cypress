@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const path_helpers = require(`${root}../lib/util/path_helpers`)
+const path_helpers = require(`../../../lib/util/path_helpers`)
 
 describe('lib/util/path_helpers', () => {
   context('checkIfResolveChangedRootFolder', () => {

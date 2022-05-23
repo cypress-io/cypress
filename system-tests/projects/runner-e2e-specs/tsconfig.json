@@ -1,0 +1,16 @@
+{
+  "include": [
+    "src/**/*.vue", 
+    "src/**/*.tsx", 
+    "src/**/*.ts",
+    "cypress/**/*.ts", 
+    "cypress/**/*.tsx",
+  ],
+  "compilerOptions": {
+    "noImplicitThis": true,
+    "allowJs": true,
+    "types": [
+      "cypress", 
+    ]
+  }
+}

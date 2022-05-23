@@ -1,11 +1,9 @@
 import _ from 'lodash'
-import { getCommonConfig, getSimpleConfig, HtmlWebpackPlugin, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, getSimpleConfig } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import webpack from 'webpack'
-import cyIcons from '@cypress/icons'
 
 const commonConfig = getCommonConfig()
-const CopyWebpackPlugin = getCopyWebpackPlugin()
 
 // @ts-ignore
 const babelLoader = _.find(commonConfig.module.rules, (rule) => {
@@ -57,19 +55,6 @@ const mainConfig: webpack.Configuration = {
     filename: '[name].js',
   },
 }
-
-// @ts-ignore
-mainConfig.plugins = [
-  // @ts-ignore
-  ...mainConfig.plugins,
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, './static/index.html'),
-    inject: false,
-  }),
-  new CopyWebpackPlugin([{
-    from: cyIcons.getPathToFavicon('favicon.ico'),
-  }]),
-]
 
 mainConfig.resolve = {
   ...mainConfig.resolve,

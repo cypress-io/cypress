@@ -7,6 +7,7 @@ const { hasBinary } = require('socket.io-parser/dist/is-binary')
 const expect = require('chai').expect
 const pkg = require('../package.json')
 const lib = require('../index')
+const browserLib = require('../lib/browser')
 const resolvePkg = require('resolve-pkg')
 
 const { PacketType } = parser
@@ -16,8 +17,8 @@ describe('Socket', function () {
     expect(lib.server).to.eq(server)
   })
 
-  it('exports client', function () {
-    expect(lib.client).to.eq(client)
+  it('exports client from lib/browser', function () {
+    expect(browserLib.client).to.eq(client)
   })
 
   context('.getPathToClientSource', function () {
