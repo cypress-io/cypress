@@ -195,6 +195,7 @@ export class GitDataSource {
 
         this.#gitBaseDirWatcher.on('error', (e) => {
           debug(`Failed to watch for git changes`, e.message)
+          this.config.onError(e)
         })
       }
     } catch (e) {

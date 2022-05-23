@@ -5,6 +5,7 @@ import simpleGit from 'simple-git'
 import fs from 'fs-extra'
 import sinon from 'sinon'
 import pDefer from 'p-defer'
+import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
 import { GitDataSource } from '../../../src/sources/GitDataSource'
@@ -118,5 +119,41 @@ describe('GitDataSource', () => {
 
     git.checkoutLocalBranch('testing123')
     expect(await switchBranch.promise).to.eq('testing123')
+  })
+
+  it(`handles error while watching .git on ${os.platform()}`, async () => {
+    sinon.stub(chokidar, 'watch').callsFake(() => {
+      const mockWatcher = {
+        on: (event, fn) => {
+          if (event === 'error') {
+            fn(new Error('Unexpected error'))
+          }
+        },
+        close: () => ({ catch: () => {} }),
+      } as unknown
+
+      return mockWatcher as chokidar.FSWatcher
+    })
+
+    const errorStub = sinon.stub()
+    const stub = sinon.stub()
+    const dfd = pDefer()
+
+    stub.onFirstCall().callsFake(dfd.resolve)
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: stub,
+      onGitInfoChange: sinon.stub(),
+      onError: errorStub,
+    })
+
+    await dfd.promise
+    const result = await dfd.promise
+
+    expect(result).to.eq((await git.branch()).current)
+
+    expect(errorStub).to.be.callCount(1)
   })
 })
