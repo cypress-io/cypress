@@ -28,7 +28,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
     // alphabetical order
     // we should "support is in alpha" for a11y (not shown visually)
-    .should('deep.eq', ['Create React App (v5) Support is in Alpha', 'Vue.js (v3)'])
+    .should('deep.eq', ['Create React App (v5) Support is in  Alpha', 'Vue.js (v3)'])
 
     const frameworkIconName = (frameworkName: string) => {
       if (frameworkName.includes('React')) {
