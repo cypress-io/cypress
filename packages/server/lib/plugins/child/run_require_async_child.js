@@ -111,7 +111,7 @@ function run (ipc, file, projectRoot) {
     try {
       debug('Trying to use esbuild to run their config file.')
       // We prefer doing this because it supports TypeScript files
-      require.resolve('esbuild')
+      require.resolve('esbuild', { paths: [process.cwd()] })
 
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
