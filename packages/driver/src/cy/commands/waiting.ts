@@ -5,7 +5,6 @@ import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
 import ordinal from 'ordinal'
 
 import $errUtils from '../../cypress/error_utils'
-import { preprocessForSerialization } from '../../util/serialization'
 
 const getNumRequests = (state, alias) => {
   const requests = state('aliasRequests') || {}
@@ -59,8 +58,8 @@ export default (Commands, Cypress, cy, state) => {
     if (options.log !== false) {
       let specBridgeLogOptions = {}
 
-      // if this came from the spec bridge, we need to set a few additional
-      // properties to ensure the log displays correctly
+      // if this came from the spec bridge, we need to set a few additional properties to ensure the log displays correctly
+      // otherwise, these props will be pulled from the current command which will be cy.origin on the primary
       if (options.isCrossOriginSpecBridge) {
         specBridgeLogOptions = {
           name: 'wait',
@@ -286,17 +285,20 @@ export default (Commands, Cypress, cy, state) => {
   Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, originPolicy) => {
     options.isCrossOriginSpecBridge = true
     waitString(null, str, options).then((responses) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { responses: preprocessForSerialization(responses) })
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', responses)
     }).catch((err) => {
       options._log?.error(err)
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', { err: preprocessForSerialization(err) })
+      err.hasSpecBridgeError = true
+      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', err)
     })
   })
 
   const delegateToPrimaryOrigin = ([_subject, str, options]) => {
     return new Promise((resolve, reject) => {
-      Cypress.specBridgeCommunicator.once('wait:for:xhr:end', ({ responses, err }) => {
-        if (err) {
+      Cypress.specBridgeCommunicator.once('wait:for:xhr:end', (responsesOrErr) => {
+        // determine if this is an error by checking if there is a spec bridge error
+        if (responsesOrErr.hasSpecBridgeError) {
+          delete responsesOrErr.hasSpecBridgeError
           if (options.log) {
             Cypress.state('onBeforeLog', (log) => {
               // skip this 'wait' log since it was already added through the primary
@@ -311,10 +313,10 @@ export default (Commands, Cypress, cy, state) => {
             })
           }
 
-          reject(err)
+          reject(responsesOrErr)
         }
 
-        resolve(responses)
+        resolve(responsesOrErr)
       })
 
       // subject is not needed when waiting on aliased requests since the request/response will be yielded
