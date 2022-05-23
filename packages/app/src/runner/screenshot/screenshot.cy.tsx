@@ -37,6 +37,16 @@ const Layout: FunctionalComponent = () => {
 
 const captureTypes = ['fullPage', 'viewport', 'runner'] as const
 
+function removeGlobalStyles () {
+  cy.get('style').each((item) => {
+    if (item[0].dataset.cy !== 'injected-style-tag') {
+      item.remove()
+    }
+  })
+
+  return cy.get('style').should('have.length', 1)
+}
+
 describe('screenshot', () => {
   captureTypes.forEach((capture) => {
     it(`takes a standard screenshot with viewport: ${capture}`, () => {
@@ -45,7 +55,9 @@ describe('screenshot', () => {
         styles,
       })
 
-      cy.screenshot(`percy/component_testing_takes_a_screenshot_viewport_${capture}`, { capture })
+      removeGlobalStyles().then(() => {
+        cy.screenshot(`percy/component_testing_takes_a_screenshot_viewport_${capture}`, { capture })
+      })
     })
   })
 
@@ -55,7 +67,9 @@ describe('screenshot', () => {
       styles,
     })
 
-    cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
+    removeGlobalStyles().then(() => {
+      cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
+    })
   })
 
   it('screenshot with a really long viewport', () => {
@@ -64,7 +78,9 @@ describe('screenshot', () => {
       styles,
     })
 
-    cy.screenshot('percy/component_testing_screenshot_long_viewport')
+    removeGlobalStyles().then(() => {
+      cy.screenshot('percy/component_testing_screenshot_long_viewport')
+    })
   })
 
   const style = `
@@ -134,8 +150,11 @@ describe('screenshot', () => {
       }
 
       mount(() => <Comp />, { style }).then(() => {
-        cy.screenshot(`percy/large_component_hardcoded_size_viewport_${viewport[0]}_${viewport[1]}`, { capture: 'viewport' })
-        cy.screenshot(`percy/large_component_hardcoded_size_fullPage_${viewport[0]}_${viewport[1]}`, { capture: 'fullPage' })
+        removeGlobalStyles().then(() => {
+          cy.pause()
+          cy.screenshot(`percy/large_component_hardcoded_size_viewport_${viewport[0]}_${viewport[1]}`, { capture: 'viewport' })
+          cy.screenshot(`percy/large_component_hardcoded_size_fullPage_${viewport[0]}_${viewport[1]}`, { capture: 'fullPage' })
+        })
       })
     })
   })
