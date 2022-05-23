@@ -147,6 +147,14 @@ iframe.aut-iframe {
   background: white;
 }
 
+.is-screenshotting #main-pane {
+  overflow: auto !important;
+}
+
+.is-screenshotting.screenshot-scrolling #main-pane {
+  overflow: visible !important;
+}
+
 iframe.spec-iframe {
     border: none;
     height: 0;

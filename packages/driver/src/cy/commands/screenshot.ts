@@ -97,6 +97,7 @@ const scrollOverrides = (win, doc) => {
 
   // hide scrollbars
   doc.documentElement.style.overflow = 'hidden'
+  document.querySelector('body').classList.add('screenshot-scrolling')
 
   // in the case that an element might change size on scroll
   // we trigger a scroll event to ensure that all elements are
@@ -111,6 +112,8 @@ const scrollOverrides = (win, doc) => {
     if (doc.body) {
       doc.body.style.overflowY = originalBodyOverflowY
     }
+
+    document.querySelector('body').classList.remove('screenshot-scrolling')
 
     return win.scrollTo(originalX, originalY)
   }
