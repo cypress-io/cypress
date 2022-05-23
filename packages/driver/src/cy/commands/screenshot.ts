@@ -97,7 +97,10 @@ const scrollOverrides = (win, doc) => {
 
   // hide scrollbars
   doc.documentElement.style.overflow = 'hidden'
-  document.querySelector('body').classList.add('screenshot-scrolling')
+
+  // this body class is used to set some other overflow-related CSS
+  // around the resizable panels in the Runner
+  document.querySelector('body')?.classList.add('screenshot-scrolling')
 
   // in the case that an element might change size on scroll
   // we trigger a scroll event to ensure that all elements are
@@ -113,7 +116,7 @@ const scrollOverrides = (win, doc) => {
       doc.body.style.overflowY = originalBodyOverflowY
     }
 
-    document.querySelector('body').classList.remove('screenshot-scrolling')
+    document.querySelector('body')?.classList.remove('screenshot-scrolling')
 
     return win.scrollTo(originalX, originalY)
   }
