@@ -13,6 +13,7 @@ import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
 import type { Log } from '../cypress/log'
+import type { StateFunc } from '../cypress/state'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -22,17 +23,6 @@ export interface KeyboardModifiers {
   meta: boolean
   shift: boolean
 }
-
-export interface KeyboardState {
-  keyboardModifiers?: KeyboardModifiers
-}
-
-export interface ProxyState<T> {
-  <K extends keyof T>(arg: K): T[K] | undefined
-  <K extends keyof T>(arg: K, arg2: T[K] | null): void
-}
-
-export type State = ProxyState<KeyboardState>
 
 interface KeyDetailsPartial extends Partial<KeyDetails> {
   key: string
@@ -697,7 +687,7 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  constructor (private state: State) {}
+  constructor (private state: StateFunc) {}
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
