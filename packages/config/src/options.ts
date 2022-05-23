@@ -209,7 +209,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -638,6 +638,11 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   }, {
+    name: 'experimentalSessionAndOrigin',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  }, {
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
@@ -681,6 +686,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },
