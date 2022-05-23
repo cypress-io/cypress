@@ -1,5 +1,3 @@
-Cypress.config('experimentalSessionAndOrigin', true)
-
 it('t1', () => {
   const setupFn = cy.stub().as('runSetup')
 
