@@ -360,7 +360,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout)
 
     setTopOnError(Cypress, this)
 
@@ -1078,9 +1078,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // reset the nestedIndex back to null
     this.state('nestedIndex', null)
-
-    // also reset recentlyReady back to null
-    this.state('recentlyReady', null)
 
     // and forcibly move the index needle to the
     // end in case we have after / afterEach hooks
