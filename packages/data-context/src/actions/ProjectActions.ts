@@ -194,10 +194,10 @@ export class ProjectActions {
   async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
-    await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
-
     if (args.open) {
       this.setCurrentProject(projectRoot).catch(this.ctx.onError)
+    } else {
+      await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
     }
   }
 
