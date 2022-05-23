@@ -1641,7 +1641,6 @@ describe('lib/cypress', () => {
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
       process.env.CYPRESS_BASE_URL = 'http://localhost'
-      process.env.CYPRESS_experimentalSessionAndOrigin = false
       process.env.CYPRESS_port = '2222'
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
@@ -1712,11 +1711,6 @@ describe('lib/cypress', () => {
 
         expect(cfg.resolved.baseUrl).to.deep.eq({
           value: 'http://localhost',
-          from: 'env',
-        })
-
-        expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({
-          value: false,
           from: 'env',
         })
 
