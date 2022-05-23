@@ -5,6 +5,7 @@ import type { RouteMap } from '../cy/net-stubbing/types'
 import type { $Command } from './command'
 import type { XHRResponse } from '../cy/commands/xhr'
 import type { KeyboardModifiers } from '../cy/keyboard'
+import type { MouseCoords } from '../cy/mouse'
 
 export interface StateFunc {
   (): Record<string, any>
@@ -37,6 +38,8 @@ export interface StateFunc {
   (k: 'aliases', v?: Record<string, any>): Record<string, any>
   (k: 'onBeforeLog', v?: () => boolean): () => boolean
   (k: 'keyboardModifiers', v?: KeyboardModifiers): KeyboardModifiers
+  (k: 'mouseLastHoveredEl', v?: HTMLElement | null): HTMLElement | null
+  (k: 'mouseCoords', v?: MouseCoords): MouseCoords
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>

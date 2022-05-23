@@ -159,11 +159,11 @@ const joinKeyArrayToString = (keyArr: KeyInfo[]) => {
   }).join('')
 }
 
-type modifierKeyDetails = KeyDetails & {
+type KeyModifiers = {
   key: keyof typeof keyToModifierMap
 }
 
-const isModifier = (details: KeyInfo): details is modifierKeyDetails => {
+const isModifier = (details: KeyInfo): details is KeyDetails & KeyModifiers => {
   return details.type === 'key' && !!keyToModifierMap[details.key]
 }
 
@@ -1098,7 +1098,7 @@ export class Keyboard {
     return details
   }
 
-  flagModifier (key: modifierKeyDetails, setTo = true) {
+  flagModifier (key: KeyModifiers, setTo = true) {
     debug('handleModifier', key.key)
     const modifier = keyToModifierMap[key.key]
 
