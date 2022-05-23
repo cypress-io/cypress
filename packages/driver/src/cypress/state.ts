@@ -37,7 +37,7 @@ export interface StateFunc {
   (k: 'currentAssertionUserInvocationStack', v?: string): string
   (k: 'responses', v?: XHRResponse[]): XHRResponse[]
   (k: 'aliases', v?: Record<string, any>): Record<string, any>
-  (k: 'onBeforeLog', v?: () => boolean): () => boolean
+  (k: 'onBeforeLog', v?: (() => boolean) | null): () => boolean | null
   (k: 'keyboardModifiers', v?: KeyboardModifiers): KeyboardModifiers
   (k: 'mouseLastHoveredEl', v?: HTMLElement | null): HTMLElement | null
   (k: 'mouseCoords', v?: MouseCoords): MouseCoords
