@@ -122,7 +122,17 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
-export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
+interface ICyFocused extends Omit<
+  IFocused,
+  'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
+> {}
+
+interface ICySnapshots extends Omit<
+  ISnapshots,
+  'onCssModified' | 'onBeforeWindowLoad'
+> {}
+
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
   state: StateFunc
@@ -200,7 +210,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
 
-  onCssModified: ReturnType<typeof createSnapshots>['onCssModified']
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
@@ -347,7 +356,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.detachDom = snapshots.detachDom
     this.getStyles = snapshots.getStyles
 
-    this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
     this.overrides = createOverrides(state, config, focused, snapshots)

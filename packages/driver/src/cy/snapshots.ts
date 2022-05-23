@@ -298,7 +298,4 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
   }
 }
 
-export interface ISnapshots extends Omit<
-  ReturnType<typeof create>,
-  'onCssModified' | 'onBeforeWindowLoad'
-> {}
+export interface ISnapshots extends ReturnType<typeof create> {}

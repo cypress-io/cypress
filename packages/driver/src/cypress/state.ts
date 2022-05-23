@@ -43,6 +43,7 @@ export interface StateFunc {
   (k: 'mouseCoords', v?: MouseCoords): MouseCoords
   (k: 'server', v?: Server): Server
   (k: 'requests', v?: XHRRequest[]): XHRRequest[]
+  (k: 'fetchPolyfilled', v?: boolean): boolean
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>
