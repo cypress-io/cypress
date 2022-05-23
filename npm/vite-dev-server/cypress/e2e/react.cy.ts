@@ -81,6 +81,40 @@ for (const project of VITE_REACT) {
       cy.get('.failed > .num').should('contain', 1)
       cy.contains('An uncaught error was detected outside of a test')
       cy.contains('The following error originated from your test code, not from Cypress.')
+
+      // Correct the problem
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(
+          `src/AppCompilationError.cy.jsx`,
+          await ctx.file.readFileInProject('src/App.cy.jsx'),
+        )
+      })
+
+      cy.waitForSpecToFinish()
+      cy.get('.passed > .num').should('contain', 1)
+
+      // Cause the problem again
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(
+          `src/AppCompilationError.cy.jsx`,
+          `
+import React from 'react'
+import { mount } from 'cypress/react'
+import { App } from './App'
+
+it('renders hello world', () => {
+  mount(<App />)
+  cy.get('h1').contains('Hello World')
+}
+})
+          `,
+        )
+      })
+
+      cy.waitForSpecToFinish()
+      cy.get('.failed > .num').should('contain', 1)
+      cy.contains('An uncaught error was detected outside of a test')
+      cy.contains('The following error originated from your test code, not from Cypress.')
     })
   })
 }
