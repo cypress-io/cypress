@@ -686,9 +686,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // so create a new chainer instance
       const chain = $Chainer.create(name, userInvocationStack, cy.specWindow, args)
 
-      // store the chain so we can access it later
-      cy.state('chain', chain)
-
       // if we are in the middle of a command
       // and its return value is a promise
       // that means we are attempting to invoke
@@ -747,9 +744,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const injected = _.isFunction(onInjectCommand)
 
       if (injected) {
-        if (onInjectCommand.call(cy, name, ...args) === false) {
-          return
-        }
+        throw new Error('injected!')
       }
 
       cy.enqueue({
