@@ -25,10 +25,6 @@ const removeList = [
   // devServerEvents). Removing this plugin can prevent double-refreshes
   // in some setups.
   'HotModuleReplacementPlugin',
-
-  // The ESLintWebpackPlugin displays failures in the AUT on ES Lint failures
-  // We do not want this behavior when running Cypress so we remove this plugin
-  'ESLintWebpackPlugin',
 ]
 
 // CaseSensitivePathsPlugin checks the paths of every loaded module to enforce
