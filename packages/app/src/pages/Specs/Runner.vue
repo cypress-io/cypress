@@ -155,6 +155,16 @@ iframe.aut-iframe {
   overflow: visible !important;
 }
 
+#resizable-panels-root {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.is-screenshotting #resizable-panels-root {
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
 iframe.spec-iframe {
     border: none;
     height: 0;

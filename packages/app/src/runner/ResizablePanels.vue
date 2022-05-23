@@ -1,8 +1,10 @@
 <template>
   <div
+    id="resizable-panels-root"
     class="flex"
     :class="{
       'select-none': panel1IsDragging || panel2IsDragging,
+      'overflow-x-hidden': isFirefox
     }"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
@@ -205,5 +207,8 @@ watchEffect(() => {
     emit('panelWidthUpdated', { panel: 'panel1', width: cachedPanel1Width.value })
   }
 })
+
+// TODO: UNIFY-1704 - avoid special case for FF
+const isFirefox = window.__CYPRESS_BROWSER__?.family === 'firefox'
 
 </script>
