@@ -1615,18 +1615,6 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
 
-  npm-vite-dev-server:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn test
-          working_directory: npm/vite-dev-server
-      - store_test_results:
-          path: npm/vite-dev-server/test_results
-      - store-npm-logs
-
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     resource_class: small
@@ -2337,9 +2325,6 @@ linux-workflow: &linux-workflow
     - npm-webpack-dev-server:
         requires:
           - system-tests-node-modules-install
-    - npm-vite-dev-server:
-        requires:
-          - build
     - npm-webpack-preprocessor:
         requires:
           - build
@@ -2383,7 +2368,6 @@ linux-workflow: &linux-workflow
           - npm-vue
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
-          - npm-vite-dev-server
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
