@@ -35,7 +35,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
-    cy.contains('test with whitespace').click()
+    cy.contains('spec with whitespace').click()
     cy.get('.passed > .num').should('contain', 1)
   })
 })

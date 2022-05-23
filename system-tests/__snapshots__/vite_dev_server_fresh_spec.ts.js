@@ -7,14 +7,15 @@ exports['@cypress/vite-dev-server / react / runs specs in vite 2.8.6'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (App.cy.jsx, MissingReact.cy.jsx, MissingReactInSpec.cy.jsx)               │
+  │ Specs:      4 found (App.cy.jsx, MissingReact.cy.jsx, MissingReactInSpec.cy.jsx, spec with whi │
+  │             tespace.cy.jsx)                                                                    │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 3)
+  Running:  App.cy.jsx                                                                      (1 of 4)
 
 
   ✓ renders hello world
@@ -45,7 +46,7 @@ exports['@cypress/vite-dev-server / react / runs specs in vite 2.8.6'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (2 of 3)
+  Running:  MissingReact.cy.jsx                                                             (2 of 4)
 
 
   1) is missing React
@@ -93,7 +94,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (3 of 3)
+  Running:  MissingReactInSpec.cy.jsx                                                       (3 of 4)
 
 
   1) is missing React in this file
@@ -135,6 +136,37 @@ When Cypress detects uncaught errors originating from your test code it will aut
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4       (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  spec with whitespace.cy.jsx                                                     (4 of 4)
+
+
+  ✓ renders hello world
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     spec with whitespace.cy.jsx                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec with whitespace.cy.jsx.mp4     (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -147,8 +179,10 @@ When Cypress detects uncaught errors originating from your test code it will aut
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  spec with whitespace.cy.jsx              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  2 of 3 failed (67%)                      XX:XX        3        1        2        -        -  
+    ✖  2 of 4 failed (50%)                      XX:XX        4        2        2        -        -  
 
 
 `
@@ -162,14 +196,15 @@ exports['@cypress/vite-dev-server / react / runs specs in vite 2.9.1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (App.cy.jsx, MissingReact.cy.jsx, MissingReactInSpec.cy.jsx)               │
+  │ Specs:      4 found (App.cy.jsx, MissingReact.cy.jsx, MissingReactInSpec.cy.jsx, spec with whi │
+  │             tespace.cy.jsx)                                                                    │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 3)
+  Running:  App.cy.jsx                                                                      (1 of 4)
 
 
   ✓ renders hello world
@@ -200,7 +235,7 @@ exports['@cypress/vite-dev-server / react / runs specs in vite 2.9.1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (2 of 3)
+  Running:  MissingReact.cy.jsx                                                             (2 of 4)
 
 
   1) is missing React
@@ -248,7 +283,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (3 of 3)
+  Running:  MissingReactInSpec.cy.jsx                                                       (3 of 4)
 
 
   1) is missing React in this file
@@ -290,6 +325,37 @@ When Cypress detects uncaught errors originating from your test code it will aut
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4       (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  spec with whitespace.cy.jsx                                                     (4 of 4)
+
+
+  ✓ renders hello world
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     spec with whitespace.cy.jsx                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec with whitespace.cy.jsx.mp4     (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -302,8 +368,10 @@ When Cypress detects uncaught errors originating from your test code it will aut
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  spec with whitespace.cy.jsx              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  2 of 3 failed (67%)                      XX:XX        3        1        2        -        -  
+    ✖  2 of 4 failed (50%)                      XX:XX        4        2        2        -        -  
 
 
 `
