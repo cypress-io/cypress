@@ -60,6 +60,7 @@ describe('cypress.config.js generation', () => {
     const config: Partial<Cypress.Config> = {
       e2e: {
         baseUrl: 'localhost:3000',
+        experimentalSessionAndOrigin: true,
       },
     }
 
@@ -126,6 +127,7 @@ describe('cypress.config.js generation', () => {
     const config = {
       viewportWidth: 300,
       baseUrl: 'localhost:300',
+      experimentalSessionAndOrigin: true,
       slowTestThreshold: 500,
       e2e: {
         retries: 2,
