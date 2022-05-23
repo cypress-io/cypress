@@ -39,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ check-results-for-env, << pipeline.git.branch >> ]
+    - equal: [ tbiethman/chore/electron-18-update, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -49,6 +50,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ check-results-for-env, << pipeline.git.branch >> ]
+    - equal: [ tbiethman/chore/electron-18-update, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -60,7 +62,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.5.0-chrome94-ff93
+      - image: cypress/browsers:node16.13.2-chrome100-ff98
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -69,7 +71,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.5.0-chrome94-ff93
+      - image: cypress/browsers:node16.13.2-chrome100-ff98
         user: node
     environment:
       PLATFORM: linux
@@ -371,8 +373,10 @@ commands:
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
       - run:
-          name: Check  Node
-          command: yarn check-node-version
+          name: Check Node
+          command: |
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            yarn check-node-version
 
   install-chrome:
     description: Install Google Chrome
@@ -589,7 +593,11 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
+      - run: 
+          name: 'Verify Mocha Results'
+          command: |
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh"
+            yarn verify:mocha:results <<parameters.expectedResultCount>>
 
   clone-repo-and-checkout-release-branch:
     description: |
@@ -896,7 +904,9 @@ commands:
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
-          command: yarn binary-zip --platform $PLATFORM
+          command: |
+            apt-get update && apt-get install -y zip
+            yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
@@ -1247,7 +1257,7 @@ jobs:
 
   runner-integration-tests-firefox:
     <<: *defaults
-    resource_class: medium
+    resource_class: medium+
     parallelism: 2
     steps:
       - run-runner-integration-tests:

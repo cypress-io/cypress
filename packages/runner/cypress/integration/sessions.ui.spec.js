@@ -19,7 +19,7 @@ const validateCreateNewSessionGroup = () => {
   .should('have.class', 'command-is-open')
   .contains('runSetup')
 
-  cy.contains('Create New Session')
+  return cy.contains('Create New Session')
   .closest('.command')
   .find('.command-name-Clear-Page')
   .should('have.length', 2)
@@ -46,9 +46,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
 
     cy.get('.command-name-session').first().click('top')
 
-    // FIXME: this should be length 2, not 3
-    // the 'Clear Page' log should be nested under session group
-    cy.get('.command').should('have.length', 3)
+    cy.get('.command').should('have.length', 2)
   })
 
   it('creates new session with validation', () => {
@@ -66,22 +64,18 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       cy.get('.command-name-session').contains('blank_session')
 
       validateCreateNewSessionGroup()
+
+      cy.contains('Validate Session: valid')
+      .closest('.command')
+      .should('have.class', 'command-is-open')
+      .contains('runValidation')
     })
 
     cy.percySnapshot()
 
-    // FIXME: this should be nested within the session command
-    cy.contains('Validate Session: valid')
-    .closest('.command')
-    .should('not.have.class', 'command-is-open')
-    .click()
-    .contains('runValidation')
-
     cy.get('.command-name-session').first().click('top')
 
-    // FIXME: this should be length 2, not 5
-    // the validate session group should be nested under session group
-    cy.get('.command').should('have.length', 5)
+    cy.get('.command').should('have.length', 2)
   })
 
   it('creates new session and fails validation', () => {
@@ -99,14 +93,12 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       cy.get('.command-name-session').contains('blank_session')
 
       validateCreateNewSessionGroup()
-    })
 
-    // FIXME: this should be nested within the session command
-    // FIXME: this should be Validate Session: invalid
-    cy.contains('Validate Session')
-    .closest('.command')
-    .should('have.class', 'command-is-open')
-    .contains('runValidation')
+      cy.contains('Validate Session: invalid')
+      .closest('.command')
+      .should('have.class', 'command-is-open')
+      .contains('runValidation')
+    })
 
     cy.contains('CypressError')
 
@@ -251,13 +243,11 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
         cy.contains('Validate Session: invalid')
 
         validateCreateNewSessionGroup()
-
-        // FIXME: this validation group should say 'Validate Session: valid'
-        cy.contains('Validate Session')
+        .parent()
         .closest('.command')
-        // FIXME: this validation group does not align with the
-        // with Create New Session's validation group behavior
-        //' should be 'not.have.class' to align
+        .next()
+        .contains('Validate Session: invalid')
+        .closest('.command')
         .should('have.class', 'command-is-open')
         .contains('runValidation')
       })

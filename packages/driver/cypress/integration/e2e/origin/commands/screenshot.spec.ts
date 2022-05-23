@@ -210,7 +210,7 @@ context('cy.origin screenshot', () => {
         // Hide the element using setTimeout
           win.setTimeout(() => {
             (win.document.getElementsByClassName('tall-element')[0] as HTMLElement).style.display = 'none'
-          }, 50)
+          }, 100)
         })
 
         cy.screenshot({
@@ -219,11 +219,11 @@ context('cy.origin screenshot', () => {
           // Set the timeout to be longer than the element hiding timeout so it has time to run and hide the element
             setTimeout(() => {
               expect($el.find('.tall-element').css('display')).to.equal('none')
-            }, 100)
+            }, 200)
           },
         })
 
-        cy.wait(200)
+        cy.wait(400)
       })
     })
 
