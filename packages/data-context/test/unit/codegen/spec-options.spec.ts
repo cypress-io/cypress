@@ -21,6 +21,10 @@ describe('spec-options', () => {
   })
 
   describe('getCodeGenOptions', () => {
+    it('uses expected set of spec extensions', () => {
+      expect(expectedSpecExtensions).to.deep.eq(['.cy', '.spec', '.test', '-spec', '-test', '_spec'])
+    })
+
     context('unique file names', () => {
       for (const specExtension of expectedSpecExtensions) {
         it(`generates options for name names with extension ${specExtension}`, async () => {

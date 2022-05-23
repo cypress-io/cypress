@@ -448,7 +448,7 @@ describe('App: Specs', () => {
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/e2e/spec.js')).should('be.exist')
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/e2e/spec.js')).should('be.visible')
         })
       })
 
