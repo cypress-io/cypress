@@ -1641,6 +1641,7 @@ describe('lib/cypress', () => {
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
       process.env.CYPRESS_BASE_URL = 'http://localhost'
+      process.env.CYPRESS_experimentalSessionAndOrigin = false
       process.env.CYPRESS_port = '2222'
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
@@ -1653,9 +1654,9 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, excludeSpecPattern } })
       }).then(() => {
         return cypress.start([
           '--port=2121',
@@ -1684,6 +1685,7 @@ describe('lib/cypress', () => {
         expect(cfg.pageLoadTimeout).to.eq(1000)
         expect(cfg.port).to.eq(2121)
         expect(cfg.baseUrl).to.eq('http://localhost')
+        expect(cfg.experimentalSessionAndOrigin).to.be.false
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
         expect(cfg.env.baz).to.eq('baz')
@@ -1710,6 +1712,11 @@ describe('lib/cypress', () => {
 
         expect(cfg.resolved.baseUrl).to.deep.eq({
           value: 'http://localhost',
+          from: 'env',
+        })
+
+        expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({
+          value: false,
           from: 'env',
         })
 
