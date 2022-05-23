@@ -1,6 +1,5 @@
 import systemTests from '../lib/system-tests'
 import type { fixtureDirs } from '@tooling/system-tests'
-import stripAnsi from 'strip-ansi'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -19,8 +18,6 @@ describe('@cypress/vite-dev-server', function () {
           browser: 'chrome',
           snapshot: true,
           expectedExitCode: 3,
-        }).then(({ stdout }) => {
-          return stripAnsi(stdout)
         })
       })
     }

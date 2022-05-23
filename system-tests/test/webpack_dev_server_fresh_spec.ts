@@ -1,6 +1,6 @@
 import systemTests from '../lib/system-tests'
 import type { fixtureDirs } from '@tooling/system-tests'
-import stripAnsi from 'strip-ansi'
+import { stripAnsi } from '@packages/server/lib/errors'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -19,8 +19,9 @@ describe('@cypress/webpack-dev-server', function () {
           browser: 'chrome',
           snapshot: true,
           expectedExitCode: 3,
-        }).then(({ stdout }) => {
-          return stripAnsi(stdout)
+          onStdout: (stdout) => {
+            return stripAnsi(systemTests.normalizeWebpackErrors(stdout))
+          },
         })
       })
     }

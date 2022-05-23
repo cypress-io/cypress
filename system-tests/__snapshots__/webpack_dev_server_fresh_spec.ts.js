@@ -19,7 +19,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
    48 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -69,7 +69,7 @@ SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.j
   1) An uncaught error was detected outside of a test:
      Error: The following error originated from your test code, not from Cypress.
 
-  > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+  > Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack4_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -249,7 +249,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
    48 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -299,7 +299,7 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
   1) An uncaught error was detected outside of a test:
      Error: The following error originated from your test code, not from Cypress.
 
-  > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+  > Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -479,7 +479,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
    48 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -529,7 +529,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.j
   1) An uncaught error was detected outside of a test:
      Error: The following error originated from your test code, not from Cypress.
 
-  > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+  > Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds3-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -709,7 +709,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
    48 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
@@ -759,7 +759,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
   1) An uncaught error was detected outside of a test:
      Error: The following error originated from your test code, not from Cypress.
 
-  > Module build failed (from /foo/bar/.cached_node_modules/babel-loader/lib/index.js):
+  > Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (9:0)
 
    7 |   cy.get('h1').contains('Hello World')
