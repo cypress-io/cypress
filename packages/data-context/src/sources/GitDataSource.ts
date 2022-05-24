@@ -187,21 +187,28 @@ export class GitDataSource {
         return
       }
 
-      this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
-        ignoreInitial: true,
-        ignorePermissionErrors: true,
-      })
-
-      // Fires when we switch branches
-      this.#gitBaseDirWatcher.on('change', () => {
-        this.#loadCurrentBranch().then(() => {
-          this.config.onBranchChange(this.#currentBranch)
-        }).catch((e) => {
-          debug('Errored loading branch info on git change %s', e.message)
-          this.#currentBranch = null
-          this.#gitErrored = true
+      if (!this.config.isRunMode) {
+        this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
+          ignoreInitial: true,
+          ignorePermissionErrors: true,
         })
-      })
+
+        // Fires when we switch branches
+        this.#gitBaseDirWatcher.on('change', () => {
+          this.#loadCurrentBranch().then(() => {
+            this.config.onBranchChange(this.#currentBranch)
+          }).catch((e) => {
+            debug('Errored loading branch info on git change %s', e.message)
+            this.#currentBranch = null
+            this.#gitErrored = true
+          })
+        })
+
+        this.#gitBaseDirWatcher.on('error', (e) => {
+          debug(`Failed to watch for git changes`, e.message)
+          this.config.onError(e)
+        })
+      }
     } catch (e) {
       this.#gitErrored = true
       debug(`Error loading & watching current branch %s`, e.message)
