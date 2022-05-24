@@ -46,7 +46,6 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/issue-21236', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -56,6 +55,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ 'tbiethman/UNIFY-1787-spec-names-with-ext', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1723,14 +1723,14 @@ jobs:
             yarn workspace @cypress/schematic build:all
           working_directory: npm/cypress-schematic
       - run:
-          name: Launch
-          command: |
-            yarn launch:test
-          working_directory: npm/cypress-schematic
-      - run:
           name: Run unit tests
           command: |
             yarn test
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Launch Sandbox and Install Schematic
+          command: |
+            yarn launch:test12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 

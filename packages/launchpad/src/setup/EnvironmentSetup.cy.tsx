@@ -22,6 +22,14 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     .click()
     .should('have.attr', 'aria-expanded', 'true')
 
+    cy.get('li')
+    .then(($items) => {
+      return $items.map((_idx, html) => Cypress.$(html).text()).get()
+    })
+    // alphabetical order
+    // we should "support is in alpha" for a11y (not shown visually)
+    .should('deep.eq', ['Create React App (v5) Support is in  Alpha', 'Vue.js (v3)'])
+
     const frameworkIconName = (frameworkName: string) => {
       if (frameworkName.includes('React')) {
         return 'react-logo'
