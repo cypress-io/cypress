@@ -3,8 +3,3 @@
 export * from './browser'
 
 export { addProjectIdToCypressConfig, addToCypressConfig, addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from './ast-utils/addToCypressConfig'
-
-export {
-  detectRelativeWebpackConfig,
-  detectRelativeViteConfig,
-} from './detect/bundleConfig'

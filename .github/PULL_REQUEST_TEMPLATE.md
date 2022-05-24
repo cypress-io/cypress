@@ -20,6 +20,12 @@ If the change is not user-facing, write "n/a".
 - Any implementation details to explain?
 -->
 
+### Steps to test
+<!--
+For non-trivial behavior changes, list the steps that a reviewer should follow to validate the new behavior.
+This is not meant to be the only testing performed by a reviewer, just the "happy path" that leads to the new behavior.
+-->
+
 ### How has the user experience changed?
 <!-- Provide before and after examples of the change.
 Screenshots or GIFs are preferred. -->

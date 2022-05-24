@@ -1,4 +1,5 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
+import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
@@ -41,7 +42,7 @@ function skipCTMigration () {
 function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js') {
   cy.contains('Migrate the configuration for me').click()
 
-  cy.withCtx(async (ctx, o) => {
+  cy.withRetryableCtx(async (ctx, o) => {
     const configStats = await ctx.file.checkIfFileExists(o.migratedConfigFile)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
@@ -184,6 +185,20 @@ describe('Opening unmigrated project', () => {
     cy.contains(cy.i18n.welcomePage.title).should('be.visible')
     cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
   })
+
+  it('should only hit the video on link once & cache it', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
+    cy.withCtx((ctx, o) => {
+      expect((ctx.util.fetch as SinonStub).args.filter((a) => String(a[0]).includes('v10-video-embed')).length).to.eq(1)
+    })
+  })
 })
 
 describe('Full migration flow for each project', { retries: { openMode: 0, runMode: 2 }, defaultCommandTimeout: 10000 }, () => {
@@ -223,8 +238,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = [
         'cypress/component/button.cy.js',
         'cypress/component/input.cy.tsx',
@@ -266,9 +280,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
       runAutoRename()
 
-      cy.wait(100)
-
-      cy.withCtx(async (ctx) => {
+      cy.withRetryableCtx(async (ctx) => {
         const specs = [
           'cypress/e2e/foo.cy.ts',
           'cypress/component/button.cy.js',
@@ -286,7 +298,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
       migrateAndVerifyConfig()
       finishMigrationAndContinue()
 
-      cy.withCtx(async (ctx) => {
+      cy.withRetryableCtx(async (ctx) => {
         const integrationFolderStats = await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
 
         expect(integrationFolderStats).to.be.null
@@ -341,9 +353,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
       cy.findByText('Rename the folder for me').click()
 
-      cy.wait(100)
-
-      cy.withCtx(async (ctx) => {
+      cy.withRetryableCtx(async (ctx) => {
         const specs = [
           'cypress/e2e/foo.spec.js',
         ]
@@ -383,9 +393,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = [
         'cypress/e2e/foo.cy.ts',
         'cypress/component/button.cy.js',
@@ -434,9 +442,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = [
         'cypress/e2e/foo.cy.ts',
         'cypress/component/button.cy.js',
@@ -454,7 +460,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
 
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const integrationFolderStats = await ctx.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
 
       expect(integrationFolderStats).to.be.null
@@ -483,9 +489,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['src/basic.cy.js']
 
       for (const spec of specs) {
@@ -547,9 +551,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/basic.test.js']
 
       for (const spec of specs) {
@@ -594,9 +596,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
@@ -641,9 +641,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.spec.js']
 
       for (const spec of specs) {
@@ -688,9 +686,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.spec.js']
 
       for (const spec of specs) {
@@ -734,9 +730,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
@@ -772,9 +766,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.coffee']
 
       for (const spec of specs) {
@@ -810,9 +802,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.cjsx']
 
       for (const spec of specs) {
@@ -1009,8 +999,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-    cy.withCtx((ctx) => {
+    cy.withRetryableCtx((ctx) => {
       ['cypress/e2e/foo.cy.js'].forEach(async (spec) => {
         const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
 
@@ -1027,7 +1016,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     startMigrationFor('migration-specs-already-migrated')
     cy.get(renameAutoStep).should('not.exist')
 
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = [
         'cypress/tests/foo.cy.js',
       ]
@@ -1069,9 +1058,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = [
         'cypress/e2e/app-spec2.cy.js',
         'cypress/e2e/app_spec2.cy.js',
@@ -1121,9 +1108,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
       runAutoRename()
 
-      cy.wait(100)
-
-      cy.withCtx(async (ctx) => {
+      cy.withRetryableCtx(async (ctx) => {
         const specs = [
           'cypress/custom-integration/foo.cy.ts',
           'cypress/custom-component/button.cy.js',
@@ -1171,7 +1156,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
       cy.findByText('Skip renaming specs').click()
 
-      cy.withCtx(async (ctx) => {
+      cy.withRetryableCtx(async (ctx) => {
         const specs = [
           'cypress/custom-integration/foo.spec.ts',
           'cypress/custom-component/button.spec.js',
@@ -1246,9 +1231,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const files = ['cypress/e2e/foo.cy.js', 'cypress/e2e/example.json']
 
       for (const file of files) {
@@ -1333,7 +1316,7 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 0, runMode: 2 
     cy.findByText('Rename the support file for me').click()
     cy.findByText('Migrate the configuration for me').click()
 
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const configStats = await ctx.file.checkIfFileExists('cypress.config.js')
 
       expect(configStats).to.not.be.null.and.not.be.undefined
@@ -1420,9 +1403,7 @@ describe('Migrate custom config files', () => {
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
@@ -1472,9 +1453,7 @@ describe('Migrate custom config files', () => {
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
@@ -1524,9 +1503,7 @@ describe('Migrate custom config files', () => {
 
     runAutoRename()
 
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
+    cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/foo.cy.js']
 
       for (const spec of specs) {
