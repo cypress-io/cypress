@@ -36,7 +36,7 @@
           <component
             :is="suffixIcon"
             class="h-16px w-16px"
-            :class="suffixIconClass"
+            :stroke-color="suffixIconClass"
           />
         </button>
       </slot>
@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent } from 'vue'
 
 const emit = defineEmits<{
   (eventName: 'suffixIconClicked'): void
@@ -54,8 +54,8 @@ const emit = defineEmits<{
 /* eslint-disable vue/require-default-prop */
 defineProps<{
   title: string
-  prefixIcon?: FunctionalComponent<SVGAttributes, {}> | null
-  suffixIcon?: FunctionalComponent<SVGAttributes, {}> | null
+  prefixIcon?: FunctionalComponent | null
+  suffixIcon?: FunctionalComponent | null
   suffixIconAriaLabel?: string
   alertClass?: string
   prefixIconClass?: string

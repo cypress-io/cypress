@@ -2448,6 +2448,20 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
+"@cypress-design/icon-registry@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.2.0.tgz#980a064ce3f797d5e2f4e39366a1d44ca8ae7fb8"
+  integrity sha512-HxzuFJS4xe/qUh1brW9A8aYVjV+d1CVfp61v8WqMJVDRJ71UUI2/K1QziQwNY1RSQ6IdZQOUF0ueyIruWbRTvQ==
+  dependencies:
+    camelcase "^6.3.0"
+
+"@cypress-design/vue-icon@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.2.0.tgz#219fb82909bc100e7efbbcce1664a9436a36bc6d"
+  integrity sha512-5UEMR98wzo2QRol8EUoyLrTcj8MQLeaMCZiBFWpgn1eQuGRK/JyA3GTUcTF5thcYlyxh/U3OUiZhBUwyzhH+PQ==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.2.0"
+
 "@cypress/browserify-preprocessor@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-3.0.0.tgz#2d1fa6a96ed7130a1b172c540448a5955cbc1264"
@@ -11698,7 +11712,7 @@ camelcase@^5.0.0, camelcase@^5.2.0, camelcase@^5.3.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
-camelcase@^6.0.0, camelcase@^6.2.0:
+camelcase@^6.0.0, camelcase@^6.2.0, camelcase@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
