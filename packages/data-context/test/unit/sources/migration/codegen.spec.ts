@@ -435,7 +435,7 @@ describe('reduceConfig', () => {
     const newConfig = reduceConfig(config, options)
 
     expect(newConfig.component.specPattern).to.eq('src/**/**.cy.js')
-    expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
+    expect(newConfig.e2e.specPattern).to.eq(`cypress/e2e/${config.testFiles}`)
   })
 
   it('should combine nested componentFolder and integrationFolder with testFiles field in component', () => {
@@ -452,7 +452,7 @@ describe('reduceConfig', () => {
 
     expect(newConfig.component.componentFolder).to.not.exist
     expect(newConfig.component.specPattern).to.eq('src/**/**.cy.js')
-    expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+    expect(newConfig.e2e.specPattern).to.eq(`cypress/e2e/${config.testFiles}`)
   })
 
   it('should add custom integrationFolder to default testFiles if testFiles is not present', () => {
