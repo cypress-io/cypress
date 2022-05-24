@@ -499,6 +499,41 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-custom-integration-default-value', () => {
+    startMigrationFor('migration-e2e-custom-integration-default-value')
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('src/basic.spec.js')
+
+    // after auto migration
+    cy.contains('src/basic.cy.js')
+
+    runAutoRename()
+
+    cy.withRetryableCtx(async (ctx) => {
+      const specs = ['src/basic.cy.js']
+
+      for (const spec of specs) {
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      }
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
   it('completes journey for migration-e2e-custom-integration-with-projectId', () => {
     startMigrationFor('migration-e2e-custom-integration-with-projectId')
     // default testFiles but custom integration - can rename automatically
