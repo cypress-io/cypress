@@ -51,9 +51,7 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
   return new Promise(async (resolve, reject) => {
     const result = await devServer.create(devServerConfig) as DevServerCreateResult
 
-    // When compiling in run mode
-    // Stop the clock early, no need to run all the tests on a failed build
-    result.compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
+    result.compiler.hooks.done.tap('cyCustomErrorBuild', function () {
       devServerConfig.devServerEvents.emit('dev-server:compile:success')
     })
 
