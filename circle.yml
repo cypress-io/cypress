@@ -2542,12 +2542,14 @@ mac-workflow: &mac-workflow
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
+        <<: *windows-workflow-filters
         name: windows-node-modules-install
         executor: windows
         resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
+        <<: *windows-workflow-filters
         name: windows-build
         context: test-runner:env-canary
         executor: windows
@@ -2555,7 +2557,9 @@ windows-workflow: &windows-workflow
         requires:
           - windows-node-modules-install
 
+
     - run-app-integration-tests-chrome:
+        <<: *windows-workflow-filters
         name: windows-run-app-integration-tests-chrome
         executor: windows
         resource_class: windows.medium
@@ -2564,6 +2568,7 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - run-launchpad-integration-tests-chrome:
+        <<: *windows-workflow-filters
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.medium
@@ -2609,4 +2614,3 @@ workflows:
     <<: *mac-workflow-filters
   windows:
     <<: *windows-workflow
-    <<: *windows-workflow-filters
