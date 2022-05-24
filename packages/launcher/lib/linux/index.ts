@@ -66,7 +66,7 @@ function getLinuxBrowser (
   }
 
   const logAndThrowError = (err: Error) => {
-    debug(
+    debugVerbose(
       'Received error detecting browser binary: "%s" with error:',
       binary,
       err.message,
