@@ -468,7 +468,7 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: Testi
   if (testingType === 'e2e') {
     const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
-    if (customIntegrationFolder) {
+    if (customIntegrationFolder && customIntegrationFolder !== legacyIntegrationFolder) {
       return `${customIntegrationFolder}/${specPattern}`
     }
 
