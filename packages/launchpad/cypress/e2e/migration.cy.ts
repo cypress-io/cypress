@@ -164,7 +164,7 @@ describe('Opening unmigrated project', () => {
     cy.wait('@iframeDocRequest')
 
     // on Windows, the vimeo request does not happen unless the video starts playing
-    if (Cypress.platform === 'win32') cy.get('@videoContainer').click()
+    if (Cypress.platform === 'win32') cy.get('@videoContainer').invoke('play')
 
     cy.wait('@vimeoCdnRequest')
     cy.percySnapshot()
