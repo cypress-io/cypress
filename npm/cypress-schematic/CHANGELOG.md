@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.7.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.6.0...@cypress/schematic-v1.7.0) (2022-05-11)
+
+
+### Features
+
+* **cypress/schematic:** add headed option and other fixes ([#21415](https://github.com/cypress-io/cypress/issues/21415)) ([8de7594](https://github.com/cypress-io/cypress/commit/8de7594446e398048a3693066f043d2d7be903f6))
+
 # [@cypress/schematic-v1.6.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.3...@cypress/schematic-v1.6.0) (2021-11-10)
 
 
