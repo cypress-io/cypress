@@ -144,7 +144,7 @@ describe('Opening unmigrated project', () => {
     cy.get('h1').should('contain', 'Migration')
   })
 
-  it('migration landing page appears with a video', () => {
+  it.only('migration landing page appears with a video', () => {
     cy.intercept(/vimeo.com/).as('iframeDocRequest')
     cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
     cy.scaffoldProject('migration')
@@ -160,10 +160,15 @@ describe('Opening unmigrated project', () => {
 
     // Vimeo's implementation may change, this is just a high level check that
     // the expected iframe code is being returned and that there is vimeo-related network traffic
-    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
+    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').as('videoContainer').should('be.visible')
     cy.wait('@iframeDocRequest')
+
+    // on Windows, the vimeo request does not happen unless the video starts playing
+    if (Cypress.platform === 'win32') cy.get('@videoContainer').click()
+
     cy.wait('@vimeoCdnRequest')
     cy.percySnapshot()
+    cy.pause()
   })
 
   it('landing page does not appear if there is no video embed code', () => {
