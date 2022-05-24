@@ -238,7 +238,7 @@ export class GitDataSource {
         this.#git.status(),
       ])
 
-      debug('stdout %s', stdout)
+      debugVerbose('stdout %s', stdout.toString())
 
       const changed: string[] = []
 
@@ -292,12 +292,12 @@ export class GitDataSource {
 
         this.#gitMeta.set(file, toSet)
         if (!_.isEqual(toSet, current)) {
-          debug(`updated %s %o`, file, toSet)
           changed.push(file)
         }
       }
 
       if (!this.#destroyed) {
+        debugVerbose(`updated %o`, changed)
         this.config.onGitInfoChange(changed)
       }
     } catch (e) {
@@ -326,15 +326,13 @@ export class GitDataSource {
     const stdout = result.stdout.split('\n')
 
     if (result.exitCode !== 0) {
-      debug(`error... stderr`, result.stderr)
+      debug(`error... %o`, result)
     }
 
     if (stdout.length !== absolutePaths.length) {
-      debug('error... stdout:', stdout)
+      debug('error... %o', result)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
-
-    debug('stdout for git info', stdout)
 
     return stdout
   }

@@ -124,7 +124,7 @@ export class VersionsDataSource {
 
     const responseJson = await response.json() as { time: Record<string, string>}
 
-    debug('NPM release dates %o', responseJson.time)
+    debug('NPM release dates received %o', { modified: responseJson.time.modified })
 
     return responseJson.time
   }
