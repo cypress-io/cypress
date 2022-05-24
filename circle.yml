@@ -2553,7 +2553,6 @@ windows-workflow: &windows-workflow
         requires:
           - windows-node-modules-install
 
-
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows

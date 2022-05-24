@@ -169,7 +169,6 @@ describe('Opening unmigrated project', () => {
     if (Cypress.platform !== 'win32') cy.wait('@vimeoCdnRequest')
 
     cy.percySnapshot()
-    cy.pause()
   })
 
   it('landing page does not appear if there is no video embed code', () => {
