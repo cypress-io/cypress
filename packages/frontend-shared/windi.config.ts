@@ -1,6 +1,7 @@
 import { defineConfig } from 'windicss/helpers'
 import InteractionVariants from '@windicss/plugin-interaction-variants'
 import { IconDuotoneColorsPlugin } from './.windicss/icon-color-plugins'
+import { safelist } from './.windicss/safelist'
 import { colors } from './.windicss/colors'
 import { shortcuts } from './.windicss/shortcuts'
 import path from 'path'
@@ -27,6 +28,7 @@ export const defaultConfig: FullConfig = {
       },
     },
   },
+  safelist,
   variants: {
     // What's hocus?
     // Hocus is a portmanteau of hover + focus. This is useful because
@@ -44,9 +46,9 @@ export const defaultConfig: FullConfig = {
     include: [
       'index.html',
       '**/*.{vue,html,tsx}',
-      path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,ts,svg}'),
-      path.resolve(__dirname, '../app/**/*.{vue,html,tsx,ts,svg}'),
-      path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,ts,svg}'),
+      path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
+      path.resolve(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
+      path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
     ],
     exclude: ['node_modules/**/*', '.git/**/*'],
   },
