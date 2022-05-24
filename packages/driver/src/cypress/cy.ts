@@ -204,8 +204,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
 
-  // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
+  overrides: IOverrides
+
+  // Private methods
 
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
@@ -215,7 +217,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
-  overrides: IOverrides
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
