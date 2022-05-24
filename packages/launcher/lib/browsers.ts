@@ -3,7 +3,7 @@ import * as cp from 'child_process'
 import { browsers, FoundBrowser } from '@packages/types'
 import type { Readable } from 'stream'
 
-const debug = Debug('cypress:launcher:browsers')
+export const debug = Debug('cypress:launcher:browsers')
 
 export { browsers }
 
