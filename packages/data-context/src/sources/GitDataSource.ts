@@ -10,8 +10,8 @@ import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
 import _ from 'lodash'
 
-const debug = Debug('cypress:data-context:GitDataSource')
-const debugVerbose = Debug('cypress-verbose:data-context:GitDataSource')
+const debug = Debug('cypress:data-context:sources:GitDataSource')
+const debugVerbose = Debug('cypress-verbose:data-context:sources:GitDataSource')
 
 dayjs.extend(relativeTime)
 
