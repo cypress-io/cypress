@@ -647,6 +647,8 @@ describe('Launchpad: Setup Project', () => {
         await ctx.actions.project.switchTestingTypesAndRelaunch('e2e')
       })
 
+      cy.reload()
+
       cy.contains('h1', 'Configuration Files')
       verifyScaffoldedFiles('e2e')
     })
@@ -665,8 +667,9 @@ describe('Launchpad: Setup Project', () => {
         sinon.stub(ctx.actions.electron, 'refreshBrowserWindow')
         sinon.stub(ctx.actions.electron, 'showBrowserWindow')
         await ctx.actions.project.switchTestingTypesAndRelaunch('component')
-        ctx.emitter.toLaunchpad()
       })
+
+      cy.reload()
 
       cy.contains('h1', 'Project Setup')
     })
