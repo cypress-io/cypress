@@ -10,7 +10,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 
 ## Table of Contents
 
-* [App lifecycle](./building-release-artifacts.md)
+* [App lifecycle](./app-lifecycle.md)
 * [Building release artifacts](./building-release-artifacts.md)
 * [Code signing](./code-signing.md)
 * [Debug logs](./debug-logs.md)
