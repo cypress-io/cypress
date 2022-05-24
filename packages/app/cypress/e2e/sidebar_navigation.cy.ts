@@ -125,7 +125,7 @@ describe('Sidebar Navigation', () => {
 
       cy.percySnapshot()
       cy.get('[aria-label="Close"]').click()
-      cy.findByText('Keyboard Shortcuts').should('not.exist')
+      cy.findAllByTestId('keyboard-modal').should('not.exist')
     })
 
     it('shows a tooltip when hovering over menu item', () => {
