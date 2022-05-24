@@ -161,7 +161,7 @@ describe('Opening unmigrated project', () => {
 
     // Vimeo's implementation may change, this is just a high level check that
     // the expected iframe code is being returned and that there is vimeo-related network traffic
-    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').as('videoContainer').should('be.visible')
+    cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
     cy.wait('@iframeDocRequest')
 
     // For an unknown reason, recaptcha blocks us from loading Vimeo on CircleCI Windows only
