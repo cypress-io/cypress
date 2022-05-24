@@ -31,14 +31,14 @@ export const create = (cy: $Cy) => ({
   getAlias (name, cmd, log) {
     const aliases = cy.state('aliases') || {}
 
-    // bail if the name doesnt reference an alias
+    // bail if the name doesn't reference an alias
     if (!aliasRe.test(name)) {
       return
     }
 
+    // slice off the '@'
     const alias = aliases[name.slice(1)]
 
-    // slice off the '@'
     if (!alias) {
       this.aliasNotFoundFor(name, cmd, log)
     }
