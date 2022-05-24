@@ -346,22 +346,6 @@ export class ProjectActions {
       throw Error(`Cannot create spec without currentProject.`)
     }
 
-    const parsed = path.parse(codeGenCandidate)
-
-    const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
-
-    const getFileExtension = () => {
-      if (erroredCodegenCandidate) {
-        return ''
-      }
-
-      return (
-        possibleExtensions.find((ext) => {
-          return codeGenCandidate.endsWith(ext + parsed.ext)
-        }) || parsed.ext
-      )
-    }
-
     const getCodeGenPath = () => {
       return codeGenType === 'e2e' || erroredCodegenCandidate
         ? this.ctx.path.join(
@@ -371,13 +355,11 @@ export class ProjectActions {
         : codeGenCandidate
     }
 
-    const specFileExtension = getFileExtension()
     const codeGenPath = getCodeGenPath()
 
     const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
       codeGenPath,
       codeGenType,
-      specFileExtension,
       erroredCodegenCandidate,
     })
 
