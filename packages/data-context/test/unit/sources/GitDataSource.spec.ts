@@ -38,6 +38,8 @@ describe('GitDataSource', () => {
   afterEach(() => {
     gitInfo.destroy()
     gitInfo = undefined
+
+    sinon.restore()
   })
 
   it(`gets correct status for files on ${os.platform()}`, async () => {
