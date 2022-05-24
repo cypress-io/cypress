@@ -66,31 +66,6 @@ export class CypressCTWebpackPlugin {
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
     }
-  };
-
-  private beforeCompile = async (compilationParams: object, callback: Function) => {
-    if (!this.compilation) {
-      callback()
-
-      return
-    }
-
-    // Ensure we don't try to load files that have been removed from the file system
-    // but have not yet been detected by the onSpecsChange handler
-
-    const foundFiles = (await Promise.all(this.files.map(async (file) => {
-      try {
-        const exists = await fs.pathExists(file.absolute)
-
-        return exists ? file : null
-      } catch (e) {
-        return null
-      }
-    })))
-
-    this.files = foundFiles.filter((file) => file !== null) as Cypress.Spec[]
-
-    callback()
   }
 
   /*
@@ -141,7 +116,6 @@ export class CypressCTWebpackPlugin {
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
-    _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
   }
 }
