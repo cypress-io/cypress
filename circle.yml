@@ -50,7 +50,9 @@ macWorkflowFilters: &mac-workflow-filters
           pattern: "-release$"
           value: << pipeline.git.branch >>
 
-windowsWorkflowExcludeFilters: &windows-workflow-exclude-filters
+# windows is slow in CI, so we only run a certain set of tests on each commit
+# add your branch to this list to run the full Windows build on your PR
+fullWindowsWorkflowFilters: &full-windows-workflow-filters
   filters:
     branches:
       only:
@@ -2569,14 +2571,14 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - lint:
-        <<: *windows-workflow-exclude-filters
+        <<: *full-windows-workflow-filters
         name: windows-lint
         executor: windows
         requires:
           - windows-build
 
     - unit-tests:
-        <<: *windows-workflow-exclude-filters
+        <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
@@ -2584,7 +2586,7 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - create-build-artifacts:
-        <<: *windows-workflow-exclude-filters
+        <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
         resource_class: windows.medium
