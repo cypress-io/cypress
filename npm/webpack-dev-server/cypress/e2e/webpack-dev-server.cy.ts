@@ -4,10 +4,6 @@ describe('Config options', () => {
     cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-no-support.config.ts'])
     cy.startAppServer('component')
 
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.removeFileInProject(`src/AppCompilationError.cy.jsx`)
-    })
-
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()

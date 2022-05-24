@@ -22,10 +22,6 @@ for (const project of WEBPACK_REACT) {
     })
 
     it('should mount a passing test', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.removeFileInProject(`src/AppCompilationError.cy.jsx`)
-      })
-
       cy.visitApp()
       cy.contains('App.cy.jsx').click()
       cy.waitForSpecToFinish()
