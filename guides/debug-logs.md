@@ -19,7 +19,7 @@ cypress:{packageName}:{relative path to file from src root, using : to separate 
 Exceptions to these rules:
 * The `cli` uses `cypress:cli:*`.
 * NPM packages should use `{moduleName}` as a prefix instead of `cypress`, like `cypress-webpack-preprocessor` for `npm/webpack-preprocessor`.
-* In some places, like the proxy package, it's more useful to attach `debug` messages to something besides the module. In that case, it's okay to create namespaces as you see fit. But at least begin with `cypress:{packageName}` or `cypress-verbose:{packageName}`
+* In some places, like per-request in the `proxy` package, it's more useful to attach `debug` messages to something besides the module (like individual HTTP requests). In that case, it's okay to create namespaces as you see fit. But at least begin with `cypress:{packageName}` or `cypress-verbose:{packageName}`
 
 ## Using debug logs
 
