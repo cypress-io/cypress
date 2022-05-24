@@ -19,6 +19,9 @@ describe('makeWebpackConfig', () => {
         output: {
           publicPath: '/this-will-be-ignored',
         },
+        devServer: {
+          overlay: true, // This will be ignored as well
+        },
       },
       devServerEvents: new EventEmitter(),
     }

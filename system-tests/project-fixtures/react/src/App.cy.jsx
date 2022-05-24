@@ -4,5 +4,5 @@ import { App } from './App'
 
 it('renders hello world', () => {
   mount(<App />)
-  cy.get('h1').contains('Hello World')
+  cy.get('h1').contains('Hello World').click()
 })
