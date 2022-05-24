@@ -144,7 +144,7 @@ describe('Opening unmigrated project', () => {
     cy.get('h1').should('contain', 'Migration')
   })
 
-  it.only('migration landing page appears with a video', () => {
+  it('migration landing page appears with a video', () => {
     cy.intercept(/vimeo.com/).as('iframeDocRequest')
     cy.intercept(/vimeocdn/).as('vimeoCdnRequest')
     cy.scaffoldProject('migration')
