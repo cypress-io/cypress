@@ -1723,14 +1723,14 @@ jobs:
             yarn workspace @cypress/schematic build:all
           working_directory: npm/cypress-schematic
       - run:
-          name: Launch
-          command: |
-            yarn launch:test
-          working_directory: npm/cypress-schematic
-      - run:
           name: Run unit tests
           command: |
             yarn test
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Launch Sandbox and Install Schematic
+          command: |
+            yarn launch:test12
           working_directory: npm/cypress-schematic
       - store-npm-logs
 

@@ -8,6 +8,7 @@ export interface CypressBuilderOptions extends JsonObject {
   env: Record<string, string>
   quiet: boolean
   exit: boolean
+  headed: boolean
   headless: boolean
   key: string
   parallel: boolean
