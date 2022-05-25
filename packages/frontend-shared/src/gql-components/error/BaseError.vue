@@ -16,7 +16,7 @@
         </h1>
 
         <div
-          v-if="props.retry"
+          v-if="retry"
           class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
         >
           <Button
@@ -24,7 +24,7 @@
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
             prefix-icon-class="icon-dark-indigo-500"
-            @click="retry(baseError.id)"
+            @click="retry?.(baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
