@@ -4,5 +4,13 @@ import { installCustomPercyCommand } from '@packages/ui-components/cypress/suppo
 
 import '../../src/main.scss'
 
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      mount: typeof mount
+    }
+  }
+}
+
 Cypress.Commands.add('mount', mount)
 installCustomPercyCommand()
