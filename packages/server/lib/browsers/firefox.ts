@@ -19,6 +19,8 @@ import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
+import { getCtx } from '@packages/data-context'
+import { getError } from '@packages/errors'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -374,7 +376,7 @@ export async function connectToNewSpec (browser: Browser, options: any = {}, aut
 }
 
 export function connectToExisting () {
-  throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')
+  getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
 export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
