@@ -3,7 +3,7 @@ import simpleGit, { StatusResult } from 'simple-git'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
-import fs from 'fs-extra'
+import fs from 'fs'
 import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
@@ -90,6 +90,7 @@ export class GitDataSource {
       this.#git = simpleGit({ baseDir: this.config.projectRoot })
     } catch {
       // suppress exception if git cannot be found
+      debug('exception caught when loading git client')
     }
 
     if (!config.isRunMode) {

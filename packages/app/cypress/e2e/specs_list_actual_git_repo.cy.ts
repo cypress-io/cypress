@@ -1,4 +1,4 @@
-describe('Spec List - Git Status', () => {
+describe('Spec List - Last updated with git info', () => {
   let projectRoot: string
 
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('Spec List - Git Status', () => {
     })
   })
 
-  it('shows correct git status for files using real git repo', () => {
+  it('shows correct git icons', () => {
     cy.wait(500)
 
     // newly created, not yet committed

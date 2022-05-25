@@ -79,10 +79,7 @@ const classes = computed(() => {
       icon: CommitIcon,
       iconClasses: 'icon-light-gray-500',
     },
-    noGitInfo: {
-      icon: null,
-      iconClasses: 'icon-light-gray-500',
-    },
+    noGitInfo: {},
   }[props.gql?.statusType || 'unmodified']
 })
 
@@ -103,7 +100,7 @@ const tooltipSubtext = computed(() => {
     })
   }
 
-  return null
+  return ''
 })
 
 </script>
