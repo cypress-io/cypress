@@ -7,15 +7,15 @@ exports['e2e web security / when enabled / fails'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (web_security_spec.js)                                                   │
-  │ Searched:     cypress/integration/web_security_spec.js                                         │
+  │ Specs:        1 found (web_security.cy.js)                                                     │
+  │ Searched:     cypress/e2e/web_security.cy.js                                                   │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  web_security_spec.js                                                            (1 of 1)
+  Running:  web_security.cy.js                                                              (1 of 1)
 
 
   web security
@@ -43,7 +43,7 @@ A command that triggers cross-origin navigation must be immediately followed by 
 \`  <commands targeting https://www.foo.com:44665 go here>\`
 \`})\`
 
-If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -66,7 +66,7 @@ A command that triggers cross-origin navigation must be immediately followed by 
 \`  <commands targeting https://www.foo.com:44665 go here>\`
 \`})\`
 
-If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -89,7 +89,7 @@ A command that triggers cross-origin navigation must be immediately followed by 
 \`  <commands targeting https://www.foo.com:44665 go here>\`
 \`})\`
 
-If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
+If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -117,26 +117,26 @@ https://on.cypress.io/origin
   │ Screenshots:  4                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security_spec.js                                                             │
+  │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      clicking a to another origin (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      submitted a form and being redirected to another origin (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      using a javascript redirect to another origin (failed).png                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      doing a CORS request cross-origin (failed).png                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c     (1280x720)
+     licking a to another origin (failed).png                                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s     (1280x720)
+     ubmitted a form and being redirected to another origin (failed).png                            
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u     (1280x720)
+     sing a javascript redirect to another origin (failed).png                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d     (1280x720)
+     oing a CORS request cross-origin (failed).png                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -146,9 +146,75 @@ https://on.cypress.io/origin
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security_spec.js                     XX:XX        5        1        4        -        - │
+  │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
+
+
+`
+
+exports['e2e web security / firefox / displays warning when firefox and chromeWebSecurity:false'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_passing.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_passing.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_passing.cy.js                                                            (1 of 1)
+
+Your project has set the configuration option: chromeWebSecurity to false
+
+This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
+
+
+  simple passing spec
+    ✓ passes
+
+
+  1 passing
+
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_passing.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -162,15 +228,15 @@ exports['e2e web security / when disabled / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (web_security_spec.js)                                                   │
-  │ Searched:     cypress/integration/web_security_spec.js                                         │
+  │ Specs:        1 found (web_security.cy.js)                                                     │
+  │ Searched:     cypress/e2e/web_security.cy.js                                                   │
   │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  web_security_spec.js                                                            (1 of 1)
+  Running:  web_security.cy.js                                                              (1 of 1)
 
 
   web security
@@ -195,14 +261,14 @@ exports['e2e web security / when disabled / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security_spec.js                                                             │
+  │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -212,74 +278,9 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security_spec.js                     XX:XX        5        5        -        -        - │
+  │ ✔  web_security.cy.js                       XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        5        5        -        -        -  
-
-
-`
-
-exports['e2e web security / firefox / displays warning when firefox and chromeWebSecurity:false'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  simple_passing_spec.js                                                          (1 of 1)
-
-Your project has set the configuration option: chromeWebSecurity to false
-
-This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
-
-
-  simple passing spec
-    ✓ passes
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing_spec.js                                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  simple_passing_spec.js                   XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

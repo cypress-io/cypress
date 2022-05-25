@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getPublicConfigKeys } = require('@packages/config')
+const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -20,9 +20,6 @@ const allowList = [
   'browser',
   'ci',
   'ciBuildId',
-  'clearLogs',
-  'userNodePath',
-  'userNodeVersion',
   'config',
   'configFile',
   'cwd',
@@ -30,11 +27,11 @@ const allowList = [
   'execPath',
   'exit',
   'exitWithCode',
+  'global',
   'group',
   'headed',
   'inspectBrk',
   'key',
-  'logs',
   'mode',
   'outputPath',
   'parallel',
@@ -54,8 +51,11 @@ const allowList = [
   'tag',
   'testingType',
   'updating',
+  'userNodePath',
+  'userNodeVersion',
   'version',
 ]
+
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -93,10 +93,7 @@ const normalizeBackslashes = (options) => {
     if (typeof options[property] === 'string') {
       options[property] = normalizeBackslash(options[property])
     } else {
-      // configFile is a special case that can be set to false
-      if (property !== 'configFile') {
-        delete options[property]
-      }
+      delete options[property]
     }
   })
 
@@ -200,14 +197,14 @@ const sanitizeAndConvertNestedArgs = (str, argName) => {
     debug('could not pass config %s value %s', argName, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argName, str, err.message)
+    return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', argName, str, 'Cannot parse as valid JSON')
   }
 }
 
 /**
  * Parses the '--spec' cli parameter to return an array of valid patterns.
  *
- * @param {Strng} pattern pattern to parse
+ * @param {String} pattern pattern to parse
  * @returns Array of patterns
  */
 const parseSpecArgv = (pattern) => {
@@ -317,6 +314,32 @@ const parseSpecArgv = (pattern) => {
   return [...partial, sanitizeFinalPath(carry)]
 }
 
+/*
+ * Certain config options (such as specPattern) are invalid at the root,
+ * and can only be used inside a testing type. We want to be convenient
+ * for the user though, so when they pass them in as CLI args, we
+ * assume they're for the current testing type. This function moves
+ * them from the root into the testing types they belong to, eg:
+ * { specPattern: 'foo.js' }
+ * ->
+ * { e2e: { specPattern: 'foo.js' }, component: { specPattern: 'foo.js' } }
+ */
+const nestInvalidRootOptions = (config) => {
+  getBreakingRootKeys().forEach(({ name, testingTypes }) => {
+    if (config[name] && testingTypes) {
+      testingTypes.forEach((testingType) => {
+        if (!config[testingType]) {
+          config[testingType] = {}
+        }
+
+        config[testingType][name] = config[name]
+      })
+
+      delete config[name]
+    }
+  })
+}
+
 module.exports = {
   normalizeBackslashes,
 
@@ -327,7 +350,6 @@ module.exports = {
       'api-key': 'apiKey',
       'app-path': 'appPath',
       'ci-build-id': 'ciBuildId',
-      'clear-logs': 'clearLogs',
       'config-file': 'configFile',
       'exec-path': 'execPath',
       'exit-with-code': 'exitWithCode',
@@ -366,7 +388,6 @@ module.exports = {
       // set in case we
       // bypassed the cli
       cwd: process.cwd(),
-      testingType: 'e2e',
     })
     .mapValues(coerceUtil.coerce)
     .value()
@@ -387,7 +408,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath, tag } = options
+    const { env, config, reporterOptions, outputPath, tag, testingType } = options
     let project = options.project || options.runProject
 
     // only accept project if it is a string
@@ -424,7 +445,7 @@ module.exports = {
         debug('could not parse config spec value %s', spec)
         debug('error %o', err)
 
-        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
+        return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
     }
 
@@ -457,6 +478,16 @@ module.exports = {
       options.config = sanitizeAndConvertNestedArgs(config, 'config')
     }
 
+    if (options.config == null) {
+      options.config = {}
+    }
+
+    // A user may pass in config options that are valid for
+    // a specific testing type, but invalid at the root level.
+    // We nest these automatically, making the assumption that
+    // we know what they meant.
+    nestInvalidRootOptions(options.config, testingType)
+
     // get a list of the available config keys
     const configKeys = getPublicConfigKeys()
 
@@ -467,10 +498,6 @@ module.exports = {
     // this solves situations where we accept
     // root level arguments which also can
     // be set in configuration
-    if (options.config == null) {
-      options.config = {}
-    }
-
     _.extend(options.config, configValues)
 
     // remove them from the root options object

@@ -37,7 +37,17 @@ export interface StyleOptions {
   cssFile: string | string[]
 }
 
-export const ROOT_ID = '__cy_root'
+export const ROOT_SELECTOR = '[data-cy-root]'
+
+export const getContainerEl = (): HTMLElement => {
+  const el = document.querySelector<HTMLElement>(ROOT_SELECTOR)
+
+  if (el) {
+    return el
+  }
+
+  throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please use the mount utils to mount it properly`)
+}
 
 /**
  * Remove any style or extra link elements from the iframe placeholder
@@ -131,7 +141,7 @@ export const injectStylesBeforeElement = (
   options: Partial<StyleOptions & { log: boolean }>,
   document: Document,
   el: HTMLElement | null,
-) => {
+): HTMLElement => {
   if (!el) return
 
   // first insert all stylesheets as Link elements

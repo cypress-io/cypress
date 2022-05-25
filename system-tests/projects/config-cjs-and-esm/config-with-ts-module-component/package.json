@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@cypress/vite-dev-server": "^2.0.0",
+    "find-up": "6.3.0",
+    "vite": "2.8.6"
+  },
+  "type": "module"
+}

@@ -24,7 +24,7 @@ describe('e2e readonly fs', function () {
   }
 
   const onRun = async (exec) => {
-    Fixtures.scaffoldProject('read-only-project-root')
+    await Fixtures.scaffoldProject('read-only-project-root')
     await scaffoldCommonNodeModules()
     chmodr(projectPath, 0o500)
 
@@ -36,7 +36,7 @@ describe('e2e readonly fs', function () {
   systemTests.it('warns when unable to write to disk', {
     project: 'read-only-project-root',
     expectedExitCode: 1,
-    spec: 'spec.js',
+    spec: 'spec.cy.js',
     snapshot: true,
     config: {
       video: false,

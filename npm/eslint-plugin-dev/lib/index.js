@@ -116,7 +116,7 @@ const baseRules = {
   'no-unneeded-ternary': 'error',
   'no-unreachable': 'error',
   'no-unused-labels': 'error',
-  'no-unused-vars': ['error', { args: 'none' }],
+  'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
   'no-useless-concat': 'error',
   'no-useless-constructor': 'error',
   'no-var': 'error',
@@ -261,6 +261,7 @@ module.exports = {
           files: [
             '*.ts',
             '*.tsx',
+            '*.vue',
           ],
           parser: '@typescript-eslint/parser',
           plugins: [
@@ -270,10 +271,18 @@ module.exports = {
             'no-undef': 'off',
             'no-unused-vars': 'off',
             'indent': 'off',
+            'no-useless-constructor': 'off',
+            'no-duplicate-imports': 'off',
+            'import/no-duplicates': 'off',
+            '@typescript-eslint/no-duplicate-imports': [
+              'error',
+            ],
             '@typescript-eslint/no-unused-vars': [
               'error',
               {
                 'args': 'none',
+                'ignoreRestSiblings': true,
+                'argsIgnorePattern': '^_',
               },
             ],
             '@typescript-eslint/type-annotation-spacing': 'error',

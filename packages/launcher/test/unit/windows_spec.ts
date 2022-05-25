@@ -2,23 +2,22 @@ import _ from 'lodash'
 import { expect } from 'chai'
 import * as windowsHelper from '../../lib/windows'
 import { normalize } from 'path'
-import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import { browsers } from '../../lib/browsers'
 import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import os from 'os'
 import snapshot from 'snap-shot-it'
-import { Browser } from '../../lib/types'
+import type { Browser } from '@packages/types'
 import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 
 function stubBrowser (path: string, version: string) {
   path = windowsHelper.doubleEscape(normalize(path))
 
-  ;(utils.execa as unknown as SinonStub)
-  .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
-  .resolves({ stdout: `Version=${version}` })
+  ;(windowsHelper.getVersionString as unknown as SinonStub)
+  .withArgs(path)
+  .resolves(version)
 
   ;(fse.pathExists as SinonStub)
   .withArgs(path)
@@ -40,7 +39,7 @@ describe('windows browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'pathExists').resolves(false)
     sinon.stub(os, 'homedir').returns(HOMEDIR)
-    sinon.stub(utils, 'execa').rejects()
+    sinon.stub(windowsHelper, 'getVersionString').rejects()
   })
 
   it('detects browsers as expected', async () => {
@@ -145,20 +144,10 @@ describe('windows browser detection', () => {
   })
 
   context('#getVersionString', () => {
-    it('runs wmic and returns output', async () => {
+    it('returns the FileVersion from win-version-info', async () => {
       stubBrowser('foo', 'bar')
 
-      expect(await windowsHelper.getVersionString('foo')).to.eq('Version=bar')
-    })
-
-    it('rejects with errors', async () => {
-      const err = new Error()
-
-      ;(utils.execa as unknown as SinonStub)
-      .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
-      .rejects(err)
-
-      await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
+      expect(await windowsHelper.getVersionString('foo')).to.eq('bar')
     })
   })
 

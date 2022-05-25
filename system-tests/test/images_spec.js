@@ -11,7 +11,7 @@ describe('e2e images', () => {
   // this tests that images are correctly proxied and that we are not
   // accidentally modifying their bytes in the stream
   systemTests.it('passes', {
-    spec: 'images_spec.js',
+    spec: 'images.cy.js',
     snapshot: true,
   })
 })
