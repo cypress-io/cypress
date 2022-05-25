@@ -16,7 +16,7 @@ export {
   BreakingOptionErrorKey,
 }
 
-const debug = Debug('cypress:config:validator')
+const debug = Debug('cypress:config:browser')
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -134,7 +134,7 @@ export const matchesConfigKey = (key: string) => {
 }
 
 export const validate = (cfg: any, onErr: (property: string) => void) => {
-  debug('validating configuration', cfg)
+  debug('validating configuration')
 
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
