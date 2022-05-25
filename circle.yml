@@ -494,7 +494,7 @@ commands:
       package:
         description: package to target
         type: enum
-        enum: ['frontend-shared', 'launchpad', 'app']
+        enum: ['frontend-shared', 'launchpad', 'app', 'reporter']
       browser:
         description: browser shortname to target
         type: string
@@ -1132,6 +1132,7 @@ jobs:
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
+            run-reporter-component-tests-chrome,
             run-webpack-dev-server-integration-tests,
             run-vite-dev-server-integration-tests
       - run:
@@ -1474,6 +1475,21 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
           experimentalSessionAndOrigin: true
+
+  run-reporter-component-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
+    parallelism: 7
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: reporter
+          type: ct
 
   reporter-integration-tests:
     <<: *defaults
@@ -2324,6 +2340,11 @@ linux-workflow: &linux-workflow
         percy: true
         requires:
           - build
+    - run-reporter-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
+        requires:
+          - build
     - reporter-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
@@ -2413,6 +2434,7 @@ linux-workflow: &linux-workflow
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
