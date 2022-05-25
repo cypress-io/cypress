@@ -2341,7 +2341,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-reporter-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
