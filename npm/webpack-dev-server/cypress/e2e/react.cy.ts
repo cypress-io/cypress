@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 /// <reference path="../support/e2e.ts" />
 import type { fixtureDirs } from '@tooling/system-tests'
+import dedent from 'dedent'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -93,16 +94,16 @@ for (const project of WEBPACK_REACT) {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
           `src/AppCompilationError.cy.jsx`,
-          `
-import React from 'react'
-import { mount } from 'cypress/react'
-import { App } from './App'
+          dedent`
+            import React from 'react'
+            import { mount } from 'cypress/react'
+            import { App } from './App'
 
-it('renders hello world', () => {
-  mount(<App />)
-  cy.get('h1').contains('Hello World')
-}
-})
+            it('renders hello world', () => {
+              mount(<App />)
+              cy.get('h1').contains('Hello World')
+            }
+            })
           `,
         )
       })

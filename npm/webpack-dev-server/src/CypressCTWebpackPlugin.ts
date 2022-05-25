@@ -45,7 +45,6 @@ export const normalizeError = (error: Error | string) => {
 export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
-  private errorEmitted = false
   private compilation: Webpack45Compilation | null = null
   private webpack: Function
 
@@ -143,5 +142,8 @@ export class CypressCTWebpackPlugin {
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
+    _compiler.hooks.done.tap('CypressCTPlugin', () => {
+      this.devServerEvents.emit('dev-server:compile:success')
+    })
   }
 }

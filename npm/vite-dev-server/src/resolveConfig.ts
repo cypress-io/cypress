@@ -50,12 +50,13 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
         incremental: true,
         plugins: [
           {
-            name: 'esbuild-plugin',
+            name: 'cypress-esbuild-plugin',
             setup (build) {
               build.onEnd(function (result) {
                 // We don't want to completely fail the build here on errors so we treat the errors as warnings
                 // which will handle things more gracefully. Vite will 500 on files that have errors when they
-                // are requested later and Cypress will display an error message
+                // are requested later and Cypress will display an error message.
+                // See: https://github.com/cypress-io/cypress/pull/21599
                 result.warnings = [...result.warnings, ...result.errors]
                 result.errors = []
               })

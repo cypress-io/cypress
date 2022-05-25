@@ -51,10 +51,6 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
   return new Promise(async (resolve, reject) => {
     const result = await devServer.create(devServerConfig) as DevServerCreateResult
 
-    result.compiler.hooks.done.tap('cyCustomErrorBuild', function () {
-      devServerConfig.devServerEvents.emit('dev-server:compile:success')
-    })
-
     if (result.version === 3) {
       const srv = result.server.listen(0, '127.0.0.1', () => {
         const port = (srv.address() as AddressInfo).port

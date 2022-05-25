@@ -296,7 +296,6 @@ Bluebird.config({
   longStackTraces: true,
 })
 
-let cacheNodeModulesDir
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
@@ -445,10 +444,6 @@ const leaveRunFinishedTable = (stdout) => {
 
 const normalizeStdout = function (str, options: any = {}) {
   const { normalizeStdoutAvailableBrowsers } = options
-
-  if (cacheNodeModulesDir) {
-    str = str.split(cacheNodeModulesDir).join('/foo/bar/.cached_node_modules')
-  }
 
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
@@ -952,7 +947,6 @@ const systemTests = {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
-      cacheNodeModulesDir = await DepInstaller.scaffoldProjectNodeModules(options.project)
     }
 
     if (process.env.NO_EXIT) {

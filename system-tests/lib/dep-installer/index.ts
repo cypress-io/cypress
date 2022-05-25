@@ -4,7 +4,6 @@ import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
-import { getRealFolderPath } from '@packages/server/lib/util/path_helpers'
 
 type Dependencies = Record<string, string>
 
@@ -250,8 +249,6 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     // 8. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
     if (persistCacheCb) await persistCacheCb()
-
-    return await getRealFolderPath(cacheNodeModulesDir)
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
