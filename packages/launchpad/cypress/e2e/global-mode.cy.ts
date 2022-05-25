@@ -1,6 +1,7 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
 import type { SinonSpy } from 'sinon'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
@@ -68,7 +69,10 @@ describe('Launchpad: Global Mode', () => {
   describe('when projects have been added', () => {
     const setupAndValidateProjectsList = (projectList, globalModeOptions?: string[] | undefined) => {
       cy.openGlobalMode(globalModeOptions)
-      projectList.forEach((projectName) => {
+
+      // Adding a project puts the project first in the list, so we reverse the list
+      // to ensure the projectList in the UI matches what is passed in.
+      ;[...projectList].reverse().forEach((projectName) => {
         cy.addProject(projectName)
       })
 
@@ -120,12 +124,10 @@ describe('Launchpad: Global Mode', () => {
 
       cy.get('[data-cy="project-card"]')
       .should('have.length', projectList.length)
-      // TODO: fix most recently updated list ()
-      // https://cypress-io.atlassian.net/browse/UNIFY-646
-      // .then((list) => {
-      // expect(list.get(0)).to.contain(projectList[2])
-      // expect(list.get(0)).to.contain(path.join('cy-projects', path.sep, projectList[2]))
-      // })
+      .then((list) => {
+        expect(list.get(0)).to.contain(projectList[2])
+        expect(list.get(0)).to.contain(getPathForPlatform(path.join('cy-projects', projectList[2])))
+      })
     })
 
     it('can open and close the add project dropzone', () => {

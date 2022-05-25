@@ -122,6 +122,8 @@ export class ProjectActions {
   }
 
   async setCurrentProject (projectRoot: string) {
+    await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
+
     await this.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
   }
@@ -138,10 +140,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.projects = [
-      ...this.projects,
-      ...projectRoots.map((projectRoot) => ({ projectRoot })),
-    ]
+    this.projects = projectRoots.map((projectRoot) => ({ projectRoot }))
 
     return this.projects
   }
@@ -177,8 +176,8 @@ export class ProjectActions {
     }
   }
 
-  createProject () {
-    //
+  private async updateProjectList (updater: () => Promise<void>) {
+    return updater().then(() => this.loadProjects())
   }
 
   async addProjectFromElectronNativeFolderSelect () {
@@ -196,15 +195,10 @@ export class ProjectActions {
   async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      this.projects.push({ projectRoot })
-      await this.api.insertProjectToCache(projectRoot)
-    }
-
     if (args.open) {
       this.setCurrentProject(projectRoot).catch(this.ctx.onError)
+    } else {
+      await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
     }
   }
 
@@ -263,15 +257,7 @@ export class ProjectActions {
   }
 
   removeProject (projectRoot: string) {
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
-
-    if (!found) {
-      throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
-    }
-
-    this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-
-    return this.api.removeProjectFromCache(projectRoot)
+    return this.updateProjectList(() => this.api.removeProjectFromCache(projectRoot))
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
