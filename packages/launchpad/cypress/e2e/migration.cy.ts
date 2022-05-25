@@ -163,7 +163,11 @@ describe('Opening unmigrated project', () => {
     // the expected iframe code is being returned and that there is vimeo-related network traffic
     cy.get('[data-cy="video-container"] iframe[src*=vimeo]').should('be.visible')
     cy.wait('@iframeDocRequest')
-    cy.wait('@vimeoCdnRequest')
+
+    // For an unknown reason, recaptcha blocks us from loading Vimeo on CircleCI Windows only
+    // So only wait on the Vimeo CDN request on Linux/Darwin.
+    if (Cypress.platform !== 'win32') cy.wait('@vimeoCdnRequest')
+
     cy.percySnapshot()
   })
 
