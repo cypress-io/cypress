@@ -321,16 +321,18 @@ describe('Sidebar Navigation', () => {
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
         o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
+        o.sinon.stub(ctx.actions.wizard, 'scaffoldTestingType').resolves()
       })
 
       cy.get('[data-cy-testingtype="e2e"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.withCtx((ctx) => {
+      cy.withRetryableCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(false)
         expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.reconfigureProject).to.have.been.called
+        expect(ctx.actions.wizard.scaffoldTestingType).to.have.been.called
       })
     })
   })
