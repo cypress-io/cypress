@@ -714,6 +714,8 @@ export class EventManager {
     // when we are re-running we first
     // need to stop cypress always
     Cypress.stop()
+    // remove listeners in the primary communicator to prevent possible memory leaks with dangling event emitters
+    Cypress.primaryOriginCommunicator.removeAllListeners()
 
     this.studioRecorder.setInactive()
   }
@@ -733,7 +735,6 @@ export class EventManager {
     // but we want to be aggressive here
     // and force GC early and often
     Cypress.removeAllListeners()
-    Cypress.primaryOriginCommunicator.removeAllListeners()
 
     this.localBus.emit('restart')
   }
