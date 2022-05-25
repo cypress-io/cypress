@@ -3,7 +3,7 @@ import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-context:versions-data-source')
+const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
@@ -124,7 +124,7 @@ export class VersionsDataSource {
 
     const responseJson = await response.json() as { time: Record<string, string>}
 
-    debug('NPM release dates %o', responseJson.time)
+    debug('NPM release dates received %o', { modified: responseJson.time.modified })
 
     return responseJson.time
   }
