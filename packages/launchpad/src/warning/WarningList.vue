@@ -1,42 +1,35 @@
 <template>
   <Warning
-    v-for="warning in warnings"
-    :key="warning.key"
+    v-for="warning in props.gql.warnings"
+    :key="warning.id"
     :title="warning.title ?? 'Warning'"
     :message="warning.errorMessage"
-    :retryable="warning.retryable"
+    :retryable="Boolean(retryables[warning.errorType])"
     dismissible
-    @update:modelValue="dismiss(warning.key)"
+    @update:modelValue="dismiss(warning.id)"
     @retry="retry(warning)"
   />
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { gql } from '@urql/core'
-import { ErrorTypeEnum, WarningListFragment, WarningList_PingBaseUrlDocument } from '../generated/graphql'
+import { ErrorTypeEnum, WarningContentFragment, WarningListFragment, WarningList_PingBaseUrlDocument, WarningList_RemoveWarningDocument } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import { useMutation } from '@urql/vue'
 
 gql`
-fragment WarningContent on ErrorWrapper {
-  title
-  errorType
-  errorMessage
-}
-`
-
-gql`
 fragment WarningList on Query {
   warnings {
+    id
     ...WarningContent
   }
 }`
 
 gql`
-mutation WarningList_removeWarning {
-  dismissWarning {
+mutation WarningList_removeWarning($id: ID!) {
+  dismissWarning(id: $id) {
     warnings {
+      id
       ...WarningContent
     }
   }
@@ -47,6 +40,7 @@ gql`
 mutation WarningList_pingBaseUrl {
   pingBaseUrl {
     warnings {
+      id
       ...WarningContent
     }
   }
@@ -58,6 +52,7 @@ const props = defineProps<{
 }>()
 
 const pingBaseUrlMutation = useMutation(WarningList_PingBaseUrlDocument)
+const dismissWarning = useMutation(WarningList_RemoveWarningDocument)
 
 type Retryables = Partial<Record<ErrorTypeEnum, () => void>>
 
@@ -67,25 +62,13 @@ const retryables: Retryables = {
   },
 }
 
-const dismissed = ref({})
-const warnings = computed(() => {
-  return props.gql.warnings
-  .map((w) => ({ ...w, key: `${w.errorType}${w.errorMessage}`, ...(w.errorType in retryables ? { retryable: true } : {}) }))
-  .filter((warning) => {
-    const hasBeenDismissed = dismissed.value[warning.key]
-
-    return !hasBeenDismissed
-  })
-})
-
-const dismiss = (key) => {
-  // TODO, call a mutation here so that the server persists the result of the mutation.
-  // However, we still intend to keep the "warnings" dismissal so that the client updates immediately before the server responds.
-  // UNIFY-1368
-  dismissed.value[key] = true
+const dismiss = (id: string) => {
+  if (!dismissWarning.fetching.value) {
+    dismissWarning.executeMutation({ id })
+  }
 }
 
-const retry = (warning: typeof warnings.value[number]) => {
+const retry = (warning: WarningContentFragment) => {
   retryables[warning.errorType]?.()
 }
 </script>

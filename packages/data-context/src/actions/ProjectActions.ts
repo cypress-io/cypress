@@ -24,7 +24,7 @@ export interface ProjectApiShape {
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
-  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
+  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): Promise<unknown>
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
@@ -81,12 +81,12 @@ export class ProjectActions {
 
   async clearCurrentProject () {
     this.ctx.update((d) => {
+      d.activeBrowser = null
       d.currentProject = null
+      d.currentProjectData = null
       d.currentTestingType = null
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
-      d.baseError = null
-      d.warnings = []
       d.app.browserStatus = 'closed'
     })
 
@@ -336,7 +336,7 @@ export class ProjectActions {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
+    await this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
@@ -496,11 +496,16 @@ export class ProjectActions {
       return
     }
 
-    this.ctx.update((d) => {
-      d.warnings = d.warnings.filter((w) => w.cypressError.type !== 'CANNOT_CONNECT_BASE_URL_WARNING')
-    })
+    const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
+
+    if (baseUrlWarning) {
+      this.ctx.actions.error.clearWarning(baseUrlWarning.id)
+      this.ctx.emitter.errorWarningChange()
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     return this.api.isListening(baseUrl)
-    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
+    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl), 'testingType'))
   }
 }

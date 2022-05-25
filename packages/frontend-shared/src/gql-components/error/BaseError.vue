@@ -124,6 +124,7 @@ import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment BaseError on ErrorWrapper {
+  id
   title
   errorName
   errorStack

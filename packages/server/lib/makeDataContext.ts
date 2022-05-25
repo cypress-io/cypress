@@ -108,10 +108,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       clearAllProjectPreferences () {
         return cache.removeAllProjectPreferences()
       },
-      insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+      async insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
         // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
         // https://cypress-io.atlassian.net/browse/UNIFY-1705
-        cache.insertProjectPreferences(projectTitle, preferences)
+        await cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)

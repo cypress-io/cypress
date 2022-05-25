@@ -28,7 +28,7 @@ export const Query = objectType({
       type: ErrorWrapper,
       description: 'A list of warnings',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.warnings
+        return ctx.warnings
       },
     })
 

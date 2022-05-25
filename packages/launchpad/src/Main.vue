@@ -109,6 +109,7 @@ fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
   baseError {
+    id
     ...BaseError
   }
   currentProject {
