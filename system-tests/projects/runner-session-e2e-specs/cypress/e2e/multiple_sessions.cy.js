@@ -1,5 +1,3 @@
-Cypress.config('experimentalSessionAndOrigin', true)
-
 it('t1', () => {
   cy.session('user1', () => {
     window.localStorage.foo = 'val'

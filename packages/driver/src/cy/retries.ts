@@ -80,7 +80,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
         const autOrigin = Cypress.state('autOrigin')
         const commandOrigin = window.location.origin
 
-        if (autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
+        if (!options.isCrossOriginSpecBridge && autOrigin && !cors.urlOriginsMatch(commandOrigin, autOrigin)) {
           const appendMsg = errByPath('miscellaneous.cross_origin_command', {
             commandOrigin,
             autOrigin,
