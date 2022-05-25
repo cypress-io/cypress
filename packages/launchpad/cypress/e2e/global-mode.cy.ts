@@ -1,6 +1,7 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
 import type { SinonSpy } from 'sinon'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
@@ -122,7 +123,7 @@ describe('Launchpad: Global Mode', () => {
       .should('have.length', projectList.length)
       .then((list) => {
         expect(list.get(0)).to.contain(projectList[2])
-        expect(list.get(0)).to.contain(path.join('cy-projects', path.sep, projectList[2]))
+        expect(list.get(0)).to.contain(getPathForPlatform(path.join('cy-projects', projectList[2])))
       })
     })
 
