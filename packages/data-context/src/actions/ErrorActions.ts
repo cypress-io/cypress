@@ -33,34 +33,34 @@ export class ErrorActions {
    */
   clearWarning (id: string) {
     this.ctx.update((d) => {
-      const idxA = d.warnings.findIndex((v) => v.id === id)
+      const warningsIndex = d.warnings.findIndex((v) => v.id === id)
 
-      if (idxA != null && idxA !== -1) {
-        d.warnings.splice(idxA, 1)
-
-        return
-      }
-
-      const idxB = d.currentProjectData?.warnings.findIndex((v) => v.id === id)
-
-      if (idxB != null && idxB !== -1) {
-        d.currentProjectData?.warnings.splice(idxB, 1)
+      if (warningsIndex != null && warningsIndex !== -1) {
+        d.warnings.splice(warningsIndex, 1)
 
         return
       }
 
-      const idxC = d.currentProjectData?.testingTypeData?.warnings.findIndex((v) => v.id === id)
+      const projectWarningsIndex = d.currentProjectData?.warnings.findIndex((v) => v.id === id)
 
-      if (idxC != null && idxC !== -1) {
-        d.currentProjectData?.testingTypeData?.warnings.splice(idxC, 1)
+      if (projectWarningsIndex != null && projectWarningsIndex !== -1) {
+        d.currentProjectData?.warnings.splice(projectWarningsIndex, 1)
 
         return
       }
 
-      const idxD = d.currentProjectData?.testingTypeData?.activeAppData?.warnings.findIndex((v) => v.id === id)
+      const testingTypeWarningsIndex = d.currentProjectData?.testingTypeData?.warnings.findIndex((v) => v.id === id)
 
-      if (idxD != null && idxD !== -1) {
-        d.currentProjectData?.testingTypeData?.activeAppData?.warnings.splice(idxD, 1)
+      if (testingTypeWarningsIndex != null && testingTypeWarningsIndex !== -1) {
+        d.currentProjectData?.testingTypeData?.warnings.splice(testingTypeWarningsIndex, 1)
+
+        return
+      }
+
+      const appWarningsIndex = d.currentProjectData?.testingTypeData?.activeAppData?.warnings.findIndex((v) => v.id === id)
+
+      if (appWarningsIndex != null && appWarningsIndex !== -1) {
+        d.currentProjectData?.testingTypeData?.activeAppData?.warnings.splice(appWarningsIndex, 1)
       }
     })
   }
