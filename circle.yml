@@ -50,18 +50,16 @@ macWorkflowFilters: &mac-workflow-filters
           pattern: "-release$"
           value: << pipeline.git.branch >>
 
-windowsWorkflowFilters: &windows-workflow-filters
-  when:
-    or:
-    - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/UNIFY-1787-spec-names-with-ext', << pipeline.git.branch >> ]
-    - matches:
-          pattern: "-release$"
-          value: << pipeline.git.branch >>
-    - matches:
-          pattern: "win*"
-          value: << pipeline.git.branch >>
+# windows is slow in CI, so we only run a certain set of tests on each commit
+# add your branch to this list to run the full Windows build on your PR
+fullWindowsWorkflowFilters: &full-windows-workflow-filters
+  filters:
+    branches:
+      only:
+      - develop
+      - '10.0-release'
+      - '*-release'
+      - 'win*'
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -2572,12 +2570,14 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - lint:
+        <<: *full-windows-workflow-filters
         name: windows-lint
         executor: windows
         requires:
           - windows-build
 
     - unit-tests:
+        <<: *full-windows-workflow-filters
         name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
@@ -2585,6 +2585,7 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - create-build-artifacts:
+        <<: *full-windows-workflow-filters
         name: windows-create-build-artifacts
         executor: windows
         resource_class: windows.medium
@@ -2609,4 +2610,3 @@ workflows:
     <<: *mac-workflow-filters
   windows:
     <<: *windows-workflow
-    <<: *windows-workflow-filters
