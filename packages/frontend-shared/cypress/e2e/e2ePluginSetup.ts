@@ -292,7 +292,7 @@ async function makeE2ETasks () {
       // which probably needs a bit of refactoring / consolidating
       const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
-      const modeOptions = argUtils.toObject(processedArgv)
+      const modeOptions = { ...argUtils.toObject(processedArgv), invokedFromCli: true }
 
       // Reset the state of the context
       await ctx.reinitializeCypress(modeOptions)
@@ -316,7 +316,7 @@ async function makeE2ETasks () {
       // which probably needs a bit of refactoring / consolidating
       const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
-      const modeOptions = argUtils.toObject(processedArgv)
+      const modeOptions = { ...argUtils.toObject(processedArgv), invokedFromCli: true }
 
       // Reset the state of the context
       await ctx.reinitializeCypress(modeOptions)

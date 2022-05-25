@@ -1,8 +1,6 @@
 let setupFn
 let validateFn
 
-Cypress.config('experimentalSessionAndOrigin', true)
-
 before(() => {
   setupFn = cy.stub().as('runSetup')
   validateFn = cy.stub().callsFake(() => {
