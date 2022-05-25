@@ -326,7 +326,7 @@ export class GitDataSource {
     const stdout = result.stdout.split('\n')
 
     if (result.exitCode !== 0) {
-      debug(`error... %o`, result)
+      debug(`command execution error: %o`, result)
     }
 
     if (stdout.length !== absolutePaths.length) {
