@@ -40,6 +40,7 @@ import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecy
 import { CypressError, getError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
+import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -428,7 +429,7 @@ export class DataContext {
 
     return Promise.all([
       destroy(),
-      this._reset(),
+      this.#_reset(),
     ])
   }
 
@@ -437,7 +438,7 @@ export class DataContext {
    * so we can initialize fresh for each E2E test
    */
   async reinitializeCypress (modeOptions: Partial<AllModeOptions> = {}) {
-    await this._reset()
+    await this.#_reset()
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
@@ -447,9 +448,11 @@ export class DataContext {
     globalPubSub.emit('reset:data-context', this)
   }
 
-  private _reset () {
+  #_reset () {
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
+
+    resetIssuedWarnings()
 
     return Promise.all([
       this.lifecycleManager.destroy(),

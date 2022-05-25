@@ -503,8 +503,6 @@ export class ProjectActions {
       this.ctx.emitter.errorWarningChange()
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
     return this.api.isListening(baseUrl)
     .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl), 'testingType'))
   }

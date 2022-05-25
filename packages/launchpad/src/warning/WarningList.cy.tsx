@@ -42,8 +42,9 @@ describe('<WarningList />', () => {
 
   it('removes warning when dismissed', () => {
     cy.stubMutationResolver(WarningList_RemoveWarningDocument, (defineResult, { id }) => {
-      defineResult({
+      return defineResult({
         dismissWarning: {
+          __typename: 'Query',
           warnings: [secondWarning],
         },
       })
