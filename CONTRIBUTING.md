@@ -329,9 +329,7 @@ This will install all the dependencies for the repo and perform a preliminary bu
 yarn start
 ```
 
-If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details.
-
-This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher` for instance.
+If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details. This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher:*` for instance. See ["Debug logs"](./guides/debug-logs.md) for more info.
 
 When running `yarn start` this routes through the CLI and eventually calls `yarn dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
@@ -411,30 +409,9 @@ Each package is responsible for building itself and testing itself and can do so
 | `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
 | `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
 
-#### Debugging
+#### Debug Logs
 
-Some packages use [debug](https://github.com/visionmedia/debug#readme) to
-log debug messages to the console. The naming scheme should be
-`cypress:<package name>`; where package name is without the `@packages` scope. For example to see launcher messages during unit
-tests start it using
-
-```bash
-$ DEBUG=cypress:launcher yarn test --scope @packages/launcher
-```
-
-If you want to see log messages from all Cypress projects use wild card
-
-```bash
-$ DEBUG=cypress:*
-```
-
-Or for an individual package:
-
-```bash
-DEBUG=cypress:cli
-DEBUG=cypress:server
-DEBUG=cypress:launcher
-```
+Many Cypress packages print out debugging information to console via the `debug` module. See ["Debug logs"](./guides/debug-logs.md) for more information.
 
 ### Coding Style
 
