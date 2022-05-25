@@ -151,7 +151,7 @@ const getUserInvocationStack = (err, state) => {
   }
 
   if (!_.isString(userInvocationStack)) {
-    return
+    return undefined
   }
 
   if (
@@ -161,6 +161,8 @@ const getUserInvocationStack = (err, state) => {
   ) {
     return userInvocationStack
   }
+
+  return undefined
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
