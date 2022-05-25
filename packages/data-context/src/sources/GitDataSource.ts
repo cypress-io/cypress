@@ -330,7 +330,7 @@ export class GitDataSource {
     }
 
     if (stdout.length !== absolutePaths.length) {
-      debug('error... %o', result)
+      debug('unexpected command execution result: %o', result)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
 
