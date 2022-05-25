@@ -483,17 +483,17 @@ export class ProjectConfigManager {
     return true
   }
 
-  private closeWatchers () {
+  private async closeWatchers () {
     for (const watcher of this._watchers.values()) {
       // We don't care if there's an error while closing the watcher,
       // the watch listener on our end is already removed synchronously by chokidar
-      watcher.close().catch((e) => {})
+      await watcher.close().catch((e) => {})
     }
     this._watchers = new Set()
     this._pathToWatcherRecord = {}
   }
 
-  destroy () {
+  async destroy () {
     if (this._eventsIpc) {
       this._eventsIpc.cleanupIpc()
     }
@@ -502,6 +502,6 @@ export class ProjectConfigManager {
     this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined
     this._registeredEventsTarget = undefined
-    this.closeWatchers()
+    await this.closeWatchers()
   }
 }

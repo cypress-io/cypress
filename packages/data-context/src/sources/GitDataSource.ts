@@ -145,18 +145,18 @@ export class GitDataSource {
     return this.#currentUser ?? null
   }
 
-  destroy () {
+  async destroy () {
     this.#destroyed = true
     if (this.#intervalTimer) {
       clearTimeout(this.#intervalTimer)
     }
 
-    this.#destroyWatcher(this.#gitBaseDirWatcher)
+    await this.#destroyWatcher(this.#gitBaseDirWatcher)
   }
 
-  #destroyWatcher (watcher?: chokidar.FSWatcher) {
+  async #destroyWatcher (watcher?: chokidar.FSWatcher) {
     // Can't do anything actionable with these errors
-    watcher?.close().catch((e) => {})
+    await watcher?.close().catch((e) => {})
   }
 
   async #loadAndWatchCurrentBranch () {

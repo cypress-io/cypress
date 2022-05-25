@@ -10,6 +10,7 @@ import path from 'path'
 import _ from 'lodash'
 import resolve from 'resolve'
 import fs from 'fs'
+import electron from 'electron'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
 import type { DataContext } from '..'
@@ -86,13 +87,36 @@ export class ProjectLifecycleManager {
   private _initializedProject: unknown | undefined
   private _eventRegistrar: EventRegistrar
 
+  private _destroyed: boolean
+
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
+    this._destroyed = false
+
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
 
-    process.on('exit', this.onProcessExit)
+    if (electron && electron.app) {
+      electron.app.once('before-quit', (event: Event) => {
+        // prevent default on the before-quit event to halt the current
+        // quit event
+        event.preventDefault()
+
+        new Promise((resolve) => {
+          this.onProcessExit().then(resolve)
+        }).then(() => {
+          // re-quit after we've completed the async clean up
+          electron.app.quit()
+        })
+      })
+    }
+
+    process.on('exit', () => {
+      // Might need to keep the exit handler? I'm not sure if there are paths
+      // that bypass the before-quit event that we'd care about
+      this.onProcessExit()
+    })
 
     return autoBindDebug(this)
   }
@@ -101,8 +125,14 @@ export class ProjectLifecycleManager {
     return this.ctx.coreData.currentProjectGitInfo
   }
 
-  private onProcessExit = () => {
-    this.resetInternalState()
+  private onProcessExit = async () => {
+    if (this._destroyed) {
+      return
+    }
+
+    this._destroyed = true
+
+    return this.resetInternalState()
   }
 
   async getProjectId (): Promise<string | null> {
@@ -525,14 +555,14 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private resetInternalState () {
+  private async resetInternalState () {
     if (this._configManager) {
-      this._configManager.destroy()
+      await this._configManager.destroy()
       this._configManager = undefined
     }
 
-    this.ctx.coreData.currentProjectGitInfo?.destroy()
-    this.ctx.project.destroy()
+    await this.ctx.coreData.currentProjectGitInfo?.destroy()
+    await this.ctx.project.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
     this._cachedFullConfig = undefined

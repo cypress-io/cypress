@@ -409,16 +409,16 @@ export class ProjectDataSource {
     return false
   }
 
-  destroy () {
-    this.stopSpecWatcher()
+  async destroy () {
+    await this.stopSpecWatcher()
   }
 
-  stopSpecWatcher () {
+  async stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this._specWatcher.close().catch(() => {})
+    await this._specWatcher.close().catch(() => {})
     this._specWatcher = null
   }
 
