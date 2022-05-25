@@ -43,7 +43,7 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex items-center justify-between">
-        <div :is-git-available="isGitAvailable">
+        <div>
           {{ t('specPage.lastUpdated.header') }}
         </div>
       </div>
@@ -202,10 +202,6 @@ const emit = defineEmits<{
 }>()
 
 const showSpecPatternModal = ref(false)
-
-const isGitAvailable = computed(() => {
-  return !props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo')
-})
 
 const isAlertOpen = ref(!!route.params?.unrunnable)
 
