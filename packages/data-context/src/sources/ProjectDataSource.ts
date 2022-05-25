@@ -12,7 +12,7 @@ import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
 
-const debug = Debug('cypress:data-context')
+const debug = Debug('cypress:data-context:sources:ProjectDataSource')
 import assert from 'assert'
 
 import type { DataContext } from '..'

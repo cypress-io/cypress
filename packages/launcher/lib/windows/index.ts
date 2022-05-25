@@ -4,9 +4,12 @@ import os from 'os'
 import { join, normalize, win32 } from 'path'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
-import { log } from '../log'
+import Debug from 'debug'
 import type { PathData } from '../types'
 import type { Browser, FoundBrowser } from '@packages/types'
+
+const debug = Debug('cypress:launcher:windows')
+const debugVerbose = Debug('cypress-verbose:launcher:windows')
 
 function formFullAppPath (name: string) {
   return [
@@ -115,7 +118,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
   const exePaths = formFullAppPathFn(browser.name)
 
-  log('looking at possible paths... %o', { browser, exePaths })
+  debugVerbose('looking at possible paths... %o', { browser, exePaths })
 
   // shift and try paths 1-by-1 until we find one that works
   const tryNextExePath = async () => {
@@ -130,7 +133,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
     return fse.pathExists(path)
     .then((exists) => {
-      log('found %s ?', path, exists)
+      debugVerbose('found %s ? %o', path, { exists })
 
       if (!exists) {
         return tryNextExePath()
@@ -139,7 +142,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       // Use exports.getVersionString here, rather than our local reference
       // to that variable so that the tests can easily mock it
       return exports.getVersionString(path).then((version) => {
-        log('browser %s at \'%s\' version %s', browser.name, exePath, version)
+        debug('got version string for %s: %o', browser.name, { exePath, version })
 
         return {
           name: browser.name,
@@ -149,7 +152,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       })
     })
     .catch((err) => {
-      log('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
+      debug('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
 
       return tryNextExePath()
     })
