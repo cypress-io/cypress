@@ -13,10 +13,13 @@ import type { Protocol } from 'devtools-protocol'
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
-import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
 import type { Browser } from './types'
+import { BrowserCriClient } from './browser-cri-client'
+import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import type { CRIWrapper } from './cri-client'
+import type { Automation } from '../automation'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -119,6 +122,8 @@ const DEFAULT_ARGS = [
   // https://github.com/cypress-io/cypress/issues/5336
   '--disable-dev-shm-usage',
 ]
+
+let browserCriClient
 
 /**
  * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
@@ -246,31 +251,6 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-// After the browser has been opened, we can connect to
-// its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName) {
-  // @ts-ignore
-  la(check.userPort(port), 'expected port number to connect CRI to', port)
-
-  debug('connecting to Chrome remote interface at random port %d', port)
-
-  return protocol.getWsTargetFor(port, browserDisplayName)
-  .then((wsUrl) => {
-    debug('received wsUrl %s for port %d', wsUrl, port)
-
-    return CriClient.create({
-      target: wsUrl,
-      onError,
-      onReconnect (client) {
-        // if the client disconnects (e.g. due to a computer sleeping), update
-        // the frame tree on reconnect in cases there were changes while
-        // the client was disconnected
-        _updateFrameTree(client)()
-      },
-    })
-  })
-}
-
 const _maybeRecordVideo = async function (client, options, browserMajorVersion) {
   if (!options.onScreencastFrame) {
     debug('options.onScreencastFrame is false')
@@ -340,9 +320,16 @@ const _handleDownloads = async function (client, dir, automation) {
 let frameTree
 let gettingFrameTree
 
+const onReconnect = (client: CRIWrapper.Client) => {
+  // if the client disconnects (e.g. due to a computer sleeping), update
+  // the frame tree on reconnect in cases there were changes while
+  // the client was disconnected
+  return _updateFrameTree(client, 'onReconnect')()
+}
+
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const _updateFrameTree = (client) => async () => {
-  debug('update frame tree')
+const _updateFrameTree = (client: CRIWrapper.Client, eventName) => async () => {
+  debug(`update frame tree for ${eventName}`)
 
   gettingFrameTree = new Promise<void>(async (resolve) => {
     try {
@@ -364,8 +351,8 @@ const _updateFrameTree = (client) => async () => {
 const _listenForFrameTreeChanges = (client) => {
   debug('listen for frame tree changes')
 
-  client.on('Page.frameAttached', _updateFrameTree(client))
-  client.on('Page.frameDetached', _updateFrameTree(client))
+  client.on('Page.frameAttached', _updateFrameTree(client, 'Page.frameAttached'))
+  client.on('Page.frameDetached', _updateFrameTree(client, 'Page.frameDetached'))
 }
 
 const _continueRequest = (client, params, header?) => {
@@ -404,7 +391,7 @@ interface HasFrame {
 const _isAUTFrame = async (frameId: string) => {
   debug('need frame tree')
 
-  // the request could come in while in the middle of geting the frame tree,
+  // the request could come in while in the middle of getting the frame tree,
   // which is asynchronous, so wait for it to be fetched
   if (gettingFrameTree) {
     debug('awaiting frame tree')
@@ -413,7 +400,7 @@ const _isAUTFrame = async (frameId: string) => {
   }
 
   const frame = _.find(frameTree?.childFrames || [], ({ frame }) => {
-    return frame?.name?.startsWith('Your App:')
+    return frame?.name?.startsWith('Your project:')
   }) as HasFrame | undefined
 
   if (frame) {
@@ -446,15 +433,8 @@ const _handlePausedRequests = async (client) => {
   })
 }
 
-const _setAutomation = async (client, automation, options) => {
-  const cdpAutomation = new CdpAutomation({
-    sendDebuggerCommandFn: client.send,
-    onFn: client.on,
-    automation,
-    experimentalSessionAndOrigin: options.experimentalSessionAndOrigin,
-  })
-
-  await cdpAutomation.enable()
+const _setAutomation = async (client: CRIWrapper.Client, automation: Automation, closeCurrentTarget: () => Promise<void>, options: CypressConfiguration = {}) => {
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, closeCurrentTarget, automation, options.experimentalSessionAndOrigin)
 
   return automation.use(cdpAutomation)
 }
@@ -469,8 +449,6 @@ export = {
   _normalizeArgExtensions,
 
   _removeRootExtension,
-
-  _connectToChromeRemoteInterface,
 
   _maybeRecordVideo,
 
@@ -487,6 +465,10 @@ export = {
   _mergeChromePreferences,
 
   _writeChromePreferences,
+
+  _getBrowserCriClient () {
+    return browserCriClient
+  },
 
   async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
@@ -569,7 +551,43 @@ export = {
     return args
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation: Automation) {
+    debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
+
+    const browserCriClient = this._getBrowserCriClient()
+    const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
+
+    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
+
+    // make sure page events are re enabled or else frame tree updates will NOT work as well as other items listening for page events
+    await pageCriClient.send('Page.enable')
+
+    await options.onInitializeNewBrowserTab()
+
+    await Promise.all([
+      this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
+      this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+    ])
+
+    await this._navigateUsingCRI(pageCriClient, options.url)
+
+    if (options.experimentalSessionAndOrigin) {
+      await this._handlePausedRequests(pageCriClient)
+      _listenForFrameTreeChanges(pageCriClient)
+    }
+  },
+
+  async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
+    const port = await protocol.getRemoteDebuggingPort()
+
+    debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
+    const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError, onReconnect)
+    const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
+
+    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
+  },
+
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation: Automation): Promise<LaunchedBrowser> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -621,49 +639,60 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', args)
+    const launchedBrowser = await launch(browser, 'about:blank', port, args) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName)
+    browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError, onReconnect)
 
-    la(criClient, 'expected Chrome remote interface reference', criClient)
+    la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
-    await criClient.ensureMinimumProtocolVersion('1.3')
-    .catch((err) => {
-      // if this minumum chrome version changes, sync it with
+    try {
+      browserCriClient.ensureMinimumProtocolVersion('1.3')
+    } catch (err: any) {
+      // if this minimum chrome version changes, sync it with
       // packages/web-config/webpack.config.base.ts and
       // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-    })
-
-    await this._setAutomation(criClient, automation, options)
+    }
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
+
+    launchedBrowser.browserCriClient = browserCriClient
 
     /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
 
-      criClient.close()
+      // Do nothing on failure here since we're shutting down anyway
+      browserCriClient.close().catch()
+      browserCriClient = undefined
+
       debug('closing chrome')
 
       originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    await criClient.send('Page.enable')
+    const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
-    await this._navigateUsingCRI(criClient, url)
-    await this._handleDownloads(criClient, options.downloadsFolder, automation)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget, options)
+
+    await pageCriClient.send('Page.enable')
+
+    await Promise.all([
+      this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
+      this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+    ])
+
+    await this._navigateUsingCRI(pageCriClient, url)
 
     if (options.experimentalSessionAndOrigin) {
-      await this._handlePausedRequests(criClient)
-      _listenForFrameTreeChanges(criClient)
+      await this._handlePausedRequests(pageCriClient)
+      _listenForFrameTreeChanges(pageCriClient)
     }
 
     // return the launched browser process

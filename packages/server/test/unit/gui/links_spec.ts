@@ -20,27 +20,4 @@ describe('lib/gui/links', () => {
     openExternal('https://on.cypress.io/string-link')
     expect(shell.openExternal).to.be.calledWith('https://on.cypress.io/string-link')
   })
-
-  it('appends get parameters', () => {
-    openExternal({
-      url: 'https://on.cypress.io/string-link',
-      params: {
-        search: 'term',
-      },
-    })
-
-    expect(shell.openExternal).to.be.calledWith('https://on.cypress.io/string-link?search=term')
-  })
-
-  it('automatically adds utm_source if utm params are present', () => {
-    openExternal({
-      url: 'https://on.cypress.io/string-link',
-      params: {
-        utm_medium: 'GUI Tab',
-        utm_campaign: 'Learn More',
-      },
-    })
-
-    expect(shell.openExternal).to.be.calledWith('https://on.cypress.io/string-link?utm_medium=GUI+Tab&utm_campaign=Learn+More&utm_source=Test+Runner')
-  })
 })

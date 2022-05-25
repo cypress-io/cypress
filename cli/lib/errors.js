@@ -227,6 +227,21 @@ const invalidTestingType = {
   solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
 }
 
+const incompatibleTestTypeFlags = {
+  description: '`--e2e` and `--component` cannot both be passed.',
+  solution: 'Either pass `--e2e` or `--component`, but not both.',
+}
+
+const incompatibleTestingTypeAndFlag = {
+  description: 'Set a `testingType` and also passed `--e2e` or `--component` flags.',
+  solution: 'Either set `testingType` or pass a testing type flag, but not both.',
+}
+
+const invalidConfigFile = {
+  description: '`--config-file` cannot be false.',
+  solution: 'Either pass a relative path to a valid Cypress config file or remove this option.',
+}
+
 /**
  * This error happens when CLI detects that the child Test Runner process
  * was killed with a signal, like SIGBUS
@@ -420,5 +435,8 @@ module.exports = {
     incompatibleHeadlessFlags,
     invalidRunProjectPath,
     invalidTestingType,
+    incompatibleTestTypeFlags,
+    incompatibleTestingTypeAndFlag,
+    invalidConfigFile,
   },
 }

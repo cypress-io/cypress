@@ -19,16 +19,17 @@ module.exports = (on, config) => {
 }
 ```
 
-3. Include the support file from your project's `cypress/support/index.js` file
+3. Include the support file from your project's `cypress/support/component.js` file
 
 ```js
 import '@cypress/vue/dist/support'
 ```
 
-4. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For exampled to have them located in `src` folder use:
+4. ⚠️ Turn the experimental component support on in your `cypress.json` by including the `component` property. You can also specify the glob for locating component spec files. For example to have them located in `src` folder use:
 
-```json
+```js
 {
-  "componentFolder": "src"
-}
+  "component": {
+    "specPattern": "src/**/*.cy.jsx"
+  }
 ```

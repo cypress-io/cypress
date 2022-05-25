@@ -15,6 +15,8 @@
         "OVERLIMIT",
         "Pinia",
         "pnpm",
+        "pseudoclass",
+        "revparse",
         "Screenshotting",
         "shiki",
         "testid",
@@ -22,10 +24,12 @@
         "unconfigured",
         "unplugin",
         "unrunnable",
+        "unstaged",
         "urql",
         "vite",
         "vitejs",
-        "vueuse"
+        "vueuse",
+        "Windi"
     ],
     "ignoreWords": [],
     "import": []
