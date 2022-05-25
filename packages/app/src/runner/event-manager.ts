@@ -142,11 +142,6 @@ export class EventManager {
       rerun()
     })
 
-    this.ws.on('dev-server:hmr:error', (error) => {
-      Cypress.stop()
-      this.localBus.emit('script:error', error)
-    })
-
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
         rerun()
