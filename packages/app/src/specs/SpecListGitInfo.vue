@@ -6,6 +6,7 @@
   >
     <Tooltip
       v-if="classes.icon"
+      :key="props.gql?.statusType ?? undefined"
       placement="top"
       class="h-full grid items-center"
     >

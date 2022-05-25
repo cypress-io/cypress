@@ -43,7 +43,9 @@
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
       <div class="flex items-center justify-between">
-        <LastUpdatedHeader :is-git-available="isGitAvailable" />
+        <div :is-git-available="isGitAvailable">
+          {{ t('specPage.lastUpdated.header') }}
+        </div>
       </div>
     </div>
     <!--
@@ -121,7 +123,6 @@
 
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
-import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql, useSubscription } from '@urql/vue'
