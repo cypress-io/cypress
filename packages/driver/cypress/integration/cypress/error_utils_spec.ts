@@ -404,6 +404,21 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.stack).to.equal('replaced stack')
     })
 
+    it('does not use boolean user invocation stack', () => {
+      // if for some reason the user invocation stack is a boolean,
+      // instead of the string, we should not use it
+      // https://github.com/cypress-io/cypress/issues/21428
+      const result = $errUtils.enhanceStack({ err, userInvocationStack: true })
+
+      expect(result.stack).to.equal(err.stack)
+    })
+
+    it('does not use null user invocation stack', () => {
+      const result = $errUtils.enhanceStack({ err, userInvocationStack: null })
+
+      expect(result.stack).to.equal(err.stack)
+    })
+
     it('attaches source mapped stack', () => {
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 

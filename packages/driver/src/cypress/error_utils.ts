@@ -150,7 +150,9 @@ const getUserInvocationStack = (err, state) => {
     userInvocationStack = withInvocationStack?.get('userInvocationStack')
   }
 
-  if (!userInvocationStack) return
+  if (!_.isString(userInvocationStack)) {
+    return
+  }
 
   if (
     isCypressErr(err)
@@ -407,7 +409,9 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
 const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameIndex => {
-  if (!userInvocationStack) return { stack: err.stack }
+  if (!_.isString(userInvocationStack)) {
+    return { stack: err.stack }
+  }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
     return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
