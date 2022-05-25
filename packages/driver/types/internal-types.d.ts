@@ -37,26 +37,6 @@ declare namespace Cypress {
     warning: (message: string) => void
   }
 
-  // Extend Cypress.state properties here
-  interface State {
-    (k: 'activeSessions', v?: Cypress.Commands.Sessions.ActiveSessions):  ActiveSessionsSessionData | undefined
-    (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
-    (k: 'routes', v?: RouteMap): RouteMap
-    (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
-    (k: 'document', v?: Document): Document
-    (k: 'window', v?: Window): Window
-    (k: 'logGroupIds', v?: Array<InternalLogConfig['id']>): Array<InternalLogConfig['id']>
-    (k: 'autOrigin', v?: string): string
-    (k: 'originCommandBaseUrl', v?: string): string
-    (k: 'currentActiveOriginPolicy', v?: string): string
-    (k: 'latestActiveOriginPolicy', v?: string): string
-    (k: 'duringUserTestExecution', v?: boolean): boolean
-    (k: 'onQueueEnd', v?: () => void): () => void
-    (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
-    (k: string, v?: any): any
-    state: Cypress.state
-  }
-
   interface InternalConfig {
     (k: keyof ResolvedConfigOptions, v?: any): any
   }
@@ -75,3 +55,14 @@ type AliasedRequest = {
 
 // utility types
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+interface SpecWindow extends Window {
+  cy: $Cy
+}
+
+interface CypressRunnable extends Mocha.Runnable {
+  type: null | 'hook' | 'suite' | 'test'
+  hookId: any
+  id: any
+  err: any
+}

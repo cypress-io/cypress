@@ -10,8 +10,8 @@ import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
 import _ from 'lodash'
 
-const debug = Debug('cypress:data-context:GitDataSource')
-const debugVerbose = Debug('cypress-verbose:data-context:GitDataSource')
+const debug = Debug('cypress:data-context:sources:GitDataSource')
+const debugVerbose = Debug('cypress-verbose:data-context:sources:GitDataSource')
 
 dayjs.extend(relativeTime)
 
@@ -176,21 +176,28 @@ export class GitDataSource {
         return
       }
 
-      this.#gitBaseDirWatcher = chokidar.watch(path.join(gitBaseDir, '.git', 'HEAD'), {
-        ignoreInitial: true,
-        ignorePermissionErrors: true,
-      })
-
-      // Fires when we switch branches
-      this.#gitBaseDirWatcher.on('change', () => {
-        this.#loadCurrentBranch().then(() => {
-          this.config.onBranchChange(this.#currentBranch)
-        }).catch((e) => {
-          debug('Errored loading branch info on git change %s', e.message)
-          this.#currentBranch = null
-          this.#gitErrored = true
+      if (!this.config.isRunMode) {
+        this.#gitBaseDirWatcher = chokidar.watch(path.join(gitBaseDir, '.git', 'HEAD'), {
+          ignoreInitial: true,
+          ignorePermissionErrors: true,
         })
-      })
+
+        // Fires when we switch branches
+        this.#gitBaseDirWatcher.on('change', () => {
+          this.#loadCurrentBranch().then(() => {
+            this.config.onBranchChange(this.#currentBranch)
+          }).catch((e) => {
+            debug('Errored loading branch info on git change %s', e.message)
+            this.#currentBranch = null
+            this.#gitErrored = true
+          })
+        })
+
+        this.#gitBaseDirWatcher.on('error', (e) => {
+          debug(`Failed to watch for git changes`, e.message)
+          this.config.onError(e)
+        })
+      }
     } catch (e) {
       this.#gitErrored = true
       debug(`Error loading & watching current branch %s`, e.message)
@@ -231,7 +238,7 @@ export class GitDataSource {
         this.#git.status(),
       ])
 
-      debug('stdout %s', stdout)
+      debugVerbose('stdout %s', stdout.toString())
 
       const changed: string[] = []
 
@@ -285,12 +292,12 @@ export class GitDataSource {
 
         this.#gitMeta.set(file, toSet)
         if (!_.isEqual(toSet, current)) {
-          debug(`updated %s %o`, file, toSet)
           changed.push(file)
         }
       }
 
       if (!this.#destroyed) {
+        debugVerbose(`updated %o`, changed)
         this.config.onGitInfoChange(changed)
       }
     } catch (e) {
@@ -319,15 +326,13 @@ export class GitDataSource {
     const stdout = result.stdout.split('\n')
 
     if (result.exitCode !== 0) {
-      debug(`error... stderr`, result.stderr)
+      debug(`command execution error: %o`, result)
     }
 
     if (stdout.length !== absolutePaths.length) {
-      debug('error... stdout:', stdout)
+      debug('unexpected command execution result: %o', result)
       throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
     }
-
-    debug('stdout for git info', stdout)
 
     return stdout
   }

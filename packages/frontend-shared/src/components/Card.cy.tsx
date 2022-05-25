@@ -98,7 +98,7 @@ describe('Card', { viewportHeight: 400 }, () => {
     // we can't actually click it
 
     cy.get('[data-cy="card"]')
-    .should('have.css', 'pointer-events', 'none')
+    .should('have.css', 'cursor', 'default')
 
     cy.get('@clickSpy').should('not.have.been.called')
 

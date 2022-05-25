@@ -1,3 +1,10 @@
+# [@cypress/react-v5.12.5](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.4...@cypress/react-v5.12.5) (2022-05-17)
+
+
+### Bug Fixes
+
+* add support for Next.js v12.1.6 ([#21516](https://github.com/cypress-io/cypress/issues/21516)) ([72ed33c](https://github.com/cypress-io/cypress/commit/72ed33c4eaa4823366fb47f212f0c5e609fa2cf0))
+
 # [@cypress/react-v5.12.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.3...@cypress/react-v5.12.4) (2022-03-03)
 
 

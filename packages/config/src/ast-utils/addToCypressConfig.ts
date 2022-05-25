@@ -6,8 +6,8 @@ import path from 'path'
 import debugLib from 'debug'
 import { parse, print } from 'recast'
 
-import { addCommonJSModuleImportToCypressConfigPlugin, addESModuleImportToCypressConfigPlugin, addToCypressConfigPlugin } from './addToCypressConfigPlugin'
-import { addCommonJSModuleDefinition, addComponentDefinition, addE2EDefinition, addESModuleDefinition, ASTComponentDefinitionConfig, ModuleToAdd } from './astConfigHelpers'
+import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
+import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
 
 const debug = debugLib('cypress:config:addToCypressConfig')
 
@@ -40,26 +40,13 @@ const debug = debugLib('cypress:config:addToCypressConfig')
  *      ...createConfigFn()
  *    }
  */
-export async function addToCypressConfig (filePath: string, code: string, toAdd: {
-  properties?: t.ObjectProperty[]
-  modules?: ModuleToAdd[]
-}) {
+export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
   try {
     const ast = parse(code, {
       parser: require('recast/parsers/typescript'),
     })
 
-    for (const prop of toAdd.properties ?? []) {
-      traverse(ast, addToCypressConfigPlugin(prop).visitor)
-    }
-
-    for (const mod of toAdd.modules ?? []) {
-      if (mod.type === 'ES') {
-        traverse(ast, addESModuleImportToCypressConfigPlugin(mod.node).visitor)
-      } else if (mod.type === 'CommonJS') {
-        traverse(ast, addCommonJSModuleImportToCypressConfigPlugin(mod.node).visitor)
-      }
-    }
+    traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
 
     return print(ast).code
   } catch (e) {
@@ -76,14 +63,10 @@ export interface AddProjectIdToCypressConfigOptions {
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
     let result = await fs.readFile(options.filePath, 'utf8')
-    const toPrint = await addToCypressConfig(options.filePath, result, {
-      properties: [
-        t.objectProperty(
-          t.identifier('projectId'),
-          t.identifier(options.projectId),
-        ),
-      ],
-    })
+    const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
+      t.identifier('projectId'),
+      t.identifier(options.projectId),
+    ))
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 
@@ -115,26 +98,6 @@ export interface AddTestingTypeToCypressConfigOptions {
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
   const toAdd = options.info.testingType === 'e2e' ? addE2EDefinition() : addComponentDefinition(options.info)
 
-  const modulesToAdd: ModuleToAdd[] = []
-
-  if (options.info.testingType === 'component') {
-    if (options.info.bundler === 'webpack' && options.info.configPath) {
-      if (options.isProjectUsingESModules) {
-        modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'webpackConfig'))
-      } else {
-        modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'webpackConfig'))
-      }
-    }
-
-    if (options.info.bundler === 'vite' && options.info.configPath) {
-      if (options.isProjectUsingESModules) {
-        modulesToAdd.push(addESModuleDefinition(options.info.configPath, 'viteConfig'))
-      } else {
-        modulesToAdd.push(addCommonJSModuleDefinition(options.info.configPath, 'viteConfig'))
-      }
-    }
-  }
-
   try {
     let result: string | undefined = undefined
     let resultStatus: 'ADDED' | 'MERGED' = 'MERGED'
@@ -154,7 +117,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
       result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules })
     }
 
-    const toPrint = await addToCypressConfig(options.filePath, result, { properties: [toAdd], modules: modulesToAdd })
+    const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
 

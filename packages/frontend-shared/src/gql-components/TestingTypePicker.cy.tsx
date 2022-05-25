@@ -2,7 +2,7 @@ import TestingTypePicker from './TestingTypePicker.vue'
 import { TestingTypePickerFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-const { component, e2e } = defaultMessages.testingType
+const { component, e2e, componentDisabled } = defaultMessages.testingType
 
 describe('TestingTypePicker', () => {
   it('renders "configured" and "not configured" states', () => {
@@ -16,7 +16,7 @@ describe('TestingTypePicker', () => {
         }
       },
       render: (gql) => {
-        return <TestingTypePicker gql={gql} onPick={pick} isApp={false}/>
+        return <TestingTypePicker gql={gql} onPick={pick}/>
       },
     })
 
@@ -39,5 +39,28 @@ describe('TestingTypePicker', () => {
     cy.get('@pick').should('have.been.calledTwice')
 
     cy.percySnapshot('after click - focus')
+  })
+
+  it('shows disabled ct when not invoked from cli', () => {
+    cy.mountFragment(TestingTypePickerFragmentDoc, {
+      onResult (result) {
+        result.invokedFromCli = false
+      },
+      render: (gql) => {
+        return <TestingTypePicker gql={gql} onPick={cy.spy().as('pick')}/>
+      },
+    })
+
+    cy.get('[data-cy-testingtype="component"]').within(() => {
+      cy.contains(component.name).should('be.visible')
+      cy.contains(componentDisabled.description.replace('{0}', componentDisabled.link)).should('be.visible')
+      cy.contains(defaultMessages.setupPage.testingCard.disabled).should('be.visible')
+
+      cy.contains(componentDisabled.link).should('have.attr', 'href', 'https://on.cypress.io/installing-cypress')
+    }).click()
+
+    cy.get('@pick').should('not.have.been.called')
+
+    cy.percySnapshot()
   })
 })

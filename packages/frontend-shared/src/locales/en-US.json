@@ -277,7 +277,8 @@
       "notConfigured": "Not Configured",
       "running": "Running",
       "chooseABrowser": "Choose a Browser",
-      "reconfigure": "Reconfigure"
+      "reconfigure": "Reconfigure",
+      "disabled": "Disabled"
     }
   },
   "globalPage": {
@@ -520,6 +521,10 @@
     "component": {
       "name": "Component Testing",
       "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
+    },
+    "componentDisabled": {
+      "description": "To test your components you must {0} as an NPM dependency for this project.",
+      "link": "install Cypress"
     }
   },
   "migration": {
@@ -609,6 +614,12 @@
         "description": "In this step, we'll explain how you will reconfigure Cypress for component testing.",
         "button": "Finish migration and continue"
       }
+    },
+    "landingPage": {
+      "title": "Welcome to Cypress 10!",
+      "description": "Check out the highlights in the video below to explore what’s changed recently.",
+      "actionContinue": "Continue to Cypress 10",
+      "linkReleaseNotes": "Release notes"
     }
   },
   "setupWizard": {
