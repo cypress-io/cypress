@@ -63,7 +63,7 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
       // for the query, we can "push" the data down using the pushFragment subscription
       onUpdatedResult (result) {
         obj.context?.graphql.pushResult({
-          result: result[info.fieldName] ?? null,
+          result: result?.[info.fieldName] ?? null,
           source: obj.rootValue,
           info,
           ctx: obj.context,
