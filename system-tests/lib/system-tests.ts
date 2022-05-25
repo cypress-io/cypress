@@ -947,6 +947,7 @@ const systemTests = {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
+      await DepInstaller.scaffoldProjectNodeModules(options.project)
     }
 
     if (process.env.NO_EXIT) {
