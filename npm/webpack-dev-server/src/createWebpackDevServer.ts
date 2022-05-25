@@ -52,7 +52,7 @@ export function createWebpackDevServer (
   }
 
   if (webpackDevServerMajorVersion === 3) {
-    debug('using webpack-dev-server v3')
+    debug('using webpack-dev-server v4')
 
     return webpackDevServer3(config, webpackCompiler, finalWebpackConfig)
   }
