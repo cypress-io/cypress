@@ -81,6 +81,7 @@ export class ProjectActions {
 
   async clearCurrentProject () {
     this.ctx.update((d) => {
+      d.baseError = null
       d.activeBrowser = null
       d.currentProject = null
       d.currentProjectData = null
@@ -187,7 +188,7 @@ export class ProjectActions {
       return
     }
 
-    await this.addProject({ path })
+    await this.addProject({ path, open: true })
 
     this.ctx.emitter.toLaunchpad()
   }
