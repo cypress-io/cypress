@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 /// <reference path="../support/e2e.ts" />
 import type { fixtureDirs } from '@tooling/system-tests'
+import dedent from 'dedent'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -89,23 +90,25 @@ for (const project of VITE_REACT) {
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
 
+      const appCompilationErrorSpec = dedent`
+        import React from 'react'
+        import { mount } from 'cypress/react'
+        import { App } from './App'
+
+        it('renders hello world', () => {
+          mount(<App />)
+          cy.get('h1').contains('Hello World')
+        }
+        })
+      `
+
       // Cause the problem again
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(
           `src/AppCompilationError.cy.jsx`,
-          `
-import React from 'react'
-import { mount } from 'cypress/react'
-import { App } from './App'
-
-it('renders hello world', () => {
-  mount(<App />)
-  cy.get('h1').contains('Hello World')
-}
-})
-          `,
+          o.appCompilationErrorSpec,
         )
-      })
+      }, { appCompilationErrorSpec })
 
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)

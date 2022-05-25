@@ -90,23 +90,25 @@ for (const project of WEBPACK_REACT) {
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
 
+      const appCompilationErrorSpec = dedent`
+        import React from 'react'
+        import { mount } from 'cypress/react'
+        import { App } from './App'
+
+        it('renders hello world', () => {
+          mount(<App />)
+          cy.get('h1').contains('Hello World')
+        }
+        })
+      `
+
       // Cause the problem again
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(
           `src/AppCompilationError.cy.jsx`,
-          dedent`
-            import React from 'react'
-            import { mount } from 'cypress/react'
-            import { App } from './App'
-
-            it('renders hello world', () => {
-              mount(<App />)
-              cy.get('h1').contains('Hello World')
-            }
-            })
-          `,
+          o.appCompilationErrorSpec,
         )
-      })
+      }, { appCompilationErrorSpec })
 
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
