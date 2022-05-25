@@ -15,10 +15,6 @@ const customMessage = `Don't worry, just click the "It's fixed now" button to tr
 const customStack = 'some err message\n  at fn (foo.js:1:1)'
 
 describe('<BaseError />', () => {
-  afterEach(() => {
-    cy.percySnapshot()
-  })
-
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       render: (gqlVal) => <BaseError gql={gqlVal} />,
@@ -29,6 +25,8 @@ describe('<BaseError />', () => {
     .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.replace(/\`/g, '').slice(0, 10))
     .get(retryButtonSelector)
     .should('not.exist')
+
+    cy.percySnapshot()
   })
 
   context('retry prop', () => {
@@ -49,24 +47,31 @@ describe('<BaseError />', () => {
       mountFragmentWithError()
       cy.contains(retryButtonSelector, cy.i18n.launchpadErrors.generic.retryButton)
       cy.get(docsButtonSelector).should('exist')
+      cy.percySnapshot()
     })
 
     it('renders the expected docs button for unknown errors', () => {
       mountFragmentWithError({ errorStack: 'UNKNOWN ERROR' })
       cy.contains(docsButtonSelector, docsButton.docsHomepage.text)
       .should('have.attr', 'href', docsButton.docsHomepage.link)
+
+      cy.percySnapshot()
     })
 
     it('renders the expected docs button for dashboard errors', () => {
       mountFragmentWithError({ errorType: 'DASHBOARD_GRAPHQL_ERROR' })
       cy.contains(docsButtonSelector, docsButton.dashboardGuide.text)
       .should('have.attr', 'href', docsButton.dashboardGuide.link)
+
+      cy.percySnapshot()
     })
 
     it('renders the expected docs button for errors that are known and unrelated to the dashboard', () => {
       mountFragmentWithError({ errorType: 'CONFIG_VALIDATION_ERROR' })
       cy.contains(docsButtonSelector, docsButton.configGuide.text)
       .should('have.attr', 'href', docsButton.configGuide.link)
+
+      cy.percySnapshot()
     })
 
     it('calls the retry function passed in', () => {
@@ -76,6 +81,8 @@ describe('<BaseError />', () => {
       .click()
       .get('@retry')
       .should('have.been.calledTwice')
+
+      cy.percySnapshot()
     })
 
     it('does not render retry or docs buttons when retry prop is NOT passed in', () => {
@@ -85,6 +92,7 @@ describe('<BaseError />', () => {
 
       cy.get(retryButtonSelector).should('not.exist')
       cy.get(docsButtonSelector).should('not.exist')
+      cy.percySnapshot()
     })
   })
 
@@ -99,6 +107,7 @@ describe('<BaseError />', () => {
       cy.contains(cy.i18n.launchpadErrors.generic.stackTraceLabel).click()
       cy.contains('Error: foobar').should('be.visible')
       cy.get('[data-cy=stack-open-true]')
+      cy.percySnapshot()
     })
   })
 
@@ -117,6 +126,8 @@ describe('<BaseError />', () => {
     .should('contain.text', customHeaderMessage)
     .and('contain.text', customMessage)
     .and('contain.text', customStack)
+
+    cy.percySnapshot()
   })
 
   it('renders the header and message slots', () => {
@@ -136,6 +147,8 @@ describe('<BaseError />', () => {
     .get('body')
     .should('contain.text', customHeaderMessage)
     .and('contain.text', customMessage)
+
+    cy.percySnapshot()
   })
 
   it('renders the header and message slots', () => {
@@ -174,5 +187,6 @@ describe('<BaseError />', () => {
     })
 
     cy.findByText('cypress/e2e/file.cy.js:12:25').should('be.visible')
+    cy.percySnapshot()
   })
 })
