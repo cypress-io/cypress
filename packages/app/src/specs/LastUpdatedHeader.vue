@@ -37,12 +37,6 @@
             {{ t('specPage.lastUpdated.tooltip.gitInfo') }}
           </ExternalLink>
         </i18n-t>
-        <!-- <i18n-t
-          v-else
-          keypath="specPage.lastUpdated.tooltip.gitInfoUnavailable"
-        >
-          http://google.com
-        </i18n-t> -->
       </div>
     </template>
   </Tooltip>
