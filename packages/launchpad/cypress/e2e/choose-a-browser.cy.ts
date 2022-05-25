@@ -186,7 +186,7 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.withCtx((ctx, o) => {
-        ctx.actions.project.launchProject = o.sinon.spy()
+        o.sinon.spy(ctx.actions.project, 'launchProject')
       })
 
       cy.intercept('mutation-OpenBrowser_LaunchProject', cy.stub().as('launchProject'))
@@ -251,7 +251,7 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.withCtx((ctx, o) => {
         ctx.project.setRelaunchBrowser(true)
-        ctx.actions.project.launchProject = o.sinon.stub()
+        o.sinon.stub(ctx.actions.project, 'launchProject')
       })
 
       cy.visitLaunchpad()
