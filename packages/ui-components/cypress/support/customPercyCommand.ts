@@ -212,7 +212,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
 
     const titlePath = test.titlePath()
 
-    const screenshotName = name ? titlePath.concat(name).filter(Boolean).join(' > ') : ''
+    const screenshotName = titlePath.concat(name || []).filter(Boolean).join(' > ')
 
     // viewport data is read from test state rather than config to ensure that
     // the snapshot is presented at the test's expected size.
