@@ -1077,8 +1077,8 @@ type Mutation {
   """Reset the Auth State"""
   resetAuthState: Query!
 
-  """Resets errors and attempts to reload the config"""
-  resetErrorsAndLoadConfig: Query
+  """Resets error and attempts to reload the config"""
+  resetErrorAndLoadConfig(id: ID!): Query
 
   """
   Resets the latest version call to capture additional telemetry for the current user

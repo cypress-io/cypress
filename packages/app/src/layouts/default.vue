@@ -23,8 +23,8 @@
     >
       <BaseError
         v-if="query.data.value?.baseError"
-        :gql="query.data.value?.baseError"
-        :retry="resetErrorsAndLoadConfig"
+        :gql="query.data.value.baseError"
+        :retry="resetErrorAndLoadConfig"
       />
       <div v-else>
         <Spinner />
@@ -85,27 +85,30 @@ query MainAppQuery {
 `
 
 gql`
-mutation MainApp_ResetErrorsAndLoadConfig {
-  resetErrorsAndLoadConfig {
+mutation MainApp_ResetErrorsAndLoadConfig($id: ID!) {
+  resetErrorAndLoadConfig(id: $id) {
     ...MainAppQueryData
   }
 }
 `
-
-const query = useQuery({ query: MainAppQueryDocument })
-const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
-
-const resetErrorsAndLoadConfig = () => {
-  if (!mutation.fetching.value) {
-    mutation.executeMutation({})
-  }
-}
 
 const currentRoute = useRoute()
 
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
 })
+
+const query = useQuery({
+  query: MainAppQueryDocument,
+  pause: !showHeader.value,
+})
+const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
+
+const resetErrorAndLoadConfig = (id: string) => {
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({ id })
+  }
+}
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
 </script>

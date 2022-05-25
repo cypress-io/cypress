@@ -25,10 +25,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('resetErrorsAndLoadConfig', {
+    t.field('resetErrorAndLoadConfig', {
       type: Query,
-      description: 'Resets errors and attempts to reload the config',
+      description: 'Resets error and attempts to reload the config',
+      args: {
+        id: nonNull(idArg()),
+      },
       resolve: async (_, args, ctx) => {
+        ctx.actions.error.clearError(args.id)
         await ctx.lifecycleManager.refreshLifecycle()
 
         return {}

@@ -24,7 +24,7 @@
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
             prefix-icon-class="icon-dark-indigo-500"
-            @click="retry"
+            @click="retry(baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -141,7 +141,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseErrorFragment
-  retry?: () => void
+  retry?: (id: string) => void
 }>()
 
 const markdownTarget = ref()

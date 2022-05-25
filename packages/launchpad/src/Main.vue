@@ -17,7 +17,7 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorsAndLoadConfig"
+        :retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
@@ -139,8 +139,8 @@ query MainLaunchpadQuery {
 `
 
 gql`
-mutation Main_ResetErrorsAndLoadConfig {
-  resetErrorsAndLoadConfig {
+mutation Main_ResetErrorsAndLoadConfig($id: ID!) {
+  resetErrorAndLoadConfig(id: $id) {
     ...MainLaunchpadQueryData
   }
 }
@@ -148,9 +148,9 @@ mutation Main_ResetErrorsAndLoadConfig {
 
 const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
 
-const resetErrorsAndLoadConfig = () => {
+const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
-    mutation.executeMutation({})
+    mutation.executeMutation({ id })
   }
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
