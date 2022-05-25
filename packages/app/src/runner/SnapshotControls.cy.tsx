@@ -11,6 +11,10 @@ const snapshotControlsSelector = '[data-testid=snapshot-controls]'
 const unpinButtonSelector = '[data-testid=unpin]'
 
 describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => {
+  afterEach(() => {
+    cy.wait(100).percySnapshot()
+  })
+
   const mountSnapshotControls = (
     eventManager = createEventManager(),
     autIframe = createTestAutIframe(),
@@ -26,7 +30,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
   it('renders nothing when messageTitle is undefined', () => {
     mountSnapshotControls()
     cy.get(snapshotControlsSelector).should('not.exist')
-    cy.wait(100).percySnapshot()
   })
 
   it('renders the "pinned" snapshot title', () => {
@@ -37,8 +40,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     cy.get('body')
     .findByText('Pinned')
     .should('be.visible')
-
-    cy.wait(100).percySnapshot()
   })
 
   it('pinned snapshots should not be dismissible', () => {
@@ -51,8 +52,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     .should('be.visible')
     .get(unpinButtonSelector)
     .should('not.exist')
-
-    cy.wait(100).percySnapshot()
   })
 
   it('clears snapshot message', () => {
@@ -68,8 +67,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     .get('body')
     .findByText('Pinned')
     .should('not.exist')
-
-    cy.wait(100).percySnapshot()
   })
 
   it('does not show highlight controls if no element present on snapshot', () => {
@@ -78,7 +75,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
 
     snapshotStore.pinSnapshot(snapshotWithSnapshots)
     cy.get('body').findByText('Highlights').should('not.exist')
-    cy.wait(100).percySnapshot()
   })
 
   it('toggles highlight controls if snapshot has an element', () => {
@@ -98,8 +94,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     cy.get('body')
     .findByLabelText(defaultMessages.runner.snapshot.highlightsLabel)
     .click({ force: true })
-
-    cy.wait(100).percySnapshot()
   })
 
   it('shows running test error', () => {
@@ -110,8 +104,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     cy.get('body')
     .findByText('Cannot show Snapshot while tests are running')
     .should('be.visible')
-
-    cy.wait(100).percySnapshot()
   })
 
   it('shows snapshot missing error', () => {
@@ -122,7 +114,5 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     cy.get('body')
     .findByText('The snapshot is missing. Displaying current state of the DOM.')
     .should('be.visible')
-
-    cy.wait(100).percySnapshot()
   })
 })
