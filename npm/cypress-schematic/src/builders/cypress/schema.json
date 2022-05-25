@@ -9,8 +9,7 @@
     },
     "configFile": {
       "type": [
-        "string",
-        "boolean"
+        "string"
       ],
       "description": "Specify a path to a JSON file where configuration values are set or pass false to disable the use of a configuration file entirely."
     },

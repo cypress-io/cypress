@@ -5,12 +5,12 @@ const EE = require('events')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 
-const menu = require(`${root}../lib/gui/menu`)
-const plugins = require(`${root}../lib/plugins`)
-const Windows = require(`${root}../lib/gui/windows`)
-const electron = require(`${root}../lib/browsers/electron`)
-const savedState = require(`${root}../lib/saved_state`)
-const { Automation } = require(`${root}../lib/automation`)
+const menu = require(`../../../lib/gui/menu`)
+const plugins = require(`../../../lib/plugins`)
+const Windows = require(`../../../lib/gui/windows`)
+const electron = require(`../../../lib/browsers/electron`)
+const savedState = require(`../../../lib/saved_state`)
+const { Automation } = require(`../../../lib/automation`)
 
 const ELECTRON_PID = 10001
 
@@ -35,6 +35,8 @@ describe('lib/browsers/electron', () => {
       close: sinon.stub(),
       loadURL: sinon.stub(),
       focusOnWebView: sinon.stub(),
+      show: sinon.stub(),
+      destroy: sinon.stub(),
       webContents: {
         session: {
           cookies: {
@@ -71,6 +73,14 @@ describe('lib/browsers/electron', () => {
         return sinon.stub(state, 'get').resolves(this.state)
       })
     }
+  })
+
+  context('.connectToNewSpec', () => {
+    it('calls open with the browser, url, options, and automation', async function () {
+      sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewSpec({ isHeaded: true }, 50505, { url: 'http://www.example.com' }, this.automation)
+      expect(electron.open).to.be.called
+    })
   })
 
   context('.open', () => {
@@ -183,7 +193,7 @@ describe('lib/browsers/electron', () => {
     it('sets menu.set whether or not its in headless mode', function () {
       return electron._launch(this.win, this.url, this.automation, { show: true })
       .then(() => {
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       }).then(() => {
         menu.set.reset()
 
@@ -283,6 +293,34 @@ describe('lib/browsers/electron', () => {
           behavior: 'allow',
           downloadPath: 'downloads',
         })
+      })
+    })
+
+    it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
+
+        expect(this.win.show).to.be.called
+      })
+    })
+
+    it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('close:browser:tabs')
+
+        expect(this.win.destroy).to.be.called
       })
     })
 
@@ -439,6 +477,8 @@ describe('lib/browsers/electron', () => {
       this.newWin = {
         maximize: sinon.stub(),
         setSize: sinon.stub(),
+        show: sinon.stub(),
+        destroy: sinon.stub(),
         webContents: this.win.webContents,
       }
 
@@ -486,17 +526,6 @@ describe('lib/browsers/electron', () => {
       return electron._render(this.url, this.automation, this.preferences, this.options)
       .then(() => {
         expect(this.newWin.maximize).not.to.be.called
-      })
-    })
-
-    it('registers onRequest automation middleware', function () {
-      sinon.spy(this.automation, 'use')
-
-      return electron._render(this.url, this.automation, this.preferences, this.options)
-      .then(() => {
-        expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
-        expect(this.automation.use).to.be.called
-        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
       })
     })
   })
@@ -560,7 +589,7 @@ describe('lib/browsers/electron', () => {
       let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
 
       opts.onFocus()
-      expect(menu.set).to.be.calledWith({ withDevTools: true })
+      expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
       menu.set.reset()
 
@@ -702,7 +731,7 @@ describe('lib/browsers/electron', () => {
         // once for main window, once for child
         expect(menu.set).to.be.calledTwice
 
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       })
     })
 
@@ -712,7 +741,7 @@ describe('lib/browsers/electron', () => {
         // once for main window, once for child, once for focus
         expect(menu.set).to.be.calledThrice
 
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       })
     })
 

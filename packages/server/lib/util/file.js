@@ -31,7 +31,14 @@ class File {
     }
 
     this.path = options.path
+    this.initialize()
 
+    exit.ensure(() => {
+      return lockFile.unlockSync(this._lockFilePath)
+    })
+  }
+
+  initialize () {
     // If multiple users write to a specific directory is os.tmpdir, permission errors can arise.
     // Instead, we make a user specific directory with os.tmpdir.
     this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
@@ -41,10 +48,12 @@ class File {
 
     this._cache = {}
     this._lastRead = 0
+  }
 
-    exit.ensure(() => {
-      return lockFile.unlockSync(this._lockFilePath)
-    })
+  __resetForTest () {
+    this._queue.clear()
+    lockFile.unlockSync(this._lockFilePath)
+    this.initialize()
   }
 
   transaction (fn) {
@@ -101,7 +110,7 @@ class File {
 
       const value = _.get(contents, key)
 
-      return value === undefined ? defaultValue : value
+      return value === undefined ? _.clone(defaultValue) : value
     })
   }
 
@@ -228,7 +237,9 @@ class File {
     return lockFile
     .unlockAsync(this._lockFilePath)
     .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
-    .catch(Promise.TimeoutError, () => {}) // ignore timeouts
+    .catch(Promise.TimeoutError, () => { // ignore timeouts
+      debug(`unlock timeout error for %s`, this._lockFilePath)
+    })
     .finally(() => {
       return debug('unlock succeeded or failed for %s', this.path)
     })

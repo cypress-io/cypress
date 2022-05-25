@@ -62,7 +62,7 @@ describe('e2e interception spec', () => {
     // @see https://github.com/cypress-io/cypress/issues/1543
     it('does not mangle non-UTF-8 text', function () {
       return systemTests.exec(this, {
-        spec: 'character_encoding_spec.js',
+        spec: 'character_encoding.cy.js',
         config: {
           defaultCommandTimeout: 100,
           baseUrl: 'http://localhost:9876',

@@ -7,7 +7,7 @@ describe('lib/konfig', () => {
     this.setup = (env) => {
       process.env['CYPRESS_INTERNAL_ENV'] = env
 
-      this.konfig = require(`${root}lib/konfig`)
+      this.konfig = require(`../../lib/konfig`)
 
       this.eq = (key, val) => {
         expect(this.konfig(key)).to.eq(val)
@@ -18,24 +18,24 @@ describe('lib/konfig', () => {
   afterEach(function () {
     process.env['CYPRESS_INTERNAL_ENV'] = this.env
 
-    return delete require.cache[require.resolve(`${root}lib/konfig`)]
+    return delete require.cache[require.resolve(`../../lib/konfig`)]
   })
 
   it('does not set global.config', () => {
     delete global.config
-    delete require.cache[require.resolve(`${root}lib/konfig`)]
+    delete require.cache[require.resolve(`../../lib/konfig`)]
 
-    require(`${root}lib/konfig`)
+    require(`../../lib/konfig`)
 
     expect(global.config).not.to.be.ok
   })
 
   it('memoizes the result', () => {
     process.env['NODE_ENV'] = 'development'
-    const config = require(`${root}lib/konfig`)
+    const config = require(`../../lib/konfig`)
 
     process.env['NODE_ENV'] = 'test'
-    const config2 = require(`${root}lib/konfig`)
+    const config2 = require(`../../lib/konfig`)
 
     expect(config).to.eq(config2)
   })
@@ -44,9 +44,9 @@ describe('lib/konfig', () => {
     const env = process.env['NODE_ENV']
 
     delete process.env['NODE_ENV']
-    delete require.cache[require.resolve(`${root}lib/konfig`)]
+    delete require.cache[require.resolve(`../../lib/konfig`)]
     expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
-    require(`${root}lib/konfig`)
+    require(`../../lib/konfig`)
 
     expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
     process.env['NODE_ENV'] = env
