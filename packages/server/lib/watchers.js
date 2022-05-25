@@ -32,7 +32,13 @@ class Watchers {
       onError: null,
     })
 
-    const w = chokidar.watch(filePath, options)
+    let w
+
+    try {
+      w = chokidar.watch(filePath, options)
+    } catch (e) {
+      w = chokidar.watch(filePath, { ...options, usePolling: true })
+    }
 
     this._add(filePath, w)
 

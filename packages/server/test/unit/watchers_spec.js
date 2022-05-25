@@ -6,13 +6,15 @@ const dependencyTree = require('dependency-tree')
 const Watchers = require(`${root}lib/watchers`)
 
 describe('lib/watchers', () => {
+  let watchStub
+
   beforeEach(function () {
     this.standardWatcher = sinon.stub({
       on () {},
       close () {},
     })
 
-    sinon.stub(chokidar, 'watch').returns(this.standardWatcher)
+    watchStub = sinon.stub(chokidar, 'watch').returns(this.standardWatcher)
     this.watchers = new Watchers()
   })
 
@@ -27,6 +29,23 @@ describe('lib/watchers', () => {
 
     it('watches with chokidar', () => {
       expect(chokidar.watch).to.be.calledWith('/foo/bar')
+    })
+
+    it('chokidar watch falls back to polling on error', function () {
+      watchStub.reset()
+      watchStub.onFirstCall().throws(new Error()).onSecondCall().returns(this.standardWatcher)
+      this.watchers.watch('/foo/bar')
+
+      expect(chokidar.watch).to.be.calledWith('/foo/bar', {
+        useFsEvents: true,
+        ignored: null,
+        onChange: null,
+        onReady: null,
+        onError: null,
+        usePolling: true,
+      })
+
+      expect(chokidar.watch).to.be.callCount(2)
     })
 
     it('stores a reference to the watcher', function () {
