@@ -42,7 +42,7 @@
     <button
       class="font-medium mx-8px mb-8px text-18px leading-24px focus:outline-transparent"
       :class="{
-        'text-gray-700': disabled,
+        'text-gray-700 cursor-default': disabled,
         'text-indigo-500': !disabled
       }"
       :disabled="disabled"
