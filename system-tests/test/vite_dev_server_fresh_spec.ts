@@ -1,27 +1,25 @@
 import systemTests from '../lib/system-tests'
+import type { fixtureDirs } from '@tooling/system-tests'
+
+type ProjectDirs = typeof fixtureDirs
+
+const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
 
 describe('@cypress/vite-dev-server', function () {
   systemTests.setup()
 
   describe('react', () => {
-    systemTests.it('runs specs in vite 2.8.6', {
-      project: 'vite2.8.6-react',
-      testingType: 'component',
-      browser: 'chrome',
-      spec: null,
-      configFile: 'cypress-vite.config.ts',
-      expectedExitCode: 2,
-      snapshot: true,
-    })
-
-    systemTests.it('runs specs in vite 2.9.1', {
-      project: 'vite2.8.6-react',
-      testingType: 'component',
-      browser: 'chrome',
-      spec: null,
-      configFile: 'cypress-vite.config.ts',
-      expectedExitCode: 2,
-      snapshot: true,
-    })
+    for (const project of VITE_REACT) {
+      it(`executes all of the tests for ${project}`, function () {
+        return systemTests.exec(this, {
+          project,
+          configFile: 'cypress-vite.config.ts',
+          testingType: 'component',
+          browser: 'chrome',
+          snapshot: true,
+          expectedExitCode: 3,
+        })
+      })
+    }
   })
 })
