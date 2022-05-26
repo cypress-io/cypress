@@ -287,7 +287,7 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher ({
+  async startSpecWatcher ({
     projectRoot,
     testingType,
     specPattern,
@@ -295,7 +295,7 @@ export class ProjectDataSource {
     excludeSpecPattern,
     additionalIgnorePattern,
   }: FindSpecs<string[]>) {
-    this.stopSpecWatcher()
+    await this.stopSpecWatcher()
 
     const currentProject = this.ctx.currentProject
 

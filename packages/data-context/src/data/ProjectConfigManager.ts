@@ -102,7 +102,7 @@ export class ProjectConfigManager {
       this._state = 'loadingConfig'
 
       // Clean things up for a new load
-      this.closeWatchers()
+      await this.closeWatchers()
       this._cachedLoadConfig = undefined
       this._cachedFullConfig = undefined
 
@@ -133,7 +133,7 @@ export class ProjectConfigManager {
       }
 
       this._state = 'errored'
-      this.closeWatchers()
+      await this.closeWatchers()
 
       throw error
     } finally {
@@ -173,7 +173,7 @@ export class ProjectConfigManager {
         this._eventsIpc.cleanupIpc()
       }
 
-      this.closeWatchers()
+      await this.closeWatchers()
 
       throw error
     } finally {
@@ -300,7 +300,8 @@ export class ProjectConfigManager {
   }
 
   onLoadError = (error: any) => {
-    this.closeWatchers()
+    // Tyler TODO: Do we need to close here? Making this async has downstream effects
+    // this.closeWatchers()
     this.options.onError(error, 'Cypress configuration error')
   }
 

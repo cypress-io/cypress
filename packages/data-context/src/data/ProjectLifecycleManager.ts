@@ -96,7 +96,7 @@ export class ProjectLifecycleManager {
     this._destroyed = false
 
     if (ctx.coreData.currentProject) {
-      this.setCurrentProject(ctx.coreData.currentProject)
+      this._setCurrentProject(ctx.coreData.currentProject)
     }
 
     const { app } = require('electron')
@@ -107,9 +107,10 @@ export class ProjectLifecycleManager {
         // the current quit event
         event.preventDefault()
 
-        new Promise((resolve) => {
-          this.onProcessExit().then(resolve)
-        }).then(() => {
+        // tslint:disable-next-line:no-floating-promises
+        new Promise((resolve, reject) => {
+          this.onProcessExit().then(resolve, reject)
+        }).finally(() => {
           debug('async cleanup complete, calling quit')
 
           // re-quit after we've completed the async clean up
@@ -121,7 +122,7 @@ export class ProjectLifecycleManager {
     process.on('exit', () => {
       // Might need to keep the exit handler? I'm not sure if there are paths
       // that bypass the before-quit event that we'd care about
-      this.onProcessExit()
+      this.onProcessExit().catch(() => {})
     })
 
     return autoBindDebug(this)
@@ -218,8 +219,8 @@ export class ProjectLifecycleManager {
     return this.metaState.isUsingTypeScript ? 'ts' : 'js'
   }
 
-  clearCurrentProject () {
-    this.resetInternalState()
+  async clearCurrentProject () {
+    await this.resetInternalState()
     this._initializedProject = undefined
     this._projectRoot = undefined
   }
@@ -416,22 +417,9 @@ export class ProjectLifecycleManager {
     return this._configManager.initializeConfig()
   }
 
-  /**
-   * When we set the current project, we need to cleanup the
-   * previous project that might have existed. We use this as the
-   * single location we should use to set the `projectRoot`, because
-   * we can call it from legacy code and it'll be a no-op if the `projectRoot`
-   * is already the same, otherwise it'll do the necessary cleanup
-   */
-  setCurrentProject (projectRoot: string) {
-    if (this._projectRoot === projectRoot) {
-      return
-    }
-
+  private _setCurrentProject (projectRoot: string) {
     this._projectRoot = projectRoot
     this._initializedProject = undefined
-
-    this.resetInternalState()
 
     this._configManager = this.createConfigManager()
 
@@ -463,6 +451,23 @@ export class ProjectLifecycleManager {
     if (this.readyToInitialize(this._projectRoot)) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
+  }
+
+  /**
+   * When we set the current project, we need to cleanup the
+   * previous project that might have existed. We use this as the
+   * single location we should use to set the `projectRoot`, because
+   * we can call it from legacy code and it'll be a no-op if the `projectRoot`
+   * is already the same, otherwise it'll do the necessary cleanup
+   */
+  async setCurrentProject (projectRoot: string) {
+    if (this._projectRoot === projectRoot) {
+      return
+    }
+
+    await this.resetInternalState()
+
+    this._setCurrentProject(projectRoot)
   }
 
   /**
@@ -592,9 +597,9 @@ export class ProjectLifecycleManager {
     return this._configManager.getConfigFileContents()
   }
 
-  reinitializeCypress () {
+  async reinitializeCypress () {
     resetPluginHandlers()
-    this.resetInternalState()
+    await this.resetInternalState()
   }
 
   registerEvent (event: string, callback: Function) {
@@ -725,8 +730,8 @@ export class ProjectLifecycleManager {
     }
   }
 
-  destroy () {
-    this.resetInternalState()
+  async destroy () {
+    await this.resetInternalState()
     // @ts-ignore
     process.removeListener('exit', this.onProcessExit)
   }

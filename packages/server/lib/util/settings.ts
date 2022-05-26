@@ -69,7 +69,7 @@ export async function read (projectRoot: string) {
 
   // For testing purposes, no-op if the projectRoot is already the same
   // as the one set in the DataContext, as it would be in normal execution
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
+  await ctx.lifecycleManager.setCurrentProject(projectRoot)
 
   return ctx.lifecycleManager.getConfigFileContents()
 }
@@ -80,10 +80,11 @@ export function writeForTesting (projectRoot, objToWrite = {}) {
   return _write(file, objToWrite)
 }
 
-export function pathToConfigFile (projectRoot) {
-  const ctx = getCtx()
+// Dead code?
+// export function pathToConfigFile (projectRoot) {
+//   const ctx = getCtx()
 
-  ctx.lifecycleManager.setCurrentProject(projectRoot)
+//   ctx.lifecycleManager.setCurrentProject(projectRoot)
 
-  return ctx.lifecycleManager.configFilePath
-}
+//   return ctx.lifecycleManager.configFilePath
+// }

@@ -90,7 +90,7 @@ export class ProjectActions {
       d.app.browserStatus = 'closed'
     })
 
-    this.ctx.lifecycleManager.clearCurrentProject()
+    await this.ctx.lifecycleManager.clearCurrentProject()
     await this.api.closeActiveProject()
   }
 
@@ -122,13 +122,13 @@ export class ProjectActions {
 
   async setCurrentProject (projectRoot: string) {
     await this.clearCurrentProject()
-    this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+    await this.ctx.lifecycleManager.setCurrentProject(projectRoot)
   }
 
   // Temporary: remove after other refactor lands
-  setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
-    this.ctx.lifecycleManager.clearCurrentProject()
-    this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+  async setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
+    await this.ctx.lifecycleManager.clearCurrentProject()
+    await this.ctx.lifecycleManager.setCurrentProject(projectRoot)
     this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
@@ -424,7 +424,7 @@ export class ProjectActions {
 
     this.ctx.actions.project.setSpecs(specs)
 
-    this.ctx.project.startSpecWatcher({
+    await this.ctx.project.startSpecWatcher({
       projectRoot,
       testingType,
       specPattern,
