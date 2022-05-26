@@ -20,7 +20,7 @@ abstract class DataEmitterEvents {
   }
 
   /**
-   * Emitted when an error / warning
+   * Emitted when an error / warning has been added / removed
    */
   errorWarningChange () {
     this._emit('errorWarningChange')
