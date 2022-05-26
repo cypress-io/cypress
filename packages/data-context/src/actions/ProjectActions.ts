@@ -24,7 +24,7 @@ export interface ProjectApiShape {
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
-  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): Promise<unknown>
+  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
@@ -318,12 +318,12 @@ export class ProjectActions {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
-  async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+  setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    await this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
+    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {

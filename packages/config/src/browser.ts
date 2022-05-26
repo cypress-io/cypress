@@ -38,7 +38,7 @@ const validationRules = createIndex(options, 'name', 'validation')
 const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
-let issuedWarnings = new Set()
+const issuedWarnings = new Set()
 
 export type BreakingErrResult = {
   name: string
@@ -54,7 +54,7 @@ type ErrorHandler = (
 ) => void
 
 export function resetIssuedWarnings () {
-  issuedWarnings = new Set()
+  issuedWarnings.clear()
 }
 
 const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {

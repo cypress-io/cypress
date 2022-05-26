@@ -315,7 +315,7 @@ export class ProjectLifecycleManager {
       return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
     })) || browsers[0]
 
-    await this.ctx.actions.browser.setActiveBrowser(browser)
+    this.ctx.actions.browser.setActiveBrowser(browser)
   }
 
   private async setActiveBrowserByNameOrPath (nameOrPath: string) {
@@ -324,7 +324,7 @@ export class ProjectLifecycleManager {
 
       this.ctx.debug('browser found to set', browser.name)
 
-      await this.ctx.actions.browser.setActiveBrowser(browser)
+      this.ctx.actions.browser.setActiveBrowser(browser)
     } catch (e) {
       const error = e as CypressError
 
