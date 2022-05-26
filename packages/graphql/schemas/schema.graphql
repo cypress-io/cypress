@@ -227,7 +227,7 @@ type CloudRun implements Node {
   """This is the number of failed tests across all groups in the run"""
   totalFailed: Int
 
-  """Number of flaky tests"""
+  """Number of flaky tests, null if flake detection is not enabled"""
   totalFlakyTests: Int
 
   """This is the number of passed tests across all groups in the run"""
@@ -402,7 +402,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """Default spec file name for spec creation"""
+  """
+  Default spec file name for spec creation, nullable so we can throw if it can't be decided
+  """
   defaultSpecFileName: String
 
   """File extension to use based on if the project has typescript or not"""
@@ -873,6 +875,9 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
+
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
 }
 
 type MigrationFile {
@@ -1100,9 +1105,6 @@ type Mutation {
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
-  """Set the selected testing type, and reconfigure the project"""
-  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
-
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
@@ -1212,6 +1214,11 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """
+  Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)
+  """
+  invokedFromCli: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!

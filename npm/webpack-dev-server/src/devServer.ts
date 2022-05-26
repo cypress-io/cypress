@@ -39,10 +39,6 @@ type DevServerCreateResult = {
   compiler: Compiler
 }
 
-const normalizeError = (error: Error | string) => {
-  return typeof error === 'string' ? error : error.message
-}
-
 /**
  * import { devServer } from '@cypress/webpack-dev-server'
  *
@@ -54,19 +50,6 @@ const normalizeError = (error: Error | string) => {
 export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
   return new Promise(async (resolve, reject) => {
     const result = await devServer.create(devServerConfig) as DevServerCreateResult
-
-    // When compiling in run mode
-    // Stop the clock early, no need to run all the tests on a failed build
-    result.compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
-      if (stats.hasErrors()) {
-        const errors = stats.compilation.errors
-
-        devServerConfig.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-        if (devServerConfig.cypressConfig.isTextTerminal) {
-          process.exit(1)
-        }
-      }
-    })
 
     if (result.version === 3) {
       const srv = result.server.listen(0, '127.0.0.1', () => {

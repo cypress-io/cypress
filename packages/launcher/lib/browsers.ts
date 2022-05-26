@@ -1,7 +1,9 @@
-import { log } from './log'
+import Debug from 'debug'
 import * as cp from 'child_process'
 import { browsers, FoundBrowser } from '@packages/types'
 import type { Readable } from 'stream'
+
+export const debug = Debug('cypress:launcher:browsers')
 
 export { browsers }
 
@@ -18,7 +20,7 @@ export function launch (
   args: string[] = [],
   defaultBrowserEnv = {},
 ): LaunchedBrowser {
-  log('launching browser %o', { browser, url })
+  debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
     throw new Error(`Browser ${browser.name} is missing path`)
@@ -28,7 +30,7 @@ export function launch (
     args = [url].concat(args)
   }
 
-  log('spawning browser with args %o', { args })
+  debug('spawning browser with args %o', { args })
 
   // allow setting default env vars such as MOZ_HEADLESS_WIDTH
   // but only if it's not already set by the environment
@@ -37,15 +39,15 @@ export function launch (
   const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
   proc.stdout.on('data', (buf) => {
-    log('%s stdout: %s', browser.name, String(buf).trim())
+    debug('%s stdout: %s', browser.name, String(buf).trim())
   })
 
   proc.stderr.on('data', (buf) => {
-    log('%s stderr: %s', browser.name, String(buf).trim())
+    debug('%s stderr: %s', browser.name, String(buf).trim())
   })
 
   proc.on('exit', (code, signal) => {
-    log('%s exited: %o', browser.name, { code, signal })
+    debug('%s exited: %o', browser.name, { code, signal })
   })
 
   return proc

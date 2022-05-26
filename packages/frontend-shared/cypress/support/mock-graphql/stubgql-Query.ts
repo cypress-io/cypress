@@ -31,6 +31,9 @@ export const stubQuery: MaybeResolver<Query> = {
   isInGlobalMode (source, args, ctx) {
     return !ctx.currentProject
   },
+  invokedFromCli (source, args, ctx) {
+    return true
+  },
   baseError (source, args, ctx) {
     return {}
   },

@@ -217,7 +217,7 @@ export class ProjectConfigIpc extends EventEmitter {
     // allow the use of ts-node in subprocesses tests by removing the env constant from it
     // without this line, packages/ts/register.js never registers the ts-node module for config and
     // run_plugins can't use the config module.
-    const { CYPRESS_INTERNAL_E2E_TESTING_SELF, ...env } = process.env
+    const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF')
 
     env.NODE_OPTIONS = process.env.ORIGINAL_NODE_OPTIONS || ''
 
@@ -235,7 +235,7 @@ export class ProjectConfigIpc extends EventEmitter {
       .value()
     }
 
-    debug('fork child process', CHILD_PROCESS_FILE_PATH, configProcessArgs, _.omit(childOptions, 'env'))
+    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
 
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 

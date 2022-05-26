@@ -24,7 +24,7 @@ export function makeDefaultWebpackConfig (
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
 
-  return {
+  const finalConfig = {
     mode: 'development',
     optimization: {
       splitChunks: {
@@ -41,5 +41,24 @@ export function makeDefaultWebpackConfig (
         template: indexHtmlFile,
       }) as any,
     ],
+  } as any
+
+  if (config.sourceWebpackModulesResult.webpackDevServer.majorVersion === 4) {
+    return {
+      ...finalConfig,
+      devServer: {
+        client: {
+          overlay: false,
+        },
+      },
+    }
+  }
+
+  // @ts-ignore
+  return {
+    ...finalConfig,
+    devServer: {
+      overlay: false,
+    },
   }
 }

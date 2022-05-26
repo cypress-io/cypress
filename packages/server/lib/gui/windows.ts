@@ -203,8 +203,6 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
   if (options.contextMenu) {
     // adds context menu with copy, paste, inspect element, etc
-    // this instance of JIT requiring electron-context-menu can be removed
-    // once https://github.com/cypress-io/cypress/issues/21236 is fixed
     require('electron-context-menu')({
       showInspectElement: true,
       window: win,

@@ -51,6 +51,14 @@ $.find.matchesSelector = function (elem, expr) {
       return matchesSelector.apply(_this, args)
     },
     catchFn (e) {
+      // https://github.com/cypress-io/cypress/issues/21108
+      // When regex starts with =, it is a syntax error when nothing found.
+      // Because Sizzle internally escapes = to handle attribute selectors.
+      // @see https://github.com/jquery/sizzle/blob/20390f05731af380833b5aa805db97de0b91268a/external/jquery/jquery.js#L4363-L4370
+      if (e.message.includes(`Syntax error, unrecognized expression: :cy-contains('`)) {
+        return false
+      }
+
       throw e
     },
     finallyFn () {

@@ -66,13 +66,14 @@ function scaffoldAndOpenCTProject (opts: {
   cy.visitLaunchpad()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
+  cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
   cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('Component Testing').click()
 
   cy.contains('React.js(detected)').click()
   cy.contains(opts.framework).click()
   if (opts.bundler) {
-    cy.contains('Pick a bundler').click()
+    cy.contains('Webpack(detected)').click()
     cy.contains(opts.bundler).click()
   }
 
@@ -156,34 +157,5 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
 
     scaffoldAndOpenCTProject({ name: 'pristine', framework: 'Create React App', removeFixturesFolder: false })
     assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)', customDirectory: 'without-fixtures' })
-  })
-
-  it('scaffolds CT for a non-framework JS project', () => {
-    const language = 'js'
-
-    scaffoldAndOpenCTProject({ name: 'pristine', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
-    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Vue.js 3 Webpack' })
-  })
-
-  it('scaffolds CT for a non-framework ESM TS project w/ webpack.config.js detected', () => {
-    const language = 'ts'
-
-    scaffoldAndOpenCTProject({ name: 'pristine-module', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
-    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Vue.js 3 Webpack' })
-
-    // since we added a valid webpack.config, the dev server starts and we are greeted
-    // with the choose browser screen.
-    cy.contains('Choose your preferred browser for component testing.')
-  })
-
-  it('scaffolds CT for a non-framework CJS JS project w/ webpack.config.js detected', () => {
-    const language = 'js'
-
-    scaffoldAndOpenCTProject({ name: 'pristine-npm', framework: 'Vue.js 3', bundler: 'Webpack', removeFixturesFolder: true })
-    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Vue.js 3 Webpack' })
-
-    // since we added a valid webpack.config, the dev server starts and we are greeted
-    // with the choose browser screen.
-    cy.contains('Choose your preferred browser for component testing.')
   })
 })

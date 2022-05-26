@@ -492,7 +492,15 @@ declare namespace Cypress {
      */
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
+      /**
+       * @deprecated Use `cy.session()` instead.
+       * @see https://on.cypress.io/session
+       */
       preserveOnce(...names: string[]): void
+      /**
+       * @deprecated Use `cy.session()` instead.
+       * @see https://on.cypress.io/session
+       */
       defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
@@ -3025,9 +3033,9 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
-  type DevServerConfigObject = {
+  type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next'
     webpackConfig?: PickConfigOpt<'webpackConfig'>
   } | {
     bundler: 'vite'
@@ -3035,8 +3043,8 @@ declare namespace Cypress {
     viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
   }
 
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl'> {
-    devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigObject
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
+    devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
   }
 

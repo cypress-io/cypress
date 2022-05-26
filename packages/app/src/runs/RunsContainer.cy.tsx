@@ -72,4 +72,29 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.percySnapshot()
     })
   })
+
+  context('with errors', () => {
+    it('renders connection failed', () => {
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        onResult (result) {
+          result.cloudViewer = cloudViewer
+          result.currentProject!.cloudProject = null
+        },
+        render (gqlVal) {
+          return <RunsContainer gql={gqlVal} online onReExecuteRunsQuery={cy.spy().as('reExecuteRunsQuery')}/>
+        },
+      })
+
+      const { title, description, link, button } = defaultMessages.runs.errors.connectionFailed
+
+      cy.contains(title).should('be.visible')
+      cy.contains(description.replace('{0}', link)).should('be.visible')
+      cy.contains('a', link).should('have.attr', 'href', 'https://www.cypressstatus.com/')
+      cy.contains('button', button).should('be.visible').click()
+
+      cy.get('@reExecuteRunsQuery').should('have.been.called')
+
+      cy.percySnapshot()
+    })
+  })
 })

@@ -42,6 +42,7 @@
     style="width: fit-content"
     class="border rounded flex outline-none gap-8px items-center select-none"
     :class="classes"
+    :use-default-hocus="false"
   >
     <ButtonInternals>
       <template

@@ -33,6 +33,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     isE2EConfigured: true,
     currentTestingType: 'e2e',
     projectId: `${globalProject.title}-id`,
+    defaultSpecFileName: 'cypress/e2e/spec.cy.js',
     specs: [
       ...randomComponents(50, 'Spec').map((c) => {
         return {

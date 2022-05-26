@@ -174,11 +174,11 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
-    totalDuration: 300,
+    totalDuration: 1000 * 60,
     totalFlakyTests: 0,
     tags: [],
     url: 'http://dummy.cypress.io/runs/1',
-    createdAt: new Date('1995-12-17T03:17:00').toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(),
     commitInfo: createCloudRunCommitInfo({
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,

@@ -315,7 +315,7 @@ describe('Launchpad: Setup Project', () => {
         verifyChooseABrowserPage()
       })
 
-      it('can setup e2e testing for a project', () => {
+      it('can setup e2e testing for a project selecting TS', () => {
         // has `typescript` in `package.json`
         scaffoldAndOpenProject('pristine-yarn')
         cy.visitLaunchpad()
@@ -326,7 +326,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .click()
+        .realPress('Enter')
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project:')
@@ -627,6 +627,51 @@ describe('Launchpad: Setup Project', () => {
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')
       .should('equal', 'https://on.cypress.io/guides/configuration')
+    })
+  })
+
+  describe('switch testing types', () => {
+    it('takes the user to first step of e2e setup when switching from app', () => {
+      scaffoldAndOpenProject('pristine-with-ct-testing')
+      cy.visitLaunchpad()
+      verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('h1', 'Choose a Browser')
+
+      // Execute same function that is called in the browser to switch testing types
+      cy.withCtx(async (ctx, { sinon }) => {
+        sinon.stub(ctx.actions.browser, 'closeBrowser')
+        sinon.stub(ctx.actions.electron, 'refreshBrowserWindow')
+        sinon.stub(ctx.actions.electron, 'showBrowserWindow')
+        await ctx.actions.project.switchTestingTypesAndRelaunch('e2e')
+      })
+
+      cy.reload()
+
+      cy.contains('h1', 'Configuration Files')
+      verifyScaffoldedFiles('e2e')
+    })
+
+    it('takes the user to first step of ct setup when switching from app', () => {
+      scaffoldAndOpenProject('pristine-with-e2e-testing')
+      cy.visitLaunchpad()
+      verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+      cy.get('[data-cy-testingtype="e2e"]').click()
+      cy.contains('h1', 'Choose a Browser')
+
+      // Execute same function that is called in the browser to switch testing types
+      cy.withCtx(async (ctx, { sinon }) => {
+        sinon.stub(ctx.actions.browser, 'closeBrowser')
+        sinon.stub(ctx.actions.electron, 'refreshBrowserWindow')
+        sinon.stub(ctx.actions.electron, 'showBrowserWindow')
+        await ctx.actions.project.switchTestingTypesAndRelaunch('component')
+      })
+
+      cy.reload()
+
+      cy.contains('h1', 'Project Setup')
     })
   })
 })
