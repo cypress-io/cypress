@@ -46,6 +46,11 @@ export class EventManager {
   studioRecorder: any
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
+  crossOriginLogs: {[key: string]: Cypress.Log} = {}
+  crossOriginOnMessageRef: ({ data, source }: MessageEvent<{
+    data: any
+    source: Window
+  }>) => void = () => undefined
 
   constructor (
     // import '@packages/driver'
@@ -360,14 +365,6 @@ export class EventManager {
       this._clearAllCookies()
       this._setUnload()
     })
-
-    // The window.top should not change between test reloads, and we only need to bind the message event once
-    // Forward all message events to the current instance of the multi-origin communicator
-    if (!window.top) throw new Error('missing window.top in event-manager')
-
-    window.top.addEventListener('message', ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
-    }, false)
   }
 
   start (config) {
@@ -659,8 +656,6 @@ export class EventManager {
 
     Cypress.primaryOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
 
-    const crossOriginLogs = {}
-
     Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
       // If the test is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
       if (Cypress.state('test')?.final) return
@@ -668,16 +663,26 @@ export class EventManager {
       // Create a new local log representation of the cross origin log.
       // It will be attached to the current command.
       // We also keep a reference to it to update it in the future.
-      crossOriginLogs[attrs.id] = Cypress.log(attrs)
+      this.crossOriginLogs[attrs.id] = Cypress.log(attrs)
     })
 
     Cypress.primaryOriginCommunicator.on('log:changed', (attrs) => {
       // Retrieve the referenced log and update it.
-      const log = crossOriginLogs[attrs.id]
+      const log = this.crossOriginLogs[attrs.id]
 
       // this will trigger a log changed event for the log itself.
       log?.set(attrs)
     })
+
+    // The window.top should not change between test reloads, and we only need to bind the message event once
+    // Forward all message events to the current instance of the multi-origin communicator
+    if (!window.top) throw new Error('missing window.top in event-manager')
+
+    this.crossOriginOnMessageRef = ({ data, source }) => {
+      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+    }
+
+    window.top.addEventListener('message', this.crossOriginOnMessageRef, false)
   }
 
   _runDriver (state) {
@@ -716,6 +721,11 @@ export class EventManager {
     Cypress.stop()
     // remove listeners in the primary communicator to prevent possible memory leaks with dangling event emitters
     Cypress.primaryOriginCommunicator.removeAllListeners()
+    // also be sure to remove the cross origin onMessage bus
+    // to make sure the communicator doesn't live on inside a closure and cause tied up events
+    window?.top?.removeEventListener('message', this.crossOriginOnMessageRef, false)
+    // reset logs in memory at this point as they should no longer be needed
+    this.crossOriginLogs = {}
 
     this.studioRecorder.setInactive()
   }
