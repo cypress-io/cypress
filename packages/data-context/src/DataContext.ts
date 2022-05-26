@@ -397,7 +397,7 @@ export class DataContext {
     }
   }
 
-  onWarning = (err: CypressError, target?: 'testingType' | 'project') => {
+  onWarning = (err: CypressError) => {
     if (this.isRunMode) {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
@@ -409,9 +409,9 @@ export class DataContext {
       }
 
       this.update((d) => {
-        if (d.currentProjectData?.testingTypeData?.activeAppData && target !== 'testingType' && target !== 'project') {
+        if (d.currentProjectData?.testingTypeData?.activeAppData) {
           d.currentProjectData.testingTypeData.activeAppData.warnings.push(warning)
-        } else if (d.currentProjectData?.testingTypeData && target !== 'project') {
+        } else if (d.currentProjectData?.testingTypeData) {
           d.currentProjectData.testingTypeData.warnings.push(warning)
         } else if (d.currentProjectData) {
           d.currentProjectData.warnings.push(warning)

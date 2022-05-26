@@ -23,6 +23,7 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
+import { makeTestingTypeData } from './coreDataShape'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -495,6 +496,9 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
+      if (d.currentProjectData) {
+        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      }
     })
 
     this._currentTestingType = testingType
@@ -513,6 +517,9 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
+      if (d.currentProjectData) {
+        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      }
     })
 
     if (this._currentTestingType === testingType) {

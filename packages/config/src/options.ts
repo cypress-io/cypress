@@ -135,6 +135,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
     canUpdateDuringTestTime: true,
+    requireRestartOnChange: 'server',
   }, {
     name: 'blockHosts',
     defaultValue: null,

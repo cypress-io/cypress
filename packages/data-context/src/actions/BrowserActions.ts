@@ -12,7 +12,7 @@ export class BrowserActions {
     return this.browserApi.close()
   }
 
-  async setActiveBrowserById (id: string) {
+  setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
     const browser = this.ctx.lifecycleManager.browsers?.find((b) => this.ctx.browser.idForBrowser(b as FoundBrowser) === browserId)
 
@@ -20,27 +20,23 @@ export class BrowserActions {
       throw new Error('no browser in setActiveBrowserById')
     }
 
-    await this.setActiveBrowser(browser)
+    this.setActiveBrowser(browser)
   }
 
-  async setActiveBrowser (browser: FoundBrowser) {
+  setActiveBrowser (browser: FoundBrowser) {
     this.ctx.update((d) => {
       d.activeBrowser = browser
-      if (d.currentProjectData?.testingTypeData?.activeAppData) {
+      if (d.currentProjectData?.testingTypeData) {
         d.currentProjectData.testingTypeData.activeAppData = { error: null, warnings: [] }
       }
     })
 
-    try {
-      await this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {
-        lastBrowser: {
-          name: browser.name,
-          channel: browser.channel,
-        },
-      })
-    } catch (e) {
-      this.ctx.logTraceError(e)
-    }
+    this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {
+      lastBrowser: {
+        name: browser.name,
+        channel: browser.channel,
+      },
+    })
   }
 
   async focusActiveBrowserWindow () {
