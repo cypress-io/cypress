@@ -77,4 +77,37 @@ describe('experimentalStudio', () => {
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
   })
+
+  it('should not continually show experimentalStudio warning in the same project', () => {
+    cy.scaffoldProject('experimental-studio')
+    cy.openProject('experimental-studio')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
+    cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+    cy.withCtx((ctx) => {
+      ctx.actions.file.writeFileInProject('cypress.config.js', ctx.actions.file.readFileInProject('cypress.config.js'))
+    })
+
+    cy.get('[data-cy="loading-spinner"]')
+    cy.get('h1').should('contain', 'Welcome to Cypress!')
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+  })
+
+  it('should show experimentalStudio warning when opening project and going back', () => {
+    cy.scaffoldProject('experimental-studio')
+    cy.addProject('experimental-studio')
+    cy.openGlobalMode()
+    cy.visitLaunchpad()
+    cy.contains('experimental-studio').click()
+    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
+    cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+    cy.get('a').contains('Projects').click()
+    cy.contains('experimental-studio').click()
+
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
+  })
 })

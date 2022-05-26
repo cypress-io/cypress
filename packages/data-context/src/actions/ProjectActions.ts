@@ -12,6 +12,7 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
+import { resetIssuedWarnings } from '@packages/config'
 
 export interface ProjectApiShape {
   /**
@@ -92,6 +93,7 @@ export class ProjectActions {
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
+    resetIssuedWarnings()
     await this.api.closeActiveProject()
   }
 
