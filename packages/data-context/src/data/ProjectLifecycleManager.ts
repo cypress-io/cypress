@@ -270,6 +270,10 @@ export class ProjectLifecycleManager {
             await this.ctx.actions.browser.closeBrowser()
             await this.ctx.actions.browser.relaunchBrowser()
           }
+
+          if (restartOnChange.pingBaseUrl) {
+            this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
+          }
         }
 
         await this.setInitialActiveBrowser()

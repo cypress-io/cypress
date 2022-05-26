@@ -6,7 +6,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 const verifyIdeOpen = ({ fileName, action, hasPreferredIde, ideLine, ideColumn }) => {
   if (hasPreferredIde) {
     cy.withCtx((ctx, o) => {
-      ctx.actions.file.openFile = o.sinon.stub()
+      o.sinon.stub(ctx.actions.file, 'openFile')
     })
 
     action()

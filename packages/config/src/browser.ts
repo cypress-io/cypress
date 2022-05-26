@@ -188,6 +188,7 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
   const restartOnChange = {
     browser: false,
     server: false,
+    pingBaseUrl: false,
   }
 
   if (!cachedConfig || !updatedConfig) {

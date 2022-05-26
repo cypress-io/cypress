@@ -8,7 +8,7 @@ describe('baseUrl', () => {
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
 
     cy.withCtx((ctx) => {
-      ctx._apis.projectApi.isListening = sinon.stub().resolves(null)
+      sinon.stub(ctx._apis.projectApi, 'isListening').resolves(undefined)
     })
 
     cy.contains('button', 'Retry').click()
@@ -61,6 +61,7 @@ describe('baseUrl', () => {
       `)
     })
 
+    cy.get('[data-cy="loading-spinner"]').should('be.visible')
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
   })
