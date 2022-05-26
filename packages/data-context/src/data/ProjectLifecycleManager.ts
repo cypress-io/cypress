@@ -10,7 +10,7 @@ import path from 'path'
 import _ from 'lodash'
 import resolve from 'resolve'
 import fs from 'fs'
-import electron from 'electron'
+import debugLib from 'debug'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
 import type { DataContext } from '..'
@@ -24,6 +24,8 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
+
+const debug = debugLib('cypress:data-context:project-lifecycle-manager')
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -97,17 +99,21 @@ export class ProjectLifecycleManager {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
 
-    if (electron && electron.app) {
-      electron.app.once('before-quit', (event: Event) => {
-        // prevent default on the before-quit event to halt the current
-        // quit event
+    const { app } = require('electron')
+
+    if (app) {
+      app.once('before-quit', (event: Event) => {
+        // prevent default on the before-quit event to halt
+        // the current quit event
         event.preventDefault()
 
         new Promise((resolve) => {
           this.onProcessExit().then(resolve)
         }).then(() => {
+          debug('async cleanup complete, calling quit')
+
           // re-quit after we've completed the async clean up
-          electron.app.quit()
+          app.quit()
         })
       })
     }
@@ -131,6 +137,8 @@ export class ProjectLifecycleManager {
     }
 
     this._destroyed = true
+
+    debug('process will exit, performing async cleanup')
 
     return this.resetInternalState()
   }
