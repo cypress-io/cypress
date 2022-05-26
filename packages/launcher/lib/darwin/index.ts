@@ -1,8 +1,10 @@
 import { findApp, FindAppParams } from './util'
 import type { Browser, DetectedBrowser } from '@packages/types'
 import * as linuxHelper from '../linux'
-import { log } from '../log'
+import Debug from 'debug'
 import { get } from 'lodash'
+
+const debugVerbose = Debug('cypress-verbose:launcher:darwin')
 
 type Detectors = {
   [name: string]: {
@@ -98,16 +100,15 @@ export function detect (browser: Browser): Promise<DetectedBrowser> {
 
   if (!findAppParams) {
     // ok, maybe it is custom alias?
-    log('detecting custom browser %s on darwin', browser.name)
+    debugVerbose('could not find %s in findApp map, falling back to linux detection method', browser.name)
 
     return linuxHelper.detect(browser)
   }
 
   return findApp(findAppParams)
   .then((val) => ({ name: browser.name, ...val }))
-  .catch(() => {
-    log('could not detect %s using traditional Mac methods', browser.name)
-    log('trying linux search')
+  .catch((err) => {
+    debugVerbose('could not detect %s using findApp %o, falling back to linux detection method', browser.name, err)
 
     return linuxHelper.detect(browser)
   })

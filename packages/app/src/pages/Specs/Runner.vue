@@ -147,6 +147,24 @@ iframe.aut-iframe {
   background: white;
 }
 
+.is-screenshotting #main-pane {
+  overflow: auto !important;
+}
+
+.is-screenshotting.screenshot-scrolling #main-pane {
+  overflow: visible !important;
+}
+
+#resizable-panels-root {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.is-screenshotting #resizable-panels-root {
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
 iframe.spec-iframe {
     border: none;
     height: 0;

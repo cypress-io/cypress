@@ -70,8 +70,7 @@ mainConfig.resolve = {
 
 // @ts-ignore
 const crossOriginConfig: webpack.Configuration = {
-  mode: 'production',
-  ...getSimpleConfig(),
+  ...commonConfig,
   entry: {
     cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.js')],
   },

@@ -15,6 +15,4 @@
 
 // Import commands.js using ES2015 syntax:
 import '@packages/frontend-shared/cypress/e2e/support/e2eSupport'
-
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
+import './commands'
