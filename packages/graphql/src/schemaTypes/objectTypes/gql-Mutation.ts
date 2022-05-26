@@ -604,30 +604,9 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.project.setRelaunchBrowser(ctx.lifecycleManager.isTestingTypeConfigured(args.testingType))
-        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
-        await ctx.actions.project.reconfigureProject()
+        await ctx.actions.project.switchTestingTypesAndRelaunch(args.testingType)
 
         return true
-      },
-    })
-
-    t.field('setTestingTypeAndReconfigureProject', {
-      description: 'Set the selected testing type, and reconfigure the project',
-      type: Query,
-      args: {
-        testingType: nonNull(arg({ type: TestingTypeEnum })),
-        isApp: nonNull(booleanArg()),
-      },
-      resolve: async (source, args, ctx) => {
-        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
-        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
-
-        if (args.isApp) {
-          await ctx.actions.project.reconfigureProject()
-        }
-
-        return {}
       },
     })
 

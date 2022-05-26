@@ -493,4 +493,18 @@ export class ProjectActions {
     return this.api.isListening(baseUrl)
     .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl), 'testingType'))
   }
+
+  async switchTestingTypesAndRelaunch (testingType: Cypress.TestingType): Promise<void> {
+    const isTestingTypeConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured(testingType)
+
+    this.ctx.project.setRelaunchBrowser(isTestingTypeConfigured)
+    this.setAndLoadCurrentTestingType(testingType)
+
+    await this.reconfigureProject()
+
+    if (testingType === 'e2e' && !isTestingTypeConfigured) {
+      // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
+      await this.ctx.actions.wizard.scaffoldTestingType()
+    }
+  }
 }
