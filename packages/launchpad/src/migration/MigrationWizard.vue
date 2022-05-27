@@ -170,6 +170,7 @@ const { t } = useI18n()
 gql`
 fragment MigrationBaseError on Query {
   baseError {
+    id
     ...BaseError
   }
 }
