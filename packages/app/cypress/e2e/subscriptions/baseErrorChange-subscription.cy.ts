@@ -1,4 +1,4 @@
-describe('baseErrorChange subscription', () => {
+describe('errorWarningChange subscription', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
