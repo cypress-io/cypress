@@ -121,8 +121,9 @@ beforeEach(function () {
 afterEach(async () => {
   try {
     await getCtx()._reset()
-  } catch {
-    // can be undefined if an error was thrown during setup
+  } catch (e) {
+    console.error('CAUGHT ERROR calling ctx._reset:')
+    console.error(e)
   }
   clearCtx()
   sinon.restore()

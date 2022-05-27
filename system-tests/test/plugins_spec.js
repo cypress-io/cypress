@@ -177,6 +177,16 @@ describe('e2e plugins', function () {
     })
   })
 
+  it('fails when require has a syntax error', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugins-root-syntax-error',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
   it('fails when function throws synchronously', function () {
     return systemTests.exec(this, {
       spec: 'app_spec.js',

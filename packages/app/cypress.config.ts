@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
 import getenv from 'getenv'
-import { initGitRepoForTestProject } from './cypress/tasks/git'
+import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
 
@@ -55,6 +55,7 @@ export default defineConfig({
 
       on('task', {
         initGitRepoForTestProject,
+        resetGitRepoForTestProject,
       })
 
       return await e2ePluginSetup(on, config)

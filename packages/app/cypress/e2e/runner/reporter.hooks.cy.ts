@@ -50,7 +50,7 @@ describe('hooks', {
     cy.get('.hook-open-in-ide').should('have.length', 4)
 
     cy.withCtx((ctx, o) => {
-      ctx.actions.file.openFile = o.sinon.stub()
+      o.sinon.stub(ctx.actions.file, 'openFile')
     })
 
     cy.contains('Open in IDE').invoke('show').click({ force: true })

@@ -18,6 +18,7 @@ function createDataContext (modeOptions?: Parameters<typeof createTestDataContex
   context.coreData.cliBrowser = undefined
 
   context._apis.browserApi.getBrowsers = sinon.stub().resolves(browsers)
+  context._apis.projectApi.insertProjectPreferencesToCache = sinon.stub()
   context.actions.project.launchProject = sinon.stub().resolves()
   context.project.getProjectPreferences = sinon.stub().resolves(null)
 

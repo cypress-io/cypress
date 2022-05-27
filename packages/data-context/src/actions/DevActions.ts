@@ -1,8 +1,7 @@
 import path from 'path'
-import chokidar from 'chokidar'
+import chokidar, { FSWatcher } from 'chokidar'
 
 import type { DataContext } from '..'
-import type { FSWatcher } from 'fs'
 
 export class DevActions {
   private _chokidar?: FSWatcher
@@ -50,7 +49,7 @@ export class DevActions {
   }
 
   dispose () {
-    this._chokidar?.close()
+    this._chokidar?.close().catch(() => {})
     this._chokidar = undefined
   }
 }
