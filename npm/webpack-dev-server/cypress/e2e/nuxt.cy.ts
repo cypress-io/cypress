@@ -24,6 +24,7 @@ for (const project of PROJECTS) {
     it('should mount a passing test and live-reload', () => {
       cy.visitApp()
       cy.contains('Tutorial.cy.js').click()
+      cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
 
       cy.withCtx(async (ctx) => {
@@ -63,6 +64,7 @@ for (const project of PROJECTS) {
       })
 
       cy.contains('New.cy.js').click()
+      cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
     })
   })
