@@ -4,8 +4,6 @@ export interface CypressBuilderOptions extends JsonObject {
   baseUrl: string
   configFile: string
   browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
-  devServerTarget: string
-  devServerBaseUrl: string
   env: Record<string, string>
   quiet: boolean
   exit: boolean
