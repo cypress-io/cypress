@@ -24,7 +24,7 @@
         :title="isInternalServerError ? t('runs.connect.errors.internalServerError.title') : t('runs.connect.errors.baseError.title')"
         class="mb-16px"
         :icon="WarningIcon"
-        dismissible
+        :dismissible="isInternalServerError"
       >
         <p v-if="!isInternalServerError">
           {{ graphqlError.message }}

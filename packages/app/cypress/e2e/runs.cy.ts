@@ -256,6 +256,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy="alert"]').within(() => {
         cy.contains(defaultMessages.runs.connect.errors.baseError.title)
+        cy.get('[data-cy="alert-suffix-icon"]').should('not.exist')
       })
 
       cy.get('[data-cy="alert-body"]').within(() => {
@@ -290,6 +291,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy="alert"]').within(() => {
         cy.contains(defaultMessages.runs.connect.errors.internalServerError.title)
+        cy.get('[data-cy="alert-suffix-icon"]').should('exist')
       })
 
       cy.get('[data-cy="alert-body"]').within(() => {
