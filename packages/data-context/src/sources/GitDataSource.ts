@@ -184,8 +184,12 @@ export class GitDataSource {
 
         // Fires when we switch branches
         this.#gitBaseDirWatcher.on('change', () => {
+          const prevBranch = this.#currentBranch
+
           this.#loadCurrentBranch().then(() => {
-            this.config.onBranchChange(this.#currentBranch)
+            if (prevBranch !== this.#currentBranch) {
+              this.config.onBranchChange(this.#currentBranch)
+            }
           }).catch((e) => {
             debug('Errored loading branch info on git change %s', e.message)
             this.#currentBranch = null

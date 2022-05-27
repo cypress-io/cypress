@@ -84,6 +84,10 @@ describe('Choose a Browser Page', () => {
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
       cy.get('[data-cy="alert-header"]').should('not.exist')
+
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('[data-cy="alert-header"]').should('not.exist')
     })
 
     it('shows installed browsers with their relevant properties', () => {
@@ -282,8 +286,8 @@ describe('Choose a Browser Page', () => {
 
       // Updating active browser in conjunction with the browser status to ensure that changes to
       // both are reflected in the UI.
-      cy.withCtx((ctx) => {
-        ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers!.find((browser) => browser.name === 'firefox') as FoundBrowser)
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers!.find((browser) => browser.name === 'firefox') as FoundBrowser)
         ctx.browser.setBrowserStatus('closed')
       })
 
