@@ -16,7 +16,7 @@
         </h1>
 
         <div
-          v-if="props.retry"
+          v-if="retry"
           class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
         >
           <Button
@@ -24,7 +24,7 @@
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
             prefix-icon-class="icon-dark-indigo-500"
-            @click="retry"
+            @click="retry?.(baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -124,6 +124,7 @@ import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment BaseError on ErrorWrapper {
+  id
   title
   errorName
   errorStack
@@ -140,7 +141,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseErrorFragment
-  retry?: () => void
+  retry?: (id: string) => void
 }>()
 
 const markdownTarget = ref()
