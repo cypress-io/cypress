@@ -19,6 +19,7 @@ interface RuntimeConfigOption {
   canUpdateDuringTestTime?: boolean
 }
 
+export const legacyIntegrationFolder = 'cypress/integration'
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -130,7 +131,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'integrationFolder',
-    defaultValue: 'cypress/integration',
+    defaultValue: legacyIntegrationFolder,
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {

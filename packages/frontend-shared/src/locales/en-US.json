@@ -546,7 +546,7 @@
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
-      "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
+      "changedSpecPatternExplain": "We've changed the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
       "optedOutMessage": "You've opted not to rename your spec file extension. You may need to change your specPattern later so we can still find your spec files.",
       "folderRenameMessage": "You've opted not to rename your spec file extension, we'll only rename the folder",
       "modal": {
