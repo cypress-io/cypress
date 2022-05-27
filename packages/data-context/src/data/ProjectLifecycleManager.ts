@@ -405,17 +405,19 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      s.currentProjectGitInfo = new GitDataSource({
-        isRunMode: this.ctx.isRunMode,
-        projectRoot,
-        onError: this.ctx.onError,
-        onBranchChange: () => {
-          this.ctx.emitter.branchChange()
-        },
-        onGitInfoChange: (specPaths) => {
-          this.ctx.emitter.gitInfoChange(specPaths)
-        },
-      })
+      if (!this.ctx.isRunMode) {
+        s.currentProjectGitInfo = new GitDataSource({
+          isRunMode: this.ctx.isRunMode,
+          projectRoot,
+          onError: this.ctx.onError,
+          onBranchChange: () => {
+            this.ctx.emitter.branchChange()
+          },
+          onGitInfoChange: (specPaths) => {
+            this.ctx.emitter.gitInfoChange(specPaths)
+          },
+        })
+      }
 
       s.packageManager = packageManagerUsed
     })
