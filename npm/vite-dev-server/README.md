@@ -47,6 +47,14 @@ From there, we check the "framework" field to source or define any known vite tr
 
 We then merge the sourced config with the user's vite config, and layer on our own transforms, and provide this to a vite instance. The vite instance used to create a vite-dev-server, which is returned.
 
+
+## Internal Options
+* `CYPRESS_INTERNAL_VITE_DEV` - Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
+* `CYPRESS_INTERNAL_VITE_INSPECT` - used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly.
+* `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING` - set to `true` when doing internal cy-in-cy type tests to access the Cypress instance from the parent frame.
+* `CYPRESS_INTERNAL_VITE_APP_PORT` - leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the app on the specified port. The default port is `3333`.
+* `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT` -  leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the launchpad on the specified port. The default port is `3001`.
+
 ## Changelog
 
 [Changelog](./CHANGELOG.md)
