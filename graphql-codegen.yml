@@ -103,7 +103,7 @@ generates:
     <<: *vueOperations
 
   './packages/frontend-shared/src/generated/graphql.ts':
-    documents: './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+    documents: './packages/frontend-shared/src/{gql-components,graphql}/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueOperations
   ###
   # All GraphQL documents imported into the .spec.tsx files for component testing.
