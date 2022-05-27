@@ -53,6 +53,10 @@ type ErrorHandler = (
   options: BreakingErrResult
 ) => void
 
+export function resetIssuedWarnings () {
+  issuedWarnings.clear()
+}
+
 const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
@@ -184,6 +188,7 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
   const restartOnChange = {
     browser: false,
     server: false,
+    pingBaseUrl: false,
   }
 
   if (!cachedConfig || !updatedConfig) {
