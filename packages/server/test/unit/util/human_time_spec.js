@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
 const humanInterval = require('human-interval')
-const humanTime = require(`${root}../lib/util/human_time`)
+const humanTime = require(`../../../lib/util/human_time`)
 
 describe('lib/util/human_time', () => {
   context('.long', () => {

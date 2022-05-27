@@ -1,7 +1,7 @@
 require('../spec_helper')
 
-const { iframesController } = require(`${root}/lib/controllers/iframes`)
-const files = require(`${root}/lib/controllers/files`)
+const { iframesController } = require('../../lib/controllers/iframes')
+const files = require('../../lib/controllers/files')
 
 describe('controllers/iframes', () => {
   describe('e2e', () => {

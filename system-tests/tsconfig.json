@@ -9,15 +9,11 @@
     "./globals.d.ts"
   ],
   "compilerOptions": {
-    "types": [
-      "mocha",
-      "node",
-      "chai"
-    ],
     "noEmit": true,
     "lib": ["esnext"],
     "skipLibCheck": true,
     "noImplicitReturns": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "typeRoots": ["../node_modules/@types"]
   }
 }

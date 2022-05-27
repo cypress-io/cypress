@@ -5,15 +5,20 @@ import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
-import { log } from './log'
+import Debug from 'debug'
 import type {
   Browser,
   DetectedBrowser,
   FoundBrowser,
+} from '@packages/types'
+import type {
   NotDetectedAtPathError,
   NotInstalledError, PathData,
 } from './types'
 import * as windowsHelper from './windows'
+
+const debug = Debug('cypress:launcher:detect')
+const debugVerbose = Debug('cypress-verbose:launcher:detect')
 
 type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   version: string
@@ -21,17 +26,10 @@ type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
 }
 
 export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
-  const majorVersion = parseInt(browser.version.split('.')[0]) || browser.version
+  const ver = browser.version.split('.')[0] ?? browser.version
+  const majorVersion = parseInt(ver) || browser.version
 
   const unsupportedVersion = browser.minSupportedVersion && majorVersion < browser.minSupportedVersion
-
-  log(
-    'browser %s version %s major version %s',
-    browser.name,
-    browser.version,
-    majorVersion,
-    unsupportedVersion,
-  )
 
   const foundBrowser = extend({}, browser, { majorVersion })
 
@@ -61,14 +59,19 @@ const helpers: Helpers = {
 }
 
 function getHelper (platform?: NodeJS.Platform): PlatformHelper {
-  return helpers[platform || os.platform()]
+  const helper = helpers[platform || os.platform()]
+
+  if (!helper) {
+    throw Error(`Could not find helper for ${platform}`)
+  }
+
+  return helper
 }
 
 function lookup (
   platform: NodeJS.Platform,
   browser: Browser,
 ): Promise<DetectedBrowser> {
-  log('looking up %s on %s platform', browser.name, platform)
   const helper = getHelper(platform)
 
   if (!helper) {
@@ -111,13 +114,9 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
     'unsupportedVersion',
   ] as const
 
-  const logBrowser = (props: any) => {
-    log('setting major version for %j', props)
-  }
-
   const failed = (err: NotInstalledError) => {
     if (err.notInstalled) {
-      log('browser %s not installed', browser.name)
+      debugVerbose('browser %s not installed', browser.name)
 
       return false
     }
@@ -125,16 +124,9 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
     throw err
   }
 
-  log('checking one browser %s', browser.name)
-
   return lookup(platform, browser)
   .then((val) => ({ ...browser, ...val }))
   .then((val) => _.pick(val, pickBrowserProps) as HasVersion)
-  .then((val) => {
-    logBrowser(val)
-
-    return val
-  })
   .then((browser) => setMajorVersion(browser))
   .catch(failed)
 }
@@ -156,7 +148,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
     return compact(browsers) as FoundBrowser[]
   }
 
-  log('detecting if the following browsers are present %o', goalBrowsers)
+  debug('detecting if the following browsers are present %o', goalBrowsers)
 
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
   .then((val) => _.flatten(val))

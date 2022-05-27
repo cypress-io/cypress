@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import _ from 'lodash'
 import send from 'send'
-import type { SpecsStore } from '@packages/server/lib/specs-store'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
 import type { Cfg } from '@packages/server/lib/project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
@@ -9,7 +8,6 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 interface ServeOptions {
   config: Cfg
   getCurrentBrowser: () => Browser
-  specsStore: SpecsStore
 }
 
 const debug = Debug('cypress:server:runner-ct')
@@ -21,11 +19,10 @@ export const handle = (req, res) => {
   .pipe(res)
 }
 
-export const serve = (req, res, options: ServeOptions) => {
+export const makeServeConfig = (options) => {
   const config = {
     ...options.config,
     browser: options.getCurrentBrowser(),
-    specs: options.specsStore.specFiles,
   } as Cfg
 
   // TODO: move the component file watchers in here
@@ -37,19 +34,20 @@ export const serve = (req, res, options: ServeOptions) => {
 
   // base64 before embedding so user-supplied contents can't break out of <script>
   // https://github.com/cypress-io/cypress/issues/4952
+
   const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+  return {
+    base64Config,
+    projectName: config.projectName,
+    namespace: config.namespace,
+  }
+}
+
+export const serve = (req, res, options: ServeOptions) => {
+  const config = makeServeConfig(options)
 
   const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')
 
-  return res.render(runnerPath, {
-    base64Config,
-    projectName: config.projectName,
-  })
-}
-
-export const serveChunk = (req, res, options) => {
-  let { config } = options
-  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(config.clientRoute, ''))
-
-  return send(req, pathToFile).pipe(res)
+  return res.render(runnerPath, config)
 }

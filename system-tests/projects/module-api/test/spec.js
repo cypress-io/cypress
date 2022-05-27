@@ -62,7 +62,7 @@ describe('successful tests', () => {
 
   it('runs specific spec', () => {
     return cypress.run({
-      spec: 'cypress/integration/a-spec.js',
+      spec: 'cypress/e2e/a-spec.cy.js',
     }).then(R.tap(debug))
     .then((result) => {
       la(result.totalTests === 1, 'there should be single test', result.totalTests)
@@ -70,7 +70,7 @@ describe('successful tests', () => {
   })
 
   it('runs specific spec using absolute path', () => {
-    const absoluteSpec = join(projectFolder, 'cypress/integration/a-spec.js')
+    const absoluteSpec = join(projectFolder, 'cypress/e2e/a-spec.cy.js')
 
     debug('absolute path to the spec: %s', absoluteSpec)
 
@@ -84,7 +84,7 @@ describe('successful tests', () => {
 
   it('runs a single spec using wildcard', () => {
     return cypress.run({
-      spec: 'cypress/integration/a-*.js',
+      spec: 'cypress/e2e/a-*.js',
     }).then(R.tap(debug))
     .then((result) => {
       la(result.totalTests === 1, 'there should be single test', result.totalTests)
@@ -93,7 +93,7 @@ describe('successful tests', () => {
 
   it('runs both found specs using wildcard', () => {
     return cypress.run({
-      spec: 'cypress/integration/a-*.js,cypress/integration/b-*.js',
+      spec: 'cypress/e2e/a-*.js,cypress/e2e/b-*.js',
     }).then(R.tap(debug))
     .then((result) => {
       la(result.totalTests === 2, 'found both tests', result.totalTests)
@@ -112,7 +112,7 @@ describe('env variables', () => {
 
   it('passes environment variables in the object', () => {
     return cypress.run({
-      spec: 'cypress/integration/env-spec.js',
+      spec: 'cypress/e2e/env-spec.cy.js',
       env: {
         foo: {
           bar: 'baz',
@@ -149,7 +149,7 @@ describe('invalid malformed spec file', () => {
   it('returns with error code', () => {
     // test has reference error on load
     return cypress.run({
-      spec: './cypress/integration/a-spec.js',
+      spec: './cypress/e2e/a-spec.cy.js',
     })
     .then(normalize)
     .then(pickImportant)

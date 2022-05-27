@@ -9,7 +9,7 @@ describe('e2e viewport', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'viewport_spec.js',
+    spec: 'viewport.cy.js',
     snapshot: true,
   })
 })
