@@ -49,8 +49,7 @@
     "edit": "Edit",
     "git": {
       "modified": "Modified",
-      "created": "Created",
-      "unmodified": "Modified"
+      "created": "Created"
     }
   },
   "status": {

@@ -1,9 +1,9 @@
 import execa from 'execa'
-import simpleGit from 'simple-git'
+import simpleGit, { StatusResult } from 'simple-git'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
-import fs from 'fs-extra'
+import fs from 'fs'
 import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
@@ -72,14 +72,13 @@ export interface GitDataSourceConfig {
  */
 export class GitDataSource {
   #specs?: string[]
-  #git: ReturnType<typeof simpleGit>
+  #git?: ReturnType<typeof simpleGit>
   #gitErrored = false
   #destroyed = false
   #gitBaseDir?: string
   #gitBaseDirWatcher?: chokidar.FSWatcher
   #gitMeta = new Map<string, GitInfo | null>()
   #currentBranch: string | null = null
-  #currentUser: string | null = null
   #intervalTimer?: NodeJS.Timeout
 
   constructor (private config: GitDataSourceConfig) {
@@ -89,9 +88,9 @@ export class GitDataSource {
     debug('config: %o', this.config)
     try {
       this.#git = simpleGit({ baseDir: this.config.projectRoot })
-      this.#gitBaseDir = this.config.projectRoot
     } catch {
-      this.#git = simpleGit()
+      // suppress exception if git cannot be found
+      debug('exception caught when loading git client')
     }
 
     if (!config.isRunMode) {
@@ -99,21 +98,37 @@ export class GitDataSource {
     }
   }
 
-  #refreshAllGitData () {
-    const toAwait = [
-      this.#loadCurrentGitUser(),
-      this.#loadAndWatchCurrentBranch(),
-    ]
+  async #verifyGitRepo () {
+    if (!this.#git) {
+      this.#gitErrored = true
 
-    if (this.#specs) {
-      toAwait.push(this.#loadBulkGitInfo(this.#specs))
+      return
     }
 
-    Promise.all(toAwait).then(() => {
-      this.#intervalTimer = setTimeout(() => {
-        debug('Refreshing git data')
-        this.#refreshAllGitData()
-      }, SIXTY_SECONDS)
+    try {
+      this.#gitBaseDir = await this.#git.revparse(GIT_ROOT_DIR_COMMAND)
+      this.#gitErrored = false
+    } catch {
+      this.#gitErrored = true
+    }
+  }
+
+  #refreshAllGitData () {
+    this.#verifyGitRepo().then(() => {
+      const toAwait = [
+        this.#loadAndWatchCurrentBranch(),
+      ]
+
+      if (this.#specs) {
+        toAwait.push(this.#loadBulkGitInfo(this.#specs))
+      }
+
+      Promise.all(toAwait).then(() => {
+        this.#intervalTimer = setTimeout(() => {
+          debug('Refreshing git data')
+          this.#refreshAllGitData()
+        }, SIXTY_SECONDS)
+      }).catch(this.config.onError)
     }).catch(this.config.onError)
   }
 
@@ -141,10 +156,6 @@ export class GitDataSource {
     return this.#currentBranch
   }
 
-  get currentUser () {
-    return this.#currentUser ?? null
-  }
-
   destroy () {
     this.#destroyed = true
     if (this.#intervalTimer) {
@@ -165,19 +176,20 @@ export class GitDataSource {
     }
 
     try {
-      const [gitBaseDir] = await Promise.all([
-        this.#git.revparse(GIT_ROOT_DIR_COMMAND),
-        this.#loadCurrentBranch(),
-      ])
+      if (this.#gitErrored) {
+        debug('Skipping branch watching because a git error was reported')
+      }
 
-      this.#gitBaseDir = gitBaseDir
+      if (this.#git) {
+        await this.#loadCurrentBranch()
+      }
 
-      if (this.#destroyed) {
+      if (this.#destroyed || !this.#gitBaseDir) {
         return
       }
 
       if (!this.config.isRunMode) {
-        this.#gitBaseDirWatcher = chokidar.watch(path.join(gitBaseDir, '.git', 'HEAD'), {
+        this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
           ignoreInitial: true,
           ignorePermissionErrors: true,
         })
@@ -209,19 +221,14 @@ export class GitDataSource {
   }
 
   async #loadCurrentBranch () {
-    this.#currentBranch = (await this.#git.branch()).current
-    debug(`On current branch %s`, this.#currentBranch)
-    this.config.onBranchChange(this.#currentBranch)
-  }
-
-  async #loadCurrentGitUser () {
-    try {
-      this.#currentUser = (await this.#git.getConfig('user.name')).value
-      debug(`Found git user %s`, this.#currentUser)
-    } catch (e) {
-      debug(`Failed to get current git user`, e.message)
-
-      this.#currentUser = null
+    if (this.#git) {
+      try {
+        this.#currentBranch = (await this.#git.branch()).current
+        debug(`On current branch %s`, this.#currentBranch)
+        this.config.onBranchChange(this.#currentBranch)
+      } catch {
+        debug('this is not a git repo')
+      }
     }
   }
 
@@ -230,21 +237,30 @@ export class GitDataSource {
   }
 
   async #loadBulkGitInfo (absolutePaths: readonly string[]) {
+    debugVerbose(`checking %d files`, absolutePaths.length)
     if (absolutePaths.length === 0) {
       return
     }
 
     try {
-      const [stdout, statusResult] = await Promise.all([
-        os.platform() === 'win32'
-          ? this.#getInfoWindows(absolutePaths)
-          : this.#getInfoPosix(absolutePaths),
-        this.#git.status(),
-      ])
-
-      debugVerbose('stdout %s', stdout.toString())
-
       const changed: string[] = []
+
+      let statusResult: StatusResult | undefined = undefined
+      let gitLogOutput: string[] = []
+
+      if (!this.#gitErrored) {
+        const [stdout, statusResultReturned] = await Promise.all([
+          os.platform() === 'win32'
+            ? this.#getInfoWindows(absolutePaths)
+            : this.#getInfoPosix(absolutePaths),
+          this.#git?.status(),
+        ])
+
+        gitLogOutput = stdout
+        statusResult = statusResultReturned
+
+        debugVerbose('stdout %s', stdout.toString())
+      }
 
       // Go through each file, updating our gitInfo cache and detecting which
       // entries have changed, to notify the UI
@@ -253,30 +269,39 @@ export class GitDataSource {
         const current = this.#gitMeta.get(file)
 
         // first check unstaged/untracked files
-        const isUnstaged = statusResult.files.find((x) => file.endsWith(x.path))
+        const isUnstaged = statusResult?.files.find((x) => file.endsWith(x.path))
 
         let toSet: GitInfo | null = null
+
+        const stat = fs.statSync(file)
+        const ctime = dayjs(stat.ctime)
+        const birthtime = dayjs(stat.birthtime)
 
         // These are the status codes used by SimpleGit.
         // M -> modified
         // ? -> unstaged
         // A or ' ' -> staged, but not yet committed
         // D -> deleted, but we do not show deleted files in the UI, so it's not used.
-        if (isUnstaged && ['M', 'A', ' ', '?'].includes(isUnstaged?.working_dir)) {
-          const stat = fs.statSync(file)
-          const ctime = dayjs(stat.ctime)
-          const birthtime = dayjs(stat.birthtime)
-
+        if (!this.#gitErrored && isUnstaged && ['M', 'A', ' ', '?'].includes(isUnstaged?.working_dir)) {
           toSet = {
             lastModifiedTimestamp: isUnstaged.working_dir === 'M' ? ctime.format('YYYY-MM-DD HH:mm:ss Z') : birthtime.format('YYYY-MM-DD HH:mm:ss Z'),
             lastModifiedHumanReadable: isUnstaged.working_dir === 'M' ? ctime.fromNow() : birthtime.fromNow(),
-            author: this.#currentUser ?? '',
+            author: '', // unstaged file don't have an author
             statusType: isUnstaged.working_dir === 'M' ? 'modified' : 'created',
             subject: null,
             shortHash: null,
           }
+        } else if (this.#gitErrored) {
+          toSet = {
+            lastModifiedTimestamp: ctime.format('YYYY-MM-DD HH:mm:ss Z'),
+            lastModifiedHumanReadable: ctime.fromNow(),
+            author: '', // unstaged file don't have an author
+            statusType: 'noGitInfo',
+            subject: null,
+            shortHash: null,
+          }
         } else {
-          const data = stdout[i]
+          const data = gitLogOutput[i]
           const info = data?.match(GIT_LOG_REGEXP)
 
           if (file && info && info[1] && info[2] && info[3] && info[4] && info[5]) {
