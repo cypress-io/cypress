@@ -151,7 +151,12 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
 
     cy.visitApp()
-    cy.contains('malformed-spec-file.spec')
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `describe('Bad spec', () => { it('has a syntax error', () => { expect(true).to.be.true }) }`)
+    }, { path: getPathForPlatform('cypress/e2e/bad-spec.spec.js') })
+
+    cy.contains('bad-spec.spec')
     .click()
 
     cy.contains('No tests found').should('be.visible')
