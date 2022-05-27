@@ -8,7 +8,7 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (issue_5475_spec_1.js, issue_5475_spec_2.js)                               │
-  │ Searched:   cypress/integration/issue_5475*                                                    │
+  │ Searched:   cypress/e2e/issue_5475*                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

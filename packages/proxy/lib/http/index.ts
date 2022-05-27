@@ -7,6 +7,7 @@ import type {
   BrowserPreRequest,
 } from '@packages/proxy'
 import Debug from 'debug'
+import chalk from 'chalk'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PreRequests } from './util/prerequests'
@@ -20,6 +21,12 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
+
+function getRandomColorFn () {
+  return chalk.hex(`#${Number(
+    Math.floor(Math.random() * 0xFFFFFF),
+  ).toString(16).padStart(6, 'F').toUpperCase()}`)
+}
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
@@ -231,7 +238,12 @@ export class Http {
     }
   }
 
-  handle (req: Request, res: Response) {
+  handle (req: CypressIncomingRequest, res: CypressOutgoingResponse) {
+    const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
+    const debugUrl = debugVerbose.enabled ?
+      (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
+      : undefined
+
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
@@ -247,7 +259,9 @@ export class Http {
       socket: this.socket,
       serverBus: this.serverBus,
       debug: (formatter, ...args) => {
-        debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        if (!debugVerbose.enabled) return
+
+        debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
       },
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({

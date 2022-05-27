@@ -13,7 +13,7 @@ export interface AgentProps {
 
 const Agent = observer(({ model }: AgentProps) => (
   <tr className={cs('agent-item', { 'no-calls': !model.callCount })}>
-    <td>{model.type}</td>
+    <td>{model.name}</td>
     <td>{model.functionName}</td>
     <td>{([] as Array<Alias>).concat(model.alias || []).join(', ')}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
@@ -51,7 +51,7 @@ const Agents = observer(({ model }: AgentsProps) => (
             <table>
               <thead>
                 <tr>
-                  <th>Type</th>
+                  <th>Type</th>{/* the spy/stub's name provided by the driver */}
                   <th>Function</th>
                   <th>Alias(es)</th>
                   <th className='call-count'># Calls</th>

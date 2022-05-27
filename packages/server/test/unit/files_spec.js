@@ -1,18 +1,24 @@
 require('../spec_helper')
 
-const config = require(`${root}lib/config`)
-const files = require(`${root}lib/files`)
-const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
+const files = require('../../lib/files')
+const FixturesHelper = require('@tooling/system-tests')
+const { getCtx } = require('../../lib/makeDataContext')
+
+let ctx
 
 describe('lib/files', () => {
   beforeEach(function () {
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath).then((cfg) => {
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    return ctx.lifecycleManager.getFullInitialConfig().then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
     })
   })
 

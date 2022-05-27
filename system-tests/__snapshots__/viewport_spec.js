@@ -7,14 +7,14 @@ exports['e2e viewport / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (viewport_spec.js)                                                         │
-  │ Searched:   cypress/integration/viewport_spec.js                                               │
+  │ Specs:      1 found (viewport.cy.js)                                                           │
+  │ Searched:   cypress/e2e/viewport.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  viewport_spec.js                                                                (1 of 1)
+  Running:  viewport.cy.js                                                                  (1 of 1)
 
 
   viewport
@@ -37,14 +37,14 @@ exports['e2e viewport / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     viewport_spec.js                                                                 │
+  │ Spec Ran:     viewport.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/viewport_spec.js.mp4                (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/viewport.cy.js.mp4                  (X second)
 
 
 ====================================================================================================
@@ -54,7 +54,7 @@ exports['e2e viewport / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  viewport_spec.js                         XX:XX        3        3        -        -        - │
+  │ ✔  viewport.cy.js                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 

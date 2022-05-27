@@ -198,12 +198,15 @@ const parseOpts = (opts) => {
     'cacheClear',
     'cachePrune',
     'ciBuildId',
+    'ct',
+    'component',
     'config',
     'configFile',
     'cypressVersion',
     'destination',
     'detached',
     'dev',
+    'e2e',
     'exit',
     'env',
     'force',
@@ -211,6 +214,8 @@ const parseOpts = (opts) => {
     'group',
     'headed',
     'headless',
+    'inspect',
+    'inspectBrk',
     'key',
     'path',
     'parallel',
@@ -252,12 +257,16 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    folder = `${folder}-e2e-test`
+  }
 
   const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 
@@ -306,7 +315,7 @@ const util = {
     // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
     // version that has been updated to webpack >= 5.61, which no longer relies on
     // Node's builtin crypto.hash function.
-    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && process.versions.openssl.startsWith('3.')) {
+    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
       opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
     }
 

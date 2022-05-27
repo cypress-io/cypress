@@ -1,0 +1,6 @@
+{
+  "integrationFolder": "src",
+  "testFiles": "**/*.spec.js",
+  "pluginsFile": "src/the-plugins-file.js",
+  "supportFile": "src/some-support-file.js"
+}

@@ -1,6 +1,0 @@
-export const automation = {
-  CONNECTING: 'CONNECTING',
-  MISSING: 'MISSING',
-  CONNECTED: 'CONNECTED',
-  DISCONNECTED: 'DISCONNECTED',
-}

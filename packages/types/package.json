@@ -1,0 +1,22 @@
+{
+  "name": "@packages/types",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "index.js",
+  "browser": "src/index.ts",
+  "scripts": {
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
+    "clean": "rimraf src/*.js src/**/*.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "14.14.31",
+    "rimraf": "3.0.2",
+    "typescript": "^4.2.3"
+  },
+  "files": [
+    "src/*"
+  ],
+  "types": "src/index.ts"
+}
