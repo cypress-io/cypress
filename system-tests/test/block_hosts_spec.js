@@ -24,15 +24,17 @@ describe('e2e blockHosts', () => {
       onServer,
     }],
     settings: {
-      baseUrl: 'http://localhost:3232',
       blockHosts: 'localhost:3131',
       video: false,
+      e2e: {
+        baseUrl: 'http://localhost:3232',
+      },
     },
   })
 
   it('passes', function () {
     return systemTests.exec(this, {
-      spec: 'block_hosts_spec.js',
+      spec: 'block_hosts.cy.js',
       snapshot: true,
     })
   })

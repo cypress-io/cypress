@@ -29,3 +29,9 @@ yarn workspace @packages/proxy test
 ```
 
 Additionally, the `server` package contains tests that use the `proxy`.
+
+## Debug Logs
+
+High level logs are available in the `DEBUG=cypress:proxy:*` namespace.
+
+Detailed per-request logs are available in `DEBUG=cypress-verbose:proxy:http`.

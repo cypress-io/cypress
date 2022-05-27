@@ -20,6 +20,12 @@ If the change is not user-facing, write "n/a".
 - Any implementation details to explain?
 -->
 
+### Steps to test
+<!--
+For non-trivial behavior changes, list the steps that a reviewer should follow to validate the new behavior.
+This is not meant to be the only testing performed by a reviewer, just the "happy path" that leads to the new behavior.
+-->
+
 ### How has the user experience changed?
 <!-- Provide before and after examples of the change.
 Screenshots or GIFs are preferred. -->
@@ -35,4 +41,3 @@ DO NOT DELETE the PR checklist.
 - [ ] Has the original issue (or this PR, if no issue exists) been tagged with a release in ZenHub? (user-facing changes only)
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?
-- [ ] Have new configuration options been added to the [`cypress.schema.json`](https://github.com/cypress-io/cypress/blob/develop/cli/schema/cypress.schema.json)?

@@ -1,21 +1,23 @@
-import { log } from '../log'
+import Debug from 'debug'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as plist from 'plist'
 
+const debugVerbose = Debug('cypress-verbose:launcher:darwin:util')
+
 /** parses Info.plist file from given application and returns a property */
 export function parsePlist (p: string, property: string): Promise<string> {
   const pl = path.join(p, 'Contents', 'Info.plist')
 
-  log('reading property file "%s"', pl)
+  debugVerbose('reading property file "%s"', pl)
 
   const failed = (e: Error) => {
     const msg = `Info.plist not found: ${pl}
     ${e.message}`
 
-    log('could not read Info.plist %o', { pl, e })
+    debugVerbose('could not read Info.plist %o', { pl, e })
     throw notInstalledErr('', msg)
   }
 
@@ -31,16 +33,16 @@ export function parsePlist (p: string, property: string): Promise<string> {
 export function mdfind (id: string): Promise<string> {
   const cmd = `mdfind 'kMDItemCFBundleIdentifier=="${id}"' | head -1`
 
-  log('looking for bundle id %s using command: %s', id, cmd)
+  debugVerbose('looking for bundle id %s using command: %s', id, cmd)
 
   const logFound = (str: string) => {
-    log('found %s at %s', id, str)
+    debugVerbose('found %s at %s', id, str)
 
     return str
   }
 
   const failedToFind = () => {
-    log('could not find %s', id)
+    debugVerbose('could not find %s', id)
     throw notInstalledErr(id)
   }
 
@@ -74,11 +76,11 @@ function formApplicationPath (appName: string) {
 
 /** finds an application and its version */
 export function findApp ({ appName, executable, appId, versionProperty }: FindAppParams): Promise<AppInfo> {
-  log('looking for app %s id %s', executable, appId)
+  debugVerbose('looking for app %s id %s', executable, appId)
 
   const findVersion = (foundPath: string) => {
     return parsePlist(foundPath, versionProperty).then((version) => {
-      log('got plist: %o', { foundPath, version })
+      debugVerbose('got plist: %o', { foundPath, version })
 
       return {
         path: path.join(foundPath, executable),
@@ -94,7 +96,7 @@ export function findApp ({ appName, executable, appId, versionProperty }: FindAp
   const tryFullApplicationFind = () => {
     const applicationPath = formApplicationPath(appName)
 
-    log('looking for application %s', applicationPath)
+    debugVerbose('looking for application %s', applicationPath)
 
     return findVersion(applicationPath)
   }

@@ -1,4 +1,4 @@
-import type { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser } from '@packages/types'
 import type { EventEmitter } from 'events'
 
 export type Browser = FoundBrowser & {

@@ -44,6 +44,7 @@ describe('http', function () {
       })
 
       return new Http(httpOpts)
+      // @ts-ignore
       .handle({}, {})
       .then(function () {
         expect(incomingRequest, 'incomingRequest').to.be.calledOnce
@@ -61,6 +62,7 @@ describe('http', function () {
       })
 
       return new Http(httpOpts)
+      // @ts-ignore
       .handle({}, {})
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
@@ -83,6 +85,7 @@ describe('http', function () {
       })
 
       return new Http(httpOpts)
+      // @ts-ignore
       .handle({}, {})
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
@@ -145,6 +148,7 @@ describe('http', function () {
       middleware[HttpStages.Error].push(error2)
 
       return new Http(httpOpts)
+      // @ts-ignore
       .handle({}, {})
       .then(function () {
         [

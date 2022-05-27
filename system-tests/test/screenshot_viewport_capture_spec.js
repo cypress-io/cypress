@@ -18,7 +18,7 @@ describe('e2e screenshot viewport capture', () => {
   // this tests that consistent screenshots are taken for app
   // captures (namely that the runner UI is hidden)
   systemTests.it('passes', {
-    spec: 'screenshot_viewport_capture_spec.js',
+    spec: 'screenshot_viewport_capture.cy.js',
     snapshot: true,
   })
 })
