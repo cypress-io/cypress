@@ -620,7 +620,7 @@ describe('lib/agent', function () {
       const proxy = url.parse('http://foo.bar:1234')
 
       createProxySock({ proxy }, () => {
-        expect(net.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
+        expect(net.connect).to.be.calledWith({ family: 4, host: 'foo.bar', port: 1234 })
         done()
       })
     })
@@ -630,7 +630,7 @@ describe('lib/agent', function () {
       const proxy = url.parse('https://foo.bar:1234')
 
       createProxySock({ proxy }, () => {
-        expect(tls.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
+        expect(tls.connect).to.be.calledWith({ family: 4, host: 'foo.bar', port: 1234 })
         done()
       })
     })

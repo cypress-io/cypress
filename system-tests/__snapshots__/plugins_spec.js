@@ -524,3 +524,16 @@ https://on.cypress.io/plugins-api
 
 
 `
+
+exports['e2e plugins fails when require has a syntax error 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugins-root-syntax-error/cypress.config.js
+
+It threw an error when required, check the stack trace below:
+
+/foo/bar/.projects/plugins-root-syntax-error/cypress.config.js:3
+}
+^
+
+SyntaxError: Unexpected token '}'
+      [stack trace lines]
+`

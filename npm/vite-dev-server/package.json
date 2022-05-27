@@ -21,6 +21,7 @@
     "pathe": "0.2.0"
   },
   "devDependencies": {
+    "dedent": "^0.7.0",
     "vite": "2.9.0-beta.3",
     "vite-plugin-inspect": "0.4.3"
   },
