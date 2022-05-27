@@ -1,15 +1,19 @@
 import { defineConfig } from 'cypress'
+import webpackConfig from './webpack.config.ts'
 
 export default defineConfig({
   projectId: 'ypt4pf',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
+
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
+
   retries: {
     runMode: 2,
     openMode: 0,
   },
+
   e2e: {
     baseUrl: 'http://localhost:5006',
     setupNodeEvents (_on, config) {
@@ -21,5 +25,13 @@ export default defineConfig({
     },
     viewportHeight: 660,
     viewportWidth: 400,
+  },
+
+  component: {
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+      webpackConfig,
+    },
   },
 })

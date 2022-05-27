@@ -645,6 +645,9 @@ type ErrorWrapper {
   errorStack: String!
   errorType: ErrorTypeEnum!
 
+  """The ID for the error, used to clear the error"""
+  id: ID!
+
   """
   Whether the error came from user code, can be used to determine whether to open a stack trace by default
   """
@@ -984,7 +987,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Dismisses a warning displayed by the frontend"""
-  dismissWarning: Query
+  dismissWarning(id: ID!): Query
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
@@ -1074,8 +1077,8 @@ type Mutation {
   """Reset the Auth State"""
   resetAuthState: Query!
 
-  """Resets errors and attempts to reload the config"""
-  resetErrorsAndLoadConfig: Query
+  """Resets error and attempts to reload the config"""
+  resetErrorAndLoadConfig(id: ID!): Query
 
   """
   Resets the latest version call to capture additional telemetry for the current user
@@ -1104,9 +1107,6 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
-
-  """Set the selected testing type, and reconfigure the project"""
-  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1310,9 +1310,6 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
-  """Triggered when the base error state changes"""
-  baseErrorChange: Query
-
   """Issued when the current branch of a project changes"""
   branchChange: CurrentProject
 
@@ -1329,6 +1326,9 @@ type Subscription {
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Triggered when the base error or warning state changes"""
+  errorWarningChange: Query
 
   """
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated

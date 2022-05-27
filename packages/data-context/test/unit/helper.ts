@@ -53,6 +53,8 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     configApi: {} as InjectedConfigApi,
     projectApi: {
       closeActiveProject: sinon.stub(),
+      insertProjectToCache: sinon.stub().resolves(),
+      getProjectRootsFromCache: sinon.stub().resolves([]),
     } as unknown as ProjectApiShape,
     electronApi: {
       isMainWindowFocused: sinon.stub().returns(false),
