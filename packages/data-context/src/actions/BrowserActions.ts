@@ -24,6 +24,10 @@ export class BrowserActions {
   }
 
   setActiveBrowser (browser: FoundBrowser) {
+    if (this.ctx.coreData.activeBrowser === browser) {
+      return
+    }
+
     this.ctx.update((d) => {
       d.activeBrowser = browser
       if (d.currentProjectData?.testingTypeData) {
