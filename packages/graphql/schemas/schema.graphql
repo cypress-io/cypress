@@ -765,6 +765,7 @@ type GitInfo {
 enum GitInfoStatusType {
   created
   modified
+  noGitInfo
   unmodified
 }
 
