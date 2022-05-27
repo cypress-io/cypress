@@ -13,7 +13,7 @@ export const osFileSystemExplorer = {
   linux: 'File System',
 } as const
 
-const debug = debugModule('cypress:server:editors')
+const debug = debugModule('cypress:server:util:editors')
 
 const createEditor = (editor: Editor): Editor => {
   return {
@@ -43,8 +43,6 @@ const computerOpener = (): Editor => {
 
 const getUserEditors = async (): Promise<Editor[]> => {
   return Bluebird.filter(getEnvEditors(), (editor) => {
-    debug('check if user has editor %s with binary %s', editor.name, editor.binary)
-
     return shell.commandExists(editor.binary)
   })
   .then((editors: Editor[] = []) => {

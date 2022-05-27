@@ -26,7 +26,7 @@ import { pathToArray } from 'graphql/jsutils/Path'
 
 export type CloudDataResponse = ExecutionResult & Partial<OperationResult> & { executing?: Promise<ExecutionResult & Partial<OperationResult>> }
 
-const debug = debugLib('cypress:data-context:CloudDataSource')
+const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 
 const REMOTE_SCHEMA_URLS = {
