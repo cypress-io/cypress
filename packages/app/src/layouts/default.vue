@@ -23,8 +23,8 @@
     >
       <BaseError
         v-if="query.data.value?.baseError"
-        :gql="query.data.value?.baseError"
-        :retry="resetErrorsAndLoadConfig"
+        :gql="query.data.value.baseError"
+        :retry="resetErrorAndLoadConfig"
       />
       <div v-else>
         <Spinner />
@@ -53,9 +53,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useMutation, useSubscription } from '@urql/vue'
+import { gql, useQuery, useMutation } from '@urql/vue'
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
-
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -63,11 +62,12 @@ import Spinner from '@cy/components/Spinner.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
-import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument, CheckBaseErrorDocument } from '../generated/graphql'
+import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 
 gql`
 fragment MainAppQueryData on Query {
     baseError {
+      id
       ...BaseError
     }
     currentProject {
@@ -85,49 +85,30 @@ query MainAppQuery {
 `
 
 gql`
-mutation MainApp_ResetErrorsAndLoadConfig {
-  resetErrorsAndLoadConfig {
+mutation MainApp_ResetErrorsAndLoadConfig($id: ID!) {
+  resetErrorAndLoadConfig(id: $id) {
     ...MainAppQueryData
   }
 }
 `
-
-gql`
-subscription CheckBaseError {
-  baseErrorChange {
-    ...MainAppQueryData
-  }
-}
-`
-
-const isRunMode = window.__CYPRESS_MODE__ === 'run'
-
-// subscriptions are used to trigger live updates without
-// reloading the page.
-// this is only useful in open mode - in run mode, we don't
-// use GraphQL, so we pause the
-// subscriptions so they never execute.
-const shouldPauseSubscriptions = isRunMode && window.top === window
-
-useSubscription({
-  query: CheckBaseErrorDocument,
-  pause: shouldPauseSubscriptions,
-})
-
-const query = useQuery({ query: MainAppQueryDocument })
-const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
-
-const resetErrorsAndLoadConfig = () => {
-  if (!mutation.fetching.value) {
-    mutation.executeMutation({})
-  }
-}
 
 const currentRoute = useRoute()
 
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
 })
+
+const query = useQuery({
+  query: MainAppQueryDocument,
+  pause: !showHeader.value,
+})
+const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
+
+const resetErrorAndLoadConfig = (id: string) => {
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({ id })
+  }
+}
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
 </script>

@@ -5,6 +5,7 @@ import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
 import str from 'underscore.string'
+import _ from 'lodash'
 
 import 'server-destroy'
 
@@ -39,6 +40,7 @@ import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecy
 import type { CypressError } from '@packages/errors'
 import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
+import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -148,7 +150,20 @@ export class DataContext {
   }
 
   get baseError () {
-    return this.coreData.baseError
+    return this.coreData.currentProjectData?.testingTypeData?.activeAppData?.error
+      ?? this.coreData.currentProjectData?.testingTypeData?.error
+      ?? this.coreData.currentProjectData?.error
+      ?? this.coreData.baseError
+      ?? null
+  }
+
+  get warnings () {
+    return [
+      ...this.coreData.currentProjectData?.testingTypeData?.activeAppData?.warnings ?? [],
+      ...this.coreData.currentProjectData?.testingTypeData?.warnings ?? [],
+      ...this.coreData.currentProjectData?.warnings ?? [],
+      ...this.coreData.warnings ?? [],
+    ]
   }
 
   @cached
@@ -343,7 +358,7 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (cypressError: CypressError, title?: string) => {
+  onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
         this.lifecycleManager.runModeExitEarly(cypressError)
@@ -351,14 +366,25 @@ export class DataContext {
         throw cypressError
       }
     } else {
-      this.update((coreData) => {
-        coreData.baseError = { title, cypressError }
+      const err = {
+        id: _.uniqueId('Error'),
+        title,
+        cypressError,
+      }
+
+      this.update((d) => {
+        if (d.currentProjectData?.testingTypeData?.activeAppData) {
+          d.currentProjectData.testingTypeData.activeAppData.error = err
+        } else if (d.currentProjectData?.testingTypeData) {
+          d.currentProjectData.testingTypeData.error = err
+        } else if (d.currentProjectData) {
+          d.currentProjectData.error = err
+        } else {
+          d.baseError = err
+        }
       })
 
-      this.emitter.baseErrorChange()
-
-      this.emitter.toLaunchpad()
-      this.emitter.toApp()
+      this.emitter.errorWarningChange()
     }
   }
 
@@ -367,12 +393,25 @@ export class DataContext {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
-      this.coreData.warnings.push({
+      const warning = {
+        id: _.uniqueId('Warning'),
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
         cypressError: err,
+      }
+
+      this.update((d) => {
+        if (d.currentProjectData?.testingTypeData?.activeAppData) {
+          d.currentProjectData.testingTypeData.activeAppData.warnings.push(warning)
+        } else if (d.currentProjectData?.testingTypeData) {
+          d.currentProjectData.testingTypeData.warnings.push(warning)
+        } else if (d.currentProjectData) {
+          d.currentProjectData.warnings.push(warning)
+        } else {
+          d.warnings.push(warning)
+        }
       })
 
-      this.emitter.toLaunchpad()
+      this.emitter.errorWarningChange()
     }
   }
 
@@ -400,9 +439,11 @@ export class DataContext {
     globalPubSub.emit('reset:data-context', this)
   }
 
-  private _reset () {
+  _reset () {
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
+
+    resetIssuedWarnings()
 
     return Promise.all([
       this.lifecycleManager.destroy(),
