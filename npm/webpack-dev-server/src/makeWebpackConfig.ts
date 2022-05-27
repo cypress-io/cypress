@@ -103,9 +103,15 @@ export async function makeWebpackConfig (
 
     if (configFile) {
       debug('found webpack config %s', configFile)
-      userWebpackConfig = require(configFile)
+      const sourcedConfig = configFile.endsWith('mjs') ? await import(configFile) : require(configFile)
+
       debug('config contains %o', userWebpackConfig)
-    } else {
+      if (sourcedConfig && typeof sourcedConfig === 'object') {
+        userWebpackConfig = sourcedConfig.default ?? sourcedConfig
+      }
+    }
+
+    if (!userWebpackConfig) {
       debug('could not find webpack.config!')
       if (config.devServerConfig?.onConfigNotFound) {
         config.devServerConfig.onConfigNotFound('webpack', projectRoot, configFiles)
