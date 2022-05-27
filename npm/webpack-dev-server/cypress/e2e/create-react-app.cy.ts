@@ -22,6 +22,7 @@ for (const project of WEBPACK_REACT) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('App.cy.js').click()
+      cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
     })
 
@@ -29,6 +30,7 @@ for (const project of WEBPACK_REACT) {
       cy.visitApp()
 
       cy.contains('App.cy.js').click()
+      cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
 
       cy.withCtx(async (ctx) => {
@@ -61,6 +63,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.contains('New.cy.js').click()
+      cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 1)
     })
   })

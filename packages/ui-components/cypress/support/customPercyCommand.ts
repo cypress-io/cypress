@@ -72,7 +72,7 @@ class ElementOverrideManager {
    */
   performOverrides (cy: Cypress.cy, overrides: NonNullable<CustomSnapshotOptions['elementOverrides']>) {
     const observer = new MutationObserver((mutations) => {
-      this.mutationStack ??= []
+      this.mutationStack = this.mutationStack || []
       this.mutationStack.push(...mutations)
     })
 

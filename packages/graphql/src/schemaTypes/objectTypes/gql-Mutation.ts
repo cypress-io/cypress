@@ -25,16 +25,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('resetErrorsAndLoadConfig', {
+    t.field('resetErrorAndLoadConfig', {
       type: Query,
-      description: 'Resets errors and attempts to reload the config',
+      description: 'Resets error and attempts to reload the config',
+      args: {
+        id: nonNull(idArg()),
+      },
       resolve: async (_, args, ctx) => {
-        ctx.update((d) => {
-          d.baseError = null
-          d.warnings = []
-        })
-
-        // Wait for the project config to be reloaded
+        ctx.actions.error.clearError(args.id)
         await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
@@ -52,7 +50,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         if (args.action === 'trigger') {
-          await ctx.actions.dev.triggerRelaunch()
+          ctx.actions.dev.triggerRelaunch()
         } else {
           ctx.actions.dev.dismissRelaunch()
         }
@@ -232,7 +230,7 @@ export const mutation = mutationType({
         })),
       },
       async resolve (_, args, ctx) {
-        await ctx.actions.app.setActiveBrowserById(args.id)
+        await ctx.actions.browser.setActiveBrowserById(args.id)
 
         return ctx.lifecycleManager
       },
@@ -606,37 +604,21 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.project.setRelaunchBrowser(ctx.lifecycleManager.isTestingTypeConfigured(args.testingType))
-        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
-        await ctx.actions.project.reconfigureProject()
+        await ctx.actions.project.switchTestingTypesAndRelaunch(args.testingType)
 
         return true
       },
     })
 
-    t.field('setTestingTypeAndReconfigureProject', {
-      description: 'Set the selected testing type, and reconfigure the project',
-      type: Query,
-      args: {
-        testingType: nonNull(arg({ type: TestingTypeEnum })),
-        isApp: nonNull(booleanArg()),
-      },
-      resolve: async (source, args, ctx) => {
-        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
-        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
-
-        if (args.isApp) {
-          await ctx.actions.project.reconfigureProject()
-        }
-
-        return {}
-      },
-    })
-
     t.field('dismissWarning', {
       type: Query,
+      args: {
+        id: nonNull(idArg({})),
+      },
       description: `Dismisses a warning displayed by the frontend`,
-      resolve: (source) => {
+      resolve: (source, args, ctx) => {
+        ctx.actions.error.clearWarning(args.id)
+
         return {}
       },
     })
