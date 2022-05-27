@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - 10.0-release
+        - fix-unit-tests-release
 
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
@@ -45,7 +45,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ 'fix-unit-tests-release', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -57,7 +57,7 @@ fullWindowsWorkflowFilters: &full-windows-workflow-filters
     branches:
       only:
       - develop
-      - '10.0-release'
+      - 'fix-unit-tests-release'
       - '*-release'
       - 'win*'
 
@@ -108,7 +108,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/issue-21236" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-unit-tests-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1220,6 +1220,11 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - run:
+          name: Update known_hosts with github.com keys
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run: yarn test-npm-package-release-script
 
   lint-types:
