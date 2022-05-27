@@ -168,7 +168,7 @@ describe('src/cypress/runner', () => {
       })
 
       cy.withCtx((ctx, o) => {
-        ctx.actions.file.openFile = o.sinon.stub()
+        o.sinon.stub(ctx.actions.file, 'openFile')
       })
 
       cy.contains('a', 'simple-cy-assert.runner')
