@@ -1,1 +1,1 @@
-export const gitStatusType = ['modified', 'created', 'unmodified'] as const
+export const gitStatusType = ['modified', 'created', 'unmodified', 'noGitInfo'] as const

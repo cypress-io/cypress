@@ -20,6 +20,14 @@ type $Cypress = any
 
 const noop = () => {}
 
+let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
+  data: any
+  source: Window
+}>) => {
+  return undefined
+}
+let crossOriginLogs: {[key: string]: Cypress.Log} = {}
+
 interface AddGlobalListenerOptions {
   element: AutomationElementId
   randomString: string
@@ -355,14 +363,6 @@ export class EventManager {
       this._clearAllCookies()
       this._setUnload()
     })
-
-    // The window.top should not change between test reloads, and we only need to bind the message event once
-    // Forward all message events to the current instance of the multi-origin communicator
-    if (!window.top) throw new Error('missing window.top in event-manager')
-
-    window.top.addEventListener('message', ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
-    }, false)
   }
 
   start (config) {
@@ -654,8 +654,6 @@ export class EventManager {
 
     Cypress.primaryOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
 
-    const crossOriginLogs = {}
-
     Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
       // If the test is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
       if (Cypress.state('test')?.final) return
@@ -673,6 +671,28 @@ export class EventManager {
       // this will trigger a log changed event for the log itself.
       log?.set(attrs)
     })
+
+    // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
+    // Forward all message events to the current instance of the multi-origin communicator
+    if (!window.top) throw new Error('missing window.top in event-manager')
+
+    /**
+     * NOTE: Be sure to remove the cross origin onMessage bus to make sure the communicator doesn't live on inside a closure and cause tied up events.
+     *
+     * This is applicable when a user navigates away from the runner and into the "specs" menu or otherwise,
+     * and the EventManager is recreated. This is the main reason this reference is scoped to the file and NOT the instance.
+     *
+     * This is also applicable when a user changes their spec file and hot reloads their spec, in which case we need to rebind onMessage
+     * with the newly creates Cypress.primaryOriginCommunicator
+     */
+    window?.top?.removeEventListener('message', crossOriginOnMessageRef, false)
+    crossOriginOnMessageRef = ({ data, source }) => {
+      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+
+      return undefined
+    }
+
+    window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
   _runDriver (state) {
@@ -709,6 +729,10 @@ export class EventManager {
     // when we are re-running we first
     // need to stop cypress always
     Cypress.stop()
+    // Clean up the primary communicator to prevent possible memory leaks / dangling references before the Cypress instance is destroyed.
+    Cypress.primaryOriginCommunicator.removeAllListeners()
+    // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
+    crossOriginLogs = {}
 
     this.studioRecorder.setInactive()
   }
@@ -728,7 +752,6 @@ export class EventManager {
     // but we want to be aggressive here
     // and force GC early and often
     Cypress.removeAllListeners()
-    Cypress.primaryOriginCommunicator.removeAllListeners()
 
     this.localBus.emit('restart')
   }
