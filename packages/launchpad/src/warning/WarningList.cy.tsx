@@ -2,6 +2,7 @@ import { WarningListFragmentDoc } from '../generated/graphql-test'
 import WarningList from './WarningList.vue'
 import faker from 'faker'
 import { defaultMessages } from '@cy/i18n'
+import { WarningList_RemoveWarningDocument } from '../generated/graphql'
 
 const warningSelector = '[data-cy=warning-alert]'
 
@@ -10,8 +11,8 @@ const createWarning = (props = {}) => ({
   ...props,
 })
 
-const firstWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase() })
-const secondWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase() })
+const firstWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase(), id: 'Warning1' })
+const secondWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase(), id: 'Warning2' })
 
 describe('<WarningList />', () => {
   it('does not render warning if there are none', () => {
@@ -40,6 +41,15 @@ describe('<WarningList />', () => {
   })
 
   it('removes warning when dismissed', () => {
+    cy.stubMutationResolver(WarningList_RemoveWarningDocument, (defineResult, { id }) => {
+      return defineResult({
+        dismissWarning: {
+          __typename: 'Query',
+          warnings: [secondWarning],
+        },
+      })
+    })
+
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
         result.warnings = [firstWarning, secondWarning]
