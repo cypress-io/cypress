@@ -429,7 +429,7 @@ export class DataContext {
 
     return Promise.all([
       destroy(),
-      this.#_reset(),
+      this._reset(),
     ])
   }
 
@@ -438,7 +438,7 @@ export class DataContext {
    * so we can initialize fresh for each E2E test
    */
   async reinitializeCypress (modeOptions: Partial<AllModeOptions> = {}) {
-    await this.#_reset()
+    await this._reset()
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
@@ -448,7 +448,7 @@ export class DataContext {
     globalPubSub.emit('reset:data-context', this)
   }
 
-  #_reset () {
+  _reset () {
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
 
