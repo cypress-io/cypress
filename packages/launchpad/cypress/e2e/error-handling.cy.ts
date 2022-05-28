@@ -63,7 +63,7 @@ describe('Error handling', () => {
   })
 
   describe('using bundler: "vite" with missing config', () => {
-    it('displays informative error about what when wrong and where we looked', () => {
+    it('displays informative error about what went wrong and where we looked', () => {
       cy.scaffoldProject('missing-vite-config')
       cy.openProject('missing-vite-config', ['--component'])
       cy.visitLaunchpad()
@@ -72,8 +72,31 @@ describe('Error handling', () => {
         cy.contains(idiomaticConfigFile)
       })
 
-      cy.contains('You are using vite for your dev server, but the required configuration file was not found')
-      cy.contains('Either ensure a configuration file exists with the above names, or pass a custom configuration file using the viteConfig option.')
+      cy.wait(1000) // ensure the error doesn't get cleared (process.exit)
+
+      cy.contains('You are using vite for your dev server, but a configuration file was not found.')
+      cy.contains('Add your vite config at one of the above paths, or import your configuration file and provide it to the devServer config as a viteConfig option.')
+
+      cy.contains('Choose a Browser').should('not.exist')
+
+      cy.withCtx((ctx) => {
+        ctx.actions.file.writeFileInProject('cypress.config.js', `
+          import { defineConfig } from 'cypress'
+          import { defineConfig as viteConfig } from 'vite'
+          export default defineConfig({
+            component: {
+              supportFile: false,
+              devServer: {
+                framework: 'react',
+                bundler: 'vite',
+                viteConfig: viteConfig({})
+              },
+            },
+          })
+        `)
+      })
+
+      cy.contains('Choose a Browser').should('not.exist')
     })
 
     context('has config file in common location', () => {
@@ -99,8 +122,10 @@ describe('Error handling', () => {
           cy.contains(idiomaticConfigFile)
         })
 
-        cy.contains('You are using webpack for your dev server, but the required configuration file was not found')
-        cy.contains('Either ensure a configuration file exists with the above names, or pass a custom configuration file using the webpackConfig option.')
+        cy.wait(1000) // ensure the error doesn't get cleared (process.exit)
+
+        cy.contains('You are using webpack for your dev server, but a configuration file was not found.')
+        cy.contains('Add your webpack config at one of the above paths, or import your configuration file and provide it to the devServer config as a webpackConfig option.')
       })
     })
 

@@ -32,6 +32,9 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   } else {
     if (config.onConfigNotFound) {
       config.onConfigNotFound('vite', root, configFiles)
+      // The config process will be killed from the parent, but we want to early exit so we don't get
+      // any additional errors related to not having a config
+      process.exit(0)
     } else {
       throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
     }

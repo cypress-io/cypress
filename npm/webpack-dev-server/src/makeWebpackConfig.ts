@@ -115,6 +115,9 @@ export async function makeWebpackConfig (
       debug('could not find webpack.config!')
       if (config.devServerConfig?.onConfigNotFound) {
         config.devServerConfig.onConfigNotFound('webpack', projectRoot, configFiles)
+        // The config process will be killed from the parent, but we want to early exit so we don't get
+        // any additional errors related to not having a config
+        process.exit(0)
       } else {
         throw new Error(`Your Cypress devServer config is missing a required webpackConfig property, since we could not automatically detect one.\nPlease add one to your ${config.devServerConfig.cypressConfig.configFile}`)
       }

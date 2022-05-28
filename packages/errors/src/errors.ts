@@ -1535,7 +1535,7 @@ export const AllCypressErrors = {
     const devServerConfigFile = `${devServer}Config`
 
     return errTemplate`\
-      You are using ${fmt.highlight(devServer)} for your dev server, but the required configuration file was not found. We traversed upwards from:
+      You are using ${fmt.highlight(devServer)} for your dev server, but a configuration file was not found. We traversed upwards from:
       
       ${fmt.highlightSecondary(root)}
       
@@ -1543,7 +1543,8 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(searchedFor, { prefix: ' - ' })}
 
-      Either ensure a configuration file exists with the above names, or pass a custom configuration file using the ${fmt.highlight(devServerConfigFile)} option.
+      Add your ${fmt.highlight(devServer)} config at one of the above paths, or import your configuration file and provide it to 
+      the devServer config as a ${fmt.highlight(devServerConfigFile)} option.
     `
   },
 } as const
