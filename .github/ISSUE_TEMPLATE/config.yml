@@ -1,4 +1,4 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
   - name: 🤔 Questions and Help
     url: https://github.com/cypress-io/cypress/discussions
