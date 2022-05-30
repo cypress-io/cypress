@@ -349,9 +349,14 @@ toolbar {
 let browserCriClient
 
 export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
+  if (!browserInstance.pid) {
+    throw new Error('Browser PID is undefined. Browser process failed to spawn.')
+  }
+
+  const browserInstancePid = browserInstance.pid
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
 
-  detachedInstance.pid = browserProcess.pid!
+  detachedInstance.pid = browserInstancePid
 
   // kill the entire process tree, from the spawned instance up
   detachedInstance.kill = (): void => {
@@ -361,7 +366,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
       browserCriClient = undefined
     }
 
-    treeKill(browserInstance.pid, (err?, result?) => {
+    treeKill(browserInstancePid, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
     })
