@@ -19,7 +19,12 @@ export class SocketAllowed {
     const { localPort } = socket
 
     debug('allowing socket %o', { localPort })
-    this.allowedLocalPorts.push(localPort!)
+
+    if (!localPort) {
+      throw Error(`localPort was not defined. This should never happen.`)
+    }
+
+    this.allowedLocalPorts.push(localPort)
 
     socket.once('close', () => {
       debug('allowed socket closed, removing %o', { localPort })
