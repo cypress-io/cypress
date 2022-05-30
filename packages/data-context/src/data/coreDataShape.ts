@@ -106,6 +106,23 @@ export interface ForceReconfigureProjectDataShape {
   component?: boolean | null
 }
 
+export interface ActiveAppData {
+  error: ErrorWrapperSource | null
+  warnings: ErrorWrapperSource[]
+}
+
+export interface CurrentTestingTypeData {
+  error: ErrorWrapperSource | null
+  warnings: ErrorWrapperSource[]
+  activeAppData: ActiveAppData | null
+}
+
+export interface CurrentProjectData {
+  error: ErrorWrapperSource | null
+  warnings: ErrorWrapperSource[]
+  testingTypeData: CurrentTestingTypeData | null
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -129,6 +146,10 @@ export interface CoreDataShape {
   currentProject: string | null
   currentProjectGitInfo: GitDataSource | null
   currentTestingType: TestingType | null
+
+  // TODO: Move everything under this container, to make it simpler to reset the data when switching
+  currentProjectData: CurrentProjectData | null
+
   wizard: WizardDataShape
   migration: MigrationDataShape
   user: AuthenticatedUserShape | null
@@ -176,6 +197,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
+    currentProjectData: makeCurrentProjectData(modeOptions.projectRoot, modeOptions.testingType),
     currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -214,4 +236,28 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     forceReconfigureProject: null,
     versionData: null,
   }
+}
+
+export function makeCurrentProjectData (projectRoot: Maybe<string>, testingType: Maybe<TestingType>): CurrentProjectData | null {
+  if (projectRoot) {
+    return {
+      error: null,
+      warnings: [],
+      testingTypeData: makeTestingTypeData(testingType),
+    }
+  }
+
+  return null
+}
+
+export function makeTestingTypeData (testingType: Maybe<TestingType>): CurrentTestingTypeData | null {
+  if (testingType) {
+    return {
+      error: null,
+      warnings: [],
+      activeAppData: null,
+    }
+  }
+
+  return null
 }
