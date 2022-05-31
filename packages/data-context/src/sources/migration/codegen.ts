@@ -438,7 +438,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
         // If the supportFile is set, but is the same value as the default one; where
         // we migrate it, we do not want to put the legacy value in the migrated config.
         // It can be .ts or .js
-        if (val.includes('cypress/support/index.')) {
+        if (val.match(/^cypress\/support\/index\.(ts|js)$/)) {
           return acc
         }
 
