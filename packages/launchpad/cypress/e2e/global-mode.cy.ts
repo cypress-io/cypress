@@ -55,6 +55,9 @@ describe('Launchpad: Global Mode', () => {
       .should('contain', 'browse manually')
       .click()
 
+      cy.get('h1').should('contain', 'Welcome to Cypress!')
+      cy.get('a').contains('Projects').click()
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
 
@@ -312,6 +315,20 @@ describe('Launchpad: Global Mode', () => {
         cy.get('#project-search').type(`${path.sep}random`)
         cy.contains(defaultMessages.globalPage.noResultsMessage)
       })
+    })
+  })
+
+  describe('error state', () => {
+    it('should not persist the error when going back to the main screen projects', () => {
+      cy.openGlobalMode()
+      cy.addProject('config-with-import-error')
+      cy.addProject('todos')
+      cy.visitLaunchpad()
+      cy.contains('[data-cy="project-card"]', 'todos').should('be.visible')
+      cy.contains('[data-cy="project-card"]', 'config-with-import-error').should('be.visible').click()
+      cy.get('h1').contains('Cypress configuration error')
+      cy.get('a').contains('Projects').click()
+      cy.get('body').should('not.contain', 'Cypress configuration error')
     })
   })
 })

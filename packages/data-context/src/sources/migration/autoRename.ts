@@ -9,6 +9,7 @@ import {
   getIntegrationFolder,
   getIntegrationTestFilesGlobs,
   isDefaultTestFiles,
+  legacyIntegrationFolder,
   regexps,
 } from '.'
 import type { MigrationFile } from '../MigrationDataSource'
@@ -123,7 +124,7 @@ export async function getSpecs (projectRoot: string, config: LegacyCypressConfig
   let componentSpecs: MigrationSpec[] = []
 
   const globs = integrationFolder
-    ? integrationFolder === 'cypress/integration'
+    ? integrationFolder === legacyIntegrationFolder
       ? [defaultTestFilesGlob].map((glob) => `${integrationFolder}/${glob}`)
       : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
     : []
@@ -132,7 +133,7 @@ export async function getSpecs (projectRoot: string, config: LegacyCypressConfig
     ? (await globby(globs, { onlyFiles: true, cwd: projectRoot }))
     : []
 
-  const fullyCustom = integrationFolder !== 'cypress/integration' && !isDefaultTestFiles(config, 'integration')
+  const fullyCustom = integrationFolder !== legacyIntegrationFolder && !isDefaultTestFiles(config, 'integration')
 
   // we cannot do a migration if either integrationFolder is false,
   // or if both the integrationFolder and testFiles are custom.
@@ -142,7 +143,7 @@ export async function getSpecs (projectRoot: string, config: LegacyCypressConfig
     integrationSpecs = specs.map((relative) => {
       return {
         relative,
-        usesDefaultFolder: integrationFolder === 'cypress/integration',
+        usesDefaultFolder: integrationFolder === legacyIntegrationFolder,
         usesDefaultTestFiles: isDefaultTestFiles(config, 'integration'),
         testingType: 'e2e',
       }

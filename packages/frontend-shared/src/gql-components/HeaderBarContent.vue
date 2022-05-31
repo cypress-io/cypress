@@ -222,6 +222,13 @@ useSubscription({ query: HeaderBarContent_AuthChangeDocument })
 gql`
 mutation GlobalPageHeader_clearCurrentProject {
   clearCurrentProject {
+    baseError {
+      id
+      ...BaseError
+    }
+    warnings {
+      id
+    }
     currentProject {
       id
     }
@@ -232,6 +239,13 @@ mutation GlobalPageHeader_clearCurrentProject {
 gql`
 mutation GlobalPageHeader_ClearCurrentTestingType {
   clearCurrentTestingType {
+    baseError {
+      id
+      ...BaseError
+    }
+    warnings {
+      id
+    }
     currentProject {
       id
       currentTestingType

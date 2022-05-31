@@ -78,6 +78,7 @@ export interface SerializedError extends Omit<CypressError, 'messageMarkdown' | 
  * Used in the GraphQL Error / Warning objects
  */
 export interface ErrorWrapperSource {
+  id: string
   title?: string | null
   cypressError: CypressError
 }

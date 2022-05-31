@@ -28,6 +28,7 @@ import {
   getIntegrationTestFilesGlobs,
   getSpecPattern,
   legacyOptions,
+  legacyIntegrationFolder,
 } from '../sources/migration'
 import { makeCoreData } from '../data'
 import { LegacyPluginsIpc } from '../data/LegacyPluginsIpc'
@@ -205,7 +206,7 @@ export class MigrationActions {
     const integrationFolder = getIntegrationFolder(legacyConfigForMigration)
     const integrationTestFiles = getIntegrationTestFilesGlobs(legacyConfigForMigration)
 
-    const hasCustomIntegrationFolder = getIntegrationFolder(legacyConfigForMigration) !== 'cypress/integration'
+    const hasCustomIntegrationFolder = getIntegrationFolder(legacyConfigForMigration) !== legacyIntegrationFolder
     const hasCustomIntegrationTestFiles = !isDefaultTestFiles(legacyConfigForMigration, 'integration')
 
     const shouldAddCustomE2ESpecPattern = Boolean(this.ctx.migration.legacyConfigProjectId)

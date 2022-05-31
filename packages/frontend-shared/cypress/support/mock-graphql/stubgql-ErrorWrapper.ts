@@ -4,6 +4,7 @@ import type { MaybeResolver } from './clientTestUtils'
 
 export const StubErrorWrapper = {
   __typename: 'ErrorWrapper',
+  id: 'Error1',
   title: 'Cypress configuration error',
   errorMessage: dedent`
     Your \`supportFile\` is set to \`foo.bar.js\`, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\`, \`.ts\`, \`.coffee\` file or be supported by your preprocessor plugin (if configured).
