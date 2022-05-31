@@ -66,7 +66,7 @@ describe('GitDataSource', () => {
 
     const dfd = pDefer()
 
-    onGitInfoChange.onFirstCall().callsFake(dfd.resolve)
+    onGitInfoChange.onSecondCall().callsFake(dfd.resolve)
 
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
