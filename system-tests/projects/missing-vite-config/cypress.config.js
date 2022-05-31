@@ -1,12 +1,11 @@
-export default ({
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   component: {
     supportFile: false,
     devServer: {
       framework: 'react',
-      bundler: 'webpack',
+      bundler: 'vite',
     },
-  },
-  e2e: {
-    supportFile: false,
   },
 })
