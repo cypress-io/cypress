@@ -105,7 +105,7 @@ describe('experimentalStudio', () => {
     cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
-    cy.contains('experimental-studio').click()
+    cy.contains('[data-cy="project-card"]', 'experimental-studio').click()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
