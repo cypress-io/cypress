@@ -7,6 +7,7 @@ module.exports = {
     'supportFile': 'tests/_support/spec_helper.js',
     'devServer': {
       'bundler': 'webpack',
+      'webpackConfig': {},
     },
   },
   'e2e': {
