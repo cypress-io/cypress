@@ -435,6 +435,13 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
           component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
+        // If the supportFile is set, but is the same value as the default one; where
+        // we migrate it, we do not want to put the legacy value in the migrated config.
+        // It can be .ts or .js
+        if (val.includes('cypress/support/index.')) {
+          return acc
+        }
+
         return {
           ...acc,
           e2e: { ...acc.e2e, supportFile: val },
