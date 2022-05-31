@@ -103,7 +103,7 @@ export async function makeWebpackConfig (
 
     if (configFile) {
       debug('found webpack config %s', configFile)
-      const sourcedConfig = configFile.endsWith('mjs') ? await import(configFile) : require(configFile)
+      const sourcedConfig = await importModule(configFile)
 
       debug('config contains %o', userWebpackConfig)
       if (sourcedConfig && typeof sourcedConfig === 'object') {
