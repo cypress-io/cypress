@@ -523,6 +523,34 @@ describe('reduceConfig', () => {
     expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
   })
 
+  it('should not add supportFile if it is null', () => {
+    const config = { supportFile: null }
+    const newConfig = reduceConfig(config, options)
+
+    expect(newConfig.e2e.supportFile).to.not.exist
+  })
+
+  it('should not add supportFile if it is undefined', () => {
+    const config = { supportFile: undefined }
+    const newConfig = reduceConfig(config, options)
+
+    expect(newConfig.e2e.supportFile).to.not.exist
+  })
+
+  it('should not add supportFile if it is cypress/support', () => {
+    const config = { supportFile: 'cypress/support' }
+    const newConfig = reduceConfig(config, options)
+
+    expect(newConfig.e2e.supportFile).to.not.exist
+  })
+
+  it('should not add supportFile if it is cypress/support/index', () => {
+    const config = { supportFile: 'cypress/support/index' }
+    const newConfig = reduceConfig(config, options)
+
+    expect(newConfig.e2e.supportFile).to.not.exist
+  })
+
   it('should not add supportFile if it is the default one', () => {
     const config = { supportFile: 'cypress/support/index.js' }
     const newConfig = reduceConfig(config, options)
