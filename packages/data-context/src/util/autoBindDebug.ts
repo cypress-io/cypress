@@ -12,7 +12,7 @@ const debugLibCache: Record<string, debugLib.Debugger> = {}
  * set DEBUG=cypress-trace:<ClassName> to utilize the logging
  */
 export function autoBindDebug <T extends object> (obj: T): T {
-  const ns = `cypress-trace:${obj.constructor.name}`
+  const ns = `trace-cypress:${obj.constructor.name}`
   const debug = debugLibCache[ns] = debugLibCache[ns] || debugLib(ns)
 
   if (!debug.enabled) {
