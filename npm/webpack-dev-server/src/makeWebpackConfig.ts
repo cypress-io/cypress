@@ -105,7 +105,7 @@ export async function makeWebpackConfig (
       debug('found webpack config %s', configFile)
       const sourcedConfig = await importModule(configFile)
 
-      debug('config contains %o', userWebpackConfig)
+      debug('config contains %o', sourcedConfig)
       if (sourcedConfig && typeof sourcedConfig === 'object') {
         userWebpackConfig = sourcedConfig.default ?? sourcedConfig
       }
