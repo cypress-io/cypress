@@ -111,14 +111,14 @@ function run (ipc, file, projectRoot) {
     try {
       debug('Trying to use esbuild to run their config file.')
       // We prefer doing this because it supports TypeScript files
-      require.resolve('esbuild')
+      require.resolve('esbuild', { paths: [process.cwd()] })
 
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
 
       return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
+      if (err.stack.includes(`Cannot find module 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
