@@ -1547,6 +1547,14 @@ export const AllCypressErrors = {
       the devServer config as a ${fmt.highlight(devServerConfigFile)} option.
     `
   },
+
+  TESTING_TYPE_NOT_CONFIGURED: (testingType: TestingType) => {
+    return errTemplate`
+      The testing type selected (${fmt.highlight(testingType)}) is not configured in your config file.
+
+      Please update it, and try running it again.
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
