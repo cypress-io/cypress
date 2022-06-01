@@ -34,11 +34,47 @@ describe('InlineSpecList', () => {
     .should('exist')
     .and('have.length', 7)
 
-    // overflow is required for the virtual list to work
-    // this test will fail if the overflow set by `useVirtualList`
-    // is overridden
-    cy.get('[data-cy="specs-list-container"]')
-    .should('have.css', 'overflow-y', 'auto')
+    cy.percySnapshot()
+  })
+
+  it('the specs should scroll correctly', () => {
+    const viewportHeight = 200
+    const viewportWidth = 300
+
+    mountInlineSpecList()
+    cy.viewport(viewportWidth, viewportHeight)
+
+    cy.get('li')
+    .should('exist')
+    .and('have.length', 7)
+
+    cy.contains('Spec-D').should(($el) => {
+      if (!$el || typeof $el !== 'object') {
+        return
+      }
+
+      const el = $el[0] as HTMLElement
+
+      const rect = el.getBoundingClientRect()
+
+      expect(rect.top).to.be.greaterThan(viewportHeight)
+    })
+
+    cy.percySnapshot()
+
+    cy.contains('Spec-D').scrollIntoView()
+
+    cy.contains('Spec-D').should(($el) => {
+      if (!$el || typeof $el !== 'object') {
+        return
+      }
+
+      const el = $el[0] as HTMLElement
+
+      const rect = el.getBoundingClientRect()
+
+      expect(rect.top).to.be.lessThan(viewportHeight)
+    })
 
     cy.percySnapshot()
   })
