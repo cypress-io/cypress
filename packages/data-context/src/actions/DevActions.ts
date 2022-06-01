@@ -21,6 +21,7 @@ export class DevActions {
     if (!this._chokidar) {
       this._chokidar = chokidar.watch(DevActions.CY_STATE_PATH, {
         ignoreInitial: true,
+        ignorePermissionErrors: true,
       })
 
       this._chokidar.on('change', () => {

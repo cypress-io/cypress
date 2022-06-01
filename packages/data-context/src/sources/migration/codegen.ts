@@ -81,6 +81,7 @@ export async function initComponentTestingMigration (
   const watcher = chokidar.watch(
     watchPaths, {
       cwd: projectRoot,
+      ignorePermissionErrors: true,
     },
   )
 
