@@ -23,6 +23,9 @@ export const defaultConfig: FullConfig = {
       cursor: {
         'ew-resize': 'ew-resize',
       },
+      boxShadow: {
+        'dropdown': '0 1px 3px 0 rgba(0, 0, 0, 0.2)',
+      },
     },
   },
   safelist,
@@ -43,7 +46,7 @@ export const defaultConfig: FullConfig = {
     include: [
       'index.html',
       '**/*.{vue,html,tsx}',
-      path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
+      path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg,ts}'),
       path.resolve(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
       path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
     ],

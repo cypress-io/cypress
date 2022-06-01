@@ -5,12 +5,11 @@ import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
-import { launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import { debug as launcherDebug, launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
-import * as launcherDebug from '@packages/launcher/lib/log'
 import type { Browser, BrowserInstance } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
@@ -19,6 +18,8 @@ import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
+import { getCtx } from '@packages/data-context'
+import { getError } from '@packages/errors'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -83,6 +84,9 @@ const defaultPreferences = {
   'browser.startup.homepage_override.mstone': 'ignore',
   // Start with a blank page about:blank
   'browser.startup.page': 0,
+  // Disable notification banners related to session restoration.
+  // Any presented banners can result in incorrectly sized screenshots.
+  'browser.startup.couldRestoreSession.count': 0,
 
   // Do not allow background tabs to be zombified on Android: otherwise for
   // tests that open additional tabs: the test harness tab itself might get
@@ -300,7 +304,7 @@ const defaultPreferences = {
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
 
-  'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
+  'marionette.log.level': launcherDebug.enabled ? 'Debug' : undefined,
 
   // where to download files
   // 0: desktop
@@ -371,7 +375,7 @@ export async function connectToNewSpec (browser: Browser, options: any = {}, aut
 }
 
 export function connectToExisting () {
-  throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')
+  getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
 export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {

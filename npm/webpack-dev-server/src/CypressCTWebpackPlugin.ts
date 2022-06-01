@@ -2,7 +2,7 @@ import type { Compiler, Compilation } from 'webpack'
 import type webpack from 'webpack'
 import type { EventEmitter } from 'events'
 import _ from 'lodash'
-import fs, { PathLike } from 'fs'
+import fs, { PathLike } from 'fs-extra'
 import path from 'path'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
@@ -45,7 +45,6 @@ export const normalizeError = (error: Error | string) => {
 export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
-  private errorEmitted = false
   private compilation: Webpack45Compilation | null = null
   private webpack: Function
 
@@ -68,40 +67,29 @@ export class CypressCTWebpackPlugin {
     }
   };
 
-  /*
-   * After compiling, we check for errors and inform the server of them.
-   */
-  private afterCompile = () => {
+  private beforeCompile = async (compilationParams: object, callback: Function) => {
     if (!this.compilation) {
+      callback()
+
       return
     }
 
-    const stats = this.compilation.getStats()
+    // Ensure we don't try to load files that have been removed from the file system
+    // but have not yet been detected by the onSpecsChange handler
 
-    if (stats.hasErrors()) {
-      this.errorEmitted = true
+    const foundFiles = (await Promise.all(this.files.map(async (file) => {
+      try {
+        const exists = await fs.pathExists(file.absolute)
 
-      // webpack 4: string[]
-      // webpack 5: Error[]
-      const errors = stats.toJson().errors as Array<Error | string> | undefined
-
-      if (!errors || !errors.length) {
-        return
+        return exists ? file : null
+      } catch (e) {
+        return null
       }
+    })))
 
-      this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-    } else if (this.errorEmitted) {
-      // compilation succeed but assets haven't emitted to the output yet
-      this.devServerEvents.emit('dev-server:compile:error', null)
-    }
-  }
+    this.files = foundFiles.filter((file) => file !== null) as Cypress.Spec[]
 
-  // After emitting assets, we tell the server complitation was successful
-  // so it can trigger a reload the AUT iframe.
-  private afterEmit = () => {
-    if (!this.compilation?.getStats().hasErrors()) {
-      this.devServerEvents.emit('dev-server:compile:success')
-    }
+    callback()
   }
 
   /*
@@ -152,8 +140,10 @@ export class CypressCTWebpackPlugin {
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
-    _compiler.hooks.afterCompile.tap('CypressCTPlugin', this.afterCompile)
-    _compiler.hooks.afterEmit.tap('CypressCTPlugin', this.afterEmit)
+    _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
+    _compiler.hooks.done.tap('CypressCTPlugin', () => {
+      this.devServerEvents.emit('dev-server:compile:success')
+    })
   }
 }

@@ -338,7 +338,7 @@ function runSpecE2E (spec: SpecFile) {
   getEventManager().initialize($autIframe, config)
 }
 
-function getRunnerConfigFromWindow () {
+export function getRunnerConfigFromWindow () {
   return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
 }
 

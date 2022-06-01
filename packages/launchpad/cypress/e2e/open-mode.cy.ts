@@ -44,12 +44,35 @@ describe('Launchpad: Open Mode', () => {
   if (Cypress.platform !== 'win32') {
     it('auto-selects the browser when launched with --browser', () => {
       cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad', ['--browser', 'firefox'])
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
+      })
+
+      // Need to visit after args have been configured, todo: fix in #18776
+      cy.visitLaunchpad()
+      cy.contains('E2E Testing').click()
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
+      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+    })
+
+    it('auto-launches the browser when launched with --browser --testingType --project', () => {
+      cy.scaffoldProject('launchpad')
       cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
       cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      })
     })
   }
 

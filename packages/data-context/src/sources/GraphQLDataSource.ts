@@ -5,7 +5,7 @@ import type { core } from 'nexus'
 import type { DataContext } from '..'
 import { DocumentNodeBuilder } from '../util/DocumentNodeBuilder'
 
-const debug = debugLib('cypress:data-context:GraphQLDataSource')
+const debug = debugLib('cypress:data-context:sources:GraphQLDataSource')
 const RESOLVED_SOURCE = Symbol('RESOLVED_SOURCE')
 
 export interface PushResultParams {

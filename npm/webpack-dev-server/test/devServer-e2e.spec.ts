@@ -1,5 +1,4 @@
 import path from 'path'
-import sinon from 'sinon'
 import { expect } from 'chai'
 import { once, EventEmitter } from 'events'
 import http from 'http'
@@ -12,7 +11,7 @@ import './support'
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
     const opts = {
-      host: 'localhost',
+      host: '127.0.0.1',
       port,
       path: encodeURI(file),
     }
@@ -168,42 +167,6 @@ describe('#devServer', () => {
     })
 
     await once(devServerEvents, 'dev-server:compile:success')
-    await new Promise<void>((resolve, reject) => {
-      close((err) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve()
-      })
-    })
-  })
-
-  it('emits dev-server:compile:error event on error compilation', async () => {
-    const devServerEvents = new EventEmitter()
-    const exitSpy = sinon.stub(process, 'exit')
-
-    const badSpec = `${root}/test/fixtures/compilation-fails.spec.js`
-    const { close } = await devServer({
-      webpackConfig,
-      cypressConfig,
-      specs: [
-        {
-          name: badSpec,
-          relative: badSpec,
-          absolute: badSpec,
-        },
-      ],
-      devServerEvents,
-    })
-
-    const [err] = await once(devServerEvents, 'dev-server:compile:error')
-
-    expect(err).to.contain('Module parse failed: Unexpected token (1:5)')
-    expect(err).to.contain('You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders')
-    expect(err).to.contain('> this is an invalid spec file')
-    expect(exitSpy.calledOnce).to.be.true
-
     await new Promise<void>((resolve, reject) => {
       close((err) => {
         if (err) {

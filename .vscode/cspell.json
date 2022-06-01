@@ -9,6 +9,7 @@
         "ERRORED",
         "Fetchable",
         "Fetchables",
+        "execa",
         "forcedefault",
         "getenv",
         "headlessui",

@@ -28,7 +28,7 @@ export const Query = objectType({
       type: ErrorWrapper,
       description: 'A list of warnings',
       resolve: (source, args, ctx) => {
-        return ctx.coreData.warnings
+        return ctx.warnings
       },
     })
 
@@ -105,6 +105,11 @@ export const Query = objectType({
       description: 'The files that have just been scaffolded',
       type: ScaffoldedFile,
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
+    })
+
+    t.nonNull.boolean('invokedFromCli', {
+      description: 'Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)',
+      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
     })
 
     t.field('node', {

@@ -1378,7 +1378,7 @@ export default {
         })
       },
 
-      onRunnableRun (runnableRun, runnable, args) {
+      onRunnableRun (runnableRun, runnable: CypressRunnable, args) {
         // extract out the next(fn) which mocha uses to
         // move to the next runnable - this will be our async seam
         const _next = args[0]

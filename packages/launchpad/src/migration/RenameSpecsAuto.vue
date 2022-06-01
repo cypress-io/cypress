@@ -19,11 +19,13 @@
           {{ t('migration.renameAuto.optedOutMessage') }}
         </template>
         <template
-          v-if="selectOption === 'renameFolder'"
+          v-else-if="selectOption === 'renameFolder'"
         >
           {{ t('migration.renameAuto.folderRenameMessage') }}
         </template>
-        <template v-else>
+        <template
+          v-else
+        >
           {{ t('migration.renameAuto.changedSpecExt') }}
           <CodeTag
             class="text-red-500"
@@ -36,7 +38,7 @@
         <span class="m-8px text-gray-100">——</span>
         <a
           class="cursor-pointer text-indigo-500 hover:underline"
-          @click="step1Modal = true"
+          @click="showOptOutModal = true"
         >
           {{ t('migration.renameAuto.changeButton') }}
         </a>
@@ -52,7 +54,7 @@
         </i18n-t>
       </MigrationListItem>
     </MigrationList>
-    <BeforeAfter>
+    <BeforeAfter v-if="selectOption !== 'skip'">
       <template #before>
         <HighlightedFilesList
           :files="specFiles.map(x => x.before)"
@@ -66,22 +68,14 @@
         />
       </template>
     </BeforeAfter>
-    <OptOutModalStep1
-      v-if="step1Modal"
-      @proceed="
-        step1Modal = false;
-        step2Modal = true;
-      "
-      @cancel="step1Modal = false"
-    />
-    <OptOutModalStep2
-      v-if="step2Modal"
+    <OptOutModal
+      v-if="showOptOutModal"
       :has-custom-integration-folder="props.gql.hasCustomIntegrationFolder"
-      @cancel="step2Modal = false"
       @save="(val) => {
-        step2Modal = false;
+        showOptOutModal = false;
         applySkipResult(val)
       }"
+      @cancel="showOptOutModal = false"
     />
   </div>
 </template>
@@ -94,8 +88,7 @@ import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationListItem from './fragments/MigrationListItem.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
-import OptOutModalStep1 from './OptOutModalStep1.vue'
-import OptOutModalStep2 from './OptOutModalStep2.vue'
+import OptOutModal from './OptOutModal.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import type { PossibleOption } from './types'
@@ -139,8 +132,7 @@ const emits = defineEmits<{
   (eventName: 'selectOption', value: PossibleOption): void
 }>()
 
-const step1Modal = ref(false)
-const step2Modal = ref(false)
+const showOptOutModal = ref(false)
 
 const selectOption = ref<PossibleOption>()
 

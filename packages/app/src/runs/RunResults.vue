@@ -1,5 +1,11 @@
 <template>
-  <ResultCounts v-bind="props.gql" />
+  <div class="flex gap-8px items-center">
+    <span
+      v-if="props.gql.totalFlakyTests"
+      class="rounded-md font-semibold bg-warning-100 text-sm py-2px px-4px text-warning-600 whitespace-nowrap"
+    >{{ props.gql.totalFlakyTests }} Flaky</span>
+    <ResultCounts v-bind="props.gql" />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -14,6 +20,7 @@ fragment RunResults on CloudRun {
   totalFailed
   totalPending
   totalSkipped
+  totalFlakyTests
 }
 `
 

@@ -16,7 +16,7 @@ export {
   BreakingOptionErrorKey,
 }
 
-const debug = Debug('cypress:config:validator')
+const debug = Debug('cypress:config:browser')
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -52,6 +52,10 @@ type ErrorHandler = (
   key: BreakingOptionErrorKey,
   options: BreakingErrResult
 ) => void
+
+export function resetIssuedWarnings () {
+  issuedWarnings.clear()
+}
 
 const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
@@ -134,7 +138,7 @@ export const matchesConfigKey = (key: string) => {
 }
 
 export const validate = (cfg: any, onErr: (property: string) => void) => {
-  debug('validating configuration', cfg)
+  debug('validating configuration')
 
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
@@ -184,6 +188,7 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
   const restartOnChange = {
     browser: false,
     server: false,
+    pingBaseUrl: false,
   }
 
   if (!cachedConfig || !updatedConfig) {

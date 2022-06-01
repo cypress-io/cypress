@@ -43,6 +43,7 @@ describe('Config files error handling', () => {
 
     cy.visitLaunchpad()
 
+    cy.contains('button', defaultMessages.migration.landingPage.actionContinue).click()
     cy.get('body').should('contain.text', defaultMessages.migration.wizard.title)
     cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
   })
@@ -95,6 +96,14 @@ describe('Launchpad: Error System Tests', () => {
   it('Handles an error thrown from the root of the config file', () => {
     cy.scaffoldProject('plugins-root-sync-error')
     cy.openProject('plugins-root-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    expectStackToBe('open')
+  })
+
+  it('Handles a syntax error in the config file', () => {
+    cy.scaffoldProject('plugins-root-syntax-error')
+    cy.openProject('plugins-root-syntax-error', ['--e2e'])
     cy.visitLaunchpad()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
     expectStackToBe('open')

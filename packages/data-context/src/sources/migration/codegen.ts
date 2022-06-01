@@ -11,7 +11,7 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
-import type { LegacyCypressConfigJson } from '..'
+import { LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 import _ from 'lodash'
@@ -407,6 +407,12 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
         }
       }
       case 'integrationFolder':
+        // If the integration folder is set, but the value is the same as the default legacy one
+        // we do not want to update the config value, we keep using the new default.
+        if (val === legacyIntegrationFolder) {
+          return acc
+        }
+
         return {
           ...acc,
           e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e', options.shouldAddCustomE2ESpecPattern) },
@@ -429,11 +435,19 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
           component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
+        // If the supportFile is set, but is the same value as the default one; where
+        // we migrate it, we do not want to put the legacy value in the migrated config.
+        // It can be .ts or .js
+        if (_.isNil(val) || !_.isBoolean(val) && val.match(/^cypress\/support($|\/index($|\.(ts|js)$))/)) {
+          return acc
+        }
+
         return {
           ...acc,
           e2e: { ...acc.e2e, supportFile: val },
         }
       case 'baseUrl':
+      case 'experimentalSessionAndOrigin':
         return {
           ...acc,
           e2e: { ...acc.e2e, [key]: val },
@@ -461,7 +475,7 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: Testi
   if (testingType === 'e2e') {
     const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
-    if (customIntegrationFolder) {
+    if (customIntegrationFolder && customIntegrationFolder !== legacyIntegrationFolder) {
       return `${customIntegrationFolder}/${specPattern}`
     }
 

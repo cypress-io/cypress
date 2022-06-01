@@ -14,6 +14,8 @@ import type { E2ETaskMap } from '../e2ePluginSetup'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
+import 'cypress-plugin-tab'
+import 'cypress-axe'
 import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
@@ -288,7 +290,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
 
         if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
 
-        await ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers[0])
+        await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers[0])
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
         if (!o.skipMockingPrompts
@@ -497,7 +499,6 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
 
 function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
   function _tabUntil (step: number) {
-    // @ts-expect-error
     return cy.tab().focused({ log: false }).then((el) => {
       const pass = fn(el)
 

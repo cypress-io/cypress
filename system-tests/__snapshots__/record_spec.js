@@ -2219,8 +2219,8 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec.js                                                       │
+  │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2242,8 +2242,8 @@ exports['e2e record api interaction errors create instance errors and exits on c
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (a_record_instantfail.spec.js)                                             │
-  │ Searched:   cypress/e2e/*_record_*                                                             │
+  │ Specs:      1 found (a_record_instantfail.cy.js)                                               │
+  │ Searched:   cypress/e2e/a_record_instantfail.cy.js                                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2265,8 +2265,8 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec*                                                         │
+  │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: foo, Parallel: false                                            │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2274,7 +2274,7 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record.spec.js                                                                (1 of 2)
+  Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: 8 seconds
 We encountered an unexpected error talking to our servers.
 
@@ -2296,8 +2296,8 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec.js                                                       │
+  │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
+  │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: foo, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2305,7 +2305,7 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record.spec.js                                                                (1 of 2)
+  Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: 8 seconds
 We encountered an unexpected error talking to our servers.
 
@@ -2391,8 +2391,8 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/e2e/b_record.spec.js             │
+  │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
+  │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2400,14 +2400,14 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record_instantfail.spec.js                                                    (1 of 2)
+  Running:  a_record_instantfail.cy.js                                                      (1 of 2)
   Estimated: 8 seconds
 
   This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  b_record.spec.js                                                                (2 of 2)
+  Running:  b_record.cy.js                                                                  (2 of 2)
   Estimated: 8 seconds
 
 
@@ -2430,7 +2430,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     b_record.spec.js                                                                 │
+  │ Spec Ran:     b_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2445,9 +2445,9 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ -  a_record_instantfail.spec.js           SKIPPED        -        -        -        -        - │
+  │ -  a_record_instantfail.cy.js             SKIPPED        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  b_record.cy.js                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     -  The run was canceled                     XX:XX        1        1        -        -        -  
 
@@ -2470,8 +2470,8 @@ exports['e2e record api skips specs records tests and exits without executing in
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/e2e/b_record.spec.js             │
+  │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
+  │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
   │ Params:     Tag: false, Group: abc, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2479,14 +2479,14 @@ exports['e2e record api skips specs records tests and exits without executing in
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record_instantfail.spec.js                                                    (1 of 2)
+  Running:  a_record_instantfail.cy.js                                                      (1 of 2)
   Estimated: 8 seconds
 
   This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  b_record.spec.js                                                                (2 of 2)
+  Running:  b_record.cy.js                                                                  (2 of 2)
   Estimated: 8 seconds
 
 
@@ -2509,7 +2509,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     b_record.spec.js                                                                 │
+  │ Spec Ran:     b_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2524,9 +2524,9 @@ exports['e2e record api skips specs records tests and exits without executing in
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ -  a_record_instantfail.spec.js           SKIPPED        -        -        -        -        - │
+  │ -  a_record_instantfail.cy.js             SKIPPED        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  b_record.cy.js                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     -  The run was canceled                     XX:XX        1        1        -        -        -  
 
@@ -2549,8 +2549,8 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (empty_suite.spec.js, empty.spec.js)                                       │
-  │ Searched:   cypress/e2e/empty_suite.spec.js, cypress/e2e/empty.spec.js                         │
+  │ Specs:      2 found (empty_suite.cy.js, empty.cy.js)                                           │
+  │ Searched:   cypress/e2e/empty_suite.cy.js, cypress/e2e/empty.cy.js                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2558,7 +2558,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  empty_suite.spec.js                                                             (1 of 2)
+  Running:  empty_suite.cy.js                                                               (1 of 2)
   Estimated: 8 seconds
 
 
@@ -2577,7 +2577,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     empty_suite.spec.js                                                              │
+  │ Spec Ran:     empty_suite.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2587,7 +2587,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  empty.spec.js                                                                   (2 of 2)
+  Running:  empty.cy.js                                                                     (2 of 2)
   Estimated: 8 seconds
 
 
@@ -2606,7 +2606,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     empty.spec.js                                                                    │
+  │ Spec Ran:     empty.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2621,9 +2621,9 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  empty_suite.spec.js                      XX:XX        -        -        -        -        - │
+  │ ✔  empty_suite.cy.js                        XX:XX        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  empty.spec.js                            XX:XX        -        -        -        -        - │
+  │ ✔  empty.cy.js                              XX:XX        -        -        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        -        -        -        -        -  
 
@@ -2665,8 +2665,8 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (studio_written.spec.js)                                                   │
-  │ Searched:   cypress/e2e/studio_written.spec.js                                                 │
+  │ Specs:      1 found (studio_written.cy.js)                                                     │
+  │ Searched:   cypress/e2e/studio_written.cy.js                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2674,7 +2674,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  studio_written.spec.js                                                          (1 of 1)
+  Running:  studio_written.cy.js                                                            (1 of 1)
   Estimated: 8 seconds
 
 
@@ -2701,7 +2701,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     studio_written.spec.js                                                           │
+  │ Spec Ran:     studio_written.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2716,7 +2716,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  studio_written.spec.js                   XX:XX        4        4        -        -        - │
+  │ ✔  studio_written.cy.js                     XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 

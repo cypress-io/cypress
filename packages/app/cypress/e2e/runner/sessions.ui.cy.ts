@@ -39,19 +39,18 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('creates new session', () => {
     loadSpec({
-      filePath: 'sessions/new_session.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session.cy.js',
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
-    .first()
     .within(() => {
       cy.get('i.command-message-indicator-successful')
       .siblings()
       .should('contain', '(new) blank_session')
 
-      cy.get('.command-name-session').contains('blank_session')
       validateCreateNewSessionGroup()
     })
 
@@ -64,19 +63,17 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('creates new session with validation', () => {
     loadSpec({
-      filePath: 'sessions/new_session_with_validation.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_with_validation.cy.js',
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
-    .first()
     .within(() => {
       cy.get('i.command-message-indicator-successful')
       .siblings()
       .should('contain', '(new) blank_session')
-
-      cy.get('.command-name-session').contains('blank_session')
 
       validateCreateNewSessionGroup()
 
@@ -100,19 +97,17 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('creates new session and fails validation', () => {
     loadSpec({
-      filePath: 'sessions/new_session_and_fails_validation.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_and_fails_validation.cy.js',
     })
 
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
-    .first()
     .within(() => {
       cy.get('i.command-message-indicator-successful')
       .siblings()
       .should('contain', '(new) blank_session')
-
-      cy.get('.command-name-session').contains('blank_session')
 
       validateCreateNewSessionGroup()
 
@@ -135,7 +130,8 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('restores saved session', () => {
     loadSpec({
-      filePath: 'sessions/restores_saved_session.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/restores_saved_session.cy.js',
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -151,12 +147,9 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
-      .first()
       .within(() => {
         cy.get('i.command-message-indicator-pending')
         .siblings().should('contain', '(saved) user1')
-
-        cy.get('.command-name-session').contains('user1')
 
         cy.contains('Restore Saved Session')
         .closest('.command')
@@ -191,7 +184,8 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('recreates session', () => {
     loadSpec({
-      filePath: 'sessions/recreates_session.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/recreates_session.cy.js',
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -208,12 +202,9 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
-      .first()
       .within(() => {
         cy.get('i.command-message-indicator-bad')
         .siblings().should('contain', '(recreated) user1')
-
-        cy.get('.command-name-session').contains('user1')
 
         cy.contains('Restore Saved Session')
         .closest('.command')
@@ -255,7 +246,8 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('recreates session and fails validation', () => {
     loadSpec({
-      filePath: 'sessions/recreates_session_and_fails_validation.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/recreates_session_and_fails_validation.cy.js',
     })
 
     cy.get('.test').each(($el) => cy.wrap($el).click())
@@ -272,12 +264,9 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
-      .first()
       .within(() => {
         cy.get('i.command-message-indicator-bad')
         .siblings().should('contain', '(recreated) user1')
-
-        cy.get('.command-name-session').contains('user1')
 
         cy.contains('Restore Saved Session')
         .closest('.command')
@@ -315,7 +304,8 @@ describe('runner/cypress sessions.ui.spec', {
 
   it('multiple sessions in a test', () => {
     loadSpec({
-      filePath: 'sessions/multiple_sessions.cy.js',
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/multiple_sessions.cy.js',
     })
 
     validateSessionsInstrumentPanel(['user1', 'user2'])

@@ -3,6 +3,7 @@ module.exports = {
     supportFile: false,
     devServer: {
       bundler: 'webpack',
+      webpackConfig: {},
     },
   },
 }

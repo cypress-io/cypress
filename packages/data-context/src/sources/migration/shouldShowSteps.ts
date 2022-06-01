@@ -1,7 +1,7 @@
 import globby from 'globby'
 import path from 'path'
 import { MIGRATION_STEPS } from '@packages/types'
-import { applyMigrationTransform, getSpecs, tryGetDefaultLegacySupportFile } from '.'
+import { applyMigrationTransform, getSpecs, legacyIntegrationFolder, tryGetDefaultLegacySupportFile } from '.'
 import type { LegacyCypressConfigJson } from '..'
 
 export const defaultTestFilesGlob = '**/*.{js,ts,jsx,tsx,coffee,cjsx}'
@@ -45,7 +45,7 @@ export function getPluginsFile (config: LegacyCypressConfigJson) {
 }
 
 export function getIntegrationFolder (config: LegacyCypressConfigJson) {
-  return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
+  return config.e2e?.integrationFolder ?? config.integrationFolder ?? legacyIntegrationFolder
 }
 
 export function getComponentFolder (config: LegacyCypressConfigJson): false | string {

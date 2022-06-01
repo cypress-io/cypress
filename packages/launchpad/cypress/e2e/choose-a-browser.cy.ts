@@ -15,6 +15,11 @@ describe('Choose a Browser Page', () => {
     })
 
     it('preselects browser that is provided through the command line', () => {
+      cy.withCtx((ctx, o) => {
+        // stub launching project since we have `--browser --testingType --project` here
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
@@ -24,6 +29,10 @@ describe('Choose a Browser Page', () => {
       cy.findByRole('radio', { name: 'Edge v8', checked: true })
 
       cy.percySnapshot()
+
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+      })
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
@@ -74,6 +83,10 @@ describe('Choose a Browser Page', () => {
 
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
+      cy.get('[data-cy="alert-header"]').should('not.exist')
+
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })
 
@@ -177,7 +190,7 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.withCtx((ctx, o) => {
-        ctx.actions.project.launchProject = o.sinon.spy()
+        o.sinon.spy(ctx.actions.project, 'launchProject')
       })
 
       cy.intercept('mutation-OpenBrowser_LaunchProject', cy.stub().as('launchProject'))
@@ -242,7 +255,7 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.withCtx((ctx, o) => {
         ctx.project.setRelaunchBrowser(true)
-        ctx.actions.project.launchProject = o.sinon.stub()
+        o.sinon.stub(ctx.actions.project, 'launchProject')
       })
 
       cy.visitLaunchpad()
@@ -273,8 +286,8 @@ describe('Choose a Browser Page', () => {
 
       // Updating active browser in conjunction with the browser status to ensure that changes to
       // both are reflected in the UI.
-      cy.withCtx((ctx) => {
-        ctx.actions.app.setActiveBrowser(ctx.lifecycleManager.browsers!.find((browser) => browser.name === 'firefox') as FoundBrowser)
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers!.find((browser) => browser.name === 'firefox') as FoundBrowser)
         ctx.browser.setBrowserStatus('closed')
       })
 
