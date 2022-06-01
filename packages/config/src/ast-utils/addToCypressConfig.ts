@@ -93,6 +93,7 @@ export interface AddTestingTypeToCypressConfigOptions {
   info: ASTComponentDefinitionConfig | {
     testingType: 'e2e'
   }
+  projectRoot: string
 }
 
 export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCypressConfigOptions): Promise<AddToCypressConfigResult> {
@@ -114,7 +115,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
       resultStatus = 'ADDED'
-      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules })
+      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules, projectRoot: options.projectRoot })
     }
 
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
@@ -133,27 +134,60 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
   }
 }
 
+// If they are running Cypress that isn't installed in their
+// project's node_modules, we don't want to include
+// defineConfig(/***/) in their cypress.config.js,
+// since it won't exist.
+export function defineConfigAvailable (projectRoot: string) {
+  try {
+    const cypress = require.resolve('cypress', {
+      paths: [projectRoot],
+    })
+    const api = require(cypress)
+
+    return 'defineConfig' in api
+  } catch (e) {
+    return false
+  }
+}
+
 type OutputExtension = '.ts' | '.mjs' | '.js'
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules }: { outputType: OutputExtension, isProjectUsingESModules: boolean}) {
-  if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
-    return dedent`
-      import { defineConfig } from 'cypress'
+function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string}) {
+  if (defineConfigAvailable(projectRoot)) {
+    if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+      return dedent`
+        import { defineConfig } from 'cypress'
 
-      export default defineConfig({
-        
+        export default defineConfig({
+
+        })
+      `
+    }
+
+    return dedent`
+      const { defineConfig } = require('cypress')
+
+      module.exports = defineConfig({
+
       })
     `
   }
 
-  return dedent`
-    const { defineConfig } = require('cypress')
+  if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+    return dedent`
+      export default {
 
-    module.exports = defineConfig({
-      
-    })
+      }
+    `
+  }
+
+  return dedent`
+    module.exports = {
+
+    }
   `
 }
 
