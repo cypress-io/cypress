@@ -507,6 +507,7 @@ describe('startSpecWatcher', () => {
       ignoreInitial: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
+      ignorePermissionErrors: true,
     })
 
     expect(onStub).to.have.been.calledWith('all', handleFsChange)
