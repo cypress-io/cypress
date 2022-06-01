@@ -20,6 +20,9 @@ const { addTestingTypeToCypressConfig } = proxyquire('../../src/ast-utils/addToC
 
 describe('addToCypressConfig', () => {
   it('will create a ts file if the file is empty and the file path is ts', async () => {
+    // For some reason, the first test in this spec file is extremely slow, and times out in CI
+    // with the default of 2000ms.
+    this.timeout(5000)
     const result = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, '../__fixtures__/empty.config.ts'),
       info: {
