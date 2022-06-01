@@ -1,7 +1,7 @@
 <template>
   <div
     v-bind="containerProps"
-    class="pt-8px specs-list-container overflow-hidden"
+    class="pt-8px specs-list-container"
   >
     <ul
       v-bind="wrapperProps"
