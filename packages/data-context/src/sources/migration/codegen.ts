@@ -11,7 +11,7 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
-import { LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
+import { isDefaultSupportFile, LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 import _ from 'lodash'
@@ -438,7 +438,7 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
         // If the supportFile is set, but is the same value as the default one; where
         // we migrate it, we do not want to put the legacy value in the migrated config.
         // It can be .ts or .js
-        if (_.isNil(val) || !_.isBoolean(val) && val.match(/^cypress\/support($|\/index($|\.(ts|js)$))/)) {
+        if (isDefaultSupportFile(val)) {
           return acc
         }
 
