@@ -2,6 +2,7 @@
   <div
     v-bind="containerProps"
     class="pt-8px specs-list-container"
+    data-cy="specs-list-container"
   >
     <ul
       v-bind="wrapperProps"
