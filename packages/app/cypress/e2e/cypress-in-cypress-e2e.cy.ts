@@ -147,6 +147,34 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('[data-model-state="passed"]').should('contain', 'renders the blank page')
   })
 
+  it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
+    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
+
+    cy.visitApp()
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `describe('Bad spec', () => { it('has a syntax error', () => { expect(true).to.be.true }) }`)
+    }, { path: getPathForPlatform('cypress/e2e/bad-spec.spec.js') })
+
+    cy.contains('bad-spec.spec')
+    .click()
+
+    cy.contains('No tests found').should('be.visible')
+
+    cy.contains('SyntaxError')
+    .should('be.visible')
+    .invoke('outerHeight')
+    .should('eq', expectedAutHeight)
+
+    // Checking the height here might seem excessive
+    // but we really want some warning if this changes
+    // and should understand the reasons if it does.
+    // We could consider removing this after percy is
+    // up and running for e2e tests.
+
+    cy.percySnapshot()
+  })
+
   it('should show visit failure blank page', () => {
     cy.visitApp()
     cy.contains('blank-contents.spec')

@@ -28,6 +28,7 @@ describe('devServer', function () {
     const result = await devServer.create({
       specs: [],
       cypressConfig,
+      webpackConfig: {},
       devServerEvents: new EventEmitter(),
     })
 
@@ -49,6 +50,7 @@ describe('devServer', function () {
     const result = await devServer.create({
       specs: [],
       cypressConfig,
+      webpackConfig: {},
       devServerEvents: new EventEmitter(),
     })
 
@@ -70,6 +72,7 @@ describe('devServer', function () {
     const result = await devServer.create({
       specs: [],
       cypressConfig,
+      webpackConfig: {},
       devServerEvents: new EventEmitter(),
     })
 

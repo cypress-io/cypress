@@ -87,8 +87,8 @@ export class RemoteStates {
     const stateArray = Array.from(this.remoteStates.entries())
 
     // reset the remoteStates and originStack to the primary
-    this.remoteStates = new Map([stateArray[0]])
-    this.originStack = [stateArray[0][0]]
+    this.remoteStates = new Map(stateArray[0] ? [stateArray[0]] : [])
+    this.originStack = stateArray[0] ? [stateArray[0][0]] : []
   }
 
   current (): Cypress.RemoteState {
