@@ -1078,7 +1078,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}. 
         
-        If you don't think you can live without Studio, or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-beta
+        If you don't think you can live without Studio, or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-removal
         
         Your feedback will help us factor in product decisions that may see Studio return in a future release.
 
