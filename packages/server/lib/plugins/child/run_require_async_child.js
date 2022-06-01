@@ -131,6 +131,7 @@ function run (ipc, file, projectRoot) {
         } catch (e) {
           // If we aren't able to import the file at all, throw the original error, since that has more accurate information
           // of what failed to begin with
+          debug('esbuild fallback for loading config failed, throwing original error. esbuild error: %o', e)
           throw originalError
         }
       }
