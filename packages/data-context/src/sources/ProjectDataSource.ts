@@ -331,6 +331,7 @@ export class ProjectDataSource {
     // ignored by config
     this._specWatcher = chokidar.watch('.', {
       ignoreInitial: true,
+      ignorePermissionErrors: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
     })
