@@ -5,7 +5,7 @@
   "private": false,
   "main": "dist",
   "scripts": {
-    "build": "shx rm -rf dist && tsc",
+    "build": "rimraf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
     "secure": "nsp check",
@@ -16,7 +16,7 @@
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
-    "types": "tsc --noEmit",
+    "check-ts": "tsc --noEmit",
     "watch": "yarn build --watch"
   },
   "dependencies": {
@@ -53,13 +53,13 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-scripts": "3.2",
+    "rimraf": "3.0.2",
     "semantic-release": "17.2.3",
-    "shx": "0.3.3",
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "8.10.1",
-    "webpack": "^4.41.12"
+    "ts-node": "^10.2.1",
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",

@@ -1,8 +1,13 @@
-const shelljs = require('shelljs')
+const fs = require('fs-extra')
+const path = require('path')
 const { includeTypes } = require('./utils')
 
-shelljs.rm('-rf', 'build')
+fs.removeSync(path.join(__dirname, '..', 'build'))
 
-includeTypes.map((m) => {
-  shelljs.rm('-rf', `types/${m}`)
+includeTypes.forEach((folder) => {
+  try {
+    fs.removeSync(path.join(__dirname, '..', 'types', folder))
+  } catch (e) {
+    //
+  }
 })

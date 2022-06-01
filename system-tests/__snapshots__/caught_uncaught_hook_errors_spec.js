@@ -7,14 +7,14 @@ exports['e2e caught and uncaught hooks errors / failing1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_caught_error_failing_spec.js)                                        │
-  │ Searched:   cypress/integration/hook_caught_error_failing_spec.js                              │
+  │ Specs:      1 found (hook_caught_error_failing.cy.js)                                          │
+  │ Searched:   cypress/e2e/hook_caught_error_failing.cy.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  hook_caught_error_failing_spec.js                                               (1 of 1)
+  Running:  hook_caught_error_failing.cy.js                                                 (1 of 1)
 
 
   ✓ t1a
@@ -74,25 +74,25 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     hook_caught_error_failing_spec.js                                                │
+  │ Spec Ran:     hook_caught_error_failing.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.js/s1a -- t2a --     (1280x720)
-      before each hook (failed).png                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.js/s3a -- t8a --     (1280x720)
-      before all hook (failed).png                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.js/s4a -- t10a -     (1280x720)
-     - before all hook (failed).png                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing.cy.js/s1a -- t2a -- b     (1280x720)
+     efore each hook (failed).png                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing.cy.js/s3a -- t8a -- b     (1280x720)
+     efore all hook (failed).png                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing.cy.js/s4a -- t10a --      (1280x720)
+     before all hook (failed).png                                                                   
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.     (X second)
-                          js.mp4                                                                    
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing.cy.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -102,7 +102,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  hook_caught_error_failing_spec.js        XX:XX       11        5        3        -        3 │
+  │ ✖  hook_caught_error_failing.cy.js          XX:XX       11        5        3        -        3 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX       11        5        3        -        3  
 
@@ -118,14 +118,14 @@ exports['e2e caught and uncaught hooks errors / failing2'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_error_failing_spec.js)                                      │
-  │ Searched:   cypress/integration/hook_uncaught_error_failing_spec.js                            │
+  │ Specs:      1 found (hook_uncaught_error_failing.cy.js)                                        │
+  │ Searched:   cypress/e2e/hook_uncaught_error_failing.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  hook_uncaught_error_failing_spec.js                                             (1 of 1)
+  Running:  hook_uncaught_error_failing.cy.js                                               (1 of 1)
 
 
   ✓ t1b
@@ -170,21 +170,21 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     hook_uncaught_error_failing_spec.js                                              │
+  │ Spec Ran:     hook_uncaught_error_failing.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_failing_spec.js/s1b -- t2b      (1280x720)
-     -- before each hook (failed).png                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_failing.cy.js/s1b -- t2b --     (1280x720)
+      before each hook (failed).png                                                                 
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing.cy.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -194,7 +194,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  hook_uncaught_error_failing_spec.js      XX:XX        7        4        1        -        2 │
+  │ ✖  hook_uncaught_error_failing.cy.js        XX:XX        7        4        1        -        2 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        7        4        1        -        2  
 
@@ -210,14 +210,14 @@ exports['e2e caught and uncaught hooks errors / failing3'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_root_error_failing_spec.js)                                 │
-  │ Searched:   cypress/integration/hook_uncaught_root_error_failing_spec.js                       │
+  │ Specs:      1 found (hook_uncaught_root_error_failing.cy.js)                                   │
+  │ Searched:   cypress/e2e/hook_uncaught_root_error_failing.cy.js                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  hook_uncaught_root_error_failing_spec.js                                        (1 of 1)
+  Running:  hook_uncaught_root_error_failing.cy.js                                          (1 of 1)
 
 
   1) "before each" hook for "t1c"
@@ -253,21 +253,21 @@ Because this error occurred during a \`before each\` hook we are skipping all of
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     hook_uncaught_root_error_failing_spec.js                                         │
+  │ Spec Ran:     hook_uncaught_root_error_failing.cy.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing_spec.js/t1c --     (1280x720)
-      before each hook (failed).png                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing.cy.js/t1c -- b     (1280x720)
+     efore each hook (failed).png                                                                   
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin     (X second)
-                          g_spec.js.mp4                                                             
+                          g.cy.js.mp4                                                               
 
 
 ====================================================================================================
@@ -277,8 +277,8 @@ Because this error occurred during a \`before each\` hook we are skipping all of
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  hook_uncaught_root_error_failing_sp      XX:XX        4        -        1        -        3 │
-  │    ec.js                                                                                       │
+  │ ✖  hook_uncaught_root_error_failing.cy      XX:XX        4        -        1        -        3 │
+  │    .js                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        -        1        -        3  
 
@@ -294,14 +294,14 @@ exports['e2e caught and uncaught hooks errors / failing4'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_error_events_failing_spec.js)                               │
-  │ Searched:   cypress/integration/hook_uncaught_error_events_failing_spec.js                     │
+  │ Specs:      1 found (hook_uncaught_error_events_failing.cy.js)                                 │
+  │ Searched:   cypress/e2e/hook_uncaught_error_events_failing.cy.js                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  hook_uncaught_error_events_failing_spec.js                                      (1 of 1)
+  Running:  hook_uncaught_error_events_failing.cy.js                                        (1 of 1)
 
 
   uncaught hook error should continue to fire all mocha events
@@ -345,22 +345,22 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     hook_uncaught_error_events_failing_spec.js                                       │
+  │ Spec Ran:     hook_uncaught_error_events_failing.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing_spec.js/unca     (1280x720)
-     ught hook error should continue to fire all mocha events -- s1 -- does not run -               
-     - before each hook (failed).png                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing.cy.js/uncaug     (1280x720)
+     ht hook error should continue to fire all mocha events -- s1 -- does not run --                
+     before each hook (failed).png                                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail     (X second)
-                          ing_spec.js.mp4                                                           
+                          ing.cy.js.mp4                                                             
 
 
 ====================================================================================================
@@ -370,8 +370,8 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  hook_uncaught_error_events_failing_      XX:XX        3        2        1        -        - │
-  │    spec.js                                                                                     │
+  │ ✖  hook_uncaught_error_events_failing.      XX:XX        3        2        1        -        - │
+  │    cy.js                                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        3        2        1        -        -  
 

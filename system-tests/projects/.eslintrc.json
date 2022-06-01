@@ -9,6 +9,7 @@
     "mocha/no-global-tests": "off"
   },
   "ignorePatterns": [
-    "failures/cypress/integration/syntax_error.js"
+    "failures/cypress/e2e/syntax_error.js",
+    "plugins-root-syntax-error/cypress.config.js"
   ]
 }

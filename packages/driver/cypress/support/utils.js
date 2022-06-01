@@ -32,10 +32,9 @@ export const clickCommandLog = (sel, type) => {
       }
 
       reactCommandInstance.props.appState.isRunning = false
+      const inner = $(commandLogEl).find('.command-wrapper-text')
 
-      $(commandLogEl).find('.command-wrapper')
-      .click()
-      .get(0).scrollIntoView()
+      inner.get(0).click()
 
       // make sure command was pinned, otherwise throw a better error message
       expect(cy.$$('.runnable-active .command-pin', top.document).length, 'command should be pinned').ok
@@ -44,7 +43,7 @@ export const clickCommandLog = (sel, type) => {
 }
 
 export const withMutableReporterState = (fn) => {
-  top.Runner.configureMobx({ enforceActions: 'never' })
+  top.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
 
   const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
 
@@ -52,7 +51,7 @@ export const withMutableReporterState = (fn) => {
 
   return Promise.try(fn)
   .then(() => {
-    top.Runner.configureMobx({ enforceActions: 'always' })
+    top.UnifiedRunner.MobX.configure({ enforceActions: 'always' })
   })
 }
 
