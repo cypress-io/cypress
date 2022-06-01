@@ -53,6 +53,7 @@ export function getDelayForRetry (iteration) {
 }
 
 interface RetryingOptions {
+  family: 4 | 6 | 0
   port: number
   host: string | undefined
   useTls: boolean
@@ -60,7 +61,9 @@ interface RetryingOptions {
 }
 
 function createSocket (opts: RetryingOptions, onConnect): net.Socket {
-  const netOpts = _.pick(opts, 'host', 'port')
+  const netOpts = _.defaults(_.pick(opts, 'family', 'host', 'port'), {
+    family: 4,
+  })
 
   if (opts.useTls) {
     return tls.connect(netOpts, onConnect)

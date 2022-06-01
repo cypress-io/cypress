@@ -7,14 +7,14 @@ exports['e2e return value failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (return_value_spec.js)                                                     │
-  │ Searched:   cypress/integration/return_value_spec.js                                           │
+  │ Specs:      1 found (return_value.cy.js)                                                       │
+  │ Searched:   cypress/e2e/return_value.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  return_value_spec.js                                                            (1 of 1)
+  Running:  return_value.cy.js                                                              (1 of 1)
 
 
   1) errors when invoking commands and return a different value
@@ -82,24 +82,24 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
   │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     return_value_spec.js                                                             │
+  │ Spec Ran:     return_value.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.js/errors when invoking comma     (1280x720)
-     nds and return a different value (failed).png                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.js/errors when invoking comma     (1280x720)
-     nds in custom command and returning different value (failed).png                               
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.js/errors when not invoking c     (1280x720)
-     ommands, invoking done callback, and returning a promise (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value.cy.js/errors when invoking command     (1280x720)
+     s and return a different value (failed).png                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value.cy.js/errors when invoking command     (1280x720)
+     s in custom command and returning different value (failed).png                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value.cy.js/errors when not invoking com     (1280x720)
+     mands, invoking done callback, and returning a promise (failed).png                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value.cy.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -109,7 +109,7 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  return_value_spec.js                     XX:XX        3        -        3        -        - │
+  │ ✖  return_value.cy.js                       XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
 

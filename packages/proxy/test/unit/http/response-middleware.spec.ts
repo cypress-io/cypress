@@ -50,7 +50,7 @@ describe('http/response-middleware', function () {
         prepareContext()
       })
 
-      it('doesn\'t do anything', function () {
+      it(`doesn't do anything`, function () {
         return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
         .then(() => {
           expect(ctx.res.set).not.to.be.called
@@ -64,7 +64,7 @@ describe('http/response-middleware', function () {
         prepareContext()
       })
 
-      it('doesn\'t do anything', function () {
+      it(`doesn't do anything`, function () {
         return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
         .then(() => {
           expect(ctx.res.set).not.to.be.called

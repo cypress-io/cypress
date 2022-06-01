@@ -2,8 +2,8 @@
   "name": "create-cypress-tests",
   "version": "0.0.0-development",
   "description": "Cypress smart installation wizard",
-  "private": false,
-  "main": "index.js",
+  "private": true,
+  "main": "dist/src/main.js",
   "scripts": {
     "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn prepare-copy-templates",
     "build-prod": "yarn build",
@@ -26,7 +26,9 @@
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
     "inquirer": "7.3.3",
-    "ora": "^5.1.0"
+    "ora": "^5.1.0",
+    "recast": "0.20.4",
+    "semver": "7.3.7"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",
@@ -34,6 +36,7 @@
     "@types/mock-fs": "4.10.0",
     "@types/node": "14.14.31",
     "@types/ora": "^3.2.0",
+    "@types/semver": "7.3.9",
     "copy": "0.3.2",
     "mocha": "7.1.1",
     "mock-fs": "5.1.1",
@@ -41,6 +44,10 @@
     "snap-shot-it": "7.9.3",
     "typescript": "^4.2.3"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "bin": {
     "create-cypress-tests": "dist/src/index.js"
   },

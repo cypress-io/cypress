@@ -132,7 +132,7 @@ describe('lib/util/process_profiler', function () {
 
       checkGroup(BROWSER_PID, 'browser')
       checkGroup(SUB_BROWSER_PID, 'browser')
-      checkGroup(GUI_PID, 'desktop-gui')
+      checkGroup(GUI_PID, 'launchpad')
       checkGroup(PLUGIN_PID, 'plugin')
       checkGroup(SUB_PLUGIN_PID, 'plugin')
       checkGroup(FFMPEG_PID, 'ffmpeg')

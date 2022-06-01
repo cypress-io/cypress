@@ -164,6 +164,7 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+type SendCloseCommand = () => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -176,33 +177,22 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-export interface CdpOptions {
-  sendDebuggerCommandFn: SendDebuggerCommand
-  onFn: OnFn
-  automation: Automation
-  experimentalSessionAndOrigin: boolean
-}
-
 export class CdpAutomation {
-  sendDebuggerCommandFn: SendDebuggerCommand
-  automation: Automation
-  experimentalSessionAndOrigin: boolean
-
-  constructor (options: CdpOptions) {
-    this.sendDebuggerCommandFn = options.sendDebuggerCommandFn
-    this.automation = options.automation
-    this.experimentalSessionAndOrigin = options.experimentalSessionAndOrigin
-
-    options.onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
-    options.onFn('Network.responseReceived', this.onResponseReceived)
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
+    onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
+    onFn('Network.responseReceived', this.onResponseReceived)
   }
 
-  async enable () {
-    await this.sendDebuggerCommandFn('Network.enable', {
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, experimentalSessionAndOrigin: boolean): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, experimentalSessionAndOrigin)
+
+    await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    return cdpAutomation
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
@@ -360,6 +350,15 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'reset:browser:state':
+        return Promise.all([
+          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
+        ])
+      case 'close:browser:tabs':
+        return this.sendCloseCommandFn()
+      case 'focus:browser:window':
+        return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

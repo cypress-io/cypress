@@ -12,7 +12,7 @@
         {
           "id": 1,
           "functionName": "get",
-          "type": "spy",
+          "name": "spy",
           "alias": "getAlias",
           "instrument": "agent",
           "callCount": 1
@@ -20,7 +20,7 @@
         {
           "id": 2,
           "functionName": "fetch",
-          "type": "stub",
+          "name": "stub-1",
           "alias": ["fetchAlias", "gonnaHappenAlias"],
           "instrument": "agent",
           "callCount": 3
@@ -28,7 +28,7 @@
         {
           "id": 3,
           "functionName": "go",
-          "type": "stub",
+          "name": "stub-2",
           "instrument": "agent",
           "callCount": 0
         }
