@@ -1076,8 +1076,11 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)} and have learned a lot. If you don't think you can live without Studio, please let us know here: http://on.cypress.io/studio-beta. Your feedback will help us factor in product
-    decisions that may see Studio return in a future release.
+        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}. 
+        
+        If you don't think you can live without Studio, or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-beta
+        
+        Your feedback will help us factor in product decisions that may see Studio return in a future release.
 
         You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
   },
