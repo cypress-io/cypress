@@ -15,7 +15,7 @@ import { isDefaultSupportFile, LegacyCypressConfigJson, legacyIntegrationFolder 
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 import _ from 'lodash'
-import { getBreakingKeys } from '@packages/config'
+import { defineConfigAvailable, getBreakingKeys } from '@packages/config'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -146,24 +146,6 @@ export async function initComponentTestingMigration (
 
 async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot: string): Promise<string | undefined> {
   return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
-}
-
-// If they are running an old version of Cypress
-// or running Cypress that isn't installed in their
-// project's node_modules, we don't want to include
-// defineConfig(/***/) in their cypress.config.js,
-// since it won't exist.
-export function defineConfigAvailable (projectRoot: string) {
-  try {
-    const cypress = require.resolve('cypress', {
-      paths: [projectRoot],
-    })
-    const api = require(cypress)
-
-    return 'defineConfig' in api
-  } catch (e) {
-    return false
-  }
 }
 
 function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
