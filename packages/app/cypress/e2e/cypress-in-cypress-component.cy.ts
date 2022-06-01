@@ -126,7 +126,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.app, 'setActiveBrowserById')
+        o.sinon.stub(ctx.actions.browser, 'setActiveBrowserById')
         o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
       })
 
@@ -137,10 +137,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       .click()
 
       cy.withCtx((ctx, o) => {
-        const browserId = (ctx.actions.app.setActiveBrowserById as SinonStub).args[0][0]
+        const browserId = (ctx.actions.browser.setActiveBrowserById as SinonStub).args[0][0]
         const genId = ctx.fromId(browserId, 'Browser')
 
-        expect(ctx.actions.app.setActiveBrowserById).to.have.been.calledWith(browserId)
+        expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
         expect(genId).to.eql('firefox-firefox-stable')
         expect(ctx.actions.project.launchProject).to.have.been.calledWith(
           ctx.coreData.currentTestingType, {}, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),

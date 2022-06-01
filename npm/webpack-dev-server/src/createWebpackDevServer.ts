@@ -28,7 +28,7 @@ export interface CreateFinalWebpackConfig {
   frameworkConfig?: unknown
 }
 
-export function createWebpackDevServer (
+export async function createWebpackDevServer (
   config: CreateFinalWebpackConfig,
 ) {
   const {
@@ -42,7 +42,7 @@ export function createWebpackDevServer (
     },
   } = config
 
-  const finalWebpackConfig = makeWebpackConfig(config)
+  const finalWebpackConfig = await makeWebpackConfig(config)
   const webpackCompiler = webpack(finalWebpackConfig)
 
   if (webpackDevServerMajorVersion === 4) {
@@ -68,7 +68,7 @@ function webpackDevServer4 (
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
   const webpackDevServerConfig = {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 'auto',
     // @ts-ignore
     ...finalWebpackConfig?.devServer,

@@ -1183,15 +1183,17 @@ export const AllCypressErrors = {
     return errTemplate`
         There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
 
-        ${fmt.cypressVersion('10.0.0')} no longer supports cypress.json.
+        ${fmt.cypressVersion('10.0.0')} no longer supports ${fmt.highlight(`cypress.json`)}.
 
-        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
+        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{js,ts,mjs,cjs}')}.
+
+        https://on.cypress.io/migration-guide
       `
   },
 
   LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
     return errTemplate`
-        Your ${fmt.highlight(file)} at ${fmt.path(`${file}`)} threw an error. ${fmt.stackTrace(error)}
+        Your ${fmt.highlight(file)} file threw an error. ${fmt.stackTrace(error)}
 
         Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
       `
@@ -1526,6 +1528,23 @@ export const AllCypressErrors = {
       Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to open or migrate.
 
       https://on.cypress.io/migration-guide
+    `
+  },
+
+  DEV_SERVER_CONFIG_FILE_NOT_FOUND: (devServer: 'vite' | 'webpack', root: string, searchedFor: string[]) => {
+    const devServerConfigFile = `${devServer}Config`
+
+    return errTemplate`\
+      You are using ${fmt.highlight(devServer)} for your dev server, but a configuration file was not found. We traversed upwards from:
+      
+      ${fmt.highlightSecondary(root)}
+      
+      looking for a file named:
+
+      ${fmt.listItems(searchedFor, { prefix: ' - ' })}
+
+      Add your ${fmt.highlight(devServer)} config at one of the above paths, or import your configuration file and provide it to 
+      the devServer config as a ${fmt.highlight(devServerConfigFile)} option.
     `
   },
 } as const

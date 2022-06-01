@@ -1,5 +1,6 @@
-import { pipe, subscribe } from 'wonka'
-import { Exchange, Client, gql,
+import {
+  Exchange,
+  Client,
   createClient,
   dedupExchange,
   errorExchange,
@@ -21,6 +22,7 @@ import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
 import type { DocumentNode } from 'graphql'
+import { initializeGlobalSubscriptions } from './urqlGlobalSubscriptions'
 
 const toast = useToast()
 
@@ -165,21 +167,9 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
 
   await connectPromise
 
-  // https://formidable.com/open-source/urql/docs/advanced/subscriptions/#one-off-subscriptions
-  pipe(
-    client.subscription(gql`
-      subscription urqlClient_PushFragment {
-        pushFragment {
-          target
-          fragment
-          data
-        }
-      }
-    `),
-    subscribe((val) => {
-      // console.log(val)
-    }),
-  )
+  if (window.__CYPRESS_MODE__ !== 'run') {
+    initializeGlobalSubscriptions(client)
+  }
 
   return client
 }

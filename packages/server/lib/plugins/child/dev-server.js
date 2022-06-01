@@ -9,10 +9,6 @@ const wrap = (ipc, invoke, ids, args) => {
     devServerEvents.emit('dev-server:specs:changed', specs)
   })
 
-  devServerEvents.on('dev-server:compile:error', (error) => {
-    ipc.send('dev-server:compile:error', error)
-  })
-
   devServerEvents.on('dev-server:compile:success', ({ specFile } = {}) => {
     ipc.send('dev-server:compile:success', { specFile })
   })

@@ -218,7 +218,8 @@ describe('detectLanguage', () => {
 
   it('pristine project with typescript in package.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-yarn')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
+    const actual = detectLanguage(projectRoot, pkgJson)
 
     expect(actual).to.eq('ts')
   })
@@ -302,5 +303,17 @@ describe('detectLanguage', () => {
     const actual = detectLanguage(projectRoot, {} as PkgJson)
 
     expect(actual).to.eq('ts')
+  })
+
+  it('ignores node_modules when checking for tsconfig.json', async () => {
+    const projectRoot = await scaffoldMigrationProject('pristine-cjs-project')
+
+    await fs.mkdirp(path.join(projectRoot, 'node_modules', 'some-node-module'))
+    await fs.writeFile(path.join(projectRoot, 'node_modules', 'some-node-module', 'tsconfig.json'), '')
+    const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
+
+    const actual = detectLanguage(projectRoot, pkgJson)
+
+    expect(actual).to.eq('js')
   })
 })

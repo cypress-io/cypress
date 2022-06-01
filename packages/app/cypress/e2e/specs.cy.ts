@@ -105,7 +105,14 @@ describe('App: Specs', () => {
           })
 
           cy.withCtx(async (ctx, options) => {
-            const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'e2e', ['**/*.cy.js'], [], [])).map((spec) => spec.relative)
+            const generatedSpecPaths = (await ctx.project.findSpecs({
+              projectRoot: ctx.currentProject ?? '',
+              testingType: 'e2e',
+              specPattern: ['**/*.cy.js'],
+              configSpecPattern: ['**/*.cy.js'],
+              excludeSpecPattern: [],
+              additionalIgnorePattern: [],
+            })).map((spec) => spec.relative)
 
             // Validate that all expected paths have been generated within the data context
             expect(generatedSpecPaths.filter((path) => {
@@ -161,7 +168,7 @@ describe('App: Specs', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.ts'))
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/spec.cy.ts'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
@@ -250,7 +257,7 @@ describe('App: Specs', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.ts'))
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/spec.cy.ts'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
@@ -386,7 +393,7 @@ describe('App: Specs', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/filename.cy.js'))
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/spec.cy.js'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
@@ -412,6 +419,36 @@ describe('App: Specs', () => {
           cy.get('[aria-label="Close"]').click()
 
           cy.visitApp().get('[data-cy-row]').contains('MyTest.cy.js')
+        })
+
+        it('generates spec with file name that does not contain a known spec extension', () => {
+          cy.withCtx(async (ctx) => {
+            let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+            config = config.replace(
+                `specPattern: 'src/**/*.{cy,spec}.{js,jsx}'`,
+                `specPattern: 'src/e2e/**/*.{js,jsx}'`,
+            )
+
+            await ctx.actions.file.writeFileInProject('cypress.config.js', config)
+          })
+
+          // Timeout is increased here to allow ample time for the config change to be processed
+          cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+
+          cy.findByRole('button', { name: 'New Spec' }).click()
+          cy.contains('Create new empty spec').click()
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/e2e/spec.js'))
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/e2e/spec.js')).should('be.visible')
         })
       })
 
@@ -509,7 +546,7 @@ describe('App: Specs', () => {
 
         it('shows success modal when empty spec is created', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
-            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/filename.cy.ts'))
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.ts'))
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
@@ -535,7 +572,7 @@ describe('App: Specs', () => {
 
         it('navigates to spec runner when selected', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
-            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/filename.cy.ts'))
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.ts'))
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
@@ -555,7 +592,7 @@ describe('App: Specs', () => {
 
         it('displays alert with docs link on new spec', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
-            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/filename.cy.ts'))
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.ts'))
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
@@ -659,6 +696,37 @@ describe('App: Specs', () => {
         cy.contains('Cancel').click()
 
         cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('not.exist')
+      })
+
+      it('generates spec with file name that does not contain a known spec extension', () => {
+        cy.withCtx(async (ctx) => {
+          let config = ctx.actions.file.readFileInProject('cypress.config.js')
+
+          config = config.replace(
+              `specPattern: 'src/specs-folder/*.cy.{js,jsx}'`,
+              `specPattern: 'src/specs-folder/*.{js,jsx}'`,
+          )
+
+          await ctx.actions.file.writeFileInProject('cypress.config.js', config)
+        })
+
+        // Timeout is increased here to allow ample time for the config change to be processed
+        cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+        cy.findByRole('button', { name: 'New Spec' }).click()
+
+        cy.findByRole('dialog', {
+          name: 'Enter the path for your new spec',
+        }).within(() => {
+          cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('src/specs-folder/ComponentName.js'))
+
+          cy.findByRole('button', { name: 'Create Spec' }).click()
+        })
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.createSpec.successPage.header,
+        }).as('SuccessDialog').within(() => {
+          cy.contains(getPathForPlatform('src/specs-folder/ComponentName.js')).should('be.visible')
+        })
       })
     })
   })

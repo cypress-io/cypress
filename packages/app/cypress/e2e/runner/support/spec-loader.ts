@@ -19,6 +19,7 @@ export type LoadSpecOptions = {
   failCount?: number | string
   pendingCount?: number | string
   hasPreferredIde?: boolean
+  projectName?: 'runner-e2e-specs' | 'session-and-origin-e2e-specs'
 }
 
 export function loadSpec (options: LoadSpecOptions) {
@@ -29,10 +30,11 @@ export function loadSpec (options: LoadSpecOptions) {
     failCount = '--',
     hasPreferredIde = false,
     pendingCount,
+    projectName = 'runner-e2e-specs',
   } = options
 
-  cy.scaffoldProject('runner-e2e-specs')
-  cy.openProject('runner-e2e-specs')
+  cy.scaffoldProject(projectName)
+  cy.openProject(projectName)
   cy.startAppServer()
 
   cy.withCtx((ctx, options) => {

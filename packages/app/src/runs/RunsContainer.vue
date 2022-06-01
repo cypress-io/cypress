@@ -1,8 +1,6 @@
 <template>
   <div class="h-full">
-    <NoInternetConnection
-      v-if="!online && !isCloudProjectReturned"
-    >
+    <NoInternetConnection v-if="!online">
       Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project.
     </NoInternetConnection>
     <RunsConnectSuccessAlert
@@ -16,8 +14,9 @@
       @success="showConnectSuccessAlert = true"
     />
     <RunsErrorRenderer
-      v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject'"
+      v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
       :gql="props.gql"
+      @re-execute-runs-query="emit('reExecuteRunsQuery')"
     />
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
@@ -26,6 +25,7 @@
     <div
       v-else
       data-cy="runs"
+      class="flex flex-col pb-24px gap-16px"
     >
       <Warning
         v-if="!online"
@@ -57,6 +57,10 @@ import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 
 const { t } = useI18n()
+
+const emit = defineEmits<{
+  (e: 'reExecuteRunsQuery'): void
+}>()
 
 gql`
 fragment RunsContainer_RunsConnection on CloudRunConnection {
@@ -185,9 +189,8 @@ const props = defineProps<{
   online: boolean
 }>()
 
-const isCloudProjectReturned = computed(() => props.gql.currentProject?.cloudProject?.__typename === 'CloudProject')
-
 const showConnectSuccessAlert = ref(false)
+const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
 </script>
 
 <style scoped>

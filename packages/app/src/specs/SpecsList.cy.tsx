@@ -137,7 +137,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the component testing header', () => {
-      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'Component Specs')
+      cy.get('[data-cy="specs-testing-type-header"]').should('have.text', 'Component specs')
     })
   })
 })

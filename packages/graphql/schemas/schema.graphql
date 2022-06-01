@@ -444,7 +444,7 @@ enum CodeLanguageEnum {
 }
 
 """
-The currently opened Cypress project, represented by a cypress.config.{ts|js} file
+The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
 type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the project"""
@@ -483,7 +483,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """Default spec file name for spec creation"""
+  """
+  Default spec file name for spec creation, nullable so we can throw if it can't be decided
+  """
   defaultSpecFileName: String
 
   """File extension to use based on if the project has typescript or not"""
@@ -635,6 +637,7 @@ enum ErrorTypeEnum {
   DASHBOARD_UNKNOWN_INVALID_REQUEST
   DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
+  DEV_SERVER_CONFIG_FILE_NOT_FOUND
   DUPLICATE_TASK_KEY
   ERROR_READING_FILE
   ERROR_WRITING_FILE
@@ -723,6 +726,9 @@ type ErrorWrapper {
   """
   errorStack: String!
   errorType: ErrorTypeEnum!
+
+  """The ID for the error, used to clear the error"""
+  id: ID!
 
   """
   Whether the error came from user code, can be used to determine whether to open a stack trace by default
@@ -841,6 +847,7 @@ type GitInfo {
 enum GitInfoStatusType {
   created
   modified
+  noGitInfo
   unmodified
 }
 
@@ -960,6 +967,9 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
+
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
 }
 
 type MigrationFile {
@@ -1066,7 +1076,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Dismisses a warning displayed by the frontend"""
-  dismissWarning: Query
+  dismissWarning(id: ID!): Query
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
@@ -1162,8 +1172,8 @@ type Mutation {
   """Reset the Auth State"""
   resetAuthState: Query!
 
-  """Resets errors and attempts to reload the config"""
-  resetErrorsAndLoadConfig: Query
+  """Resets error and attempts to reload the config"""
+  resetErrorAndLoadConfig(id: ID!): Query
 
   """
   Resets the latest version call to capture additional telemetry for the current user
@@ -1192,9 +1202,6 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
-
-  """Set the selected testing type, and reconfigure the project"""
-  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1346,6 +1353,11 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """
+  Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)
+  """
+  invokedFromCli: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
@@ -1550,9 +1562,6 @@ type Subscription {
   """Triggered when the auth state changes"""
   authChange: Query
 
-  """Triggered when the base error state changes"""
-  baseErrorChange: Query
-
   """Issued when the current branch of a project changes"""
   branchChange: CurrentProject
 
@@ -1569,6 +1578,9 @@ type Subscription {
 
   """Issued for internal development changes"""
   devChange: DevState
+
+  """Triggered when the base error or warning state changes"""
+  errorWarningChange: Query
 
   """
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated

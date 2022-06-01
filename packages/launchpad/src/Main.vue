@@ -3,18 +3,28 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
-    <div class="px-24px pt-86px">
+
+    <MigrationLandingPage
+      v-if="currentProject?.needsLegacyConfigMigration && !wasLandingPageShown && online && videoHtml"
+      class="pt-64px"
+      :video-html="videoHtml"
+      @clearLandingPage="wasLandingPageShown = true"
+    />
+    <div
+      v-else
+      class="px-24px pt-86px"
+    >
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorsAndLoadConfig"
+        :retry="resetErrorAndLoadConfig"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration"
+        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageShown"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -82,20 +92,24 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-
+import MigrationLandingPage from './migration/MigrationLandingPage.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
+import { useOnline } from '@vueuse/core'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
+const wasLandingPageShown = ref(false)
+const online = useOnline()
 
 gql`
 fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
   baseError {
+    id
     ...BaseError
   }
   currentProject {
@@ -107,6 +121,9 @@ fragment MainLaunchpadQueryData on Query {
     isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
+  }
+  migration {
+    videoEmbedHtml
   }
   isInGlobalMode
   ...GlobalPage
@@ -122,8 +139,8 @@ query MainLaunchpadQuery {
 `
 
 gql`
-mutation Main_ResetErrorsAndLoadConfig {
-  resetErrorsAndLoadConfig {
+mutation Main_ResetErrorsAndLoadConfig($id: ID!) {
+  resetErrorAndLoadConfig(id: $id) {
     ...MainLaunchpadQueryData
   }
 }
@@ -131,12 +148,13 @@ mutation Main_ResetErrorsAndLoadConfig {
 
 const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
 
-const resetErrorsAndLoadConfig = () => {
+const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
-    mutation.executeMutation({})
+    mutation.executeMutation({ id })
   }
 }
-
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+const videoHtml = computed(() => query.data.value?.migration?.videoEmbedHtml)
+
 </script>

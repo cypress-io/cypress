@@ -5,6 +5,7 @@ import simpleGit from 'simple-git'
 import fs from 'fs-extra'
 import sinon from 'sinon'
 import pDefer from 'p-defer'
+import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
 import { GitDataSource } from '../../../src/sources/GitDataSource'
@@ -37,12 +38,20 @@ describe('GitDataSource', () => {
   afterEach(() => {
     gitInfo.destroy()
     gitInfo = undefined
+
+    sinon.restore()
   })
 
   it(`gets correct status for files on ${os.platform()}`, async () => {
     const onBranchChange = sinon.stub()
     const onGitInfoChange = sinon.stub()
     const onError = sinon.stub()
+
+    // create a file and modify a file to express all
+    // git states we are interested in (created, unmodified, modified)
+    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
+    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
+    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
 
     gitInfo = new GitDataSource({
       isRunMode: false,
@@ -52,28 +61,24 @@ describe('GitDataSource', () => {
       onError,
     })
 
-    // create a file and modify a file to express all
-    // git states we are interested in (created, unmodified, modified)
-    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.spec.js')
-    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
-
     fs.createFileSync(fooSpec)
     fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
 
-    const dfd = pDefer()
-
-    onGitInfoChange.onFirstCall().callsFake(dfd.resolve)
-
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
-    await dfd.promise
+    let result: any[] = []
 
-    const [created, unmodified, modified] = await Promise.all([
-      gitInfo.gitInfoFor(fooSpec),
-      gitInfo.gitInfoFor(aRecordSpec),
-      gitInfo.gitInfoFor(xhrSpec),
-    ])
+    do {
+      result = await Promise.all([
+        gitInfo.gitInfoFor(fooSpec),
+        gitInfo.gitInfoFor(aRecordSpec),
+        gitInfo.gitInfoFor(xhrSpec),
+      ])
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    } while (result.some((r) => r == null))
+
+    const [created, unmodified, modified] = result
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(created.statusType).to.eql('created')
@@ -118,5 +123,41 @@ describe('GitDataSource', () => {
 
     git.checkoutLocalBranch('testing123')
     expect(await switchBranch.promise).to.eq('testing123')
+  })
+
+  it(`handles error while watching .git on ${os.platform()}`, async () => {
+    sinon.stub(chokidar, 'watch').callsFake(() => {
+      const mockWatcher = {
+        on: (event, fn) => {
+          if (event === 'error') {
+            fn(new Error('Unexpected error'))
+          }
+        },
+        close: () => ({ catch: () => {} }),
+      } as unknown
+
+      return mockWatcher as chokidar.FSWatcher
+    })
+
+    const errorStub = sinon.stub()
+    const stub = sinon.stub()
+    const dfd = pDefer()
+
+    stub.onFirstCall().callsFake(dfd.resolve)
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: stub,
+      onGitInfoChange: sinon.stub(),
+      onError: errorStub,
+    })
+
+    await dfd.promise
+    const result = await dfd.promise
+
+    expect(result).to.eq((await git.branch()).current)
+
+    expect(errorStub).to.be.callCount(1)
   })
 })

@@ -5,20 +5,24 @@ import Button from '../components/Button.vue'
 describe('<StatusBadge />', () => {
   it('renders and toggles', { viewportWidth: 500, viewportHeight: 200 }, () => {
     const status = ref(false)
+    const title = ref('not configured')
+
+    function onClick () {
+      status.value = !status.value
+      title.value = 'configured'
+    }
 
     cy.mount(() => (
       <div class="p-6">
         <StatusBadge
-          titleOn="configured"
-          titleOff="not configured"
+          title={title.value}
           status={status.value}
-          testingType='component'
-          isRunning={false}
-          isApp={false}
         />
         <br /><br />
-        {// @ts-ignore
-        }<Button onClick={() => status.value = !status.value}>toggle</Button>
+        {
+          // @ts-ignore
+          <Button onClick={onClick}>toggle</Button>
+        }
       </div>
     ))
 

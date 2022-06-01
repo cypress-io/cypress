@@ -30,3 +30,11 @@ export async function initGitRepoForTestProject (projectPath: string) {
 
   return null
 }
+
+export async function resetGitRepoForTestProject (projectPath: string) {
+  const git = simpleGit({ baseDir: projectPath })
+
+  await git.reset(['--hard'])
+
+  return null
+}

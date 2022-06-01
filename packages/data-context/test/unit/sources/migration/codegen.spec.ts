@@ -60,6 +60,7 @@ describe('cypress.config.js generation', () => {
     const config: Partial<Cypress.Config> = {
       e2e: {
         baseUrl: 'localhost:3000',
+        experimentalSessionAndOrigin: true,
       },
     }
 
@@ -126,6 +127,7 @@ describe('cypress.config.js generation', () => {
     const config = {
       viewportWidth: 300,
       baseUrl: 'localhost:300',
+      experimentalSessionAndOrigin: true,
       slowTestThreshold: 500,
       e2e: {
         retries: 2,
@@ -428,8 +430,15 @@ describe('reduceConfig', () => {
     expect(newConfig.component.specPattern).to.eq('**/**.cy.js')
   })
 
+  it('should update integration folder for e2e when is set to default', () => {
+    const config = { testFiles: '*.spec.js', integrationFolder: 'cypress/integration' }
+    const newConfig = reduceConfig(config, options)
+
+    expect(newConfig.e2e.specPattern).to.eq(`cypress/e2e/${config.testFiles}`)
+  })
+
   it('should combine componentFolder and integrationFolder with testFiles field in component', () => {
-    const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
+    const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/src' }
     const newConfig = reduceConfig(config, options)
 
     expect(newConfig.component.specPattern).to.eq('src/**/**.cy.js')
@@ -443,7 +452,7 @@ describe('reduceConfig', () => {
         componentFolder: 'src',
       },
       e2e: {
-        integrationFolder: 'cypress/integration',
+        integrationFolder: 'cypress/src',
       },
     }
     const newConfig = reduceConfig(config, options)
@@ -508,10 +517,18 @@ describe('reduceConfig', () => {
   })
 
   it('should nest supportFile under component and e2e', () => {
-    const config = { supportFile: 'cypress/support/index.js' }
+    const config = { supportFile: 'cypress/support/mySupportFile.js' }
     const newConfig = reduceConfig(config, options)
 
     expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
+  })
+
+  it('should not add supportFile if it is the default one', () => {
+    expect(reduceConfig({ supportFile: null }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: undefined }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: 'cypress/support' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: 'cypress/support/index' }, options).e2e.supportFile).to.not.exist
+    expect(reduceConfig({ supportFile: 'cypress/support/index.js' }, options).e2e.supportFile).to.not.exist
   })
 
   it('should exclude the pluginsFile', () => {

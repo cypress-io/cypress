@@ -14,9 +14,7 @@
       width: 100%;
 
       &:hover {
-        .collapsible-header {
-          color: $gray-300;
-        }
+        background-color: $gray-900;
 
         .hook-open-in-ide {
           cursor: pointer;

@@ -15,7 +15,7 @@ export const PackageManagerEnum = enumType({
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
-  description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
+  description: 'The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file',
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
@@ -136,7 +136,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('defaultSpecFileName', {
-      description: 'Default spec file name for spec creation',
+      description: 'Default spec file name for spec creation, nullable so we can throw if it can\'t be decided',
       resolve: (source, args, ctx) => {
         return ctx.project.defaultSpecFileName()
       },
