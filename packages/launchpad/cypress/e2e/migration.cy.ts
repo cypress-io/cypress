@@ -509,7 +509,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     cy.get(renameAutoStep).should('exist')
     // no CT
     cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
+    // supportFile is custom - cannot rename
     cy.get(renameSupportStep).should('not.exist')
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
