@@ -338,6 +338,7 @@ export class ProjectConfigManager {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
       cwd: this.options.projectRoot,
+      ignorePermissionErrors: true,
     })
 
     this._watchers.add(w)
