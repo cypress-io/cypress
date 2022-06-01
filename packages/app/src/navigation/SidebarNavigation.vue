@@ -38,12 +38,12 @@
       >
         <RouterLink
           v-for="item in navigation"
-          v-slot="{ isActive }"
+          v-slot="{ isExactActive }"
           :key="item.name"
           :to="item.href"
         >
           <SidebarNavigationRow
-            :active="isActive"
+            :active="isExactActive"
             :icon="item.icon"
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
