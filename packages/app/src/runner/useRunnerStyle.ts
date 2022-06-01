@@ -66,6 +66,7 @@ export const useRunnerStyle = () => {
     width: ${autStore.viewportDimensions.width}px;
     height: ${autStore.viewportDimensions.height}px;
     transform: scale(${scale.value});
+    position: absolute;
     `
 
     // to keep the AUT iframe centered during scaling, we need to calculate the difference between
