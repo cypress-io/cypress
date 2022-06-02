@@ -519,11 +519,13 @@ describe('startSpecWatcher', () => {
 
     it('creates file watcher based on given config properties', () => {
       const onStub = sinon.stub()
+      const ignoredStub = sinon.stub()
 
       sinon.stub(chokidar, 'watch').callsFake(() => {
         const mockWatcher = {
           on: onStub,
           close: () => ({ catch: () => {} }),
+          ignored: ignoredStub,
         } as unknown
 
         return mockWatcher as chokidar.FSWatcher
@@ -551,7 +553,7 @@ describe('startSpecWatcher', () => {
       expect(chokidar.watch).to.have.been.calledWith('.', {
         ignoreInitial: true,
         cwd: projectRoot,
-        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js'],
+        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', sinon.match.func],
         ignorePermissionErrors: true,
       })
 

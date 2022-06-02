@@ -339,7 +339,14 @@ export class ProjectDataSource {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
-      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern],
+      ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string) => {
+        // don't ignore things that look like directories
+        if (!path.extname(file) || !path.relative(projectRoot, file)) {
+          return false
+        }
+
+        return specPattern.some((s) => !minimatch(path.relative(projectRoot, file), s))
+      }],
     })
 
     // the 'all' event includes: add, addDir, change, unlink, unlinkDir
