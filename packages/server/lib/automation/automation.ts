@@ -3,20 +3,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
-
-type NullableMiddlewareHook = (() => void) | null
+import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
-
-export type OnRequestEvent = (eventName: string, data: any) => void
-
-export interface AutomationMiddleware {
-  onPush?: NullableMiddlewareHook
-  onBeforeRequest?: OnRequestEvent | null
-  onRequest?: OnRequestEvent | null
-  onResponse?: NullableMiddlewareHook
-  onAfterResponse?: NullableMiddlewareHook
-}
 
 export class Automation {
   private requests: Record<number, (any) => void>

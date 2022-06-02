@@ -26,14 +26,14 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (https_passthru_spec.js)                                                   │
-  │ Searched:   cypress/integration/https_passthru_spec.js                                         │
+  │ Specs:      1 found (https_passthru.cy.js)                                                     │
+  │ Searched:   cypress/e2e/https_passthru.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  https_passthru_spec.js                                                          (1 of 1)
+  Running:  https_passthru.cy.js                                                            (1 of 1)
 
 
   https passthru retries
@@ -55,14 +55,14 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     https_passthru_spec.js                                                           │
+  │ Spec Ran:     https_passthru.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -72,7 +72,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  https_passthru_spec.js                   XX:XX        2        2        -        -        - │
+  │ ✔  https_passthru.cy.js                     XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
@@ -88,14 +88,14 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_304_handling_spec.js)                                       │
-  │ Searched:   cypress/integration/network_error_304_handling_spec.js                             │
+  │ Specs:      1 found (network_error_304_handling.cy.js)                                         │
+  │ Searched:   cypress/e2e/network_error_304_handling.cy.js                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  network_error_304_handling_spec.js                                              (1 of 1)
+  Running:  network_error_304_handling.cy.js                                                (1 of 1)
 
 
   network error 304 handling
@@ -116,15 +116,15 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     network_error_304_handling_spec.js                                               │
+  │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -134,7 +134,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling.cy.js         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -150,14 +150,14 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_304_handling_spec.js)                                       │
-  │ Searched:   cypress/integration/network_error_304_handling_spec.js                             │
+  │ Specs:      1 found (network_error_304_handling.cy.js)                                         │
+  │ Searched:   cypress/e2e/network_error_304_handling.cy.js                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  network_error_304_handling_spec.js                                              (1 of 1)
+  Running:  network_error_304_handling.cy.js                                                (1 of 1)
 
 
   network error 304 handling
@@ -178,15 +178,15 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     network_error_304_handling_spec.js                                               │
+  │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -196,7 +196,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling.cy.js         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -212,14 +212,14 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_304_handling_spec.js)                                       │
-  │ Searched:   cypress/integration/network_error_304_handling_spec.js                             │
+  │ Specs:      1 found (network_error_304_handling.cy.js)                                         │
+  │ Searched:   cypress/e2e/network_error_304_handling.cy.js                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  network_error_304_handling_spec.js                                              (1 of 1)
+  Running:  network_error_304_handling.cy.js                                                (1 of 1)
 
 
   network error 304 handling
@@ -240,15 +240,15 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     network_error_304_handling_spec.js                                               │
+  │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -258,7 +258,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling.cy.js         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -274,14 +274,14 @@ exports['e2e network error handling Cypress tests run as expected 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_handling_spec.js)                                           │
-  │ Searched:   cypress/integration/network_error_handling_spec.js                                 │
+  │ Specs:      1 found (network_error_handling.cy.js)                                             │
+  │ Searched:   cypress/e2e/network_error_handling.cy.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  network_error_handling_spec.js                                                  (1 of 1)
+  Running:  network_error_handling.cy.js                                                    (1 of 1)
 
 
   network error handling
@@ -377,23 +377,23 @@ https://on.cypress.io/request
   │ Screenshots:  2                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     network_error_handling_spec.js                                                   │
+  │ Spec Ran:     network_error_handling.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling_spec.js/network error ha     (1280x720)
-     ndling -- cy.visit() retries -- fails after retrying 5x (failed).png                           
-  -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling_spec.js/network error ha     (1280x720)
-     ndling -- cy.request() retries -- fails after retrying 5x (failed).png                         
+  -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling.cy.js/network error hand     (1280x720)
+     ling -- cy.visit() retries -- fails after retrying 5x (failed).png                             
+  -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling.cy.js/network error hand     (1280x720)
+     ling -- cy.request() retries -- fails after retrying 5x (failed).png                           
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_handling_spec.js.     (X second)
-                          mp4                                                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_handling.cy.js.mp     (X second)
+                          4                                                                         
 
 
 ====================================================================================================
@@ -403,7 +403,7 @@ https://on.cypress.io/request
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  network_error_handling_spec.js           XX:XX        9        7        2        -        - │
+  │ ✖  network_error_handling.cy.js             XX:XX        9        7        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        9        7        2        -        -  
 

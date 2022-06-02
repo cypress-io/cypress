@@ -5,7 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 30000 test/spec.js"
+    "test": "mocha --timeout 45000 test/spec.js"
   },
   "devDependencies": {
     "@bahmutov/all-paths": "1.0.2",

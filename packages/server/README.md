@@ -4,7 +4,7 @@ The server is the heart of the Cypress application. All of this code represents 
 
 - Proxying every byte coming in and out of the browser
 - Performing and normalizing automation tasks for each browser
-- Coordinating and synchronizing state with the [desktop-gui](../desktop-gui) and [driver](../driver) packages
+- Coordinating and synchronizing state with the [launchpad](../launchpad) and [driver](../driver) packages
 - Performing node specific tasks on behalf of the [driver](../driver)
 - Instantiating and orchestrating nearly every other layer and package
 - Spinning up various static file and http servers
