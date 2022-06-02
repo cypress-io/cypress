@@ -2,7 +2,6 @@
   "name": "@cypress/schematic",
   "version": "0.0.0-development",
   "description": "Official Cypress schematic for the Angular CLI",
-  "private": true,
   "main": "./src",
   "scripts": {
     "build": "tsc -p tsconfig.json",
