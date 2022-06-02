@@ -519,13 +519,11 @@ describe('startSpecWatcher', () => {
 
     it('creates file watcher based on given config properties', () => {
       const onStub = sinon.stub()
-      const ignoredStub = sinon.stub()
 
       sinon.stub(chokidar, 'watch').callsFake(() => {
         const mockWatcher = {
           on: onStub,
           close: () => ({ catch: () => {} }),
-          ignored: ignoredStub,
         } as unknown
 
         return mockWatcher as chokidar.FSWatcher
