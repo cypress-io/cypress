@@ -1,6 +1,7 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
+const { pathToFileURL } = require('url')
 const tsNodeUtil = require('./ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
@@ -127,7 +128,8 @@ function run (ipc, file, projectRoot) {
         // Certain modules cannot be dynamically imported. If this throws, however, we want
         // to show the original error that was thrown, because that's ultimately the source of the problem
         try {
-          return await import(file)
+          // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
+          return await import(pathToFileURL(pathToFileURL).href)
         } catch (e) {
           // If we aren't able to import the file at all, throw the original error, since that has more accurate information
           // of what failed to begin with
