@@ -97,10 +97,12 @@ function run (ipc, file, projectRoot) {
     //   3a. Yes: Use bundleRequire
     //   3b. No: Continue through to `await import(configFile)`
     // 4. Use node's dynamic import to import the configFile
+    let originalError
 
     try {
       return require(file)
     } catch (err) {
+      originalError = err
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
       }
@@ -111,19 +113,27 @@ function run (ipc, file, projectRoot) {
     try {
       debug('Trying to use esbuild to run their config file.')
       // We prefer doing this because it supports TypeScript files
-      require.resolve('esbuild')
+      require.resolve('esbuild', { paths: [process.cwd()] })
 
       debug(`They have esbuild, so we'll load the configFile via bundleRequire`)
       const { bundleRequire } = require('bundle-require')
 
       return (await bundleRequire({ filepath: file })).mod
     } catch (err) {
-      if (err.stack.includes(`Cannot find package 'esbuild'`)) {
+      if (err.stack.includes(`Cannot find module 'esbuild'`)) {
         debug(`User doesn't have esbuild. Going to use native node imports.`)
 
         // We cannot replace the initial `require` with `await import` because
-        // Certain modules cannot be dynamically imported
-        return await import(file)
+        // Certain modules cannot be dynamically imported. If this throws, however, we want
+        // to show the original error that was thrown, because that's ultimately the source of the problem
+        try {
+          return await import(file)
+        } catch (e) {
+          // If we aren't able to import the file at all, throw the original error, since that has more accurate information
+          // of what failed to begin with
+          debug('esbuild fallback for loading config failed, throwing original error. node import error: %o', e)
+          throw originalError
+        }
       }
 
       throw err
@@ -173,12 +183,19 @@ function run (ipc, file, projectRoot) {
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
+            const onConfigNotFound = (devServer, root, searchedFor) => {
+              ipc.send('setupTestingType:error', util.serializeError(
+                require('@packages/errors').getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServer, root, searchedFor),
+              ))
+            }
+
             on('dev-server:start', (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
                 return devServer({
                   cypressConfig: config,
+                  onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
