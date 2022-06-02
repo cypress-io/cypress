@@ -11,11 +11,11 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
-import { LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
+import { isDefaultSupportFile, LegacyCypressConfigJson, legacyIntegrationFolder } from '..'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 import _ from 'lodash'
-import { getBreakingKeys } from '@packages/config'
+import { defineConfigAvailable, getBreakingKeys } from '@packages/config'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -81,6 +81,7 @@ export async function initComponentTestingMigration (
   const watcher = chokidar.watch(
     watchPaths, {
       cwd: projectRoot,
+      ignorePermissionErrors: true,
     },
   )
 
@@ -145,24 +146,6 @@ export async function initComponentTestingMigration (
 
 async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot: string): Promise<string | undefined> {
   return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
-}
-
-// If they are running an old version of Cypress
-// or running Cypress that isn't installed in their
-// project's node_modules, we don't want to include
-// defineConfig(/***/) in their cypress.config.js,
-// since it won't exist.
-export function defineConfigAvailable (projectRoot: string) {
-  try {
-    const cypress = require.resolve('cypress', {
-      paths: [projectRoot],
-    })
-    const api = require(cypress)
-
-    return 'defineConfig' in api
-  } catch (e) {
-    return false
-  }
 }
 
 function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
@@ -435,6 +418,13 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
           component: { ...acc.component, excludeSpecPattern: val },
         }
       case 'supportFile':
+        // If the supportFile is set, but is the same value as the default one; where
+        // we migrate it, we do not want to put the legacy value in the migrated config.
+        // It can be .ts or .js
+        if (isDefaultSupportFile(val)) {
+          return acc
+        }
+
         return {
           ...acc,
           e2e: { ...acc.e2e, supportFile: val },

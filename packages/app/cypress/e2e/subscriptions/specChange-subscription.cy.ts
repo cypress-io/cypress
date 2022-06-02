@@ -137,7 +137,6 @@ component: {
   devServer: {
     framework: 'react',
     bundler: 'webpack',
-    webpackConfig: require('./webpack.config')
   }
 },
 e2e: {
@@ -267,7 +266,6 @@ component: {
   devServer: {
     framework: 'react',
     bundler: 'webpack',
-    webpackConfig: require('./webpack.config')
   }
 },
 e2e: {
@@ -377,7 +375,6 @@ component: {
   devServer: {
     framework: 'react',
     bundler: 'webpack',
-    webpackConfig: require('./webpack.config')
   }
 },
 e2e: {
