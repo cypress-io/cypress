@@ -619,13 +619,13 @@ export class ProjectLifecycleManager {
     }
 
     try {
-      const packageJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
+      const pkgJson = this.ctx.fs.readJsonSync(this._pathToFile('package.json'))
 
-      if (packageJson.type === 'module') {
+      if (pkgJson.type === 'module') {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage(this.projectRoot, packageJson, metaState.hasLegacyCypressJson) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
     } catch {
       // No need to handle
     }

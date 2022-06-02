@@ -103,7 +103,7 @@ export function detectFramework (projectPath: string): DetectFramework {
  * END
  */
 
-export function detectLanguage (projectRoot: string, pkgJson: PkgJson, isMigrating = false): 'js' | 'ts' {
+export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: { projectRoot: string, pkgJson: PkgJson, isMigrating?: boolean }): 'js' | 'ts' {
   try {
     if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
       debug('Detected cypress.config.ts - using TS')

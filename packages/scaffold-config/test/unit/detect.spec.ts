@@ -222,14 +222,14 @@ describe('detectFramework', () => {
 describe('detectLanguage', () => {
   it('existing project with `cypress.config.ts`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-ts')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
 
   it('existing project with `cypress.config.js`', async () => {
     const projectRoot = await scaffoldMigrationProject('config-with-js')
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('js')
   })
@@ -239,7 +239,7 @@ describe('detectLanguage', () => {
 
     fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
     const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
-    const actual = detectLanguage(projectRoot, pkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -248,7 +248,7 @@ describe('detectLanguage', () => {
     const projectRoot = await scaffoldMigrationProject('pristine-npm')
 
     fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -256,7 +256,7 @@ describe('detectLanguage', () => {
   it('detects js if typescript is not resolvable when there is a tsconfig.json', async () => {
     let projectRoot = await scaffoldMigrationProject('pristine-npm')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('js')
 
@@ -264,7 +264,7 @@ describe('detectLanguage', () => {
 
     fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
 
-    const actualTypescript = detectLanguage(projectRoot, {} as PkgJson)
+    const actualTypescript = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actualTypescript).to.eq('ts')
   })
@@ -273,7 +273,7 @@ describe('detectLanguage', () => {
     const projectRoot = await scaffoldMigrationProject('migration')
 
     fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -297,7 +297,7 @@ describe('detectLanguage', () => {
 
     fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson, true)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson, isMigrating: true })
 
     expect(actual).to.eq('js')
   })
@@ -309,7 +309,7 @@ describe('detectLanguage', () => {
 
     removeAllTsFilesExcept(projectRoot, 'support')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -321,7 +321,7 @@ describe('detectLanguage', () => {
 
     removeAllTsFilesExcept(projectRoot, 'plugins')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -334,7 +334,7 @@ describe('detectLanguage', () => {
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'integration')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -347,7 +347,7 @@ describe('detectLanguage', () => {
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'integration')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -360,7 +360,7 @@ describe('detectLanguage', () => {
     // detected based on `integration/**/*.tsx
     removeAllTsFilesExcept(projectRoot, 'component')
 
-    const actual = detectLanguage(projectRoot, {} as PkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
     expect(actual).to.eq('ts')
   })
@@ -374,7 +374,7 @@ describe('detectLanguage', () => {
     await fs.writeFile(path.join(projectRoot, 'node_modules', 'some-node-module', 'tsconfig.json'), '')
     const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
 
-    const actual = detectLanguage(projectRoot, pkgJson)
+    const actual = detectLanguage({ projectRoot, pkgJson })
 
     expect(actual).to.eq('js')
   })
