@@ -126,7 +126,7 @@ function run (ipc, file, projectRoot) {
         // Certain modules cannot be dynamically imported.
 
         // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
-        return await import(pathToFileURL(pathToFileURL).href)
+        return await import(pathToFileURL(file).href)
       }
 
       throw err
